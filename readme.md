@@ -14,6 +14,12 @@
 
 <br>
 
+```
+git clone https://github.com/macjjuni/react18-ts-boilerplate.git
+```
+
+<br>
+
 ## Support List
 
 - [x] 디렉토리 구조 설정
