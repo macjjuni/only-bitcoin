@@ -1,19 +1,30 @@
-import { useState } from 'react'
+import { useAppSelector, useAppDispatch } from './redux/hook'
+import { up, down } from './redux/slice/counter'
 
 const App = () => {
-  const [count, setCount] = useState(0)
+  const dispatch = useAppDispatch()
+  const state = useAppSelector((store) => store.counter.value)
+
   return (
     <div className="App">
-      <div>
+      <center>
         <a href="https://vitejs.dev" target="_blank" rel="noreferrer">
           <img src="/vite.svg" className="logo" alt="Vite logo" />
         </a>
-      </div>
+      </center>
       <h1>Vite + React</h1>
       <div className="card">
-        <button type="button" onClick={() => setCount((prev) => prev + 1)}>
-          count is {count}
-        </button>
+        <center>
+          <h2>count is {state}</h2>
+        </center>
+        <center>
+          <button type="button" onClick={() => dispatch(up(100))}>
+            UP
+          </button>{' '}
+          <button type="button" onClick={() => dispatch(down(100))}>
+            DOWN
+          </button>
+        </center>
       </div>
     </div>
   )

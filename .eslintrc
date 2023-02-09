@@ -41,6 +41,7 @@
     "jsx-a11y/label-has-associated-control": "off",
     "no-plusplus": "off",
     "import/no-extraneous-dependencies": "off",
-    "@typescript-eslint/return-await": "off"
+    "@typescript-eslint/return-await": "off",
+    "no-param-reassign": ["error", { "props": false }]
   }
 }
