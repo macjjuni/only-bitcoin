@@ -18,6 +18,8 @@
 git clone https://github.com/macjjuni/react18-ts-boilerplate.git
 ```
 
+> 강제 예비 백수로 전락하기 전, 채용 과제를 준비하기 위한 보일러플레이트
+
 <br>
 
 ## Support List
@@ -30,30 +32,30 @@ git clone https://github.com/macjjuni/react18-ts-boilerplate.git
 - [ ] React-Router 설정(예정)
 - [ ] Axios 설정
 - [ ] emotion 설정(예정)
-- [ ] Redux 설정
+- [x] Redux-toolkit 설정 (카운터 예제)
 
 <br>
 
 ### 패키지 설치
 
 ```
-> yarn
-//  or
-> npm i
+yarn
+or
+npm i
 ```
 
 ### 개발서버 실행
 
 ```
-> yarn dev
-//  or
-> npm run start
+yarn dev
+or
+npm run start
 ```
 
 ### 빌드 실행
 
 ```
-> yarn build
-//  or
-> npm run build
+yarn build
+or
+npm run build
 ```
