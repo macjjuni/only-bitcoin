@@ -18,7 +18,7 @@
 git clone https://github.com/macjjuni/react18-ts-boilerplate.git
 ```
 
-> 강제 예비 백수로 전락하기 전, 채용 과제를 준비하기 위한 보일러플레이트
+> <del>강제 예비 백수로 전락하기 전 채용 과제를 준비하기 위한</del> 여러 용도로 사용 할 보일러플레이트
 
 <br>
 
