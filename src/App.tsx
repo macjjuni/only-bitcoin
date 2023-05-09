@@ -1,9 +1,19 @@
-import { useAppSelector, useAppDispatch } from './redux/hook'
-import { up, down } from './redux/slice/counter'
+import { useRef, useEffect } from 'react'
+import { useBearStore } from './zustand/store'
 
 const App = () => {
-  const dispatch = useAppDispatch()
-  const state = useAppSelector((store) => store.counter.value)
+  const bears = useBearStore((state) => state.bears)
+  const bearsRef = useRef(useBearStore.getState().bears) // Transient updates
+
+  const upBear = useBearStore((state) => state.increase)
+  const clear = useBearStore((state) => state.clear)
+
+  useEffect(() => {
+    // Transient updates
+    useBearStore.subscribe((state) => {
+      bearsRef.current = state.bears
+    })
+  }, [])
 
   return (
     <div className="App">
@@ -15,14 +25,25 @@ const App = () => {
       <h1>Vite + React</h1>
       <div className="card">
         <center>
-          <h2>count is {state}</h2>
+          {/* <h2>count is {bears}</h2> */}
+          <h2>Count = {bears}</h2>
         </center>
         <center>
-          <button type="button" onClick={() => dispatch(up(100))}>
-            UP
-          </button>{' '}
-          <button type="button" onClick={() => dispatch(down(100))}>
-            DOWN
+          <button
+            type="button"
+            onClick={() => {
+              upBear(1)
+            }}
+          >
+            증가
+          </button>
+          <button
+            type="button"
+            onClick={() => {
+              clear()
+            }}
+          >
+            초기화
           </button>
         </center>
       </div>
