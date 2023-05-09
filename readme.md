@@ -32,7 +32,7 @@ git clone https://github.com/macjjuni/react18-ts-boilerplate.git
 - [ ] React-Router 설정(예정)
 - [ ] Axios 설정
 - [ ] emotion 설정(예정)
-- [x] Redux-toolkit 설정 (카운터 예제)
+- [x] <del>Redux-toolkit 설정 (카운터 예제)</del> => Zustand 마이그레이션
 
 <br>
 
