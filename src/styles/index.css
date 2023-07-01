@@ -1,77 +1,93 @@
-:root {
-  font-family: Inter, system-ui, Avenir, Helvetica, Arial, sans-serif;
-  line-height: 1.5;
-  font-weight: 400;
-
-  color-scheme: light dark;
-  color: rgba(255, 255, 255, 0.87);
-  background-color: #242424;
-
-  font-synthesis: none;
-  text-rendering: optimizeLegibility;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  -webkit-text-size-adjust: 100%;
-}
-
-a {
-  font-weight: 500;
-  color: #646cff;
-  text-decoration: inherit;
-}
-a:hover {
-  color: #535bf2;
-}
-
 body {
   margin: 0;
-  display: flex;
-  place-items: center;
-  min-width: 320px;
-  min-height: 100vh;
+  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
 }
 
-h1 {
-  font-size: 3.2em;
-  line-height: 1.1;
-}
-
-button {
-  border-radius: 8px;
-  border: 1px solid transparent;
-  padding: 0.6em 1.2em;
-  font-size: 1em;
-  font-weight: 500;
-  font-family: inherit;
-  background-color: #1a1a1a;
-  cursor: pointer;
-  transition: border-color 0.25s;
-}
-button:hover {
-  border-color: #646cff;
-}
-button:focus,
-button:focus-visible {
-  outline: 4px auto -webkit-focus-ring-color;
-}
-
-#root {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+#btc-forever {
+  position: relative;
   width: 100vw;
   height: 100vh;
 }
+.amount-input > div > input {
+  text-align: center;
+}
+.crypto-input > input {
+  text-align: center;
+  padding-right: 32px;
+  font-size: 18px;
+}
 
-@media (prefers-color-scheme: light) {
-  :root {
-    color: #213547;
-    background-color: #ffffff;
+.crypto-copy-input > input {
+  text-align: center;
+  margin-right: 0;
+  padding-left: 28px;
+}
+
+.price-copy-input > input {
+  text-align: center;
+  margin-right: 0;
+  padding-left: 14px;
+}
+
+.price-input {
+  padding-right: 32px;
+}
+.price-input > input {
+  text-align: center;
+  font-size: 18px;
+}
+
+.header-wrap {
+  height: 84px;
+}
+
+@media screen and (max-width: 600px) {
+  .header-wrap {
+    height: 76px;
   }
-  a:hover {
-    color: #747bff;
+  .main {
+    min-height: calc(100vh - 126px);
   }
-  button {
-    background-color: #f9f9f9;
+}
+
+.done {
+  animation: done 1s;
+}
+
+@keyframes done {
+  0% {
+    transform: rotate(0deg);
   }
+  10% {
+    transform: rotate(15deg);
+  }
+  20% {
+    transform: rotate(-15deg);
+  }
+  30% {
+    transform: rotate(7deg);
+  }
+  40% {
+    transform: rotate(-7deg);
+  }
+  50% {
+    transform: rotate(3deg);
+  }
+  60% {
+    transform: rotate(-3deg);
+  }
+  70% {
+    transform: rotate(0deg);
+  }
+  100% {
+    transform: rotate(0deg);
+  }
+}
+.css-1t7y2o5-MuiButtonBase-root-MuiToggleButton-root.Mui-selected {
+  background-color: rgba(244, 157, 26, 0.18) !important;
+}
+.Toastify__toast-container--top-right {
+  top: 5em !important;
 }

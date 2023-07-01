@@ -16,18 +16,7 @@
     "noEmit": true,
     "jsx": "react-jsx",
     "types": ["node"],
-    "paths": {
-      "@/*": ["./src/*"],
-      "@/api/*": ["./src/api/*"],
-      "@components/*": ["./src/components/*"],
-      "@hoc/*": ["./src/hoc/*"],
-      "@hooks/*": ["./src/hooks/*"],
-      "@layout/*": ["./src/layout/*"],
-      "@pages/*": ["./src/pages/*"],
-      "@router/*": ["./src/router/*"],
-      "@styles/*": ["./src/styles/*"],
-      "@utils/*": ["./src/utils/*"]
-    }
+    "paths": { "@/*": ["./src/*"] }
   },
   "include": ["src"],
   "references": [{ "path": "./tsconfig.node.json" }]
