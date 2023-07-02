@@ -1,45 +1,59 @@
-import { useEffect, useLayoutEffect, useState, useRef, useCallback } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { Stack, FormGroup, FormControlLabel, Checkbox, FormControl, InputLabel, OutlinedInput, InputAdornment } from '@mui/material'
 import { FaWonSign } from 'react-icons/fa'
+import CopyButton from '@/components/CopyButton'
 import { useBearStore } from '@/zustand/store'
 import { btcInfo } from '@/data/crypto'
-import { comma } from '@/utils/common'
+import { comma, isSafari } from '@/utils/common'
 
+const numReg = /^[-+]?(\d+(\.\d*)?|\.\d+)$/
 const commaLength = 5 // 소숫점
-const saveKey = 'btc-amount'
+const satoshi = 100000000
 
 const BtcToPrice = () => {
-  // state
-  const [standard, setStandard] = useState(false) // 기준 : 개수(false) or 가격(false)
-  const [price, setPrice] = useState('0') // 금액
-  // ref
-  const chkRef = useRef<HTMLDivElement>(null)
-  const amountRef = useRef<HTMLInputElement | null>(null)
-  const priceRef = useRef<HTMLInputElement | null>(null)
   // zustand Store
   const btc = useBearStore((state) => state.btc)
   const amount = useBearStore((state) => state.amount)
   const setAmount = useBearStore((state) => state.setAmount)
+  // state
+  const [standard, setStandard] = useState(false) // 기준 : 개수(false) or 가격(false)
+  const [price, setPrice] = useState('0') // 금액
+  const [sat, setSat] = useState('0')
+  // ref
+  const chkRef = useRef<HTMLDivElement>(null)
+  const amountRef = useRef<HTMLInputElement | null>(null)
+  const priceRef = useRef<HTMLInputElement | null>(null)
 
+  // 인풋 초기화
   const initialInput = () => {
     setAmount('0')
     setPrice('0')
+    setSat('0')
   }
 
+  const calcPrice = (amt: number) => {
+    return comma((btc.price * Number(amt)).toFixed(0).toString())
+  }
+
+  // 비트코인 개수 변경
   const handleAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
     const amountTxt = e.target.value
-    const reAmtTxt = amountTxt.replace(/(^0+)/, '')
-    if (Number(amountTxt) < 0 || amountTxt === '') initialInput()
-    else if (reAmtTxt === '') setAmount('0')
+    if (amountTxt === '' || amountTxt === '0') setAmount('0')
     else {
-      if (reAmtTxt.includes('.')) setAmount(`0${reAmtTxt}`)
-      else setAmount(reAmtTxt)
-      const totalPrice = (btc.price * Number(amountTxt)).toFixed(0).toString()
-      setPrice(comma(totalPrice))
+      const cleanNum = amountTxt.replace(/^0+/, '')
+      if (cleanNum.charAt(0) === '.') setAmount(`0${cleanNum}`)
+      else setAmount(cleanNum)
+      setPrice(calcPrice(Number(amountTxt)))
     }
   }
+  // IOS 전용
+  const iosHandleAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const amountTxt = e.target.value
+    setAmount(amountTxt)
+    setPrice(calcPrice(Number(amountTxt)))
+  }
 
-  // 금액 변경
+  // 원화 금액 변경
   const handlePrice = (e: React.ChangeEvent<HTMLInputElement>) => {
     const priceTxt = e.target.value.replace(/(^0+)/, '').replace(/,/g, '')
     if (priceTxt === '' || Number.isNaN(Number(priceTxt))) initialInput()
@@ -78,6 +92,15 @@ const BtcToPrice = () => {
     focusInput()
   }, [standard])
 
+  useEffect(() => {
+    if (numReg.test(amount)) {
+      const calcSat = (Number(amount) * satoshi).toFixed(0).toString()
+      setSat(comma(calcSat))
+      return
+    }
+    setSat('0')
+  }, [amount])
+
   // 실시간 가격 변동 시 인풋 박스에 반영
   useEffect(() => {
     if (standard) {
@@ -88,8 +111,7 @@ const BtcToPrice = () => {
     } else {
       // 개수
       const numAmount = Number(amount.replace(/(^0+)/, '').replace(/,/g, ''))
-      const calcPrice = (numAmount * Number(btc.price)).toFixed(0)
-      setPrice(comma(calcPrice))
+      setPrice(calcPrice(numAmount))
     }
   }, [btc])
 
@@ -101,7 +123,7 @@ const BtcToPrice = () => {
         </FormGroup>
       </Stack>
 
-      <Stack spacing={4} direction={standard ? 'column-reverse' : 'column'}>
+      <Stack spacing={3} direction={standard ? 'column-reverse' : 'column'}>
         <FormControl fullWidth>
           <InputLabel htmlFor="outlined-adornment-amount">BitCoin</InputLabel>
           <OutlinedInput
@@ -112,12 +134,19 @@ const BtcToPrice = () => {
             readOnly={standard}
             value={amount}
             type="number"
-            slotProps={{ input: { min: 0, step: 0.1 } }}
+            slotProps={{ input: { min: 0, step: 0.1, inputMode: 'decimal', pattern: '[0-9]+([.,]0|[1-9]+)?' } }}
             onClick={focusInput}
-            onChange={handleAmount}
+            onChange={!isSafari ? handleAmount : iosHandleAmount}
             onKeyDown={handleAmountKeydown}
             startAdornment={<InputAdornment position="start">{btcInfo.icon}</InputAdornment>}
+            endAdornment={<CopyButton txt={amount} />}
           />
+          <Stack alignItems="flex-end" pt="8px">
+            <div>
+              {sat}
+              <span className="unit-txt">Sat</span>
+            </div>
+          </Stack>
         </FormControl>
 
         <FormControl fullWidth>
@@ -125,6 +154,7 @@ const BtcToPrice = () => {
           <OutlinedInput
             inputRef={priceRef}
             id="outlined-adornment-amount"
+            label="Amount"
             className="price-input"
             readOnly={!standard}
             value={price}
@@ -136,7 +166,7 @@ const BtcToPrice = () => {
                 <FaWonSign size="28" />
               </InputAdornment>
             }
-            label="Amount"
+            endAdornment={<CopyButton txt={price} />}
           />
         </FormControl>
       </Stack>

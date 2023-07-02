@@ -1,20 +1,11 @@
 import { Container } from '@mui/material'
 import { useEffect, useState } from 'react'
 
-import styled from '@emotion/styled'
 import Spinner from '@/components/Spinner'
 import Home from '@/pages/Home'
 
 import { useBearStore } from '@/zustand/store'
 import initSocket from '@/api/socket'
-
-const MainWrapper = styled(Container)`
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 24px 24px 120px 24px;
-  min-height: calc(100vh - 134px);
-`
 
 const Main = () => {
   const [load, setLoad] = useState(false) // 렌더링(소켓 연결)
@@ -29,10 +20,10 @@ const Main = () => {
   }, [btc])
 
   return (
-    <MainWrapper>
+    <Container component="main" className="main">
       <Spinner isRender={load} />
       <Home />
-    </MainWrapper>
+    </Container>
   )
 }
 

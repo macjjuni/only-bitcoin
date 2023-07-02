@@ -10,3 +10,19 @@ export const comma = (num: string): string => {
   console.error('숫자 이외에 문자열이 포함됨')
   return '0'
 }
+
+// iOS Safari 브라우저 구분
+export const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+
+// 복사
+export const copyText = async (txt: string) => {
+  return await navigator.clipboard
+    .writeText(txt)
+    .then(() => {
+      return true
+    })
+    .catch((e) => {
+      console.error(e)
+      return false
+    })
+}

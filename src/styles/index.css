@@ -5,14 +5,30 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+#btc-forever {
+  position: relative;
+  width: 100vw;
+  min-height: 100vh;
+}
+
+.main {
+  position: sticky;
+  top: 50%;
+  transform: translateY(-50%);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 0 24px;
+  min-height: 500px;
+}
+
 .top-dashboard {
   display: flex;
   align-items: center;
   justify-content: center;
   font-size: 32px !important;
   font-weight: 500;
-  padding: 1rem 8px 2rem 0;
-  text-shadow: 1px 1px 1px #f7931a;
+  text-shadow: 1px 1px 1px #404040;
   cursor: pointer;
 }
 
@@ -24,17 +40,11 @@ body {
   user-select: none;
 }
 
-#btc-forever {
-  position: relative;
-  width: 100vw;
-  height: 100vh;
-}
 .amount-input > div > input {
   text-align: center;
 }
 .crypto-input > input {
   text-align: center;
-  padding-right: 32px;
   font-size: 18px;
 }
 
@@ -59,11 +69,18 @@ body {
 }
 
 @media screen and (max-width: 600px) {
+  #btc-forever {
+    min-height: -webkit-fill-available;
+    min-height: fill-available;
+  }
   .header-wrap {
     height: 76px;
   }
   .main {
-    min-height: calc(100vh - 126px);
+    position: relative;
+    top: auto;
+    transform: translateY(0);
+    padding: 36px 24px 0 24px;
   }
 }
 
@@ -103,6 +120,16 @@ body {
 .css-1t7y2o5-MuiButtonBase-root-MuiToggleButton-root.Mui-selected {
   background-color: rgba(244, 157, 26, 0.18) !important;
 }
+.Toastify__toast {
+  min-height: 56px !important;
+}
+.Toastify__toast-container {
+  padding: 0 16px !important;
+}
+.Toastify__toast-container > div {
+  margin-bottom: 8px;
+}
+
 .Toastify__toast-container--top-right {
   top: 5em !important;
 }
