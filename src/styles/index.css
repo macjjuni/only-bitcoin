@@ -5,6 +5,25 @@ body {
   -moz-osx-font-smoothing: grayscale;
 }
 
+.top-dashboard {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 32px !important;
+  font-weight: 500;
+  padding: 1rem 8px 2rem 0;
+  text-shadow: 1px 1px 1px #f7931a;
+  cursor: pointer;
+}
+
+.unit-txt {
+  font-size: 16px;
+  padding-left: 3px;
+  font-weight: 500;
+  text-shadow: none !important;
+  user-select: none;
+}
+
 #btc-forever {
   position: relative;
   width: 100vw;
@@ -37,10 +56,6 @@ body {
 .price-input > input {
   text-align: center;
   font-size: 18px;
-}
-
-.header-wrap {
-  height: 84px;
 }
 
 @media screen and (max-width: 600px) {
