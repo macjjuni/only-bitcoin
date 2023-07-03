@@ -15,7 +15,7 @@ export default defineConfig(({ mode }) => {
         minify: false,
         entry: 'src/main.tsx',
         template: 'index.html',
-        inject: { data: { title: env.VITE_TITLE } },
+        inject: { data: { title: env.VITE_TITLE, url: env.VITE_URL } },
       }),
     ],
     resolve: { alias: [{ find: '@', replacement: path.resolve(__dirname, 'src') }] },
