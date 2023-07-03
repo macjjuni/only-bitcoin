@@ -15,7 +15,7 @@
 
 ## 📸 Initail Screen
 
-<image src="https://github.com/macjjuni/btc-price/assets/38034518/0ce78010-5e39-4d97-a9b3-0fdce1347e24" alt="btc-price initial screen gif">
+<img src="https://github.com/macjjuni/btc-price/assets/38034518/0ce78010-5e39-4d97-a9b3-0fdce1347e24" width="100%" alt="btc-price initial screen gif">
 
 <br>
 
@@ -58,6 +58,8 @@ btc-price
 <br>
 
 ## 🪄 Market Price Info
+
+<br>
 
 - https://upbit.com/open_api_agreement
 
