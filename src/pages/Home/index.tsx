@@ -42,7 +42,7 @@ const Home = () => {
             <span className="unit-txt">KRW</span>
           </Box>
         </Typography>
-        <Typography component="h2" fontSize={22} align="center" mb="36px">
+        <Typography component="h2" id="not-key-not-btc">
           Not your keys, not your ₿itcoin
         </Typography>
       </Stack>

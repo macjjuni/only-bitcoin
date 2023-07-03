@@ -39,6 +39,13 @@ body {
   user-select: none;
 }
 
+#not-key-not-btc {
+  font-size: 20px !important;
+  text-align: center;
+  margin-bottom: 36px;
+  text-shadow: 1px 1px 1px #ce0000;
+}
+
 .amount-input > div > input {
   text-align: center;
 }
@@ -80,6 +87,10 @@ body {
     top: auto;
     transform: translateY(0);
     padding: 36px 24px 0 24px;
+  }
+  #not-key-not-btc {
+    font-size: 16px !important;
+    margin: -12px 0 12px 0;
   }
 }
 
