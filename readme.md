@@ -1,38 +1,65 @@
-# React + TS + Vite(+ SWC) Boilerplate
+# BitCoin Market Price
 
-<br>
+##
 
 <div align="center">
 	<img src="https://img.shields.io/badge/React-61DAFB?style=flat&logo=React&logoColor=white" />
 	<img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=TypeScript&logoColor=white" />
-	<img src="https://img.shields.io/badge/HTML5-E34F26?style=flat&logo=HTML5&logoColor=white" />
-	<img src="https://img.shields.io/badge/CSS3-1572B6?style=flat&logo=CSS3&logoColor=white" />
+	<img src="https://img.shields.io/badge/Zustand-443d36?style=flat&logo=JavaScript&logoColor=white" />
 	<img src="https://img.shields.io/badge/Vite-646CFF?style=flat&logo=Vite&logoColor=white" />
 		<img src="https://img.shields.io/badge/ESLint-4B32C3?style=flat&logo=ESLint&logoColor=white" />
-	<img src="https://img.shields.io/badge/Prettier-F7B93E?style=flat&logo=Prettier&logoColor=white" />
+	<img src="https://img.shields.io/badge/Prettier-F7B93E?style=flat&logo=Prettier&logoColor=white" />	
 </div>
 
-<br>
+---
 
-```
-git clone https://github.com/macjjuni/react18-ts-boilerplate.git
-```
+## 📸 Initail Screen
 
-> <del>강제 예비 백수로 전락하기 전 채용 과제를 준비하기 위한</del> 여러 용도로 사용 할 보일러플레이트
+<image src="https://github.com/macjjuni/btc-price/assets/38034518/0ce78010-5e39-4d97-a9b3-0fdce1347e24" alt="btc-price initial screen gif">
 
 <br>
 
-## Support List
+## 🌳 Project tree
 
-- [x] 디렉토리 구조 설정
-- [x] ESLint & Prettier 설정
-- [x] HTML 템플릿 설정
-- [x] 환경변수 설정
-- [x] Path Alias 설정
-- [ ] React-Router 설정(예정)
-- [ ] Axios 설정
-- [ ] emotion 설정(예정)
-- [x] <del>Redux-toolkit 설정 (카운터 예제)</del> => Zustand 마이그레이션
+```
+btc-price
+├─ .env.development
+├─ .env.production
+├─ .eslintrc
+├─ .prettierrc
+├─ .gitignore
+├─ public
+├─ src
+│  ├─ api
+│  ├─ App.tsx
+│  ├─ assets
+│  ├─ components
+│  ├─ data
+│  ├─ layout
+│  │  ├─ footer
+│  │  ├─ header
+│  │  └─ main
+│  │
+│  ├─ main.tsx
+│  ├─ pages
+│  ├─ styles
+│  ├─ utils
+│  └─ zustand
+│
+├─ package.json
+├─ yarn.lock
+├─ index.html
+├─ tsconfig.json
+├─ tsconfig.node.json
+├─ vite.config.ts
+└─ readme.md
+```
+
+<br>
+
+## 🪄 Market Price Info
+
+- https://upbit.com/open_api_agreement
 
 <br>
 
@@ -49,7 +76,7 @@ npm i
 ```
 yarn dev
 or
-npm run start
+npm run dev
 ```
 
 ### 빌드 실행
