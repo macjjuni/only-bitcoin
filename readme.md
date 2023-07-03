@@ -1,7 +1,6 @@
-# BitCoin Market Price
+# BitCoin Market Price - [🔗 Link](https://btc-price.web.app/)
 
-##
-
+<br>
 <div align="center">
 	<img src="https://img.shields.io/badge/React-61DAFB?style=flat&logo=React&logoColor=white" />
 	<img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=TypeScript&logoColor=white" />
@@ -11,12 +10,13 @@
 	<img src="https://img.shields.io/badge/Prettier-F7B93E?style=flat&logo=Prettier&logoColor=white" />	
 </div>
 
----
+<br>
 
 ## 📸 Initail Screen
 
 <img src="https://github.com/macjjuni/btc-price/assets/38034518/0ce78010-5e39-4d97-a9b3-0fdce1347e24" width="100%" alt="btc-price initial screen gif">
 
+<br>
 <br>
 
 ## 🌳 Project tree
