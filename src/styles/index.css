@@ -13,8 +13,7 @@ body {
 
 .main {
   position: sticky;
-  top: 50%;
-  transform: translateY(-50%);
+  top: calc(100vh / 2 - 282px);
   display: flex;
   align-items: center;
   justify-content: center;
