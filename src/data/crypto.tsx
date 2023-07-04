@@ -17,3 +17,5 @@ export const btcInfo: CryptoProp = {
   icon: <FaBitcoin size="28" color="#f7931a" />,
   color: '#f7931a',
 }
+
+export const assetList = ['BTC/KRW']

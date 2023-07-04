@@ -1,5 +1,5 @@
 import { Container } from '@mui/material'
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 
 import Spinner from '@/components/Spinner'
 import Home from '@/pages/Home'
@@ -11,7 +11,7 @@ const Main = () => {
   const [load, setLoad] = useState(false) // 렌더링(소켓 연결)
   const btc = useBearStore((state) => state.btc)
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     initSocket()
   }, [])
 
