@@ -2,10 +2,13 @@ import { toast } from 'react-toastify'
 import { useBearStore } from '@/zustand/store'
 import { btcInfo } from '@/data/btcInfo'
 
+// Upbit API URL
+const upbitURL = import.meta.env.VITE_UPBIT_API_URL || 'wss://api.upbit.com/websocket/v1'
+
 // Zustand
 const { getState } = useBearStore
 
-const currency = [{ ticket: 'macjjuni' }, { type: 'ticker', codes: [btcInfo.ticker] }, { format: 'SIMPLE' }]
+const currency = [{ ticket: 'kku.dev' }, { type: 'ticker', codes: [btcInfo.ticker] }, { format: 'SIMPLE' }]
 
 let timeoutId: ReturnType<typeof setInterval>
 let retryCount = 1
@@ -21,9 +24,9 @@ const intervalTime = 3000 // ms 재시도 시간 간격
 // 소켓 생성
 let socket: WebSocket | null = null
 
+// 소켓 초기화
 function initSocket() {
-  // 초기 접속 실행
-  socket = new WebSocket('wss://api.upbit.com/websocket/v1')
+  socket = new WebSocket(upbitURL)
   socket.binaryType = 'arraybuffer'
 
   // eslint-disable-next-line func-names
