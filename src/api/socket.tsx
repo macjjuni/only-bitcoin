@@ -29,6 +29,7 @@ function initSocket() {
   // eslint-disable-next-line func-names
   socket.onopen = function () {
     console.log('on socket')
+    retryCount = 1
     this.send(JSON.stringify(currency))
     toast.success(`서버에 연결되었습니다! 2,100만 하세요⚡`, {
       icon: () => <FaBitcoin fontSize={32} color={btcInfo.color} />,
