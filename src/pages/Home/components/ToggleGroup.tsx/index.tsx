@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
-import { btcInfo, assetList } from '@/data/btcInfo'
+import { btcInfo, upbitAsset } from '@/data/btcInfo'
 
 interface IToggleGroup {
   select: string | null
@@ -16,7 +16,7 @@ const ToggleGroup = ({ select, setSelect }: IToggleGroup) => {
 
   return (
     <ToggleButtonGroup exclusive aria-label="text alignment" value={select} onChange={handleSelect}>
-      {assetList.map((tab) => (
+      {upbitAsset.map((tab) => (
         <ToggleButton key={tab} value={tab} sx={{ width: '100%' }}>
           <Typography ml={1.5} fontWeight="bold" fontSize="large" color={btcInfo.color}>
             {tab}

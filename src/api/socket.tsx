@@ -1,4 +1,5 @@
 import { toast } from 'react-toastify'
+import moment from 'moment'
 import { useBearStore } from '@/zustand/store'
 import { btcInfo } from '@/data/btcInfo'
 import { uuid } from '@/utils/common'
@@ -52,7 +53,8 @@ function initSocket() {
     const filterData = {
       title: data.cd.split('-')[1].toLowerCase(),
       ticker: data.cd,
-      price: data.tp,
+      priceKRW: data.tp,
+      time: moment(data.ttms).format('YYYY-MM-DD HH:mm:ss'),
     }
     getState().update(filterData) // store update
   }

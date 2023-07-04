@@ -18,4 +18,5 @@ export const btcInfo: CryptoProp = {
   color: '#f7931a',
 }
 
-export const assetList = ['BTC/KRW']
+export const upbitAsset = ['BTC/KRW']
+export const binaceAsset = ['btcusdt']

@@ -32,7 +32,7 @@ const BtcToPrice = () => {
   }
 
   const calcPrice = (amt: number) => {
-    return comma((btc.price * Number(amt)).toFixed(0).toString())
+    return comma((btc.priceKRW * Number(amt)).toFixed(0).toString())
   }
 
   // 비트코인 개수 변경
@@ -59,7 +59,7 @@ const BtcToPrice = () => {
     if (priceTxt === '' || Number.isNaN(Number(priceTxt))) initialInput()
     else {
       setPrice(comma(priceTxt))
-      setAmount((Number(priceTxt) / btc.price).toFixed(commaLength).toString())
+      setAmount((Number(priceTxt) / btc.priceKRW).toFixed(commaLength).toString())
     }
   }
 
@@ -106,7 +106,7 @@ const BtcToPrice = () => {
     if (standard) {
       // 금액
       const numPrice = Number(price.replace(/(^0+)/, '').replace(/,/g, ''))
-      const calcAmount = (numPrice / btc.price).toFixed(commaLength).toString()
+      const calcAmount = (numPrice / btc.priceKRW).toFixed(commaLength).toString()
       setAmount(calcAmount)
     } else {
       // 개수

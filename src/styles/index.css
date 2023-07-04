@@ -74,6 +74,17 @@ body {
   font-size: 18px;
 }
 
+.krw-txt,
+.usd-txt {
+  display: inline-block;
+  width: 100%;
+}
+
+.usd-txt {
+  width: 100%;
+  font-size: 24px !important;
+}
+
 @media screen and (max-width: 600px) {
   #btc-forever {
     min-height: -webkit-fill-available;
