@@ -11,6 +11,10 @@ const Main = () => {
   const [load, setLoad] = useState(false) // 렌더링(소켓 연결)
   const btc = useBearStore((state) => state.btc)
 
+  // const test = () => {
+  //   disconnect()
+  // }
+
   useLayoutEffect(() => {
     initSocket()
   }, [])
@@ -21,6 +25,9 @@ const Main = () => {
 
   return (
     <Container component="main" className="main">
+      {/* <button type="button" onClick={test}>
+        DisConnect
+      </button> */}
       <Spinner isRender={load} />
       <Home />
     </Container>

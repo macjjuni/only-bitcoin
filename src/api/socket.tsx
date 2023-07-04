@@ -1,5 +1,4 @@
 import { toast } from 'react-toastify'
-import { FaBitcoin } from 'react-icons/fa'
 import { useBearStore } from '@/zustand/store'
 import { btcInfo } from '@/data/crypto'
 
@@ -11,6 +10,7 @@ const currency = [{ ticket: 'macjjuni' }, { type: 'ticker', codes: [btcInfo.tick
 let timeoutId: ReturnType<typeof setInterval>
 let retryCount = 1
 const limitCount = 3
+const intervalTime = 3000 // ms 재시도 시간 간격
 
 /**
  * --- TODO LIST ---
@@ -31,9 +31,7 @@ function initSocket() {
     console.log('on socket')
     retryCount = 1
     this.send(JSON.stringify(currency))
-    toast.success(`서버에 연결되었습니다! 2,100만 하세요⚡`, {
-      icon: () => <FaBitcoin fontSize={32} color={btcInfo.color} />,
-    })
+    toast.success(`서버에 연결되었습니다! 2,100만 하세요⚡`)
     clearInterval(timeoutId)
   }
   socket.onmessage = (evt) => {
@@ -57,19 +55,18 @@ function initSocket() {
   }
   socket.onclose = () => {
     console.log('socket close')
-    toast.info(`서버 연결이 해제되었습니다. 2초 후 재연결 시도합니다.`)
-    setTimeout(() => {
-      timeoutId = setInterval(() => {
-        console.log('timeout', retryCount)
-        if (retryCount > limitCount) {
-          toast.warn(`인터넷 연결 오류 또는 업비트 서버 점검 중입니다. 나중에 다시 시도해주세요 🙏`)
-          clearInterval(timeoutId)
-          return
-        }
-        toast.warn(`재연결 시도 중..🏃(${retryCount++}번 시도)`)
-        initSocket()
-      }, 1500)
-    }, 2000)
+    toast.info(`서버 연결이 해제되었습니다. ${intervalTime / 1000}초 후 재연결 시도합니다.`)
+
+    timeoutId = setInterval(() => {
+      console.log('timeout', retryCount)
+      if (retryCount > limitCount) {
+        toast.warn(`인터넷 연결 오류 또는 업비트 서버 점검 중입니다. 나중에 다시 시도해주세요 🙏`)
+        clearInterval(timeoutId)
+        return
+      }
+      toast.warn(`재연결 시도 중..🏃(${retryCount++}번 시도)`)
+      initSocket()
+    }, intervalTime)
   }
 }
 // 접속 해제
