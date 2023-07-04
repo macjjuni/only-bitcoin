@@ -10,7 +10,7 @@ import equal from '@/assets/equal.json'
 
 import BtcToPrice from './components/BtcToPrice'
 import { useBearStore } from '@/zustand/store'
-import { assetList } from '@/data/crypto'
+import { assetList } from '@/data/btcInfo'
 
 // Lottie Option
 const defaultOption: LottieProps = { loop: true, play: true }

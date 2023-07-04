@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { ToggleButton, ToggleButtonGroup, Typography } from '@mui/material'
-import { btcInfo, assetList } from '@/data/crypto'
+import { btcInfo, assetList } from '@/data/btcInfo'
 
 interface IToggleGroup {
   select: string | null

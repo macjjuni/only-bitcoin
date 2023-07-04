@@ -3,7 +3,7 @@ import { Stack, FormGroup, FormControlLabel, Checkbox, FormControl, InputLabel, 
 import { FaWonSign } from 'react-icons/fa'
 import CopyButton from '@/components/CopyButton'
 import { useBearStore } from '@/zustand/store'
-import { btcInfo } from '@/data/crypto'
+import { btcInfo } from '@/data/btcInfo'
 import { comma, isSafari } from '@/utils/common'
 
 const numReg = /^[-+]?(\d+(\.\d*)?|\.\d+)$/

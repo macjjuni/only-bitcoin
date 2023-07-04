@@ -1,6 +1,6 @@
 import { toast } from 'react-toastify'
 import { useBearStore } from '@/zustand/store'
-import { btcInfo } from '@/data/crypto'
+import { btcInfo } from '@/data/btcInfo'
 
 // Zustand
 const { getState } = useBearStore
