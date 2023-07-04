@@ -1,3 +1,5 @@
+import { v4 as uuidv4 } from 'uuid'
+
 // -------------------- string 형식에 숫자만 포함됐는지 체크 --------------------
 export const isStrNumber = (val: string): boolean => {
   return !Number.isNaN(Number(val))
@@ -25,4 +27,17 @@ export const copyText = async (txt: string) => {
       console.error(e)
       return false
     })
+}
+
+export const uuid = {
+  generate: () => {
+    return uuidv4()
+  },
+  getUuid: () => {
+    const savedUuid: string | null = localStorage.getItem('uuid')
+    return savedUuid
+  },
+  saveUuid: (uuidTxt: string) => {
+    localStorage.setItem('uuid', uuidTxt)
+  },
 }

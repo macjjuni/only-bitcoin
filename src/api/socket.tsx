@@ -1,6 +1,7 @@
 import { toast } from 'react-toastify'
 import { useBearStore } from '@/zustand/store'
 import { btcInfo } from '@/data/btcInfo'
+import { uuid } from '@/utils/common'
 
 // Upbit API URL
 const upbitURL = import.meta.env.VITE_UPBIT_API_URL || 'wss://api.upbit.com/websocket/v1'
@@ -8,7 +9,13 @@ const upbitURL = import.meta.env.VITE_UPBIT_API_URL || 'wss://api.upbit.com/webs
 // Zustand
 const { getState } = useBearStore
 
-const currency = [{ ticket: 'kku.dev' }, { type: 'ticker', codes: [btcInfo.ticker] }, { format: 'SIMPLE' }]
+// Uuid
+const isUuid = uuid.getUuid()
+if (!isUuid) {
+  const newUuid = uuid.generate()
+  uuid.saveUuid(newUuid)
+}
+const currency = [{ ticket: uuid.getUuid() }, { type: 'ticker', codes: [btcInfo.ticker] }, { format: 'SIMPLE' }]
 
 let timeoutId: ReturnType<typeof setInterval>
 let retryCount = 1
