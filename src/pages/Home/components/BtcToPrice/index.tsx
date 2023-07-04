@@ -1,6 +1,7 @@
 import { useEffect, useState, useRef } from 'react'
 import { Stack, FormGroup, FormControlLabel, Checkbox, FormControl, InputLabel, OutlinedInput, InputAdornment } from '@mui/material'
 import { FaWonSign } from 'react-icons/fa'
+import { toast } from 'react-toastify'
 import CopyButton from '@/components/CopyButton'
 import { useBearStore } from '@/zustand/store'
 import { btcInfo } from '@/data/btcInfo'
@@ -83,15 +84,6 @@ const BtcToPrice = () => {
     setStandard(e.target.checked)
   }
 
-  const focusInput = () => {
-    if (!standard) amountRef.current?.focus()
-    else priceRef.current?.focus()
-  }
-
-  useEffect(() => {
-    focusInput()
-  }, [standard])
-
   useEffect(() => {
     if (numReg.test(amount)) {
       const calcSat = (Number(amount) * satoshi).toFixed(0).toString()
@@ -135,7 +127,6 @@ const BtcToPrice = () => {
             value={amount}
             type="number"
             slotProps={{ input: { min: 0, step: 0.1, inputMode: 'decimal', pattern: '[0-9]+([.,]0|[1-9]+)?' } }}
-            onClick={focusInput}
             onChange={!isSafari ? handleAmount : iosHandleAmount}
             onKeyDown={handleAmountKeydown}
             startAdornment={<InputAdornment position="start">{btcInfo.icon}</InputAdornment>}
@@ -158,7 +149,6 @@ const BtcToPrice = () => {
             className="price-input"
             readOnly={!standard}
             value={price}
-            onClick={focusInput}
             onChange={handlePrice}
             onKeyDown={handlePriceKeydown}
             startAdornment={

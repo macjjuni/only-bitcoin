@@ -12,16 +12,14 @@ import equal from '@/assets/equal.json'
 
 import BtcToPrice from './components/BtcToPrice'
 import { useBearStore } from '@/zustand/store'
-import { upbitAsset } from '@/data/btcInfo'
 
 // Lottie Option
 const defaultOption: LottieProps = { loop: true, play: true }
 const btcOption = { ...defaultOption, style: { width: '90px', height: '90px' } }
-const equalOption = { ...defaultOption, style: { width: '50px', height: '90px', marginLeft: '-8px' } }
+const equalOption = { ...defaultOption, style: { width: '50px', height: '90px' } }
 
 const Home = () => {
   // State
-  const [select, setSelect] = useState<string | null>(upbitAsset[0]) // Tab Menu
   const btc = useBearStore((state) => state.btc) // Zustand Store
 
   const [speed, setSpeed] = useState(1)
@@ -57,9 +55,7 @@ const Home = () => {
         </Typography>
       </Stack>
 
-      <ToggleGroup select={select} setSelect={setSelect} />
-
-      <Box height="220px">{select === 'BTC/KRW' && <BtcToPrice />}</Box>
+      <BtcToPrice />
     </Stack>
   )
 }

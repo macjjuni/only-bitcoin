@@ -5,20 +5,21 @@ import Spinner from '@/components/Spinner'
 import Home from '@/pages/Home'
 
 import { useBearStore } from '@/zustand/store'
-import initSocket from '@/api/socket'
-import initBinance from '@/api/binance'
+import initUpbit from '@/socket/upbit' //
+import initBinance from '@/socket/binance'
 
 const Main = () => {
   const [load, setLoad] = useState(false) // 렌더링(소켓 연결)
   const btc = useBearStore((state) => state.btc)
 
-  // const test = () => {
-  //   disconnect()
-  // }
+  const socketInit = () => {
+    console.log('socket init')
+    initUpbit()
+    initBinance()
+  }
 
   useLayoutEffect(() => {
-    initSocket()
-    initBinance()
+    socketInit()
   }, [])
 
   useEffect(() => {
@@ -27,9 +28,6 @@ const Main = () => {
 
   return (
     <Container component="main" className="main">
-      {/* <button type="button" onClick={test}>
-        DisConnect
-      </button> */}
       <Spinner isRender={load} />
       <Home />
     </Container>

@@ -16,6 +16,17 @@ if (!isUuid) {
   const newUuid = uuid.generate()
   uuid.saveUuid(newUuid)
 }
+
+const resetData = () => {
+  const cleanData = {
+    title: '',
+    ticker: '',
+    priceKRW: 0,
+    time: moment().format('YYYY-MM-DD HH:mm:ss'),
+  }
+  getState().update(cleanData) // store update
+}
+
 const currency = [{ ticket: uuid.getUuid() }, { type: 'ticker', codes: [btcInfo.ticker] }, { format: 'SIMPLE' }]
 
 let timeoutId: ReturnType<typeof setInterval>
@@ -33,7 +44,7 @@ const intervalTime = 3000 // ms 재시도 시간 간격
 let socket: WebSocket | null = null
 
 // 소켓 초기화
-function initSocket() {
+function initUpbit() {
   socket = new WebSocket(upbitURL)
   socket.binaryType = 'arraybuffer'
 
@@ -42,7 +53,7 @@ function initSocket() {
     console.log('on socket')
     retryCount = 1
     this.send(JSON.stringify(currency))
-    toast.success(`서버에 연결되었습니다! 2,100만 하세요⚡`)
+    toast.success(`서버에 연결되었습니다! 2,100만 하세요 ⚡️`)
     clearInterval(timeoutId)
   }
   socket.onmessage = (evt) => {
@@ -60,31 +71,50 @@ function initSocket() {
   }
 
   socket.onerror = (e) => {
-    if (socket === null) return
     console.log('on error!')
+    if (socket === null) return
     socket.close()
     console.error(e)
   }
-  socket.onclose = () => {
+  socket.onclose = (e) => {
     console.log('socket close')
+    if (e.code === 4999) {
+      toast.warn(`연결 해제!`)
+      return
+    }
+
+    if (e.code === 4998) {
+      // 한 번 재접속
+      initUpbit()
+      return
+    }
+
     toast.info(`서버 연결이 해제되었습니다. ${intervalTime / 1000}초 후 재연결 시도합니다.`)
 
     timeoutId = setInterval(() => {
-      console.log('timeout', retryCount)
+      console.log(`timeout Retry Count: ${retryCount}`)
       if (retryCount > limitCount) {
         toast.warn(`인터넷 연결 오류 또는 업비트 서버 점검 중입니다. 나중에 다시 시도해주세요 🙏`)
         clearInterval(timeoutId)
         return
       }
-      toast.warn(`재연결 시도 중..🏃(${retryCount++}번 시도)`)
-      initSocket()
+      // toast.warn(`재연결 시도 중..🏃(${retryCount++}번 시도)`)
+      initUpbit()
     }, intervalTime)
   }
 }
 // 접속 해제
 export const disconnect = () => {
   if (!socket) return
-  socket.close()
+  resetData()
+  socket.close(4999)
 }
 
-export default initSocket
+// 접속 해제
+export const reConnect = () => {
+  if (!socket) return
+  resetData()
+  socket.close(4998)
+}
+
+export default initUpbit

@@ -152,5 +152,15 @@ body {
 }
 
 .Toastify__toast-container--top-right {
-  top: 5em !important;
+  top: 1.5em !important;
+}
+
+.Toastify__toast-container--bottom-center {
+  bottom: 2rem !important;
+}
+
+.Toastify__toast {
+  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px !important;
+  border-radius: 6px !important;
+  overflow: hidden !important;
 }

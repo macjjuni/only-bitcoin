@@ -4,7 +4,11 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import { toast } from 'react-toastify'
 import { copyText } from '@/utils/common'
 
-const CopyButton = ({ txt }: { txt: string | number }) => {
+interface ICopy {
+  txt: string
+}
+
+const CopyButton = ({ txt }: ICopy) => {
   const clickCopy = async () => {
     if (!txt) return
     const target = txt.toString()

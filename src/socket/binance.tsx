@@ -12,6 +12,11 @@ let retryCount = 1
 const limitCount = 3
 const intervalTime = 3000 // ms 재시도 시간 간격
 
+const resetData = () => {
+  const time = moment().format('YYYY-MM-DD HH:mm:ss')
+  getState().updateUSD({ priceUSD: 0, time }) // store update
+}
+
 /**
  * --- TODO LIST ---
  *
@@ -42,9 +47,14 @@ function initBinance() {
     socket.close()
     console.error(e)
   }
-  socket.onclose = () => {
+  socket.onclose = (e) => {
     console.log('socket close')
-    // toast.info(`서버 연결이 해제되었습니다. ${intervalTime / 1000}초 후 재연결 시도합니다.`)
+    if (e.code === 4999) return // 그냥 종료
+    else if (e.code === 4998) {
+      // 한 번 재접속
+      initBinance()
+      return
+    }
 
     timeoutId = setInterval(() => {
       if (retryCount > limitCount) {
@@ -58,7 +68,14 @@ function initBinance() {
 // 접속 해제
 export const disconnect = () => {
   if (!socket) return
-  socket.close()
+  resetData()
+  socket.close(4999)
+}
+
+export const reConnect = () => {
+  if (!socket) return
+  resetData()
+  socket.close(4998)
 }
 
 export default initBinance

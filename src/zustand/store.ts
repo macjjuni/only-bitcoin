@@ -17,6 +17,7 @@ interface IUpdateUSD {
 interface BearState {
   btc: IBtc
   amount: string
+  // theme: 'dark' | 'light'
   setAmount: (by: string) => void
   update: (by: Omit<IBtc, 'priceUSD'>) => void
   updateUSD: (by: IUpdateUSD) => void
@@ -33,6 +34,7 @@ export const useBearStore = create<BearState>()(
         time: 'no data',
       },
       amount: '1',
+      // theme: 'light',
       setAmount: (by) => set(() => ({ amount: by })),
       update: (by) =>
         set((state) => ({
