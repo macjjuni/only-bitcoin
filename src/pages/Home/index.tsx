@@ -34,10 +34,10 @@ const Home = () => {
   }
 
   return (
-    <Stack onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} direction="column" useFlexGap flexWrap="wrap" gap="1rem" maxWidth={400} width="100%" m="auto">
-      <Stack gap="12px">
+    <Stack direction="column" useFlexGap flexWrap="wrap" gap="1rem" maxWidth={400} width="100%" m="auto">
+      <Stack onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} gap="12px">
         <Typography variant="h1" className="top-dashboard">
-          <LottieItem option={btcOption} animationData={bitcoin} speed={speed + 0.5} />
+          <LottieItem option={btcOption} animationData={bitcoin} speed={speed + 0.8} />
           <LottieItem option={equalOption} animationData={equal} speed={speed + 1} />
           <Box>
             <CountUp start={convertToZero(btc.price)} end={btc.price} duration={0.3} />
