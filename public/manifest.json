@@ -1,6 +1,11 @@
 {
   "short_name": "BTC Price",
   "name": "Bitcoin Market Price",
+  "start_url": "/",
+  "theme_color": "#f7931a",
+  "background_color": "#ffffff",
+  "display": "standalone",
+  "description": "Only Bitcoin market price WebApp",
   "icons": [
     {
       "src": "/android-chrome-192x192.png",
@@ -11,9 +16,12 @@
       "src": "/android-chrome-512x512.png",
       "sizes": "512x512",
       "type": "image/png"
+    },
+    {
+      "src": "/logo512.png",
+      "type": "image/png",
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
-  ],
-  "theme_color": "#f7931a",
-  "background_color": "#ffffff",
-  "display": "standalone"
+  ]
 }

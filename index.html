@@ -27,10 +27,38 @@
     <meta name="twitter:description" content="온리 비트코인 시세 및 사토시, 원화 자동 계산기(BTC/KRW/SAT), Not your keys, not your Bitcoin" />
     <meta name="twitter:image" content="<%= url %>logo512.png" />
 
+    <!-- Google tag (gtag.js) -->
+    <script async src="https://www.googletagmanager.com/gtag/js?id=G-HDZFH7FZ0B"></script>
+    <script>
+      window.dataLayer = window.dataLayer || []
+      function gtag() {
+        dataLayer.push(arguments)
+      }
+      gtag('js', new Date())
+
+      gtag('config', 'G-HDZFH7FZ0B')
+    </script>
+
     <title><%= title %></title>
   </head>
   <body>
     <div id="root"></div>
     <script type="module" src="/src/main.tsx"></script>
+    <script>
+      if ('serviceWorker' in navigator) {
+        // Register a service worker hosted at the root of the
+        // site using the default scope.
+        navigator.serviceWorker
+          .register('/sw.js')
+          .then((registration) => {
+            console.warn('Service worker registration succeeded:', registration)
+          })
+          .catch((err) => {
+            console.warn('Service worker registration failed:', error)
+          })
+      } else {
+        console.warn('Service workers are not supported.')
+      }
+    </script>
   </body>
 </html>

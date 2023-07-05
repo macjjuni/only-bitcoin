@@ -84,6 +84,15 @@ body {
   width: 100%;
   font-size: 24px !important;
 }
+.btc-krw-flag {
+  position: absolute;
+  top: 40%;
+  left: 24px;
+  height: 20px;
+  transform: translateY(-50%) rotate(8deg);
+  width: 2px;
+  background-color: #000;
+}
 
 @media screen and (max-width: 600px) {
   #btc-forever {
@@ -163,4 +172,20 @@ body {
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px !important;
   border-radius: 6px !important;
   overflow: hidden !important;
+}
+
+/* MUI Style */
+
+.MuiPaper-elevation1 {
+  margin: 0 !important;
+  box-shadow: none !important;
+}
+.MuiPaper-elevation1::before {
+  display: none !important;
+}
+.MuiAccordionSummary-root {
+  height: 64px !important;
+}
+.MuiAccordionSummary-content {
+  margin: 0 !important;
 }

@@ -2,52 +2,55 @@ import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
 export interface IBtc {
-  title: string
-  ticker: string
-  priceKRW: number
-  priceUSD: number
-  time: string
+  krw: number
+  krwTime: string
+  usd: number
+  usdTime: string
+}
+
+interface IUpdateKRW {
+  krw: number
+  krwTime: string
 }
 
 interface IUpdateUSD {
-  priceUSD: number
-  time: string
+  usd: number
+  usdTime: string
 }
 
 interface BearState {
-  btc: IBtc
-  amount: string
+  btc: IBtc // BTC 시세 정보
+  amount: string // BTC 개수 Input 값
+  isShow: boolean // 아코디언 토글
   // theme: 'dark' | 'light'
   setAmount: (by: string) => void
-  update: (by: Omit<IBtc, 'priceUSD'>) => void
+  updateKRW: (by: IUpdateKRW) => void
   updateUSD: (by: IUpdateUSD) => void
+  toggleAcc: () => void
 }
 
 export const useBearStore = create<BearState>()(
   persist(
     (set) => ({
       btc: {
-        title: 'btc',
-        ticker: 'KRW-BTC',
-        priceKRW: 0,
-        priceUSD: 0,
-        time: 'no data',
+        krw: 0,
+        krwTime: '',
+        usd: 0,
+        usdTime: '',
       },
       amount: '1',
+      isShow: true,
       // theme: 'light',
-      setAmount: (by) => set(() => ({ amount: by })),
-      update: (by) =>
+      setAmount: (price) => set(() => ({ amount: price })),
+      updateKRW: (krw) =>
         set((state) => ({
-          btc: { ...by, priceUSD: state.btc.priceUSD },
+          btc: { ...state.btc, ...krw },
         })),
-      updateUSD: (by) =>
+      updateUSD: (usd) =>
         set((state) => ({
-          btc: {
-            ...state.btc,
-            priceUSD: by.priceUSD,
-            time: by.time,
-          },
+          btc: { ...state.btc, ...usd },
         })),
+      toggleAcc: () => set((state) => ({ isShow: !state.isShow })),
     }),
     {
       name: 'bear-storage', // persist key

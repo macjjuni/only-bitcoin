@@ -1,14 +1,21 @@
 import { toast } from 'react-toastify'
-import moment from 'moment'
 import { useBearStore } from '@/zustand/store'
 import { btcInfo } from '@/data/btcInfo'
-import { uuid } from '@/utils/common'
+import { uuid, isNetwork, transDate, getNowDate } from '@/utils/common'
 
 // Upbit API URL
 const upbitURL = import.meta.env.VITE_UPBIT_API_URL || 'wss://api.upbit.com/websocket/v1'
 
 // Zustand
 const { getState } = useBearStore
+// Store data reset
+const resetData = () => {
+  const cleanData = {
+    krw: 0,
+    krwTime: getNowDate(),
+  }
+  getState().updateKRW(cleanData) // store update
+}
 
 // Uuid
 const isUuid = uuid.getUuid()
@@ -17,22 +24,18 @@ if (!isUuid) {
   uuid.saveUuid(newUuid)
 }
 
-const resetData = () => {
-  const cleanData = {
-    title: '',
-    ticker: '',
-    priceKRW: 0,
-    time: moment().format('YYYY-MM-DD HH:mm:ss'),
-  }
-  getState().update(cleanData) // store update
-}
-
 const currency = [{ ticket: uuid.getUuid() }, { type: 'ticker', codes: [btcInfo.ticker] }, { format: 'SIMPLE' }]
 
-let timeoutId: ReturnType<typeof setInterval>
+let timeout: NodeJS.Timeout | null = null
 let retryCount = 1
 const limitCount = 3
-const intervalTime = 3000 // ms 재시도 시간 간격
+const setTime = 3000 // ms 재시도 시간 간격
+
+const clearTimeOut = () => {
+  if (!timeout) return
+  clearTimeout(timeout)
+  timeout = null
+}
 
 /**
  * --- TODO LIST ---
@@ -50,11 +53,10 @@ function initUpbit() {
 
   // eslint-disable-next-line func-names
   socket.onopen = function () {
-    console.log('on socket')
+    console.log('on socket_upbit')
     retryCount = 1
     this.send(JSON.stringify(currency))
-    toast.success(`서버에 연결되었습니다! 2,100만 하세요 ⚡️`)
-    clearInterval(timeoutId)
+    toast.success(`서버에 연결되었습니다.(Upbit) 2,100만 하세요⚡️`)
   }
   socket.onmessage = (evt) => {
     const enc = new TextDecoder('utf-8')
@@ -62,59 +64,46 @@ function initUpbit() {
     const data = JSON.parse(enc.decode(arr))
 
     const filterData = {
-      title: data.cd.split('-')[1].toLowerCase(),
-      ticker: data.cd,
-      priceKRW: data.tp,
-      time: moment(data.ttms).format('YYYY-MM-DD HH:mm:ss'),
+      krw: data.tp,
+      krwTime: transDate(data.ttms),
     }
-    getState().update(filterData) // store update
+    getState().updateKRW(filterData) // store update
   }
-
+  // 소켓 에러 핸들링
   socket.onerror = (e) => {
-    console.log('on error!')
+    console.dir(e)
+
     if (socket === null) return
-    socket.close()
-    console.error(e)
+    if (!isNetwork()) {
+      toast.warn(`인터넷 연결 오류 또는 서버 점검 중입니다. 나중에 다시 시도해주세요 🙏`)
+      socket.close()
+    }
   }
+  // 소켓 닫힘
   socket.onclose = (e) => {
-    console.log('socket close')
-    if (e.code === 4999) {
-      toast.warn(`연결 해제!`)
-      return
+    console.dir(`비정상적 종료(Upbit): ${e.code}`)
+    if (e.wasClean || e.code === 1000) {
+      toast.info(`서버 연결 해제(Upbit)`)
+    } else if (e.code === 1006) {
+      // 비정상적 오류
+      timeout = setTimeout(() => {
+        toast.info(`${setTime / 1000}초 후 재연결 시도합니다. (${retryCount++})`)
+        if (retryCount > limitCount) {
+          // 제한 횟숨만큼 연결 재시도
+          clearTimeOut()
+          toast.error(`서버가 응답하지 않습니다. 나중에 다시 시도해주세요 🙏`)
+        } else {
+          initUpbit()
+        }
+      }, setTime)
     }
-
-    if (e.code === 4998) {
-      // 한 번 재접속
-      initUpbit()
-      return
-    }
-
-    toast.info(`서버 연결이 해제되었습니다. ${intervalTime / 1000}초 후 재연결 시도합니다.`)
-
-    timeoutId = setInterval(() => {
-      console.log(`timeout Retry Count: ${retryCount}`)
-      if (retryCount > limitCount) {
-        toast.warn(`인터넷 연결 오류 또는 업비트 서버 점검 중입니다. 나중에 다시 시도해주세요 🙏`)
-        clearInterval(timeoutId)
-        return
-      }
-      // toast.warn(`재연결 시도 중..🏃(${retryCount++}번 시도)`)
-      initUpbit()
-    }, intervalTime)
   }
 }
 // 접속 해제
 export const disconnect = () => {
   if (!socket) return
   resetData()
-  socket.close(4999)
-}
-
-// 접속 해제
-export const reConnect = () => {
-  if (!socket) return
-  resetData()
-  socket.close(4998)
+  socket.close(1000)
 }
 
 export default initUpbit
