@@ -3,10 +3,10 @@ import { Stack, FormGroup, FormControlLabel, Checkbox, FormControl, InputLabel, 
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
 
 import { FaWonSign } from 'react-icons/fa'
-import CopyButton from '@/components/CopyButton'
 import { useBearStore } from '@/zustand/store'
 import { btcInfo } from '@/data/btcInfo'
 import { comma, isSafari } from '@/utils/common'
+import CopyButton from '@/components/CopyButton'
 
 const numReg = /^[-+]?(\d+(\.\d*)?|\.\d+)$/
 const commaLength = 5 // 소숫점
@@ -14,7 +14,7 @@ const satoshi = 100000000
 
 const BtcToPrice = () => {
   // zustand Store
-  const btc = useBearStore((state) => state.btc)
+  const { btc, isShow, toggleAcc } = useBearStore((state) => state)
   const amount = useBearStore((state) => state.amount)
   const setAmount = useBearStore((state) => state.setAmount)
   // state
@@ -85,6 +85,10 @@ const BtcToPrice = () => {
     setStandard(e.target.checked)
   }
 
+  const toggleAccordian = (e: React.SyntheticEvent, expanded: boolean) => {
+    toggleAcc(expanded)
+  }
+
   useEffect(() => {
     if (numReg.test(amount)) {
       const calcSat = (Number(amount) * satoshi).toFixed(0).toString()
@@ -109,15 +113,11 @@ const BtcToPrice = () => {
   }, [btc])
 
   return (
-    <Accordion>
+    <Accordion expanded={isShow} onChange={toggleAccordian} TransitionProps={{ unmountOnExit: true }} square={false}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1 a-header">
-        <Stack position="relative" width="100%" flexDirection="row" alignItems="center" justifyContent="flex-start" gap="8px">
-          <span>{btcInfo.icon2(24, '#bababa')}</span>
-          <span className="btc-krw-flag" />
-          <span>
-            <FaWonSign fontSize={20} color="#bababa" />
-          </span>
-        </Stack>
+        <Typography component="h3" fontSize="15px" fontWeight="bold">
+          BTC / KRW
+        </Typography>
       </AccordionSummary>
       <AccordionDetails>
         <Stack direction="row" useFlexGap flexWrap="wrap" paddingBottom="1rem">

@@ -1,8 +1,24 @@
+@font-face {
+  font-family: 'Pretendard-Regular';
+  src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
+  font-weight: 400;
+  font-style: normal;
+}
+
+* {
+  font-family: 'Pretendard-Regular';
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
+  background-image: url('/public/btc-cover.webp'); /*이미지 경로지정*/
+  background-size: 500px;
+  background-position: center 60%;
+  background-repeat: no-repeat;
+  background-attachment: fix;
 }
 
 #btc-forever {
@@ -18,7 +34,7 @@ body {
   align-items: center;
   justify-content: center;
   padding: 0 24px;
-  min-height: 500px;
+  min-height: 600px;
 }
 
 .top-dashboard {
@@ -44,6 +60,7 @@ body {
   text-align: center;
   margin-bottom: 36px;
   text-shadow: 1px 1px 1px #ce0000;
+  font-weight: bold;
 }
 
 .amount-input > div > input {
@@ -72,6 +89,7 @@ body {
 .price-input > input {
   text-align: center;
   font-size: 18px;
+  padding: 16.5px 16px 16.5px 0;
 }
 
 .krw-txt,
@@ -84,18 +102,14 @@ body {
   width: 100%;
   font-size: 24px !important;
 }
-.btc-krw-flag {
-  position: absolute;
-  top: 40%;
-  left: 24px;
-  height: 20px;
-  transform: translateY(-50%) rotate(8deg);
-  width: 2px;
-  background-color: #000;
-}
 
 @media screen and (max-width: 600px) {
+  body {
+    background-size: 90vw;
+    background-position: center 64%;
+  }
   #btc-forever {
+    min-height: 100vh;
     min-height: -webkit-fill-available;
     min-height: fill-available;
   }
@@ -111,6 +125,11 @@ body {
   #not-key-not-btc {
     font-size: 16px !important;
     margin: -12px 0 12px 0;
+  }
+  .price-input > input {
+    text-align: center;
+    font-size: 18px;
+    padding: 16.5px 8px 16.5px 0;
   }
 }
 
@@ -178,7 +197,11 @@ body {
 
 .MuiPaper-elevation1 {
   margin: 0 !important;
-  box-shadow: none !important;
+  /* box-shadow: none !important; */
+  /* box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px !important; */
+  /* box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px !important; */
+  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px !important;
+  /* box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px !important; */
 }
 .MuiPaper-elevation1::before {
   display: none !important;

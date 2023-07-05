@@ -40,7 +40,7 @@ function initBinance() {
   socket.onopen = function () {
     console.log('on socket_Binance')
     retryCount = 1
-    toast.success(`서버에 연결되었습니다.(Binance) 2,100만 하세요⚡️`)
+    toast.success(`서버에 연결되었습니다.(Binance)`)
   }
   socket.onmessage = ({ data }) => {
     const json = JSON.parse(data)

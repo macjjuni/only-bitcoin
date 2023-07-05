@@ -1,4 +1,3 @@
-import { memo } from 'react'
 import { Box } from '@mui/material'
 import Lottie, { LottieProps } from 'react-lottie-player'
 import logo from '@/assets/logo.json'
@@ -14,4 +13,4 @@ const Logo = () => {
   )
 }
 
-export default memo(Logo)
+export default Logo

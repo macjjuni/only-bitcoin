@@ -56,7 +56,7 @@ function initUpbit() {
     console.log('on socket_upbit')
     retryCount = 1
     this.send(JSON.stringify(currency))
-    toast.success(`서버에 연결되었습니다.(Upbit) 2,100만 하세요⚡️`)
+    toast.success(`서버에 연결되었습니다. (Upbit)`)
   }
   socket.onmessage = (evt) => {
     const enc = new TextDecoder('utf-8')

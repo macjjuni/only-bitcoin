@@ -34,7 +34,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
           <Typography component="p" fontSize={14}>
             시시 정보:{' '}
             <Link href="https://docs.upbit.com/docs/upbit-quotation-websocket" target="_blank" title="Upbit API Docs">
-              upbit
+              Upbit
             </Link>{' '}
             /{' '}
             <Link href="https://binance-docs.github.io/apidocs/spot/en/#introduction" target="_blank" title="Binance API Docs">

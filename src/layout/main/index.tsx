@@ -5,8 +5,8 @@ import Spinner from '@/components/Spinner'
 import Home from '@/pages/Home'
 
 import { useBearStore } from '@/zustand/store'
-import initUpbit, { disconnect as upbitDisconnect } from '@/socket/upbit' //
-import initBinance, { disconnect as binanceDisconnect } from '@/socket/binance'
+import initUpbit from '@/socket/upbit' //
+import initBinance from '@/socket/binance'
 
 const Main = () => {
   const [load, setLoad] = useState(false) // 렌더링(소켓 연결)

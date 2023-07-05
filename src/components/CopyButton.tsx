@@ -1,8 +1,8 @@
-import { memo } from 'react'
 import IconButton from '@mui/material/IconButton'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import { toast } from 'react-toastify'
 import { copyText } from '@/utils/common'
+import { btcInfo } from '@/data/btcInfo'
 
 interface ICopy {
   txt: string
@@ -18,10 +18,10 @@ const CopyButton = ({ txt }: ICopy) => {
   }
 
   return (
-    <IconButton onClick={clickCopy} aria-label="copy" color="primary">
+    <IconButton onClick={clickCopy} aria-label="copy" sx={{ color: btcInfo.color }}>
       <ContentCopyIcon fontSize="small" />
     </IconButton>
   )
 }
 
-export default memo(CopyButton)
+export default CopyButton

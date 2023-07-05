@@ -26,7 +26,7 @@ interface BearState {
   setAmount: (by: string) => void
   updateKRW: (by: IUpdateKRW) => void
   updateUSD: (by: IUpdateUSD) => void
-  toggleAcc: () => void
+  toggleAcc: (flag: boolean) => void
 }
 
 export const useBearStore = create<BearState>()(
@@ -50,7 +50,7 @@ export const useBearStore = create<BearState>()(
         set((state) => ({
           btc: { ...state.btc, ...usd },
         })),
-      toggleAcc: () => set((state) => ({ isShow: !state.isShow })),
+      toggleAcc: (flag) => set(() => ({ isShow: flag })),
     }),
     {
       name: 'bear-storage', // persist key
