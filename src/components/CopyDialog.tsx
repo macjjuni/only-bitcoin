@@ -22,7 +22,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
         <Container sx={{ padding: '16px' }}>
           <Stack component="h2" justifyContent="center" flexDirection="row" alignItems="center" fontWeight="bold" gap="8px" m="0" p="16px 0 24px">
             {btcInfo.icon(24)}
-            <Typography component="p" fontSize={20} fontWeight="bold">
+            <Typography component="p" fontSize={18} fontWeight="bold">
               비트코인 디플로마 [
               <Link href="https://t.co/lS2dUOKcK0" target="_blank" title="비트코인 디플로마 한글 번역본 by ATOMIC BITCOIN">
                 💾 다운로드
