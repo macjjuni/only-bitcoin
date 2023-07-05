@@ -75,7 +75,7 @@ function initUpbit() {
 
     if (socket === null) return
     if (!isNetwork()) {
-      toast.warn(`인터넷 연결 오류 또는 서버 점검 중입니다. 나중에 다시 시도해주세요 🙏`)
+      toast.warn(`인터넷 연결 오류 또는 서버 점검 중입니다. 나중에 다시 시도해 주세요 🙏`)
       socket.close()
     }
   }
@@ -91,7 +91,7 @@ function initUpbit() {
         if (retryCount > limitCount) {
           // 제한 횟숨만큼 연결 재시도
           clearTimeOut()
-          toast.error(`서버가 응답하지 않습니다. 나중에 다시 시도해주세요 🙏`)
+          toast.error(`서버가 응답하지 않습니다. 나중에 다시 시도해주세요. (Upbit) 🙏`)
         } else {
           initUpbit()
         }
