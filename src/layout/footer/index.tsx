@@ -26,11 +26,11 @@ const Footer = () => {
     <>
       <Stack component="footer" className="footer">
         <Stack component="div" flexDirection="row" justifyContent="space-between" alignItems="center" width="100%" color="#474E68">
-          <IconButton title="설정" onClick={onSet}>
+          <IconButton size="small" title="설정" onClick={onSet}>
             <SettingIcon />
           </IconButton>
           <Stack component="div" flexDirection="row" alignItems="center" gap="4px">
-            <IconButton size="small" onClick={onCopy}>
+            <IconButton size="small" title="정보" onClick={onCopy}>
               <Logo />
             </IconButton>
           </Stack>
