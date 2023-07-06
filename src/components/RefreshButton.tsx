@@ -9,7 +9,7 @@ const RefreshButton = () => {
   }
 
   return (
-    <IconButton onClick={onRefresh} sx={{ width: '48px', padding: '0', margin: '0' }}>
+    <IconButton onClick={onRefresh} sx={{ width: '48px', height: '48px', padding: '0', margin: '0' }}>
       <IoMdRefresh fontSize={42} color={btcInfo.color} />
     </IconButton>
   )

@@ -17,8 +17,11 @@ interface IUpdateUSD {
   usd: number
   usdTime: string
 }
+export type MarketType = 'KRW' | 'USD' | 'KRW/USD'
 
 interface BearState {
+  market: MarketType
+  setMarket: (market: MarketType) => void
   btc: IBtc // BTC 시세 정보
   amount: string // BTC 개수 Input 값
   isShow: boolean // 아코디언 토글
@@ -32,6 +35,8 @@ interface BearState {
 export const useBearStore = create<BearState>()(
   persist(
     (set) => ({
+      market: 'KRW/USD',
+      setMarket: (market: MarketType) => set(() => ({ market })),
       btc: {
         krw: 0,
         krwTime: '',
@@ -40,6 +45,7 @@ export const useBearStore = create<BearState>()(
       },
       amount: '1',
       isShow: true,
+      isSetting: false,
       // theme: 'light',
       setAmount: (price) => set(() => ({ amount: price })),
       updateKRW: (krw) =>
@@ -52,8 +58,6 @@ export const useBearStore = create<BearState>()(
         })),
       toggleAcc: (flag) => set(() => ({ isShow: flag })),
     }),
-    {
-      name: 'bear-storage', // persist key
-    }
+    { name: 'bear-storage' } // persist key
   )
 )

@@ -19,8 +19,12 @@ const TopDashboard = () => {
   const btc = useBearStore((state) => state.btc) // Zustand Store
 
   const [speed, setSpeed] = useState(1)
-  const mouseEnter = () => setSpeed(3)
-  const mouseLeave = () => setSpeed(1)
+  const mouseEnter = () => {
+    setSpeed(3)
+  }
+  const mouseLeave = () => {
+    setSpeed(1)
+  }
 
   return (
     <Stack onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} gap="12px">

@@ -1,48 +1,45 @@
 import { memo, useState } from 'react'
-import { Stack, Link, IconButton } from '@mui/material'
-import CopyrightIcon from '@mui/icons-material/Copyright'
-import GitHubIcon from '@mui/icons-material/GitHub'
+import { Stack, IconButton } from '@mui/material'
+import { LuCopyright } from 'react-icons/lu'
+import { BsGithub } from 'react-icons/bs'
+import SettingIcon from '@/components/SettingIcon'
 import CopyDialog from '@/components/CopyDialog'
+import SettingDialog from '@/components/SettingDialog'
+
+const iconStyle = {
+  fontSize: '20px',
+  color: '#2e2e2e',
+}
 
 const Footer = () => {
-  const [open, setOpen] = useState(false)
+  const [isCopy, setCopy] = useState(false)
+  const [isSetting, setSetting] = useState(false)
+
+  const onCopy = () => {
+    setCopy(true)
+  }
+  const onSet = () => {
+    setSetting(true)
+  }
 
   return (
     <>
-      <Stack
-        component="footer"
-        flexDirection="row"
-        justifyContent="flex-end"
-        alignItems="center"
-        px="16px"
-        sx={{
-          position: 'absolute',
-          bottom: '0',
-          left: '0',
-          width: '100%',
-          height: '50px',
-        }}
-      >
-        <Stack component="div" flexDirection="row" alignItems="center" gap="2px" sx={{ color: '#474E68' }}>
-          <IconButton
-            aria-label="delete"
-            size="small"
-            onClick={() => {
-              setOpen(true)
-            }}
-          >
-            <CopyrightIcon fontSize="inherit" />
+      <Stack component="footer" className="footer">
+        <Stack component="div" flexDirection="row" justifyContent="space-between" alignItems="center" width="100%" color="#474E68">
+          <IconButton title="설정" onClick={onSet}>
+            <SettingIcon />
           </IconButton>
-
-          <IconButton title="GitHub Repository" href="https://github.com/macjjuni/btc-price" target="_blank" sx={{ padding: '2px', borderRadius: '50%' }}>
-            <GitHubIcon sx={{ color: '#000', fontSize: '16px' }} />
-          </IconButton>
-
-          <Link href="https://kku.dev" underline="hover" target="_blank" pl="4px" pb="3px" sx={{ position: 'relative', top: '1px', color: '#393E46' }}>
-            kku.dev
-          </Link>
+          <Stack component="div" flexDirection="row" alignItems="center" gap="4px">
+            <IconButton title="GitHub Repository" href="https://github.com/macjjuni/btc-price" target="_blank">
+              <BsGithub {...iconStyle} />
+            </IconButton>
+            <IconButton size="small" onClick={onCopy}>
+              <LuCopyright {...iconStyle} />
+            </IconButton>
+          </Stack>
         </Stack>
-        <CopyDialog open={open} setOpen={setOpen} />
+        <CopyDialog open={isCopy} setOpen={setCopy} />
+        <SettingDialog open={isSetting} setOpen={setSetting} />
       </Stack>
     </>
   )
