@@ -13,7 +13,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
   }
   return (
     <>
-      <Dialog onClose={closeDialog} open={open}>
+      <Dialog onClose={closeDialog} open={open} className="mui-dialog">
         <DialogTitle minWidth={420} borderBottom="1px solid #a5a5a5" sx={{ padding: '12px 16px' }}>
           <Typography component="p" fontSize={16} fontWeight="bold">
             리소스 출처

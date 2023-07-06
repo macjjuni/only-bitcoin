@@ -5,37 +5,43 @@ import Spinner from '@/components/Spinner'
 import Home from '@/pages/Home'
 
 import { useBearStore } from '@/zustand/store'
-import initUpbit from '@/socket/upbit' //
-import initBinance from '@/socket/binance'
+import initUpbit, { closeUpbit } from '@/socket/upbit' //
+import initBinance, { closeBinance } from '@/socket/binance'
 
 const Main = () => {
   const [load, setLoad] = useState(false) // 렌더링(소켓 연결)
-  const btc = useBearStore((state) => state.btc)
+  const { btc, market } = useBearStore((state) => state)
 
-  const socketInit = useCallback(() => {
-    console.log('socket init')
+  // 업비트 소켓 연결 초기화
+  const upbitInit = useCallback(() => {
+    closeUpbit()
     initUpbit()
-    initBinance()
   }, [])
-
-  // const disconnect = () => {
-  //   upbitDisconnect()
-  //   binanceDisconnect()
-  // }
-
-  useLayoutEffect(() => {
-    socketInit()
+  // 바이넨스 소켓 연결 초기화
+  const binanceInit = useCallback(() => {
+    closeBinance()
+    initBinance()
   }, [])
 
   useEffect(() => {
     if (!load && btc.krw !== 0) setLoad(true) // 시세 변동 시 계산 => 코인 개수를 기준으로 가격 변환
   }, [btc])
 
+  useLayoutEffect(() => {
+    if (market === 'KRW') {
+      initUpbit()
+      closeBinance()
+    } else if (market === 'USD') {
+      initBinance()
+      closeUpbit()
+    } else {
+      binanceInit()
+      upbitInit()
+    }
+  }, [market])
+
   return (
     <Container component="main" className="main">
-      {/* <button type="button" onClick={disconnect}>
-        Disconnect
-      </button> */}
       <Spinner isRender={load} />
       <Home />
     </Container>

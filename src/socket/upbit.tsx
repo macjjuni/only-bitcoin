@@ -39,8 +39,7 @@ const clearTimeOut = () => {
 
 /**
  * --- TODO LIST ---
- * 1. 업비트 점검 시 코빗이나 다른 해외 거래소 시세 받아와 연결
- * 2.
+ * 1.
  */
 
 // 소켓 생성
@@ -83,7 +82,7 @@ function initUpbit() {
   socket.onclose = (e) => {
     console.dir(`비정상적 종료(Upbit): ${e.code}`)
     if (e.wasClean || e.code === 1000) {
-      toast.info(`서버 연결 해제(Upbit)`)
+      console.log(`서버 연결 해제(Upbit)`)
     } else if (e.code === 1006) {
       // 비정상적 오류
       timeout = setTimeout(() => {
@@ -100,7 +99,7 @@ function initUpbit() {
   }
 }
 // 접속 해제
-export const disconnect = () => {
+export const closeUpbit = () => {
   if (!socket) return
   resetData()
   socket.close(1000)

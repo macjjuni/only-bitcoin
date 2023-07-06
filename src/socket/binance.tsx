@@ -64,7 +64,7 @@ function initBinance() {
   socket.onclose = (e) => {
     console.dir(`비정상적 종료(Binance): ${e.code}`)
     if (e.wasClean || e.code === 1000) {
-      toast.info(`서버 연결 해제(Binance)`)
+      console.log(`서버 연결 해제(Binance)`)
     } else if (e.code === 1006) {
       // 비정상적 오류
       timeout = setTimeout(() => {
@@ -81,7 +81,7 @@ function initBinance() {
   }
 }
 // 접속 해제
-export const disconnect = () => {
+export const closeBinance = () => {
   if (!socket) return
   resetData()
   socket.close(1000)

@@ -226,3 +226,6 @@ body {
 .MuiAccordionSummary-content {
   margin: 0 !important;
 }
+.mui-dialog > .MuiDialog-container > .MuiDialog-paper {
+  margin-bottom: 80px;
+}
