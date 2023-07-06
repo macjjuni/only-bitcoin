@@ -1,4 +1,4 @@
-# Only BitCoin Market Price - [🔗 Link](https://btc-price.web.app/)
+# Only ₿itcoin Market Price - [🔗 Link](https://btc-price.web.app/)
 
 <br>
 <div align="center">

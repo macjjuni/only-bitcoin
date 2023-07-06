@@ -3,12 +3,12 @@ import Lottie, { LottieProps } from 'react-lottie-player'
 import logo from '@/assets/logo.json'
 
 // Lottie Option
-const defaultOptions: LottieProps = { loop: true, play: true, style: { width: '48px', height: '48px' } }
+const defaultOptions: LottieProps = { loop: true, play: true, style: { width: '40px', height: '40px' } }
 
 const Logo = () => {
   return (
     <Box sx={{ display: 'flex', cursor: 'pointer' }}>
-      <Lottie {...defaultOptions} animationData={logo} speed={1} />
+      <Lottie {...defaultOptions} animationData={logo} speed={3} />
     </Box>
   )
 }

@@ -1,10 +1,10 @@
 import { memo, useState } from 'react'
 import { Stack, IconButton } from '@mui/material'
 import { LuCopyright } from 'react-icons/lu'
-import { BsGithub } from 'react-icons/bs'
 import SettingIcon from '@/components/SettingIcon'
 import CopyDialog from '@/components/CopyDialog'
 import SettingDialog from '@/components/SettingDialog'
+import Logo from '@/components/Logo'
 
 const iconStyle = {
   fontSize: '20px',
@@ -30,11 +30,8 @@ const Footer = () => {
             <SettingIcon />
           </IconButton>
           <Stack component="div" flexDirection="row" alignItems="center" gap="4px">
-            <IconButton title="GitHub Repository" href="https://github.com/macjjuni/btc-price" target="_blank">
-              <BsGithub {...iconStyle} />
-            </IconButton>
             <IconButton size="small" onClick={onCopy}>
-              <LuCopyright {...iconStyle} />
+              <Logo />
             </IconButton>
           </Stack>
         </Stack>

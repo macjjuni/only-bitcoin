@@ -109,7 +109,7 @@ body {
   align-items: center;
   padding: 0 16px;
   position: absolute;
-  bottom: 0;
+  bottom: 4px;
   width: 100%;
   height: 56px;
 }
@@ -227,5 +227,5 @@ body {
   margin: 0 !important;
 }
 .mui-dialog > .MuiDialog-container > .MuiDialog-paper {
-  margin-bottom: 80px;
+  margin: 24px 24px 80px 24px;
 }
