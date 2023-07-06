@@ -1,4 +1,4 @@
-# BitCoin Market Price - [🔗 Link](https://btc-price.web.app/)
+# Only BitCoin Market Price - [🔗 Link](https://btc-price.web.app/)
 
 <br>
 <div align="center">
@@ -6,8 +6,9 @@
 	<img src="https://img.shields.io/badge/TypeScript-3178C6?style=flat&logo=TypeScript&logoColor=white" />
 	<img src="https://img.shields.io/badge/Zustand-443d36?style=flat&logo=JavaScript&logoColor=white" />
 	<img src="https://img.shields.io/badge/Vite-646CFF?style=flat&logo=Vite&logoColor=white" />
-		<img src="https://img.shields.io/badge/ESLint-4B32C3?style=flat&logo=ESLint&logoColor=white" />
+	<img src="https://img.shields.io/badge/ESLint-4B32C3?style=flat&logo=ESLint&logoColor=white" />
 	<img src="https://img.shields.io/badge/Prettier-F7B93E?style=flat&logo=Prettier&logoColor=white" />	
+	<img src="https://img.shields.io/badge/Firebase-FFCA28?style=flat&logo=Firebase&logoColor=white" />
 </div>
 
 <br>
@@ -30,21 +31,18 @@ btc-price
 ├─ .gitignore
 ├─ public
 ├─ src
-│  ├─ api
-│  ├─ App.tsx
 │  ├─ assets
 │  ├─ components
 │  ├─ data
 │  ├─ layout
-│  │  ├─ footer
-│  │  ├─ header
-│  │  └─ main
-│  │
-│  ├─ main.tsx
 │  ├─ pages
+│  ├─ socket
 │  ├─ styles
 │  ├─ utils
-│  └─ zustand
+│  ├─ zustand
+│  │
+│  ├─ App.tsx
+│  └─ main.tsx
 │
 ├─ package.json
 ├─ yarn.lock
@@ -61,11 +59,12 @@ btc-price
 
 <br>
 
-- https://upbit.com/open_api_agreement
+- [Upbit API Docs](https://upbit.com/open_api_agreement)
+- [Binance API Docs](https://binance-docs.github.io/apidocs/spot/en/#introduction)
 
 <br>
 
-### 패키지 설치
+## Package Install
 
 ```
 yarn
@@ -73,7 +72,7 @@ or
 npm i
 ```
 
-### 개발서버 실행
+## Run dev server
 
 ```
 yarn dev
@@ -81,7 +80,7 @@ or
 npm run dev
 ```
 
-### 빌드 실행
+## Build
 
 ```
 yarn build
