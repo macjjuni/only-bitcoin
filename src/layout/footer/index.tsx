@@ -16,7 +16,7 @@ const Footer = () => {
         alignItems="center"
         px="16px"
         sx={{
-          position: 'fixed',
+          position: 'absolute',
           bottom: '0',
           left: '0',
           width: '100%',
@@ -38,7 +38,7 @@ const Footer = () => {
             <GitHubIcon sx={{ color: '#000', fontSize: '16px' }} />
           </IconButton>
 
-          <Link href="https://kku.dev" underline="hover" target="_blank" pl="4px" sx={{ position: 'relative', top: '1px', color: '#393E46' }}>
+          <Link href="https://kku.dev" underline="hover" target="_blank" pl="4px" pb="3px" sx={{ position: 'relative', top: '1px', color: '#393E46' }}>
             kku.dev
           </Link>
         </Stack>

@@ -115,9 +115,11 @@ const BtcToPrice = () => {
   return (
     <Accordion expanded={isShow} onChange={toggleAccordian} TransitionProps={{ unmountOnExit: true }} square={false}>
       <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1 a-header">
-        <Typography component="h3" fontSize="15px" fontWeight="bold">
-          BTC / KRW
-        </Typography>
+        <Stack flexDirection="row" alignItems="center" justifyContent="space-between" width="100%">
+          <Typography component="h3" fontSize="15px" fontWeight="bold">
+            BTC / KRW
+          </Typography>
+        </Stack>
       </AccordionSummary>
       <AccordionDetails>
         <Stack direction="row" useFlexGap flexWrap="wrap" paddingBottom="1rem">

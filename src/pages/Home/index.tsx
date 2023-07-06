@@ -1,5 +1,5 @@
 import { Stack } from '@mui/material'
-import TopDashboard from './components/TopDashboard'
+import TopDashboard from '@/pages/Home/components/TopDashboard'
 import BtcToPrice from '@/pages/Home/components/BtcToPrice'
 
 const Home = () => {
