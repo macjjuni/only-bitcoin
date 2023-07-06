@@ -56,7 +56,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
           <Typography component="p" fontSize={14}>
             파비콘:{' '}
             <Link href="https://www.flaticon.com/free-icons/bitcoin" target="_blank" title="bitcoin icons">
-              Bitcoin icons created by Freepik - Flaticon
+              Freepik - Flaticon
             </Link>
           </Typography>
         </Container>
