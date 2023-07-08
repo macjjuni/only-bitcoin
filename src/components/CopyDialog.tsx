@@ -1,5 +1,6 @@
 import { Dispatch, SetStateAction } from 'react'
 import { Link, DialogTitle, Dialog, Container, Typography, Stack, IconButton } from '@mui/material'
+import { RiCloseCircleLine } from 'react-icons/ri'
 import { SiNaver } from 'react-icons/si'
 import { btcInfo } from '@/data/btcInfo'
 
@@ -15,10 +16,15 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
   return (
     <>
       <Dialog onClose={closeDialog} open={open} className="mui-dialog">
-        <DialogTitle minWidth={420} borderBottom="1px solid #a5a5a5" sx={{ padding: '12px 16px' }}>
-          <Typography component="p" fontSize={16} fontWeight="bold">
-            ₿itcoin Market Price
-          </Typography>
+        <DialogTitle minWidth={340} borderBottom="1px solid #a5a5a5" sx={{ padding: '12px 16px' }}>
+          <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
+            <Typography component="p" fontSize={16} fontWeight="bold">
+              ₿itcoin Market Price
+            </Typography>
+            <IconButton onClick={closeDialog} sx={{ padding: '0' }}>
+              <RiCloseCircleLine fontSize={24} />
+            </IconButton>
+          </Stack>
         </DialogTitle>
         <Container sx={{ padding: '16px' }}>
           <Stack component="h2" justifyContent="flex-start" flexDirection="row" alignItems="center" fontWeight="bold" gap="8px" m="0" py="8px">
