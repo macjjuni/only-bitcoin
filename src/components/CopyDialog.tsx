@@ -1,5 +1,5 @@
 import { Dispatch, SetStateAction } from 'react'
-import { Link, DialogTitle, Dialog, Container, Typography, Stack, IconButton } from '@mui/material'
+import { Link, DialogTitle, Dialog, Container, Typography, Stack } from '@mui/material'
 import { SiNaver } from 'react-icons/si'
 import { btcInfo } from '@/data/btcInfo'
 
