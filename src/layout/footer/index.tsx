@@ -1,15 +1,9 @@
 import { memo, useState } from 'react'
 import { Stack, IconButton } from '@mui/material'
-import { LuCopyright } from 'react-icons/lu'
 import SettingIcon from '@/components/SettingIcon'
 import CopyDialog from '@/components/CopyDialog'
 import SettingDialog from '@/components/SettingDialog'
 import Logo from '@/components/Logo'
-
-const iconStyle = {
-  fontSize: '20px',
-  color: '#2e2e2e',
-}
 
 const Footer = () => {
   const [isCopy, setCopy] = useState(false)
