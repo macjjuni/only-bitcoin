@@ -4,6 +4,8 @@ interface ImportMetaEnv {
   readonly VITE_TITLE: string
   readonly VITE_URL: string
   readonly VITE_UPBIT_API_URL: string
+  readonly VITE_FEEDBACK_URL: string
+  readonly VITE_GA_TRAKING_ID: string
 }
 
 interface ImportMeta {

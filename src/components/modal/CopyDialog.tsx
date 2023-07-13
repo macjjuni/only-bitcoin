@@ -9,6 +9,9 @@ type DialogType = {
   setOpen: Dispatch<SetStateAction<boolean>>
 }
 
+const feedbackUrl = import.meta.env.VITE_FEEDBACK_URL
+console.log(feedbackUrl)
+
 const CopyDialog = ({ open, setOpen }: DialogType) => {
   const closeDialog = () => {
     setOpen(false)
@@ -27,7 +30,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
           </Stack>
         </DialogTitle>
         <Container sx={{ padding: '16px' }}>
-          <Stack component="h2" justifyContent="flex-start" flexDirection="row" alignItems="center" fontWeight="bold" gap="8px" m="0" py="8px">
+          <Stack component="h2" justifyContent="flex-start" flexDirection="row" alignItems="center" fontWeight="bold" gap="8px" m="0" py="6px">
             {btcInfo.icon(24)}
             <Typography component="p" fontSize={18} fontWeight="bold">
               비트코인 디플로마 [
@@ -38,7 +41,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
             </Typography>
           </Stack>
 
-          <Stack component="h2" justifyContent="flex-start" flexDirection="row" alignItems="center" fontWeight="bold" gap="8px" m="0" py="8px" pb="24px">
+          <Stack component="h2" justifyContent="flex-start" flexDirection="row" alignItems="center" fontWeight="bold" gap="8px" m="0" py="6px" pb="24px">
             {btcInfo.icon(24)}
             <Typography component="p" fontSize={18} fontWeight="bold">
               비트코인 결제매장 [
@@ -53,6 +56,12 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
             깃허브:{' '}
             <Link title="GitHub Repository" href="https://github.com/macjjuni/btc-price" target="_blank">
               Bitcoin Market Price
+            </Link>
+          </Typography>
+          <Typography component="p" fontSize={14}>
+            피드백:{' '}
+            <Link href={feedbackUrl || '/'} target="_blank" title="Twitter url">
+              Twitter
             </Link>
           </Typography>
           <Typography component="p" fontSize={14}>
