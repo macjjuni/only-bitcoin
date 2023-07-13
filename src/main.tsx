@@ -1,10 +1,11 @@
 import ReactDOM from 'react-dom/client'
 import '@/styles/index.css'
 
+import { RouterProvider } from 'react-router-dom'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ToastContainer } from 'react-toastify'
 import { toastProps } from '@/data/toast'
-import App from '@/App'
+import router from './Router'
 
 import 'react-toastify/dist/ReactToastify.css'
 
@@ -15,6 +16,6 @@ root.render(
   <>
     <ToastContainer {...toastOptions} />
     <CssBaseline />
-    <App />
+    <RouterProvider router={router} />
   </>
 )
