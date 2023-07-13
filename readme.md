@@ -15,12 +15,11 @@
 
 ## 📸 Initail Screen
 
-<img src="https://github.com/macjjuni/btc-price/assets/38034518/0ce78010-5e39-4d97-a9b3-0fdce1347e24" width="100%" alt="btc-price initial screen gif">
+<img src="https://github.com/macjjuni/btc-market-price/assets/38034518/36f00570-a949-4440-b876-58565357eb55" width="100%" alt="btc-price initial screen gif">
 
 <br>
-<br>
 
-## 🌳 Project tree
+## 🌳 Project Tree
 
 ```
 btc-price
@@ -31,15 +30,16 @@ btc-price
 ├─ .gitignore
 ├─ public
 ├─ src
-│  ├─ assets
-│  ├─ components
-│  ├─ data
-│  ├─ layout
-│  ├─ pages
-│  ├─ socket
-│  ├─ styles
-│  ├─ utils
-│  ├─ zustand
+│  ├─ assets       (🧱)
+│  ├─ components   (🧩)
+│  ├─ data         (📀)
+│  ├─ layout       (🪟)
+│  ├─ pages        (📄)
+│  ├─ router       (🚦)
+│  ├─ socket       (🔌)
+│  ├─ styles       (💃🏻)
+│  ├─ utils        (🛠️)
+│  ├─ zustand      (⛅️)
 │  │
 │  ├─ App.tsx
 │  └─ main.tsx
@@ -64,7 +64,9 @@ btc-price
 
 <br>
 
-## Package Install
+## 🏃🏻‍♂️ Getting Started!
+
+### Package Install
 
 ```
 yarn
@@ -72,7 +74,7 @@ or
 npm i
 ```
 
-## Run dev server
+### Run Develop Server
 
 ```
 yarn dev
@@ -80,7 +82,7 @@ or
 npm run dev
 ```
 
-## Build
+### Build
 
 ```
 yarn build
