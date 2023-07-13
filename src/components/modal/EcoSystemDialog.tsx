@@ -30,20 +30,6 @@ const EcoDialog = ({ open, setOpen }: DialogType) => {
         <Container sx={{ padding: '16px' }}>
           <TableContainer component={Paper}>
             <Table aria-label="simple table" size="small">
-              <TableHead>
-                <TableRow>
-                  <TableCell>
-                    <Typography fontSize={16} fontWeight="bold">
-                      분류
-                    </Typography>
-                  </TableCell>
-                  <TableCell align="right">
-                    <Typography fontSize={16} fontWeight="bold">
-                      조건 범위
-                    </Typography>
-                  </TableCell>
-                </TableRow>
-              </TableHead>
               <TableBody>
                 {ecoSystemPyramid.map((row) => (
                   <TableRow key={row.name} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>

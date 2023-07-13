@@ -25,11 +25,13 @@ interface BearState {
   btc: IBtc // BTC 시세 정보
   amount: string // BTC 개수 Input 값
   isShow: boolean // 아코디언 토글
+  isEcoSystem: boolean // 비트코인 생태계 표시 여부
   // theme: 'dark' | 'light'
   setAmount: (by: string) => void
   updateKRW: (by: IUpdateKRW) => void
   updateUSD: (by: IUpdateUSD) => void
   toggleAcc: (flag: boolean) => void
+  toggleEco: (flag: boolean) => void
 }
 
 export const useBearStore = create<BearState>()(
@@ -45,6 +47,7 @@ export const useBearStore = create<BearState>()(
       },
       amount: '1',
       isShow: true,
+      isEcoSystem: false,
       isSetting: false,
       // theme: 'light',
       setAmount: (price) => set(() => ({ amount: price })),
@@ -57,6 +60,7 @@ export const useBearStore = create<BearState>()(
           btc: { ...state.btc, ...usd },
         })),
       toggleAcc: (flag) => set(() => ({ isShow: flag })),
+      toggleEco: (flag) => set(() => ({ isEcoSystem: flag })),
     }),
     { name: 'bear-storage' } // persist key
   )

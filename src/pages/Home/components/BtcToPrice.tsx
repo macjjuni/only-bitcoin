@@ -16,7 +16,7 @@ const satoshi = 100000000
 
 const BtcToPrice = () => {
   // zustand Store
-  const { btc, isShow, toggleAcc } = useBearStore((state) => state)
+  const { btc, isShow, isEcoSystem, toggleAcc } = useBearStore((state) => state)
   const amount = useBearStore((state) => state.amount)
   const setAmount = useBearStore((state) => state.setAmount)
 
@@ -98,7 +98,7 @@ const BtcToPrice = () => {
     toggleAcc(expanded)
   }
 
-  // 생태계 수준 표시
+  // 생태계별 표시
   const findEcoSystem = () => {
     const numAmt = Number(amount.replace(/[^\d.]/g, ''))
     const me = ecoSystemPyramid.find((eco) => numAmt === 0 || (numAmt >= eco.min && eco.max > numAmt))
@@ -150,9 +150,13 @@ const BtcToPrice = () => {
               <FormControlLabel control={<Checkbox checked={standard} onChange={toggleStandard} />} label="가격 기준" />
             </FormGroup>
 
-            <Typography fontSize={30} width={40} onClick={onEco} sx={{ cursor: 'pointer' }}>
-              {emoji}
-            </Typography>
+            <div>
+              {isEcoSystem && (
+                <Typography fontSize={28} width={40} onClick={onEco} sx={{ cursor: 'pointer' }}>
+                  {emoji}
+                </Typography>
+              )}
+            </div>
           </Stack>
 
           <Stack spacing={3} direction={standard ? 'column-reverse' : 'column'}>

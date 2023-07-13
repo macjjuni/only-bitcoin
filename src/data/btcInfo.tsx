@@ -27,7 +27,7 @@ export const upbitAsset = ['BTC/KRW']
 export const binaceAsset = ['btcusdt']
 
 export const ecoSystemPyramid = [
-  { name: 'foo', min: 0, max: 0, emoji: '💩' },
+  { name: 'foo', min: 0, max: 0, emoji: '🐣' },
   { name: 'shrimp', min: 0, max: 1, emoji: '🦐' },
   { name: 'crab', min: 1, max: 10, emoji: '🦀' },
   { name: 'octopus', min: 10, max: 50, emoji: '🐙' },

@@ -9,20 +9,29 @@ type DialogType = {
 }
 
 const unitList = [
-  { id: 0, value: 'KRW', width: '48px' },
-  { id: 1, value: 'USD', width: '48px' },
-  { id: 2, value: 'KRW/USD', width: '72px' },
+  { value: 'KRW', width: '44px' },
+  { value: 'USD', width: '44px' },
+  { value: 'KRW/USD', width: '68px' },
+]
+const ecoList = [
+  { label: '보이기', value: true, width: '86px' },
+  { label: '숨기기', value: false, width: '86px' },
 ]
 
 const SettingDialog = ({ open, setOpen }: DialogType) => {
-  const { market, setMarket } = useBearStore((state) => state)
+  const { market, setMarket, isEcoSystem, toggleEco } = useBearStore((state) => state)
 
   const closeDialog = () => {
     setOpen(false)
   }
 
-  const handleChange = (e: MouseEvent<HTMLElement>, selectMarket: MarketType) => {
+  const marketChange = (e: MouseEvent<HTMLElement>, selectMarket: MarketType) => {
     setMarket(selectMarket)
+  }
+
+  const ecoChange = (e: MouseEvent<HTMLElement>, flag: boolean) => {
+    if (flag) toggleEco(true)
+    else toggleEco(false)
   }
 
   return (
@@ -39,19 +48,35 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
           </Stack>
         </DialogTitle>
         <Container sx={{ padding: '16px' }}>
-          <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-            <Typography fontSize={16} fontWeight="bold">
-              💵 단위:
-            </Typography>
-            <ToggleButtonGroup color="primary" value={market} exclusive onChange={handleChange} aria-label="Platform">
-              {unitList.map((unit) => (
-                <ToggleButton key={unit.id} value={unit.value} size="small">
-                  <Typography fontSize={14} fontWeight="bold" width={unit.width}>
-                    {unit.value}
-                  </Typography>
-                </ToggleButton>
-              ))}
-            </ToggleButtonGroup>
+          <Stack flexDirection="column" justifyContent="flex-start" gap="8px">
+            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
+              <Typography fontSize={16} fontWeight="bold">
+                💵 단위
+              </Typography>
+              <ToggleButtonGroup color="primary" value={market} exclusive onChange={marketChange} aria-label="Platform">
+                {unitList.map((unit) => (
+                  <ToggleButton key={unit.value} value={unit.value} size="small">
+                    <Typography fontSize={14} fontWeight="bold" width={unit.width}>
+                      {unit.value}
+                    </Typography>
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Stack>
+            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
+              <Typography fontSize={16} fontWeight="bold">
+                🦐 생태계
+              </Typography>
+              <ToggleButtonGroup color="primary" value={isEcoSystem} exclusive onChange={ecoChange} aria-label="Platform">
+                {ecoList.map((eco) => (
+                  <ToggleButton key={eco.label} value={eco.value} size="small">
+                    <Typography fontSize={14} fontWeight="bold" width={eco.width}>
+                      {eco.label}
+                    </Typography>
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Stack>
           </Stack>
         </Container>
       </Dialog>
