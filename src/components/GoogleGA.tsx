@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react'
 import { useLocation } from 'react-router-dom'
 import ReactGA from 'react-ga4'
 
+const mode = import.meta.env.MODE
 const GA_TRACKING_ID = import.meta.env.VITE_GA_TRAKING_ID
 
 const GoogleGA = () => {
@@ -10,7 +11,7 @@ const GoogleGA = () => {
 
   // 개발서버는 제외
   useEffect(() => {
-    if (window.location.href.includes('localhost')) return
+    if (mode === 'development') return
     ReactGA.initialize(GA_TRACKING_ID)
     setInitialized(true)
   }, [])

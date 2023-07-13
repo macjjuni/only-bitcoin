@@ -221,8 +221,9 @@ body {
   display: none !important;
 }
 .MuiAccordionSummary-root {
-  height: 64px !important;
+  height: 56px !important;
 }
+
 .MuiAccordionSummary-content {
   margin: 0 !important;
 }

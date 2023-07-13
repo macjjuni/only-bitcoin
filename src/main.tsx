@@ -5,7 +5,7 @@ import { RouterProvider } from 'react-router-dom'
 import CssBaseline from '@mui/material/CssBaseline'
 import { ToastContainer } from 'react-toastify'
 import { toastProps } from '@/data/toast'
-import router from './Router'
+import router from './router'
 
 import 'react-toastify/dist/ReactToastify.css'
 

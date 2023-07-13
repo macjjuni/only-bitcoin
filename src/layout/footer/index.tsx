@@ -1,8 +1,8 @@
 import { memo, useState } from 'react'
 import { Stack, IconButton } from '@mui/material'
 import SettingIcon from '@/components/SettingIcon'
-import CopyDialog from '@/components/CopyDialog'
-import SettingDialog from '@/components/SettingDialog'
+import CopyDialog from '@/components/modal/CopyDialog'
+import SettingDialog from '@/components/modal/SettingDialog'
 import Logo from '@/components/Logo'
 
 const Footer = () => {
