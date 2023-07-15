@@ -32,13 +32,13 @@ const TopDashboard = () => {
         <LottieItem option={btcOption} animationData={bitcoin} speed={speed + 0.8} />
         <LottieItem option={equalOption} animationData={equal} speed={speed + 1} />
         <Stack flexDirection="column" justifyContent="flex-end" minWidth="200px">
-          {market.includes('KRW') && (
+          {market?.includes('KRW') && (
             <Stack flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
               <CountText className="market-price-txt" text={btc.krw} duration={0.3} />
               <FaWonSign fontSize={26} />
             </Stack>
           )}
-          {market.includes('USD') && (
+          {market?.includes('USD') && (
             <Stack flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
               <CountText className="market-price-txt" text={btc.usd} duration={0.3} />
               <IoLogoUsd fontSize={30} />

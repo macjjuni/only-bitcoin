@@ -17,7 +17,11 @@ interface IUpdateUSD {
   usd: number
   usdTime: string
 }
-export type MarketType = 'KRW' | 'USD' | 'KRW/USD'
+
+export type KrwType = 'KRW'
+export type UsdType = 'USD'
+export type KrwUsdType = 'KRW/USD'
+export type MarketType = KrwType | UsdType | KrwUsdType
 
 interface BearState {
   market: MarketType

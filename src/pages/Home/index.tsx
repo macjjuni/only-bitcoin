@@ -9,8 +9,14 @@ import initBinance, { closeBinance } from '@/socket/binance'
 import TopDashboard from '@/pages/Home/components/TopDashboard'
 import BtcToPrice from '@/pages/Home/components/BtcToPrice'
 
+import { type KrwType, UsdType, KrwUsdType } from '@/zustand/store'
+
+const krw: KrwType = 'KRW'
+const usd: UsdType = 'USD'
+const krwUsd: KrwUsdType = 'KRW/USD'
+
 const Home = () => {
-  const { market } = useBearStore((state) => state)
+  const { market, setMarket } = useBearStore((state) => state)
   // 업비트 소켓 연결 초기화
   const upbitInit = useCallback(() => {
     closeUpbit()
@@ -23,15 +29,17 @@ const Home = () => {
   }, [])
 
   useLayoutEffect(() => {
-    if (market === 'KRW') {
+    if (market === krw) {
       initUpbit()
       closeBinance()
-    } else if (market === 'USD') {
+    } else if (market === usd) {
       initBinance()
       closeUpbit()
-    } else {
+    } else if (market === krwUsd) {
       binanceInit()
       upbitInit()
+    } else {
+      setMarket(krwUsd)
     }
   }, [market])
 

@@ -26,10 +26,13 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
   }
 
   const marketChange = (e: MouseEvent<HTMLElement>, selectMarket: MarketType) => {
+    if (selectMarket === null) return
     setMarket(selectMarket)
   }
 
   const ecoChange = (e: MouseEvent<HTMLElement>, flag: boolean) => {
+    if (flag === null) return
+
     if (flag) toggleEco(true)
     else toggleEco(false)
   }
