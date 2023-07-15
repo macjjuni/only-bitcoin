@@ -24,10 +24,6 @@ const clearTimeOut = () => {
   clearTimeout(timeout)
   timeout = null
 }
-/**
- * --- TODO LIST ---
- *
- */
 
 // 소켓 생성
 let socket: WebSocket | null = null

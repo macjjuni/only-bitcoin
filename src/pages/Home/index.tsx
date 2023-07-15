@@ -17,12 +17,12 @@ const krwUsd: KrwUsdType = 'KRW/USD'
 
 const Home = () => {
   const { market, setMarket } = useBearStore((state) => state)
-  // 업비트 소켓 연결 초기화
+  // 업비트 소켓 연결 초기화  => 따로 함수 분리 가능
   const upbitInit = useCallback(() => {
     closeUpbit()
     initUpbit()
   }, [])
-  // 바이넨스 소켓 연결 초기화
+  // 바이넨스 소켓 연결 초기화 => 따로 함수 분리 가능
   const binanceInit = useCallback(() => {
     closeBinance()
     initBinance()
