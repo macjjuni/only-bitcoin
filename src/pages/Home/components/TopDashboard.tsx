@@ -37,14 +37,14 @@ const TopDashboard = () => {
           {isKimchi && <Kimchi />}
           {market?.includes('KRW') && (
             <Stack flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
+              <FaWonSign fontSize={24} />
               <CountText className="market-price-txt" text={btc.krw} duration={0.3} />
-              <FaWonSign fontSize={26} />
             </Stack>
           )}
           {market?.includes('USD') && (
             <Stack flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
+              <IoLogoUsd fontSize={26} style={{ marginRight: '-4px' }} />
               <CountText className="market-price-txt" text={btc.usd} duration={0.3} />
-              <IoLogoUsd fontSize={30} />
             </Stack>
           )}
         </Stack>

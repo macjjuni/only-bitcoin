@@ -33,8 +33,8 @@ const Kimchi = () => {
   return (
     <>
       <Box onClick={showDialog} position="absolute" top="-28px" right="0px" display="flex" flexDirection="row" justifyContent="flex-end" alignItems="center" height={30} gap="4px" fontSize={20}>
-        <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="kimchi-color" duration={0.3} percent decimals={2} />
         <img src="/images/kimchi.png" alt="김치 이미지" width={40} className="kimchi-img" />
+        <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="kimchi-color" duration={0.3} percent decimals={2} />
       </Box>
       <ExRateDialog open={isEx} setOpen={setEx} kimpPrice={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} />
     </>
