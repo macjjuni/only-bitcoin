@@ -1,6 +1,9 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useLayoutEffect, useState } from 'react'
 import { Container } from '@mui/material'
 import Spinner from '@/components/Spinner'
+
+import initUpbit from '@/socket/upbit'
+import initBinance from '@/socket/binance'
 
 import { useBearStore } from '@/zustand/store'
 
@@ -11,6 +14,11 @@ const Main = ({ children }: { children: JSX.Element }) => {
   useEffect(() => {
     if (!load && btc.krw !== 0) setLoad(true) // 시세 변동 시 계산 => 코인 개수를 기준으로 가격 변환
   }, [btc])
+
+  useLayoutEffect(() => {
+    initBinance()
+    initUpbit()
+  }, [])
 
   return (
     <Container component="main" className="main">

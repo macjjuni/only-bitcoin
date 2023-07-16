@@ -55,6 +55,10 @@ body {
   user-select: none;
 }
 
+.market-price-txt {
+  font-size: 30px;
+}
+
 #not-key-not-btc {
   font-size: 20px !important;
   text-align: center;
@@ -112,6 +116,16 @@ body {
   bottom: 4px;
   width: 100%;
   height: 56px;
+}
+
+.kimchi-img {
+  margin: 0 -7px;
+  user-select: none;
+  -webkit-touch-callout: none;
+  pointer-events: none;
+}
+.kimchi-color {
+  color: #ea5b59;
 }
 
 @media screen and (max-width: 600px) {

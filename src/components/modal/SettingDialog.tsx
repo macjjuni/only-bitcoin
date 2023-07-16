@@ -1,4 +1,4 @@
-import { memo, type Dispatch, type SetStateAction, type MouseEvent } from 'react'
+import { memo, type Dispatch, type SetStateAction, type MouseEvent, useCallback } from 'react'
 import { RiCloseCircleLine } from 'react-icons/ri'
 import { DialogTitle, Dialog, Container, Typography, ToggleButtonGroup, ToggleButton, IconButton, Stack } from '@mui/material'
 import { useBearStore, type MarketType } from '@/zustand/store'
@@ -8,34 +8,40 @@ type DialogType = {
   setOpen: Dispatch<SetStateAction<boolean>>
 }
 
-const unitList = [
+const threeList = [
   { value: 'KRW', width: '44px' },
   { value: 'USD', width: '44px' },
   { value: 'KRW/USD', width: '68px' },
 ]
-const ecoList = [
+
+const twoList = [
   { label: '보이기', value: true, width: '86px' },
   { label: '숨기기', value: false, width: '86px' },
 ]
 
 const SettingDialog = ({ open, setOpen }: DialogType) => {
-  const { market, setMarket, isEcoSystem, toggleEco } = useBearStore((state) => state)
+  const { market, setMarket, isEcoSystem, toggleEco, isKimchi, toggleKimchi } = useBearStore((state) => state)
 
-  const closeDialog = () => {
+  const closeDialog = useCallback(() => {
     setOpen(false)
-  }
+  }, [])
 
-  const marketChange = (e: MouseEvent<HTMLElement>, selectMarket: MarketType) => {
+  const marketChange = useCallback((e: MouseEvent<HTMLElement>, selectMarket: MarketType) => {
     if (selectMarket === null) return
     setMarket(selectMarket)
-  }
+  }, [])
 
-  const ecoChange = (e: MouseEvent<HTMLElement>, flag: boolean) => {
+  const kimchiChange = useCallback((e: MouseEvent<HTMLElement>, flag: boolean) => {
+    if (flag === null) return
+    toggleKimchi(flag)
+  }, [])
+
+  const ecoChange = useCallback((e: MouseEvent<HTMLElement>, flag: boolean) => {
     if (flag === null) return
 
     if (flag) toggleEco(true)
     else toggleEco(false)
-  }
+  }, [])
 
   return (
     <>
@@ -57,7 +63,7 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
                 💵 단위
               </Typography>
               <ToggleButtonGroup color="primary" value={market} exclusive onChange={marketChange} aria-label="Platform">
-                {unitList.map((unit) => (
+                {threeList.map((unit) => (
                   <ToggleButton key={unit.value} value={unit.value} size="small">
                     <Typography fontSize={14} fontWeight="bold" width={unit.width}>
                       {unit.value}
@@ -68,10 +74,24 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
             </Stack>
             <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
               <Typography fontSize={16} fontWeight="bold">
+                🇰🇷 김프
+              </Typography>
+              <ToggleButtonGroup color="primary" value={isKimchi} exclusive onChange={kimchiChange} aria-label="Platform">
+                {twoList.map((unit) => (
+                  <ToggleButton key={unit.label} value={unit.value} size="small">
+                    <Typography fontSize={14} fontWeight="bold" width={unit.width}>
+                      {unit.label}
+                    </Typography>
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Stack>
+            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
+              <Typography fontSize={16} fontWeight="bold">
                 🦐 생태계
               </Typography>
               <ToggleButtonGroup color="primary" value={isEcoSystem} exclusive onChange={ecoChange} aria-label="Platform">
-                {ecoList.map((eco) => (
+                {twoList.map((eco) => (
                   <ToggleButton key={eco.label} value={eco.value} size="small">
                     <Typography fontSize={14} fontWeight="bold" width={eco.width}>
                       {eco.label}

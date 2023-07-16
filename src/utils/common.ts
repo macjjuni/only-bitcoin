@@ -53,3 +53,12 @@ export const transDate = (timeStamp: string | number) => {
 export const getNowDate = () => {
   return moment().format('YYYY-MM-DD HH:mm:ss')
 }
+
+// 김치 프리미엄 퍼센트 구하는 로직
+export const calcPerDiff = (krwPrice: number, usdPrice: number, exRate: number) => {
+  const basedUsdKRW = Math.floor(usdPrice * exRate) // 환율 * 비트코인 USD 시세
+  const priceDiff = krwPrice - basedUsdKRW
+  const per = (priceDiff / krwPrice) * 100
+
+  return parseFloat(per.toFixed(2))
+}

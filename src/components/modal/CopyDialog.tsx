@@ -10,7 +10,6 @@ type DialogType = {
 }
 
 const feedbackUrl = import.meta.env.VITE_FEEDBACK_URL
-console.log(feedbackUrl)
 
 const CopyDialog = ({ open, setOpen }: DialogType) => {
   const closeDialog = () => {
