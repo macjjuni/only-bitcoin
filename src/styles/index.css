@@ -118,14 +118,11 @@ body {
   height: 56px;
 }
 
-.kimchi-img {
-  margin: 0 -4px;
-  user-select: none;
-  -webkit-touch-callout: none;
-  pointer-events: none;
-}
 .kimchi-color {
   color: #ea5b59;
+}
+.kimchi-info {
+  margin-top: 3px;
 }
 
 @media screen and (max-width: 600px) {
