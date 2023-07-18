@@ -1,4 +1,4 @@
-const index = () => {
+const Test = () => {
   return (
     <div>
       <img src="https://alternative.me/crypto/fear-and-greed-index.png" alt="crypto fear greed index chart" />
@@ -6,4 +6,4 @@ const index = () => {
   )
 }
 
-export default index
+export default Test

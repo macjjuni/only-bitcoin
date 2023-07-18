@@ -1,5 +1,6 @@
 import { v4 as uuidv4 } from 'uuid'
 import moment from 'moment'
+import { ICurrency } from '@/api/dominance'
 
 // -------------------- string 형식에 숫자만 포함됐는지 체크 --------------------
 export const isStrNumber = (val: string): boolean => {
@@ -61,4 +62,20 @@ export const calcPerDiff = (krwPrice: number, usdPrice: number, exRate: number) 
   const per = (priceDiff / krwPrice) * 100
 
   return parseFloat(per.toFixed(2))
+}
+
+export const getDominace = (list: ICurrency[]) => {
+  // Initializes variables
+  let BTCCap = 0
+  let altCap = 0
+
+  list.forEach((x) => {
+    if (x.id === 'bitcoin') {
+      BTCCap = x.market_cap
+      altCap += x.market_cap
+    } else {
+      altCap += x.market_cap
+    }
+  })
+  return ((BTCCap / altCap) * 100).toFixed(2)
 }
