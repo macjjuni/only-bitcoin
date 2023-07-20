@@ -35,6 +35,8 @@ export interface ICurrency {
 export const getCurrencies = async (): Promise<ICurrency[] | null> => {
   try {
     const { data } = await axios.get<ICurrency[]>(btcDUrl)
+    console.log(data)
+
     return data
   } catch (e) {
     console.error(e)

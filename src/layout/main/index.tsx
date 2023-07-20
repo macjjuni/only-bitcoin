@@ -1,5 +1,6 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { Container } from '@mui/material'
+import { layout } from '@/styles/style'
 import Spinner from '@/components/Spinner'
 
 import initUpbit from '@/socket/upbit'
@@ -21,7 +22,7 @@ const Main = ({ children }: { children: JSX.Element }) => {
   }, [])
 
   return (
-    <Container component="main" className="main">
+    <Container className="main" sx={{ minHeight: `calc(100dvh - ${layout.main}px)` }}>
       <Spinner isRender={load} />
       {children}
     </Container>

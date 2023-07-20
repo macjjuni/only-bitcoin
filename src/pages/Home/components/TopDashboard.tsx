@@ -4,6 +4,7 @@ import { FaWonSign } from 'react-icons/fa'
 import { IoLogoUsd } from 'react-icons/io'
 import { LottieProps } from 'react-lottie-player'
 import { useBearStore } from '@/zustand/store'
+import BoxItem from '@/components/Box'
 import CountText from '@/components/CountText'
 import Kimchi from './Kimchi'
 import LottieItem from '@/components/Lottie'
@@ -28,31 +29,36 @@ const TopDashboard = () => {
   }
 
   return (
-    <Stack onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} gap="12px">
-      <Typography variant="h1" className="top-dashboard">
-        <LottieItem option={btcOption} animationData={bitcoin} speed={speed + 0.8} />
-        <LottieItem option={equalOption} animationData={equal} speed={speed + 1} />
+    <BoxItem>
+      <Typography variant="h1" fontSize={20} fontWeight="bold" align="left" pb={1} mb={1} borderBottom="1px solid #cbcbcb">
+        Dashboard
+      </Typography>
+      <Stack onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px" gap="40px">
+        <Typography variant="h1" className="top-dashboard">
+          <LottieItem option={btcOption} animationData={bitcoin} speed={speed + 0.8} />
+          <LottieItem option={equalOption} animationData={equal} speed={speed + 1} />
 
-        <Stack flexDirection="column" justifyContent="flex-end" minWidth="200px" position="relative">
-          {isKimchi && <Kimchi />}
-          {market?.includes('KRW') && (
-            <Stack flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
-              <FaWonSign fontSize={24} />
-              <CountText className="market-price-txt" text={btc.krw} duration={0.3} />
-            </Stack>
-          )}
-          {market?.includes('USD') && (
-            <Stack flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
-              <IoLogoUsd fontSize={26} style={{ marginRight: '-4px' }} />
-              <CountText className="market-price-txt" text={btc.usd} duration={0.3} />
-            </Stack>
-          )}
-        </Stack>
-      </Typography>
-      <Typography component="h2" id="not-key-not-btc">
-        Not your keys, not your ₿itcoin
-      </Typography>
-    </Stack>
+          <Stack flexDirection="column" justifyContent="flex-end" minWidth="200px" position="relative">
+            {isKimchi && <Kimchi />}
+            {market?.includes('KRW') && (
+              <Stack flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
+                <FaWonSign fontSize={24} />
+                <CountText className="market-price-txt" text={btc.krw} duration={0.3} />
+              </Stack>
+            )}
+            {market?.includes('USD') && (
+              <Stack flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
+                <IoLogoUsd fontSize={26} style={{ marginRight: '-4px' }} />
+                <CountText className="market-price-txt" text={btc.usd} duration={0.3} />
+              </Stack>
+            )}
+          </Stack>
+        </Typography>
+        <Typography component="h2" id="not-key-not-btc">
+          Not your keys, not your ₿itcoin
+        </Typography>
+      </Stack>
+    </BoxItem>
   )
 }
 

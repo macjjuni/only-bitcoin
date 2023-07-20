@@ -1,18 +1,17 @@
 import { memo } from 'react'
 import { Stack, AppBar } from '@mui/material'
-import Topbanner from '@/components/TopBanner'
+// import Topbanner from '@/components/TopBanner'
 import RefreshButton from '@/components/RefreshButton'
+import { layout } from '@/styles/style'
 
 const Header = () => {
   return (
-    <>
-      <AppBar position="static" sx={{ boxShadow: 'none', background: 'inherit' }}>
-        <Topbanner />
-        <Stack height={64} flexDirection="row" alignItems="center" justifyContent="flex-end" padding="0 8px">
-          <RefreshButton />
-        </Stack>
-      </AppBar>
-    </>
+    <AppBar position="static" sx={{ boxShadow: 'none', background: 'inherit' }}>
+      {/* <Topbanner /> */}
+      <Stack height={layout.header} flexDirection="row" alignItems="center" justifyContent="flex-end">
+        <RefreshButton />
+      </Stack>
+    </AppBar>
   )
 }
 

@@ -19,32 +19,28 @@ body {
   background-position: center 60%;
   background-repeat: no-repeat;
   background-attachment: fix;
+  padding: 0 8px;
+}
+
+.main {
+  padding: 0 !important;
 }
 
 #btc-forever {
   position: relative;
-  width: 100vw;
+  width: 100%;
+  max-width: 1200px;
   min-height: 100dvh;
+  margin: 0 auto;
 }
 
 .top-banner {
   width: 100%;
-  height: 32px;
+  height: 28px;
   padding: 0 8px;
-  font-size: 16px;
-  background-color: #f4f4f4;
-  color: #000;
-  box-shadow: rgba(50, 50, 93, 0.25) 0px 2px 5px -1px, rgba(0, 0, 0, 0.3) 0px 1px 3px -1px;
-}
-
-.main {
-  position: sticky;
-  top: calc(100dvh / 2 - 282px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 24px;
-  min-height: 600px;
+  font-size: 14px !important;
+  font-weight: 300;
+  color: #404040;
 }
 
 .top-dashboard {
@@ -70,9 +66,8 @@ body {
 }
 
 #not-key-not-btc {
-  font-size: 20px !important;
+  font-size: 22px !important;
   text-align: center;
-  margin-bottom: 36px;
   text-shadow: 1px 1px 1px #ce0000;
   font-weight: bold;
 }
@@ -117,17 +112,6 @@ body {
   font-size: 24px !important;
 }
 
-.footer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0 16px;
-  position: absolute;
-  bottom: 4px;
-  width: 100%;
-  height: 56px;
-}
-
 .kimchi-color {
   color: #ea5b59;
 }
@@ -153,23 +137,13 @@ body {
     font-size: 14px;
   }
 
-  .main {
-    position: relative;
-    top: auto;
-    transform: translateY(0);
-    padding: 36px 24px 0 24px;
-  }
   #not-key-not-btc {
     font-size: 16px !important;
-    margin: -12px 0 16px 0;
   }
   .price-input > input {
     text-align: center;
     font-size: 18px;
     padding: 16.5px 8px 16.5px 0;
-  }
-  .footer {
-    bottom: 12px;
   }
 }
 
@@ -255,4 +229,17 @@ body {
 }
 .mui-dialog > .MuiDialog-container > .MuiDialog-paper {
   margin: 24px 24px 80px 24px;
+}
+
+.box-item {
+  width: 100%;
+  max-width: 400px;
+  min-width: 360px;
+  height: 320px;
+  padding: 16px;
+  margin: 0 auto;
+  background-color: #fff;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
 }
