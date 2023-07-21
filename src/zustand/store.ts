@@ -1,39 +1,13 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-export interface IBtc {
-  krw: number
-  krwTime: string
-  usd: number
-  usdTime: string
-}
-
-interface IUpdateKRW {
-  krw: number
-  krwTime: string
-}
-
-interface IUpdateUSD {
-  usd: number
-  usdTime: string
-}
-
-export interface IExRate {
-  date: string
-  provider: string
-  basePrice: number
-}
-
-export type KrwType = 'KRW'
-export type UsdType = 'USD'
-export type KrwUsdType = 'KRW/USD'
-export type MarketType = KrwType | UsdType | KrwUsdType
+import { type IBtc, MarketType, IExRate, IUpdateKRW, IUpdateUSD } from '@/zustand/type'
 
 interface BearState {
   market: MarketType
   setMarket: (market: MarketType) => void
   btc: IBtc // BTC 시세 정보
-  exRate: IExRate
+  exRate: IExRate // USD/KRW 환율 데이터
   setExRate: (exRate: IExRate) => void
   amount: string // BTC 개수 Input 값
   isShow: boolean // 아코디언 토글
@@ -56,8 +30,10 @@ export const useBearStore = create<BearState>()(
       btc: {
         krw: 0,
         krwTime: '',
+        krwColor: true,
         usd: 0,
         usdTime: '',
+        usdColor: true,
       },
       exRate: {
         date: '',

@@ -13,6 +13,7 @@ const resetData = () => {
   const cleanData = {
     krw: 0,
     krwTime: getNowDate(),
+    krwColor: true,
   }
   getState().updateKRW(cleanData) // store update
 }
@@ -62,11 +63,12 @@ function initUpbit() {
     const arr = new Uint8Array(evt.data)
     const data = JSON.parse(enc.decode(arr))
 
-    const filterData = {
-      krw: data.tp,
-      krwTime: transDate(data.ttms),
-    }
-    getState().updateKRW(filterData) // store update
+    const krw = data.tp
+    const krwTime = transDate(data.ttms)
+    const beforeKrw = getState().btc.krw
+
+    if (krw > beforeKrw) getState().updateKRW({ krw, krwTime, krwColor: true })
+    else if (krw < beforeKrw) getState().updateKRW({ krw, krwTime, krwColor: false })
   }
   // 소켓 에러 핸들링
   socket.onerror = (e) => {

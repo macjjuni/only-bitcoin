@@ -11,7 +11,7 @@ const { getState } = useBearStore
 // Store data reset
 const resetData = () => {
   const usdTime = getNowDate()
-  getState().updateUSD({ usd: 0, usdTime }) // store update
+  getState().updateUSD({ usd: 0, usdTime, usdColor: true }) // store update
 }
 
 let timeout: NodeJS.Timeout | null = null
@@ -42,7 +42,10 @@ function initBinance() {
     const json = JSON.parse(data)
     const usd = Number(json.c) // 현재 가격
     const usdTime = transDate(json.C)
-    getState().updateUSD({ usd, usdTime }) // store update
+    const beforeUsd = getState().btc.usd
+
+    if (usd > beforeUsd) getState().updateUSD({ usd, usdTime, usdColor: true })
+    else if (usd < beforeUsd) getState().updateUSD({ usd, usdTime, usdColor: false })
   }
 
   // 소켓 에러 핸들링

@@ -1,12 +1,12 @@
 import { useLayoutEffect, useState, useCallback } from 'react'
 import { Box } from '@mui/material'
-import { BiSolidInfoCircle } from 'react-icons/bi'
+import { TbSquareRoundedLetterK } from 'react-icons/tb'
 import CountText from '@/components/CountText'
 
 import { calcPerDiff } from '@/utils/common'
 import { getExRate } from '@/api/exRate'
 import ExRateDialog from '@/components/modal/ExRateDialog'
-import { type IExRate, type IBtc } from '@/zustand/store'
+import { type IExRate, type IBtc } from '@/zustand/type'
 
 interface IKimchi {
   btc: IBtc
@@ -51,8 +51,8 @@ const Kimchi = ({ btc, exRate, setExRate }: IKimchi) => {
         fontSize={20}
         sx={{ cursor: 'pointer' }}
       >
-        <BiSolidInfoCircle fontSize={20} className="kimchi-color" />
-        <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="price-txt-sm kimchi-color" duration={0.3} percent decimals={2} />
+        <TbSquareRoundedLetterK fontSize={24} />
+        <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="price-txt-md kimchi" duration={0.3} percent decimals={2} />
       </Box>
       <ExRateDialog open={isEx} setOpen={setEx} kimpPrice={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} />
     </>

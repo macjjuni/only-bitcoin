@@ -18,22 +18,20 @@ const Footer = () => {
   }
 
   return (
-    <>
-      <Stack component="footer" height={layout.footer}>
-        <Stack component="div" flexDirection="row" justifyContent="space-between" alignItems="center" width="100%" color="#474E68">
-          <IconButton size="small" title="설정" onClick={onSet}>
-            <SettingIcon />
+    <Stack component="footer" height={layout.footer}>
+      <Stack component="div" flexDirection="row" justifyContent="space-between" alignItems="center" width="100%" color="#474E68">
+        <IconButton size="small" title="설정" onClick={onSet} sx={{ padding: 0 }}>
+          <SettingIcon />
+        </IconButton>
+        <Stack component="div" flexDirection="row" alignItems="center" gap="4px">
+          <IconButton size="small" title="정보" sx={{ padding: 0 }} onClick={onCopy}>
+            <Logo />
           </IconButton>
-          <Stack component="div" flexDirection="row" alignItems="center" gap="4px">
-            <IconButton size="small" title="정보" sx={{ padding: 0 }} onClick={onCopy}>
-              <Logo />
-            </IconButton>
-          </Stack>
         </Stack>
-        <CopyDialog open={isCopy} setOpen={setCopy} />
-        <SettingDialog open={isSetting} setOpen={setSetting} />
       </Stack>
-    </>
+      <CopyDialog open={isCopy} setOpen={setCopy} />
+      <SettingDialog open={isSetting} setOpen={setSetting} />
+    </Stack>
   )
 }
 

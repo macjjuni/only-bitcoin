@@ -1,5 +1,5 @@
 export const layout = {
-  header: 56,
-  main: 104,
-  footer: 48,
+  header: 42,
+  main: 98,
+  footer: 56,
 }

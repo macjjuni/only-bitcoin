@@ -16,10 +16,10 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-image: url('/btc-cover.webp'); /*이미지 경로지정*/
   background-size: 500px;
-  background-position: center 60%;
+  background-position: center 66%;
   background-repeat: no-repeat;
   background-attachment: fix;
-  padding: 0 8px;
+  padding: 0 12px;
 }
 
 .main {
@@ -29,7 +29,7 @@ body {
 #btc-forever {
   position: relative;
   width: 100%;
-  max-width: 1200px;
+  max-width: 768px;
   min-height: 100dvh;
   margin: 0 auto;
 }
@@ -43,6 +43,13 @@ body {
   color: #404040;
 }
 
+.up {
+  color: #0ecb81;
+}
+.down {
+  color: #f6465d;
+}
+
 .unit-txt {
   font-size: 16px;
   padding-left: 3px;
@@ -53,20 +60,14 @@ body {
 
 .price-txt-sm {
   font-size: 18px;
-  text-shadow: 1px 1px 1px #404040;
-  font-weight: 500;
 }
 
 .price-txt-md {
-  font-size: 24px;
-  text-shadow: 1px 1px 1px #404040;
-  font-weight: 500;
+  font-size: 22px;
 }
 
 .price-txt-lg {
   font-size: 30px;
-  text-shadow: 1px 1px 1px #404040;
-  font-weight: 500;
 }
 
 #not-key-not-btc {
@@ -116,36 +117,32 @@ body {
   font-size: 24px !important;
 }
 
-.kimchi-color {
-  color: #ea5b59;
+.up > .price-txt-lg {
+  text-shadow: 1px 1px 1px #0ecb81;
 }
 
-@media screen and (max-width: 600px) {
-  body {
-    background-size: 90vw;
-    background-position: center 64%;
-  }
-  #btc-forever {
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    min-height: fill-available;
-  }
-  .header-wrap {
-    height: 76px;
-  }
-  .top-banner {
-    height: 28px;
-    font-size: 14px;
-  }
+.down > .price-txt-lg {
+  text-shadow: 1px 1px 1px #dd3f53;
+}
 
-  #not-key-not-btc {
-    font-size: 16px !important;
-  }
-  .price-input > input {
-    text-align: center;
-    font-size: 18px;
-    padding: 16.5px 8px 16.5px 0;
-  }
+.chip-txt {
+  color: #1e2329;
+  border-color: #1e2329 !important;
+}
+
+.kimchi {
+  font-weight: bold;
+}
+
+.box-item {
+  width: 100%;
+  max-width: 400px;
+  min-width: 360px;
+  height: 300px;
+  padding: 8px;
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
 .done {
@@ -232,15 +229,37 @@ body {
   margin: 24px 24px 80px 24px;
 }
 
-.box-item {
-  width: 100%;
-  max-width: 400px;
-  min-width: 360px;
-  height: 300px;
-  padding: 8px;
-  margin: 0 auto;
-  background-color: #fff;
-  border-radius: 8px;
-  overflow: hidden;
-  box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
+.no-shadow.MuiPaper-elevation1 {
+  box-shadow: none !important;
+}
+.no-bg.MuiPaper-elevation1 {
+  background: none !important;
+}
+
+@media screen and (max-width: 600px) {
+  body {
+    background-size: 90vw;
+    background-position: center 64%;
+  }
+  #btc-forever {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    min-height: fill-available;
+  }
+  .header-wrap {
+    height: 76px;
+  }
+  .top-banner {
+    height: 28px;
+    font-size: 14px;
+  }
+
+  #not-key-not-btc {
+    font-size: 20px !important;
+  }
+  .price-input > input {
+    text-align: center;
+    font-size: 18px;
+    padding: 16.5px 8px 16.5px 0;
+  }
 }
