@@ -43,16 +43,6 @@ body {
   color: #404040;
 }
 
-.top-dashboard {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px !important;
-  font-weight: 500;
-  text-shadow: 1px 1px 1px #404040;
-  cursor: pointer;
-}
-
 .unit-txt {
   font-size: 16px;
   padding-left: 3px;
@@ -61,8 +51,22 @@ body {
   user-select: none;
 }
 
-.market-price-txt {
+.price-txt-sm {
+  font-size: 18px;
+  text-shadow: 1px 1px 1px #404040;
+  font-weight: 500;
+}
+
+.price-txt-md {
+  font-size: 24px;
+  text-shadow: 1px 1px 1px #404040;
+  font-weight: 500;
+}
+
+.price-txt-lg {
   font-size: 30px;
+  text-shadow: 1px 1px 1px #404040;
+  font-weight: 500;
 }
 
 #not-key-not-btc {
@@ -114,9 +118,6 @@ body {
 
 .kimchi-color {
   color: #ea5b59;
-}
-.kimchi-info {
-  margin-top: 3px;
 }
 
 @media screen and (max-width: 600px) {
@@ -235,8 +236,8 @@ body {
   width: 100%;
   max-width: 400px;
   min-width: 360px;
-  height: 320px;
-  padding: 16px;
+  height: 300px;
+  padding: 8px;
   margin: 0 auto;
   background-color: #fff;
   border-radius: 8px;

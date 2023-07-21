@@ -6,7 +6,7 @@ import { FaWonSign } from 'react-icons/fa'
 import { useBearStore } from '@/zustand/store'
 import { btcInfo, ecoSystemPyramid } from '@/data/btcInfo'
 import { comma, isSafari } from '@/utils/common'
-import BoxItem from '@/components/Box'
+import BoxItem from '@/components/BoxItem'
 import CopyButton from '@/components/CopyButton'
 
 import EcoSystemDialog from '@/components/modal/EcoSystemDialog'
