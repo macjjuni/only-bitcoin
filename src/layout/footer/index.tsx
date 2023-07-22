@@ -1,6 +1,6 @@
 import { memo, useState } from 'react'
 import { Stack, IconButton } from '@mui/material'
-import SettingIcon from '@/components/SettingIcon'
+import SettingIcon from '@/components/icon/SettingIcon'
 import CopyDialog from '@/components/modal/CopyDialog'
 import SettingDialog from '@/components/modal/SettingDialog'
 import Logo from '@/components/Logo'

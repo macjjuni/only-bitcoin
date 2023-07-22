@@ -1,21 +1,26 @@
 export interface IBtc {
   krw: number
-  krwTime: string
+  krwDate: string
   krwColor: boolean
   usd: number
-  usdTime: string
+  usdDate: string
   usdColor: boolean // true = green, false = red
+}
+
+export interface IDominance {
+  value: string
+  date: string
 }
 
 export interface IUpdateKRW {
   krw: number
-  krwTime: string
+  krwDate: string
   krwColor: boolean
 }
 
 export interface IUpdateUSD {
   usd: number
-  usdTime: string
+  usdDate: string
   usdColor: boolean
 }
 
@@ -23,6 +28,15 @@ export interface IExRate {
   date: string
   provider: string
   basePrice: number
+}
+
+export interface IUpdateDominance {
+  value: string
+  date: string
+}
+
+export interface IDropDown {
+  [index: string]: boolean
 }
 
 export type MarketType = 'KRW' | 'USD' | 'KRW/USD'

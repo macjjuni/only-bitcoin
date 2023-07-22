@@ -10,8 +10,8 @@ const binanceURL = `wss://stream.binance.com:9443/ws/${binaceAsset[0]}@ticker`
 const { getState } = useBearStore
 // Store data reset
 const resetData = () => {
-  const usdTime = getNowDate()
-  getState().updateUSD({ usd: 0, usdTime, usdColor: true }) // store update
+  const usdDate = getNowDate()
+  getState().updateUSD({ usd: 0, usdDate, usdColor: true }) // store update
 }
 
 let timeout: NodeJS.Timeout | null = null
@@ -41,11 +41,11 @@ function initBinance() {
   socket.onmessage = ({ data }) => {
     const json = JSON.parse(data)
     const usd = Number(json.c) // 현재 가격
-    const usdTime = transDate(json.C)
+    const usdDate = transDate(json.C)
     const beforeUsd = getState().btc.usd
 
-    if (usd > beforeUsd) getState().updateUSD({ usd, usdTime, usdColor: true })
-    else if (usd < beforeUsd) getState().updateUSD({ usd, usdTime, usdColor: false })
+    if (usd > beforeUsd) getState().updateUSD({ usd, usdDate, usdColor: true })
+    else if (usd < beforeUsd) getState().updateUSD({ usd, usdDate, usdColor: false })
   }
 
   // 소켓 에러 핸들링

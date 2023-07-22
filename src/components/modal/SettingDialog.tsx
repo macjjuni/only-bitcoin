@@ -1,7 +1,8 @@
 import { memo, type Dispatch, type SetStateAction, type MouseEvent, useCallback } from 'react'
 import { RiCloseCircleLine } from 'react-icons/ri'
 import { DialogTitle, Dialog, Container, Typography, ToggleButtonGroup, ToggleButton, IconButton, Stack } from '@mui/material'
-import { useBearStore, type MarketType } from '@/zustand/store'
+import { useBearStore } from '@/zustand/store'
+import { type MarketType } from '@/zustand/type'
 
 type DialogType = {
   open: boolean

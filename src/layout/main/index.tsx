@@ -22,7 +22,7 @@ const Main = ({ children }: { children: JSX.Element }) => {
   }, [])
 
   return (
-    <Container className="main" sx={{ minHeight: `calc(100dvh - ${layout.main}px)` }}>
+    <Container component="main" className="main" sx={{ minHeight: `calc(100dvh - ${layout.main}px)` }}>
       <Spinner isRender={load} />
       {children}
     </Container>

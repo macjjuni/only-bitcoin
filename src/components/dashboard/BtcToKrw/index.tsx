@@ -9,6 +9,7 @@ import { type IBtc } from '@/zustand/type'
 import BoxItem from '@/components/BoxItem'
 import CopyButton from '@/components/CopyButton'
 import EcoSystemDialog from '@/components/modal/EcoSystemDialog'
+import SatIcon from '@/components/icon/SatIcon'
 
 import { btcInfo, ecoSystemPyramid } from '@/data/btcInfo'
 import { comma, isSafari } from '@/utils/common'
@@ -137,7 +138,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
   }, [btc])
 
   return (
-    <BoxItem icon={<BiTransferAlt fontSize={26} color={btcInfo.color} />} title="BTC/KRW">
+    <BoxItem id="btcKrw" icon={<BiTransferAlt fontSize={26} color={btcInfo.color} />} title="BTC/KRW">
       <Stack gap="24px">
         <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap">
           <FormGroup ref={chkRef} sx={{ userSelect: 'none' }}>
@@ -171,10 +172,15 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
           </FormControl>
 
           <Stack alignItems="flex-end">
-            <div>
+            <Stack flexDirection="row" alignItems="center">
               {sat}
               <span className="unit-txt">Sat</span>
-            </div>
+              <Stack flexDirection="row" alignItems="center">
+                &#40;
+                <SatIcon width={20} height={20} />
+                &#41;
+              </Stack>
+            </Stack>
           </Stack>
 
           <FormControl fullWidth>

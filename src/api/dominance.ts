@@ -1,4 +1,5 @@
 import axios from 'axios'
+import { toast } from 'react-toastify'
 
 const btcDUrl = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false' // BTC 도미넌스
 
@@ -35,11 +36,10 @@ export interface ICurrency {
 export const getCurrencies = async (): Promise<ICurrency[] | null> => {
   try {
     const { data } = await axios.get<ICurrency[]>(btcDUrl)
-    console.log(data)
-
     return data
   } catch (e) {
     console.error(e)
+    toast.error('비트코인 도미넌스 업데이트 오류 🕷️')
     return null
   }
 }

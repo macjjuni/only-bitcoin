@@ -4,7 +4,7 @@ import { FaWonSign } from 'react-icons/fa'
 import { IoLogoUsd } from 'react-icons/io'
 
 import { LottieProps } from 'react-lottie-player'
-import LottieItem from '@/components/Lottie'
+import LottieItem from '@/components/LottieItem'
 import BoxItem from '@/components/BoxItem'
 import CountText from '@/components/CountText'
 import Kimchi from './components/Kimchi'
@@ -15,12 +15,10 @@ import { type IBtc, type MarketType, type IExRate } from '@/zustand/type'
 
 // Lottie Files
 import bitcoin from '@/assets/bitcoin.json'
-// import equal from '@/assets/equal.json'
 
 // Lottie Option
 const defaultOption: LottieProps = { loop: true, play: true }
-const btcOption = { ...defaultOption, style: { width: '120px', height: '120px' } }
-// const equalOption = { ...defaultOption, style: { width: '44px', height: '90px' } }
+const btcOption = { ...defaultOption, style: { width: '160px', height: '160px' } }
 
 interface IMarketPrice {
   btc: IBtc
@@ -41,8 +39,8 @@ const MarketPrice = ({ btc, market, isKimchi, exRate, setExRate }: IMarketPrice)
 
   return (
     <BoxItem icon={btcInfo.icon(24)} noShadow>
-      <Stack onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px" gap="24px">
-        <Stack flexDirection="row" justifyContent="space-evenly" alignItems="center" gap={1} pr={1.5}>
+      <Stack onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px">
+        <Stack flexDirection="row" justifyContent="space-between" alignItems="center" pr="8px">
           <LottieItem option={btcOption} animationData={bitcoin} speed={speed + 0.8} />
           {/* <LottieItem option={equalOption} animationData={equal} speed={speed + 1} /> */}
 

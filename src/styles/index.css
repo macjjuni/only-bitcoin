@@ -9,6 +9,16 @@
   font-family: 'Pretendard-Regular';
 }
 
+button {
+  background: inherit;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  overflow: visible;
+  cursor: pointer;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
@@ -23,7 +33,10 @@ body {
 }
 
 .main {
-  padding: 0 !important;
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  padding: 0 0 24px !important;
 }
 
 #btc-forever {
@@ -32,15 +45,6 @@ body {
   max-width: 768px;
   min-height: 100dvh;
   margin: 0 auto;
-}
-
-.top-banner {
-  width: 100%;
-  height: 28px;
-  padding: 0 8px;
-  font-size: 14px !important;
-  font-weight: 300;
-  color: #404040;
 }
 
 .up {
@@ -56,6 +60,15 @@ body {
   font-weight: 500;
   text-shadow: none !important;
   user-select: none;
+}
+
+.chip-txt {
+  color: #1e2329;
+  border-color: #1e2329 !important;
+}
+
+.price-txt-xs {
+  font-size: 13px;
 }
 
 .price-txt-sm {
@@ -125,11 +138,6 @@ body {
   text-shadow: 1px 1px 1px #dd3f53;
 }
 
-.chip-txt {
-  color: #1e2329;
-  border-color: #1e2329 !important;
-}
-
 .kimchi {
   font-weight: bold;
 }
@@ -145,8 +153,38 @@ body {
   overflow: hidden;
 }
 
+.toggle-down {
+  height: 52px !important;
+  margin-bottom: calc(300px - 52px) !important;
+}
+.toggle-btn {
+  transform: rotate(180deg);
+}
+.toggle-down .toggle-btn {
+  transform: rotate(0);
+}
+
 .done {
   animation: done 1s;
+}
+
+.fear-greed-img {
+  width: 100%;
+}
+.fear-greed-btn {
+  position: relative;
+  width: 48px;
+  height: 36px;
+  border-radius: 4px;
+  outline: none;
+  user-select: none;
+}
+
+.fear-greed-lottie {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 @keyframes done {
@@ -208,12 +246,8 @@ body {
 /* MUI Style */
 
 .MuiPaper-elevation1 {
-  margin: 0 !important;
-  /* box-shadow: none !important; */
-  /* box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px !important; */
-  /* box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px !important; */
+  margin: 0;
   box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px !important;
-  /* box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px !important; */
 }
 .MuiPaper-elevation1::before {
   display: none !important;
@@ -241,6 +275,9 @@ body {
     background-size: 90vw;
     background-position: center 64%;
   }
+  .main {
+    align-items: flex-start;
+  }
   #btc-forever {
     min-height: 100vh;
     min-height: -webkit-fill-available;
@@ -248,10 +285,6 @@ body {
   }
   .header-wrap {
     height: 76px;
-  }
-  .top-banner {
-    height: 28px;
-    font-size: 14px;
   }
 
   #not-key-not-btc {

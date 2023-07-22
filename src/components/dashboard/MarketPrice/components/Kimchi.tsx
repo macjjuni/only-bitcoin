@@ -40,7 +40,7 @@ const Kimchi = ({ btc, exRate, setExRate }: IKimchi) => {
       <Box
         onClick={showDialog}
         position="absolute"
-        top="-28px"
+        top="-24px"
         right="0px"
         display="flex"
         flexDirection="row"
@@ -48,11 +48,10 @@ const Kimchi = ({ btc, exRate, setExRate }: IKimchi) => {
         alignItems="center"
         height={30}
         gap="4px"
-        fontSize={20}
         sx={{ cursor: 'pointer' }}
       >
-        <TbSquareRoundedLetterK fontSize={24} />
-        <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="price-txt-md kimchi" duration={0.3} percent decimals={2} />
+        <TbSquareRoundedLetterK fontSize={22} />
+        <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="price-txt-sm kimchi" duration={0.3} percent decimals={2} />
       </Box>
       <ExRateDialog open={isEx} setOpen={setEx} kimpPrice={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} />
     </>
