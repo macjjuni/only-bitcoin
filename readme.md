@@ -61,6 +61,7 @@ btc-price
 
 - [Upbit API Docs](https://upbit.com/open_api_agreement)
 - [Binance API Docs](https://binance-docs.github.io/apidocs/spot/en/#introduction)
+- [Coin Gecko](https://www.coingecko.com/ko/api/documentation)
 
 <br>
 

@@ -42,7 +42,6 @@ body {
 #btc-forever {
   position: relative;
   width: 100%;
-  max-width: 768px;
   min-height: 100dvh;
   margin: 0 auto;
 }
