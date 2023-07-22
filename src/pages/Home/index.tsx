@@ -1,12 +1,16 @@
 import { Stack } from '@mui/material'
-import TopDashboard from '@/pages/Home/components/TopDashboard'
-import BtcToPrice from '@/pages/Home/components/BtcToPrice'
+import MarketPrice from '@/components/dashboard/MarketPrice'
+import BtcToKrw from '@/components/dashboard/BtcToKrw'
+import { useBearStore } from '@/zustand/store'
 
 const Home = () => {
+  // Zustand Store
+  const { btc, market, isKimchi, exRate, setExRate, isEcoSystem } = useBearStore((state) => state)
+
   return (
-    <Stack direction="column" useFlexGap flexWrap="wrap" gap="1rem" maxWidth={400} width="100%" m="auto">
-      <TopDashboard />
-      <BtcToPrice />
+    <Stack alignItems="center" gap={1} width="100%">
+      <MarketPrice btc={btc} market={market} isKimchi={isKimchi} exRate={exRate} setExRate={setExRate} />
+      <BtcToKrw btc={btc} isEcoSystem={isEcoSystem} />
     </Stack>
   )
 }

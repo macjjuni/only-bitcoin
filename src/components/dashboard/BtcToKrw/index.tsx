@@ -1,22 +1,29 @@
 import { useEffect, useState, useRef } from 'react'
-import { Stack, FormGroup, FormControlLabel, Checkbox, FormControl, InputLabel, OutlinedInput, InputAdornment, Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material'
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore'
+import { Stack, FormGroup, FormControlLabel, Checkbox, FormControl, InputLabel, OutlinedInput, InputAdornment, Typography } from '@mui/material'
 import { FaWonSign } from 'react-icons/fa'
-
+import { BiTransferAlt } from 'react-icons/bi'
+// Zustand
 import { useBearStore } from '@/zustand/store'
+import { type IBtc } from '@/zustand/type'
+// Components
+import BoxItem from '@/components/BoxItem'
+import CopyButton from '@/components/CopyButton'
+import EcoSystemDialog from '@/components/modal/EcoSystemDialog'
+import SatIcon from '@/components/icon/SatIcon'
+
 import { btcInfo, ecoSystemPyramid } from '@/data/btcInfo'
 import { comma, isSafari } from '@/utils/common'
-import CopyButton from '@/components/CopyButton'
 
-import EcoSystemDialog from '@/components/modal/EcoSystemDialog'
+interface IBtcToKrw {
+  btc: IBtc
+  isEcoSystem: boolean
+}
 
 const numReg = /^[-+]?(\d+(\.\d*)?|\.\d+)$/
 const commaLength = 5 // 소숫점
 const satoshi = 100000000
 
-const BtcToPrice = () => {
-  // zustand Store
-  const { btc, isShow, isEcoSystem, toggleAcc } = useBearStore((state) => state)
+const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
   const amount = useBearStore((state) => state.amount)
   const setAmount = useBearStore((state) => state.setAmount)
 
@@ -24,7 +31,7 @@ const BtcToPrice = () => {
   const [standard, setStandard] = useState(false) // 기준 : 개수(false) or 가격(false)
   const [price, setPrice] = useState('0') // 금액
   const [sat, setSat] = useState('0')
-  // - Eco System
+  // state - Eco System
   const [isEco, setEco] = useState(false)
   const [emoji, setEmoji] = useState('')
 
@@ -94,10 +101,6 @@ const BtcToPrice = () => {
     setStandard(e.target.checked)
   }
 
-  const toggleAccordian = (e: React.SyntheticEvent, expanded: boolean) => {
-    toggleAcc(expanded)
-  }
-
   // 생태계별 표시
   const findEcoSystem = () => {
     const numAmt = Number(amount.replace(/[^\d.]/g, ''))
@@ -135,82 +138,77 @@ const BtcToPrice = () => {
   }, [btc])
 
   return (
-    <>
-      <Accordion expanded={isShow} onChange={toggleAccordian} TransitionProps={{ unmountOnExit: true }} square={false} sx={{ borderRadius: '4px' }}>
-        <AccordionSummary expandIcon={<ExpandMoreIcon />} aria-controls="panel1a-content" id="panel1 a-header">
-          <Stack flexDirection="row" alignItems="center" justifyContent="space-between" width="100%">
-            <Typography component="h3" fontSize="15px" fontWeight="bold">
-              BTC / KRW
+    <BoxItem id="btcKrw" icon={<BiTransferAlt fontSize={26} color={btcInfo.color} />} title="BTC/KRW">
+      <Stack gap="24px">
+        <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap">
+          <FormGroup ref={chkRef} sx={{ userSelect: 'none' }}>
+            <FormControlLabel control={<Checkbox checked={standard} onChange={toggleStandard} />} label="가격 기준" />
+          </FormGroup>
+          {/* 생태계 이모지 */}
+          {isEcoSystem && (
+            <Typography fontSize={28} width={40} onClick={onEco} sx={{ cursor: 'pointer' }}>
+              {emoji}
             </Typography>
-          </Stack>
-        </AccordionSummary>
-        <AccordionDetails>
-          <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap" paddingBottom="1rem">
-            <FormGroup ref={chkRef} sx={{ userSelect: 'none' }}>
-              <FormControlLabel control={<Checkbox checked={standard} onChange={toggleStandard} />} label="가격 기준" />
-            </FormGroup>
+          )}
+        </Stack>
 
-            <div>
-              {isEcoSystem && (
-                <Typography fontSize={28} width={40} onClick={onEco} sx={{ cursor: 'pointer' }}>
-                  {emoji}
-                </Typography>
-              )}
-            </div>
-          </Stack>
+        <Stack direction={standard ? 'column-reverse' : 'column'} justifyContent="center" gap={1} height="calc(100% - 85px)">
+          <FormControl fullWidth>
+            <InputLabel htmlFor="outlined-adornment-amount">BitCoin</InputLabel>
+            <OutlinedInput
+              inputRef={amountRef}
+              id="outlined-adornment-amount"
+              label="Amount"
+              className="crypto-input"
+              readOnly={standard}
+              value={amount}
+              type="number"
+              slotProps={{ input: { min: 0, step: 0.1, inputMode: 'decimal', pattern: '[0-9]+([.,]0|[1-9]+)?' } }}
+              onChange={!isSafari ? handleAmount : iosHandleAmount}
+              onKeyDown={handleAmountKeydown}
+              startAdornment={<InputAdornment position="start">{btcInfo.icon(36)}</InputAdornment>}
+              endAdornment={<CopyButton txt={amount} />}
+            />
+          </FormControl>
 
-          <Stack spacing={3} direction={standard ? 'column-reverse' : 'column'}>
-            <FormControl fullWidth>
-              <InputLabel htmlFor="outlined-adornment-amount">BitCoin</InputLabel>
-              <OutlinedInput
-                inputRef={amountRef}
-                id="outlined-adornment-amount"
-                label="Amount"
-                className="crypto-input"
-                readOnly={standard}
-                value={amount}
-                type="number"
-                slotProps={{ input: { min: 0, step: 0.1, inputMode: 'decimal', pattern: '[0-9]+([.,]0|[1-9]+)?' } }}
-                onChange={!isSafari ? handleAmount : iosHandleAmount}
-                onKeyDown={handleAmountKeydown}
-                startAdornment={<InputAdornment position="start">{btcInfo.icon(36)}</InputAdornment>}
-                endAdornment={<CopyButton txt={amount} />}
-              />
-              <Stack alignItems="flex-end" pt="8px">
-                <div>
-                  {sat}
-                  <span className="unit-txt">Sat</span>
-                </div>
+          <Stack alignItems="flex-end">
+            <Stack flexDirection="row" alignItems="center">
+              {sat}
+              <span className="unit-txt">Sat</span>
+              <Stack flexDirection="row" alignItems="center">
+                &#40;
+                <SatIcon width={20} height={20} />
+                &#41;
               </Stack>
-            </FormControl>
-
-            <FormControl fullWidth>
-              <InputLabel htmlFor="outlined-adornment-amount">KRW</InputLabel>
-              <OutlinedInput
-                inputRef={priceRef}
-                id="outlined-adornment-amount"
-                label="Amount"
-                className="price-input"
-                readOnly={!standard}
-                value={price}
-                onChange={handlePrice}
-                onKeyDown={handlePriceKeydown}
-                startAdornment={
-                  <InputAdornment position="start">
-                    <Stack justifyContent="center" alignItems="center" width="36px">
-                      <FaWonSign size="20" color="#483C32" />
-                    </Stack>
-                  </InputAdornment>
-                }
-                endAdornment={<CopyButton txt={price} />}
-              />
-            </FormControl>
+            </Stack>
           </Stack>
-        </AccordionDetails>
-      </Accordion>
+
+          <FormControl fullWidth>
+            <InputLabel htmlFor="outlined-adornment-amount">KRW</InputLabel>
+            <OutlinedInput
+              inputRef={priceRef}
+              id="outlined-adornment-amount"
+              label="Amount"
+              className="price-input"
+              readOnly={!standard}
+              value={price}
+              onChange={handlePrice}
+              onKeyDown={handlePriceKeydown}
+              startAdornment={
+                <InputAdornment position="start">
+                  <Stack justifyContent="center" alignItems="center" width="36px">
+                    <FaWonSign size="20" color="#483C32" />
+                  </Stack>
+                </InputAdornment>
+              }
+              endAdornment={<CopyButton txt={price} />}
+            />
+          </FormControl>
+        </Stack>
+      </Stack>
       <EcoSystemDialog open={isEco} setOpen={setEco} />
-    </>
+    </BoxItem>
   )
 }
 
-export default BtcToPrice
+export default BtcToKrw

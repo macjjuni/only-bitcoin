@@ -1,11 +1,22 @@
 import { v4 as uuidv4 } from 'uuid'
 import moment from 'moment'
+import { ICurrency } from '@/api/dominance'
 
-// -------------------- string 형식에 숫자만 포함됐는지 체크 --------------------
+/* ---------- 값 체크 ---------- */
+export const valueCheck = (val?: string | number | null | object) => {
+  const valType = typeof val
+  if (val === null || valType === 'undefined') return false
+  else {
+    if (val === '') return false
+    return true
+  }
+}
+
+/* ---------- string 형식에 숫자만 포함됐는지 체크 ---------- */
 export const isStrNumber = (val: string): boolean => {
   return !Number.isNaN(Number(val))
 }
-
+/* ---------- 천 단위 콤마 변환 ---------- */
 export const comma = (num: string): string => {
   // 문자형이지만 숫자말고 문자가 포함된 경우 체크
   const numCheck = isStrNumber(num)
@@ -14,12 +25,12 @@ export const comma = (num: string): string => {
   return '0'
 }
 
-// iOS Safari 브라우저 구분
+/* ---------- iOS Safari 브라우저 구분 ---------- */
 export const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
-// NetWork Status 구분
+/* ---------- NetWork Status 구분 ---------- */
 export const isNetwork = () => window.navigator.onLine
 
-// 복사
+/* ---------- 복사 기능 ---------- */
 export const copyText = async (txt: string) => {
   return await navigator.clipboard
     .writeText(txt)
@@ -32,6 +43,7 @@ export const copyText = async (txt: string) => {
     })
 }
 
+/* ---------- uuid 객체 ---------- */
 export const uuid = {
   generate: () => {
     return uuidv4()
@@ -45,20 +57,42 @@ export const uuid = {
   },
 }
 
-// 날짜 포멧
+const dateFormat = 'YYYY-MM-DD HH:mm:ss'
+/* ---------- 날짜 포멧 변환 ---------- */
 export const transDate = (timeStamp: string | number) => {
-  return moment(timeStamp).format('YYYY-MM-DD HH:mm:ss')
+  return moment(timeStamp).format(dateFormat)
 }
-// 현재 날짜
+/* ---------- 현재 날짜 반환 ---------- */
 export const getNowDate = () => {
-  return moment().format('YYYY-MM-DD HH:mm:ss')
+  return moment().format(dateFormat)
 }
 
-// 김치 프리미엄 퍼센트 구하는 로직
+export const getDateFormat = () => {
+  return dateFormat
+}
+
+/* ---------- 김치 프리미엄 퍼센트 계산 ---------- */
 export const calcPerDiff = (krwPrice: number, usdPrice: number, exRate: number) => {
   const basedUsdKRW = Math.floor(usdPrice * exRate) // 환율 * 비트코인 USD 시세
   const priceDiff = krwPrice - basedUsdKRW
   const per = (priceDiff / krwPrice) * 100
 
   return parseFloat(per.toFixed(2))
+}
+
+/* ---------- 비트코인 도미넌스 퍼센트 계산 ---------- */
+export const getDominace = (list: ICurrency[]) => {
+  // Initializes variables
+  let BTCCap = 0
+  let altCap = 0
+
+  list.forEach((x) => {
+    if (x.id === 'bitcoin') {
+      BTCCap = x.market_cap
+      altCap += x.market_cap
+    } else {
+      altCap += x.market_cap
+    }
+  })
+  return ((BTCCap / altCap) * 100).toFixed(2)
 }

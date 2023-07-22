@@ -3,7 +3,7 @@ import Lottie, { LottieProps } from 'react-lottie-player'
 import logo from '@/assets/logo.json'
 
 // Lottie Option
-const defaultOptions: LottieProps = { loop: true, play: true, style: { width: '40px', height: '40px' } }
+const defaultOptions: LottieProps = { loop: true, play: true, style: { width: '36px', height: '36px' } }
 
 const Logo = () => {
   return (

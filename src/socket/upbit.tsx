@@ -12,7 +12,8 @@ const { getState } = useBearStore
 const resetData = () => {
   const cleanData = {
     krw: 0,
-    krwTime: getNowDate(),
+    krwDate: getNowDate(),
+    krwColor: true,
   }
   getState().updateKRW(cleanData) // store update
 }
@@ -62,11 +63,12 @@ function initUpbit() {
     const arr = new Uint8Array(evt.data)
     const data = JSON.parse(enc.decode(arr))
 
-    const filterData = {
-      krw: data.tp,
-      krwTime: transDate(data.ttms),
-    }
-    getState().updateKRW(filterData) // store update
+    const krw = data.tp
+    const krwDate = transDate(data.ttms)
+    const beforeKrw = getState().btc.krw
+
+    if (krw > beforeKrw) getState().updateKRW({ krw, krwDate, krwColor: true })
+    else if (krw < beforeKrw) getState().updateKRW({ krw, krwDate, krwColor: false })
   }
   // 소켓 에러 핸들링
   socket.onerror = (e) => {

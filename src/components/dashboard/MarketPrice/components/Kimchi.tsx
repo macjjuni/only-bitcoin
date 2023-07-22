@@ -1,14 +1,20 @@
 import { useLayoutEffect, useState, useCallback } from 'react'
 import { Box } from '@mui/material'
-import { BiSolidInfoCircle } from 'react-icons/bi'
+import { TbSquareRoundedLetterK } from 'react-icons/tb'
 import CountText from '@/components/CountText'
-import { useBearStore } from '@/zustand/store'
+
 import { calcPerDiff } from '@/utils/common'
 import { getExRate } from '@/api/exRate'
 import ExRateDialog from '@/components/modal/ExRateDialog'
+import { type IExRate, type IBtc } from '@/zustand/type'
 
-const Kimchi = () => {
-  const { exRate, btc, setExRate } = useBearStore((state) => state)
+interface IKimchi {
+  btc: IBtc
+  exRate: IExRate
+  setExRate: (exRate: IExRate) => void
+}
+
+const Kimchi = ({ btc, exRate, setExRate }: IKimchi) => {
   const [isEx, setEx] = useState(false)
 
   const showDialog = useCallback(() => {
@@ -26,14 +32,26 @@ const Kimchi = () => {
 
   if (exRate.basePrice === 0) {
     console.error('환율 데이터 에러')
-    return <></>
+    return null
   }
 
   return (
     <>
-      <Box onClick={showDialog} position="absolute" top="-28px" right="0px" display="flex" flexDirection="row" justifyContent="flex-end" alignItems="center" height={30} gap="4px" fontSize={20}>
-        <BiSolidInfoCircle fontSize={20} className="kimchi-color kimchi-info" />
-        <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="kimchi-color" duration={0.3} percent decimals={2} />
+      <Box
+        onClick={showDialog}
+        position="absolute"
+        top="-24px"
+        right="0px"
+        display="flex"
+        flexDirection="row"
+        justifyContent="flex-end"
+        alignItems="center"
+        height={30}
+        gap="4px"
+        sx={{ cursor: 'pointer' }}
+      >
+        <TbSquareRoundedLetterK fontSize={22} />
+        <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="price-txt-sm kimchi" duration={0.3} percent decimals={2} />
       </Box>
       <ExRateDialog open={isEx} setOpen={setEx} kimpPrice={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} />
     </>

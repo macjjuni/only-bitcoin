@@ -1,17 +1,24 @@
-import { memo } from 'react'
 import { Stack, AppBar } from '@mui/material'
+import { layout } from '@/styles/style'
+
+import BtcDominance from '@/components/BtcDominance'
+import ExRatePrice from '@/components/ExRatePrice'
 import RefreshButton from '@/components/RefreshButton'
+import FearGreed from '@/components/FearGreed'
 
 const Header = () => {
   return (
-    <>
-      <AppBar position="static" sx={{ boxShadow: 'none', background: 'inherit' }}>
-        <Stack height={64} flexDirection="row" alignItems="center" justifyContent="flex-end" padding="0 8px">
-          <RefreshButton />
+    <AppBar position="static" sx={{ boxShadow: 'none', background: 'inherit' }}>
+      <Stack height={layout.header} flexDirection="row" alignItems="center" justifyContent="space-between">
+        <Stack flexDirection="row" gap="8px" alignItems="center">
+          <BtcDominance />
+          <ExRatePrice />
+          <FearGreed />
         </Stack>
-      </AppBar>
-    </>
+        <RefreshButton />
+      </Stack>
+    </AppBar>
   )
 }
 
-export default memo(Header)
+export default Header

@@ -9,6 +9,16 @@
   font-family: 'Pretendard-Regular';
 }
 
+button {
+  background: inherit;
+  border: none;
+  box-shadow: none;
+  border-radius: 0;
+  padding: 0;
+  overflow: visible;
+  cursor: pointer;
+}
+
 body {
   margin: 0;
   font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
@@ -16,35 +26,32 @@ body {
   -moz-osx-font-smoothing: grayscale;
   background-image: url('/btc-cover.webp'); /*이미지 경로지정*/
   background-size: 500px;
-  background-position: center 60%;
+  background-position: center 66%;
   background-repeat: no-repeat;
   background-attachment: fix;
+  padding: 0 12px;
+}
+
+.main {
+  display: flex !important;
+  justify-content: center;
+  align-items: center;
+  padding: 0 0 24px !important;
 }
 
 #btc-forever {
   position: relative;
-  width: 100vw;
-  min-height: 100vh;
+  width: 100%;
+  max-width: 768px;
+  min-height: 100dvh;
+  margin: 0 auto;
 }
 
-.main {
-  position: sticky;
-  top: calc(100vh / 2 - 282px);
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 0 24px;
-  min-height: 600px;
+.up {
+  color: #0ecb81;
 }
-
-.top-dashboard {
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 32px !important;
-  font-weight: 500;
-  text-shadow: 1px 1px 1px #404040;
-  cursor: pointer;
+.down {
+  color: #f6465d;
 }
 
 .unit-txt {
@@ -55,14 +62,30 @@ body {
   user-select: none;
 }
 
-.market-price-txt {
+.chip-txt {
+  color: #1e2329;
+  border-color: #1e2329 !important;
+}
+
+.price-txt-xs {
+  font-size: 13px;
+}
+
+.price-txt-sm {
+  font-size: 18px;
+}
+
+.price-txt-md {
+  font-size: 22px;
+}
+
+.price-txt-lg {
   font-size: 30px;
 }
 
 #not-key-not-btc {
-  font-size: 20px !important;
+  font-size: 22px !important;
   text-align: center;
-  margin-bottom: 36px;
   text-shadow: 1px 1px 1px #ce0000;
   font-weight: bold;
 }
@@ -107,59 +130,61 @@ body {
   font-size: 24px !important;
 }
 
-.footer {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  padding: 0 16px;
-  position: absolute;
-  bottom: 4px;
+.up > .price-txt-lg {
+  text-shadow: 1px 1px 1px #0ecb81;
+}
+
+.down > .price-txt-lg {
+  text-shadow: 1px 1px 1px #dd3f53;
+}
+
+.kimchi {
+  font-weight: bold;
+}
+
+.box-item {
   width: 100%;
-  height: 56px;
+  max-width: 400px;
+  min-width: 360px;
+  height: 300px;
+  padding: 8px;
+  margin: 0 auto;
+  border-radius: 8px;
+  overflow: hidden;
 }
 
-.kimchi-color {
-  color: #ea5b59;
+.toggle-down {
+  height: 52px !important;
+  margin-bottom: calc(300px - 52px) !important;
 }
-.kimchi-info {
-  margin-top: 3px;
+.toggle-btn {
+  transform: rotate(180deg);
 }
-
-@media screen and (max-width: 600px) {
-  body {
-    background-size: 90vw;
-    background-position: center 64%;
-  }
-  #btc-forever {
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    min-height: fill-available;
-  }
-  .header-wrap {
-    height: 76px;
-  }
-  .main {
-    position: relative;
-    top: auto;
-    transform: translateY(0);
-    padding: 36px 24px 0 24px;
-  }
-  #not-key-not-btc {
-    font-size: 16px !important;
-    margin: -12px 0 16px 0;
-  }
-  .price-input > input {
-    text-align: center;
-    font-size: 18px;
-    padding: 16.5px 8px 16.5px 0;
-  }
-  .footer {
-    bottom: 12px;
-  }
+.toggle-down .toggle-btn {
+  transform: rotate(0);
 }
 
 .done {
   animation: done 1s;
+}
+
+.fear-greed-img {
+  width: 100%;
+}
+.fear-greed-btn {
+  position: relative;
+  width: 48px;
+  height: 36px;
+  border-radius: 4px;
+  outline: none;
+  user-select: none;
+}
+
+.fear-greed-lottie {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
 }
 
 @keyframes done {
@@ -221,12 +246,8 @@ body {
 /* MUI Style */
 
 .MuiPaper-elevation1 {
-  margin: 0 !important;
-  /* box-shadow: none !important; */
-  /* box-shadow: rgba(149, 157, 165, 0.2) 0px 8px 24px !important; */
-  /* box-shadow: rgba(100, 100, 111, 0.2) 0px 7px 29px 0px !important; */
+  margin: 0;
   box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px !important;
-  /* box-shadow: rgba(0, 0, 0, 0.15) 0px 5px 15px 0px !important; */
 }
 .MuiPaper-elevation1::before {
   display: none !important;
@@ -240,4 +261,38 @@ body {
 }
 .mui-dialog > .MuiDialog-container > .MuiDialog-paper {
   margin: 24px 24px 80px 24px;
+}
+
+.no-shadow.MuiPaper-elevation1 {
+  box-shadow: none !important;
+}
+.no-bg.MuiPaper-elevation1 {
+  background: none !important;
+}
+
+@media screen and (max-width: 600px) {
+  body {
+    background-size: 90vw;
+    background-position: center 64%;
+  }
+  .main {
+    align-items: flex-start;
+  }
+  #btc-forever {
+    min-height: 100vh;
+    min-height: -webkit-fill-available;
+    min-height: fill-available;
+  }
+  .header-wrap {
+    height: 76px;
+  }
+
+  #not-key-not-btc {
+    font-size: 20px !important;
+  }
+  .price-input > input {
+    text-align: center;
+    font-size: 18px;
+    padding: 16.5px 8px 16.5px 0;
+  }
 }
