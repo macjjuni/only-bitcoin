@@ -12,7 +12,7 @@ interface BearState {
   amount: string // BTC 개수 Input 값
   isKimchi: boolean // 김치 프리미엄 표시 여부
   isEcoSystem: boolean // 비트코인 생태계 표시 여부
-  // theme: 'dark' | 'light'
+  theme: 'dark' | 'light'
   updateKRW: (by: IUpdateKRW) => void
   updateUSD: (by: IUpdateUSD) => void
   updateDoimnance: (by: IUpdateDominance) => void
@@ -22,11 +22,13 @@ interface BearState {
   setAmount: (by: string) => void
   toggleKimchi: (flag: boolean) => void
   toggleEco: (flag: boolean) => void
+  toggleTheme: () => void
 }
 
 export const useBearStore = create<BearState>()(
   persist(
     (set) => ({
+      theme: 'dark',
       market: 'KRW/USD',
       setMarket: (market: MarketType) => set(() => ({ market })),
       btc: {
@@ -71,6 +73,7 @@ export const useBearStore = create<BearState>()(
       toggleKimchi: (flag) => set(() => ({ isKimchi: flag })),
       toggleEco: (flag) => set(() => ({ isEcoSystem: flag })),
       setExRate: (exRate) => set(() => ({ exRate })),
+      toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
     }),
     { name: 'bear-storage' } // persist key
   )
