@@ -1,4 +1,4 @@
-# Only ₿itcoin Market Price - [🔗 Link](https://btc-price.web.app/)
+# Only ₿itcoin Market Price(PWA) - [🔗 Link](https://btc-price.web.app/)
 
 <br>
 <div align="center">
@@ -13,13 +13,36 @@
 
 <br>
 
-## 📸 Initail Screen
+## 📸 이미지
 
-<img src="https://github.com/macjjuni/btc-market-price/assets/38034518/36f00570-a949-4440-b876-58565357eb55" width="100%" alt="btc-price initial screen gif">
+<img src="https://github.com/macjjuni/btc-market-price/assets/38034518/f64f1a38-1570-49f4-8979-4fe3779e2c19" width="23.5%" alt="btc-price initial screen1">
+<img src="https://github.com/macjjuni/btc-market-price/assets/38034518/a13a3017-9f07-4bbc-b458-819743a34c27" width="23.5%" alt="btc-price initial screen1">
+<img src="https://github.com/macjjuni/btc-market-price/assets/38034518/9587ad3c-77e0-4cc3-b112-f8b08dc839fc" width="23.5%" alt="btc-price initial screen1">
+<img src="https://github.com/macjjuni/btc-market-price/assets/38034518/bd5f0fa3-e76e-4ac8-8553-028815355b92" width="23.5%" alt="btc-price initial screen1">
 
 <br>
 
-## 🌳 Project Tree
+## ⛏️ 기능
+
+<br>
+
+- [x] 비트코인 시장가 제공(USD, KRW)
+- [x] 환율(USD/KRW), 김치 프리미엄, 크립토 공포&탐욕 지수 제공
+- [x] BTC/KRW, KRW/BTC, BTC/SAT, KRW/SAT 계산기
+
+<br>
+
+## 🪄 시장가 데이터 출처
+
+<br>
+
+- [Upbit API Docs](https://upbit.com/open_api_agreement)
+- [Binance API Docs](https://binance-docs.github.io/apidocs/spot/en/#introduction)
+- [Coin Gecko](https://www.coingecko.com/ko/api/documentation)
+
+<br>
+
+## 🌳 프로젝트 구성
 
 ```
 btc-price
@@ -30,16 +53,16 @@ btc-price
 ├─ .gitignore
 ├─ public
 ├─ src
-│  ├─ assets       (🧱)
-│  ├─ components   (🧩)
-│  ├─ data         (📀)
-│  ├─ layout       (🪟)
-│  ├─ pages        (📄)
-│  ├─ router       (🚦)
-│  ├─ socket       (🔌)
-│  ├─ styles       (💃🏻)
-│  ├─ utils        (🛠️)
-│  ├─ zustand      (⛅️)
+│  ├─ assets       (🧱) - 구성요소 파일 모음
+│  ├─ components   (🧩) - 컴포넌트 모음
+│  ├─ data         (📀) - 기본 데이터 셋 모음
+│  ├─ layout       (🪟) - 레이아웃 컴포넌트
+│  ├─ pages        (📄) - 페이지 정보
+│  ├─ router       (🚦) - 페이지 라우터 정보
+│  ├─ socket       (🔌) - 소켓 함수 모음
+│  ├─ styles       (💃🏻) - 스타일 관련
+│  ├─ utils        (🛠️) - 공통 유틸리티 함수
+│  ├─ zustand      (⛅️) - 전역 스토어
 │  │
 │  ├─ App.tsx
 │  └─ main.tsx
@@ -53,18 +76,6 @@ btc-price
 └─ readme.md
 ```
 
-<br>
-
-## 🪄 Market Price Info
-
-<br>
-
-- [Upbit API Docs](https://upbit.com/open_api_agreement)
-- [Binance API Docs](https://binance-docs.github.io/apidocs/spot/en/#introduction)
-- [Coin Gecko](https://www.coingecko.com/ko/api/documentation)
-
-<br>
-
 ## 🏃🏻‍♂️ Getting Started!
 
 ### Package Install
@@ -75,7 +86,7 @@ or
 npm i
 ```
 
-### Run Develop Server
+### Run Dev Server
 
 ```
 yarn dev
