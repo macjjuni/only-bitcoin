@@ -29,7 +29,6 @@ body {
   background-position: center 66%;
   background-repeat: no-repeat;
   background-attachment: fix;
-  padding: 0 12px;
 }
 
 .main {
@@ -39,10 +38,11 @@ body {
   padding: 0 0 24px !important;
 }
 
-#btc-forever {
+#only-bitcoin {
   position: relative;
   width: 100%;
   min-height: 100dvh;
+  padding: 0 12px;
   margin: 0 auto;
 }
 
@@ -170,6 +170,10 @@ body {
 .fear-greed-img {
   width: 100%;
 }
+.sat-img {
+  border-radius: 50%;
+  overflow: hidden;
+}
 .fear-greed-btn {
   position: relative;
   width: 48px;
@@ -277,7 +281,7 @@ body {
   .main {
     align-items: flex-start;
   }
-  #btc-forever {
+  #only-bitcoin {
     min-height: 100vh;
     min-height: -webkit-fill-available;
     min-height: fill-available;

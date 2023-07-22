@@ -197,7 +197,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
               startAdornment={
                 <InputAdornment position="start">
                   <Stack justifyContent="center" alignItems="center" width="36px">
-                    <FaWonSign size="20" color="#483C32" />
+                    <FaWonSign size="20" color="#828282" />
                   </Stack>
                 </InputAdornment>
               }

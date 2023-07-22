@@ -1,6 +1,6 @@
-import { memo, type Dispatch, type SetStateAction, type MouseEvent, useCallback } from 'react'
+import { memo, type Dispatch, type SetStateAction, type MouseEvent, type ChangeEvent, useCallback } from 'react'
 import { RiCloseCircleLine } from 'react-icons/ri'
-import { DialogTitle, Dialog, Container, Typography, ToggleButtonGroup, ToggleButton, IconButton, Stack } from '@mui/material'
+import { DialogTitle, Dialog, Container, Typography, ToggleButtonGroup, ToggleButton, IconButton, Stack, Switch } from '@mui/material'
 import { useBearStore } from '@/zustand/store'
 import { type MarketType } from '@/zustand/type'
 
@@ -21,7 +21,7 @@ const twoList = [
 ]
 
 const SettingDialog = ({ open, setOpen }: DialogType) => {
-  const { market, setMarket, isEcoSystem, toggleEco, isKimchi, toggleKimchi } = useBearStore((state) => state)
+  const { market, setMarket, isEcoSystem, toggleEco, isKimchi, toggleKimchi, theme, toggleTheme } = useBearStore((state) => state)
 
   const closeDialog = useCallback(() => {
     setOpen(false)
@@ -39,9 +39,12 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
 
   const ecoChange = useCallback((e: MouseEvent<HTMLElement>, flag: boolean) => {
     if (flag === null) return
-
     if (flag) toggleEco(true)
     else toggleEco(false)
+  }, [])
+
+  const onToggleTheme = useCallback(() => {
+    toggleTheme()
   }, [])
 
   return (
@@ -59,6 +62,12 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
         </DialogTitle>
         <Container sx={{ padding: '16px' }}>
           <Stack flexDirection="column" justifyContent="flex-start" gap="8px">
+            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
+              <Typography fontSize={16} fontWeight="bold">
+                🎨 색상
+              </Typography>
+              <Switch checked={theme === 'dark'} onChange={onToggleTheme} />
+            </Stack>
             <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
               <Typography fontSize={16} fontWeight="bold">
                 💵 단위
