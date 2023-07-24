@@ -221,6 +221,9 @@ body {
 .css-1t7y2o5-MuiButtonBase-root-MuiToggleButton-root.Mui-selected {
   background-color: rgba(244, 157, 26, 0.18) !important;
 }
+
+/* ------ Toast CSS ------ */
+
 .Toastify__toast {
   min-height: 56px !important;
 }
@@ -243,6 +246,16 @@ body {
   box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px !important;
   border-radius: 6px !important;
   overflow: hidden !important;
+}
+
+.dark .Toastify__toast {
+  background-color: #474747;
+}
+.dark .Toastify__toast .Toastify__toast-body {
+  color: #e6e6e6;
+}
+.dark .Toastify__toast .Toastify__close-button > svg {
+  color: #fff;
 }
 
 /* MUI Style */

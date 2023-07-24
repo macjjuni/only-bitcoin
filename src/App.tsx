@@ -19,7 +19,7 @@ const App = () => {
   GoogleGA()
   return (
     <ThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
-      <div id="only-bitcoin">
+      <div id="only-bitcoin" className={theme}>
         <CssBaseline />
         <Header />
         <Main>

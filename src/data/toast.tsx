@@ -14,7 +14,7 @@ export const toastProps: () => ToastContainerProps = () => {
     newestOnTop: false,
     closeOnClick: true,
     rtl: false,
-    pauseOnFocusLoss: false,
+    pauseOnFocusLoss: true,
     draggable: true,
     pauseOnHover: false,
     icon: () => <FaBitcoin fontSize={32} color={btcInfo.color} />,
