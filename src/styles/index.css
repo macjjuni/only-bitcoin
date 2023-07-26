@@ -293,6 +293,11 @@ body {
   .main {
     align-items: flex-start;
   }
+
+  .error-page {
+    padding-top: 24px;
+  }
+
   #only-bitcoin {
     min-height: 100vh;
     min-height: -webkit-fill-available;

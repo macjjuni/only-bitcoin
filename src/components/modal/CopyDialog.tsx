@@ -54,7 +54,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
           <Typography component="p" fontSize={14}>
             깃허브:{' '}
             <Link title="GitHub Repository" href="https://github.com/macjjuni/btc-price" target="_blank">
-              Bitcoin Market Price
+              Only Bitcoin Market Price
             </Link>
           </Typography>
           <Typography component="p" fontSize={14}>

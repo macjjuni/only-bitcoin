@@ -1,6 +1,6 @@
 import { FcSettings } from 'react-icons/fc'
 
 const SettingIcon = () => {
-  return <FcSettings fontSize={32} />
+  return <FcSettings fontSize={36} />
 }
 export default SettingIcon
