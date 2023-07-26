@@ -3,7 +3,7 @@ import { AiFillCaretDown } from 'react-icons/ai'
 import { useBearStore } from '@/zustand/store'
 import { IDropDown } from '@/zustand/type'
 
-interface IBoxItem {
+interface ICardItem {
   icon?: JSX.Element
   id?: string
   title?: string
@@ -15,7 +15,7 @@ interface IBoxItem {
 
 const toggleClassName = 'toggle-down'
 
-const BoxItem = ({ id, icon, title, height, noShadow, noBg, children }: IBoxItem) => {
+const CardItem = ({ id, icon, title, height, noShadow, noBg, children }: ICardItem) => {
   const { dropDown, setDropDown } = useBearStore((state) => state)
 
   const toggleDropDown = () => {
@@ -48,4 +48,4 @@ const BoxItem = ({ id, icon, title, height, noShadow, noBg, children }: IBoxItem
     </Card>
   )
 }
-export default BoxItem
+export default CardItem

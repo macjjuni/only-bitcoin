@@ -5,7 +5,7 @@ import { IoLogoUsd } from 'react-icons/io'
 
 import { LottieProps } from 'react-lottie-player'
 import LottieItem from '@/components/LottieItem'
-import BoxItem from '@/components/BoxItem'
+import CardItem from '@/components/CardItem'
 import CountText from '@/components/CountText'
 import Kimchi from './components/Kimchi'
 import NotKeyNotBtc from './components/NotKeyNotBtc'
@@ -38,7 +38,7 @@ const MarketPrice = ({ btc, market, isKimchi, exRate, setExRate }: IMarketPrice)
   }
 
   return (
-    <BoxItem icon={btcInfo.icon(24)} noShadow>
+    <CardItem icon={btcInfo.icon(24)} noShadow>
       <Stack onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px">
         <Stack flexDirection="row" justifyContent="space-between" alignItems="center" pr="8px">
           <LottieItem option={btcOption} animationData={bitcoin} speed={speed + 0.8} />
@@ -62,7 +62,7 @@ const MarketPrice = ({ btc, market, isKimchi, exRate, setExRate }: IMarketPrice)
         </Stack>
         <NotKeyNotBtc />
       </Stack>
-    </BoxItem>
+    </CardItem>
   )
 }
 
