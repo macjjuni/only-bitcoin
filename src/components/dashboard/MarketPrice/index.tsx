@@ -42,7 +42,6 @@ const MarketPrice = ({ btc, market, isKimchi, exRate, setExRate }: IMarketPrice)
       <Stack onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px">
         <Stack flexDirection="row" justifyContent="space-between" alignItems="center" pr="8px">
           <LottieItem option={btcOption} animationData={bitcoin} speed={speed + 0.8} />
-          {/* <LottieItem option={equalOption} animationData={equal} speed={speed + 1} /> */}
 
           <Stack flexDirection="column" justifyContent="flex-end" minWidth="200px" position="relative">
             {isKimchi && <Kimchi btc={btc} exRate={exRate} setExRate={setExRate} />}
