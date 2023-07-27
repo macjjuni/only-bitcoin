@@ -10,14 +10,14 @@ type DialogType = {
 }
 
 const threeList = [
-  { value: 'KRW', width: '44px' },
-  { value: 'USD', width: '44px' },
-  { value: 'KRW/USD', width: '68px' },
+  { value: 'KRW', width: '40px' },
+  { value: 'USD', width: '40px' },
+  { value: 'KRW/USD', width: '64px' },
 ]
 
 const twoList = [
-  { label: '보이기', value: true, width: '86px' },
-  { label: '숨기기', value: false, width: '86px' },
+  { label: '보이기', value: true, width: '80px' },
+  { label: '숨기기', value: false, width: '80px' },
 ]
 
 const SettingDialog = ({ open, setOpen }: DialogType) => {
@@ -64,7 +64,7 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
           <Stack flexDirection="column" justifyContent="flex-start" gap="8px">
             <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
               <Typography fontSize={16} fontWeight="bold">
-                🎨 색상
+                🎨 다크모드
               </Typography>
               <Switch checked={theme === 'dark'} onChange={onToggleTheme} />
             </Stack>
@@ -84,7 +84,7 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
             </Stack>
             <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
               <Typography fontSize={16} fontWeight="bold">
-                🇰🇷 김프
+                🇰🇷 프리미엄
               </Typography>
               <ToggleButtonGroup color="primary" value={isKimchi} exclusive onChange={kimchiChange} aria-label="Platform">
                 {twoList.map((unit) => (

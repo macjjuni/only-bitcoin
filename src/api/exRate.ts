@@ -51,7 +51,7 @@ export const getExRate = async (): Promise<IExRate> => {
 
     const ResponseData = {
       basePrice: basePrice || 0,
-      date: moment(modifiedAt).format('yyyy-MM-DD HH:mm:ss'),
+      date: moment(modifiedAt).format('yyyy.MM.DD HH:mm:ss'),
       provider,
     }
     return ResponseData

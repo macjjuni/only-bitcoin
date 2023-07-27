@@ -22,7 +22,7 @@ const ExRateDialog = ({ open, setOpen, kimpPrice }: DialogType) => {
         <DialogTitle minWidth={340} borderBottom="1px solid #a5a5a5" sx={{ padding: '12px 16px' }}>
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
             <Typography component="p" fontSize={16} fontWeight="bold">
-              김치 프리미엄 정보
+              한국 프리미엄 정보
             </Typography>
             <IconButton onClick={closeDialog} sx={{ padding: '0' }}>
               <RiCloseCircleLine fontSize={24} />
@@ -31,15 +31,15 @@ const ExRateDialog = ({ open, setOpen, kimpPrice }: DialogType) => {
         </DialogTitle>
         <Container sx={{ padding: '16px' }}>
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-            <Typography>김치 프리미엄:</Typography>
+            <Typography>한국 프리미엄</Typography>
             <Typography>{kimpPrice}%</Typography>
           </Stack>
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-            <Typography>환율(USD/KRW):</Typography>
+            <Typography>환율(USD/KRW)</Typography>
             <Typography>{comma(basePrice.toString())}원</Typography>
           </Stack>
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-            <Typography>제공:</Typography>
+            <Typography>제공</Typography>
             <Typography>{provider}</Typography>
           </Stack>
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
