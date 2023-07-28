@@ -9,15 +9,15 @@ type DialogType = {
   setOpen: Dispatch<SetStateAction<boolean>>
 }
 
-const threeList = [
-  { value: 'KRW', width: '40px' },
-  { value: 'USD', width: '40px' },
-  { value: 'KRW/USD', width: '64px' },
+const threeButtons = [
+  { value: 'KRW', width: '36px' },
+  { value: 'USD', width: '36px' },
+  { value: 'KRW/USD', width: '65px' },
 ]
 
-const twoList = [
-  { label: '보이기', value: true, width: '80px' },
-  { label: '숨기기', value: false, width: '80px' },
+const twoButtons = [
+  { label: '보이기', value: true, width: '76px' },
+  { label: '숨기기', value: false, width: '76px' },
 ]
 
 const SettingDialog = ({ open, setOpen }: DialogType) => {
@@ -43,6 +43,11 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
     else toggleEco(false)
   }, [])
 
+  // const onToggleFearGreed = useCallback((e: MouseEvent<HTMLElement>, flag: boolean) => {
+  //   if (flag === null) return
+  //   setFearGreed(flag)
+  // }, [])
+
   const onToggleTheme = useCallback(() => {
     toggleTheme()
   }, [])
@@ -50,7 +55,7 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
   return (
     <>
       <Dialog onClose={closeDialog} open={open} className="mui-dialog">
-        <DialogTitle minWidth={340} borderBottom="1px solid #a5a5a5" sx={{ padding: '12px 16px' }}>
+        <DialogTitle width="100%" minWidth={356} borderBottom="1px solid #a5a5a5" sx={{ padding: '12px 16px' }}>
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
             <Typography component="p" fontSize={16} fontWeight="bold">
               설정
@@ -73,7 +78,7 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
                 💵 단위
               </Typography>
               <ToggleButtonGroup color="primary" value={market} exclusive onChange={marketChange} aria-label="Platform">
-                {threeList.map((unit) => (
+                {threeButtons.map((unit) => (
                   <ToggleButton key={unit.value} value={unit.value} size="small">
                     <Typography fontSize={14} fontWeight="bold" width={unit.width}>
                       {unit.value}
@@ -87,7 +92,7 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
                 🇰🇷 프리미엄
               </Typography>
               <ToggleButtonGroup color="primary" value={isKimchi} exclusive onChange={kimchiChange} aria-label="Platform">
-                {twoList.map((unit) => (
+                {twoButtons.map((unit) => (
                   <ToggleButton key={unit.label} value={unit.value} size="small">
                     <Typography fontSize={14} fontWeight="bold" width={unit.width}>
                       {unit.label}
@@ -101,7 +106,7 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
                 🦐 생태계
               </Typography>
               <ToggleButtonGroup color="primary" value={isEcoSystem} exclusive onChange={ecoChange} aria-label="Platform">
-                {twoList.map((eco) => (
+                {twoButtons.map((eco) => (
                   <ToggleButton key={eco.label} value={eco.value} size="small">
                     <Typography fontSize={14} fontWeight="bold" width={eco.width}>
                       {eco.label}
@@ -110,6 +115,20 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
                 ))}
               </ToggleButtonGroup>
             </Stack>
+            {/* <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
+              <Typography fontSize={16} fontWeight="bold">
+                😱 공포 탐욕지수
+              </Typography>
+              <ToggleButtonGroup color="primary" value={isFearGreed} exclusive onChange={onToggleFearGreed} aria-label="Platform">
+                {twoButtons.map((eco) => (
+                  <ToggleButton key={eco.label} value={eco.value} size="small">
+                    <Typography fontSize={14} fontWeight="bold" width={eco.width}>
+                      {eco.value ? '사진' : '텍스트'}
+                    </Typography>
+                  </ToggleButton>
+                ))}
+              </ToggleButtonGroup>
+            </Stack> */}
           </Stack>
         </Container>
       </Dialog>
