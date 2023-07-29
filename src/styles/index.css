@@ -143,7 +143,7 @@ body {
 .box-item {
   width: 100%;
   max-width: 400px;
-  min-width: 360px;
+  min-width: 340px;
   height: 300px;
   padding: 8px;
   margin: 0 auto;
