@@ -22,6 +22,7 @@ const twoButtons = [
 
 const SettingDialog = ({ open, setOpen }: DialogType) => {
   const { market, setMarket, isEcoSystem, toggleEco, isKimchi, toggleKimchi, theme, toggleTheme } = useBearStore((state) => state)
+  // isFearGreed, setFearGreed
 
   const closeDialog = useCallback(() => {
     setOpen(false)

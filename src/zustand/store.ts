@@ -12,7 +12,7 @@ interface BearState {
   amount: string // BTC 개수 Input 값
   isKimchi: boolean // 김치 프리미엄 표시 여부
   isEcoSystem: boolean // 비트코인 생태계 표시 여부
-  // isFearGreed: boolean // 공포 탐욕 지수 표시 방법 true(사진), false(텍스트)
+  isFearGreed: boolean // 공포 탐욕 지수 표시 방법 true(사진), false(텍스트)
   theme: 'dark' | 'light'
   updateKRW: (by: IUpdateKRW) => void
   updateUSD: (by: IUpdateUSD) => void
@@ -23,7 +23,7 @@ interface BearState {
   setAmount: (by: string) => void
   toggleKimchi: (flag: boolean) => void
   toggleEco: (flag: boolean) => void
-  // setFearGreed: (bool: boolean) => void
+  setFearGreed: (bool: boolean) => void
   toggleTheme: () => void
 }
 
@@ -57,8 +57,7 @@ export const useBearStore = create<BearState>()(
       isKimchi: true,
       isEcoSystem: false,
       isSetting: false,
-      // isFearGreed: true,
-      // theme: 'light',
+      isFearGreed: true,
       setAmount: (price) => set(() => ({ amount: price })),
       updateKRW: (krw) =>
         set((state) => ({
@@ -76,7 +75,7 @@ export const useBearStore = create<BearState>()(
       toggleKimchi: (flag) => set(() => ({ isKimchi: flag })),
       toggleEco: (flag) => set(() => ({ isEcoSystem: flag })),
       setExRate: (exRate) => set(() => ({ exRate })),
-      // setFearGreed: (flag) => set(() => ({ isFearGreed: flag })),
+      setFearGreed: (flag) => set(() => ({ isFearGreed: flag })),
       toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
     }),
     { name: 'bear-storage' } // persist key
