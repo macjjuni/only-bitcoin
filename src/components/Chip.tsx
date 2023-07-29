@@ -1,7 +1,10 @@
 import { useMemo } from 'react'
-import { Stack, Chip } from '@mui/material'
+import { Stack, Chip, useMediaQuery } from '@mui/material'
+import { responsive } from '@/styles/style'
 
 const ChipItem = ({ label, value }: { label: string; value: string }) => {
+  const isSmall = useMediaQuery(`(max-width: ${responsive.mobile}px)`)
+
   const generateLabel = useMemo(() => {
     return (
       <Stack flexDirection="row" gap="5px">
@@ -13,7 +16,7 @@ const ChipItem = ({ label, value }: { label: string; value: string }) => {
     )
   }, [value])
 
-  return <Chip className="chip-txt" label={generateLabel} variant="outlined" size="small" sx={{ borderRadius: 0 }} />
+  return <Chip className="chip-txt" label={generateLabel} variant="outlined" size={isSmall ? 'small' : 'medium'} sx={{ borderRadius: 0 }} />
 }
 
 export default ChipItem

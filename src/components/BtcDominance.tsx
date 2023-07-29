@@ -7,8 +7,8 @@ import { useBearStore } from '@/zustand/store'
 import { getCurrencies } from '@/api/dominance'
 import { getDominace, getNowDate, valueCheck } from '@/utils/common'
 
-const limitMins = 10 // 분
-const intervalTime = 180000 // Interval Time
+const limitMins = 10 // 분(min)
+const intervalTime = 300000 // Interval Time(ms): 5분
 
 const BtcDominance = () => {
   const timerRef = useRef<NodeJS.Timer | null>()

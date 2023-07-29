@@ -38,7 +38,7 @@ const MarketPrice = ({ btc, market, isKimchi, exRate, setExRate }: IMarketPrice)
   }
 
   return (
-    <CardItem icon={btcInfo.icon(24)} noShadow>
+    <CardItem icon={btcInfo.icon(24)} noShadow noBg>
       <Stack onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px">
         <Stack flexDirection="row" justifyContent="space-between" alignItems="center" pr="8px">
           <LottieItem option={btcOption} animationData={bitcoin} speed={speed + 0.8} />

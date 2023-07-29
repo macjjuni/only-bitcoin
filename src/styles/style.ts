@@ -3,3 +3,7 @@ export const layout = {
   main: 104,
   footer: 56,
 }
+
+export const responsive = {
+  mobile: 600,
+}
