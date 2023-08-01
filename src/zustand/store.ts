@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import { type IBtc, IDominance, MarketType, IExRate, IUpdateKRW, IUpdateUSD, IUpdateDominance, IDropDown } from '@/zustand/type'
+import { type IBtc, IDominance, MarketType, IExRate, IUpdateKRW, IUpdateUSD, IUpdateDominance, IDropDown, IfearGreed } from '@/zustand/type'
 
 interface BearState {
   btc: IBtc // BTC 시세 정보
@@ -13,6 +13,7 @@ interface BearState {
   isKimchi: boolean // 김치 프리미엄 표시 여부
   isEcoSystem: boolean // 비트코인 생태계 표시 여부
   isFearGreed: boolean // 공포 탐욕 지수 표시 방법 true(사진), false(텍스트)
+  fearGreed: IfearGreed
   theme: 'dark' | 'light'
   updateKRW: (by: IUpdateKRW) => void
   updateUSD: (by: IUpdateUSD) => void
@@ -24,6 +25,7 @@ interface BearState {
   toggleKimchi: (flag: boolean) => void
   toggleEco: (flag: boolean) => void
   setFearGreed: (bool: boolean) => void
+  updateFearGreed: (data: IfearGreed) => void
   toggleTheme: () => void
 }
 
@@ -42,6 +44,10 @@ export const useBearStore = create<BearState>()(
         usdColor: true,
       },
       dominance: {
+        value: '',
+        date: '',
+      },
+      fearGreed: {
         value: '',
         date: '',
       },
@@ -76,6 +82,7 @@ export const useBearStore = create<BearState>()(
       toggleEco: (flag) => set(() => ({ isEcoSystem: flag })),
       setExRate: (exRate) => set(() => ({ exRate })),
       setFearGreed: (flag) => set(() => ({ isFearGreed: flag })),
+      updateFearGreed: (data) => set(() => ({ fearGreed: data })),
       toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
     }),
     { name: 'bear-storage' } // persist key

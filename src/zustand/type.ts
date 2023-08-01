@@ -12,6 +12,11 @@ export interface IDominance {
   date: string
 }
 
+export interface IfearGreed {
+  value: string
+  date: string
+}
+
 export interface IUpdateKRW {
   krw: number
   krwDate: string

@@ -21,8 +21,7 @@ const twoButtons = [
 ]
 
 const SettingDialog = ({ open, setOpen }: DialogType) => {
-  const { market, setMarket, isEcoSystem, toggleEco, isKimchi, toggleKimchi, theme, toggleTheme } = useBearStore((state) => state)
-  // isFearGreed, setFearGreed
+  const { market, setMarket, isEcoSystem, toggleEco, isKimchi, toggleKimchi, theme, toggleTheme, isFearGreed, setFearGreed } = useBearStore((state) => state)
 
   const closeDialog = useCallback(() => {
     setOpen(false)
@@ -44,10 +43,10 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
     else toggleEco(false)
   }, [])
 
-  // const onToggleFearGreed = useCallback((e: MouseEvent<HTMLElement>, flag: boolean) => {
-  //   if (flag === null) return
-  //   setFearGreed(flag)
-  // }, [])
+  const onToggleFearGreed = useCallback((e: MouseEvent<HTMLElement>, flag: boolean) => {
+    if (flag === null) return
+    setFearGreed(flag)
+  }, [])
 
   const onToggleTheme = useCallback(() => {
     toggleTheme()
@@ -116,7 +115,7 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
                 ))}
               </ToggleButtonGroup>
             </Stack>
-            {/* <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
+            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
               <Typography fontSize={16} fontWeight="bold">
                 😱 공포 탐욕지수
               </Typography>
@@ -129,7 +128,7 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
                   </ToggleButton>
                 ))}
               </ToggleButtonGroup>
-            </Stack> */}
+            </Stack>
           </Stack>
         </Container>
       </Dialog>
