@@ -21,7 +21,7 @@ const twoButtons = [
 ]
 
 const SettingDialog = ({ open, setOpen }: DialogType) => {
-  const { market, setMarket, isEcoSystem, toggleEco, isKimchi, toggleKimchi, theme, toggleTheme, isFearGreed, setFearGreed } = useBearStore((state) => state)
+  const { market, setMarket, isEcoSystem, toggleEco, isKimchi, toggleKimchi, theme, toggleTheme } = useBearStore((state) => state)
 
   const closeDialog = useCallback(() => {
     setOpen(false)
@@ -41,11 +41,6 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
     if (flag === null) return
     if (flag) toggleEco(true)
     else toggleEco(false)
-  }, [])
-
-  const onToggleFearGreed = useCallback((e: MouseEvent<HTMLElement>, flag: boolean) => {
-    if (flag === null) return
-    setFearGreed(flag)
   }, [])
 
   const onToggleTheme = useCallback(() => {
@@ -110,20 +105,6 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
                   <ToggleButton key={eco.label} value={eco.value} size="small">
                     <Typography fontSize={14} fontWeight="bold" width={eco.width}>
                       {eco.label}
-                    </Typography>
-                  </ToggleButton>
-                ))}
-              </ToggleButtonGroup>
-            </Stack>
-            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-              <Typography fontSize={16} fontWeight="bold">
-                😱 공포 탐욕지수
-              </Typography>
-              <ToggleButtonGroup color="primary" value={isFearGreed} exclusive onChange={onToggleFearGreed} aria-label="Platform">
-                {twoButtons.map((eco) => (
-                  <ToggleButton key={eco.label} value={eco.value} size="small">
-                    <Typography fontSize={14} fontWeight="bold" width={eco.width}>
-                      {eco.value ? '사진' : '텍스트'}
                     </Typography>
                   </ToggleButton>
                 ))}

@@ -173,21 +173,6 @@ body {
   border-radius: 50%;
   overflow: hidden;
 }
-.fear-greed-btn {
-  position: relative;
-  width: 48px;
-  height: 36px;
-  border-radius: 4px;
-  outline: none;
-  user-select: none;
-}
-
-.fear-greed-lottie {
-  position: absolute;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-}
 
 @keyframes done {
   0% {
