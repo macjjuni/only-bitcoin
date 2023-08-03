@@ -2,7 +2,13 @@ import { useMemo } from 'react'
 import { Stack, Chip, useMediaQuery } from '@mui/material'
 import { responsive } from '@/styles/style'
 
-const ChipItem = ({ label, value, onClick }: { label: string; value: string; onClick: () => void }) => {
+interface IChip {
+  label: string
+  value: string
+  onClick?: () => void
+}
+
+const ChipItem = ({ label, value, onClick }: IChip) => {
   const isSmall = useMediaQuery(`(max-width: ${responsive.mobile}px)`)
 
   const generateLabel = useMemo(() => {
