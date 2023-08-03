@@ -17,7 +17,7 @@ const limitMins = 10 // 분(min)
 const intervalTime = 300000 // Interval Time(ms): 5분
 
 const FearGreed = () => {
-  const timerRef = useRef<NodeJS.Timer | null>()
+  const timerRef = useRef<NodeJS.Timer | null>(null)
   const { isFearGreed, fearGreed, updateFearGreed } = useBearStore((state) => state)
   const [isModal, setModal] = useState(false)
 
@@ -44,8 +44,6 @@ const FearGreed = () => {
     if (!valCheck) updateFGIndex()
     else {
       const minDiff = Math.floor(moment.duration(moment().diff(fearGreed.date)).asMinutes())
-      console.log(minDiff)
-
       if (minDiff > limitMins) updateFGIndex() // 10분 이후면 업데이트
     }
   }
@@ -54,10 +52,9 @@ const FearGreed = () => {
     updateCheck()
     intervalRun(updateCheck)
     return () => {
-      if (timerRef.current !== null) {
-        clearInterval(timerRef.current)
-        timerRef.current = null
-      }
+      if (timerRef.current === null) return
+      clearInterval(timerRef.current)
+      timerRef.current = null
     }
   }, [])
 
