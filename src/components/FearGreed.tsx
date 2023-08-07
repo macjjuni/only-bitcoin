@@ -33,7 +33,7 @@ const FearGreed = () => {
   // 업데이트 시간 체크해서 업데이트 실행
   const updateCheck = () => {
     const minDiff = Math.floor(moment.duration(moment().diff(fearGreed.date)).asMinutes())
-    if (minDiff > limitMins) updateFGIndex() // 10분 이후면 업데이트
+    if (Number.isNaN(minDiff) || minDiff > limitMins) updateFGIndex() // 10분 이후면 업데이트
   }
 
   useEffect(() => {
