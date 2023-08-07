@@ -4,10 +4,8 @@ import { ICurrency } from '@/api/dominance'
 
 /* ---------- 값 체크 ---------- */
 export const valueCheck = (val?: string | number | null | object) => {
-  const valType = typeof val
-  if (val === null || valType === 'undefined') return false
+  if (val === null || val === undefined || val === '') return false
   else {
-    if (val === '') return false
     return true
   }
 }

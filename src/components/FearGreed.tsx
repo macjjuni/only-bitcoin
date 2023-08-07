@@ -4,7 +4,6 @@ import FearGreedDialog from '@/components/modal/FearGreedDialog'
 import { useBearStore } from '@/zustand/store'
 import ChipItem from './Chip'
 import { getFearGreed } from '@/api/fearGreed'
-import { valueCheck } from '@/utils/common'
 
 const limitMins = 10 // 분(min)
 const intervalTime = 300000 // Interval Time(ms): 5분
@@ -33,12 +32,8 @@ const FearGreed = () => {
 
   // 업데이트 시간 체크해서 업데이트 실행
   const updateCheck = () => {
-    const valCheck = valueCheck(fearGreed.value)
-    if (!valCheck) updateFGIndex()
-    else {
-      const minDiff = Math.floor(moment.duration(moment().diff(fearGreed.date)).asMinutes())
-      if (minDiff > limitMins) updateFGIndex() // 10분 이후면 업데이트
-    }
+    const minDiff = Math.floor(moment.duration(moment().diff(fearGreed.date)).asMinutes())
+    if (minDiff > limitMins) updateFGIndex() // 10분 이후면 업데이트
   }
 
   useEffect(() => {
