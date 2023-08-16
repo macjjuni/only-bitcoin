@@ -50,7 +50,7 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
   return (
     <>
       <Dialog onClose={closeDialog} open={open} className="mui-dialog">
-        <DialogTitle width="100%" minWidth={356} borderBottom="1px solid #a5a5a5" sx={{ padding: '12px 16px' }}>
+        <DialogTitle width="100%" minWidth={340} borderBottom="1px solid #a5a5a5" sx={{ padding: '12px 16px' }}>
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
             <Typography component="p" fontSize={16} fontWeight="bold">
               설정
