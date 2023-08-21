@@ -7,9 +7,10 @@ interface ICount {
   duration: number
   percent?: boolean
   decimals?: number
+  isAnime: boolean
 }
 
-const CountText = ({ text, className, duration = 1, percent, decimals }: ICount) => {
+const CountText = ({ text, className, duration = 1, percent, decimals, isAnime }: ICount) => {
   // 카운트다운 애니메이션 최소값
   const convertToZero = useCallback((num: number) => {
     const firstDigit = Math.floor(num / 10 ** Math.floor(Math.log10(num)))
@@ -17,9 +18,15 @@ const CountText = ({ text, className, duration = 1, percent, decimals }: ICount)
     return convertedNumber
   }, [])
 
+  const getStartText = () => {
+    if (!isAnime) return text
+    if (!percent) return convertToZero(text)
+    return 0
+  }
+
   return (
     <>
-      <CountUp className={className} start={!percent ? convertToZero(text) : 0} end={text} decimals={decimals} duration={duration} />
+      <CountUp className={className} start={getStartText()} end={text} decimals={decimals} duration={isAnime ? duration : 0} />
       {percent && <h4 className={className}>%</h4>}
     </>
   )

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { Stack } from '@mui/material'
 import { FaWonSign } from 'react-icons/fa'
 import { IoLogoUsd } from 'react-icons/io'
@@ -10,6 +10,7 @@ import CountText from '@/components/CountText'
 import Kimchi from './components/Kimchi'
 import NotKeyNotBtc from './components/NotKeyNotBtc'
 import { btcInfo } from '@/data/btcInfo'
+import { useBearStore } from '@/zustand/store'
 
 import { type IBtc, type MarketType, type IExRate } from '@/zustand/type'
 
@@ -29,6 +30,7 @@ interface IMarketPrice {
 }
 
 const MarketPrice = ({ btc, market, isKimchi, exRate, setExRate }: IMarketPrice) => {
+  const { isCountAnime, isCountColor } = useBearStore((state) => state)
   const [speed, setSpeed] = useState(1)
   const mouseEnter = () => {
     setSpeed(2)
@@ -37,6 +39,15 @@ const MarketPrice = ({ btc, market, isKimchi, exRate, setExRate }: IMarketPrice)
     setSpeed(1)
   }
 
+  const getColor = useCallback(
+    (color: boolean) => {
+      if (!isCountColor) return ''
+      if (color) return 'up'
+      return 'down'
+    },
+    [isCountColor]
+  )
+
   return (
     <CardItem icon={btcInfo.icon(24)} noShadow noBg>
       <Stack onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px">
@@ -44,17 +55,17 @@ const MarketPrice = ({ btc, market, isKimchi, exRate, setExRate }: IMarketPrice)
           <LottieItem option={btcOption} animationData={bitcoin} speed={speed + 0.8} />
 
           <Stack flexDirection="column" justifyContent="flex-end" minWidth="200px" position="relative">
-            {isKimchi && <Kimchi btc={btc} exRate={exRate} setExRate={setExRate} />}
+            {isKimchi && <Kimchi btc={btc} exRate={exRate} setExRate={setExRate} isAnime={isCountAnime} />}
             {market?.includes('KRW') && (
-              <Stack className={`${btc.krwColor ? 'up' : 'down'}`} flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
+              <Stack className={getColor(btc.krwColor)} flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
                 <FaWonSign fontSize={26} />
-                <CountText className="price-txt-lg" text={btc.krw} duration={0.3} />
+                <CountText className="price-txt-lg" text={btc.krw} duration={0.3} isAnime={isCountAnime} />
               </Stack>
             )}
             {market?.includes('USD') && (
-              <Stack className={`${btc.usdColor ? 'up' : 'down'}`} flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
+              <Stack className={getColor(btc.usdColor)} flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
                 <IoLogoUsd fontSize={27} style={{ marginRight: '-4px' }} />
-                <CountText className="price-txt-lg" text={btc.usd} duration={0.3} />
+                <CountText className="price-txt-lg" text={btc.usd} duration={0.3} isAnime={isCountAnime} />
               </Stack>
             )}
           </Stack>

@@ -52,19 +52,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
           </Stack>
 
           <Typography component="p" fontSize={14}>
-            깃허브:{' '}
-            <Link title="GitHub Repository" href="https://github.com/macjjuni/btc-price" target="_blank">
-              Only Bitcoin Market Price
-            </Link>
-          </Typography>
-          <Typography component="p" fontSize={14}>
-            피드백:{' '}
-            <Link href={feedbackUrl || '/'} target="_blank" title="Twitter url">
-              Twitter
-            </Link>
-          </Typography>
-          <Typography component="p" fontSize={14}>
-            시시 정보:{' '}
+            시세 정보:{' '}
             <Link href="https://docs.upbit.com/docs/upbit-quotation-websocket" target="_blank" title="Upbit API Docs">
               Upbit
             </Link>{' '}
@@ -74,21 +62,15 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
             </Link>
           </Typography>
           <Typography component="p" fontSize={14}>
-            애니메이션:
-            <Link href="https://lottiefiles.com/" target="_blank" title="LottieFiles">
-              LottieFiles
+            피드백:{' '}
+            <Link href={feedbackUrl || '/'} target="_blank" title="Twitter url">
+              Twitter
             </Link>
           </Typography>
           <Typography component="p" fontSize={14}>
-            아이콘:{' '}
-            <Link href="https://react-icons.github.io/react-icons/" target="_blank" title="react-icon">
-              React-Icon
-            </Link>
-          </Typography>
-          <Typography component="p" fontSize={14}>
-            파비콘:{' '}
-            <Link href="https://www.flaticon.com/free-icons/bitcoin" target="_blank" title="bitcoin icons">
-              Freepik - Flaticon
+            깃허브:{' '}
+            <Link title="GitHub Repository" href="https://github.com/macjjuni/btc-price" target="_blank">
+              Only Bitcoin Market Price
             </Link>
           </Typography>
         </Container>

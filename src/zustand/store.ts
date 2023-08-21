@@ -12,6 +12,8 @@ interface BearState {
   amount: string // BTC 개수 Input 값
   isKimchi: boolean // 김치 프리미엄 표시 여부
   isEcoSystem: boolean // 비트코인 생태계 표시 여부
+  isCountAnime: boolean // 가격 변동 애니메이션 효과 여부
+  isCountColor: boolean
   fearGreed: IfearGreed
   theme: 'dark' | 'light'
   updateKRW: (by: IUpdateKRW) => void
@@ -21,10 +23,12 @@ interface BearState {
   setExRate: (exRate: IExRate) => void
   setDropDown: (bool: { [index: string]: boolean }) => void
   setAmount: (by: string) => void
-  toggleKimchi: (flag: boolean) => void
-  toggleEco: (flag: boolean) => void
+  toggleKimchi: () => void
+  toggleEco: () => void
   updateFearGreed: (data: IfearGreed) => void
   toggleTheme: () => void
+  toggleCountAnime: () => void
+  toggleCountColor: () => void
 }
 
 export const useBearStore = create<BearState>()(
@@ -61,6 +65,8 @@ export const useBearStore = create<BearState>()(
       isKimchi: true,
       isEcoSystem: false,
       isSetting: false,
+      isCountAnime: true,
+      isCountColor: true,
       setAmount: (price) => set(() => ({ amount: price })),
       updateKRW: (krw) =>
         set((state) => ({
@@ -75,11 +81,13 @@ export const useBearStore = create<BearState>()(
           dominance,
         })),
       setDropDown: (bool) => set(() => ({ dropDown: { ...bool } })), // 확정성 필요
-      toggleKimchi: (flag) => set(() => ({ isKimchi: flag })),
-      toggleEco: (flag) => set(() => ({ isEcoSystem: flag })),
+      toggleKimchi: () => set((state) => ({ isKimchi: !state.isKimchi })),
+      toggleEco: () => set((state) => ({ isEcoSystem: !state.isEcoSystem })),
       setExRate: (exRate) => set(() => ({ exRate })),
       updateFearGreed: (data) => set(() => ({ fearGreed: data })),
       toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
+      toggleCountAnime: () => set((state) => ({ isCountAnime: !state.isCountAnime })),
+      toggleCountColor: () => set((state) => ({ isCountColor: !state.isCountColor })),
     }),
     { name: 'bear-storage' } // persist key
   )

@@ -15,13 +15,8 @@ const threeButtons = [
   { value: 'KRW/USD', width: '65px' },
 ]
 
-const twoButtons = [
-  { label: '보이기', value: true, width: '76px' },
-  { label: '숨기기', value: false, width: '76px' },
-]
-
 const SettingDialog = ({ open, setOpen }: DialogType) => {
-  const { market, setMarket, isEcoSystem, toggleEco, isKimchi, toggleKimchi, theme, toggleTheme } = useBearStore((state) => state)
+  const { market, setMarket, isEcoSystem, toggleEco, isKimchi, toggleKimchi, theme, toggleTheme, isCountAnime, toggleCountAnime, isCountColor, toggleCountColor } = useBearStore((state) => state)
 
   const closeDialog = useCallback(() => {
     setOpen(false)
@@ -32,19 +27,24 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
     setMarket(selectMarket)
   }, [])
 
-  const kimchiChange = useCallback((e: MouseEvent<HTMLElement>, flag: boolean) => {
-    if (flag === null) return
-    toggleKimchi(flag)
+  const onToggleKimchi = useCallback(() => {
+    toggleKimchi()
   }, [])
 
-  const ecoChange = useCallback((e: MouseEvent<HTMLElement>, flag: boolean) => {
-    if (flag === null) return
-    if (flag) toggleEco(true)
-    else toggleEco(false)
+  const onToggleEco = useCallback(() => {
+    toggleEco()
+  }, [])
+
+  const onToggleAnime = useCallback(() => {
+    toggleCountAnime()
   }, [])
 
   const onToggleTheme = useCallback(() => {
     toggleTheme()
+  }, [])
+
+  const onToggleCountColor = useCallback(() => {
+    toggleCountColor()
   }, [])
 
   return (
@@ -64,12 +64,6 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
           <Stack flexDirection="column" justifyContent="flex-start" gap="8px">
             <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
               <Typography fontSize={16} fontWeight="bold">
-                🎨 다크모드
-              </Typography>
-              <Switch checked={theme === 'dark'} onChange={onToggleTheme} />
-            </Stack>
-            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-              <Typography fontSize={16} fontWeight="bold">
                 💵 단위
               </Typography>
               <ToggleButtonGroup color="primary" value={market} exclusive onChange={marketChange} aria-label="Platform">
@@ -84,31 +78,33 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
             </Stack>
             <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
               <Typography fontSize={16} fontWeight="bold">
-                🇰🇷 프리미엄
+                🎨 다크모드
               </Typography>
-              <ToggleButtonGroup color="primary" value={isKimchi} exclusive onChange={kimchiChange} aria-label="Platform">
-                {twoButtons.map((unit) => (
-                  <ToggleButton key={unit.label} value={unit.value} size="small">
-                    <Typography fontSize={14} fontWeight="bold" width={unit.width}>
-                      {unit.label}
-                    </Typography>
-                  </ToggleButton>
-                ))}
-              </ToggleButtonGroup>
+              <Switch checked={theme === 'dark'} onChange={onToggleTheme} />
             </Stack>
             <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
               <Typography fontSize={16} fontWeight="bold">
-                🦐 생태계
+                🇰🇷 프리미엄 정보
               </Typography>
-              <ToggleButtonGroup color="primary" value={isEcoSystem} exclusive onChange={ecoChange} aria-label="Platform">
-                {twoButtons.map((eco) => (
-                  <ToggleButton key={eco.label} value={eco.value} size="small">
-                    <Typography fontSize={14} fontWeight="bold" width={eco.width}>
-                      {eco.label}
-                    </Typography>
-                  </ToggleButton>
-                ))}
-              </ToggleButtonGroup>
+              <Switch checked={isKimchi} onChange={onToggleKimchi} />
+            </Stack>
+            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
+              <Typography fontSize={16} fontWeight="bold">
+                🦐 생태계 표시
+              </Typography>
+              <Switch checked={isEcoSystem} onChange={onToggleEco} />
+            </Stack>
+            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
+              <Typography fontSize={16} fontWeight="bold">
+                🕺🏻 카운트 애니메이션
+              </Typography>
+              <Switch checked={isCountAnime} onChange={onToggleAnime} />
+            </Stack>
+            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
+              <Typography fontSize={16} fontWeight="bold">
+                🌈 가격 변동 색상
+              </Typography>
+              <Switch checked={isCountColor} onChange={onToggleCountColor} />
             </Stack>
           </Stack>
         </Container>

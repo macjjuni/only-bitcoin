@@ -11,10 +11,11 @@ import { type IExRate, type IBtc } from '@/zustand/type'
 interface IKimchi {
   btc: IBtc
   exRate: IExRate
+  isAnime: boolean
   setExRate: (exRate: IExRate) => void
 }
 
-const Kimchi = ({ btc, exRate, setExRate }: IKimchi) => {
+const Kimchi = ({ btc, exRate, setExRate, isAnime }: IKimchi) => {
   const [isEx, setEx] = useState(false)
 
   const showDialog = useCallback(() => {
@@ -51,7 +52,7 @@ const Kimchi = ({ btc, exRate, setExRate }: IKimchi) => {
         sx={{ cursor: 'pointer' }}
       >
         <TbSquareRoundedLetterK fontSize={22} />
-        <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="price-txt-sm kimchi" duration={0.3} percent decimals={2} />
+        <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="price-txt-sm kimchi" duration={0.3} percent decimals={2} isAnime={isAnime} />
       </Box>
       <ExRateDialog open={isEx} setOpen={setEx} kimpPrice={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} />
     </>
