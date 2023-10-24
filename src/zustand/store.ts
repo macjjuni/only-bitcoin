@@ -16,6 +16,7 @@ interface BearState {
   isCountColor: boolean
   fearGreed: IfearGreed
   theme: 'dark' | 'light'
+  isLottiePlay: boolean
   updateKRW: (by: IUpdateKRW) => void
   updateUSD: (by: IUpdateUSD) => void
   updateDoimnance: (by: IUpdateDominance) => void
@@ -29,6 +30,7 @@ interface BearState {
   toggleTheme: () => void
   toggleCountAnime: () => void
   toggleCountColor: () => void
+  toggleLottie: () => void
 }
 
 export const useBearStore = create<BearState>()(
@@ -67,6 +69,7 @@ export const useBearStore = create<BearState>()(
       isSetting: false,
       isCountAnime: true,
       isCountColor: true,
+      isLottiePlay: true,
       setAmount: (price) => set(() => ({ amount: price })),
       updateKRW: (krw) =>
         set((state) => ({
@@ -88,6 +91,7 @@ export const useBearStore = create<BearState>()(
       toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
       toggleCountAnime: () => set((state) => ({ isCountAnime: !state.isCountAnime })),
       toggleCountColor: () => set((state) => ({ isCountColor: !state.isCountColor })),
+      toggleLottie: () => set((state) => ({ isLottiePlay: !state.isLottiePlay })),
     }),
     { name: 'bear-storage' } // persist key
   )

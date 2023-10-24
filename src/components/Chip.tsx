@@ -1,9 +1,9 @@
-import { useMemo } from 'react'
+import React, { useMemo } from 'react'
 import { Stack, Chip, useMediaQuery } from '@mui/material'
 import { responsive } from '@/styles/style'
 
 interface IChip {
-  label: string
+  label: string | React.ReactNode
   value: string
   onClick?: () => void
 }
@@ -14,7 +14,7 @@ const ChipItem = ({ label, value, onClick }: IChip) => {
   const generateLabel = useMemo(() => {
     return (
       <Stack flexDirection="row" gap="5px" onClick={onClick} sx={{ cursor: 'pointer' }}>
-        <span>{label}</span>
+        <span className="fcc">{label}</span>
         <span style={{ textShadow: '1px 1px 1px #d0d0d0' }}>{value}</span>
       </Stack>
     )

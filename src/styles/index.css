@@ -61,6 +61,13 @@ body {
   user-select: none;
 }
 
+.fcc {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 2px;
+}
+
 .chip-txt {
   color: #1e2329;
 }

@@ -41,7 +41,7 @@ const Kimchi = ({ btc, exRate, setExRate, isAnime }: IKimchi) => {
       <Box
         onClick={showDialog}
         position="absolute"
-        top="-24px"
+        top="-28px"
         right="0px"
         display="flex"
         flexDirection="row"

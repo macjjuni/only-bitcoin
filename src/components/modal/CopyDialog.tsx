@@ -21,7 +21,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
         <DialogTitle minWidth={340} borderBottom="1px solid #a5a5a5" sx={{ padding: '12px 16px' }}>
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
             <Typography component="p" fontSize={16} fontWeight="bold">
-              ₿itcoin Market Price
+              Only ₿itcoin Market Price
             </Typography>
             <IconButton onClick={closeDialog} sx={{ padding: '0' }}>
               <RiCloseCircleLine fontSize={24} />
