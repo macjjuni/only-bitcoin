@@ -5,11 +5,9 @@ import { IoLogoUsd } from 'react-icons/io'
 
 import { LottieProps } from 'react-lottie-player'
 import LottieItem from '@/components/LottieItem'
-import CardItem from '@/components/CardItem'
 import CountText from '@/components/CountText'
 import Kimchi from './components/Kimchi'
 import NotKeyNotBtc from './components/NotKeyNotBtc'
-import { btcInfo } from '@/data/btcInfo'
 import { useBearStore } from '@/zustand/store'
 
 import { type IBtc, type MarketType, type IExRate } from '@/zustand/type'
@@ -49,30 +47,28 @@ const MarketPrice = ({ btc, market, isKimchi, exRate, setExRate }: IMarketPrice)
   )
 
   return (
-    <CardItem icon={btcInfo.icon(24)} noShadow noBg>
-      <Stack onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px">
-        <Stack flexDirection="row" justifyContent="space-between" alignItems="center" pr="8px">
-          <LottieItem option={btcOption} animationData={bitcoin} speed={speed + 0.8} />
+    <Stack className="box-item" onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px">
+      <Stack flexDirection="row" justifyContent="space-between" alignItems="center" pr="8px">
+        <LottieItem option={btcOption} animationData={bitcoin} speed={speed + 0.8} />
 
-          <Stack flexDirection="column" justifyContent="flex-end" minWidth="200px" position="relative">
-            {isKimchi && <Kimchi btc={btc} exRate={exRate} setExRate={setExRate} isAnime={isCountAnime} />}
-            {market?.includes('KRW') && (
-              <Stack className={getColor(btc.krwColor)} flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
-                <FaWonSign fontSize={26} />
-                <CountText className="price-txt-lg" text={btc.krw} duration={0.3} isAnime={isCountAnime} />
-              </Stack>
-            )}
-            {market?.includes('USD') && (
-              <Stack className={getColor(btc.usdColor)} flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
-                <IoLogoUsd fontSize={27} style={{ marginRight: '-4px' }} />
-                <CountText className="price-txt-lg" text={btc.usd} duration={0.3} isAnime={isCountAnime} />
-              </Stack>
-            )}
-          </Stack>
+        <Stack flexDirection="column" justifyContent="flex-end" minWidth="200px" position="relative">
+          {isKimchi && <Kimchi btc={btc} exRate={exRate} setExRate={setExRate} isAnime={isCountAnime} />}
+          {market?.includes('KRW') && (
+            <Stack className={getColor(btc.krwColor)} flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
+              <FaWonSign fontSize={26} />
+              <CountText className="price-txt-lg" text={btc.krw} duration={0.2} isAnime={isCountAnime} />
+            </Stack>
+          )}
+          {market?.includes('USD') && (
+            <Stack className={getColor(btc.usdColor)} flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30}>
+              <IoLogoUsd fontSize={27} style={{ marginRight: '-4px' }} />
+              <CountText className="price-txt-lg" text={btc.usd} duration={0.2} isAnime={isCountAnime} />
+            </Stack>
+          )}
         </Stack>
-        <NotKeyNotBtc />
       </Stack>
-    </CardItem>
+      <NotKeyNotBtc />
+    </Stack>
   )
 }
 

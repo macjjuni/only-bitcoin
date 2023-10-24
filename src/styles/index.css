@@ -150,11 +150,14 @@ body {
   width: 100%;
   max-width: 400px;
   min-width: 340px;
-  height: 300px;
-  padding: 8px;
+  min-height: 330px;
   margin: 0 auto;
-  border-radius: 8px;
-  overflow: hidden;
+}
+
+@media screen and (max-width: 600px) {
+  .box-item {
+    min-height: auto;
+  }
 }
 
 .toggle-down {
@@ -173,8 +176,29 @@ body {
 }
 
 .fear-greed-img {
+  visibility: hidden;
   width: 100%;
+  height: 0;
+  opacity: 0;
+  transition: 0.3s ease;
 }
+.fear-greed-skeleton {
+  width: 552px;
+  aspect-ratio: 9 / 8.07;
+}
+
+@media screen and (max-width: 648px) {
+  .fear-greed-skeleton {
+    width: 100%;
+  }
+}
+
+.loaded {
+  visibility: visible;
+  height: auto !important;
+  opacity: 1 !important;
+}
+
 .sat-img {
   border-radius: 50%;
   overflow: hidden;
@@ -251,9 +275,15 @@ body {
 
 /* MUI Style */
 
+.MuiAccordionSummary-expandIconWrapper {
+  transform: rotate(0) !important;
+}
+
 .MuiPaper-elevation1 {
   margin: 0;
-  box-shadow: rgba(0, 0, 0, 0.16) 0px 1px 4px !important;
+  border-radius: 4px;
+  overflow: hidden;
+  box-shadow: none !important;
 }
 .MuiPaper-elevation1::before {
   display: none !important;
@@ -265,15 +295,9 @@ body {
 .MuiAccordionSummary-content {
   margin: 0 !important;
 }
+
 .mui-dialog > .MuiDialog-container > .MuiDialog-paper {
   margin: 24px 24px 80px 24px;
-}
-
-.no-shadow.MuiPaper-elevation1 {
-  box-shadow: none !important;
-}
-.no-bg.MuiPaper-elevation1 {
-  background: none !important;
 }
 
 @media screen and (max-width: 600px) {
@@ -305,5 +329,21 @@ body {
     text-align: center;
     font-size: 18px;
     padding: 16.5px 8px 16.5px 0;
+  }
+}
+
+.skeleton {
+  animation: skeletonMotion 1.5s ease-in-out infinite;
+}
+
+@keyframes skeletonMotion {
+  0% {
+    opacity: 0.1;
+  }
+  50% {
+    opacity: 0.9;
+  }
+  100% {
+    opacity: 0.1;
   }
 }

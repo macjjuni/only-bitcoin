@@ -1,6 +1,6 @@
-import { memo, type Dispatch, type SetStateAction } from 'react'
+import { useState, useRef, useCallback, useEffect, memo, type Dispatch, type SetStateAction } from 'react'
 import { RiCloseCircleLine } from 'react-icons/ri'
-import { DialogTitle, Dialog, Container, Typography, IconButton, Stack } from '@mui/material'
+import { DialogTitle, Dialog, Container, Typography, IconButton, Stack, Box } from '@mui/material'
 
 type DialogType = {
   open: boolean
@@ -8,9 +8,24 @@ type DialogType = {
 }
 
 const ExRateDialog = ({ open, setOpen }: DialogType) => {
-  const closeDialog = () => {
+  const [load, setLoad] = useState(false)
+  const imgRef = useRef<HTMLImageElement>(null)
+  const closeDialog = useCallback(() => {
     setOpen(false)
-  }
+  }, [])
+
+  const onLoad = useCallback(() => {
+    setLoad(true)
+    imgRef.current?.classList.add('loaded')
+  }, [])
+
+  useEffect(() => {
+    if (!open) {
+      setTimeout(() => {
+        setLoad(false)
+      }, 100)
+    }
+  }, [open])
 
   return (
     <Dialog onClose={closeDialog} open={open} className="mui-dialog">
@@ -24,8 +39,16 @@ const ExRateDialog = ({ open, setOpen }: DialogType) => {
           </IconButton>
         </Stack>
       </DialogTitle>
-      <Container sx={{ padding: '16px' }}>
-        <img className="fear-greed-img" src={`https://alternative.me/crypto/fear-and-greed-index.png?${new Date().getTime()}`} width="550" alt="crypto fear greed index chart" />
+      <Container sx={{ padding: '16px', maxHeight: '534px', overflow: 'hidden' }}>
+        {!load && <Box className="skeleton fear-greed-skeleton" bgcolor="#000" />}
+        <img
+          ref={imgRef}
+          onLoad={onLoad}
+          className={`fear-greed-img ${load && 'loaded'}`}
+          src={`https://alternative.me/crypto/fear-and-greed-index.png?${new Date().getTime()}`}
+          width="550"
+          alt="crypto fear greed index chart"
+        />
       </Container>
     </Dialog>
   )

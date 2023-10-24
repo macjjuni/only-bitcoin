@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, memo } from 'react'
 import CountUp from 'react-countup'
 
 interface ICount {
@@ -32,4 +32,4 @@ const CountText = ({ text, className, duration = 1, percent, decimals, isAnime }
   )
 }
 
-export default CountText
+export default memo(CountText)

@@ -1,3 +1,4 @@
+import { memo } from 'react'
 import IconButton from '@mui/material/IconButton'
 import ContentCopyIcon from '@mui/icons-material/ContentCopy'
 import { toast } from 'react-toastify'
@@ -24,4 +25,4 @@ const CopyButton = ({ txt }: ICopy) => {
   )
 }
 
-export default CopyButton
+export default memo(CopyButton)

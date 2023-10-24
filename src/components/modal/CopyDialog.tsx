@@ -2,7 +2,7 @@ import { Dispatch, SetStateAction } from 'react'
 import { Link, DialogTitle, Dialog, Container, Typography, Stack, IconButton } from '@mui/material'
 import { RiCloseCircleLine } from 'react-icons/ri'
 import { SiNaver } from 'react-icons/si'
-import { btcInfo } from '@/data/btcInfo'
+import BtcIcon from '../icon/BtcIcon'
 
 type DialogType = {
   open: boolean
@@ -30,7 +30,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
         </DialogTitle>
         <Container sx={{ padding: '16px' }}>
           <Stack component="h2" justifyContent="flex-start" flexDirection="row" alignItems="center" fontWeight="bold" gap="8px" m="0" py="6px">
-            {btcInfo.icon(24)}
+            <BtcIcon size={24} />
             <Typography component="p" fontSize={18} fontWeight="bold">
               비트코인 디플로마 [
               <Link href="https://t.co/lS2dUOKcK0" target="_blank" title="비트코인 디플로마 한글 번역본 by ATOMIC BITCOIN">
@@ -41,7 +41,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
           </Stack>
 
           <Stack component="h2" justifyContent="flex-start" flexDirection="row" alignItems="center" fontWeight="bold" gap="8px" m="0" py="6px" pb="24px">
-            {btcInfo.icon(24)}
+            <BtcIcon size={24} />
             <Typography component="p" fontSize={18} fontWeight="bold">
               비트코인 결제매장 [
               <Link href="https://map.naver.com/v5/favorite/myPlace/folder/05ad290200484bed8ae4ffd19e6cd213?c=7,0,0,0,dh" target="_blank" title="비트코인 결제매장(네이버지도)">

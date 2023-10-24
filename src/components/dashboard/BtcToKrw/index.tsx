@@ -1,6 +1,5 @@
-import { useEffect, useState, useRef } from 'react'
+import { useEffect, useState, useRef, useCallback } from 'react'
 import { Stack, FormGroup, FormControlLabel, Checkbox, FormControl, InputLabel, OutlinedInput, InputAdornment, Typography } from '@mui/material'
-import { FaWonSign } from 'react-icons/fa'
 import { BiTransferAlt } from 'react-icons/bi'
 // Zustand
 import { useBearStore } from '@/zustand/store'
@@ -13,6 +12,8 @@ import SatIcon from '@/components/icon/SatIcon'
 
 import { btcInfo, ecoSystemPyramid } from '@/data/btcInfo'
 import { comma, isSafari } from '@/utils/common'
+import BtcIcon from '@/components/icon/BtcIcon'
+import KrwIcon from '@/components/icon/KrwIcon'
 
 interface IBtcToKrw {
   btc: IBtc
@@ -41,19 +42,22 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
   const priceRef = useRef<HTMLInputElement | null>(null)
 
   // 인풋 초기화
-  const initialInput = () => {
+  const initialInput = useCallback(() => {
     setAmount('0')
     setPrice('0')
     setSat('0')
-  }
+  }, [])
 
   // 가격 계산
-  const calcPrice = (amt: number) => {
-    return comma((btc.krw * Number(amt)).toFixed(0).toString())
-  }
+  const calcPrice = useCallback(
+    (amt: number) => {
+      return comma((btc.krw * Number(amt)).toFixed(0).toString())
+    },
+    [btc]
+  )
 
   // 비트코인 개수 변경
-  const handleAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAmount = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const amountTxt = e.target.value
     if (amountTxt === '' || amountTxt === '0') setAmount('0')
     else {
@@ -62,56 +66,56 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
       else setAmount(cleanNum)
       setPrice(calcPrice(Number(amountTxt)))
     }
-  }
+  }, [])
   // IOS 전용
-  const iosHandleAmount = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const iosHandleAmount = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const amountTxt = e.target.value
     setAmount(amountTxt)
     setPrice(calcPrice(Number(amountTxt)))
-  }
+  }, [])
 
   // 원화 금액 변경
-  const handlePrice = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePrice = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const priceTxt = e.target.value.replace(/(^0+)/, '').replace(/,/g, '')
     if (priceTxt === '' || Number.isNaN(Number(priceTxt))) initialInput()
     else {
       setPrice(comma(priceTxt))
       setAmount((Number(priceTxt) / btc.krw).toFixed(commaLength).toString())
     }
-  }
+  }, [])
 
-  const handlePriceKeydown = () => {
+  const handlePriceKeydown = useCallback(() => {
     if (standard) return
     chkRef.current?.classList.add('done')
     setTimeout(() => {
       chkRef.current?.classList.remove('done')
     }, 1000)
-  }
+  }, [])
 
   // 잘 못 의도된 키 다운 이벤트 체크박스 애니메이션 효과
-  const handleAmountKeydown = () => {
+  const handleAmountKeydown = useCallback(() => {
     if (!standard) return
     chkRef.current?.classList.add('done')
     setTimeout(() => {
       chkRef.current?.classList.remove('done')
     }, 1000)
-  }
+  }, [])
 
-  const toggleStandard = (e: React.ChangeEvent<HTMLInputElement>) => {
+  const toggleStandard = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     setStandard(e.target.checked)
-  }
+  }, [])
 
   // 생태계별 표시
-  const findEcoSystem = () => {
+  const findEcoSystem = useCallback(() => {
     const numAmt = Number(amount.replace(/[^\d.]/g, ''))
     const me = ecoSystemPyramid.find((eco) => numAmt === 0 || (numAmt >= eco.min && eco.max > numAmt))
     if (me) setEmoji(me.emoji)
-  }
+  }, [amount])
 
   // 생태계 모달 오픈
-  const onEco = () => {
+  const onEco = useCallback(() => {
     setEco(true)
-  }
+  }, [])
 
   useEffect(() => {
     if (numReg.test(amount)) {
@@ -138,7 +142,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
   }, [btc])
 
   return (
-    <CardItem id="btcKrw" icon={<BiTransferAlt fontSize={26} color={btcInfo.color} />} title="BTC/KRW">
+    <CardItem id="btcKrw" icon={<BiTransferAlt fontSize={28} color={btcInfo.color} />} title="BTC/KRW">
       <Stack gap="24px">
         <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap">
           <FormGroup ref={chkRef} sx={{ userSelect: 'none' }}>
@@ -166,13 +170,18 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
               slotProps={{ input: { min: 0, step: 0.1, inputMode: 'decimal', pattern: '[0-9]+([.,]0|[1-9]+)?' } }}
               onChange={!isSafari ? handleAmount : iosHandleAmount}
               onKeyDown={handleAmountKeydown}
-              startAdornment={<InputAdornment position="start">{btcInfo.icon(36)}</InputAdornment>}
+              startAdornment={
+                <InputAdornment position="start">
+                  <BtcIcon size={36} />
+                </InputAdornment>
+              }
               endAdornment={<CopyButton txt={amount} />}
             />
           </FormControl>
 
           <Stack alignItems="flex-end">
             <Stack flexDirection="row" alignItems="center">
+              <CopyButton txt={sat} />
               {sat}
               <span className="unit-txt">Sat</span>
               <Stack flexDirection="row" alignItems="center">
@@ -197,7 +206,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
               startAdornment={
                 <InputAdornment position="start">
                   <Stack justifyContent="center" alignItems="center" width="36px">
-                    <FaWonSign size="20" color="#828282" />
+                    <KrwIcon size={20} />
                   </Stack>
                 </InputAdornment>
               }
