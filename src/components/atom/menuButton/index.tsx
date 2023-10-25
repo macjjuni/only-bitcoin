@@ -2,10 +2,10 @@ import { memo } from 'react'
 import { IconButton } from '@mui/material'
 import { HiMenuAlt2 } from 'react-icons/hi'
 
-const MenuButton = () => {
+const MenuButton = ({ onToggle }: { onToggle: () => void }) => {
   return (
-    <IconButton sx={{ width: '32px', height: '32px', padding: '0', margin: '0' }}>
-      <HiMenuAlt2 size={26} />
+    <IconButton className="icon-btn" onClick={onToggle}>
+      <HiMenuAlt2 size={28} />
     </IconButton>
   )
 }

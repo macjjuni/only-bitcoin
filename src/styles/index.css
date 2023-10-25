@@ -153,6 +153,13 @@ body {
   font-weight: bold;
 }
 
+.icon-btn {
+  width: 40px;
+  height: 40px;
+  padding: 0;
+  margin: 0;
+}
+
 .box-item {
   width: 100%;
   max-width: 400px;
@@ -164,6 +171,10 @@ body {
 @media screen and (max-width: 600px) {
   .box-item {
     min-height: auto;
+  }
+  .icon-btn {
+    width: 34px;
+    height: 34px;
   }
 }
 
