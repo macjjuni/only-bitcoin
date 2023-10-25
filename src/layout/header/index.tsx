@@ -1,5 +1,6 @@
 import { Stack, AppBar } from '@mui/material'
 import { layout } from '@/styles/style'
+import MenuButton from '@/components/atom/menuButton'
 
 import BtcDominance from '@/components/BtcDominance'
 import ExRatePrice from '@/components/ExRatePrice'
@@ -11,6 +12,7 @@ const Header = () => {
     <AppBar position="static" sx={{ boxShadow: 'none', background: 'inherit' }}>
       <Stack height={layout.header} flexDirection="row" alignItems="center" justifyContent="space-between">
         <Stack flexDirection="row" gap="8px" alignItems="center">
+          <MenuButton />
           <BtcDominance />
           <ExRatePrice />
           <FearGreed />

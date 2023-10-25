@@ -22,7 +22,7 @@ const ExRateDialog = ({ open, setOpen, kimpPrice }: DialogType) => {
         <DialogTitle minWidth={340} borderBottom="1px solid #a5a5a5" sx={{ padding: '12px 16px' }}>
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
             <Typography component="p" fontSize={16} fontWeight="bold">
-              한국 프리미엄 정보
+              한국 프리미엄 및 환율 정보
             </Typography>
             <IconButton onClick={closeDialog} sx={{ padding: '0' }}>
               <RiCloseCircleLine fontSize={24} />
