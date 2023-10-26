@@ -1,5 +1,6 @@
-import { useState, useCallback, type KeyboardEvent, type MouseEvent } from 'react'
-import { Stack, AppBar, SwipeableDrawer, List, ListItem, ListItemText, ListItemButton } from '@mui/material'
+import { useState, useCallback, type KeyboardEvent, type MouseEvent, useEffect } from 'react'
+import { Stack, AppBar, SwipeableDrawer, List, ListItem, ListItemText, ListItemButton, Typography } from '@mui/material'
+import { Link, useLocation } from 'react-router-dom'
 import { layout } from '@/styles/style'
 import MenuButton from '@/components/atom/menuButton'
 
@@ -9,6 +10,7 @@ import RefreshButton from '@/components/RefreshButton'
 import FearGreed from '@/components/FearGreed'
 
 const Header = () => {
+  const { pathname } = useLocation()
   const [isOpen, setOpen] = useState(false)
 
   const toggleDrawer = useCallback(
@@ -22,6 +24,10 @@ const Header = () => {
   const onToggle = useCallback(() => {
     setOpen((prev) => !prev)
   }, [isOpen])
+
+  useEffect(() => {
+    setOpen(false)
+  }, [pathname])
 
   return (
     <AppBar position="static" sx={{ boxShadow: 'none', background: 'inherit' }}>
@@ -38,13 +44,35 @@ const Header = () => {
       {/* 사이드 메뉴바 */}
       <SwipeableDrawer anchor="left" open={isOpen} onClose={toggleDrawer(false)} onOpen={toggleDrawer(true)}>
         <List sx={{ width: '220px' }}>
-          {['All mail', 'Trash', 'Spam'].map((text) => (
+          {/* {['All mail', 'Trash', 'Spam'].map((text) => (
             <ListItem key={text} disablePadding>
               <ListItemButton>
                 <ListItemText primary={text} />
               </ListItemButton>
             </ListItem>
-          ))}
+          ))} */}
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => {
+                setOpen(false)
+              }}
+            >
+              <Link to="/">
+                <ListItemText primary="Home" />
+              </Link>
+            </ListItemButton>
+          </ListItem>
+          <ListItem disablePadding>
+            <ListItemButton
+              onClick={() => {
+                setOpen(false)
+              }}
+            >
+              <Link to="/mvrv">
+                <ListItemText primary="MVRV Z-Score" />
+              </Link>
+            </ListItemButton>
+          </ListItem>
         </List>
       </SwipeableDrawer>
     </AppBar>

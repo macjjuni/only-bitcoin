@@ -8,6 +8,17 @@
 * {
   font-family: 'Pretendard-Regular';
 }
+a {
+  width: 100%;
+  color: inherit;
+  text-decoration: none;
+  outline: none;
+}
+
+a:hover,
+a:active {
+  text-decoration: none;
+}
 
 button {
   background: inherit;
@@ -200,22 +211,6 @@ body {
   opacity: 0;
   transition: 0.3s ease;
 }
-.fear-greed-skeleton {
-  width: 552px;
-  aspect-ratio: 9 / 8.07;
-}
-
-@media screen and (max-width: 648px) {
-  .fear-greed-skeleton {
-    width: 100%;
-  }
-}
-
-.loaded {
-  visibility: visible;
-  height: auto !important;
-  opacity: 1 !important;
-}
 
 .sat-img {
   border-radius: 50%;
@@ -350,18 +345,18 @@ body {
   }
 }
 
-.skeleton {
-  animation: skeletonMotion 1.5s ease-in-out infinite;
+/* MVRV Page */
+.mvrv-img {
+  visibility: hidden;
+  width: 100%;
+  border-radius: 4px;
+  border: 1px solid #eee;
+  opacity: 0;
+  transition: 0.3s ease;
 }
 
-@keyframes skeletonMotion {
-  0% {
-    opacity: 0.1;
-  }
-  50% {
-    opacity: 0.9;
-  }
-  100% {
-    opacity: 0.1;
-  }
+.loaded {
+  visibility: visible;
+  height: auto !important;
+  opacity: 1 !important;
 }

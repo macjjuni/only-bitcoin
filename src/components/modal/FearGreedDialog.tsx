@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect, memo, type Dispatch, type SetStateAction } from 'react'
+import useMediaQuery from '@mui/material/useMediaQuery'
 import { RiCloseCircleLine } from 'react-icons/ri'
-import { DialogTitle, Dialog, Container, Typography, IconButton, Stack, Box } from '@mui/material'
+import { DialogTitle, Dialog, Container, Typography, IconButton, Stack, Skeleton } from '@mui/material'
 
 type DialogType = {
   open: boolean
@@ -8,6 +9,7 @@ type DialogType = {
 }
 
 const ExRateDialog = ({ open, setOpen }: DialogType) => {
+  const matches = useMediaQuery('(min-width:600px)')
   const [load, setLoad] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
   const closeDialog = useCallback(() => {
@@ -40,13 +42,14 @@ const ExRateDialog = ({ open, setOpen }: DialogType) => {
         </Stack>
       </DialogTitle>
       <Container sx={{ padding: '16px', maxHeight: '534px', overflow: 'hidden' }}>
-        {!load && <Box className="skeleton fear-greed-skeleton" bgcolor="#000" />}
+        {!load && <Skeleton variant="rectangular" width={matches ? 550 : '100%'} height="100%" sx={{ bgcolor: 'gray.800', aspectRatio: '9 / 8.07' }} />}
         <img
           ref={imgRef}
           onLoad={onLoad}
           className={`fear-greed-img ${load && 'loaded'}`}
           src={`https://alternative.me/crypto/fear-and-greed-index.png?${new Date().getTime()}`}
           width="550"
+          height="495"
           alt="crypto fear greed index chart"
         />
       </Container>
