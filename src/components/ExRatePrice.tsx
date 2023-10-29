@@ -15,10 +15,10 @@ const label = () => {
   )
 }
 
-const ExRatePrice = () => {
+const ExRatePrice = ({ onClick }: { onClick: () => void }) => {
   const { basePrice } = useBearStore((state) => state.exRate)
 
-  return <ChipItem label={label()} value={comma(basePrice?.toString())} />
+  return <ChipItem onClick={onClick} label={label()} value={comma(basePrice?.toString())} />
 }
 
 export default ExRatePrice

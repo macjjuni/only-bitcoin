@@ -1,7 +1,6 @@
 import { useState, useRef, useCallback, useEffect, memo, type Dispatch, type SetStateAction } from 'react'
-import useMediaQuery from '@mui/material/useMediaQuery'
 import { RiCloseCircleLine } from 'react-icons/ri'
-import { DialogTitle, Dialog, Container, Typography, IconButton, Stack, Skeleton } from '@mui/material'
+import { DialogTitle, Dialog, Container, Typography, IconButton, Stack, Skeleton, useMediaQuery } from '@mui/material'
 
 type DialogType = {
   open: boolean

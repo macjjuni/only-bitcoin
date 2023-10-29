@@ -1,4 +1,4 @@
-import { memo, useEffect, useState, useRef } from 'react'
+import { memo, useCallback, useEffect, useState, useRef } from 'react'
 import moment from 'moment'
 import FearGreedDialog from '@/components/modal/FearGreedDialog'
 import { useBearStore } from '@/zustand/store'
@@ -13,28 +13,28 @@ const FearGreed = () => {
   const { fearGreed, updateFearGreed } = useBearStore((state) => state)
   const [isModal, setModal] = useState(false)
 
-  const openFearGreed = () => {
+  const openFearGreed = useCallback(() => {
     setModal(true)
-  }
+  }, [])
 
   // 공포 탐욕 지수 데이터 초기화
-  const updateFGIndex = async () => {
+  const updateFGIndex = useCallback(async () => {
     const data = await getFearGreed()
     updateFearGreed(data)
-  }
+  }, [])
 
   // 일정 기간동안 반복 실행
-  const intervalRun = (func: () => void) => {
+  const intervalRun = useCallback((func: () => void) => {
     timerRef.current = setInterval(async () => {
       func()
     }, intervalTime)
-  }
+  }, [])
 
   // 업데이트 시간 체크해서 업데이트 실행
-  const updateCheck = () => {
+  const updateCheck = useCallback(() => {
     const minDiff = Math.floor(moment.duration(moment().diff(fearGreed.date)).asMinutes())
     if (Number.isNaN(minDiff) || minDiff > limitMins) updateFGIndex() // 10분 이후면 업데이트
-  }
+  }, [])
 
   useEffect(() => {
     updateCheck()

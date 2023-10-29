@@ -1,11 +1,10 @@
-import { useLayoutEffect, useState, useCallback } from 'react'
-import { Box } from '@mui/material'
+import { useCallback, useLayoutEffect, useState } from 'react'
+import { Box, Tooltip } from '@mui/material'
 import { TbSquareRoundedLetterK } from 'react-icons/tb'
 import CountText from '@/components/CountText'
 
 import { calcPerDiff } from '@/utils/common'
 import { getExRate } from '@/api/exRate'
-import ExRateDialog from '@/components/modal/ExRateDialog'
 import { type IExRate, type IBtc } from '@/zustand/type'
 
 interface IKimchi {
@@ -16,16 +15,15 @@ interface IKimchi {
 }
 
 const Kimchi = ({ btc, exRate, setExRate, isAnime }: IKimchi) => {
-  const [isEx, setEx] = useState(false)
-
-  const showDialog = useCallback(() => {
-    setEx(true)
-  }, [isEx])
-
+  const [isTooltip, setTooltip] = useState(false)
   const getFetchExRate = async () => {
     const resExRate = await getExRate()
     setExRate(resExRate)
   }
+
+  const toggleTooptip = useCallback(() => {
+    setTooltip((prev) => !prev)
+  }, [isTooltip])
 
   useLayoutEffect(() => {
     getFetchExRate()
@@ -38,23 +36,12 @@ const Kimchi = ({ btc, exRate, setExRate, isAnime }: IKimchi) => {
 
   return (
     <>
-      <Box
-        onClick={showDialog}
-        position="absolute"
-        top="-28px"
-        right="0px"
-        display="flex"
-        flexDirection="row"
-        justifyContent="flex-end"
-        alignItems="center"
-        height={30}
-        gap="4px"
-        sx={{ cursor: 'pointer' }}
-      >
-        <TbSquareRoundedLetterK fontSize={22} />
-        <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="price-txt-sm kimchi" duration={0.3} percent decimals={2} isAnime={isAnime} />
-      </Box>
-      <ExRateDialog open={isEx} setOpen={setEx} kimpPrice={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} />
+      <Tooltip title="한국 프리미엄" placement="top" arrow open={isTooltip} onClick={toggleTooptip}>
+        <Box position="absolute" top="-28px" right="0px" display="flex" flexDirection="row" justifyContent="flex-end" alignItems="center" height={30} gap="4px" sx={{ cursor: 'pointer' }}>
+          <TbSquareRoundedLetterK fontSize={22} />
+          <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="price-txt-sm kimchi" duration={0.3} percent decimals={2} isAnime={isAnime} />
+        </Box>
+      </Tooltip>
     </>
   )
 }

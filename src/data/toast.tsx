@@ -9,7 +9,7 @@ export const toastProps: () => ToastContainerProps = () => {
   return {
     position,
     transition: Flip,
-    autoClose: 2000,
+    autoClose: 1500,
     hideProgressBar: false,
     newestOnTop: false,
     closeOnClick: true,

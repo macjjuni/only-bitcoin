@@ -57,7 +57,7 @@ export const uuid = {
 
 const dateFormat = 'YYYY-MM-DD HH:mm:ss'
 /* ---------- 날짜 포멧 변환 ---------- */
-export const transDate = (timeStamp: string | number) => {
+export const transDate = (timeStamp: string | number | Date) => {
   return moment(timeStamp).format(dateFormat)
 }
 /* ---------- 현재 날짜 반환 ---------- */

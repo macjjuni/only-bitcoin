@@ -2,15 +2,15 @@ import { memo, type Dispatch, type SetStateAction } from 'react'
 import { RiCloseCircleLine } from 'react-icons/ri'
 import { DialogTitle, Dialog, Container, Typography, IconButton, Stack } from '@mui/material'
 import { useBearStore } from '@/zustand/store'
-import { comma } from '@/utils/common'
+import { comma, calcPerDiff } from '@/utils/common'
 
 type DialogType = {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
-  kimpPrice: number
 }
 
-const ExRateDialog = ({ open, setOpen, kimpPrice }: DialogType) => {
+const ExRateDialog = ({ open, setOpen }: DialogType) => {
+  const { btc } = useBearStore((state) => state)
   const { basePrice, date, provider } = useBearStore((state) => state.exRate)
   const closeDialog = () => {
     setOpen(false)
@@ -32,7 +32,7 @@ const ExRateDialog = ({ open, setOpen, kimpPrice }: DialogType) => {
         <Container sx={{ padding: '16px' }}>
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
             <Typography>한국 프리미엄</Typography>
-            <Typography>{kimpPrice}%</Typography>
+            <Typography>{calcPerDiff(btc.krw, btc.usd, basePrice)}%</Typography>
           </Stack>
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
             <Typography>환율(USD/KRW)</Typography>
