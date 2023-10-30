@@ -38,8 +38,6 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
 
   // ref
   const chkRef = useRef<HTMLDivElement>(null)
-  const amountRef = useRef<HTMLInputElement | null>(null)
-  const priceRef = useRef<HTMLInputElement | null>(null)
 
   // 인풋 초기화
   const initialInput = useCallback(() => {
@@ -160,7 +158,6 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
           <FormControl fullWidth>
             <InputLabel htmlFor="outlined-adornment-amount">BitCoin</InputLabel>
             <OutlinedInput
-              inputRef={amountRef}
               id="outlined-adornment-amount"
               label="Amount"
               className="crypto-input"
@@ -195,7 +192,6 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
           <FormControl fullWidth>
             <InputLabel htmlFor="outlined-adornment-amount">KRW</InputLabel>
             <OutlinedInput
-              inputRef={priceRef}
               id="outlined-adornment-amount"
               label="Amount"
               className="price-input"

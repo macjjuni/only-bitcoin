@@ -4,38 +4,30 @@ import HalvingExpain from '@/components/molecule/HalvingExpain'
 import HalvingTable from '@/components/molecule/HalvingTable'
 import BtcIcon from '@/components/icon/BtcIcon'
 import CopyNoneIconButton from '@/components/CopyNoneIconButton'
+import { useBearStore } from '@/zustand/store'
 import { btcHalvingData } from '@/data/btcInfo'
-import { getBtcRecentBlockHeight } from '@/api/mempool'
+import { transTimeStampDate } from '@/utils/common'
 
 interface IBlock {
-  height: number | string
-  date: string
   nextHalvingHeight: number | string
   nextHalvingPredictedDate: number | string
 }
 
 const BitcoinHalvingTable = () => {
-  const [block, setBlock] = useState<IBlock>({
-    height: 0, // 최신 블록 높이
-    date: '', // 최신 블록 날짜
+  const { blockData } = useBearStore((state) => state)
+  const [nextHalving, setNextHalving] = useState<IBlock>({
     nextHalvingHeight: 0, // 다음 반감기 블록 높이
     nextHalvingPredictedDate: '', // 다음 반감기 예측 날짜
   })
 
-  const getBlockHeight = useCallback(async () => {
-    try {
-      const { height, date } = await getBtcRecentBlockHeight()
-      const nextHalving = btcHalvingData.find((Halving) => Halving.blockNum > height)
-      setBlock({ height, date, nextHalvingHeight: nextHalving?.blockNum || 0, nextHalvingPredictedDate: nextHalving?.date || '' })
-    } catch (err) {
-      console.error(err)
-      setBlock({ height: 'Network Error!', date: '-', nextHalvingHeight: '-', nextHalvingPredictedDate: '-' })
-    }
+  const getNextHalvingData = useCallback(() => {
+    const nextHalv = btcHalvingData.find((Halving) => Halving.blockNum > blockData.height)
+    setNextHalving({ nextHalvingHeight: nextHalv?.blockNum || 0, nextHalvingPredictedDate: nextHalv?.date || '' })
   }, [])
 
   useEffect(() => {
-    getBlockHeight()
-  }, [])
+    getNextHalvingData()
+  }, [blockData])
 
   return (
     <Stack flexDirection="column" width="100%" height="100%" justifyContent="center">
@@ -64,19 +56,19 @@ const BitcoinHalvingTable = () => {
           <TableBody>
             <TableRow sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
               <TableCell component="th" scope="row">
-                <CopyNoneIconButton txt={block.date} />
+                <CopyNoneIconButton txt={transTimeStampDate(blockData.timeStamp)} />
               </TableCell>
               <TableCell align="right">
-                <CopyNoneIconButton txt={block.height} />
+                <CopyNoneIconButton txt={blockData.height} />
               </TableCell>
               <TableCell align="right">
-                <CopyNoneIconButton txt={block.nextHalvingHeight} />
+                <CopyNoneIconButton txt={nextHalving.nextHalvingHeight} />
               </TableCell>
               <TableCell align="right">
-                <CopyNoneIconButton txt={block.nextHalvingPredictedDate} />
+                <CopyNoneIconButton txt={nextHalving.nextHalvingPredictedDate} />
               </TableCell>
               <TableCell align="right">
-                <CopyNoneIconButton txt={Number(block.nextHalvingHeight) - Number(block.height)} />
+                <CopyNoneIconButton txt={Number(nextHalving.nextHalvingHeight) - Number(blockData.height)} />
               </TableCell>
             </TableRow>
           </TableBody>

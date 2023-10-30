@@ -27,15 +27,17 @@ interface IMarketPrice {
   setExRate: (exRate: IExRate) => void
 }
 
+const defaultSpeed = 0.3
+
 const MarketPrice = ({ btc, market, isKimchi, exRate, setExRate }: IMarketPrice) => {
   const { isCountAnime, isCountColor, isLottiePlay, toggleLottie } = useBearStore((state) => state)
-  const [speed, setSpeed] = useState(1)
+  const [speed, setSpeed] = useState(defaultSpeed)
 
   const mouseEnter = useCallback(() => {
     setSpeed(2)
   }, [])
   const mouseLeave = useCallback(() => {
-    setSpeed(1)
+    setSpeed(defaultSpeed)
   }, [])
 
   const onToggleLottie = useCallback(() => {

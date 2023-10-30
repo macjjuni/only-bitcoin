@@ -1,4 +1,5 @@
 import { Stack } from '@mui/material'
+import BlockView from '@/components/dashboard/BlockView'
 import MarketPrice from '@/components/dashboard/MarketPrice'
 import BtcToKrw from '@/components/dashboard/BtcToKrw'
 import { useBearStore } from '@/zustand/store'
@@ -9,6 +10,7 @@ const Home = () => {
 
   return (
     <Stack alignItems="center" gap={1} width="100%">
+      <BlockView />
       <MarketPrice btc={btc} market={market} isKimchi={isKimchi} exRate={exRate} setExRate={setExRate} />
       <BtcToKrw btc={btc} isEcoSystem={isEcoSystem} />
     </Stack>

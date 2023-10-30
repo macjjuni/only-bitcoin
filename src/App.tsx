@@ -8,13 +8,13 @@ import Main from '@/layout/main'
 import Footer from '@/layout/footer'
 import GoogleGA from './components/GoogleGA'
 import AdsenseCodeSnippet from './components/AdSenseCodeSnippet'
+import BlockHeight from './components/init/BlockHeight'
 
 import { darkTheme, lightTheme } from './styles/theme'
 import { useBearStore } from './zustand/store'
 import { toastProps } from '@/data/toast'
 
 const toastOptions = toastProps()
-
 const isDev = import.meta.env.MODE === 'development'
 
 const App = () => {
@@ -23,6 +23,7 @@ const App = () => {
   return (
     <ThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
       {!isDev && <AdsenseCodeSnippet />}
+      <BlockHeight />
       <div id="only-bitcoin" className={theme}>
         <CssBaseline />
         <Header />

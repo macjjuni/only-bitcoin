@@ -2,7 +2,7 @@ import { memo, useCallback, useEffect, useState, useRef } from 'react'
 import moment from 'moment'
 import FearGreedDialog from '@/components/modal/FearGreedDialog'
 import { useBearStore } from '@/zustand/store'
-import ChipItem from './Chip'
+import ChipItem from '../../Chip'
 import { getFearGreed } from '@/api/fearGreed'
 
 const limitMins = 10 // 분(min)

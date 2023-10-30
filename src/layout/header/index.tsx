@@ -4,10 +4,10 @@ import { useNavigate, useLocation } from 'react-router-dom'
 import { layout } from '@/styles/style'
 import MenuButton from '@/components/atom/menuButton'
 
-import BtcDominance from '@/components/BtcDominance'
-import ExRatePrice from '@/components/ExRatePrice'
+import BtcDominance from '@/components/widget/BtcDominance'
+import ExRatePrice from '@/components/widget/ExRatePrice'
 import RefreshButton from '@/components/RefreshButton'
-import FearGreed from '@/components/FearGreed'
+import FearGreed from '@/components/widget/FearGreed'
 import ExRateDialog from '@/components/modal/ExRateDialog'
 
 import { routes } from '@/router'
