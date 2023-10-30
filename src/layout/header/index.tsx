@@ -1,5 +1,5 @@
 import { useState, useCallback, type KeyboardEvent, type MouseEvent, useEffect } from 'react'
-import { Stack, AppBar, SwipeableDrawer, List, ListItem, ListItemText, ListItemButton, Typography } from '@mui/material'
+import { Stack, AppBar, SwipeableDrawer, List, ListItem, ListItemText, ListItemButton } from '@mui/material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { layout } from '@/styles/style'
 import MenuButton from '@/components/atom/menuButton'

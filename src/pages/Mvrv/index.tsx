@@ -45,16 +45,21 @@ const MvrvPage = () => {
     <Stack flexDirection="column" width="100%" height="100%" justifyContent="center">
       <Typography variant="h2" fontSize={24} fontWeight="bold" display="flex" justifyContent="flex-start" alignItems="center" gap="4px" mt="8px" mb="16px">
         <BtcIcon size={28} />
-        Bitcoin: MVRV Z-Score
+        비트코인: MVRV Z-Score
       </Typography>
 
       <Divider />
 
-      <Typography my="16px" fontSize={matches ? 16 : 14}>
-        MVRV 비율은 실현 시가총액과 시가총액을 비교하며 현재 시가총액 즉 시장 가격이 고평가/저평가의 영역에 있는지 시장 가격의 고점 혹은 저점을 예측하는데 도움을 줍니다. <br />
+      <Typography mt="16px" fontSize={matches ? 16 : 14} mb="8px">
+        MVRV(Market Value - Realized Value) 비율은 실현 시가총액과 시가총액을 비교하며 현재 시가총액 즉 시장 가격이 고평가/저평가의 영역에 있는지 시장 가격의 고점 혹은 저점을 예측하는데 도움을 줍니다.{' '}
+        <br />
       </Typography>
-      <Typography my="16px" fontSize={matches ? 14 : 12}>
-        MVRV Z = (시가총액 - 실현 시가총액) /시가총액 표준편차
+
+      <Typography mb="16px" fontSize={matches ? 16 : 14}>
+        MVRV Z = (시가총액 - 실현 시가총액) /시가총액 표준편차 {!matches && <br />}
+        <a target="_blank" rel="noreferrer" href="https://dataguide.cryptoquant.com/v/korean/market-data-indicators/mvrv-ratio">
+          <u>(자세히)</u>
+        </a>
       </Typography>
 
       {isLoad === true && (
