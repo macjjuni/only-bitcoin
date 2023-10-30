@@ -9,7 +9,7 @@ interface IChip {
 }
 
 const ChipItem = ({ label, value, onClick }: IChip) => {
-  const isSmall = useMediaQuery(`(max-width: ${responsive.mobile}px)`)
+  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
 
   const generateLabel = useMemo(() => {
     return (
@@ -20,7 +20,7 @@ const ChipItem = ({ label, value, onClick }: IChip) => {
     )
   }, [value])
 
-  return <Chip className="chip-txt" label={generateLabel} variant="outlined" size={isSmall ? 'small' : 'medium'} sx={{ borderRadius: 0, fontSize: isSmall ? '13px' : '18px' }} />
+  return <Chip className="chip-txt" label={generateLabel} variant="outlined" size={matches ? 'medium' : 'small'} sx={{ borderRadius: 0, fontSize: matches ? '18px' : '13px' }} />
 }
 
 export default ChipItem

@@ -1,6 +1,7 @@
 import { useState, useRef, useCallback, useEffect, memo, type Dispatch, type SetStateAction } from 'react'
 import { RiCloseCircleLine } from 'react-icons/ri'
 import { DialogTitle, Dialog, Container, Typography, IconButton, Stack, Skeleton, useMediaQuery } from '@mui/material'
+import { responsive } from '@/styles/style'
 
 type DialogType = {
   open: boolean
@@ -8,7 +9,7 @@ type DialogType = {
 }
 
 const ExRateDialog = ({ open, setOpen }: DialogType) => {
-  const matches = useMediaQuery('(min-width:600px)')
+  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
   const [load, setLoad] = useState(false)
   const imgRef = useRef<HTMLImageElement>(null)
   const closeDialog = useCallback(() => {

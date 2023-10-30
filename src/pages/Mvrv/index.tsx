@@ -1,20 +1,22 @@
 import { useState, useRef, useCallback, useLayoutEffect } from 'react'
 import { Typography, Stack, Skeleton, useMediaQuery, Divider, Box } from '@mui/material'
 import { LottieProps } from 'react-lottie-player'
+import { responsive } from '@/styles/style'
 import { getMVRVImage, type IMvrv } from '@/api/mvrv'
 import BtcIcon from '@/components/icon/BtcIcon'
+import MvrvExplain from '@/components/molecule/MvrvExplain'
 import LottieItem from '@/components/LottieItem'
 import Bitcoin404 from '@/assets/404-bitcoin.json'
 
 const imgSize = {
-  width: 1270,
+  width: 1200,
   height: 700,
 }
 const defaultOption: LottieProps = { loop: true, play: true }
 const lottieOption = { ...defaultOption, style: { width: '100%', height: '150px' } }
 
 const MvrvPage = () => {
-  const matches = useMediaQuery('(min-width:600px)')
+  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
   const [isLoad, setLoad] = useState<boolean | null>(null)
   const imgRef = useRef<HTMLImageElement>(null)
   const [img, setImg] = useState<IMvrv>({
@@ -47,23 +49,12 @@ const MvrvPage = () => {
         <BtcIcon size={28} />
         비트코인: MVRV Z-Score
       </Typography>
-
       <Divider />
-
-      <Typography mt="16px" fontSize={matches ? 16 : 14} mb="8px">
-        MVRV(Market Value - Realized Value) 비율은 실현 시가총액과 시가총액을 비교하며 현재 시가총액 즉 시장 가격이 고평가/저평가의 영역에 있는지 시장 가격의 고점 혹은 저점을 예측하는데 도움을 줍니다.{' '}
-        <br />
-      </Typography>
-
-      <Typography mb="16px" fontSize={matches ? 16 : 14}>
-        MVRV Z = (시가총액 - 실현 시가총액) /시가총액 표준편차 {!matches && <br />}
-        <a target="_blank" rel="noreferrer" href="https://dataguide.cryptoquant.com/v/korean/market-data-indicators/mvrv-ratio">
-          <u>(자세히)</u>
-        </a>
-      </Typography>
+      <br />
+      <MvrvExplain />
 
       {isLoad === true && (
-        <Typography variant="h2" fontSize={20} fontWeight="bold" display="flex" alignItems="center" justifyContent="flex-start" gap="8px" my="16px">
+        <Typography variant="h2" fontSize={20} fontWeight="bold" display="flex" alignItems="center" justifyContent="flex-start" gap="8px" mt="24px" mb="16px">
           <Box>
             MVRV Z-Score: <u>{img.mvrv.val}</u>
           </Box>
@@ -77,7 +68,7 @@ const MvrvPage = () => {
         </Typography>
       )}
 
-      {isLoad === null && <Skeleton variant="rectangular" width={matches ? `${imgSize.width}px` : '360px'} height="100%" sx={{ bgcolor: '#000', aspectRatio: '9 / 5' }} />}
+      {isLoad === null && <Skeleton variant="rectangular" width={matches ? `${imgSize.width}px` : '360px'} height="100%" sx={{ bgcolor: '#000', aspectRatio: '9 / 5', margin: '16px 0' }} />}
       {isLoad === false && <LottieItem play option={lottieOption} animationData={Bitcoin404} speed={1} />}
       {isLoad !== false && <img ref={imgRef} className="mvrv-img" src={img.src} onLoad={onLoad} width={imgSize.width} height={matches ? imgSize.height : 'auto'} alt="Bitcoin Mvrv Z-Score" />}
     </Stack>

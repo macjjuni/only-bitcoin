@@ -295,7 +295,6 @@ body {
   margin: 0;
   border-radius: 4px;
   overflow: hidden;
-  box-shadow: none !important;
 }
 .MuiPaper-elevation1::before {
   display: none !important;
