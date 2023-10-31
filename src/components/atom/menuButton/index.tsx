@@ -1,11 +1,14 @@
 import { memo } from 'react'
-import { IconButton } from '@mui/material'
+import { IconButton, useMediaQuery } from '@mui/material'
 import { HiMenuAlt2 } from 'react-icons/hi'
+import { responsive } from '@/styles/style'
 
 const MenuButton = ({ onToggle }: { onToggle: () => void }) => {
+  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
+
   return (
-    <IconButton className="icon-btn" onClick={onToggle}>
-      <HiMenuAlt2 size={28} />
+    <IconButton className="icon-btn" onClick={onToggle} sx={{ p: matches ? '6px' : '4px' }}>
+      <HiMenuAlt2 size={30} />
     </IconButton>
   )
 }

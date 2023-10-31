@@ -1,24 +1,15 @@
-import { BiSolidDollarCircle, BiWon } from 'react-icons/bi'
+import { BiWon } from 'react-icons/bi'
+import { useMediaQuery } from '@mui/material'
 import ChipItem from '@/components/Chip'
 import { useBearStore } from '@/zustand/store'
+import { responsive } from '@/styles/style'
 import { comma } from '@/utils/common'
 
-const iconSize = 18
-
-const label = () => {
-  return (
-    <>
-      <BiSolidDollarCircle size={iconSize} />
-      <span>/</span>
-      <BiWon size={iconSize} />
-    </>
-  )
-}
-
 const ExRatePrice = ({ onClick }: { onClick: () => void }) => {
+  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
   const { basePrice } = useBearStore((state) => state.exRate)
 
-  return <ChipItem onClick={onClick} label={label()} value={comma(basePrice?.toString())} />
+  return <ChipItem onClick={onClick} label={<BiWon size={matches ? 22 : 16} />} value={comma(basePrice?.toString())} />
 }
 
 export default ExRatePrice

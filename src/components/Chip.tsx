@@ -13,7 +13,7 @@ const ChipItem = ({ label, value, onClick }: IChip) => {
 
   const generateLabel = useMemo(() => {
     return (
-      <Stack flexDirection="row" gap="5px" onClick={onClick} sx={{ cursor: 'pointer' }}>
+      <Stack flexDirection="row" gap="4px" alignContent="center" alignItems="center" onClick={onClick} sx={{ cursor: 'pointer' }}>
         <span className="fcc">{label}</span>
         <span style={{ textShadow: '1px 1px 1px #d0d0d0' }}>{value}</span>
       </Stack>
