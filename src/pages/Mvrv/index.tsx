@@ -4,7 +4,7 @@ import { LottieProps } from 'react-lottie-player'
 import { responsive } from '@/styles/style'
 import { getMVRVImage, type IMvrv } from '@/api/mvrv'
 import BtcIcon from '@/components/icon/BtcIcon'
-import MvrvExplain from '@/components/molecule/MvrvExplain'
+import MvrvExplain from '@/components/explain/MvrvExplain'
 import LottieItem from '@/components/LottieItem'
 import Bitcoin404 from '@/assets/404-bitcoin.json'
 

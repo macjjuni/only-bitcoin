@@ -97,3 +97,8 @@ export const getDominace = (list: ICurrency[]) => {
   })
   return ((BTCCap / altCap) * 100).toFixed(2)
 }
+
+// 반감기 진행률 계산
+export const calcProgress = (start: number, end: number, current: number) => {
+  return ((current - start) / (end - start)) * 100
+}

@@ -1,12 +1,12 @@
 import { memo } from 'react'
 import { useMediaQuery, Typography } from '@mui/material'
-import ExplainAcc from '../ExplainAcc'
+import ExplainFrame from '../../molecule/ExplainFrame'
 import { responsive } from '@/styles/style'
 
 const MvrvExplain = () => {
   const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
   return (
-    <ExplainAcc
+    <ExplainFrame
       title="MVRV(Market Value - Realized Value)란?"
       content={
         <>

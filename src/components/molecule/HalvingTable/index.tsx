@@ -7,7 +7,7 @@ import { comma } from '@/utils/common'
 const HalvingTable = () => {
   return (
     <TableContainer component={Paper}>
-      <Table sx={{ minWidth: 650 }} size="small" aria-label="a dense table">
+      <Table sx={{ minWidth: 580 }} size="small" aria-label="a dense table">
         <TableHead>
           <TableRow>
             <TableCell>날짜</TableCell>
