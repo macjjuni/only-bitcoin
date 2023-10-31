@@ -1,21 +1,46 @@
-import { memo } from 'react'
-// useRef, useCallback, useEffect
+import { memo, useState, useCallback } from 'react'
 import { Stack, Typography } from '@mui/material'
-import { type LottieProps } from 'react-lottie-player'
-import LottieItem from '@/components/LottieItem'
-import BlockLottie1 from '@/assets/block1.json'
+import CubeLottie from './components/CubeLottie'
+import PopOver from './components/PopOver'
 import { IBlock } from '@/zustand/type'
 
-const defaultOption: LottieProps = { loop: true, play: true }
-const lottieOption = { ...defaultOption, style: { width: '80px', height: '80px' } }
-
 const BlockView = ({ blockData }: { blockData: IBlock }) => {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const handlePopoverOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(e.currentTarget)
+  }, [])
+
+  const handlePopoverClose = useCallback(() => {
+    setAnchorEl(null)
+  }, [])
+
+  const open = Boolean(anchorEl)
+
+  /**
+   * Todo List
+   * 📌 - 큐브 로티 따로 컴포넌트 분리
+   * 📌 - Popover 컴포넌트 분리
+   */
+
   return (
     <Stack mb="-60px" display="flex" flexDirection="row" justifyContent="flex-end" alignItems="center" maxWidth="400px" width="100%">
-      <LottieItem play option={lottieOption} animationData={BlockLottie1} speed={1} />
-      <Typography fontSize={20} fontWeight="bold" letterSpacing="0.64px" ml="-8px" mr="8px">
-        {blockData.height}
-      </Typography>
+      <Stack
+        position="relative"
+        height="48px"
+        display="flex"
+        flexDirection="row"
+        justifyContent="flex-end"
+        alignItems="center"
+        gap="8px"
+        onMouseEnter={handlePopoverOpen}
+        onMouseLeave={handlePopoverClose}
+      >
+        <CubeLottie />
+        <Typography fontSize={20} fontWeight="bold" letterSpacing="0.64px" mr="8px">
+          {blockData.height}
+        </Typography>
+      </Stack>
+      <PopOver anchorEl={anchorEl} open={open} handlePopoverClose={handlePopoverClose} />
     </Stack>
   )
 }

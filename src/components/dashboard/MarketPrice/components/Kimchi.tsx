@@ -1,6 +1,7 @@
 import { useCallback, useLayoutEffect, useState } from 'react'
-import { Box, Tooltip } from '@mui/material'
+import { Box } from '@mui/material'
 import { TbSquareRoundedLetterK } from 'react-icons/tb'
+import PopOver from './PopOver'
 import CountText from '@/components/CountText'
 
 import { calcPerDiff } from '@/utils/common'
@@ -15,15 +16,19 @@ interface IKimchi {
 }
 
 const Kimchi = ({ btc, exRate, setExRate, isAnime }: IKimchi) => {
-  const [isTooltip, setTooltip] = useState(false)
-  const getFetchExRate = async () => {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+  const handlePopoverOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
+    setAnchorEl(e.currentTarget)
+  }, [])
+
+  const handlePopoverClose = useCallback(() => {
+    setAnchorEl(null)
+  }, [])
+
+  const getFetchExRate = useCallback(async () => {
     const resExRate = await getExRate()
     setExRate(resExRate)
-  }
-
-  const toggleTooptip = useCallback(() => {
-    setTooltip((prev) => !prev)
-  }, [isTooltip])
+  }, [])
 
   useLayoutEffect(() => {
     getFetchExRate()
@@ -36,12 +41,24 @@ const Kimchi = ({ btc, exRate, setExRate, isAnime }: IKimchi) => {
 
   return (
     <>
-      <Tooltip title="한국 프리미엄" placement="top" arrow open={isTooltip} onClick={toggleTooptip}>
-        <Box position="absolute" top="-28px" right="0px" display="flex" flexDirection="row" justifyContent="flex-end" alignItems="center" height={30} gap="4px" sx={{ cursor: 'pointer' }}>
-          <TbSquareRoundedLetterK fontSize={22} />
-          <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="price-txt-sm kimchi" duration={0.3} percent decimals={2} isAnime={isAnime} />
-        </Box>
-      </Tooltip>
+      <Box
+        position="absolute"
+        top="-32px"
+        right="0px"
+        display="flex"
+        flexDirection="row"
+        justifyContent="flex-end"
+        alignItems="center"
+        height={30}
+        gap="4px"
+        sx={{ cursor: 'pointer' }}
+        onMouseEnter={handlePopoverOpen}
+        onMouseLeave={handlePopoverClose}
+      >
+        <TbSquareRoundedLetterK fontSize={22} />
+        <CountText text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} className="price-txt-sm kimchi" duration={0.3} percent decimals={2} isAnime={isAnime} />
+      </Box>
+      <PopOver anchorEl={anchorEl} open={Boolean(anchorEl)} handlePopoverClose={handlePopoverClose} />
     </>
   )
 }
