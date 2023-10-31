@@ -13,6 +13,10 @@
 
 <br>
 
+### 내용 업데이트 예정...
+
+<br>
+
 ## 📸 이미지
 
 <img src="https://github.com/macjjuni/btc-market-price/assets/38034518/f64f1a38-1570-49f4-8979-4fe3779e2c19" width="23.5%" alt="btc-price initial screen1">
