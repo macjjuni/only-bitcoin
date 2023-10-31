@@ -76,9 +76,11 @@ const BitcoinHalvingTable = () => {
           }
           bottom={
             <>
-              <b>예상시간</b>
+              <Typography fontSize={14} fontWeight="bold" mb="4px">
+                예상시간
+              </Typography>
               <div>
-                {calcRemainingTime(nextHalving.remainingHeight)} ({nextHalving.nextHalvingPredictedDate})
+                {calcRemainingTime(nextHalving.remainingHeight)}({nextHalving.nextHalvingPredictedDate})
               </div>
             </>
           }
@@ -96,7 +98,9 @@ const BitcoinHalvingTable = () => {
           }
           bottom={
             <>
-              <b>타임스탬프</b>
+              <Typography fontSize={14} fontWeight="bold" mb="4px">
+                타임스탬프
+              </Typography>
               <div>{transTimeStampDate(blockData.timeStamp).replace(/-/g, '.')}</div>
             </>
           }
@@ -112,7 +116,14 @@ const BitcoinHalvingTable = () => {
               </Typography>
             </>
           }
-          bottom={<Progress value={calcProgress(Number(nextHalving.nextHalvingHeight) - 210000, Number(nextHalving.nextHalvingHeight), blockData.height)} />}
+          bottom={
+            <>
+              <Typography fontSize={14} fontWeight="bold" mb="4px">
+                예상시간
+              </Typography>
+              <Progress value={calcProgress(Number(nextHalving.nextHalvingHeight) - 210000, Number(nextHalving.nextHalvingHeight), blockData.height)} />
+            </>
+          }
         />
       </Stack>
 

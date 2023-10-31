@@ -9,7 +9,7 @@ interface ICard {
   bottom?: string | ReactNode
 }
 
-const CardItem = ({ width = '100%', minWidth = '200px', title, content, bottom }: ICard) => {
+const CardItem = ({ width = '100%', minWidth = '220px', title, content, bottom }: ICard) => {
   return (
     <Card sx={{ minWidth, width }}>
       <CardContent>
