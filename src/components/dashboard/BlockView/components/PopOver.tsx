@@ -1,6 +1,8 @@
 import { memo, useState, useEffect } from 'react'
 import moment from 'moment'
-import { Popover, Typography } from '@mui/material'
+import { Popover, Stack, Typography, useMediaQuery } from '@mui/material'
+import { responsive } from '@/styles/style'
+import Progress from '@/components/molecule/Progress'
 import { useBearStore } from '@/zustand/store'
 import { transTimeStampDate } from '@/utils/common'
 
@@ -18,6 +20,7 @@ const diffTimeStamp = (time1: number, time2 = new Date().getTime()) => {
 }
 
 const PopOver = ({ anchorEl, open, handlePopoverClose }: IPopOver) => {
+  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
   const blockData = useBearStore((state) => state.blockData)
   const [diff, setDiff] = useState(diffTimeStamp(blockData.timeStamp))
 
@@ -27,7 +30,6 @@ const PopOver = ({ anchorEl, open, handlePopoverClose }: IPopOver) => {
 
   return (
     <Popover
-      id="mouse-over-popover"
       sx={{ pointerEvents: 'none' }}
       open={open}
       anchorEl={anchorEl}
@@ -36,9 +38,12 @@ const PopOver = ({ anchorEl, open, handlePopoverClose }: IPopOver) => {
       onClose={handlePopoverClose}
       disableRestoreFocus
     >
-      <Typography fontSize={14} px="8px" py="4px">
-        블록 생성 시간: {transTimeStampDate(blockData.timeStamp).replace(/-/g, '.')}({diff}분 전)
-      </Typography>
+      <Stack px="8px" pt="4px" pb="8px" gap="6px">
+        <Typography fontSize={matches ? 16 : 14}>
+          블록 생성 시간: {transTimeStampDate(blockData.timeStamp).replace(/-/g, '.')}({diff}분 전)
+        </Typography>
+        <Progress value={80} />
+      </Stack>
     </Popover>
   )
 }
