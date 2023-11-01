@@ -7,6 +7,8 @@ export interface IBtc {
   usdColor: boolean // true = green, false = red
 }
 
+export type ThemeTypes = 'dark' | 'light'
+
 // 도미넌스지수
 export interface IDominance {
   value: string

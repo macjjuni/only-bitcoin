@@ -5,7 +5,7 @@ import { responsive } from '@/styles/style'
 import { getMVRVImage, type IMvrv } from '@/api/mvrv'
 import BtcIcon from '@/components/icon/BtcIcon'
 import MvrvExplain from '@/components/explain/MvrvExplain'
-import LottieItem from '@/components/LottieItem'
+import LottieItem from '@/components/atom/LottieItem'
 import Bitcoin404 from '@/assets/404-bitcoin.json'
 
 const imgSize = {

@@ -1,8 +1,8 @@
-import { memo, useCallback, useEffect, useState, useRef } from 'react'
+import { useCallback, useEffect, useState, useRef } from 'react'
 import moment from 'moment'
 import FearGreedDialog from '@/components/modal/FearGreedDialog'
-import { useBearStore } from '@/zustand/store'
-import ChipItem from '../../Chip'
+import ChipItem from '@/components/atom/ChipItem'
+import { bearStore } from '@/zustand/store'
 import { getFearGreed } from '@/api/fearGreed'
 
 const limitMins = 10 // 분(min)
@@ -10,7 +10,8 @@ const intervalTime = 300000 // Interval Time(ms): 5분
 
 const FearGreed = () => {
   const timerRef = useRef<NodeJS.Timer | null>(null)
-  const { fearGreed, updateFearGreed } = useBearStore((state) => state)
+  // 👇 BTC시세 업데이트 마다 렌더링 방지하기 위해 스토어에서 할당하지 않고 개별 State로 관리
+  const [fearGreed, setFearGreed] = useState(bearStore.fearGreed)
   const [isModal, setModal] = useState(false)
 
   const openFearGreed = useCallback(() => {
@@ -20,7 +21,8 @@ const FearGreed = () => {
   // 공포 탐욕 지수 데이터 초기화
   const updateFGIndex = useCallback(async () => {
     const data = await getFearGreed()
-    updateFearGreed(data)
+    bearStore.updateFearGreed(data)
+    setFearGreed(data)
   }, [])
 
   // 일정 기간동안 반복 실행
@@ -54,4 +56,4 @@ const FearGreed = () => {
   )
 }
 
-export default memo(FearGreed)
+export default FearGreed

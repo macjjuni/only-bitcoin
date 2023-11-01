@@ -6,12 +6,12 @@ import { useBearStore } from '@/zustand/store'
 
 const Home = () => {
   // Zustand Store
-  const { btc, market, isKimchi, exRate, setExRate, isEcoSystem, blockData } = useBearStore((state) => state)
+  const { btc, market, isKimchi, isLottiePlay, exRate, isEcoSystem, blockData } = useBearStore((state) => state)
 
   return (
     <Stack alignItems="center" gap={1} width="100%">
       <BlockView blockData={blockData} />
-      <MarketPrice btc={btc} market={market} isKimchi={isKimchi} exRate={exRate} setExRate={setExRate} />
+      <MarketPrice btc={btc} market={market} isKimchi={isKimchi} isLottiePlay={isLottiePlay} exRate={exRate} />
       <BtcToKrw btc={btc} isEcoSystem={isEcoSystem} />
     </Stack>
   )

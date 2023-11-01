@@ -5,7 +5,7 @@ import HalvingTable from '@/components/molecule/HalvingTable'
 import BtcIcon from '@/components/icon/BtcIcon'
 import { useBearStore } from '@/zustand/store'
 import { btcHalvingData } from '@/data/btcInfo'
-import { transTimeStampDate, calcProgress } from '@/utils/common'
+import { transTimeStampDate, calcProgress, comma } from '@/utils/common'
 import CubeLottie from '@/components/dashboard/BlockView/components/CubeLottie'
 import CardItem from '@/components/molecule/CardItem'
 import Progress from '@/components/molecule/Progress'
@@ -70,7 +70,7 @@ const BitcoinHalvingTable = () => {
             <>
               <CubeLottie />
               <Typography variant="h5" fontWeight="bold" gutterBottom>
-                {nextHalving.nextHalvingHeight}
+                {comma(nextHalving.nextHalvingHeight?.toString())}
               </Typography>
             </>
           }
@@ -92,7 +92,7 @@ const BitcoinHalvingTable = () => {
             <>
               <CubeLottie />
               <Typography variant="h5" fontWeight="bold" gutterBottom>
-                {blockData.height}
+                {comma(blockData.height?.toString())}
               </Typography>
             </>
           }
@@ -112,14 +112,14 @@ const BitcoinHalvingTable = () => {
             <>
               <CubeLottie />
               <Typography variant="h5" fontWeight="bold" gutterBottom>
-                {nextHalving.remainingHeight}
+                {comma(nextHalving.remainingHeight?.toString())}
               </Typography>
             </>
           }
           bottom={
             <>
               <Typography fontSize={14} fontWeight="bold" mb="4px">
-                예상시간
+                진행률
               </Typography>
               <Progress value={calcProgress(Number(nextHalving.nextHalvingHeight) - 210000, Number(nextHalving.nextHalvingHeight), blockData.height)} />
             </>

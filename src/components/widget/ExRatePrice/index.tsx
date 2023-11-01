@@ -1,6 +1,6 @@
 import { BiWon } from 'react-icons/bi'
 import { useMediaQuery } from '@mui/material'
-import ChipItem from '@/components/Chip'
+import ChipItem from '@/components/atom/ChipItem'
 import { useBearStore } from '@/zustand/store'
 import { responsive } from '@/styles/style'
 import { comma } from '@/utils/common'

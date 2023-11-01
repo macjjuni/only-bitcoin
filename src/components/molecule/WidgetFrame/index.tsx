@@ -34,7 +34,7 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   borderTop: '1px solid rgba(0, 0, 0, .125)',
 }))
 
-const CardItem = ({ id, icon, title, children }: ICardItem) => {
+const WidgetFrame = ({ id, icon, title, children }: ICardItem) => {
   const { dropDown, setDropDown } = useBearStore((state) => state)
 
   const toggleDropDown = useCallback(() => {
@@ -67,4 +67,4 @@ const CardItem = ({ id, icon, title, children }: ICardItem) => {
     </div>
   )
 }
-export default CardItem
+export default WidgetFrame

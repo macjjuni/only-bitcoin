@@ -2,7 +2,7 @@ import { Typography, Button, Stack } from '@mui/material'
 import { useNavigate } from 'react-router-dom'
 
 import { type LottieProps } from 'react-lottie-player'
-import LottieItem from '@/components/LottieItem'
+import LottieItem from '@/components/atom/LottieItem'
 import Bitcoin404 from '@/assets/404-bitcoin.json'
 
 const defaultOption: LottieProps = { loop: true, play: true }

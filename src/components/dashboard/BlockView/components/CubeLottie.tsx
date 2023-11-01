@@ -1,7 +1,7 @@
 import { memo } from 'react'
 import { type LottieProps } from 'react-lottie-player'
 import { Box } from '@mui/material'
-import LottieItem from '@/components/LottieItem'
+import LottieItem from '@/components/atom/LottieItem'
 import BlockLottie1 from '@/assets/block1.json'
 
 const defaultOption: LottieProps = { loop: true, play: true }

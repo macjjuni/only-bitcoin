@@ -1,27 +1,25 @@
-import { memo } from 'react'
-import IconButton from '@mui/material/IconButton'
-import ContentCopyIcon from '@mui/icons-material/ContentCopy'
+import { memo, useCallback } from 'react'
+import { Box } from '@mui/material'
 import { toast } from 'react-toastify'
 import { copyText } from '@/utils/common'
-import { btcInfo } from '@/data/btcInfo'
 
 interface ICopy {
-  txt: string
+  txt: string | number
 }
 
 const CopyButton = ({ txt }: ICopy) => {
-  const clickCopy = async () => {
+  const clickCopy = useCallback(async () => {
     if (!txt) return
     const target = txt.toString()
     const isDone = await copyText(target)
     if (isDone) toast.success(`"${txt}" 복사 완료!`)
     else toast.error('복사 실패!')
-  }
+  }, [txt])
 
   return (
-    <IconButton onClick={clickCopy} aria-label="copy" sx={{ color: btcInfo.color }}>
-      <ContentCopyIcon fontSize="small" />
-    </IconButton>
+    <Box onClick={clickCopy} aria-label="copy">
+      {txt}
+    </Box>
   )
 }
 

@@ -1,4 +1,4 @@
-import { Dispatch, SetStateAction } from 'react'
+import { Dispatch, SetStateAction, memo } from 'react'
 import { Link, DialogTitle, Dialog, Container, Typography, Stack, IconButton } from '@mui/material'
 import { RiCloseCircleLine } from 'react-icons/ri'
 import { SiNaver } from 'react-icons/si'
@@ -79,4 +79,4 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
   )
 }
 
-export default CopyDialog
+export default memo(CopyDialog)

@@ -1,11 +1,11 @@
-import { useCallback, useState } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { Stack } from '@mui/material'
 import { FaWonSign } from 'react-icons/fa'
 import { IoLogoUsd } from 'react-icons/io'
 
 import { LottieProps } from 'react-lottie-player'
-import LottieItem from '@/components/LottieItem'
-import CountText from '@/components/CountText'
+import LottieItem from '@/components/atom/LottieItem'
+import CountText from '@/components/atom/CountText'
 import Kimchi from './components/Kimchi'
 import NotKeyNotBtc from './components/NotKeyNotBtc'
 import { useBearStore } from '@/zustand/store'
@@ -23,22 +23,22 @@ interface IMarketPrice {
   btc: IBtc
   market: MarketType
   isKimchi: boolean
+  isLottiePlay: boolean
   exRate: IExRate
-  setExRate: (exRate: IExRate) => void
 }
 
 const defaultSpeed = 0.3
 
-const MarketPrice = ({ btc, market, isKimchi, exRate, setExRate }: IMarketPrice) => {
-  const { isCountAnime, isCountColor, isLottiePlay, toggleLottie } = useBearStore((state) => state)
+const MarketPrice = ({ btc, market, isKimchi, isLottiePlay, exRate }: IMarketPrice) => {
+  const { isCountAnime, isCountColor, toggleLottie } = useBearStore((state) => state)
   const [speed, setSpeed] = useState(defaultSpeed)
 
   const mouseEnter = useCallback(() => {
-    setSpeed(2)
-  }, [])
+    if (isLottiePlay) setSpeed(2)
+  }, [isLottiePlay])
   const mouseLeave = useCallback(() => {
-    setSpeed(defaultSpeed)
-  }, [])
+    if (isLottiePlay) setSpeed(defaultSpeed)
+  }, [isLottiePlay])
 
   const onToggleLottie = useCallback(() => {
     toggleLottie()
@@ -53,22 +53,25 @@ const MarketPrice = ({ btc, market, isKimchi, exRate, setExRate }: IMarketPrice)
     [isCountColor]
   )
 
+  const WonIcon = useMemo(() => <FaWonSign fontSize={26} />, [])
+  const DollarIcon = useMemo(() => <IoLogoUsd fontSize={27} style={{ marginRight: '-4px' }} />, [])
+
   return (
     <Stack className="box-item" onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px">
       <Stack flexDirection="row" justifyContent="space-between" alignItems="center" pr="8px">
         <LottieItem onClick={onToggleLottie} option={btcOption} play={isLottiePlay} animationData={btcLottie} speed={speed + 0.8} />
 
         <Stack flexDirection="column" justifyContent="flex-end" minWidth="200px" position="relative" mt="24px">
-          {isKimchi && <Kimchi btc={btc} exRate={exRate} setExRate={setExRate} isAnime={isCountAnime} />}
+          {isKimchi && <Kimchi btc={btc} exRate={exRate} isAnime={isCountAnime} />}
           {market?.includes('KRW') && (
             <Stack className={getColor(btc.krwColor)} flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30} lineHeight="38px">
-              <FaWonSign fontSize={26} />
+              {WonIcon}
               <CountText className="price-txt-lg" text={btc.krw} duration={0.2} isAnime={isCountAnime} />
             </Stack>
           )}
           {market?.includes('USD') && (
             <Stack className={getColor(btc.usdColor)} flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30} lineHeight="38px">
-              <IoLogoUsd fontSize={27} style={{ marginRight: '-4px' }} />
+              {DollarIcon}
               <CountText className="price-txt-lg" text={btc.usd} duration={0.2} isAnime={isCountAnime} />
             </Stack>
           )}

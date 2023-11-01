@@ -1,7 +1,7 @@
-import { memo, type Dispatch, type SetStateAction, type MouseEvent, useCallback } from 'react'
+import { memo, type Dispatch, type SetStateAction, type MouseEvent, useCallback, useState } from 'react'
 import { RiCloseCircleLine } from 'react-icons/ri'
 import { DialogTitle, Dialog, Container, Typography, ToggleButtonGroup, ToggleButton, IconButton, Stack, Switch } from '@mui/material'
-import { useBearStore } from '@/zustand/store'
+import { bearStore } from '@/zustand/store'
 import { type MarketType } from '@/zustand/type'
 
 type DialogType = {
@@ -16,36 +16,50 @@ const threeButtons = [
 ]
 
 const SettingDialog = ({ open, setOpen }: DialogType) => {
-  const { market, setMarket, isEcoSystem, toggleEco, isKimchi, toggleKimchi, theme, toggleTheme, isCountAnime, toggleCountAnime, isCountColor, toggleCountColor } = useBearStore((state) => state)
+  const [market, setMarket] = useState(bearStore.market)
+  const [theme, setTheme] = useState(bearStore.theme)
+  const [isKimchi, setKimchi] = useState(bearStore.isKimchi)
+  const [isEcoSystem, setEco] = useState(bearStore.isEcoSystem)
+  const [isCountAnime, setCountAnime] = useState(bearStore.isCountAnime)
+  const [isCountColor, setCountColor] = useState(bearStore.isCountAnime)
 
   const closeDialog = useCallback(() => {
     setOpen(false)
   }, [])
 
-  const marketChange = useCallback((e: MouseEvent<HTMLElement>, selectMarket: MarketType) => {
-    if (selectMarket === null) return
-    setMarket(selectMarket)
-  }, [])
-
-  const onToggleKimchi = useCallback(() => {
-    toggleKimchi()
-  }, [])
-
-  const onToggleEco = useCallback(() => {
-    toggleEco()
-  }, [])
-
-  const onToggleAnime = useCallback(() => {
-    toggleCountAnime()
-  }, [])
+  const marketChange = useCallback(
+    (e: MouseEvent<HTMLElement>, selectMarket: MarketType) => {
+      if (selectMarket === null) return
+      const getMarket = bearStore.setMarket(selectMarket)
+      setMarket(getMarket)
+    },
+    [market]
+  )
 
   const onToggleTheme = useCallback(() => {
-    toggleTheme()
-  }, [])
+    const getTheme = bearStore.setTheme(theme === 'dark' ? 'light' : 'dark')
+    setTheme(getTheme)
+  }, [theme])
+
+  const onToggleKimchi = useCallback(() => {
+    const getIsKimchi = bearStore.setKimchi(!isKimchi)
+    setKimchi(getIsKimchi)
+  }, [isKimchi])
+
+  const onToggleEco = useCallback(() => {
+    const getIsEco = bearStore.setEco(!isEcoSystem)
+    setEco(getIsEco)
+  }, [isEcoSystem])
+
+  const onToggleAnime = useCallback(() => {
+    const getIsCountAnime = bearStore.setCountAnime(!isCountAnime)
+    setCountAnime(getIsCountAnime)
+  }, [isCountAnime])
 
   const onToggleCountColor = useCallback(() => {
-    toggleCountColor()
-  }, [])
+    const getIsCountColor = bearStore.setCountColor(!isCountColor)
+    setCountColor(getIsCountColor)
+  }, [isCountColor])
 
   return (
     <>

@@ -1,4 +1,4 @@
-import { memo, type Dispatch, type SetStateAction } from 'react'
+import { type Dispatch, type SetStateAction } from 'react'
 import { RiCloseCircleLine } from 'react-icons/ri'
 import { DialogTitle, Dialog, Container, Typography, IconButton, Stack } from '@mui/material'
 import { useBearStore } from '@/zustand/store'
@@ -52,4 +52,4 @@ const ExRateDialog = ({ open, setOpen }: DialogType) => {
   )
 }
 
-export default memo(ExRateDialog)
+export default ExRateDialog

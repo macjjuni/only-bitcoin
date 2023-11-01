@@ -1,7 +1,11 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import { type IBtc, IDominance, MarketType, IExRate, IUpdateKRW, IUpdateUSD, IUpdateDominance, IDropDown, IfearGreed, IBlock } from '@/zustand/type'
+import { type IBtc, ThemeTypes, IDominance, MarketType, IExRate, IUpdateKRW, IUpdateUSD, IUpdateDominance, IDropDown, IfearGreed, IBlock } from '@/zustand/type'
+
+/** 📌 Rules!
+ * 1. 설정(ex: 테마)값 업데이트 함수는 변경된 값을 그대로 리턴하도록 작성
+ */
 
 interface BearState {
   btc: IBtc // BTC 시세 정보
@@ -15,22 +19,22 @@ interface BearState {
   isCountAnime: boolean // 가격 변동 애니메이션 효과 여부
   isCountColor: boolean // 가격 업다운 색 변경 여부
   fearGreed: IfearGreed // 공포&탐욕 지수
-  theme: 'dark' | 'light'
+  theme: ThemeTypes
   isLottiePlay: boolean // 메인 로티 애니메이션
   blockData: IBlock // 블록 생성 정보
   updateKRW: (by: IUpdateKRW) => void
   updateUSD: (by: IUpdateUSD) => void
   updateDoimnance: (by: IUpdateDominance) => void
-  setMarket: (market: MarketType) => void
+  setMarket: (market: MarketType) => MarketType
   setExRate: (exRate: IExRate) => void
   setDropDown: (bool: { [index: string]: boolean }) => void
   setAmount: (by: string) => void
-  toggleKimchi: () => void
-  toggleEco: () => void
+  setKimchi: (bool: boolean) => boolean
+  setEco: (bool: boolean) => boolean
   updateFearGreed: (data: IfearGreed) => void
-  toggleTheme: () => void
-  toggleCountAnime: () => void
-  toggleCountColor: () => void
+  setTheme: (theme: ThemeTypes) => ThemeTypes
+  setCountAnime: (bool: boolean) => boolean
+  setCountColor: (bool: boolean) => boolean
   toggleLottie: () => void
   updateBlock: (blockData: IBlock) => void // 블록 생성 정보 업데이트
 }
@@ -38,10 +42,13 @@ interface BearState {
 export const useBearStore = create<BearState>()(
   persist(
     (set) => ({
+      btc: { krw: 0, krwDate: '', krwColor: true, usd: 0, usdDate: '', usdColor: true },
       theme: 'dark',
       market: 'KRW/USD',
-      setMarket: (market: MarketType) => set(() => ({ market })),
-      btc: { krw: 0, krwDate: '', krwColor: true, usd: 0, usdDate: '', usdColor: true },
+      setMarket: (market: MarketType) => {
+        set({ market })
+        return market
+      },
       dominance: { value: '', date: '' },
       fearGreed: { value: '', date: '' },
       exRate: { date: '', provider: '', basePrice: 0 },
@@ -59,16 +66,33 @@ export const useBearStore = create<BearState>()(
       updateUSD: (usd) => set((state) => ({ btc: { ...state.btc, ...usd } })),
       updateDoimnance: (dominance) => set(() => ({ dominance })),
       setDropDown: (bool) => set(() => ({ dropDown: { ...bool } })), // 확정성 필요
-      toggleKimchi: () => set((state) => ({ isKimchi: !state.isKimchi })),
-      toggleEco: () => set((state) => ({ isEcoSystem: !state.isEcoSystem })),
+      setKimchi: (isKimchi) => {
+        set({ isKimchi })
+        return isKimchi
+      },
+      setEco: (isEcoSystem) => {
+        set({ isEcoSystem })
+        return isEcoSystem
+      },
       setExRate: (exRate) => set(() => ({ exRate })),
       updateFearGreed: (data) => set(() => ({ fearGreed: data })),
-      toggleTheme: () => set((state) => ({ theme: state.theme === 'light' ? 'dark' : 'light' })),
-      toggleCountAnime: () => set((state) => ({ isCountAnime: !state.isCountAnime })),
-      toggleCountColor: () => set((state) => ({ isCountColor: !state.isCountColor })),
+      setTheme: (theme) => {
+        set({ theme })
+        return theme
+      },
+      setCountAnime: (isCountAnime) => {
+        set({ isCountAnime })
+        return isCountAnime
+      },
+      setCountColor: (isCountColor) => {
+        set({ isCountColor })
+        return isCountColor
+      },
       toggleLottie: () => set((state) => ({ isLottiePlay: !state.isLottiePlay })),
       updateBlock: (blockData) => set(() => ({ blockData })),
     }),
     { name: 'bear-storage' } // persist key
   )
 )
+
+export const bearStore = useBearStore.getState()

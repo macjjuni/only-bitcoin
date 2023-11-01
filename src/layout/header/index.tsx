@@ -2,11 +2,11 @@ import { useState, useCallback, type KeyboardEvent, type MouseEvent, useEffect }
 import { Stack, AppBar, SwipeableDrawer, List, ListItem, ListItemText, ListItemButton } from '@mui/material'
 import { useNavigate, useLocation } from 'react-router-dom'
 import { layout } from '@/styles/style'
-import MenuButton from '@/components/atom/menuButton'
+import MenuButton from '@/components/atom/MenuButton'
 
 import BtcDominance from '@/components/widget/BtcDominance'
 import ExRatePrice from '@/components/widget/ExRatePrice'
-import RefreshButton from '@/components/RefreshButton'
+import RefreshButton from '@/components/atom/RefreshButton'
 import FearGreed from '@/components/widget/FearGreed'
 import ExRateDialog from '@/components/modal/ExRateDialog'
 

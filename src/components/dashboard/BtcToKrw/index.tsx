@@ -5,8 +5,8 @@ import { BiTransferAlt } from 'react-icons/bi'
 import { useBearStore } from '@/zustand/store'
 import { type IBtc } from '@/zustand/type'
 // Components
-import CardItem from '@/components/CardItem'
-import CopyButton from '@/components/CopyButton'
+import WidgetFrame from '@/components/molecule/WidgetFrame'
+import CopyButton from '@/components/atom/CopyButton'
 import EcoSystemDialog from '@/components/modal/EcoSystemDialog'
 import SatIcon from '@/components/icon/SatIcon'
 
@@ -140,7 +140,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
   }, [btc])
 
   return (
-    <CardItem id="btcKrw" icon={<BiTransferAlt fontSize={28} color={btcInfo.color} />} title="BTC/KRW">
+    <WidgetFrame id="btcKrw" icon={<BiTransferAlt fontSize={28} color={btcInfo.color} />} title="BTC/KRW">
       <Stack gap="24px">
         <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap">
           <FormGroup ref={chkRef} sx={{ userSelect: 'none' }}>
@@ -212,7 +212,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
         </Stack>
       </Stack>
       <EcoSystemDialog open={isEco} setOpen={setEco} />
-    </CardItem>
+    </WidgetFrame>
   )
 }
 

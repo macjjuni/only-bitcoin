@@ -1,7 +1,7 @@
 import { useEffect, useLayoutEffect, useState } from 'react'
 import { Container } from '@mui/material'
 import { layout } from '@/styles/style'
-import Spinner from '@/components/Spinner'
+import Spinner from '@/components/loading/Spinner'
 
 import initUpbit from '@/socket/upbit'
 import initBinance from '@/socket/binance'

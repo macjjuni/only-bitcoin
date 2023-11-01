@@ -1,9 +1,9 @@
-import { useEffect, useRef, memo, useCallback } from 'react'
+import { useEffect, useRef, useState, useCallback } from 'react'
 import moment from 'moment'
 
-import ChipItem from '@/components/Chip'
+import ChipItem from '@/components/atom/ChipItem'
 
-import { useBearStore } from '@/zustand/store'
+import { bearStore } from '@/zustand/store'
 import { getCurrencies } from '@/api/dominance'
 import { getDominace, getNowDate, valueCheck } from '@/utils/common'
 
@@ -12,12 +12,17 @@ const intervalTime = 300000 // Interval Time(ms): 5분
 
 const BtcDominance = () => {
   const timerRef = useRef<NodeJS.Timer | null>()
-  const { dominance, updateDoimnance } = useBearStore((state) => state)
+  // 👇 BTC시세 업데이트 마다 렌더링 방지하기 위해 스토어에서 할당하지 않고 개별 State로 관리
+  const [dominance, setDominance] = useState(bearStore.dominance)
 
   // 도미넌스 데이터 초기화
   const updateDominance = useCallback(async () => {
     const res = await getCurrencies()
-    if (res) updateDoimnance({ value: `${getDominace(res)}%`, date: getNowDate() })
+    if (res) {
+      const getDominance = { value: `${getDominace(res)}%`, date: getNowDate() }
+      bearStore.updateDoimnance(getDominance)
+      setDominance(getDominance)
+    }
   }, [])
 
   // 일정 기간동안 반복 실행
@@ -44,4 +49,4 @@ const BtcDominance = () => {
   return <ChipItem label="BTC.D" value={dominance.value} />
 }
 
-export default memo(BtcDominance)
+export default BtcDominance

@@ -3,6 +3,7 @@ import { Stack, Typography } from '@mui/material'
 import CubeLottie from './components/CubeLottie'
 import PopOver from './components/PopOver'
 import { IBlock } from '@/zustand/type'
+import { comma } from '@/utils/common'
 
 const BlockView = ({ blockData }: { blockData: IBlock }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
@@ -13,14 +14,6 @@ const BlockView = ({ blockData }: { blockData: IBlock }) => {
   const handlePopoverClose = useCallback(() => {
     setAnchorEl(null)
   }, [])
-
-  const open = Boolean(anchorEl)
-
-  /**
-   * Todo List
-   * 📌 - 큐브 로티 따로 컴포넌트 분리
-   * 📌 - Popover 컴포넌트 분리
-   */
 
   return (
     <Stack mb="-60px" display="flex" flexDirection="row" justifyContent="flex-end" alignItems="center" maxWidth="400px" width="100%">
@@ -37,10 +30,10 @@ const BlockView = ({ blockData }: { blockData: IBlock }) => {
       >
         <CubeLottie />
         <Typography fontSize={20} fontWeight="bold" letterSpacing="0.64px" mr="8px">
-          {blockData.height}
+          {comma(blockData.height.toString())}
         </Typography>
       </Stack>
-      <PopOver anchorEl={anchorEl} open={open} handlePopoverClose={handlePopoverClose} />
+      <PopOver anchorEl={anchorEl} open={Boolean(anchorEl)} handlePopoverClose={handlePopoverClose} />
     </Stack>
   )
 }

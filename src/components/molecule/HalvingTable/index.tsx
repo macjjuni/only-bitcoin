@@ -1,6 +1,6 @@
 import { memo } from 'react'
 import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material'
-import CopyNoneIconButton from '@/components/CopyNoneIconButton'
+import CopyNoneIconButton from '@/components/atom/CopyNoneIconButton'
 import { btcHalvingData } from '@/data/btcInfo'
 import { comma } from '@/utils/common'
 
