@@ -5,7 +5,7 @@ import HalvingTable from '@/components/molecule/HalvingTable'
 import BtcIcon from '@/components/icon/BtcIcon'
 import { useBearStore } from '@/zustand/store'
 import { btcHalvingData } from '@/data/btcInfo'
-import { transTimeStampDate, calcProgress, comma } from '@/utils/common'
+import { calcRemainingTime, transTimeStampDate, calcProgress, comma } from '@/utils/common'
 import CubeLottie from '@/components/dashboard/BlockView/components/CubeLottie'
 import CardItem from '@/components/molecule/CardItem'
 import Progress from '@/components/molecule/Progress'
@@ -16,20 +16,8 @@ interface IBlock {
   remainingHeight: number
 }
 
-// 블록 채굴 평균 분
-const avgMainingTime = 10
-
-// 예상시간 일 시간 분으로 계산
-const calcRemainingTime = (remainingBlock: number) => {
-  const target = remainingBlock * avgMainingTime //
-  const days = Math.floor(target / (24 * 60)) // 일(day) 계산
-  const hours = Math.floor((target % (24 * 60)) / 60) // 시간(hour) 계산
-  const remainingMinutes = target % 60 // 분(minute) 계산
-  return `${days}일 ${hours}시간 ${remainingMinutes}분`
-}
-
 const BitcoinHalvingTable = () => {
-  const { blockData } = useBearStore((state) => state)
+  const blockData = useBearStore((state) => state.blockData)
   const [nextHalving, setNextHalving] = useState<IBlock>({
     nextHalvingHeight: 0, // 다음 반감기 블록 높이
     nextHalvingPredictedDate: '', // 다음 반감기 예측 날짜

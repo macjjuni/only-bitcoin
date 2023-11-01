@@ -2,7 +2,7 @@ import { useEffect, useState, useRef, useCallback } from 'react'
 import { Stack, FormGroup, FormControlLabel, Checkbox, FormControl, InputLabel, OutlinedInput, InputAdornment, Typography } from '@mui/material'
 import { BiTransferAlt } from 'react-icons/bi'
 // Zustand
-import { useBearStore } from '@/zustand/store'
+import { useBearStore, bearStore } from '@/zustand/store'
 import { type IBtc } from '@/zustand/type'
 // Components
 import WidgetFrame from '@/components/molecule/WidgetFrame'
@@ -26,7 +26,6 @@ const satoshi = 100000000
 
 const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
   const amount = useBearStore((state) => state.amount)
-  const setAmount = useBearStore((state) => state.setAmount)
 
   // state
   const [standard, setStandard] = useState(false) // 기준 : 개수(false) or 가격(false)
@@ -41,7 +40,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
 
   // 인풋 초기화
   const initialInput = useCallback(() => {
-    setAmount('0')
+    bearStore.setAmount('0')
     setPrice('0')
     setSat('0')
   }, [])
@@ -57,18 +56,18 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
   // 비트코인 개수 변경
   const handleAmount = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const amountTxt = e.target.value
-    if (amountTxt === '' || amountTxt === '0') setAmount('0')
+    if (amountTxt === '' || amountTxt === '0') bearStore.setAmount('0')
     else {
       const cleanNum = amountTxt.replace(/^0+/, '')
-      if (cleanNum.charAt(0) === '.') setAmount(`0${cleanNum}`)
-      else setAmount(cleanNum)
+      if (cleanNum.charAt(0) === '.') bearStore.setAmount(`0${cleanNum}`)
+      else bearStore.setAmount(cleanNum)
       setPrice(calcPrice(Number(amountTxt)))
     }
   }, [])
   // IOS 전용
   const iosHandleAmount = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
     const amountTxt = e.target.value
-    setAmount(amountTxt)
+    bearStore.setAmount(amountTxt)
     setPrice(calcPrice(Number(amountTxt)))
   }, [])
 
@@ -78,7 +77,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
     if (priceTxt === '' || Number.isNaN(Number(priceTxt))) initialInput()
     else {
       setPrice(comma(priceTxt))
-      setAmount((Number(priceTxt) / btc.krw).toFixed(commaLength).toString())
+      bearStore.setAmount((Number(priceTxt) / btc.krw).toFixed(commaLength).toString())
     }
   }, [])
 
@@ -131,7 +130,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
       // 금액
       const numPrice = Number(price.replace(/(^0+)/, '').replace(/,/g, ''))
       const calcAmount = (numPrice / btc.krw).toFixed(commaLength).toString()
-      setAmount(calcAmount)
+      bearStore.setAmount(calcAmount)
     } else {
       // 개수
       const numAmount = Number(amount.replace(/(^0+)/, '').replace(/,/g, ''))

@@ -18,7 +18,7 @@ const diffTimeStamp = (time1: number, time2 = new Date().getTime()) => {
 }
 
 const PopOver = ({ anchorEl, open, handlePopoverClose }: IPopOver) => {
-  const { blockData } = useBearStore((state) => state)
+  const blockData = useBearStore((state) => state.blockData)
   const [diff, setDiff] = useState(diffTimeStamp(blockData.timeStamp))
 
   useEffect(() => {

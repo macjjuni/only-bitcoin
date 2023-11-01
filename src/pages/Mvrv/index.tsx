@@ -44,7 +44,7 @@ const MvrvPage = () => {
   }, [])
 
   return (
-    <Stack flexDirection="column" width="100%" height="100%" justifyContent="center">
+    <Stack flexDirection="column" width="100%" height="100%" justifyContent="flex-start">
       <Typography variant="h2" fontSize={24} fontWeight="bold" display="flex" justifyContent="flex-start" alignItems="center" gap="4px" mt="8px" mb="16px">
         <BtcIcon size={28} />
         비트코인: MVRV Z-Score

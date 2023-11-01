@@ -102,3 +102,12 @@ export const getDominace = (list: ICurrency[]) => {
 export const calcProgress = (start: number, end: number, current: number) => {
   return ((current - start) / (end - start)) * 100
 }
+
+/* ---------- 비트코인 반감기까지 남은 블록개수 받아서 계산 후 일/시/분 문자열 반환 ---------- */
+export const calcRemainingTime = (remainingBlock: number) => {
+  const target = remainingBlock * 10 // 10 = 블록 채굴 평균 분
+  const days = Math.floor(target / (24 * 60)) // 일(day) 계산
+  const hours = Math.floor((target % (24 * 60)) / 60) // 시간(hour) 계산
+  const remainingMinutes = target % 60 // 분(minute) 계산
+  return `${days}일 ${hours}시간 ${remainingMinutes}분`
+}
