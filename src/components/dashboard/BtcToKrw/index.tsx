@@ -1,19 +1,19 @@
-import { useEffect, useState, useRef, useCallback } from 'react'
-import { Stack, FormGroup, FormControlLabel, Checkbox, FormControl, InputLabel, OutlinedInput, InputAdornment, Typography } from '@mui/material'
+import { useEffect, useState, useCallback } from 'react'
+import { Stack, Typography } from '@mui/material'
 import { BiTransferAlt } from 'react-icons/bi'
 // Zustand
 import { useBearStore, bearStore } from '@/zustand/store'
 import { type IBtc } from '@/zustand/type'
 // Components
 import WidgetFrame from '@/components/molecule/WidgetFrame'
-import CopyButton from '@/components/atom/CopyButton'
+import PriceStandardSwitch from './components/Switch'
 import EcoSystemDialog from '@/components/modal/EcoSystemDialog'
-import SatIcon from '@/components/icon/SatIcon'
+import AmountInput from './components/AmountInput'
+import SatoshiLabel from './components/SatoshiLabel'
+import KrwInput from './components/KrwInput'
 
 import { btcInfo, ecoSystemPyramid } from '@/data/btcInfo'
 import { comma, isSafari } from '@/utils/common'
-import BtcIcon from '@/components/icon/BtcIcon'
-import KrwIcon from '@/components/icon/KrwIcon'
 
 interface IBtcToKrw {
   btc: IBtc
@@ -34,9 +34,6 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
   // state - Eco System
   const [isEco, setEco] = useState(false)
   const [emoji, setEmoji] = useState('')
-
-  // ref
-  const chkRef = useRef<HTMLDivElement>(null)
 
   // 인풋 초기화
   const initialInput = useCallback(() => {
@@ -79,23 +76,6 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
       setPrice(comma(priceTxt))
       bearStore.setAmount((Number(priceTxt) / btc.krw).toFixed(commaLength).toString())
     }
-  }, [])
-
-  const handlePriceKeydown = useCallback(() => {
-    if (standard) return
-    chkRef.current?.classList.add('done')
-    setTimeout(() => {
-      chkRef.current?.classList.remove('done')
-    }, 1000)
-  }, [])
-
-  // 잘 못 의도된 키 다운 이벤트 체크박스 애니메이션 효과
-  const handleAmountKeydown = useCallback(() => {
-    if (!standard) return
-    chkRef.current?.classList.add('done')
-    setTimeout(() => {
-      chkRef.current?.classList.remove('done')
-    }, 1000)
   }, [])
 
   const toggleStandard = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
@@ -142,9 +122,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
     <WidgetFrame id="btcKrw" icon={<BiTransferAlt fontSize={28} color={btcInfo.color} />} title="BTC/KRW">
       <Stack gap="24px">
         <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap">
-          <FormGroup ref={chkRef} sx={{ userSelect: 'none' }}>
-            <FormControlLabel control={<Checkbox checked={standard} onChange={toggleStandard} />} label="가격 기준" />
-          </FormGroup>
+          <PriceStandardSwitch label="가격 기준" value={standard} onChange={toggleStandard} />
           {/* 생태계 이모지 */}
           {isEcoSystem && (
             <Typography fontSize={28} width={40} onClick={onEco} sx={{ cursor: 'pointer' }}>
@@ -154,60 +132,12 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
         </Stack>
 
         <Stack direction={standard ? 'column-reverse' : 'column'} justifyContent="center" gap={1} height="calc(100% - 85px)">
-          <FormControl fullWidth>
-            <InputLabel htmlFor="outlined-adornment-amount">BitCoin</InputLabel>
-            <OutlinedInput
-              id="outlined-adornment-amount"
-              label="Amount"
-              className="crypto-input"
-              readOnly={standard}
-              value={amount}
-              type="number"
-              slotProps={{ input: { min: 0, step: 0.1, inputMode: 'decimal', pattern: '[0-9]+([.,]0|[1-9]+)?' } }}
-              onChange={!isSafari ? handleAmount : iosHandleAmount}
-              onKeyDown={handleAmountKeydown}
-              startAdornment={
-                <InputAdornment position="start">
-                  <BtcIcon size={36} />
-                </InputAdornment>
-              }
-              endAdornment={<CopyButton txt={amount} />}
-            />
-          </FormControl>
-
-          <Stack alignItems="flex-end">
-            <Stack flexDirection="row" alignItems="center">
-              <CopyButton txt={sat} />
-              {sat}
-              <span className="unit-txt">Sat</span>
-              <Stack flexDirection="row" alignItems="center">
-                &#40;
-                <SatIcon width={20} height={20} />
-                &#41;
-              </Stack>
-            </Stack>
-          </Stack>
-
-          <FormControl fullWidth>
-            <InputLabel htmlFor="outlined-adornment-amount">KRW</InputLabel>
-            <OutlinedInput
-              id="outlined-adornment-amount"
-              label="Amount"
-              className="price-input"
-              readOnly={!standard}
-              value={price}
-              onChange={handlePrice}
-              onKeyDown={handlePriceKeydown}
-              startAdornment={
-                <InputAdornment position="start">
-                  <Stack justifyContent="center" alignItems="center" width="36px">
-                    <KrwIcon size={20} />
-                  </Stack>
-                </InputAdornment>
-              }
-              endAdornment={<CopyButton txt={price} />}
-            />
-          </FormControl>
+          {/* BTC Input */}
+          <AmountInput value={amount} readOnly={standard} onChange={!isSafari ? handleAmount : iosHandleAmount} />
+          {/* Satoshi Label */}
+          <SatoshiLabel sat={sat} />
+          {/* KRW Input */}
+          <KrwInput value={price} readOnly={!standard} onChange={handlePrice} />
         </Stack>
       </Stack>
       <EcoSystemDialog open={isEco} setOpen={setEco} />

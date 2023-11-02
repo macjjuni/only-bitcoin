@@ -25,7 +25,7 @@ const FearGreed = () => {
     setFearGreed(data)
   }, [])
 
-  // 일정 기간동안 반복 실행
+  // 일정 시간동안 반복 실행
   const intervalRun = useCallback((func: () => void) => {
     timerRef.current = setInterval(async () => {
       func()

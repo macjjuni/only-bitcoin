@@ -1,13 +1,12 @@
 import { useCallback } from 'react'
-import { Box, Typography, Stack } from '@mui/material'
-import { AiFillCaretDown } from 'react-icons/ai'
-
+import { Typography, Stack, Box } from '@mui/material'
 import { styled } from '@mui/material/styles'
 import MuiAccordion, { AccordionProps } from '@mui/material/Accordion'
 import MuiAccordionSummary, { AccordionSummaryProps } from '@mui/material/AccordionSummary'
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
+import { AiFillCaretDown } from 'react-icons/ai'
 
-import { useBearStore } from '@/zustand/store'
+import { useBearStore, bearStore } from '@/zustand/store'
 import { IDropDown } from '@/zustand/type'
 
 interface ICardItem {
@@ -35,14 +34,13 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
 }))
 
 const WidgetFrame = ({ id, icon, title, children }: ICardItem) => {
-  const { dropDown, setDropDown } = useBearStore((state) => state)
+  const dropDown = useBearStore((state) => state.dropDown)
 
   const toggleDropDown = useCallback(() => {
-    if (!id) return
-    if (dropDown[id] === undefined) return
+    if (!id || dropDown[id] === undefined) return
     const params: IDropDown = {}
     params[id] = !dropDown[id]
-    setDropDown(params)
+    bearStore.setDropDown(params)
   }, [dropDown])
 
   return (

@@ -53,22 +53,20 @@ const MvrvPage = () => {
       <br />
       <MvrvExplain />
 
-      {isLoad === true && (
+      {isLoad && (
         <Typography variant="h2" fontSize={20} fontWeight="bold" display="flex" alignItems="center" justifyContent="flex-start" gap="8px" mt="24px" mb="16px">
           <Box>
             MVRV Z-Score: <u>{img.mvrv.val}</u>
           </Box>
           <Box>
-            {isLoad === true && (
-              <Typography align="right" fontSize={16} py="4px">
-                (Update: {img.mvrv.date?.toString().replace(/-/g, '.')})
-              </Typography>
-            )}
+            <Typography align="right" fontSize={16} py="4px">
+              (Update: {img.mvrv.date?.toString().replace(/-/g, '.')})
+            </Typography>
           </Box>
         </Typography>
       )}
 
-      {isLoad === null && <Skeleton variant="rectangular" width={matches ? `${imgSize.width}px` : '360px'} height="100%" sx={{ bgcolor: '#000', aspectRatio: '9 / 5', margin: '16px 0' }} />}
+      {isLoad === null && <Skeleton variant="rectangular" width="100%" height="100%" sx={{ maxWidth: `${imgSize.width}px`, bgcolor: '#000', aspectRatio: '9 / 5', margin: '16px 0' }} />}
       {isLoad === false && <LottieItem play option={lottieOption} animationData={Bitcoin404} speed={1} />}
       {isLoad !== false && <img ref={imgRef} className="mvrv-img" src={img.src} onLoad={onLoad} width={imgSize.width} height={matches ? imgSize.height : 'auto'} alt="Bitcoin Mvrv Z-Score" />}
     </Stack>

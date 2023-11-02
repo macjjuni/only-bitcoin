@@ -65,7 +65,7 @@ export const useBearStore = create<BearState>()(
       updateKRW: (krw) => set((state) => ({ btc: { ...state.btc, ...krw } })),
       updateUSD: (usd) => set((state) => ({ btc: { ...state.btc, ...usd } })),
       updateDoimnance: (dominance) => set(() => ({ dominance })),
-      setDropDown: (bool) => set(() => ({ dropDown: { ...bool } })), // 확정성 필요
+      setDropDown: (bool) => set(() => ({ dropDown: { ...bool } })),
       setKimchi: (isKimchi) => {
         set({ isKimchi })
         return isKimchi
