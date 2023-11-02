@@ -101,8 +101,11 @@ export const getDominace = (list: ICurrency[]) => {
 }
 
 // 반감기 진행률 계산
-export const calcProgress = (start: number, end: number, current: number) => {
-  return ((current - start) / (end - start)) * 100
+const blockDiff = 210000
+
+export const calcProgress = (nextHalvingHeight: number, current: number) => {
+  const startHeight = nextHalvingHeight - blockDiff
+  return ((current - startHeight) / (nextHalvingHeight - startHeight)) * 100
 }
 
 /* ---------- 비트코인 반감기까지 남은 블록개수 받아서 계산 후 일/시/분 문자열 반환 ---------- */

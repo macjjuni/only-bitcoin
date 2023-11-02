@@ -60,7 +60,17 @@ export const useBearStore = create<BearState>()(
       isCountAnime: true,
       isCountColor: true,
       isLottiePlay: true,
-      blockData: { height: 0, timeStamp: 0, updateTimeStamp: 0 },
+      blockData: {
+        height: 0,
+        timeStamp: 0,
+        updateTimeStamp: 0,
+        halvingPercent: 0,
+        nextHalving: {
+          nextHalvingHeight: 0,
+          nextHalvingPredictedDate: 0,
+          remainingHeight: 0,
+        },
+      },
       setAmount: (price) => set(() => ({ amount: price })),
       updateKRW: (krw) => set((state) => ({ btc: { ...state.btc, ...krw } })),
       updateUSD: (usd) => set((state) => ({ btc: { ...state.btc, ...usd } })),

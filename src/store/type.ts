@@ -49,11 +49,19 @@ export interface IDropDown {
   [index: string]: boolean
 }
 
+export interface INextHalving {
+  nextHalvingHeight: number //
+  nextHalvingPredictedDate: number | string
+  remainingHeight: number
+}
+
 // BTC Recent Block Height Data
 export interface IBlock {
   height: number // 블록 높이
   timeStamp: number // 블록 생성 타임스탬프
   updateTimeStamp: number // 데이터 업데이트 타임스탬프
+  halvingPercent: number // 반감기 진행률
+  nextHalving: INextHalving
 }
 
 // MVRV Z-Score

@@ -42,7 +42,8 @@ const PopOver = ({ anchorEl, open, handlePopoverClose }: IPopOver) => {
         <Typography fontSize={matches ? 16 : 14}>
           블록 생성 시간: {transTimeStampDate(blockData.timeStamp).replace(/-/g, '.')}({diff}분 전)
         </Typography>
-        <Progress value={80} />
+
+        <Progress />
       </Stack>
     </Popover>
   )

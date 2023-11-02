@@ -6,7 +6,7 @@ import GoogleGA from '@/components/initial/GoogleGA'
 import AdsenseCodeSnippet from '@/components/initial/AdSenseCodeSnippet'
 import BtcBlockInit from '@/components/initial/BtcBlockInit'
 import DominanceInit from './DominanceInit'
-import FeargreedInit from './\bFeargreedInit'
+import FeargreedInit from './FeargreedInit'
 import { isDev } from '@/utils/common'
 
 // 초기화 HOC

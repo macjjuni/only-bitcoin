@@ -1,41 +1,16 @@
-import { memo, useEffect, useCallback, useState } from 'react'
 import { Stack, Typography, Divider } from '@mui/material'
 import HalvingExpain from '@/components/explain/HalvingExpain'
 import HalvingTable from '@/components/molecule/HalvingTable'
 import BtcIcon from '@/components/icon/BtcIcon'
-import { useBearStore } from '@/store'
-import { btcHalvingData } from '@/data/btcInfo'
-import { calcRemainingTime, transTimeStampDate, calcProgress, comma } from '@/utils/common'
 import CubeLottie from '@/components/dashboard/BlockView/components/CubeLottie'
 import CardItem from '@/components/molecule/CardItem'
 import Progress from '@/components/molecule/Progress'
 
-interface IBlock {
-  nextHalvingHeight: number
-  nextHalvingPredictedDate: number | string
-  remainingHeight: number
-}
+import { useBearStore } from '@/store'
+import { calcRemainingTime, transTimeStampDate, comma } from '@/utils/common'
 
-const BitcoinHalvingTable = () => {
+const BitcoinHalvingPage = () => {
   const blockData = useBearStore((state) => state.blockData)
-  const [nextHalving, setNextHalving] = useState<IBlock>({
-    nextHalvingHeight: 0, // 다음 반감기 블록 높이
-    nextHalvingPredictedDate: '', // 다음 반감기 예측 날짜
-    remainingHeight: 0,
-  })
-
-  const getNextHalvingData = useCallback(() => {
-    const nextHalv = btcHalvingData.find((Halving) => Halving.blockNum > blockData.height)
-    setNextHalving({
-      nextHalvingHeight: nextHalv?.blockNum || 0,
-      nextHalvingPredictedDate: nextHalv?.date || '',
-      remainingHeight: Number(nextHalv?.blockNum) - Number(blockData.height), // 다음 반감기까지 남은 블록 수
-    })
-  }, [])
-
-  useEffect(() => {
-    getNextHalvingData()
-  }, [blockData])
 
   return (
     <Stack flexDirection="column" width="100%" height="100%" justifyContent="center">
@@ -45,6 +20,7 @@ const BitcoinHalvingTable = () => {
       </Typography>
       <Divider />
       <br />
+      {/* 반감기 설명 컴포넌트 */}
       <HalvingExpain />
 
       <Typography variant="h3" fontSize={20} fontWeight="bold" display="flex" justifyContent="flex-start" alignItems="center" gap="4px" mt="24px" mb="16px">
@@ -58,7 +34,7 @@ const BitcoinHalvingTable = () => {
             <>
               <CubeLottie />
               <Typography variant="h5" fontWeight="bold" gutterBottom>
-                {comma(nextHalving.nextHalvingHeight?.toString())}
+                {comma(blockData.nextHalving.nextHalvingHeight?.toString())}
               </Typography>
             </>
           }
@@ -68,7 +44,7 @@ const BitcoinHalvingTable = () => {
                 예상시간
               </Typography>
               <div>
-                {calcRemainingTime(nextHalving.remainingHeight)}({nextHalving.nextHalvingPredictedDate})
+                {calcRemainingTime(blockData.nextHalving.remainingHeight)}({blockData.nextHalving.nextHalvingPredictedDate})
               </div>
             </>
           }
@@ -100,7 +76,7 @@ const BitcoinHalvingTable = () => {
             <>
               <CubeLottie />
               <Typography variant="h5" fontWeight="bold" gutterBottom>
-                {comma(nextHalving.remainingHeight?.toString())}
+                {comma(blockData.nextHalving.remainingHeight?.toString())}
               </Typography>
             </>
           }
@@ -109,7 +85,8 @@ const BitcoinHalvingTable = () => {
               <Typography fontSize={14} fontWeight="bold" mb="4px">
                 진행률
               </Typography>
-              <Progress value={calcProgress(Number(nextHalving.nextHalvingHeight) - 210000, Number(nextHalving.nextHalvingHeight), blockData.height)} />
+              {/* 다음 반감기까지 진행률 프로그레스바 */}
+              <Progress />
             </>
           }
         />
@@ -123,4 +100,4 @@ const BitcoinHalvingTable = () => {
   )
 }
 
-export default memo(BitcoinHalvingTable)
+export default BitcoinHalvingPage
