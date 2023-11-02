@@ -43,7 +43,7 @@ const PopOver = ({ anchorEl, open, handlePopoverClose }: IPopOver) => {
           블록 생성 시간: {transTimeStampDate(blockData.timeStamp).replace(/-/g, '.')}({diff}분 전)
         </Typography>
 
-        <Progress />
+        <Progress isMaxNum />
       </Stack>
     </Popover>
   )
