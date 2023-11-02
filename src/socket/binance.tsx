@@ -34,8 +34,8 @@ function initBinance() {
 
   // eslint-disable-next-line func-names
   socket.onopen = function () {
-    console.log('on socket_Binance')
     retryCount = 1
+    console.log('✅ 바이낸스 소켓 연결 초기화')
     toast.success(`서버에 연결되었습니다.(Binance)`)
   }
   socket.onmessage = ({ data }) => {

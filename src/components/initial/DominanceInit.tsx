@@ -1,14 +1,14 @@
 import { useCallback, useLayoutEffect } from 'react'
 import moment from 'moment'
 import { getCurrencies } from '@/api/dominance'
-import { getDominace, getNowDate, valueCheck } from '@/utils/common'
+import { getDominace, getNowDate, valueCheck, isDev } from '@/utils/common'
 import { bearStore, useBearStore } from '@/store'
 import interval from '@/utils/interval'
 
 const limitMins = 10 // 분(min)
-const intervalTime = 300000 // Interval Time(ms): 5분
+const intervalTime = 5 * 60000 // Interval Time(ms): 5분
 
-const Dominance = () => {
+const DominanceInit = () => {
   const dominance = useBearStore((state) => state.dominance)
   // BTC 도미넌스 데이터 초기화
   const updateDominance = useCallback(async () => {
@@ -30,6 +30,7 @@ const Dominance = () => {
   }, [])
 
   useLayoutEffect(() => {
+    if (isDev) console.log('✅ BTC 도미넌스 초기화')
     updateCheck()
     const blockInterval = interval(updateDominance, intervalTime)
     blockInterval.start()
@@ -38,4 +39,4 @@ const Dominance = () => {
   return null
 }
 
-export default Dominance
+export default DominanceInit

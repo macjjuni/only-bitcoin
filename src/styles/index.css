@@ -105,33 +105,9 @@ body {
   font-weight: bold;
 }
 
-.amount-input > div > input {
-  text-align: center;
-}
-.crypto-input > input {
+.input-center > input {
   text-align: center;
   font-size: 18px;
-}
-
-.crypto-copy-input > input {
-  text-align: center;
-  margin-right: 0;
-  padding-left: 28px;
-}
-
-.price-copy-input > input {
-  text-align: center;
-  margin-right: 0;
-  padding-left: 14px;
-}
-
-.price-input {
-  padding-right: 32px;
-}
-.price-input > input {
-  text-align: center;
-  font-size: 18px;
-  padding: 16.5px 16px 16.5px 0;
 }
 
 .krw-txt,
@@ -335,11 +311,6 @@ body {
 
   #not-key-not-btc {
     font-size: 20px !important;
-  }
-  .price-input > input {
-    text-align: center;
-    font-size: 18px;
-    padding: 16.5px 8px 16.5px 0;
   }
 }
 

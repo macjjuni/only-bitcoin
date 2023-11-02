@@ -38,11 +38,6 @@ const clearTimeOut = () => {
   timeout = null
 }
 
-/**
- * --- TODO LIST ---
- * 1.
- */
-
 // 소켓 생성
 let socket: WebSocket | null = null
 
@@ -53,10 +48,10 @@ function initUpbit() {
 
   // eslint-disable-next-line func-names
   socket.onopen = function () {
-    console.log('on socket_upbit')
     retryCount = 1
     this.send(JSON.stringify(currency))
     toast.success(`서버에 연결되었습니다. (Upbit)`)
+    console.log('✅ 업비트 소켓 연결 초기화')
   }
   socket.onmessage = (evt) => {
     const enc = new TextDecoder('utf-8')

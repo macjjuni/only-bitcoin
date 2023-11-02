@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { Stack } from '@mui/material'
+import { Stack, FormControl, InputLabel, InputAdornment, OutlinedInput } from '@mui/material'
 import CopyButton from '@/components/atom/CopyButton'
 import SatIcon from '@/components/icon/SatIcon'
 
@@ -10,16 +10,32 @@ interface ISatoshi {
 const SatoshiLabel = ({ sat }: ISatoshi) => {
   return (
     <Stack alignItems="flex-end">
-      <Stack flexDirection="row" alignItems="center">
-        <CopyButton txt={sat} />
-        {sat}
-        <span className="unit-txt">Sat</span>
-        <Stack flexDirection="row" alignItems="center">
-          &#40;
-          <SatIcon width={20} height={20} />
-          &#41;
-        </Stack>
-      </Stack>
+      <FormControl fullWidth size="small">
+        <InputLabel size="small" htmlFor="sat">
+          Satoshi
+        </InputLabel>
+        <OutlinedInput
+          id="sat"
+          className="input-center fz16"
+          readOnly
+          sx={{ fontSize: 'inherit' }}
+          value={sat}
+          label="Satoshi"
+          size="small"
+          startAdornment={
+            <InputAdornment position="start">
+              <Stack justifyContent="center" alignItems="center" width="36px">
+                <SatIcon width={24} height={24} />
+              </Stack>
+            </InputAdornment>
+          }
+          endAdornment={
+            <InputAdornment position="start" sx={{ m: 0 }}>
+              <CopyButton txt={sat} />
+            </InputAdornment>
+          }
+        />
+      </FormControl>
     </Stack>
   )
 }

@@ -5,7 +5,7 @@ interface ISats {
   height: number
 }
 
-const SatIcon = ({ width, height }: ISats) => {
+const SatIcon = ({ width = 40, height = 40 }: ISats) => {
   return <img src="./images/sat.jpeg" alt="Satoshi Symbol" className="sat-img" width={width} height={height} />
 }
 

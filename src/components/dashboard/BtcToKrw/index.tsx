@@ -1,5 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
-import { Stack, Typography } from '@mui/material'
+import { Stack, Typography, Divider } from '@mui/material'
 import { BiTransferAlt } from 'react-icons/bi'
 // Zustand
 import { useBearStore, bearStore } from '@/store'
@@ -120,7 +120,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
 
   return (
     <WidgetFrame id="btcKrw" icon={<BiTransferAlt fontSize={28} color={btcInfo.color} />} title="BTC/KRW">
-      <Stack gap="24px">
+      <Stack gap={1.5}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap">
           <PriceStandardSwitch label="가격 기준" value={standard} onChange={toggleStandard} />
           {/* 생태계 이모지 */}
@@ -131,14 +131,15 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
           )}
         </Stack>
 
-        <Stack direction={standard ? 'column-reverse' : 'column'} justifyContent="center" gap={1} height="calc(100% - 85px)">
+        <Stack direction={standard ? 'column-reverse' : 'column'} justifyContent="center" gap={1.5} height="calc(100% - 85px)">
           {/* BTC Input */}
-          <AmountInput value={amount} readOnly={standard} onChange={!isSafari ? handleAmount : iosHandleAmount} />
-          {/* Satoshi Label */}
-          <SatoshiLabel sat={sat} />
+          <AmountInput value={amount} readOnly={standard} onChange={!isSafari ? handleAmount : iosHandleAmount} standard={standard} />
           {/* KRW Input */}
-          <KrwInput value={price} readOnly={!standard} onChange={handlePrice} />
+          <KrwInput value={price} readOnly={!standard} onChange={handlePrice} standard={standard} />
         </Stack>
+        <Divider />
+        {/* Satoshi Label */}
+        <SatoshiLabel sat={sat} />
       </Stack>
       <EcoSystemDialog open={isEco} setOpen={setEco} />
     </WidgetFrame>

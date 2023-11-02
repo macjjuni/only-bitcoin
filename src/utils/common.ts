@@ -2,6 +2,8 @@ import { v4 as uuidv4 } from 'uuid'
 import moment from 'moment'
 import { ICurrency } from '@/api/dominance'
 
+export const isDev = import.meta.env.MODE === 'development'
+
 /* ---------- 값 체크 ---------- */
 export const valueCheck = (val?: string | number | null | object) => {
   if (val === null || val === undefined || val === '') return false
