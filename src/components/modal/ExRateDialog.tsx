@@ -1,7 +1,7 @@
 import { type Dispatch, type SetStateAction, useCallback } from 'react'
 import { RiCloseCircleLine } from 'react-icons/ri'
 import { DialogTitle, Dialog, Container, Typography, IconButton, Stack } from '@mui/material'
-import { useBearStore } from '@/zustand/store'
+import { useBearStore } from '@/store'
 import { comma, calcPerDiff } from '@/utils/common'
 
 type DialogType = {

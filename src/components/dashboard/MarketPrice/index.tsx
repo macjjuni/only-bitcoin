@@ -8,9 +8,9 @@ import LottieItem from '@/components/atom/LottieItem'
 import CountText from '@/components/atom/CountText'
 import Kimchi from './components/Kimchi'
 import NotKeyNotBtc from './components/NotKeyNotBtc'
-import { useBearStore } from '@/zustand/store'
+import { useBearStore } from '@/store'
 
-import { type IBtc, type MarketType, type IExRate } from '@/zustand/type'
+import { type IBtc, type MarketType, type IExRate } from '@/store/type'
 
 // Lottie Files
 import btcLottie from '@/assets/bitcoin.json'

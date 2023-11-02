@@ -1,5 +1,5 @@
 import { memo, useCallback, useLayoutEffect } from 'react'
-import { useBearStore, bearStore } from '@/zustand/store'
+import { useBearStore, bearStore } from '@/store'
 import { getBtcRecentBlockHeight } from '@/api/mempool'
 import interval from '@/utils/interval'
 
@@ -7,7 +7,6 @@ const intervalTime = 120000 // Interval Time(ms): 2분
 
 const BtcBlockInit = () => {
   const blockData = useBearStore((state) => state.blockData)
-
   // 비트코인 블록 데이터 초기화
   const updateBlockHeight = useCallback(async () => {
     console.log('Get Block Status!')

@@ -1,5 +1,5 @@
 import { toast } from 'react-toastify'
-import { useBearStore } from '@/zustand/store'
+import { useBearStore } from '@/store'
 import { binaceAsset } from '@/data/btcInfo'
 import { isNetwork, transDate, getNowDate } from '@/utils/common'
 

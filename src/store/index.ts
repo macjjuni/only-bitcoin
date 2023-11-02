@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import { type IBtc, ThemeTypes, IDominance, MarketType, IExRate, IUpdateKRW, IUpdateUSD, IUpdateDominance, IDropDown, IfearGreed, IBlock } from '@/zustand/type'
+import { type IBtc, ThemeTypes, IDominance, MarketType, IExRate, IUpdateKRW, IUpdateUSD, IUpdateDominance, IDropDown, IfearGreed, IBlock } from '@/store/type'
 
 /** 📌 Rules!
  * 1. 설정(ex: 테마)값 업데이트 함수는 변경된 값을 그대로 리턴하도록 작성

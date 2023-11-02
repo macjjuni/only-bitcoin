@@ -2,8 +2,8 @@ import { useEffect, useState, useCallback } from 'react'
 import { Stack, Typography } from '@mui/material'
 import { BiTransferAlt } from 'react-icons/bi'
 // Zustand
-import { useBearStore, bearStore } from '@/zustand/store'
-import { type IBtc } from '@/zustand/type'
+import { useBearStore, bearStore } from '@/store'
+import { type IBtc } from '@/store/type'
 // Components
 import WidgetFrame from '@/components/molecule/WidgetFrame'
 import PriceStandardSwitch from './components/Switch'

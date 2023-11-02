@@ -9,7 +9,7 @@ import Footer from '@/layout/footer'
 import Initializer from './components/initial/Initializer'
 
 import { darkTheme, lightTheme } from './styles/theme'
-import { useBearStore } from './zustand/store'
+import { useBearStore } from './store'
 import { toastProps } from '@/data/toast'
 
 const toastOptions = toastProps()

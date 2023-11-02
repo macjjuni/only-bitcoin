@@ -1,5 +1,6 @@
 import axios from 'axios'
 
+// BTC 블록 상태 조회
 const apiUrl = 'https://mempool.space/api/v1/blocks'
 
 export const getBtcRecentBlockHeight = async (): Promise<{ height: number; timeStamp: number }> => {

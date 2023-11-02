@@ -2,7 +2,7 @@ import { Stack } from '@mui/material'
 import BlockView from '@/components/dashboard/BlockView'
 import MarketPrice from '@/components/dashboard/MarketPrice'
 import BtcToKrw from '@/components/dashboard/BtcToKrw'
-import { useBearStore } from '@/zustand/store'
+import { useBearStore } from '@/store'
 
 const Home = () => {
   // Zustand Store

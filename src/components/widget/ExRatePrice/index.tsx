@@ -1,7 +1,7 @@
 import { BiWon } from 'react-icons/bi'
 import { useMediaQuery } from '@mui/material'
 import ChipItem from '@/components/atom/ChipItem'
-import { useBearStore } from '@/zustand/store'
+import { useBearStore } from '@/store'
 import { responsive } from '@/styles/style'
 import { comma } from '@/utils/common'
 

@@ -3,11 +3,11 @@ import { Box } from '@mui/material'
 import { TbSquareRoundedLetterK } from 'react-icons/tb'
 import PopOver from './PopOver'
 import CountText from '@/components/atom/CountText'
-import { bearStore } from '@/zustand/store'
+import { bearStore } from '@/store'
 
 import { calcPerDiff } from '@/utils/common'
 import { getExRate } from '@/api/exRate'
-import { type IExRate, type IBtc } from '@/zustand/type'
+import { type IExRate, type IBtc } from '@/store/type'
 
 interface IKimchi {
   btc: IBtc

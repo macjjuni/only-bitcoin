@@ -3,7 +3,7 @@ import moment from 'moment'
 import { Popover, Stack, Typography, useMediaQuery } from '@mui/material'
 import { responsive } from '@/styles/style'
 import Progress from '@/components/molecule/Progress'
-import { useBearStore } from '@/zustand/store'
+import { useBearStore } from '@/store'
 import { transTimeStampDate } from '@/utils/common'
 
 interface IPopOver {

@@ -2,7 +2,7 @@ import { useCallback, useLayoutEffect } from 'react'
 import moment from 'moment'
 import { getCurrencies } from '@/api/dominance'
 import { getDominace, getNowDate, valueCheck } from '@/utils/common'
-import { bearStore, useBearStore } from '@/zustand/store'
+import { bearStore, useBearStore } from '@/store'
 import interval from '@/utils/interval'
 
 const limitMins = 10 // 분(min)

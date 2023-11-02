@@ -1,7 +1,7 @@
 import axios from 'axios'
 import { toast } from 'react-toastify'
 import moment from 'moment'
-import { IfearGreed } from '@/zustand/type'
+import { IfearGreed } from '@/store/type'
 
 const fearGreedURI = 'https://api.alternative.me/fng/'
 

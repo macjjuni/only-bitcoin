@@ -2,7 +2,7 @@ import { memo, useState, useCallback } from 'react'
 import { Stack, Typography } from '@mui/material'
 import CubeLottie from './components/CubeLottie'
 import PopOver from './components/PopOver'
-import { IBlock } from '@/zustand/type'
+import { IBlock } from '@/store/type'
 import { comma } from '@/utils/common'
 
 const BlockView = ({ blockData }: { blockData: IBlock }) => {

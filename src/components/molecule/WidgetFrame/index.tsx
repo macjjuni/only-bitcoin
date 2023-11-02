@@ -6,8 +6,8 @@ import MuiAccordionSummary, { AccordionSummaryProps } from '@mui/material/Accord
 import MuiAccordionDetails from '@mui/material/AccordionDetails'
 import { AiFillCaretDown } from 'react-icons/ai'
 
-import { useBearStore, bearStore } from '@/zustand/store'
-import { IDropDown } from '@/zustand/type'
+import { useBearStore, bearStore } from '@/store'
+import { IDropDown } from '@/store/type'
 
 interface ICardItem {
   icon?: JSX.Element
