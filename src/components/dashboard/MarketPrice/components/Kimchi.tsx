@@ -46,7 +46,7 @@ const Kimchi = ({ btc, exRate, isAnime }: IKimchi) => {
       <Box
         position="absolute"
         top="-32px"
-        right="0px"
+        right="0"
         display="flex"
         flexDirection="row"
         justifyContent="flex-end"

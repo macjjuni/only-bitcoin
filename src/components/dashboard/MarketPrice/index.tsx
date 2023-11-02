@@ -17,7 +17,7 @@ import btcLottie from '@/assets/bitcoin.json'
 
 // Lottie Option
 const defaultOption: LottieProps = { loop: true }
-const btcOption = { ...defaultOption, style: { width: '160px', height: '160px' } }
+const btcOption = { ...defaultOption, style: { width: '160px', height: '160px', marginLeft: '-4px' } }
 
 interface IMarketPrice {
   btc: IBtc
@@ -57,8 +57,8 @@ const MarketPrice = ({ btc, market, isKimchi, isLottiePlay, exRate }: IMarketPri
   const DollarIcon = useMemo(() => <IoLogoUsd fontSize={27} style={{ marginRight: '-4px' }} />, [])
 
   return (
-    <Stack className="box-item" onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px">
-      <Stack flexDirection="row" justifyContent="space-between" alignItems="center" pr="8px">
+    <Stack className="box-item" onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px" overflow="hidden">
+      <Stack flexDirection="row" justifyContent="space-between" alignItems="center" pr={1}>
         <LottieItem onClick={onToggleLottie} option={btcOption} play={isLottiePlay} animationData={btcLottie} speed={speed + 0.8} />
 
         <Stack flexDirection="column" justifyContent="flex-end" minWidth="200px" position="relative" mt="24px">
