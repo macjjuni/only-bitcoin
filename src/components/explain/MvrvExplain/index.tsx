@@ -7,7 +7,7 @@ const MvrvExplain = () => {
   const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
   return (
     <ExplainFrame
-      title="MVRV(Market Value - Realized Value)란?"
+      title="📚 MVRV(Market Value Realized Value)란?"
       content={
         <>
           <Typography fontSize={matches ? 16 : 14}>

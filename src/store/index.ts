@@ -1,7 +1,7 @@
 import { create } from 'zustand'
 import { persist } from 'zustand/middleware'
 
-import { type IBtc, ThemeTypes, IDominance, MarketType, IExRate, IUpdateKRW, IUpdateUSD, IUpdateDominance, IDropDown, IfearGreed, IBlock } from '@/store/type'
+import { type IBtc, ThemeTypes, IDominance, MarketType, IExRate, IUpdateKRW, IUpdateUSD, IUpdateDominance, IDropDown, IfearGreed, IBlock, IMvrvStore } from '@/store/type'
 
 /** 📌 Rules!
  * 1. 설정(ex: 테마)값 업데이트 함수는 변경된 값을 그대로 리턴하도록 작성
@@ -22,6 +22,7 @@ interface BearState {
   theme: ThemeTypes
   isLottiePlay: boolean // 메인 로티 애니메이션
   blockData: IBlock // 블록 생성 정보
+  mvrvData: IMvrvStore // MVRV 데이터 조회 기록
   updateKRW: (by: IUpdateKRW) => void
   updateUSD: (by: IUpdateUSD) => void
   updateDoimnance: (by: IUpdateDominance) => void
@@ -37,6 +38,7 @@ interface BearState {
   setCountColor: (bool: boolean) => boolean
   toggleLottie: () => void
   updateBlock: (blockData: IBlock) => void // 블록 생성 정보 업데이트
+  setMvrv: (mvrv: IMvrvStore) => void // MVRV 데이터 조회 기록
 }
 
 export const useBearStore = create<BearState>()(
@@ -71,6 +73,7 @@ export const useBearStore = create<BearState>()(
           remainingHeight: 0,
         },
       },
+      mvrvData: { value: '', date: '', timeStamp: 0 },
       setAmount: (price) => set(() => ({ amount: price })),
       updateKRW: (krw) => set((state) => ({ btc: { ...state.btc, ...krw } })),
       updateUSD: (usd) => set((state) => ({ btc: { ...state.btc, ...usd } })),
@@ -100,6 +103,7 @@ export const useBearStore = create<BearState>()(
       },
       toggleLottie: () => set((state) => ({ isLottiePlay: !state.isLottiePlay })),
       updateBlock: (blockData) => set(() => ({ blockData })),
+      setMvrv: (mvrvData: IMvrvStore) => set(() => ({ mvrvData })),
     }),
     { name: 'bear-storage' } // persist key
   )

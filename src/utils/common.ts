@@ -116,3 +116,8 @@ export const calcRemainingTime = (remainingBlock: number) => {
   const remainingMinutes = target % 60 // 분(minute) 계산
   return `${days}일 ${hours}시간 ${remainingMinutes}분`
 }
+
+/* ---------- 2개의 타임스탬프로 limitTime(ms) 시간을 받아 넘었는지 안넘었는지 체크 ---------- */
+export const getIsOverTimeCheck = (timeStamp1: number, timeStamp2: number, limitTime: number) => {
+  return Math.abs(timeStamp1 - timeStamp2) >= limitTime
+}

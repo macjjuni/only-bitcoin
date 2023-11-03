@@ -9,6 +9,8 @@ export interface IBtc {
 
 export type ThemeTypes = 'dark' | 'light'
 
+export type MarketType = 'KRW' | 'USD' | 'KRW/USD'
+
 // 도미넌스지수
 export interface IDominance {
   value: string
@@ -64,9 +66,9 @@ export interface IBlock {
   nextHalving: INextHalving
 }
 
-// MVRV Z-Score
-export interface IMvrv {
+// MVRV Z-Score 이미지 캐싱 처리를 위한 데이터
+export interface IMvrvStore {
+  value: string
   date: string
+  timeStamp: number
 }
-
-export type MarketType = 'KRW' | 'USD' | 'KRW/USD'
