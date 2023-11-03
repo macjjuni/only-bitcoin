@@ -1,4 +1,4 @@
-import { useMemo } from 'react'
+// import { useMemo } from 'react'
 import { Box, Typography, LinearProgress, LinearProgressProps } from '@mui/material'
 import { btcColor } from '@/data/btcInfo'
 import { useBearStore } from '@/store'
@@ -22,16 +22,12 @@ const LinearProgressWithLabel = ({ value, end, isMaxNum }: LinearProgressProps &
 const Progress = ({ isMaxNum }: { isMaxNum?: boolean }) => {
   const blockData = useBearStore((state) => state.blockData)
 
-  const calcPer = useMemo(() => {
-    return Math.round(blockData.halvingPercent * 100) / 100 // 소수 둘째 자리 까지
-  }, [blockData])
-
   return (
     <Box sx={{ width: '100%' }} position="relative">
-      <Box position="absolute" top="50%" left="0" fontSize={14} textAlign="right" pr={1.5} sx={{ width: `calc(${calcPer}% - 40px)`, translate: '0 -50%', zIndex: 1 }}>
-        {calcPer}%
+      <Box position="absolute" top="50%" left="0" fontSize={14} textAlign="right" pr={1.5} sx={{ width: `calc(${blockData.halvingPercent}% - 40px)`, translate: '0 -50%', zIndex: 1 }}>
+        {blockData.halvingPercent}%
       </Box>
-      <LinearProgressWithLabel value={calcPer} end={blockData.nextHalving.nextHalvingHeight} isMaxNum={isMaxNum} />
+      <LinearProgressWithLabel value={blockData.halvingPercent} end={blockData.nextHalving.nextHalvingHeight} isMaxNum={isMaxNum} />
     </Box>
   )
 }

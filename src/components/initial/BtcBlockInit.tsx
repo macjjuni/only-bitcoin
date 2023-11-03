@@ -26,12 +26,15 @@ const BtcBlockInit = () => {
   const updateBlockHeight = useCallback(async () => {
     console.log('🏃🏻‍♂️ 블록 상태 조회!')
     const { height, timeStamp } = await getBtcRecentBlockHeight()
-
     const nextHalving = getNextHalvingData()
-    // console.log(nextHalving)
-
-    const halvingPercent = calcProgress(Number(nextHalving.nextHalvingHeight), blockData.height)
-    bearStore.updateBlock({ height, timeStamp, updateTimeStamp: Number(new Date()), halvingPercent, nextHalving })
+    // 스토어 업데이트
+    bearStore.updateBlock({
+      height,
+      timeStamp,
+      updateTimeStamp: Number(new Date()),
+      halvingPercent: calcProgress(nextHalving.nextHalvingHeight, blockData.height), // 퍼센트 계산
+      nextHalving,
+    })
   }, [])
   // 첫 렌더링 시 이전 업데이트 시간 체크해서 초기화
   const updateCheck = useCallback(() => {
