@@ -16,6 +16,7 @@ const KrwInput = ({ value, readOnly, onChange, standard }: IKrwInput) => {
   const isFocused = useMemo(() => {
     return standard ? 'Mui-focused' : ''
   }, [standard])
+
   return (
     <FormControl fullWidth>
       <InputLabel htmlFor="outlined-adornment-amount" className={isFocused}>

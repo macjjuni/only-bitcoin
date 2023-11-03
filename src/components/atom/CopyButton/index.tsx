@@ -16,7 +16,7 @@ const CopyButton = ({ txt }: ICopy) => {
     const isDone = await copyText(target)
     if (isDone) toast.success(`"${txt}" 복사 완료!`)
     else toast.error('복사 실패!')
-  }, [])
+  }, [txt])
 
   return (
     <IconButton onClick={clickCopy} aria-label="copy" sx={{ color: btcInfo.color }}>
