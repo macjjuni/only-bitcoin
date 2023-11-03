@@ -1,4 +1,4 @@
-import { Stack, Typography, Divider } from '@mui/material'
+import { Stack, Typography, Divider, useMediaQuery } from '@mui/material'
 import HalvingExpain from '@/components/explain/HalvingExpain'
 import HalvingTable from '@/components/molecule/HalvingTable'
 import BtcIcon from '@/components/icon/BtcIcon'
@@ -8,8 +8,10 @@ import Progress from '@/components/molecule/Progress'
 
 import { useBearStore } from '@/store'
 import { calcRemainingTime, transTimeStampDate, comma } from '@/utils/common'
+import { responsive } from '@/styles/style'
 
 const BitcoinHalvingPage = () => {
+  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
   const blockData = useBearStore((state) => state.blockData)
 
   return (
@@ -27,9 +29,10 @@ const BitcoinHalvingPage = () => {
         실시간 블록 현황
       </Typography>
 
-      <Stack direction="row" spacing={2} sx={{ pb: '16px', overflowX: 'auto' }}>
+      <Stack direction={matches ? 'row' : 'column'} spacing={2} sx={{ pb: '16px', overflowX: 'auto' }}>
         <CardItem
           title="다음 반감기 블록 높이"
+          matches={matches}
           content={
             <>
               <CubeLottie />
@@ -52,6 +55,7 @@ const BitcoinHalvingPage = () => {
 
         <CardItem
           title="현재 블록 높이"
+          matches={matches}
           content={
             <>
               <CubeLottie />
@@ -72,6 +76,7 @@ const BitcoinHalvingPage = () => {
 
         <CardItem
           title="다음 반감기까지 남은 블록"
+          matches={matches}
           content={
             <>
               <CubeLottie />

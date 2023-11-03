@@ -7,7 +7,7 @@ const HalvingExplain = () => {
   const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
   return (
     <ExplainFrame
-      title="반감기(Halving)란?"
+      title="📚 반감기(Halving)란?"
       content={
         <Typography fontSize={matches ? 16 : 14}>
           비트코인 네트워크에서는 4년마다 “반감기”라는 이벤트가 발생합니다. 이것은 대략 10분마다 새로운 블록 생성자 즉, 채굴자에게 주어지는 보상이 절반으로 줄어든다는 의미입니다. 반감기는 210,000

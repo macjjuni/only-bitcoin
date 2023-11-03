@@ -4,16 +4,17 @@ import { Stack, Card, CardActions, CardContent, Typography } from '@mui/material
 interface ICard {
   width?: string
   minWidth?: string
+  matches?: boolean
   title: string | ReactNode
   content: string | ReactNode
   bottom?: string | ReactNode
 }
 
-const CardItem = ({ width = '100%', minWidth = '220px', title, content, bottom }: ICard) => {
+const CardItem = ({ width = '100%', minWidth = '220px', title, matches = true, content, bottom }: ICard) => {
   return (
     <Card sx={{ minWidth, width }}>
-      <CardContent>
-        <Typography variant="h4" fontSize={16} gutterBottom>
+      <CardContent sx={{ display: matches ? 'block' : 'flex', justifyContent: matches ? 'none' : 'space-between', pb: matches ? 2 : 0 }}>
+        <Typography variant="h4" fontSize={16} fontWeight="bold" gutterBottom>
           {title}
         </Typography>
         <Stack direction="row" alignItems="center" spacing={1}>
