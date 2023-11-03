@@ -287,6 +287,10 @@ body {
   margin: 24px 24px 80px 24px;
 }
 
+.css-19i0i5v-MuiPaper-root-MuiAccordion-root.Mui-expanded:first-of-type {
+  margin: 0 !important;
+}
+
 @media screen and (max-width: 600px) {
   body {
     background-size: 90vw;

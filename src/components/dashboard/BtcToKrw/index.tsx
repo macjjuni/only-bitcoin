@@ -1,6 +1,5 @@
 import { useEffect, useState, useCallback } from 'react'
 import { Stack, Typography, Divider } from '@mui/material'
-import { BiTransferAlt } from 'react-icons/bi'
 // Zustand
 import { useBearStore, bearStore } from '@/store'
 import { type IBtc } from '@/store/type'
@@ -11,8 +10,9 @@ import EcoSystemDialog from '@/components/modal/EcoSystemDialog'
 import AmountInput from './components/AmountInput'
 import SatoshiLabel from './components/SatoshiLabel'
 import KrwInput from './components/KrwInput'
+import TransIcon from '@/components/icon/TransIcon'
 
-import { btcInfo, ecoSystemPyramid } from '@/data/btcInfo'
+import { ecoSystemPyramid } from '@/data/btcInfo'
 import { comma, isSafari } from '@/utils/common'
 
 interface IBtcToKrw {
@@ -107,8 +107,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
   // 실시간 가격 변동 시 인풋 박스에 반영
   useEffect(() => {
     if (standard) {
-      // 금액
-      const numPrice = Number(price.replace(/(^0+)/, '').replace(/,/g, ''))
+      const numPrice = Number(price.replace(/(^0+)/, '').replace(/,/g, '')) // 금액
       const calcAmount = (numPrice / btc.krw).toFixed(commaLength).toString()
       bearStore.setAmount(calcAmount)
     } else {
@@ -119,7 +118,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
   }, [btc])
 
   return (
-    <WidgetFrame id="btcKrw" icon={<BiTransferAlt fontSize={28} color={btcInfo.color} />} title="BTC/KRW">
+    <WidgetFrame id="btcKrw" icon={<TransIcon size={28} />} title="BTC/KRW">
       <Stack gap={1.5}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap">
           <PriceStandardSwitch label="가격 기준" value={standard} onChange={toggleStandard} />

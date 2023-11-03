@@ -5,6 +5,9 @@ import { useBearStore } from '@/store'
 import { responsive } from '@/styles/style'
 import { getIsOverTimeCheck } from '@/utils/common'
 import { getMVRVImage, getStorageMvrvImage } from '@/api/mvrv'
+
+import PageTitle from '@/components/atom/PageTitle'
+import PageSubTitle from '@/components/atom/PageSubTitle'
 import BtcIcon from '@/components/icon/BtcIcon'
 import MvrvExplain from '@/components/explain/MvrvExplain'
 import LottieItem from '@/components/atom/LottieItem'
@@ -65,14 +68,8 @@ const MvrvPage = () => {
 
   return (
     <Stack flexDirection="column" width="100%" height="100%" justifyContent="flex-start">
-      <Typography variant="h2" fontSize={24} fontWeight="bold" display="flex" justifyContent="flex-start" alignItems="center" gap="4px" mt="8px" mb="16px">
-        <BtcIcon size={28} />
-        비트코인: MVRV Z-Score
-      </Typography>
-      <Divider />
-      <br />
+      <PageTitle title="비트코인: MVRV Z-Score" />
       <MvrvExplain />
-
       {isLoad && (
         <Typography variant="h2" fontSize={20} fontWeight="bold" display="flex" alignItems="center" justifyContent="flex-start" gap="8px" mt="24px" mb="16px">
           <Typography fontSize={18} fontWeight="bold">

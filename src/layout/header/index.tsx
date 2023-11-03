@@ -1,6 +1,7 @@
 import { useState, useCallback, type KeyboardEvent, type MouseEvent, useEffect } from 'react'
-import { Stack, AppBar, SwipeableDrawer, List, ListItem, ListItemText, ListItemButton } from '@mui/material'
+import { Stack, AppBar, SwipeableDrawer, List, ListItem, ListItemText, ListItemIcon, ListItemButton } from '@mui/material'
 import { useNavigate, useLocation } from 'react-router-dom'
+import { useBearStore } from '@/store'
 import { layout } from '@/styles/style'
 import MenuButton from '@/components/atom/MenuButton'
 
@@ -10,11 +11,12 @@ import RefreshButton from '@/components/atom/RefreshButton'
 import FearGreed from '@/components/widget/FearGreed'
 import ExRateDialog from '@/components/modal/ExRateDialog'
 
-import { routes } from '@/router'
+import { routesWithIcon } from '@/router'
 
 const Header = () => {
   const navigate = useNavigate()
   const { pathname } = useLocation()
+  const theme = useBearStore((state) => state.theme)
   const [isEx, setEx] = useState(false) // 환율&김프 모달
   const [isOpen, setOpen] = useState(false)
 
@@ -39,6 +41,11 @@ const Header = () => {
     setOpen(false)
   }, [])
 
+  const getActiveColor = useCallback(() => {
+    if (theme === 'light') return '#e0e0e0'
+    return '#616161'
+  }, [theme])
+
   useEffect(() => {
     setOpen(false)
   }, [pathname])
@@ -58,16 +65,18 @@ const Header = () => {
 
         {/* 사이드 메뉴바 */}
         <SwipeableDrawer anchor="left" open={isOpen} onClose={toggleDrawer(false)} onOpen={toggleDrawer(true)}>
-          <List sx={{ width: '220px' }}>
-            {routes.map((route) => (
+          <List sx={{ width: '240px' }}>
+            {routesWithIcon.map((route) => (
               <ListItem
                 key={route.id}
                 disablePadding
+                sx={{ bgcolor: pathname === route.path ? getActiveColor() : 'none' }}
                 onClick={() => {
                   onRoute(route.path)
                 }}
               >
                 <ListItemButton>
+                  <ListItemIcon sx={{ minWidth: '40px' }}>{route.icon}</ListItemIcon>
                   <ListItemText primary={route.title} />
                 </ListItemButton>
               </ListItem>
