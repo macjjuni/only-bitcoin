@@ -105,9 +105,6 @@ const blockDiff = 210000
 
 export const calcProgress = (nextHalvingHeight: number, current: number) => {
   const remain = current % blockDiff
-  console.log('remain', remain)
-  console.log('blockDiff', blockDiff)
-
   return Math.round((remain / blockDiff) * 100 * 100) / 100 // 소수 둘 째 자리까지 남김
 }
 
