@@ -4,14 +4,20 @@ import { RiCloseCircleLine } from 'react-icons/ri'
 import { SiNaver } from 'react-icons/si'
 import BtcIcon from '../icon/BtcIcon'
 
-type DialogType = {
+interface ICopyDialog {
   open: boolean
   setOpen: Dispatch<SetStateAction<boolean>>
 }
 
-const feedbackUrl = import.meta.env.VITE_FEEDBACK_URL
+const title = import.meta.env.VITE_TITLE || 'Info'
+const btcDiplomaUrl = 'https://t.co/lS2dUOKcK0'
+const btcStoreMapUrl = 'https://map.naver.com/v5/favorite/myPlace/folder/05ad290200484bed8ae4ffd19e6cd213?c=7,0,0,0,dh'
+const binanceUrl = 'https://binance-docs.github.io/apidocs/spot/en/#introduction'
+const upbitUrl = 'https://docs.upbit.com/docs/upbit-quotation-websocket'
+const feedbackUrl = import.meta.env.VITE_FEEDBACK_URL || 'https://twitter.com/kkusaeng'
+const gitUrl = import.meta.env.VITE_GIT_URL || 'https://github.com/macjjuni/only-bitcoin'
 
-const CopyDialog = ({ open, setOpen }: DialogType) => {
+const CopyDialog = ({ open, setOpen }: ICopyDialog) => {
   const closeDialog = () => {
     setOpen(false)
   }
@@ -21,7 +27,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
         <DialogTitle minWidth={340} borderBottom="1px solid #a5a5a5" sx={{ padding: '12px 16px' }}>
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
             <Typography component="p" fontSize={16} fontWeight="bold">
-              Only ₿itcoin Market Price
+              {title}
             </Typography>
             <IconButton onClick={closeDialog} sx={{ padding: '0' }}>
               <RiCloseCircleLine fontSize={24} />
@@ -33,7 +39,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
             <BtcIcon size={24} />
             <Typography component="p" fontSize={18} fontWeight="bold">
               비트코인 디플로마 [
-              <Link href="https://t.co/lS2dUOKcK0" target="_blank" title="비트코인 디플로마 한글 번역본 by ATOMIC BITCOIN">
+              <Link href={btcDiplomaUrl} target="_blank" title="비트코인 디플로마 한글 번역본 by ATOMIC BITCOIN">
                 💾 다운로드
               </Link>
               ]
@@ -44,7 +50,7 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
             <BtcIcon size={24} />
             <Typography component="p" fontSize={18} fontWeight="bold">
               비트코인 결제매장 [
-              <Link href="https://map.naver.com/v5/favorite/myPlace/folder/05ad290200484bed8ae4ffd19e6cd213?c=7,0,0,0,dh" target="_blank" title="비트코인 결제매장(네이버지도)">
+              <Link href={btcStoreMapUrl} target="_blank" title="비트코인 결제매장(네이버지도)">
                 <SiNaver color="#2DB400" fontSize={14} /> 네이버 지도
               </Link>
               ]
@@ -53,11 +59,11 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
 
           <Typography component="p" fontSize={14}>
             시세 정보:{' '}
-            <Link href="https://docs.upbit.com/docs/upbit-quotation-websocket" target="_blank" title="Upbit API Docs">
+            <Link href={upbitUrl} target="_blank" title="Upbit API Docs">
               Upbit
             </Link>{' '}
             /{' '}
-            <Link href="https://binance-docs.github.io/apidocs/spot/en/#introduction" target="_blank" title="Binance API Docs">
+            <Link href={binanceUrl} target="_blank" title="Binance API Docs">
               Binance
             </Link>
           </Typography>
@@ -69,8 +75,8 @@ const CopyDialog = ({ open, setOpen }: DialogType) => {
           </Typography>
           <Typography component="p" fontSize={14}>
             깃허브:{' '}
-            <Link title="GitHub Repository" href="https://github.com/macjjuni/btc-price" target="_blank">
-              Only Bitcoin Market Price
+            <Link title="GitHub Repository" href={gitUrl} target="_blank">
+              Only-Bitcoin
             </Link>
           </Typography>
         </Container>

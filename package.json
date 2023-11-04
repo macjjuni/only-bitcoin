@@ -1,5 +1,5 @@
 {
-  "name": "react-ts-boilerpate",
+  "name": "only-bitcoin",
   "private": true,
   "version": "0.0.0",
   "type": "module",
@@ -7,7 +7,8 @@
     "dev": "vite --host 0.0.0.0 --port 4000",
     "build": "tsc && vite build",
     "lint": "eslint .",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "test": "jest"
   },
   "lint-staged": {
     "*.js": [
@@ -45,6 +46,7 @@
     "zustand": "^4.3.8"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.7",
     "@types/node": "^18.11.18",
     "@types/react": "^18.0.27",
     "@types/react-dom": "^18.0.10",
@@ -64,6 +66,7 @@
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
     "husky": "^8.0.3",
+    "jest": "^29.7.0",
     "lint-staged": "^15.0.2",
     "prettier": "^2.8.3",
     "typescript": "^4.9.3",
