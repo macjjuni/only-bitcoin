@@ -1,7 +1,7 @@
 import { toast } from 'react-toastify'
 import { useBearStore } from '@/store'
 import { binaceAsset } from '@/data/btcInfo'
-import { isNetwork, transDate, getNowDate } from '@/utils/common'
+import { isNetwork, transDate, getNowDate, setTitle, comma } from '@/utils/common'
 
 // Binance API URL
 const binanceURL = `wss://stream.binance.com:9443/ws/${binaceAsset[0]}@ticker`
@@ -43,7 +43,7 @@ function initBinance() {
     const usd = Number(json.c) // 현재 가격
     const usdDate = transDate(json.C)
     const beforeUsd = getState().btc.usd
-
+    setTitle(comma(usd.toFixed(0)))
     if (usd > beforeUsd) getState().updateUSD({ usd, usdDate, usdColor: true })
     else if (usd < beforeUsd) getState().updateUSD({ usd, usdDate, usdColor: false })
   }

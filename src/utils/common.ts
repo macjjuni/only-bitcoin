@@ -2,6 +2,7 @@ import { v4 as uuidv4 } from 'uuid'
 import moment from 'moment'
 import { ICurrency } from '@/api/dominance'
 
+const title = import.meta.env.VITE_TITLE
 export const isDev = import.meta.env.MODE === 'development'
 
 /* ---------- 값 체크 ---------- */
@@ -24,7 +25,10 @@ export const comma = (num: string): string => {
   console.error('숫자 이외에 문자열이 포함됨', num)
   return '0'
 }
-
+/* ---------- 문서 타이틀 수정 ---------- */
+export const setTitle = (price: string | number) => {
+  document.title = `${price} | ${title}`
+}
 /* ---------- iOS Safari 브라우저 구분 ---------- */
 export const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
 /* ---------- NetWork Status 구분 ---------- */
