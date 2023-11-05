@@ -1,6 +1,6 @@
 import axios from 'axios'
-import { toast } from 'react-toastify'
 import { bearStore } from '@/store'
+import { mvrvToast } from '@/utils/toast'
 
 // mvrv 데이터 타입(이미지 제외)
 export interface IMvrvValue {
@@ -29,7 +29,7 @@ export const getMVRVImage = async () => {
     })
   } catch (err) {
     console.error(err)
-    toast.error('MVRV 데이터를 조회할 수 없습니다.')
+    mvrvToast.error()
   }
 }
 

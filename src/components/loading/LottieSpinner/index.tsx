@@ -25,7 +25,7 @@ const SpinnerWrapper = styled.div`
   z-index: 9999;
 `
 
-const Spinner = ({ isRender }: { isRender: boolean }) => {
+const LottieSpinner = ({ isRender }: { isRender: boolean }) => {
   return (
     <AnimatePresence>
       {!isRender && (
@@ -39,4 +39,4 @@ const Spinner = ({ isRender }: { isRender: boolean }) => {
   )
 }
 
-export default memo(Spinner)
+export default memo(LottieSpinner)
