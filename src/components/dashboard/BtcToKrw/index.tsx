@@ -121,7 +121,7 @@ const BtcToKrw = ({ btc, isEcoSystem }: IBtcToKrw) => {
     <WidgetFrame id="btcKrw" icon={<TransIcon size={28} />} title="BTC/KRW">
       <Stack gap={1.5}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap">
-          <PriceStandardSwitch label="가격 기준" value={standard} onChange={toggleStandard} />
+          <PriceStandardSwitch label="원화 기준" value={standard} onChange={toggleStandard} />
           {/* 생태계 이모지 */}
           {isEcoSystem && (
             <Typography fontSize={28} width={40} onClick={onEco} sx={{ cursor: 'pointer' }}>

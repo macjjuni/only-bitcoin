@@ -43,7 +43,7 @@ function initBinance() {
     const usd = Number(json.c) // 현재 가격
     const usdDate = transDate(json.C)
     const beforeUsd = getState().btc.usd
-    setTitle(comma(usd.toFixed(0)))
+    setTitle(comma(usd.toFixed(0))) // 페이지 타이틀 업데이트
     if (usd > beforeUsd) getState().updateUSD({ usd, usdDate, usdColor: true })
     else if (usd < beforeUsd) getState().updateUSD({ usd, usdDate, usdColor: false })
   }
