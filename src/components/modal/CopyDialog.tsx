@@ -1,8 +1,10 @@
-import { Dispatch, SetStateAction, memo } from 'react'
+import { Dispatch, SetStateAction, memo, useState, useCallback } from 'react'
 import { Link, DialogTitle, Dialog, Container, Typography, Stack, IconButton } from '@mui/material'
 import { RiCloseCircleLine } from 'react-icons/ri'
 import { SiNaver } from 'react-icons/si'
 import BtcIcon from '../icon/BtcIcon'
+import SatIcon from '../icon/SatIcon'
+import { btcColor } from '@/data/btcInfo'
 
 interface ICopyDialog {
   open: boolean
@@ -18,9 +20,15 @@ const feedbackUrl = import.meta.env.VITE_FEEDBACK_URL || 'https://twitter.com/kk
 const gitUrl = import.meta.env.VITE_GIT_URL || 'https://github.com/macjjuni/only-bitcoin'
 
 const CopyDialog = ({ open, setOpen }: ICopyDialog) => {
+  const [isDoname, setDonate] = useState(false)
   const closeDialog = () => {
     setOpen(false)
   }
+
+  const toggleDonate = useCallback(() => {
+    setDonate((prev) => !prev)
+  }, [isDoname])
+
   return (
     <>
       <Dialog onClose={closeDialog} open={open} className="mui-dialog">
@@ -46,7 +54,7 @@ const CopyDialog = ({ open, setOpen }: ICopyDialog) => {
             </Typography>
           </Stack>
 
-          <Stack component="h2" justifyContent="flex-start" flexDirection="row" alignItems="center" fontWeight="bold" gap="8px" m="0" py="6px" pb="24px">
+          <Stack component="h2" justifyContent="flex-start" flexDirection="row" alignItems="center" fontWeight="bold" gap="8px" m="0" py="6px">
             <BtcIcon size={24} />
             <Typography component="p" fontSize={18} fontWeight="bold">
               비트코인 결제매장 [
@@ -56,6 +64,37 @@ const CopyDialog = ({ open, setOpen }: ICopyDialog) => {
               ]
             </Typography>
           </Stack>
+
+          <Stack
+            component="h2"
+            onClick={toggleDonate}
+            justifyContent="flex-start"
+            flexDirection="row"
+            alignItems="center"
+            fontWeight="bold"
+            gap="8px"
+            m="0"
+            py="6px"
+            pb="16px"
+            sx={{ cursor: 'pointer' }}
+          >
+            <SatIcon width={24} height={24} />
+            <Typography component="p" fontSize={18} fontWeight="bold" color={btcColor}>
+              사토시 후원하기
+            </Typography>
+          </Stack>
+          {isDoname && (
+            <Stack component="div" pb="16px">
+              <lightning-widget
+                name="🙏🏻"
+                accent="#f7931a"
+                to="macjjuni@strike.me"
+                image="https://tistory1.daumcdn.net/tistory/3617178/skin/images/bitcoin-pacman.gif"
+                amounts="1000, 6000, 10000"
+                labels="🏃🏻‍♂️, ☕️, 💻, ⭐️"
+              />
+            </Stack>
+          )}
 
           <Typography component="p" fontSize={14}>
             시세 정보:{' '}
