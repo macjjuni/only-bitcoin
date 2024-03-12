@@ -13,7 +13,7 @@ interface ICopyDialog {
 
 const title = import.meta.env.VITE_TITLE || 'Info'
 const btcDiplomaUrl = 'https://t.co/lS2dUOKcK0'
-const btcStoreMapUrl = 'https://map.naver.com/v5/favorite/myPlace/folder/05ad290200484bed8ae4ffd19e6cd213?c=7,0,0,0,dh'
+const btcStoreMapUrl = 'https://naver.me/GPXCmWjV'
 const binanceUrl = 'https://binance-docs.github.io/apidocs/spot/en/#introduction'
 const upbitUrl = 'https://docs.upbit.com/docs/upbit-quotation-websocket'
 const feedbackUrl = import.meta.env.VITE_FEEDBACK_URL || 'https://twitter.com/kkusaeng'
