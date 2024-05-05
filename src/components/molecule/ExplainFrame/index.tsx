@@ -11,7 +11,7 @@ interface IExplainFrame {
 const ExplainFrame = ({ title, content }: IExplainFrame) => {
   const [isExpanded, setIsExpanded] = useState(true)
 
-  const onChange = useCallback((_, expanded: boolean) => {
+  const onChange = useCallback((_: React.SyntheticEvent, expanded: boolean) => {
     setIsExpanded(expanded)
   }, [])
 
