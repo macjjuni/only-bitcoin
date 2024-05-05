@@ -17,6 +17,9 @@ export interface IMvrv {
 const apuUrl = import.meta.env.VITE_MVRV_URL || ''
 const mvrvStorageKey = 'mvrv'
 
+/**
+ * @deprecated 서버 비용 문제로..
+ */
 export const getMVRVImage = async () => {
   try {
     const { data } = await axios.get<IMvrv>(`${apuUrl}/image/mvrv`)
