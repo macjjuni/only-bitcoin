@@ -24,7 +24,6 @@
   "dependencies": {
     "@emotion/react": "^11.11.1",
     "@emotion/styled": "^11.11.0",
-    "@fontsource/roboto": "^5.0.3",
     "@mui/icons-material": "^5.11.16",
     "@mui/material": "^5.13.6",
     "axios": "^1.4.0",
@@ -77,5 +76,6 @@
   "description": "feat. SWC",
   "main": "main.tsx",
   "author": "macjjuni <macjjuni@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }

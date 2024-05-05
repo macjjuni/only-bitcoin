@@ -1,13 +1,35 @@
 @font-face {
-  font-family: 'Pretendard-Regular';
-  src: url('https://cdn.jsdelivr.net/gh/Project-Noonnu/noonfonts_2107@1.1/Pretendard-Regular.woff') format('woff');
-  font-weight: 400;
+  font-family: 'Pretendard';
   font-style: normal;
+  font-weight: 900;
+  font-display: swap;
+  src: local('Pretendard Black'), url('/font/pretendard/subset-pretendard-black.woff2') format('woff2');
 }
 
-* {
-  font-family: 'Pretendard-Regular';
+@font-face {
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 700;
+  font-display: swap;
+  src: local('Pretendard Bold'), url('/font/pretendard/subset-pretendard-bold.woff2') format('woff2');
 }
+
+@font-face {
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: normal;
+  font-display: swap;
+  src: local('Pretendard Regular'), url('/font/pretendard/subset-pretendard-regular.woff2') format('woff2');
+}
+
+@font-face {
+  font-family: 'Pretendard';
+  font-style: normal;
+  font-weight: 300;
+  font-display: swap;
+  src: local('Pretendard Bold'), url('/font/p4retendard/subset-pretendard-thin.woff2') format('woff2');
+}
+
 a {
   width: 100%;
   color: inherit;
@@ -32,7 +54,7 @@ button {
 
 body {
   margin: 0;
-  font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-image: url('/btc-cover.webp'); /*이미지 경로지정*/
