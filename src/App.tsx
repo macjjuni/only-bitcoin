@@ -17,6 +17,7 @@ const toastOptions = toastProps()
 const App = () => {
   // 소켓 초기화
   const theme = useBearStore((state) => state.theme)
+
   return (
     <Initializer>
       <ThemeProvider theme={theme === 'light' ? lightTheme : darkTheme}>
