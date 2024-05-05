@@ -1,5 +1,5 @@
 import { memo } from 'react'
-import { useMediaQuery, Typography } from '@mui/material'
+import { useMediaQuery, Typography, Link } from '@mui/material'
 import ExplainFrame from '../../molecule/ExplainFrame'
 import { responsive } from '@/styles/style'
 
@@ -20,6 +20,11 @@ const MvrvExplain = () => {
             <a target="_blank" rel="noreferrer" href="https://dataguide.cryptoquant.com/v/korean/market-data-indicators/mvrv-ratio">
               <u>(자세히)</u>
             </a>
+            <br />
+            <br />
+            <Link href="https://en.macromicro.me/charts/30335/bitcoin-mvrv-zscore" target="_blank">
+              MVRV Z-Score 확인하기
+            </Link>
           </Typography>
         </>
       }

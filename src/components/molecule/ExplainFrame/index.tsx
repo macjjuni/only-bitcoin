@@ -1,4 +1,4 @@
-import { memo } from 'react'
+import { memo, useCallback, useState } from 'react'
 import { Accordion, AccordionSummary, AccordionDetails, Typography } from '@mui/material'
 
 interface IExplainFrame {
@@ -9,8 +9,14 @@ interface IExplainFrame {
 // Explain 관련 컴포넌트 프레임
 
 const ExplainFrame = ({ title, content }: IExplainFrame) => {
+  const [isExpanded, setIsExpanded] = useState(true)
+
+  const onChange = useCallback((_, expanded: boolean) => {
+    setIsExpanded(expanded)
+  }, [])
+
   return (
-    <Accordion>
+    <Accordion expanded={isExpanded} onChange={onChange}>
       <AccordionSummary aria-controls="panel1a-content" id="panel1a-header">
         <Typography fontSize={16} fontWeight="bold">
           {title}
