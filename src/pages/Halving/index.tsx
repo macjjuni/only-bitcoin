@@ -24,7 +24,7 @@ const BitcoinHalvingPage = () => {
       {/* 페이지 서브 타이틀 */}
       <PageSubTitle subTitle="실시간 블록 현황" />
       {/* 실시간 블록 현황 */}
-      <Stack direction={matches ? 'row' : 'column'} spacing={1.5} sx={{ overflowX: 'auto' }}>
+      <Stack direction={matches ? 'row' : 'column'} spacing={1.5} sx={{ overflowX: 'auto' }} px={0.5} py={1}>
         <CardItem
           title="다음 반감기 블록 높이"
           matches={matches}

@@ -21,11 +21,13 @@ const CardItem = ({ width = '100%', minWidth = '220px', title, matches = true, c
           {content}
         </Stack>
       </CardContent>
-      <CardActions>
-        <Typography component="div" fontSize={14} width="100%" p="0 0 8px 8px">
-          {bottom}
-        </Typography>
-      </CardActions>
+      {bottom && (
+        <CardActions>
+          <Typography component="div" fontSize={14} width="100%" p="0 0 4px 8px">
+            {bottom}
+          </Typography>
+        </CardActions>
+      )}
     </Card>
   )
 }
