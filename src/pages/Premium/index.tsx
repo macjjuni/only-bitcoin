@@ -52,9 +52,9 @@ const PremiumPage = () => {
       <Stack direction={matches ? 'row' : 'column'} spacing={1.5} sx={{ overflowX: 'auto' }} px={0.5} py={1}>
         <CardItem
           title={
-            <Stack flexDirection="row" alignItems="center" gap={1}>
+            <Stack flexDirection="row" alignItems="center" gap={1} mt={matches ? 0 : '4px'}>
               <TbSquareRoundedLetterK fontSize={24} />
-              <Typography fontSize={22} fontWeight="bold">
+              <Typography fontSize={18} fontWeight="bold">
                 프리미엄
               </Typography>
             </Stack>
@@ -87,9 +87,9 @@ const PremiumPage = () => {
         />
         <CardItem
           title={
-            <Stack flexDirection="row" alignItems="center" gap={1}>
+            <Stack flexDirection="row" alignItems="center" gap={1} mt={matches ? 0 : '4px'}>
               <img src="/images/upbit_logo.webp" alt="upbit_logo" width={24} height={24} />
-              <Typography fontSize={22} fontWeight="bold">
+              <Typography fontSize={18} fontWeight="bold">
                 한국 시세
               </Typography>
             </Stack>
@@ -113,9 +113,9 @@ const PremiumPage = () => {
         />
         <CardItem
           title={
-            <Stack flexDirection="row" alignItems="center" gap={1}>
+            <Stack flexDirection="row" alignItems="center" gap={1} mt={matches ? 0 : '4px'}>
               <img src="/images/binance_logo.webp" alt="binance_logo" width={24} height={24} />
-              <Typography fontSize={22} fontWeight="bold">
+              <Typography fontSize={18} fontWeight="bold">
                 해외 시세
               </Typography>
             </Stack>
