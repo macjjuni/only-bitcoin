@@ -48,12 +48,17 @@ export const ecoSystemPyramid = [
   { name: 'whale', min: 6.15, max: 1000000, emoji: '🐳' },
 ]
 
+// TODO. 반감기 날짜를 멤풀에 조회해서 뿌려주기.
+// - 현재 블록 높이 가져와서 지난 지난 반감기 블록 높이 조회 후 날짜를 보여주기
+// - 단점: 멤풀에 의존적이므로 네트워크 오류 시 데이터 표시 못 함.
+// - 장점: 계속 업데이트 안해줘도 됨.
+
 export const btcHalvingData = [
   { date: '2009.01.03', blockNum: 0, currentReward: 50.0 },
-  { date: '2012.11.28', blockNum: 210000, currentReward: 25.0 },
-  { date: '2016.07.09', blockNum: 420000, currentReward: 12.5 },
-  { date: '2020.05.11', blockNum: 630000, currentReward: 6.25 },
-  { date: '2024.04.xx', blockNum: 840000, currentReward: 3.125 },
+  { date: '2012.11.29', blockNum: 210000, currentReward: 25.0 },
+  { date: '2016.07.10', blockNum: 420000, currentReward: 12.5 },
+  { date: '2020.05.12', blockNum: 630000, currentReward: 6.25 },
+  { date: '2024.04.20', blockNum: 840000, currentReward: 3.125 },
   { date: 2028, blockNum: 1050000, currentReward: 1.5625 },
   { date: 2032, blockNum: 1260000, currentReward: 0.78125 },
   { date: 2036, blockNum: 1470000, currentReward: 0.390625 },
