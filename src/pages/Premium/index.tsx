@@ -9,6 +9,7 @@ import { useBearStore } from '@/store'
 import { comma, calcPerDiff } from '@/utils/common'
 import { responsive } from '@/styles/style'
 import PageTitle from '@/components/atom/PageTitle'
+import CountText from '@/components/atom/CountText'
 
 const LabelElement = ({ children }: { children: ReactNode }) => {
   return <span style={{ width: '28px', height: '26px' }}>{children}</span>
@@ -64,26 +65,21 @@ const PremiumPage = () => {
             <Stack>
               <Stack direction="row" justifyContent={stackJustifyContent} alignItems="center" gap={1} fontSize={24} fontWeight="bold">
                 {WonIcon}
-                {primiumKrw.includes('-') ? '' : '+'}
                 {primiumKrw}
               </Stack>
               <Stack direction="row" justifyContent={stackJustifyContent} alignItems="center" gap={1} fontSize={24} fontWeight="bold">
                 {DollarIcon}
-                {primiumUsd.includes('-') ? '' : '+'}
                 {primiumUsd}
+              </Stack>
+              <Stack flexDirection="row" justifyContent={stackJustifyContent} alignItems="center" gap={1} fontSize={24} fontWeight="bold">
+                <MdOutlinePercent size={28} />
+                <Typography fontSize="inherit" fontWeight="inherit">
+                  <CountText text={calcPerDiff(krw, usd, basePrice)} decimals={2} duration={0.2} isAnime />
+                </Typography>
               </Stack>
             </Stack>
           }
-          bottom={
-            <>
-              <Stack flexDirection="row" alignItems="center">
-                <MdOutlinePercent size={20} />
-                <Typography fontSize={18} fontWeight="bold">
-                  {calcPerDiff(krw, usd, basePrice)}
-                </Typography>
-              </Stack>
-            </>
-          }
+          bottom={<></>}
         />
         <CardItem
           title={
@@ -96,7 +92,7 @@ const PremiumPage = () => {
           }
           matches={matches}
           content={
-            <Stack>
+            <Stack pb={1.5}>
               <Stack direction="row" justifyContent={stackJustifyContent} alignItems="center" gap={1} fontSize={24} fontWeight="bold">
                 {WonIcon} {comma(krw.toString())}
               </Stack>
@@ -122,7 +118,7 @@ const PremiumPage = () => {
           }
           matches={matches}
           content={
-            <Stack>
+            <Stack pb={1.5}>
               <Stack direction="row" justifyContent={stackJustifyContent} alignItems="center" gap={1} fontSize={24} fontWeight="bold">
                 {WonIcon} {comma(usaKrwPrice.toFixed(0))}
               </Stack>

@@ -6,9 +6,10 @@ import CardItem from '@/components/molecule/CardItem'
 import Progress from '@/components/molecule/Progress'
 import PageTitle from '@/components/atom/PageTitle'
 import PageSubTitle from '@/components/atom/PageSubTitle'
+import CountText from '@/components/atom/CountText'
 
 import { useBearStore } from '@/store'
-import { calcRemainingTime, transTimeStampDate, comma } from '@/utils/common'
+import { calcRemainingTime, transTimeStampDate } from '@/utils/common'
 import { responsive } from '@/styles/style'
 
 const BitcoinHalvingPage = () => {
@@ -32,7 +33,7 @@ const BitcoinHalvingPage = () => {
             <>
               <CubeLottie />
               <Typography variant="h5" fontWeight="bold">
-                {comma(blockData.nextHalving.nextHalvingHeight?.toString())}
+                <CountText text={blockData.nextHalving.nextHalvingHeight} isAnime duration={0.3} />
               </Typography>
             </>
           }
@@ -54,7 +55,7 @@ const BitcoinHalvingPage = () => {
             <>
               <CubeLottie />
               <Typography variant="h5" fontWeight="bold">
-                {comma(blockData.height?.toString())}
+                <CountText text={blockData.height} isAnime duration={0.3} />
               </Typography>
             </>
           }
@@ -74,7 +75,7 @@ const BitcoinHalvingPage = () => {
             <>
               <CubeLottie />
               <Typography variant="h5" fontWeight="bold" gutterBottom>
-                {comma(blockData.nextHalving.remainingHeight?.toString())}
+                <CountText text={blockData.nextHalving.remainingHeight} isAnime duration={0.3} />
               </Typography>
             </>
           }
