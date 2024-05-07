@@ -3,7 +3,7 @@ import { Stack, Typography } from '@mui/material'
 import CubeLottie from './components/CubeLottie'
 import PopOver from './components/PopOver'
 import { IBlock } from '@/store/type'
-import { comma } from '@/utils/common'
+import CountText from '@/components/atom/CountText'
 
 const BlockView = ({ blockData }: { blockData: IBlock }) => {
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
@@ -30,7 +30,7 @@ const BlockView = ({ blockData }: { blockData: IBlock }) => {
       >
         <CubeLottie />
         <Typography fontSize={20} fontWeight="bold" letterSpacing="0.64px" mr="8px">
-          {comma(blockData.height.toString())}
+          <CountText text={blockData.height} duration={0.3} isAnime />
         </Typography>
       </Stack>
       <PopOver anchorEl={anchorEl} open={Boolean(anchorEl)} handlePopoverClose={handlePopoverClose} />
