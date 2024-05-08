@@ -13,72 +13,39 @@
 
 <br>
 
-### 내용 업데이트 예정...
+## 📸 Screen
+
+<img src="https://github.com/macjjuni/only-bitcoin/assets/38034518/8b7a18eb-822a-491e-a9d6-0451f149ac39" width="23.5%" alt="btc-price initial screen1">
+<img src="https://github.com/macjjuni/only-bitcoin/assets/38034518/faeb311d-7b87-4841-aa80-bc50aa89f1cc" width="23.5%" alt="btc-price initial screen1">
+<img src="https://github.com/macjjuni/only-bitcoin/assets/38034518/9ae8ffa1-b13e-4c5a-a5f4-3644bedccdc5" width="23.5%" alt="btc-price initial screen1">
+<img src="https://github.com/macjjuni/only-bitcoin/assets/38034518/a586d2af-6f78-409d-a2af-572a6e87cf02" width="23.5%" alt="btc-price initial screen1">
 
 <br>
 
-## 📸 이미지
+## 👻 소개
 
-<img src="https://github.com/macjjuni/btc-market-price/assets/38034518/f64f1a38-1570-49f4-8979-4fe3779e2c19" width="23.5%" alt="btc-price initial screen1">
-<img src="https://github.com/macjjuni/btc-market-price/assets/38034518/a13a3017-9f07-4bbc-b458-819743a34c27" width="23.5%" alt="btc-price initial screen1">
-<img src="https://github.com/macjjuni/btc-market-price/assets/38034518/9587ad3c-77e0-4cc3-b112-f8b08dc839fc" width="23.5%" alt="btc-price initial screen1">
-<img src="https://github.com/macjjuni/btc-market-price/assets/38034518/bd5f0fa3-e76e-4ac8-8553-028815355b92" width="23.5%" alt="btc-price initial screen1">
-
-<br>
-
-## ⛏️ 기능
+- [x] 비트코인 거래소 시장가 시세 제공(KRW/USD)
+- [x] 한국 프리미엄, 환율(USD/KRW), Fear & Greed Index 지수 제공
+- [x] BTC 계산기
+  - BTC/KRW  <=> KRW/BTC
+  - BTC/USD  <=> USD/BTC
+  - BTC/SAT
 
 <br>
 
-- [x] 비트코인 시장가 제공(USD, KRW)
-- [x] 환율(USD/KRW), 김치 프리미엄, 크립토 공포&탐욕 지수 제공
-- [x] BTC/KRW, KRW/BTC, BTC/SAT, KRW/SAT 계산기
-
-<br>
-
-## 🪄 시장가 데이터 출처
-
-<br>
-
+## 🪄 리소스 출처
+ 
 - [Upbit API Docs](https://upbit.com/open_api_agreement)
 - [Binance API Docs](https://binance-docs.github.io/apidocs/spot/en/#introduction)
 - [Coin Gecko](https://www.coingecko.com/ko/api/documentation)
 
 <br>
 
-## 🌳 프로젝트 구성
+## 📚 업데이트 기록
 
-```
-btc-price
-├─ .env.development
-├─ .env.production
-├─ .eslintrc
-├─ .prettierrc
-├─ .gitignore
-├─ public
-├─ src
-│  ├─ assets       (🧱) - 구성요소 파일 모음
-│  ├─ components   (🧩) - 컴포넌트 모음
-│  ├─ data         (📀) - 기본 데이터 셋 모음
-│  ├─ layout       (🪟) - 레이아웃 컴포넌트
-│  ├─ pages        (📄) - 페이지 정보
-│  ├─ router       (🚦) - 페이지 라우터 정보
-│  ├─ socket       (🔌) - 소켓 함수 모음
-│  ├─ styles       (💃🏻) - 스타일 관련
-│  ├─ utils        (🛠️) - 공통 유틸리티 함수
-│  ├─ zustand      (⛅️) - 전역 스토어
-│  │
-│  ├─ App.tsx
-│  └─ main.tsx
-│
-├─ package.json
-├─ yarn.lock
-├─ index.html
-├─ tsconfig.json
-├─ tsconfig.node.json
-├─ vite.config.ts
-└─ readme.md
-```
+- MVRV 수치 제거 및 연관 링크로 대체(24.05.06)
+- 프리미엄 페이지 추가(24.05.06) 
+
 
 ## 🏃🏻‍♂️ Getting Started!
 
