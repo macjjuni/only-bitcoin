@@ -21,7 +21,7 @@ const BitcoinHalvingPage = () => {
       {/* 페이지 타이틀 */}
       <PageTitle title="비트코인 반감기" />
       {/* 반감기 설명 컴포넌트 */}
-      <HalvingExpain />
+      <HalvingExpain nextHeight={blockData.nextHalving.nextHalvingHeight} />
       {/* 페이지 서브 타이틀 */}
       <PageSubTitle subTitle="실시간 블록 현황" />
       {/* 실시간 블록 현황 */}

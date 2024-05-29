@@ -1,359 +1,374 @@
 @font-face {
-  font-family: 'Pretendard';
-  font-style: normal;
-  font-weight: 900;
-  font-display: swap;
-  src: local('Pretendard Black'), url('/font/pretendard/subset-pretendard-black.woff2') format('woff2');
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 900;
+    font-display: swap;
+    src: local('Pretendard Black'), url('/font/pretendard/subset-pretendard-black.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Pretendard';
-  font-style: normal;
-  font-weight: 700;
-  font-display: swap;
-  src: local('Pretendard Bold'), url('/font/pretendard/subset-pretendard-bold.woff2') format('woff2');
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: local('Pretendard Bold'), url('/font/pretendard/subset-pretendard-bold.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Pretendard';
-  font-style: normal;
-  font-weight: normal;
-  font-display: swap;
-  src: local('Pretendard Regular'), url('/font/pretendard/subset-pretendard-regular.woff2') format('woff2');
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: normal;
+    font-display: swap;
+    src: local('Pretendard Regular'), url('/font/pretendard/subset-pretendard-regular.woff2') format('woff2');
 }
 
 @font-face {
-  font-family: 'Pretendard';
-  font-style: normal;
-  font-weight: 300;
-  font-display: swap;
-  src: local('Pretendard Bold'), url('/font/p4retendard/subset-pretendard-thin.woff2') format('woff2');
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: local('Pretendard Bold'), url('/font/p4retendard/subset-pretendard-thin.woff2') format('woff2');
 }
 
 a {
-  width: 100%;
-  color: inherit;
-  text-decoration: none;
-  outline: none;
+    width: 100%;
+    color: inherit;
+    text-decoration: none;
+    outline: none;
 }
 
 a:hover,
 a:active {
-  text-decoration: none;
+    text-decoration: none;
 }
 
 button {
-  background: inherit;
-  border: none;
-  box-shadow: none;
-  border-radius: 0;
-  padding: 0;
-  overflow: visible;
-  cursor: pointer;
+    background: inherit;
+    border: none;
+    box-shadow: none;
+    border-radius: 0;
+    padding: 0;
+    overflow: visible;
+    cursor: pointer;
 }
 
 body {
-  margin: 0;
-  font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
-  background-image: url('/btc-cover.webp'); /*이미지 경로지정*/
-  background-size: 500px;
-  background-position: center 66%;
-  background-repeat: no-repeat;
-  background-attachment: fix;
+    margin: 0;
+    font-family: 'Pretendard', -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Roboto', 'Oxygen', 'Ubuntu', 'Cantarell', 'Fira Sans', 'Droid Sans', 'Helvetica Neue', sans-serif;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    background-image: url('/btc-cover.webp'); /*이미지 경로지정*/
+    background-size: 500px;
+    background-position: center 66%;
+    background-repeat: no-repeat;
+    background-attachment: fix;
 }
 
 .main {
-  display: flex !important;
-  justify-content: center;
-  align-items: center;
-  padding: 0 0 24px !important;
+    display: flex !important;
+    justify-content: center;
+    align-items: center;
+    padding: 0 0 24px !important;
 }
 
 #only-bitcoin {
-  position: relative;
-  width: 100%;
-  min-height: 100dvh;
-  padding: 0 12px;
-  margin: 0 auto;
+    position: relative;
+    width: 100%;
+    min-height: 100dvh;
+    padding: 0 12px;
+    margin: 0 auto;
 }
 
 .up {
-  color: #0ecb81;
+    color: #0ecb81;
 }
+
 .down {
-  color: #f6465d;
+    color: #f6465d;
 }
 
 .unit-txt {
-  font-size: 16px;
-  padding-left: 3px;
-  font-weight: 500;
-  text-shadow: none !important;
-  user-select: none;
+    font-size: 16px;
+    padding-left: 3px;
+    font-weight: 500;
+    text-shadow: none !important;
+    user-select: none;
 }
 
 .fcc {
-  display: flex;
-  justify-content: center;
-  align-items: center;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .chip-txt {
-  color: #1e2329;
+    color: #1e2329;
 }
 
 .price-txt-xs {
-  font-size: 13px;
+    font-size: 13px;
 }
 
 .price-txt-sm {
-  font-size: 18px;
+    font-size: 18px;
 }
 
 .price-txt-md {
-  font-size: 22px;
+    font-size: 22px;
 }
 
 .price-txt-lg {
-  font-size: 30px;
+    font-size: 30px;
 }
 
 #not-key-not-btc {
-  font-size: 22px !important;
-  text-align: center;
-  text-shadow: 1px 1px 1px #ce0000;
-  font-weight: bold;
+    font-size: 22px !important;
+    text-align: center;
+    text-shadow: 1px 1px 1px #ce0000;
+    font-weight: bold;
 }
 
 .input-center > input {
-  text-align: center;
-  font-size: 18px;
+    text-align: center;
+    font-size: 18px;
 }
 
 .krw-txt,
 .usd-txt {
-  display: inline-block;
-  width: 100%;
+    display: inline-block;
+    width: 100%;
 }
 
 .usd-txt {
-  width: 100%;
-  font-size: 24px !important;
+    width: 100%;
+    font-size: 24px !important;
 }
+
 .price-txt-lg {
-  text-shadow: 1px 1px 1px #434343;
+    text-shadow: 1px 1px 1px #434343;
 }
+
 .dark .price-txt-lg {
-  text-shadow: 1px 1px 1px rgb(214, 214, 214);
+    text-shadow: 1px 1px 1px rgb(214, 214, 214);
 }
 
 .up > .price-txt-lg {
-  text-shadow: 1px 1px 1px #0ecb81;
+    text-shadow: 1px 1px 1px #0ecb81;
 }
 
 .down > .price-txt-lg {
-  text-shadow: 1px 1px 1px #dd3f53;
+    text-shadow: 1px 1px 1px #dd3f53;
 }
 
 .kimchi {
-  font-weight: bold;
+    font-weight: bold;
 }
 
 .icon-btn {
-  width: 40px;
-  height: 40px;
-  padding: 0;
-  margin: 0;
+    width: 40px;
+    height: 40px;
+    padding: 0;
+    margin: 0;
 }
 
 .box-item {
-  width: 100%;
-  max-width: 400px;
-  min-width: 340px;
-  min-height: 300px;
-  margin: 0 auto;
+    width: 100%;
+    max-width: 400px;
+    min-width: 340px;
+    min-height: 300px;
+    margin: 0 auto;
 }
 
 @media screen and (max-width: 600px) {
-  .box-item {
-    min-height: auto;
-  }
-  .icon-btn {
-    width: 34px;
-    height: 34px;
-  }
+    .box-item {
+        min-height: auto;
+    }
+
+    .icon-btn {
+        width: 34px;
+        height: 34px;
+    }
 }
 
 .toggle-down {
-  height: 52px !important;
-  margin-bottom: calc(300px - 52px) !important;
+    height: 52px !important;
+    margin-bottom: calc(300px - 52px) !important;
 }
+
 .toggle-btn {
-  transform: rotate(180deg);
+    transform: rotate(180deg);
 }
+
 .toggle-down .toggle-btn {
-  transform: rotate(0);
+    transform: rotate(0);
 }
 
 .done {
-  animation: done 1s;
+    animation: done 1s;
 }
 
 .fear-greed-img {
-  visibility: hidden;
-  width: 100%;
-  height: 0;
-  opacity: 0;
-  transition: 0.3s ease;
+    visibility: hidden;
+    width: 100%;
+    height: 0;
+    opacity: 0;
+    transition: 0.3s ease;
 }
 
 .sat-img {
-  border-radius: 50%;
-  overflow: hidden;
+    border-radius: 50%;
+    overflow: hidden;
 }
 
 @keyframes done {
-  0% {
-    transform: rotate(0deg);
-  }
-  10% {
-    transform: rotate(15deg);
-  }
-  20% {
-    transform: rotate(-15deg);
-  }
-  30% {
-    transform: rotate(7deg);
-  }
-  40% {
-    transform: rotate(-7deg);
-  }
-  50% {
-    transform: rotate(3deg);
-  }
-  60% {
-    transform: rotate(-3deg);
-  }
-  70% {
-    transform: rotate(0deg);
-  }
-  100% {
-    transform: rotate(0deg);
-  }
+    0% {
+        transform: rotate(0deg);
+    }
+    10% {
+        transform: rotate(15deg);
+    }
+    20% {
+        transform: rotate(-15deg);
+    }
+    30% {
+        transform: rotate(7deg);
+    }
+    40% {
+        transform: rotate(-7deg);
+    }
+    50% {
+        transform: rotate(3deg);
+    }
+    60% {
+        transform: rotate(-3deg);
+    }
+    70% {
+        transform: rotate(0deg);
+    }
+    100% {
+        transform: rotate(0deg);
+    }
 }
+
 .css-1t7y2o5-MuiButtonBase-root-MuiToggleButton-root.Mui-selected {
-  background-color: rgba(244, 157, 26, 0.18) !important;
+    background-color: rgba(244, 157, 26, 0.18) !important;
 }
 
 /* ------ Toast CSS ------ */
 
 .Toastify__toast {
-  min-height: 56px !important;
+    min-height: 56px !important;
 }
+
 .Toastify__toast-container {
-  padding: 0 16px !important;
+    padding: 0 16px !important;
 }
+
 .Toastify__toast-container > div {
-  margin-bottom: 8px;
+    margin-bottom: 8px;
 }
 
 .Toastify__toast-container--top-right {
-  top: 1.5em !important;
+    top: 1.5em !important;
 }
 
 .Toastify__toast-container--bottom-center {
-  bottom: 2rem !important;
+    bottom: 2rem !important;
 }
 
 .Toastify__toast {
-  box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px !important;
-  border-radius: 6px !important;
-  overflow: hidden !important;
+    box-shadow: rgba(0, 0, 0, 0.35) 0px 5px 15px !important;
+    border-radius: 6px !important;
+    overflow: hidden !important;
 }
 
 .dark .Toastify__toast {
-  background-color: #474747;
+    background-color: #474747;
 }
+
 .dark .Toastify__toast .Toastify__toast-body {
-  color: #e6e6e6;
+    color: #e6e6e6;
 }
+
 .dark .Toastify__toast .Toastify__close-button > svg {
-  color: #fff;
+    color: #fff;
 }
 
 /* MUI Style */
 
 .MuiAccordionSummary-expandIconWrapper {
-  transform: rotate(0) !important;
+    transform: rotate(0) !important;
 }
 
 .MuiPaper-elevation1 {
-  margin: 0;
-  border-radius: 4px;
-  overflow: hidden;
+    margin: 0;
+    border-radius: 4px;
+    overflow: hidden;
 }
+
 .MuiPaper-elevation1::before {
-  display: none !important;
+    display: none !important;
 }
+
 .MuiAccordionSummary-root {
-  height: 56px !important;
+    height: 56px !important;
 }
 
 .MuiAccordionSummary-content {
-  margin: 0 !important;
+    margin: 0 !important;
 }
 
 .mui-dialog > .MuiDialog-container > .MuiDialog-paper {
-  margin: 24px 24px 80px 24px;
+    margin: 24px 24px 80px 24px;
 }
 
 .css-19i0i5v-MuiPaper-root-MuiAccordion-root.Mui-expanded:first-of-type {
-  margin: 0 !important;
+    margin: 0 !important;
 }
 
 @media screen and (max-width: 600px) {
-  body {
-    background-size: 90vw;
-    background-position: center 64%;
-  }
-  .main {
-    align-items: flex-start;
-  }
+    body {
+        background-size: 90vw;
+        background-position: center 64%;
+    }
 
-  .error-page {
-    padding-top: 24px;
-  }
+    .main {
+        align-items: flex-start;
+    }
 
-  #only-bitcoin {
-    min-height: 100vh;
-    min-height: -webkit-fill-available;
-    min-height: fill-available;
-  }
-  .header-wrap {
-    height: 76px;
-  }
+    .error-page {
+        padding-top: 24px;
+    }
 
-  #not-key-not-btc {
-    font-size: 20px !important;
-  }
+    #only-bitcoin {
+        min-height: 100vh;
+        min-height: -webkit-fill-available;
+        min-height: fill-available;
+    }
+
+    .header-wrap {
+        height: 76px;
+    }
+
+    #not-key-not-btc {
+        font-size: 20px !important;
+    }
 }
 
 /* MVRV Page */
 .mvrv-img {
-  visibility: hidden;
-  width: 100%;
-  max-width: 1220px;
-  height: 0;
-  border-radius: 3px;
-  border: 1px solid #eee;
-  opacity: 0;
-  transition: 0.3s ease;
+    visibility: hidden;
+    width: 100%;
+    max-width: 1220px;
+    height: 0;
+    border-radius: 3px;
+    border: 1px solid #eee;
+    opacity: 0;
+    transition: 0.3s ease;
 }
 
 .loaded {
-  visibility: visible;
-  height: auto !important;
-  opacity: 1 !important;
+    visibility: visible;
+    height: auto !important;
+    opacity: 1 !important;
 }
