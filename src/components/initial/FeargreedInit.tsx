@@ -2,7 +2,7 @@ import { useCallback, useLayoutEffect } from "react";
 import moment from "moment";
 import { getFearGreed } from "@/api/fearGreed";
 import interval from "@/utils/interval";
-import { bearStore, useBearStore } from "@/store";
+import { useBearStore, bearStore } from "@/store";
 import { isDev } from "@/utils/common";
 
 const limitMins = 10; // 분(min)

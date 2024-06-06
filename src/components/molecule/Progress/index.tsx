@@ -11,7 +11,7 @@ const Progress = ({ isMaxNum }: { isMaxNum?: boolean }) => {
     return (
       <Box sx={{ display: "flex", alignItems: "center" }}>
         <Box sx={{ width: "100%", mr: 1, color: btcColor }}>
-          <LinearProgress sx={{ height: "24px" }} color="inherit" variant="determinate" value={blockData.halvingPercent} />
+          <LinearProgress sx={{ height: "24px" }} variant="determinate" value={blockData.halvingPercent} />
         </Box>
         {isMaxNum && (
           <Box sx={{ minWidth: 40 }}>

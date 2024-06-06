@@ -1,5 +1,5 @@
 import axios from "axios";
-import { bearStore } from "@/store";
+import { bearStore } from "@/store/store";
 import { mvrvToast } from "@/utils/toast";
 
 // mvrv 데이터 타입(이미지 제외)

@@ -5,5 +5,5 @@ export const layout = {
 };
 
 export const responsive = {
-  mobile: 600,
+  mobile: 768,
 };

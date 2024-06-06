@@ -1,0 +1,9 @@
+
+.only-btc__page-sub-title {
+    @include flex-row-start;
+    @include font-sub-title;
+    width: 100%;
+    padding: 8px 0;
+    margin: 8px 0;
+    font-weight: bold;
+}

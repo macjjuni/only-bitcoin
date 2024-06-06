@@ -53,8 +53,8 @@ const MarketPrice = ({ btc, market, isKimchi, isLottiePlay, exRate }: IMarketPri
     [isCountColor]
   );
 
-  const WonIcon = useMemo(() => <FaWonSign fontSize={26} />, []);
-  const DollarIcon = useMemo(() => <IoLogoUsd fontSize={27} style={{ marginRight: "-4px" }} />, []);
+  const WonIcon = useMemo(() => <FaWonSign fontSize={26} color="inherit" fill="inherit" />, []);
+  const DollarIcon = useMemo(() => <IoLogoUsd fontSize={27} color="inherit" fill="inherit" style={{ marginRight: "-4px" }} />, []);
 
   return (
     <Stack className="box-item" onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px" overflow="hidden">

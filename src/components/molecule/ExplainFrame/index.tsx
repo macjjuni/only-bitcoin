@@ -1,9 +1,9 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useState, ReactNode } from "react";
 import { Accordion, AccordionSummary, AccordionDetails, Typography } from "@mui/material";
 
 interface IExplainFrame {
-  title: string | React.ReactNode;
-  content: string | React.ReactNode;
+  title: string | ReactNode;
+  content: string | ReactNode;
 }
 
 // Explain 관련 컴포넌트 프레임

@@ -1,0 +1,34 @@
+.only-btc__header {
+    @include flex-row-center;
+    flex: 0 0 48px;
+    height: auto;
+    padding: 0 $layout-padding-size;
+
+    .only-btc__header__container {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        width: 100%;
+
+        .only-btc__header__hamburger-button {
+            margin: 0;
+
+            svg { fill: $default-font-color; }
+        }
+        .only-btc__header__refresh-button {
+            margin: 0;
+
+            svg { fill: $primary-color; }
+        }
+    }
+}
+
+.dark {
+    .only-btc__header {
+        .only-btc__header__container {
+            .only-btc__header__hamburger-button {
+                svg { fill: $dark-font-color; }
+            }
+        }
+    }
+}

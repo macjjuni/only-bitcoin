@@ -15,14 +15,14 @@ const feedbackUrl = import.meta.env.VITE_FEEDBACK_URL || "https://twitter.com/kk
 const gitUrl = import.meta.env.VITE_GIT_URL || "https://github.com/macjjuni/only-bitcoin";
 
 const CopyDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetStateAction<boolean>> }) => {
-  const [isDonamte, setDonate] = useState(false);
+  const [isDonate, setDonate] = useState(false);
   const closeDialog = () => {
     setOpen(false);
   };
 
   const toggleDonate = useCallback(() => {
     setDonate((prev) => !prev);
-  }, [isDonamte]);
+  }, [isDonate]);
 
   return (
     <>
@@ -78,7 +78,7 @@ const CopyDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetSta
               사토시 후원하기
             </Typography>
           </Stack>
-          {isDonamte && (
+          {isDonate && (
             <Stack component="div" pb="16px">
               <lightning-widget
                 name="🙏🏻"

@@ -19,7 +19,7 @@ const numReg = /^[-+]?(\d+(\.\d*)?|\.\d+)$/;
 const commaLength = 5; // 소숫점
 const satoshi = 100000000;
 
-const BtcToKrw = ({ btc, isEcoSystem }: { btc: BtcProps; isEcoSystem: boolean }) => {
+const BtcToKrw = ({ btc }: { btc: BtcProps }) => {
   const amount = useBearStore((state) => state.amount);
 
   // state
@@ -123,11 +123,9 @@ const BtcToKrw = ({ btc, isEcoSystem }: { btc: BtcProps; isEcoSystem: boolean })
         <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap">
           <PriceStandardSwitch label="원화 기준" value={standard} onChange={toggleStandard} />
           {/* 생태계 이모지 */}
-          {isEcoSystem && (
-            <Typography fontSize={28} width={40} onClick={onEco} sx={{ cursor: "pointer" }}>
-              {emoji}
-            </Typography>
-          )}
+          <Typography fontSize={28} width={40} onClick={onEco} sx={{ cursor: "pointer" }}>
+            {emoji}
+          </Typography>
         </Stack>
 
         <Stack direction={standard ? "column-reverse" : "column"} justifyContent="center" gap={1.5} height="calc(100% - 85px)">
