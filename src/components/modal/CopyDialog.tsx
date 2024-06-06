@@ -1,48 +1,43 @@
-import { Dispatch, SetStateAction, memo, useState, useCallback } from 'react'
-import { Link, DialogTitle, Dialog, Container, Typography, Stack, IconButton } from '@mui/material'
-import { RiCloseCircleLine } from 'react-icons/ri'
-import { SiNaver } from 'react-icons/si'
-import BtcIcon from '../icon/BtcIcon'
-import SatIcon from '../icon/SatIcon'
-import { btcColor } from '@/data/btcInfo'
+import { Dispatch, SetStateAction, memo, useState, useCallback } from "react";
+import { Link, DialogTitle, Dialog, Container, Typography, Stack, IconButton } from "@mui/material";
+import { RiCloseCircleLine } from "react-icons/ri";
+import { SiNaver } from "react-icons/si";
+import BtcIcon from "../icon/BtcIcon";
+import SatIcon from "../icon/SatIcon";
+import { btcColor } from "@/data/btcInfo";
 
-interface ICopyDialog {
-  open: boolean
-  setOpen: Dispatch<SetStateAction<boolean>>
-}
+const title = import.meta.env.VITE_TITLE || "Info";
+const btcDiplomaUrl = "https://t.co/lS2dUOKcK0";
+const btcStoreMapUrl = "https://naver.me/GPXCmWjV";
+const binanceUrl = "https://binance-docs.github.io/apidocs/spot/en/#introduction";
+const upbitUrl = "https://docs.upbit.com/docs/upbit-quotation-websocket";
+const feedbackUrl = import.meta.env.VITE_FEEDBACK_URL || "https://twitter.com/kkusaeng";
+const gitUrl = import.meta.env.VITE_GIT_URL || "https://github.com/macjjuni/only-bitcoin";
 
-const title = import.meta.env.VITE_TITLE || 'Info'
-const btcDiplomaUrl = 'https://t.co/lS2dUOKcK0'
-const btcStoreMapUrl = 'https://naver.me/GPXCmWjV'
-const binanceUrl = 'https://binance-docs.github.io/apidocs/spot/en/#introduction'
-const upbitUrl = 'https://docs.upbit.com/docs/upbit-quotation-websocket'
-const feedbackUrl = import.meta.env.VITE_FEEDBACK_URL || 'https://twitter.com/kkusaeng'
-const gitUrl = import.meta.env.VITE_GIT_URL || 'https://github.com/macjjuni/only-bitcoin'
-
-const CopyDialog = ({ open, setOpen }: ICopyDialog) => {
-  const [isDoname, setDonate] = useState(false)
+const CopyDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetStateAction<boolean>> }) => {
+  const [isDonamte, setDonate] = useState(false);
   const closeDialog = () => {
-    setOpen(false)
-  }
+    setOpen(false);
+  };
 
   const toggleDonate = useCallback(() => {
-    setDonate((prev) => !prev)
-  }, [isDoname])
+    setDonate((prev) => !prev);
+  }, [isDonamte]);
 
   return (
     <>
       <Dialog onClose={closeDialog} open={open} className="mui-dialog">
-        <DialogTitle minWidth={340} borderBottom="1px solid #a5a5a5" sx={{ padding: '12px 16px' }}>
+        <DialogTitle minWidth={340} borderBottom="1px solid #a5a5a5" sx={{ padding: "12px 16px" }}>
           <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
             <Typography component="p" fontSize={16} fontWeight="bold">
               {title}
             </Typography>
-            <IconButton onClick={closeDialog} sx={{ padding: '0' }}>
+            <IconButton onClick={closeDialog} sx={{ padding: "0" }}>
               <RiCloseCircleLine fontSize={24} />
             </IconButton>
           </Stack>
         </DialogTitle>
-        <Container sx={{ padding: '16px' }}>
+        <Container sx={{ padding: "16px" }}>
           <Stack component="h2" justifyContent="flex-start" flexDirection="row" alignItems="center" fontWeight="bold" gap="8px" m="0" py="6px">
             <BtcIcon size={24} />
             <Typography component="p" fontSize={18} fontWeight="bold">
@@ -76,14 +71,14 @@ const CopyDialog = ({ open, setOpen }: ICopyDialog) => {
             m="0"
             py="6px"
             pb="16px"
-            sx={{ cursor: 'pointer' }}
+            sx={{ cursor: "pointer" }}
           >
             <SatIcon width={24} height={24} />
             <Typography component="p" fontSize={18} fontWeight="bold" color={btcColor}>
               사토시 후원하기
             </Typography>
           </Stack>
-          {isDoname && (
+          {isDonamte && (
             <Stack component="div" pb="16px">
               <lightning-widget
                 name="🙏🏻"
@@ -97,23 +92,23 @@ const CopyDialog = ({ open, setOpen }: ICopyDialog) => {
           )}
 
           <Typography component="p" fontSize={14}>
-            시세 정보:{' '}
+            시세 정보:{" "}
             <Link href={upbitUrl} target="_blank" title="Upbit API Docs">
               Upbit
-            </Link>{' '}
-            /{' '}
+            </Link>{" "}
+            /{" "}
             <Link href={binanceUrl} target="_blank" title="Binance API Docs">
               Binance
             </Link>
           </Typography>
           <Typography component="p" fontSize={14}>
-            피드백:{' '}
-            <Link href={feedbackUrl || '/'} target="_blank" title="Twitter url">
+            피드백:{" "}
+            <Link href={feedbackUrl || "/"} target="_blank" title="Twitter url">
               Twitter
             </Link>
           </Typography>
           <Typography component="p" fontSize={14}>
-            깃허브:{' '}
+            깃허브:{" "}
             <Link title="GitHub Repository" href={gitUrl} target="_blank">
               Only-Bitcoin
             </Link>
@@ -121,7 +116,7 @@ const CopyDialog = ({ open, setOpen }: ICopyDialog) => {
         </Container>
       </Dialog>
     </>
-  )
-}
+  );
+};
 
-export default memo(CopyDialog)
+export default memo(CopyDialog);

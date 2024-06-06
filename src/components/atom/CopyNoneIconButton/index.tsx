@@ -1,26 +1,29 @@
-import { memo, useCallback } from 'react'
-import { Box } from '@mui/material'
-import { toast } from 'react-toastify'
-import { copyText } from '@/utils/common'
+import { memo, useCallback } from "react";
+import { Box } from "@mui/material";
+import { toast } from "react-toastify";
+import { copyText } from "@/utils/common";
 
 interface ICopy {
-  txt: string | number
+  txt: string | number;
 }
 
 const CopyButton = ({ txt }: ICopy) => {
   const clickCopy = useCallback(async () => {
-    if (!txt) return
-    const target = txt.toString()
-    const isDone = await copyText(target)
-    if (isDone) toast.success(`"${txt}" 복사 완료!`)
-    else toast.error('복사 실패!')
-  }, [txt])
+    if (!txt) return;
+    const target = txt.toString();
+    const isDone = await copyText(target);
+    if (isDone) {
+      toast.success(`"${txt}" 복사 완료!`);
+    } else {
+      toast.error("복사 실패!");
+    }
+  }, [txt]);
 
   return (
     <Box onClick={clickCopy} aria-label="copy">
       {txt}
     </Box>
-  )
-}
+  );
+};
 
-export default memo(CopyButton)
+export default memo(CopyButton);

@@ -1,5 +1,5 @@
 // import { useState } from 'react'
-import { Stack } from '@mui/material'
+import { Stack } from "@mui/material";
 // import { LottieProps } from 'react-lottie-player'
 // import { useBearStore } from '@/store'
 // import { responsive } from '@/styles/style'
@@ -7,8 +7,8 @@ import { Stack } from '@mui/material'
 // import { getMVRVImage, getStorageMvrvImage } from '@/api/mvrv'
 
 // import Spinner from '@/components/atom/Spinner'
-import PageTitle from '@/components/atom/PageTitle'
-import MvrvExplain from '@/components/explain/MvrvExplain'
+import PageTitle from "@/components/atom/PageTitle";
+import MvrvExplain from "@/components/explain/MvrvExplain";
 // import LottieItem from '@/components/atom/LottieItem'
 // import Bitcoin404 from '@/assets/404-bitcoin.json'
 // import { mvrvToast } from '@/utils/toast'
@@ -108,7 +108,7 @@ const MvrvPage = () => {
       )}
       {isDev && <Button onClick={resetCache}>캐시 리셋</Button>} */}
     </Stack>
-  )
-}
+  );
+};
 
-export default MvrvPage
+export default MvrvPage;

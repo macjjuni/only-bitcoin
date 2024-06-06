@@ -1,19 +1,19 @@
-import { memo, useState, useCallback } from 'react'
-import { Stack, Typography } from '@mui/material'
-import CubeLottie from './components/CubeLottie'
-import PopOver from './components/PopOver'
-import { IBlock } from '@/store/type'
-import CountText from '@/components/atom/CountText'
+import { memo, useState, useCallback } from "react";
+import { Stack, Typography } from "@mui/material";
+import CubeLottie from "./components/CubeLottie";
+import PopOver from "./components/PopOver";
+import { BlockProps } from "@/store/type";
+import CountText from "@/components/atom/CountText";
 
-const BlockView = ({ blockData }: { blockData: IBlock }) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+const BlockView = ({ blockData }: { blockData: BlockProps }) => {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const handlePopoverOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(e.currentTarget)
-  }, [])
+    setAnchorEl(e.currentTarget);
+  }, []);
 
   const handlePopoverClose = useCallback(() => {
-    setAnchorEl(null)
-  }, [])
+    setAnchorEl(null);
+  }, []);
 
   return (
     <Stack mb="-60px" display="flex" flexDirection="row" justifyContent="flex-end" alignItems="center" maxWidth="400px" width="100%">
@@ -35,7 +35,7 @@ const BlockView = ({ blockData }: { blockData: IBlock }) => {
       </Stack>
       <PopOver anchorEl={anchorEl} open={Boolean(anchorEl)} handlePopoverClose={handlePopoverClose} />
     </Stack>
-  )
-}
+  );
+};
 
-export default memo(BlockView)
+export default memo(BlockView);

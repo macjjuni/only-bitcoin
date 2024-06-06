@@ -1,15 +1,15 @@
-import { Typography, Button, Stack } from '@mui/material'
-import { useNavigate } from 'react-router-dom'
+import { Typography, Button, Stack } from "@mui/material";
+import { useNavigate } from "react-router-dom";
 
-import { type LottieProps } from 'react-lottie-player'
-import LottieItem from '@/components/atom/LottieItem'
-import Bitcoin404 from '@/assets/404-bitcoin.json'
+import { type LottieProps } from "react-lottie-player";
+import LottieItem from "@/components/atom/LottieItem";
+import Bitcoin404 from "@/assets/404-bitcoin.json";
 
-const defaultOption: LottieProps = { loop: true, play: true }
-const lottieOption = { ...defaultOption, style: { width: 'auto', height: '150px' } }
+const defaultOption: LottieProps = { loop: true, play: true };
+const lottieOption = { ...defaultOption, style: { width: "auto", height: "150px" } };
 
 const Error = () => {
-  const navigate = useNavigate()
+  const navigate = useNavigate();
 
   return (
     <Stack className="error-page">
@@ -20,16 +20,16 @@ const Error = () => {
         <Button
           variant="contained"
           color="secondary"
-          sx={{ width: '120px' }}
+          sx={{ width: "120px" }}
           onClick={() => {
-            navigate('/')
+            navigate("/");
           }}
         >
           Go Home
         </Button>
       </Stack>
     </Stack>
-  )
-}
+  );
+};
 
-export default Error
+export default Error;

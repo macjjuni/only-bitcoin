@@ -1,14 +1,14 @@
-import { ChangeEvent, memo } from 'react'
-import { FormControlLabel, Switch } from '@mui/material'
+import { ChangeEvent, memo } from "react";
+import { FormControlLabel, Switch } from "@mui/material";
 
-interface ISwitch {
-  label: string
-  value: boolean
-  onChange: (e: ChangeEvent<HTMLInputElement>) => void
+interface SwitchProps {
+  label: string;
+  value: boolean;
+  onChange: (e: ChangeEvent<HTMLInputElement>) => void;
 }
 
-const PriceStandardSwitch = ({ label, value, onChange }: ISwitch) => {
-  return <FormControlLabel control={<Switch aria-label="price stardard" value={value} onChange={onChange} />} label={label} />
-}
+const PriceStandardSwitch = ({ label, value, onChange }: SwitchProps) => {
+  return <FormControlLabel control={<Switch aria-label="price stardard" value={value} onChange={onChange} />} label={label} />;
+};
 
-export default memo(PriceStandardSwitch)
+export default memo(PriceStandardSwitch);

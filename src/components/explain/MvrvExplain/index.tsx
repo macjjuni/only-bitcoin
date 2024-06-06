@@ -1,10 +1,10 @@
-import { memo } from 'react'
-import { useMediaQuery, Typography, Link } from '@mui/material'
-import ExplainFrame from '../../molecule/ExplainFrame'
-import { responsive } from '@/styles/style'
+import { memo } from "react";
+import { useMediaQuery, Typography, Link } from "@mui/material";
+import ExplainFrame from "../../molecule/ExplainFrame";
+import { responsive } from "@/styles/style";
 
 const MvrvExplain = () => {
-  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
+  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`);
   return (
     <ExplainFrame
       title="📚 MVRV(Market Value Realized Value)란?"
@@ -29,7 +29,7 @@ const MvrvExplain = () => {
         </>
       }
     />
-  )
-}
+  );
+};
 
-export default memo(MvrvExplain)
+export default memo(MvrvExplain);

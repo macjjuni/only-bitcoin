@@ -1,26 +1,26 @@
-import React, { useMemo } from 'react'
-import { Stack, Chip, useMediaQuery } from '@mui/material'
-import { responsive } from '@/styles/style'
+import { useMemo, memo, ReactNode } from "react";
+import { Stack, Chip, useMediaQuery } from "@mui/material";
+import { responsive } from "@/styles/style";
 
 interface IChip {
-  label: string | React.ReactNode
-  value: string
-  onClick?: () => void
+  label: string | ReactNode;
+  value: string;
+  onClick?: () => void;
 }
 
 const ChipItem = ({ label, value, onClick }: IChip) => {
-  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
+  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`);
 
   const generateLabel = useMemo(() => {
     return (
-      <Stack flexDirection="row" gap="4px" alignContent="center" alignItems="center" onClick={onClick} sx={{ cursor: 'pointer' }}>
+      <Stack flexDirection="row" gap="4px" alignContent="center" alignItems="center" onClick={onClick} sx={{ cursor: "pointer" }}>
         <span className="fcc">{label}</span>
-        <span style={{ textShadow: '1px 1px 1px #d0d0d0' }}>{value}</span>
+        <span style={{ textShadow: "1px 1px 1px #d0d0d0" }}>{value}</span>
       </Stack>
-    )
-  }, [value])
+    );
+  }, [value]);
 
-  return <Chip className="chip-txt" label={generateLabel} variant="outlined" size={matches ? 'medium' : 'small'} sx={{ borderRadius: 0, fontSize: matches ? '18px' : '13px' }} />
-}
+  return <Chip className="chip-txt" label={generateLabel} variant="outlined" size={matches ? "medium" : "small"} sx={{ borderRadius: 0, fontSize: matches ? "18px" : "13px" }} />;
+};
 
-export default ChipItem
+export default memo(ChipItem);

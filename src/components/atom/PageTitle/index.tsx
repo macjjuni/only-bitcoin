@@ -1,14 +1,14 @@
-import { ReactNode, memo } from 'react'
-import { Typography, Divider, useMediaQuery } from '@mui/material'
-import { responsive } from '@/styles/style'
-import BtcIcon from '@/components/icon/BtcIcon'
+import { ReactNode, memo } from "react";
+import { Typography, Divider, useMediaQuery } from "@mui/material";
+import { responsive } from "@/styles/style";
+import BtcIcon from "@/components/icon/BtcIcon";
 
-interface IPageTitle {
-  title: string | ReactNode
+interface PageTitleProps {
+  title: string | ReactNode;
 }
 
-const PageTitle = ({ title }: IPageTitle) => {
-  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
+const PageTitle = ({ title }: PageTitleProps) => {
+  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`);
 
   return (
     <>
@@ -18,7 +18,7 @@ const PageTitle = ({ title }: IPageTitle) => {
       </Typography>
       <Divider sx={{ mb: 1.5 }} />
     </>
-  )
-}
+  );
+};
 
-export default memo(PageTitle)
+export default memo(PageTitle);

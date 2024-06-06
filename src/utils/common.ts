@@ -1,127 +1,128 @@
-import { v4 as uuidv4 } from 'uuid'
-import moment from 'moment'
-import { ICurrency } from '@/api/dominance'
+import { v4 as uuidv4 } from "uuid";
+import moment from "moment";
+import { ICurrency } from "@/api/dominance";
 
-const title = import.meta.env.VITE_TITLE
-export const isDev = import.meta.env.MODE === 'development'
+const title = import.meta.env.VITE_TITLE;
+export const isDev = import.meta.env.MODE === "development";
 
 /* ---------- 값 체크 ---------- */
 export const valueCheck = (val?: string | number | null | object) => {
-  if (val === null || val === undefined || val === '') return false
-  else {
-    return true
+  if (val === null || val === undefined || val === "") {
+    return false;
+  } else {
+    return true;
   }
-}
+};
 
 /* ---------- string 형식에 숫자만 포함됐는지 체크 ---------- */
 export const isStrNumber = (val: string): boolean => {
-  return !Number.isNaN(Number(val))
-}
+  return !Number.isNaN(Number(val));
+};
 /* ---------- 천 단위 콤마 변환 ---------- */
 export const comma = (num: string): string => {
   // 문자형이지만 숫자말고 문자가 포함된 경우 체크
-  const numCheck = isStrNumber(num)
-  if (numCheck) return num.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ',')
-  console.error('숫자 이외에 문자열이 포함됨', num)
-  return '0'
-}
+  const numCheck = isStrNumber(num);
+  if (numCheck) return num.replace(/\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g, ",");
+  console.error("숫자 이외에 문자열이 포함됨", num);
+  return "0";
+};
 /* ---------- 문서 타이틀 수정 ---------- */
 export const setTitle = (price: string | number) => {
-  document.title = `${price} | ${title}`
-}
+  document.title = `${price} | ${title}`;
+};
 /* ---------- iOS Safari 브라우저 구분 ---------- */
-export const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent)
+export const isSafari = /^((?!chrome|android).)*safari/i.test(navigator.userAgent);
 /* ---------- NetWork Status 구분 ---------- */
-export const isNetwork = () => window.navigator.onLine
+export const isNetwork = () => window.navigator.onLine;
 
 /* ---------- 복사 기능 ---------- */
 export const copyText = async (txt: string) => {
   return await navigator.clipboard
     .writeText(txt)
     .then(() => {
-      return true
+      return true;
     })
     .catch((e) => {
-      console.error(e)
-      return false
-    })
-}
+      console.error(e);
+      return false;
+    });
+};
 
 /* ---------- uuid 객체 ---------- */
 export const uuid = {
   generate: () => {
-    return uuidv4()
+    return uuidv4();
   },
   getUuid: () => {
-    const savedUuid: string | null = localStorage.getItem('uuid')
-    return savedUuid
+    const savedUuid: string | null = localStorage.getItem("uuid");
+    return savedUuid;
   },
   saveUuid: (uuidTxt: string) => {
-    localStorage.setItem('uuid', uuidTxt)
+    localStorage.setItem("uuid", uuidTxt);
   },
-}
+};
 
-const dateFormat = 'YYYY-MM-DD HH:mm:ss'
+const dateFormat = "YYYY-MM-DD HH:mm:ss";
 /* ---------- 날짜 포멧 변환 ---------- */
 export const transDate = (dateStr: string | number | Date) => {
-  return moment(dateStr).format(dateFormat)
-}
+  return moment(dateStr).format(dateFormat);
+};
 export const transTimeStampDate = (timeStamp: string | number | Date) => {
-  return moment.unix(Number(timeStamp)).format(dateFormat)
-}
+  return moment.unix(Number(timeStamp)).format(dateFormat);
+};
 /* ---------- 현재 날짜 반환 ---------- */
 export const getNowDate = () => {
-  return moment().format(dateFormat)
-}
+  return moment().format(dateFormat);
+};
 
 export const getDateFormat = () => {
-  return dateFormat
-}
+  return dateFormat;
+};
 
 /* ---------- 김치 프리미엄 퍼센트 계산 ---------- */
 export const calcPerDiff = (krwPrice: number, usdPrice: number, exRate: number) => {
-  const basedUsdKRW = Math.floor(usdPrice * exRate) // 환율 * 비트코인 USD 시세
-  const priceDiff = krwPrice - basedUsdKRW
-  const per = (priceDiff / krwPrice) * 100
+  const basedUsdKRW = Math.floor(usdPrice * exRate); // 환율 * 비트코인 USD 시세
+  const priceDiff = krwPrice - basedUsdKRW;
+  const per = (priceDiff / krwPrice) * 100;
 
-  return parseFloat(per.toFixed(2))
-}
+  return parseFloat(per.toFixed(2));
+};
 
 /* ---------- 비트코인 도미넌스 퍼센트 계산 ---------- */
 export const getDominace = (list: ICurrency[]) => {
   // Initializes variables
-  let BTCCap = 0
-  let altCap = 0
+  let BTCCap = 0;
+  let altCap = 0;
 
   list.forEach((x) => {
-    if (x.id === 'bitcoin') {
-      BTCCap = x.market_cap
-      altCap += x.market_cap
+    if (x.id === "bitcoin") {
+      BTCCap = x.market_cap;
+      altCap += x.market_cap;
     } else {
-      altCap += x.market_cap
+      altCap += x.market_cap;
     }
-  })
-  return ((BTCCap / altCap) * 100).toFixed(2)
-}
+  });
+  return ((BTCCap / altCap) * 100).toFixed(2);
+};
 
 // 반감기 진행률 계산
-const blockDiff = 210000
+const blockDiff = 210000;
 
 export const calcProgress = (nextHalvingHeight: number, current: number) => {
-  const remain = current % blockDiff
-  return Math.round((remain / blockDiff) * 100 * 100) / 100 // 소수 둘 째 자리까지 남김
-}
+  const remain = current % blockDiff;
+  return Math.round((remain / blockDiff) * 100 * 100) / 100; // 소수 둘 째 자리까지 남김
+};
 
 /* ---------- 비트코인 반감기까지 남은 블록개수 받아서 계산 후 일/시/분 문자열 반환 ---------- */
 export const calcRemainingTime = (remainingBlock: number) => {
-  const target = remainingBlock * 10 // 10 = 블록 채굴 평균 분
-  const days = Math.floor(target / (24 * 60)) // 일(day) 계산
-  const hours = Math.floor((target % (24 * 60)) / 60) // 시간(hour) 계산
-  const remainingMinutes = target % 60 // 분(minute) 계산
-  return `${days}일 ${hours}시간 ${remainingMinutes}분`
-}
+  const target = remainingBlock * 10; // 10 = 블록 채굴 평균 분
+  const days = Math.floor(target / (24 * 60)); // 일(day) 계산
+  const hours = Math.floor((target % (24 * 60)) / 60); // 시간(hour) 계산
+  const remainingMinutes = target % 60; // 분(minute) 계산
+  return `${days}일 ${hours}시간 ${remainingMinutes}분`;
+};
 
 /* ---------- 2개의 타임스탬프로 limitTime(ms) 시간을 받아 넘었는지 안넘었는지 체크 ---------- */
 export const getIsOverTimeCheck = (timeStamp1: number, timeStamp2: number, limitTime: number) => {
-  return Math.abs(timeStamp1 - timeStamp2) >= limitTime
-}
+  return Math.abs(timeStamp1 - timeStamp2) >= limitTime;
+};

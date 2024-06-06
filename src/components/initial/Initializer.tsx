@@ -1,21 +1,21 @@
-import { ReactNode, useLayoutEffect } from 'react'
+import { ReactNode, useLayoutEffect } from "react";
 
-import initUpbit from '@/socket/upbit'
-import initBinance from '@/socket/binance'
-import GoogleGA from '@/components/initial/GoogleGA'
-import AdsenseCodeSnippet from '@/components/initial/AdSenseCodeSnippet'
-import BtcBlockInit from '@/components/initial/BtcBlockInit'
-import DominanceInit from './DominanceInit'
-import FeargreedInit from './FeargreedInit'
-import { isDev } from '@/utils/common'
+import initUpbit from "@/socket/upbit";
+import initBinance from "@/socket/binance";
+import GoogleGA from "@/components/initial/GoogleGA";
+import AdsenseCodeSnippet from "@/components/initial/AdSenseCodeSnippet";
+import BtcBlockInit from "@/components/initial/BtcBlockInit";
+import DominanceInit from "./DominanceInit";
+import FeargreedInit from "./FeargreedInit";
+import { isDev } from "@/utils/common";
 
 // 초기화 HOC
 const Initializer = ({ children }: { children: ReactNode }) => {
-  GoogleGA()
+  GoogleGA();
   useLayoutEffect(() => {
-    initBinance()
-    initUpbit()
-  }, [])
+    initBinance();
+    initUpbit();
+  }, []);
   return (
     <>
       {/* BTC Block 초기화 */}
@@ -28,7 +28,7 @@ const Initializer = ({ children }: { children: ReactNode }) => {
       {!isDev && <AdsenseCodeSnippet />}
       {children}
     </>
-  )
-}
+  );
+};
 
-export default Initializer
+export default Initializer;

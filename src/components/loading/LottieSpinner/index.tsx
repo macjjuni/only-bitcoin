@@ -1,15 +1,15 @@
-import { memo } from 'react'
-import styled from '@emotion/styled'
-import Lottie, { LottieProps } from 'react-lottie-player'
-import { AnimatePresence, motion } from 'framer-motion'
-import logo from '@/assets/loading.json'
+import { memo } from "react";
+import styled from "@emotion/styled";
+import Lottie, { LottieProps } from "react-lottie-player";
+import { AnimatePresence, motion } from "framer-motion";
+import logo from "@/assets/loading.json";
 
 // Lottie Option
 const defaultOptions: LottieProps = {
   loop: true,
   play: true,
-  style: { width: '300px', height: '300px', margin: '0' },
-}
+  style: { width: "300px", height: "300px", margin: "0" },
+};
 
 const SpinnerWrapper = styled.div`
   position: fixed;
@@ -23,7 +23,7 @@ const SpinnerWrapper = styled.div`
   padding-bottom: 100px;
   background-color: #fff;
   z-index: 9999;
-`
+`;
 
 const LottieSpinner = ({ isRender }: { isRender: boolean }) => {
   return (
@@ -36,7 +36,7 @@ const LottieSpinner = ({ isRender }: { isRender: boolean }) => {
         </SpinnerWrapper>
       )}
     </AnimatePresence>
-  )
-}
+  );
+};
 
-export default memo(LottieSpinner)
+export default memo(LottieSpinner);

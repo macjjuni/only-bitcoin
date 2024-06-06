@@ -1,44 +1,44 @@
-import { useCallback, useMemo, useLayoutEffect, useState } from 'react'
-import { Box } from '@mui/material'
-import { TbSquareRoundedLetterK } from 'react-icons/tb'
-import PopOver from './PopOver'
-import CountText from '@/components/atom/CountText'
-import { bearStore } from '@/store'
+import { useCallback, useMemo, useLayoutEffect, useState, memo } from "react";
+import { Box } from "@mui/material";
+import { TbSquareRoundedLetterK } from "react-icons/tb";
+import PopOver from "./PopOver";
+import CountText from "@/components/atom/CountText";
+import { bearStore } from "@/store";
 
-import { calcPerDiff } from '@/utils/common'
-import { getExRate } from '@/api/exRate'
-import { type IExRate, type IBtc } from '@/store/type'
+import { calcPerDiff } from "@/utils/common";
+import { getExRate } from "@/api/exRate";
+import { type ExRateProps, type BtcProps } from "@/store/type";
 
-interface IKimchi {
-  btc: IBtc
-  exRate: IExRate
-  isAnime: boolean
+interface KimchiProps {
+  btc: BtcProps;
+  exRate: ExRateProps;
+  isAnime: boolean;
 }
 
-const Kimchi = ({ btc, exRate, isAnime }: IKimchi) => {
-  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null)
+const Kimchi = ({ btc, exRate, isAnime }: KimchiProps) => {
+  const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const handlePopoverOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
-    setAnchorEl(e.currentTarget)
-  }, [])
+    setAnchorEl(e.currentTarget);
+  }, []);
 
   const handlePopoverClose = useCallback(() => {
-    setAnchorEl(null)
-  }, [])
+    setAnchorEl(null);
+  }, []);
 
   const getFetchExRate = useCallback(async () => {
-    const resExRate = await getExRate()
-    bearStore.setExRate(resExRate)
-  }, [])
+    const resExRate = await getExRate();
+    bearStore.setExRate(resExRate);
+  }, []);
 
   useLayoutEffect(() => {
-    getFetchExRate()
-  }, [])
+    getFetchExRate();
+  }, []);
 
-  const KIcon = useMemo(() => <TbSquareRoundedLetterK fontSize={22} />, [])
+  const KIcon = useMemo(() => <TbSquareRoundedLetterK fontSize={22} />, []);
 
   if (exRate.basePrice === 0) {
-    console.error('환율 데이터 에러')
-    return null
+    console.error("환율 데이터 에러");
+    return null;
   }
 
   return (
@@ -53,7 +53,7 @@ const Kimchi = ({ btc, exRate, isAnime }: IKimchi) => {
         alignItems="center"
         height={30}
         gap="4px"
-        sx={{ cursor: 'pointer' }}
+        sx={{ cursor: "pointer" }}
         onMouseEnter={handlePopoverOpen}
         onMouseLeave={handlePopoverClose}
       >
@@ -62,7 +62,7 @@ const Kimchi = ({ btc, exRate, isAnime }: IKimchi) => {
       </Box>
       <PopOver anchorEl={anchorEl} open={Boolean(anchorEl)} handlePopoverClose={handlePopoverClose} />
     </>
-  )
-}
+  );
+};
 
-export default Kimchi
+export default memo(Kimchi);

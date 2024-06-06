@@ -1,20 +1,21 @@
-import { memo } from 'react'
-import { Popover, Typography } from '@mui/material'
+import { memo } from "react";
+import { Popover, Typography } from "@mui/material";
 
 interface IPopOver {
-  anchorEl: HTMLElement | null
-  open: boolean
-  handlePopoverClose: (e: React.MouseEvent<HTMLElement>) => void
+  anchorEl: HTMLElement | null;
+  open: boolean;
+  handlePopoverClose: (e: React.MouseEvent<HTMLElement>) => void;
 }
+
 const PopOver = ({ anchorEl, open, handlePopoverClose }: IPopOver) => {
   return (
     <Popover
       id="mouse-over-popover"
-      sx={{ pointerEvents: 'none' }}
+      sx={{ pointerEvents: "none" }}
       open={open}
       anchorEl={anchorEl}
-      anchorOrigin={{ vertical: 'center', horizontal: 'left' }}
-      transformOrigin={{ vertical: 'center', horizontal: 'right' }}
+      anchorOrigin={{ vertical: "center", horizontal: "left" }}
+      transformOrigin={{ vertical: "center", horizontal: "right" }}
       onClose={handlePopoverClose}
       disableRestoreFocus
     >
@@ -22,7 +23,7 @@ const PopOver = ({ anchorEl, open, handlePopoverClose }: IPopOver) => {
         한국 프리미엄
       </Typography>
     </Popover>
-  )
-}
+  );
+};
 
-export default memo(PopOver)
+export default memo(PopOver);

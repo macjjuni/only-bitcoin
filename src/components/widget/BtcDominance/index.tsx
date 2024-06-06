@@ -1,9 +1,10 @@
-import ChipItem from '@/components/atom/ChipItem'
-import { useBearStore } from '@/store'
+import { memo } from "react";
+import ChipItem from "@/components/atom/ChipItem";
+import { useBearStore } from "@/store";
 
 const BtcDominance = () => {
-  const dominance = useBearStore((state) => state.dominance)
-  return <ChipItem label="BTC.D" value={dominance.value} />
-}
+  const dominance = useBearStore((state) => state.dominance);
+  return <ChipItem label="BTC.D" value={dominance.value} />;
+};
 
-export default BtcDominance
+export default memo(BtcDominance);

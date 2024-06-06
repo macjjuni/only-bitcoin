@@ -1,13 +1,13 @@
-import { memo } from 'react'
-import { Stack, FormControl, InputLabel, InputAdornment, OutlinedInput } from '@mui/material'
-import CopyButton from '@/components/atom/CopyButton'
-import SatIcon from '@/components/icon/SatIcon'
+import { memo } from "react";
+import { Stack, FormControl, InputLabel, InputAdornment, OutlinedInput } from "@mui/material";
+import CopyButton from "@/components/atom/CopyButton";
+import SatIcon from "@/components/icon/SatIcon";
 
-interface ISatoshi {
-  sat: string
+interface SatoshiProps {
+  sat: string;
 }
 
-const SatoshiLabel = ({ sat }: ISatoshi) => {
+const SatoshiLabel = ({ sat }: SatoshiProps) => {
   return (
     <Stack alignItems="flex-end">
       <FormControl fullWidth size="small">
@@ -18,7 +18,7 @@ const SatoshiLabel = ({ sat }: ISatoshi) => {
           id="sat"
           className="input-center fz16"
           readOnly
-          sx={{ fontSize: 'inherit' }}
+          sx={{ fontSize: "inherit" }}
           value={sat}
           label="Satoshi"
           size="small"
@@ -37,7 +37,7 @@ const SatoshiLabel = ({ sat }: ISatoshi) => {
         />
       </FormControl>
     </Stack>
-  )
-}
+  );
+};
 
-export default memo(SatoshiLabel)
+export default memo(SatoshiLabel);

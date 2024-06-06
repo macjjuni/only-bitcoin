@@ -1,34 +1,29 @@
-import { type Dispatch, type SetStateAction, useCallback } from 'react'
-import { RiCloseCircleLine } from 'react-icons/ri'
-import { DialogTitle, Dialog, Container, Typography, IconButton, Stack } from '@mui/material'
-import { useBearStore } from '@/store'
-import { comma, calcPerDiff } from '@/utils/common'
+import { type Dispatch, type SetStateAction, useCallback } from "react";
+import { RiCloseCircleLine } from "react-icons/ri";
+import { DialogTitle, Dialog, Container, Typography, IconButton, Stack } from "@mui/material";
+import { useBearStore } from "@/store";
+import { comma, calcPerDiff } from "@/utils/common";
 
-type DialogType = {
-  open: boolean
-  setOpen: Dispatch<SetStateAction<boolean>>
-}
-
-const ExRateDialog = ({ open, setOpen }: DialogType) => {
-  const btc = useBearStore((state) => state.btc)
-  const { basePrice, date, provider } = useBearStore((state) => state.exRate)
+const ExRateDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetStateAction<boolean>> }) => {
+  const btc = useBearStore((state) => state.btc);
+  const { basePrice, date, provider } = useBearStore((state) => state.exRate);
   const closeDialog = useCallback(() => {
-    setOpen(false)
-  }, [])
+    setOpen(false);
+  }, []);
 
   return (
     <Dialog onClose={closeDialog} open={open} className="mui-dialog">
-      <DialogTitle minWidth={340} borderBottom="1px solid #a5a5a5" sx={{ padding: '12px 16px' }}>
+      <DialogTitle minWidth={340} borderBottom="1px solid #a5a5a5" sx={{ padding: "12px 16px" }}>
         <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
           <Typography component="p" fontSize={16} fontWeight="bold">
             한국 프리미엄 및 환율 정보
           </Typography>
-          <IconButton onClick={closeDialog} sx={{ padding: '0' }}>
+          <IconButton onClick={closeDialog} sx={{ padding: "0" }}>
             <RiCloseCircleLine fontSize={24} />
           </IconButton>
         </Stack>
       </DialogTitle>
-      <Container sx={{ padding: '16px' }}>
+      <Container sx={{ padding: "16px" }}>
         <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
           <Typography>한국 프리미엄</Typography>
           <Typography>{calcPerDiff(btc.krw, btc.usd, basePrice)}%</Typography>
@@ -47,7 +42,7 @@ const ExRateDialog = ({ open, setOpen }: DialogType) => {
         </Stack>
       </Container>
     </Dialog>
-  )
-}
+  );
+};
 
-export default ExRateDialog
+export default ExRateDialog;
