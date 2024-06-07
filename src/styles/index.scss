@@ -1,3 +1,5 @@
+* { color: $default-font-color; }
+.dark * { color: $dark-font-color; }
 
 body {
     margin: 0;
@@ -25,42 +27,6 @@ body {
     }
 }
 
-* { color: $default-font-color; }
-.dark * { color: $dark-font-color; }
-
-.up { color: #0ecb81; fill: #0ecb81; }
-.down { color: #f6465d; fill: #f6465d; }
-.unit-txt {
-    font-size: 16px;
-    padding-left: 3px;
-    font-weight: 500;
-    text-shadow: none !important;
-    user-select: none;
-}
-
-.fcc {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-}
-
-.price-txt-xs {
-    font-size: 13px;
-}
-
-.price-txt-sm {
-    font-size: 18px;
-}
-
-.price-txt-md {
-    font-size: 22px;
-}
-
-.price-txt-lg {
-    font-size: 30px;
-    color: inherit;
-}
-
 #not-key-not-btc {
     font-size: 22px !important;
     text-align: center;
@@ -73,8 +39,7 @@ body {
     font-size: 18px;
 }
 
-.krw-txt,
-.usd-txt {
+.krw-txt, .usd-txt {
     display: inline-block;
     width: 100%;
 }
@@ -84,25 +49,7 @@ body {
     font-size: 24px !important;
 }
 
-.price-txt-lg {
-    text-shadow: 1px 1px 1px #434343;
-}
-
-.dark .price-txt-lg {
-    text-shadow: 1px 1px 1px rgb(214, 214, 214);
-}
-
-.up > .price-txt-lg {
-    text-shadow: 1px 1px 1px #0ecb81;
-}
-
-.down > .price-txt-lg {
-    text-shadow: 1px 1px 1px #dd3f53;
-}
-
-.kimchi {
-    font-weight: bold;
-}
+.kimchi { font-weight: bold; }
 
 .icon-btn {
     width: 40px;

@@ -118,7 +118,7 @@ const BtcToKrw = ({ btc }: { btc: BtcProps }) => {
   }, [btc]);
 
   return (
-    <WidgetFrame id="btcKrw" icon={<TransIcon size={28} />} title="BTC/KRW">
+    <WidgetFrame icon={<TransIcon size={28} />} title="BTC/KRW">
       <Stack gap={1.5}>
         <Stack direction="row" justifyContent="space-between" alignItems="center" useFlexGap flexWrap="wrap">
           <PriceStandardSwitch label="원화 기준" value={standard} onChange={toggleStandard} />

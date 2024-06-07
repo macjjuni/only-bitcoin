@@ -25,9 +25,7 @@ interface BearState {
   dominance: DominanceProps; // 도미넌스 정보
   market: MarketType; // 메인 시세 단위 => 'KRW' | 'USD' | 'KRW/USD'
   exRate: ExRateProps; // USD/KRW 환율 데이터
-  dropDown: DropDownProps; // btc2krw Toggle
   amount: string; // BTC 개수 Input 값
-  isKimchi: boolean; // 김치 프리미엄 표시 여부
   isCountAnime: boolean; // 가격 변동 애니메이션 효과 여부
   isCountColor: boolean; // 가격 업다운 색 변경 여부
   fearGreed: FearGreedProps; // 공포&탐욕 지수
@@ -40,9 +38,7 @@ interface BearState {
   updateDominance: (by: UpdateDominanceProps) => void;
   setMarket: (market: MarketType) => MarketType;
   setExRate: (exRate: ExRateProps) => void;
-  setDropDown: (bool: { [index: string]: boolean }) => void;
   setAmount: (by: string) => void;
-  setKimchi: (bool: boolean) => boolean;
   updateFearGreed: (data: FearGreedProps) => void;
   setTheme: (theme: ThemeTypes) => ThemeTypes;
   setCountAnime: (bool: boolean) => boolean;
@@ -65,9 +61,7 @@ const useBearStore = create<BearState>()(
       dominance: { value: "", date: "" },
       fearGreed: { value: "", date: "" },
       exRate: { date: "", provider: "", basePrice: 0 },
-      dropDown: { btcKrw: true },
       amount: "1",
-      isKimchi: true,
       isSetting: false,
       isCountAnime: true,
       isCountColor: true,
@@ -88,11 +82,6 @@ const useBearStore = create<BearState>()(
       updateKRW: (krw) => set((state) => ({ btc: { ...state.btc, ...krw } })),
       updateUSD: (usd) => set((state) => ({ btc: { ...state.btc, ...usd } })),
       updateDominance: (dominance) => set(() => ({ dominance })),
-      setDropDown: (bool) => set(() => ({ dropDown: { ...bool } })),
-      setKimchi: (isKimchi) => {
-        set({ isKimchi });
-        return isKimchi;
-      },
       setExRate: (exRate) => set(() => ({ exRate })),
       updateFearGreed: (data) => set(() => ({ fearGreed: data })),
       setTheme: (theme) => {

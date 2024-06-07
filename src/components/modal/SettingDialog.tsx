@@ -1,6 +1,6 @@
-import { memo, type Dispatch, type SetStateAction, type MouseEvent, useCallback, useState } from "react";
+import { type Dispatch, memo, type MouseEvent, type SetStateAction, useCallback, useState } from "react";
 import { RiCloseCircleLine } from "react-icons/ri";
-import { DialogTitle, Dialog, Container, Typography, ToggleButtonGroup, ToggleButton, IconButton, Stack, Switch } from "@mui/material";
+import { Container, Dialog, DialogTitle, IconButton, Stack, Switch, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { bearStore } from "@/store/store";
 import { type MarketType } from "@/store/type";
 
@@ -17,8 +17,6 @@ const threeButtons = [
 
 const SettingDialog = ({ open, setOpen }: DialogType) => {
   const [market, setMarket] = useState(bearStore.market);
-  const [theme, setTheme] = useState(bearStore.theme);
-  const [isKimchi, setKimchi] = useState(bearStore.isKimchi);
   const [isCountAnime, setCountAnime] = useState(bearStore.isCountAnime);
   const [isCountColor, setCountColor] = useState(bearStore.isCountAnime);
 
@@ -34,16 +32,6 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
     },
     [market]
   );
-
-  const onToggleTheme = useCallback(() => {
-    const getTheme = bearStore.setTheme(theme === "dark" ? "light" : "dark");
-    setTheme(getTheme);
-  }, [theme]);
-
-  const onToggleKimchi = useCallback(() => {
-    const getIsKimchi = bearStore.setKimchi(!isKimchi);
-    setKimchi(getIsKimchi);
-  }, [isKimchi]);
 
   const onToggleAnime = useCallback(() => {
     const getIsCountAnime = bearStore.setCountAnime(!isCountAnime);
@@ -84,18 +72,7 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
                 ))}
               </ToggleButtonGroup>
             </Stack>
-            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-              <Typography fontSize={16} fontWeight="bold">
-                🎨 다크모드
-              </Typography>
-              <Switch checked={theme === "dark"} onChange={onToggleTheme} />
-            </Stack>
-            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-              <Typography fontSize={16} fontWeight="bold">
-                🇰🇷 프리미엄 정보
-              </Typography>
-              <Switch checked={isKimchi} onChange={onToggleKimchi} />
-            </Stack>
+
             <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
               <Typography fontSize={16} fontWeight="bold">
                 🕺🏻 카운트 애니메이션

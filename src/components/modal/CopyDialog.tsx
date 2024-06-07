@@ -3,8 +3,6 @@ import { Link, DialogTitle, Dialog, Container, Typography, Stack, IconButton } f
 import { RiCloseCircleLine } from "react-icons/ri";
 import { SiNaver } from "react-icons/si";
 import BtcIcon from "../icon/BtcIcon";
-import SatIcon from "../icon/SatIcon";
-import { btcColor } from "@/data/btcInfo";
 
 const title = import.meta.env.VITE_TITLE || "Info";
 const btcDiplomaUrl = "https://t.co/lS2dUOKcK0";
@@ -49,7 +47,7 @@ const CopyDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetSta
             </Typography>
           </Stack>
 
-          <Stack component="h2" justifyContent="flex-start" flexDirection="row" alignItems="center" fontWeight="bold" gap="8px" m="0" py="6px">
+          <Stack component="h2" justifyContent="flex-start" flexDirection="row" alignItems="center" fontWeight="bold" gap="8px" m="0" py="6px" mb={2}>
             <BtcIcon size={24} />
             <Typography component="p" fontSize={18} fontWeight="bold">
               비트코인 결제매장 [
@@ -59,37 +57,6 @@ const CopyDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetSta
               ]
             </Typography>
           </Stack>
-
-          <Stack
-            component="h2"
-            onClick={toggleDonate}
-            justifyContent="flex-start"
-            flexDirection="row"
-            alignItems="center"
-            fontWeight="bold"
-            gap="8px"
-            m="0"
-            py="6px"
-            pb="16px"
-            sx={{ cursor: "pointer" }}
-          >
-            <SatIcon width={24} height={24} />
-            <Typography component="p" fontSize={18} fontWeight="bold" color={btcColor}>
-              사토시 후원하기
-            </Typography>
-          </Stack>
-          {isDonate && (
-            <Stack component="div" pb="16px">
-              <lightning-widget
-                name="🙏🏻"
-                accent="#f7931a"
-                to="macjjuni@strike.me"
-                image="https://tistory1.daumcdn.net/tistory/3617178/skin/images/bitcoin-pacman.gif"
-                amounts="1000, 6000, 10000"
-                labels="🏃🏻‍♂️, ☕️, 💻, ⭐️"
-              />
-            </Stack>
-          )}
 
           <Typography component="p" fontSize={14}>
             시세 정보:{" "}

@@ -9,16 +9,12 @@ const defaultFont = {
 export const darkTheme = createTheme({
   palette: {
     mode: "dark",
-    primary: {
-      main: "#f7931a",
-    },
+    primary: { main: "#f7931a" },
   },
   ...defaultFont,
 });
 
 export const lightTheme = createTheme({
-  palette: {
-    mode: "light",
-  },
+  palette: { mode: "light" },
   ...defaultFont,
 });

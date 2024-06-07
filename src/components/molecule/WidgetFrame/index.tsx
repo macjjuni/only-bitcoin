@@ -1,19 +1,14 @@
-import { useCallback, memo } from "react";
+import { ReactNode, memo } from "react";
 import { Typography, Stack, Box } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
 import MuiAccordionSummary, { AccordionSummaryProps } from "@mui/material/AccordionSummary";
 import MuiAccordionDetails from "@mui/material/AccordionDetails";
-import { AiFillCaretDown } from "react-icons/ai";
-
-import { useBearStore, bearStore } from "@/store";
-import { DropDownProps } from "@/store/type";
 
 interface ICardItem {
   icon?: JSX.Element;
-  id: string;
   title?: string;
-  children: React.ReactNode;
+  children: ReactNode;
 }
 
 const Accordion = styled((props: AccordionProps) => <MuiAccordion disableGutters elevation={1} square {...props} />)(({ theme }) => ({
@@ -33,28 +28,16 @@ const AccordionDetails = styled(MuiAccordionDetails)(({ theme }) => ({
   borderTop: "1px solid rgba(0, 0, 0, .125)",
 }));
 
-const WidgetFrame = ({ id, icon, title, children }: ICardItem) => {
-  const dropDown = useBearStore((state) => state.dropDown);
-
-  const toggleDropDown = useCallback(() => {
-    if (!id || dropDown[id] === undefined) return;
-    const params: DropDownProps = {};
-    params[id] = !dropDown[id];
-    bearStore.setDropDown(params);
-  }, [dropDown]);
-
+const WidgetFrame = ({ icon, title, children }: ICardItem) => {
   return (
     <div className="box-item">
       {/* 토글 숨김 처리시 unmountOnExit: true 해당 옵션으로 렌더링 최적화 */}
-      <Accordion expanded={dropDown[id]} onChange={toggleDropDown} TransitionProps={{ unmountOnExit: true }}>
+      <Accordion expanded TransitionProps={{ unmountOnExit: true }}>
         <AccordionSummary expandIcon={icon} aria-controls="panel1d-content" id="panel1d-header" sx={{ width: "100%" }}>
           {title && (
             <Typography className="box-title" variant="h2" fontSize={18} fontWeight="bold" width="100%">
               <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-                <Box pl={1}>{title}</Box>
-                <Box sx={{ rotate: `${dropDown[id] ? 0 : 180}deg`, transition: "0.3s ease" }}>
-                  <AiFillCaretDown size={26} />
-                </Box>
+                {title}
               </Stack>
             </Typography>
           )}

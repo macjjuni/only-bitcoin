@@ -8,7 +8,7 @@
     width: $drawer-width;
     height: 100%;
     padding: $layout-padding-size 0;
-    transition: left 0.16s ease;
+    transition: left 0.12s ease;
     user-select: none;
     z-index: 9999;
 
@@ -28,6 +28,7 @@
 
     &.only-btc__drawer--open {
         left: 0;
+        box-shadow: rgba(255, 255, 255, 0.32) 0 5px 15px;
 
         .only-btc__drawer__overlay {
             display: block;
@@ -52,7 +53,7 @@
                 gap: 8px;
                 width: 100%;
                 margin: 0;
-                padding: 8px 12px;
+                padding: 12px 12px;
 
                 .only-btc__drawer__list-button-icon {
                     @include flex-row-center;

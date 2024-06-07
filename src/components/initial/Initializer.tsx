@@ -10,12 +10,14 @@ import FeargreedInit from "./FeargreedInit";
 import { isDev } from "@/utils/common";
 
 // 초기화 HOC
-const Initializer = ({ children }: { children: ReactNode }) => {
+export default function Initializer() {
   GoogleGA();
+
   useLayoutEffect(() => {
     initBinance();
     initUpbit();
   }, []);
+
   return (
     <>
       {/* BTC Block 초기화 */}
@@ -26,9 +28,6 @@ const Initializer = ({ children }: { children: ReactNode }) => {
       <FeargreedInit />
       {/* 애드센스... 승인 될 수 있으려나.. */}
       {!isDev && <AdsenseCodeSnippet />}
-      {children}
     </>
   );
-};
-
-export default Initializer;
+}

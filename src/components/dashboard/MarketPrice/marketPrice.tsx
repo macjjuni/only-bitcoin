@@ -14,6 +14,7 @@ import { type BtcProps, type MarketType, type ExRateProps } from "@/store/type";
 
 // Lottie Files
 import btcLottie from "@/assets/bitcoin.json";
+import "./marketPrice.scss";
 
 // Lottie Option
 const defaultOption: LottieProps = { loop: true };
@@ -22,14 +23,13 @@ const btcOption = { ...defaultOption, style: { width: "160px", height: "160px", 
 interface IMarketPrice {
   btc: BtcProps;
   market: MarketType;
-  isKimchi: boolean;
   isLottiePlay: boolean;
   exRate: ExRateProps;
 }
 
 const defaultSpeed = 0.3;
 
-const MarketPrice = ({ btc, market, isKimchi, isLottiePlay, exRate }: IMarketPrice) => {
+const MarketPrice = ({ btc, market, isLottiePlay, exRate }: IMarketPrice) => {
   const { isCountAnime, isCountColor, toggleLottie } = useBearStore((state) => state);
   const [speed, setSpeed] = useState(defaultSpeed);
 
@@ -53,8 +53,8 @@ const MarketPrice = ({ btc, market, isKimchi, isLottiePlay, exRate }: IMarketPri
     [isCountColor]
   );
 
-  const WonIcon = useMemo(() => <FaWonSign fontSize={26} color="inherit" fill="inherit" />, []);
-  const DollarIcon = useMemo(() => <IoLogoUsd fontSize={27} color="inherit" fill="inherit" style={{ marginRight: "-4px" }} />, []);
+  const WonIcon = useMemo(() => <FaWonSign fontSize={26} />, []);
+  const DollarIcon = useMemo(() => <IoLogoUsd fontSize={27} style={{ marginRight: "-4px" }} />, []);
 
   return (
     <Stack className="box-item" onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px" overflow="hidden">
@@ -62,7 +62,7 @@ const MarketPrice = ({ btc, market, isKimchi, isLottiePlay, exRate }: IMarketPri
         <LottieItem onClick={onToggleLottie} option={btcOption} play={isLottiePlay} animationData={btcLottie} speed={speed + 0.8} />
 
         <Stack flexDirection="column" justifyContent="flex-end" minWidth="200px" position="relative" mt="24px">
-          {isKimchi && <Kimchi btc={btc} exRate={exRate} isAnime={isCountAnime} />}
+          <Kimchi btc={btc} exRate={exRate} isAnime={isCountAnime} />
           {market?.includes("KRW") && (
             <Stack className={getColor(btc.krwColor)} flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30} lineHeight="38px">
               {WonIcon}
