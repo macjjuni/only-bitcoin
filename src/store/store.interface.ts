@@ -49,10 +49,6 @@ export interface ExRateProps {
   basePrice: number;
 }
 
-export interface DropDownProps {
-  [index: string]: boolean;
-}
-
 export interface NextHalvingProps {
   nextHalvingHeight: number; //
   nextHalvingPredictedDate: number | string;
@@ -74,3 +70,19 @@ export interface MvrvStoreProps {
   date: string;
   timeStamp: number;
 }
+
+// 비트코인 차트 데이터
+export interface ChartData {
+  date: number[];
+  price: number[];
+  timeStamp: number;
+}
+
+export interface BtcChart {
+  "1": ChartData;
+  "7": ChartData;
+  "30": ChartData;
+  "365": ChartData;
+}
+
+export type MarketChartDays = 1 | 7 | 30 | 365;

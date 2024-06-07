@@ -10,11 +10,13 @@ import {
   UpdateKRWProps,
   UpdateUSDProps,
   UpdateDominanceProps,
-  DropDownProps,
   FearGreedProps,
   BlockProps,
   MvrvStoreProps,
-} from "@/store/type";
+  ChartData,
+  BtcChart,
+  MarketChartDays,
+} from "@/store/store.interface";
 
 /** 📌 Rules!
  * 1. 설정(ex: 테마)값 업데이트 함수는 변경된 값을 그대로 리턴하도록 작성
@@ -22,6 +24,8 @@ import {
 
 interface BearState {
   btc: BtcProps; // BTC 시세 정보
+  btcChart: BtcChart;
+  setBtcChart: (value: MarketChartDays, data: ChartData) => void;
   dominance: DominanceProps; // 도미넌스 정보
   market: MarketType; // 메인 시세 단위 => 'KRW' | 'USD' | 'KRW/USD'
   exRate: ExRateProps; // USD/KRW 환율 데이터
@@ -52,6 +56,16 @@ const useBearStore = create<BearState>()(
   persist(
     (set) => ({
       btc: { krw: 0, krwDate: "", krwColor: true, usd: 0, usdDate: "", usdColor: true },
+      btcChart: {
+        1: { date: [], price: [], timeStamp: 0 },
+        7: { date: [], price: [], timeStamp: 0 },
+        30: { date: [], price: [], timeStamp: 0 },
+        365: { date: [], price: [], timeStamp: 0 },
+      },
+      setBtcChart: (day, data) =>
+        set((state) => ({
+          btcChart: { ...state.btcChart, [day]: data },
+        })),
       theme: "dark",
       market: "KRW/USD",
       setMarket: (market: MarketType) => {

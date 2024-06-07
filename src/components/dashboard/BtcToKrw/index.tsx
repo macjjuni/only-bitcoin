@@ -2,7 +2,7 @@ import { useEffect, useState, useCallback, memo } from "react";
 import { Stack, Typography, Divider } from "@mui/material";
 // Zustand
 import { useBearStore, bearStore } from "@/store";
-import { type BtcProps } from "@/store/type";
+import { type BtcProps } from "@/store/store.interface";
 // Components
 import WidgetFrame from "@/components/molecule/WidgetFrame";
 import PriceStandardSwitch from "./components/Switch";

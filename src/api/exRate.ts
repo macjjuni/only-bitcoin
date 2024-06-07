@@ -1,7 +1,7 @@
 import axios from "axios";
 import moment from "moment";
 import { toast } from "react-toastify";
-import { type ExRateProps } from "@/store/type";
+import { type ExRateProps } from "@/store/store.interface";
 
 // 원달러 환율
 const exRateUrl = "https://quotation-api-cdn.dunamu.com/v1/forex/recent?codes=FRX.KRWUSD";

@@ -2,7 +2,7 @@ import { type Dispatch, memo, type MouseEvent, type SetStateAction, useCallback,
 import { RiCloseCircleLine } from "react-icons/ri";
 import { Container, Dialog, DialogTitle, IconButton, Stack, Switch, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { bearStore } from "@/store/store";
-import { type MarketType } from "@/store/type";
+import { type MarketType } from "@/store/store.interface";
 
 type DialogType = {
   open: boolean;

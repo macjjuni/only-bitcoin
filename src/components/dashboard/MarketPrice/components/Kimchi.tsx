@@ -7,7 +7,7 @@ import { bearStore } from "@/store";
 
 import { calcPerDiff } from "@/utils/common";
 import { getExRate } from "@/api/exRate";
-import { type ExRateProps, type BtcProps } from "@/store/type";
+import { type ExRateProps, type BtcProps } from "@/store/store.interface";
 
 interface KimchiProps {
   btc: BtcProps;

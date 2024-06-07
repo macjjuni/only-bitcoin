@@ -2,7 +2,7 @@ import { memo, useState, useCallback } from "react";
 import { Stack, Typography } from "@mui/material";
 import CubeLottie from "./components/CubeLottie";
 import PopOver from "./components/PopOver";
-import { BlockProps } from "@/store/type";
+import { BlockProps } from "@/store/store.interface";
 import CountText from "@/components/atom/CountText";
 
 const BlockView = ({ blockData }: { blockData: BlockProps }) => {

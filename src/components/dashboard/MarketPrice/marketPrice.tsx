@@ -10,7 +10,7 @@ import Kimchi from "./components/Kimchi";
 import NotKeyNotBtc from "./components/NotKeyNotBtc";
 import { useBearStore } from "@/store";
 
-import { type BtcProps, type MarketType, type ExRateProps } from "@/store/type";
+import { type BtcProps, type MarketType, type ExRateProps } from "@/store/store.interface";
 
 // Lottie Files
 import btcLottie from "@/assets/bitcoin.json";

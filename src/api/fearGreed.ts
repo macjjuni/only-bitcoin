@@ -1,7 +1,7 @@
 import axios from "axios";
 import { toast } from "react-toastify";
 import moment from "moment";
-import { FearGreedProps } from "@/store/type";
+import { FearGreedProps } from "@/store/store.interface";
 
 const fearGreedURI = "https://api.alternative.me/fng/";
 
