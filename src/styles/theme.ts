@@ -10,6 +10,7 @@ export const darkTheme = createTheme({
   palette: {
     mode: "dark",
     primary: { main: "#f7931a" },
+    info: { main: "#fff" },
   },
   ...defaultFont,
 });

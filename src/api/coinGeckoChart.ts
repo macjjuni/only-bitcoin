@@ -1,13 +1,13 @@
 // 코인게코 API 엔드포인트
 import { MarketChartFormattedData, MarketChartParams, MarketChartResponseData } from "@/api/coinGeckoChart.interface";
-import { MarketChartDays } from "@/store/store.interface";
+import { ChartData, MarketChartDays } from "@/store/store.interface";
 import { bearStore } from "@/store";
 
 const url = "https://api.coingecko.com/api/v3/coins/bitcoin/market_chart";
 
-function isTwoMinutesPassed(timestamp1: number, timestamp2: number): boolean {
-  const THREE_MINUTES_IN_MS = 2 * 60 * 1000; // 3분을 밀리초로 변환
-  return Math.abs(timestamp2 - timestamp1) >= THREE_MINUTES_IN_MS;
+function isThreeMinutesPassed(timestamp: number): boolean {
+  const THREE_MINUTES_IN_MS = 3 * 60 * 1000;
+  return Math.abs(Date.now() - timestamp) >= THREE_MINUTES_IN_MS;
 }
 
 // Parameters
@@ -20,12 +20,12 @@ function createParams(params: MarketChartParams): URLSearchParams {
 
 const params: MarketChartParams = {
   vs_currency: "usd",
-  days: 7,
+  days: 0,
 };
 
-export async function getBtcRangeData(days: MarketChartDays): Promise<MarketChartFormattedData> {
-  const btcChartData = bearStore.btcChart[days];
-  const isAllow = isTwoMinutesPassed(btcChartData.timeStamp, Date.now());
+export async function getBtcRangeData(days: MarketChartDays, chartData: ChartData): Promise<MarketChartFormattedData> {
+  // 타임스탬프가 존재하지 않거나 3분이 지났는지 확인
+  const isAllow = isThreeMinutesPassed(chartData.timeStamp);
 
   if (isAllow) {
     const searchParams = createParams({ ...params, days });
@@ -39,7 +39,6 @@ export async function getBtcRangeData(days: MarketChartDays): Promise<MarketChar
         price: data.prices.map((price) => price[1]),
         date: data.prices.map((price) => price[0]),
       };
-
       bearStore.setBtcChart(days, { ...formattedData, timeStamp: Date.now() });
 
       return formattedData;
@@ -49,7 +48,7 @@ export async function getBtcRangeData(days: MarketChartDays): Promise<MarketChar
   }
 
   return {
-    price: btcChartData.price,
-    date: btcChartData.date,
+    price: chartData.price,
+    date: chartData.date,
   };
 }

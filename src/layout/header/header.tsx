@@ -2,7 +2,9 @@ import { useCallback, useEffect, useState } from "react";
 import { Stack } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IoMdRefresh } from "react-icons/io";
-import { HiMenuAlt2 } from "react-icons/hi";
+import { CgMenuGridR } from "react-icons/cg";
+
+import { TfiMenuAlt } from "react-icons/tfi";
 
 import BtcDominance from "@/layout/header/components/BtcDominance";
 import ExRatePrice from "@/layout/header/components/ExRatePrice";
@@ -63,7 +65,7 @@ const Header = () => {
         <div className="only-btc__header__container">
           <Stack flexDirection="row" gap="8px" alignItems="center">
             <button type="button" className="only-btc__header__hamburger-button" onClick={openDrawer}>
-              <HiMenuAlt2 size={30} />
+              <CgMenuGridR size={32} />
             </button>
 
             <BtcDominance />

@@ -8,8 +8,8 @@ body {
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-image: url('/btc-cover.webp'); /*이미지 경로지정*/
-    background-size: 500px;
-    background-position: center 66%;
+    background-size: 600px;
+    background-position: center 50%;
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-color: $default-background-color;
@@ -26,6 +26,22 @@ body {
         margin: 0 auto;
     }
 }
+
+@media screen and (max-width: $mobile-size) {
+    body {
+        background-size: 100%;
+    }
+    .error-page {
+        padding-top: 24px;
+    }
+    .header-wrap {
+        height: 76px;
+    }
+    #not-key-not-btc {
+        font-size: 20px !important;
+    }
+}
+
 
 #not-key-not-btc {
     font-size: 22px !important;
@@ -179,22 +195,6 @@ body {
 
 .css-19i0i5v-MuiPaper-root-MuiAccordion-root.Mui-expanded:first-of-type {
     margin: 0 !important;
-}
-
-@media screen and (max-width: $mobile-size) {
-    body {
-        background-size: 90vw;
-        background-position: center 64%;
-    }
-    .error-page {
-        padding-top: 24px;
-    }
-    .header-wrap {
-        height: 76px;
-    }
-    #not-key-not-btc {
-        font-size: 20px !important;
-    }
 }
 
 /* MVRV Page */

@@ -31,7 +31,6 @@ interface BearState {
   exRate: ExRateProps; // USD/KRW 환율 데이터
   amount: string; // BTC 개수 Input 값
   isCountAnime: boolean; // 가격 변동 애니메이션 효과 여부
-  isCountColor: boolean; // 가격 업다운 색 변경 여부
   fearGreed: FearGreedProps; // 공포&탐욕 지수
   theme: ThemeTypes;
   isLottiePlay: boolean; // 메인 로티 애니메이션
@@ -46,7 +45,6 @@ interface BearState {
   updateFearGreed: (data: FearGreedProps) => void;
   setTheme: (theme: ThemeTypes) => ThemeTypes;
   setCountAnime: (bool: boolean) => boolean;
-  setCountColor: (bool: boolean) => boolean;
   toggleLottie: () => void;
   updateBlock: (blockData: BlockProps) => void; // 블록 생성 정보 업데이트
   setMvrv: (mvrv: MvrvStoreProps) => void; // MVRV 데이터 조회 기록
@@ -78,7 +76,6 @@ const useBearStore = create<BearState>()(
       amount: "1",
       isSetting: false,
       isCountAnime: true,
-      isCountColor: true,
       isLottiePlay: true,
       blockData: {
         height: 0,
@@ -105,10 +102,6 @@ const useBearStore = create<BearState>()(
       setCountAnime: (isCountAnime) => {
         set({ isCountAnime });
         return isCountAnime;
-      },
-      setCountColor: (isCountColor) => {
-        set({ isCountColor });
-        return isCountColor;
       },
       toggleLottie: () => set((state) => ({ isLottiePlay: !state.isLottiePlay })),
       updateBlock: (blockData) => set(() => ({ blockData })),

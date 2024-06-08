@@ -10,7 +10,7 @@ import { comma, calcPerDiff } from "@/utils/common";
 import { responsive } from "@/styles/style";
 import PageLayout from "@/layout/pageLayout/pageLayout";
 import PageTitle from "@/components/atom/PageTitle/pageTitle";
-import CountText from "@/components/atom/CountText";
+import CountText from "../../components/atom/countText/countText";
 import "./premium.scss";
 
 const LabelElement = ({ children }: { children: ReactNode }) => {

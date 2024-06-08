@@ -4,16 +4,13 @@ import { FaWonSign } from "react-icons/fa";
 import { IoLogoUsd } from "react-icons/io";
 
 import { LottieProps } from "react-lottie-player";
-import LottieItem from "@/components/atom/LottieItem";
-import CountText from "@/components/atom/CountText";
-import Kimchi from "./components/Kimchi";
-import NotKeyNotBtc from "./components/NotKeyNotBtc";
 import { useBearStore } from "@/store";
-
-import { type BtcProps, type MarketType, type ExRateProps } from "@/store/store.interface";
-
-// Lottie Files
+import LottieItem from "@/components/atom/LottieItem";
+import CountText from "../../../../components/atom/countText/countText";
+import NotKeyNotBtc from "./components/NotKeyNotBtc";
+import PremiumRate from "@/pages/dashboard/components/premiumRate/premiumRate";
 import btcLottie from "@/assets/bitcoin.json";
+import { type BtcProps, type MarketType, type ExRateProps } from "@/store/store.interface";
 import "./marketPrice.scss";
 
 // Lottie Option
@@ -30,7 +27,7 @@ interface IMarketPrice {
 const defaultSpeed = 0.3;
 
 const MarketPrice = ({ btc, market, isLottiePlay, exRate }: IMarketPrice) => {
-  const { isCountAnime, isCountColor, toggleLottie } = useBearStore((state) => state);
+  const { isCountAnime, toggleLottie } = useBearStore((state) => state);
   const [speed, setSpeed] = useState(defaultSpeed);
 
   const mouseEnter = useCallback(() => {
@@ -44,14 +41,10 @@ const MarketPrice = ({ btc, market, isLottiePlay, exRate }: IMarketPrice) => {
     toggleLottie();
   }, []);
 
-  const getColor = useCallback(
-    (color: boolean) => {
-      if (!isCountColor) return "";
-      if (color) return "up";
-      return "down";
-    },
-    [isCountColor]
-  );
+  const getColor = useCallback((color: boolean) => {
+    if (color) return "up";
+    return "down";
+  }, []);
 
   const WonIcon = useMemo(() => <FaWonSign fontSize={26} />, []);
   const DollarIcon = useMemo(() => <IoLogoUsd fontSize={27} style={{ marginRight: "-4px" }} />, []);
@@ -61,8 +54,8 @@ const MarketPrice = ({ btc, market, isLottiePlay, exRate }: IMarketPrice) => {
       <Stack flexDirection="row" justifyContent="space-between" alignItems="center" pr={1}>
         <LottieItem onClick={onToggleLottie} option={btcOption} play={isLottiePlay} animationData={btcLottie} speed={speed + 0.8} />
 
-        <Stack flexDirection="column" justifyContent="flex-end" minWidth="200px" position="relative" mt="24px">
-          <Kimchi btc={btc} exRate={exRate} isAnime={isCountAnime} />
+        <Stack flexDirection="column" justifyContent="flex-end" minWidth="200px" position="relative" mb="12px">
+          <PremiumRate btc={btc} className="only-btc__market-price__premium-rate" />
           {market?.includes("KRW") && (
             <Stack className={getColor(btc.krwColor)} flexDirection="row" justifyContent="flex-end" alignItems="center" gap="4px" fontSize={30} lineHeight="38px">
               {WonIcon}

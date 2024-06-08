@@ -33,7 +33,7 @@ const PopOver = ({ anchorEl, open, handlePopoverClose }: PopOverProps) => {
       sx={{ pointerEvents: "none" }}
       open={open}
       anchorEl={anchorEl}
-      anchorOrigin={{ vertical: "bottom", horizontal: "left" }}
+      anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       transformOrigin={{ vertical: "top", horizontal: "center" }}
       onClose={handlePopoverClose}
       disableRestoreFocus
@@ -42,7 +42,6 @@ const PopOver = ({ anchorEl, open, handlePopoverClose }: PopOverProps) => {
         <Typography fontSize={matches ? 16 : 14}>
           블록 생성 시간: {transTimeStampDate(blockData.timeStamp).replace(/-/g, ".")}({diff}분 전)
         </Typography>
-
         <Progress isMaxNum />
       </Stack>
     </Popover>

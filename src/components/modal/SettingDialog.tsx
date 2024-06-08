@@ -18,7 +18,6 @@ const threeButtons = [
 const SettingDialog = ({ open, setOpen }: DialogType) => {
   const [market, setMarket] = useState(bearStore.market);
   const [isCountAnime, setCountAnime] = useState(bearStore.isCountAnime);
-  const [isCountColor, setCountColor] = useState(bearStore.isCountAnime);
 
   const closeDialog = useCallback(() => {
     setOpen(false);
@@ -37,11 +36,6 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
     const getIsCountAnime = bearStore.setCountAnime(!isCountAnime);
     setCountAnime(getIsCountAnime);
   }, [isCountAnime]);
-
-  const onToggleCountColor = useCallback(() => {
-    const getIsCountColor = bearStore.setCountColor(!isCountColor);
-    setCountColor(getIsCountColor);
-  }, [isCountColor]);
 
   return (
     <>
@@ -78,12 +72,6 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
                 🕺🏻 카운트 애니메이션
               </Typography>
               <Switch checked={isCountAnime} onChange={onToggleAnime} />
-            </Stack>
-            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-              <Typography fontSize={16} fontWeight="bold">
-                🌈 가격 변동 색상
-              </Typography>
-              <Switch checked={isCountColor} onChange={onToggleCountColor} />
             </Stack>
           </Stack>
         </Container>

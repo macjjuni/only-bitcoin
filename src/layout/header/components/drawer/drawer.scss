@@ -23,12 +23,12 @@
         width: calc(100% - $drawer-width);
         height: 100%;
         background-color: rgba(0, 0, 0, 0.48);
-        transition: left 0.2s ease;
+        transition: left 0.24s ease;
     }
 
     &.only-btc__drawer--open {
         left: 0;
-        box-shadow: rgba(255, 255, 255, 0.32) 0 5px 15px;
+        box-shadow: rgba(255, 255, 255, 0.32) 0 5px 2px;
 
         .only-btc__drawer__overlay {
             display: block;

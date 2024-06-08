@@ -12,9 +12,14 @@
 
     .price-txt-lg {
         color: #f6465d;
-        text-shadow: 1px 1px 1px #dd3f53;
+        text-shadow: 1px 1px 1px #f6465d;
     }
 }
+
+.price-txt-lg {
+    text-shadow: 1px 1px 1px rgb(214, 214, 214);
+}
+
 
 .unit-txt {
     font-size: 16px;
@@ -31,7 +36,6 @@
     text-shadow: 1px 1px 1px #434343;
 }
 
-.dark .price-txt-lg {
-    text-shadow: 1px 1px 1px rgb(214, 214, 214);
+.only-btc__market-price__premium-rate {
+    @include flex-row-end;
 }
-

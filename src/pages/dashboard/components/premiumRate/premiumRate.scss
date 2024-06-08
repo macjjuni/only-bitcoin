@@ -1,0 +1,13 @@
+
+.only-btc__premium-rate {
+    .only-btc__premium-rate__container {
+        @include flex-row-center;
+        gap: 2px;
+        cursor: pointer;
+
+        .only-btc__premium-rate__text {
+            font-size: inherit;
+            font-weight: bold;
+        }
+    }
+}
