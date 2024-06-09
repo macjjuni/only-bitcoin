@@ -80,8 +80,14 @@ function MarketChart() {
   // region [Effects]
 
   useEffect(() => {
-    getListBtcPrice();
-  }, [marketChartInterval]);
+    getListBtcPrice(); // 처음 마운트되었을 때, 그리고 marketChartInterval이 바뀔 때마다 호출
+
+    const intervalId = setInterval(() => {
+      getListBtcPrice(); // 3분마다 호출
+    }, 3 * 60 * 1000); // 3분 간격 (3분 * 60초 * 1000밀리초)
+
+    return () => clearInterval(intervalId); // 컴포넌트 언마운트 시 또는 marketChartInterval이 바뀔 때 인터벌 정리
+  }, [marketChartInterval, getListBtcPrice]);
 
   // endregion
 
