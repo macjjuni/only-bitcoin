@@ -1,6 +1,5 @@
 import { memo, useMemo } from "react";
 import { useBearStore } from "@/store";
-import { comma } from "@/utils/common";
 import BlockView from "@/pages/dashboard/components/blockView/blockView";
 import PremiumRate from "@/pages/dashboard/components/premiumRate/premiumRate";
 import "./marketData.scss";

@@ -3,9 +3,6 @@ import { Stack } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IoMdRefresh } from "react-icons/io";
 import { CgMenuGridR } from "react-icons/cg";
-
-import { TfiMenuAlt } from "react-icons/tfi";
-
 import BtcDominance from "@/layout/header/components/BtcDominance";
 import ExRatePrice from "@/layout/header/components/ExRatePrice";
 import FearGreed from "@/layout/header/components/FearGreed";

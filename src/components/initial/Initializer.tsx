@@ -1,4 +1,4 @@
-import { ReactNode, useLayoutEffect } from "react";
+import { useLayoutEffect } from "react";
 
 import initUpbit from "@/socket/upbit";
 import initBinance from "@/socket/binance";

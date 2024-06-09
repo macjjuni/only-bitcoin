@@ -1,5 +1,5 @@
-import { ReactNode, memo } from "react";
-import { Typography, Stack, Box } from "@mui/material";
+import { memo, ReactNode } from "react";
+import { Stack, Typography } from "@mui/material";
 import { styled } from "@mui/material/styles";
 import MuiAccordion, { AccordionProps } from "@mui/material/Accordion";
 import MuiAccordionSummary, { AccordionSummaryProps } from "@mui/material/AccordionSummary";

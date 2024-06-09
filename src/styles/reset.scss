@@ -31,9 +31,9 @@ q:before, q:after {
     content: none;
 }
 table { border-collapse: collapse; border-spacing: 0; }
-a { width: 100%; color: $default-font-color; text-decoration: none; outline: none; }
-.dark a { color: $dark-font-color; }
-a:hover, a:active { text-decoration: none; }
+a { width: 100%; color: $link-color; text-decoration: none; }
+.dark a { color: $link-color; text-decoration: none; }
+a:hover, a:active { text-decoration: underline; }
 * { box-sizing: border-box; margin: 0 auto; font-family: $default-font-family; }
 button {
     background: inherit;

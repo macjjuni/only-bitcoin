@@ -11,7 +11,7 @@ import PopOver from "@/pages/btc2krw/components/MarketPrice/components/PopOver";
 import { getExRate } from "@/api/exRate";
 
 const defaultOption: LottieProps = { loop: true, play: true };
-const lottieOption = { ...defaultOption, style: { width: "32px", height: "32px" } };
+const lottieOption = { ...defaultOption, style: { width: "28px", height: "28px" } };
 
 function PremiumRate({ btc, className }: { btc: BtcProps; className?: string }) {
   // region [Hooks]

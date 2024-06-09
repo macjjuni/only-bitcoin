@@ -10,7 +10,7 @@ import CountText from "../../../../components/atom/countText/countText";
 import NotKeyNotBtc from "./components/NotKeyNotBtc";
 import PremiumRate from "@/pages/dashboard/components/premiumRate/premiumRate";
 import btcLottie from "@/assets/bitcoin.json";
-import { type BtcProps, type MarketType, type ExRateProps } from "@/store/store.interface";
+import { type BtcProps, type MarketType } from "@/store/store.interface";
 import "./marketPrice.scss";
 
 // Lottie Option
@@ -21,12 +21,11 @@ interface IMarketPrice {
   btc: BtcProps;
   market: MarketType;
   isLottiePlay: boolean;
-  exRate: ExRateProps;
 }
 
 const defaultSpeed = 0.3;
 
-const MarketPrice = ({ btc, market, isLottiePlay, exRate }: IMarketPrice) => {
+const MarketPrice = ({ btc, market, isLottiePlay }: IMarketPrice) => {
   const { isCountAnime, toggleLottie } = useBearStore((state) => state);
   const [speed, setSpeed] = useState(defaultSpeed);
 

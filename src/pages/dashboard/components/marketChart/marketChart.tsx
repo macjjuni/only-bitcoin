@@ -27,7 +27,6 @@ function MarketChart() {
   const btcChart = useBearStore((state) => state.btcChart);
   const marketChartInterval = useBearStore((state) => state.marketChartInterval);
   const setMarketChartInterval = useBearStore((state) => state.setMarketChartInterval);
-  console.log(marketChartInterval);
   const [chartData, setChartData] = useState<ChartData>({
     labels: [],
     datasets: [],
