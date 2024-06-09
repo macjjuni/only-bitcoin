@@ -1,0 +1,34 @@
+.only-btc__market-chart {
+    max-width: 660px;
+    width: calc(100% + $layout-padding-size * 2);
+    margin-left: -$layout-padding-size;
+    margin-right: -$layout-padding-size;
+    margin-bottom: 220px;
+
+}
+.only-btc__market-chart__button__group {
+    position: absolute;
+    bottom: 12px;
+    left: 0;
+    @include flex-row-center;
+    width: 100%;
+    height: 32px;
+    background-color: $default-background-color;
+
+    .only-btc__button--active {
+        background-color: darken($default-background-color, 16%);
+        border-color: #000;
+    }
+}
+
+.dark {
+
+    .only-btc__market-chart__button__group {
+        background-color: $dark-background-color;
+
+        .only-btc__button--active {
+            background-color: lighten($dark-background-color, 16%);
+            border-color: #fff;
+        }
+    }
+}

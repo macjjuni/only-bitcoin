@@ -1,8 +1,8 @@
-import { memo } from 'react'
-import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from '@mui/material'
-import CopyNoneIconButton from '@/components/atom/CopyNoneIconButton'
-import { btcHalvingData } from '@/data/btcInfo'
-import { comma } from '@/utils/common'
+import { memo } from "react";
+import { Table, TableBody, TableCell, TableContainer, TableHead, TableRow, Paper } from "@mui/material";
+import CopyNoneIconButton from "@/components/atom/CopyNoneIconButton";
+import { btcHalvingData } from "@/data/btcInfo";
+import { comma } from "@/utils/common";
 
 const HalvingTable = () => {
   return (
@@ -19,7 +19,7 @@ const HalvingTable = () => {
         </TableHead>
         <TableBody>
           {btcHalvingData.map((row, idx) => (
-            <TableRow key={row.date} sx={{ '&:last-child td, &:last-child th': { border: 0 } }}>
+            <TableRow key={row.date} sx={{ "&:last-child td, &:last-child th": { border: 0 } }}>
               <TableCell component="th" scope="row">
                 <CopyNoneIconButton txt={row.date} />
               </TableCell>
@@ -40,7 +40,7 @@ const HalvingTable = () => {
         </TableBody>
       </Table>
     </TableContainer>
-  )
-}
+  );
+};
 
-export default memo(HalvingTable)
+export default memo(HalvingTable);

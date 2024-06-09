@@ -1,0 +1,22 @@
+
+.only-btc__market-price {
+    width: 100%;
+    height: 160px;
+
+    .only-btc__market-price__top-area {
+        @include flex-row-center;
+        @include font-sub-title;
+        padding: 8px 0;
+        font-weight: bold;
+    }
+    .only-btc__market-price__top-area__cost {
+        @include flex-row-center;
+        @include font-heading;
+        font-weight: 500;
+    }
+
+    .only-btc__market-price__bottom-area {
+        @include flex-row-center;
+        gap: 4px;
+    }
+}

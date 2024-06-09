@@ -1,0 +1,65 @@
+
+
+@mixin flex-col-start {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: column;
+}
+@mixin flex-col-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: column;
+}
+@mixin flex-col-end {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-direction: column;
+}
+@mixin flex-row-start {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    flex-direction: row;
+}
+@mixin flex-row-center {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-direction: row;
+}
+@mixin flex-row-end {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    flex-direction: row;
+}
+
+
+// region [Font Sizes]
+
+@mixin font-heading {
+    font-size: $font-heading-size;
+    line-height: $line-height-heading-size;
+}
+@mixin font-title {
+    font-size: $font-title-size;
+    line-height: $line-height-title-size;
+}
+@mixin font-sub-title {
+    font-size: $font-sub-title-size;
+    line-height: $line-height-sub-title-size;
+}
+@mixin font-body {
+    font-size: $font-body-size;
+    line-height: $line-height-body-size;
+}
+@mixin font-chip {
+    font-size: $font-chip-size;
+    line-height: $line-height-chip-size;
+}
+
+// endregion
+

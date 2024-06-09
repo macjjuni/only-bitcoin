@@ -1,11 +1,11 @@
-import { memo } from 'react'
-import { useMediaQuery, Typography } from '@mui/material'
-import ExplainFrame from '../../molecule/ExplainFrame'
-import { responsive } from '@/styles/style'
-import { comma } from '@/utils/common'
+import { memo } from "react";
+import { useMediaQuery, Typography } from "@mui/material";
+import ExplainFrame from "../../molecule/ExplainFrame";
+import { responsive } from "@/styles/style";
+import { comma } from "@/utils/common";
 
 const HalvingExplain = ({ nextHeight }: { nextHeight: number }) => {
-  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`)
+  const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`);
   return (
     <ExplainFrame
       title="📚 반감기(Halving)란?"
@@ -20,7 +20,7 @@ const HalvingExplain = ({ nextHeight }: { nextHeight: number }) => {
         </Typography>
       }
     />
-  )
-}
+  );
+};
 
-export default memo(HalvingExplain)
+export default memo(HalvingExplain);

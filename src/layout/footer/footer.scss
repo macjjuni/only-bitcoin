@@ -1,0 +1,19 @@
+
+.only-btc__footer {
+    @include flex-row-center;
+    flex: 0 0 48px;
+    padding: 0 $layout-padding-size;
+
+    .only-btc__footer__container {
+        @include flex-row-start;
+        justify-content: space-between;
+        width: 100%;
+    }
+}
+
+
+@media screen and (max-width: $mobile-size) {
+    .only-btc__footer {
+        align-items: flex-start;
+    }
+}

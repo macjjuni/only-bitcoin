@@ -15,13 +15,7 @@
   "rules": {
     "react/react-in-jsx-scope": 0,
     "react/jsx-filename-extension": [1, { "extensions": [".ts", ".tsx"] }],
-    "react/function-component-definition": [
-      2,
-      {
-        "namedComponents": "arrow-function",
-        "unnamedComponents": "arrow-function"
-      }
-    ],
+    "react/function-component-definition": "off",
     "prettier/prettier": ["error", { "endOfLine": "auto" }],
     "import/prefer-default-export": "off",
     "default-param-last": "off",

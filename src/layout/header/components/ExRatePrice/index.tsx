@@ -1,0 +1,12 @@
+import { memo } from "react";
+import { useBearStore } from "@/store";
+import { comma } from "@/utils/common";
+import ChipItem from "@/components/atom/chipItem/chipItem";
+
+const ExRatePrice = ({ onClick }: { onClick: () => void }) => {
+  const { basePrice } = useBearStore((state) => state.exRate);
+
+  return <ChipItem onClick={onClick} label="KRW" value={comma(basePrice?.toString())} />;
+};
+
+export default memo(ExRatePrice);

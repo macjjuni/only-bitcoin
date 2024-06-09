@@ -9,14 +9,14 @@
  * ⚠️ 타임스탬프로 통일 해야함.. date는 문자열이고 timeStamp는 숫자형식이라 기존에 사용자들 데이터 오류나지 않게 조심해야함
  */
 
-const calcMS = (min: number) => min * 60000
+const calcMS = (min: number) => min * 60000;
 
 const intervalTime = {
   blockHeight: calcMS(1),
-}
+};
 
 const config = {
   intervalTime,
-}
+};
 
-export default config
+export default config;

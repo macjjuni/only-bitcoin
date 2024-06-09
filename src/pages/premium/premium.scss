@@ -1,0 +1,17 @@
+
+.premium-page {
+    .premium-page__card-list {
+        @include flex-row-center;
+        gap: 12px;
+        width: 100%;
+    }
+}
+
+
+@media screen and (max-width: $mobile-size) {
+    .premium-page {
+        .premium-page__card-list {
+            @include flex-col-center;
+        }
+    }
+}

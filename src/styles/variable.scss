@@ -1,0 +1,56 @@
+
+
+$default-font-family: 'Pretendard', ui-sans-serif, system-ui, -apple-system,
+'Segoe UI', Roboto, 'Helvetica Neue', Arial,
+'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji',
+'Segoe UI Symbol', 'Noto Color Emoji';
+
+$default-font-color: #2b2b2b;
+$dark-font-color: #eee;
+
+$default-border-color: #2e2e2e;
+$dark-border-color: #808080;
+
+$default-background-color: #fff;
+$dark-background-color: #171717;
+
+
+// region [fonts]
+
+$font-heading-size: 36px;
+$line-height-heading-size: 40px;
+
+$font-title-size: 24px;
+$line-height-title-size: 28px;
+
+$font-sub-title-size: 20px;
+$line-height-sub-title-size: 24px;
+
+$font-body-size: 16px;
+$line-height-body-size: 20px;
+
+$font-chip-size: 14px;
+$line-height-chip-size: 16px;
+
+// endregion
+
+// region [Colors]
+
+$primary-color: #f7931a;
+$link-color: #90CAF9;
+
+// endregion
+
+
+// region [Padding]
+
+$layout-padding-size: 12px;
+
+// endregion
+
+
+// region [Media Screen Size]
+
+$mobile-size: 768px;
+
+// endregion

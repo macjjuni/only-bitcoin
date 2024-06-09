@@ -1,0 +1,82 @@
+
+.only-btc__drawer {
+    $drawer-width: 260px;
+
+    position: fixed;
+    top: 0;
+    left: -$drawer-width;
+    width: $drawer-width;
+    height: 100%;
+    padding: $layout-padding-size 0;
+    transition: left 0.12s ease;
+    user-select: none;
+    z-index: 9999;
+
+    $drawer-default-background-color: darken($default-background-color, 8%);
+    background-color: $drawer-default-background-color;
+
+    .only-btc__drawer__overlay {
+        display: none;
+        position: fixed;
+        top: 0;
+        left: 100%;
+        width: calc(100% - $drawer-width);
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.48);
+        transition: left 0.24s ease;
+    }
+
+    &.only-btc__drawer--open {
+        left: 0;
+        box-shadow: rgba(255, 255, 255, 0.32) 0 5px 2px;
+
+        .only-btc__drawer__overlay {
+            display: block;
+            left: $drawer-width;
+            animation: fadeIn 0.4s backwards;
+        }
+    }
+
+    .only-btc__drawer__wrapper {
+        @include flex-col-start;
+        gap: 4px;
+
+        .only-btc__drawer__list {
+            width: 100%;
+
+            &.only-btc__drawer__list--active {
+                background-color: darken($drawer-default-background-color, 8%);
+            }
+
+            .only-btc__drawer__list-button {
+                @include flex-row-start;
+                gap: 8px;
+                width: 100%;
+                margin: 0;
+                padding: 12px 12px;
+
+                .only-btc__drawer__list-button-icon {
+                    @include flex-row-center;
+                }
+                .only-btc__drawer__list-button-text {
+                    @include font-body;
+                }
+            }
+        }
+    }
+}
+
+.dark {
+    .only-btc__drawer {
+        $drawer-dark-background-color: lighten($dark-background-color, 12%);
+        background-color: $drawer-dark-background-color;
+
+        .only-btc__drawer__list {
+
+            &.only-btc__drawer__list--active {
+                background-color: lighten($drawer-dark-background-color, 8%);
+            }
+
+        }
+    }
+}

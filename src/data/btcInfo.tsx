@@ -1,52 +1,39 @@
-import { FaBitcoin } from 'react-icons/fa'
+import { FaBitcoin } from "react-icons/fa";
 
-export const btcColor = '#f7931a'
+export const btcColor = "#f7931a";
 
 export interface CryptoProp {
-  label: string
-  value: string
-  ticker: string
-  price: number
-  icon: (size: number, color?: string) => JSX.Element
-  color: string
+  label: string;
+  value: string;
+  ticker: string;
+  price: number;
+  icon: (size: number, color?: string) => JSX.Element;
+  color: string;
 }
 
 export const btcInfo: CryptoProp = {
-  label: 'BTC(BitCoin)',
-  value: 'btc',
-  ticker: 'KRW-BTC',
+  label: "BTC(BitCoin)",
+  value: "btc",
+  ticker: "KRW-BTC",
   price: 0,
   icon: (size, color) => <FaBitcoin size={size || 28} color={color || btcColor} />,
   color: btcColor,
-}
+};
 
-export const upbitAsset = ['BTC/KRW']
-export const binaceAsset = ['btcusdt']
-
-// 비트코인 레거시 생태계
-// export const ecoSystemPyramid = [
-//   { name: 'foo', min: 0, max: 0, emoji: '🐣' },
-//   { name: 'shrimp', min: 0, max: 1, emoji: '🦐' },
-//   { name: 'crab', min: 1, max: 10, emoji: '🦀' },
-//   { name: 'octopus', min: 10, max: 50, emoji: '🐙' },
-//   { name: 'fish', min: 50, max: 100, emoji: '🐟' },
-//   { name: 'dolphin', min: 100, max: 500, emoji: '🐬' },
-//   { name: 'shark', min: 500, max: 1000, emoji: '🦈' },
-//   { name: 'whale', min: 1000, max: 5000, emoji: '🐳' },
-//   { name: 'humpback', min: 5000, max: 100000, emoji: '🐋' },
-// ]
+export const upbitAsset = ["BTC/KRW"];
+export const binaceAsset = ["btcusdt"];
 
 // 비트코인 최신 생태계
 export const ecoSystemPyramid = [
-  { name: 'foo', min: 0, max: 0, emoji: '🐣' },
-  { name: 'shrimp', min: 0.001, max: 0.01, emoji: '🦐' },
-  { name: 'crab', min: 0.01, max: 0.1, emoji: '🦀' },
-  { name: 'octopus', min: 0.1, max: 0.26, emoji: '🐙' },
-  { name: 'fish', min: 0.26, max: 1, emoji: '🐟' },
-  { name: 'dolphin', min: 1, max: 3.125, emoji: '🐬' },
-  { name: 'shark', min: 3.125, max: 6.15, emoji: '🦈' },
-  { name: 'whale', min: 6.15, max: 1000000, emoji: '🐳' },
-]
+  { name: "foo", min: 0, max: 0, emoji: "🐣" },
+  { name: "shrimp", min: 0.001, max: 0.01, emoji: "🦐" },
+  { name: "crab", min: 0.01, max: 0.1, emoji: "🦀" },
+  { name: "octopus", min: 0.1, max: 0.26, emoji: "🐙" },
+  { name: "fish", min: 0.26, max: 1, emoji: "🐟" },
+  { name: "dolphin", min: 1, max: 3.125, emoji: "🐬" },
+  { name: "shark", min: 3.125, max: 6.15, emoji: "🦈" },
+  { name: "whale", min: 6.15, max: 1000000, emoji: "🐳" },
+];
 
 // TODO. 반감기 날짜를 멤풀에 조회해서 뿌려주기.
 // - 현재 블록 높이 가져와서 지난 지난 반감기 블록 높이 조회 후 날짜를 보여주기
@@ -54,11 +41,11 @@ export const ecoSystemPyramid = [
 // - 장점: 계속 업데이트 안해줘도 됨.
 
 export const btcHalvingData = [
-  { date: '2009.01.03', blockNum: 0, currentReward: 50.0 },
-  { date: '2012.11.29', blockNum: 210000, currentReward: 25.0 },
-  { date: '2016.07.10', blockNum: 420000, currentReward: 12.5 },
-  { date: '2020.05.12', blockNum: 630000, currentReward: 6.25 },
-  { date: '2024.04.20', blockNum: 840000, currentReward: 3.125 },
+  { date: "2009.01.03", blockNum: 0, currentReward: 50.0 },
+  { date: "2012.11.29", blockNum: 210000, currentReward: 25.0 },
+  { date: "2016.07.10", blockNum: 420000, currentReward: 12.5 },
+  { date: "2020.05.12", blockNum: 630000, currentReward: 6.25 },
+  { date: "2024.04.20", blockNum: 840000, currentReward: 3.125 },
   { date: 2028, blockNum: 1050000, currentReward: 1.5625 },
   { date: 2032, blockNum: 1260000, currentReward: 0.78125 },
   { date: 2036, blockNum: 1470000, currentReward: 0.390625 },
@@ -88,4 +75,4 @@ export const btcHalvingData = [
   { date: 2132, blockNum: 6510000, currentReward: 0.000000023283064365386962890625 },
   { date: 2136, blockNum: 6720000, currentReward: 0.0000000116415321826934814453125 },
   { date: 2140, blockNum: 6930000, currentReward: 0.00000000582076609134674072265625 },
-]
+];
