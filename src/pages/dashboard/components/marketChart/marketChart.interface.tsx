@@ -1,4 +1,4 @@
-import { MarketChartDays } from "@/store/store.interface";
+import { MarketChartIntervalType } from "@/store/store.interface";
 
 export interface ChartData {
   labels: string[];
@@ -11,7 +11,7 @@ export interface ChartData {
   }[];
 }
 
-export interface MarketChartDaysList {
+export interface MarketChartIntervalTypeList {
   text: string;
-  value: MarketChartDays;
+  value: MarketChartIntervalType;
 }

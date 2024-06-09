@@ -12,10 +12,9 @@ import {
   UpdateDominanceProps,
   FearGreedProps,
   BlockProps,
-  MvrvStoreProps,
   ChartData,
   BtcChart,
-  MarketChartDays,
+  MarketChartIntervalType,
 } from "@/store/store.interface";
 
 /** 📌 Rules!
@@ -25,7 +24,7 @@ import {
 interface BearState {
   btc: BtcProps; // BTC 시세 정보
   btcChart: BtcChart;
-  setBtcChart: (value: MarketChartDays, data: ChartData) => void;
+  setBtcChart: (interval: MarketChartIntervalType, data: ChartData) => void;
   dominance: DominanceProps; // 도미넌스 정보
   market: MarketType; // 메인 시세 단위 => 'KRW' | 'USD' | 'KRW/USD'
   exRate: ExRateProps; // USD/KRW 환율 데이터
@@ -35,7 +34,7 @@ interface BearState {
   theme: ThemeTypes;
   isLottiePlay: boolean; // 메인 로티 애니메이션
   blockData: BlockProps; // 블록 생성 정보
-  mvrvData: MvrvStoreProps; // MVRV 데이터 조회 기록
+  marketChartInterval: MarketChartIntervalType; // 대시보드 차트 인터벌
   updateKRW: (by: UpdateKRWProps) => void;
   updateUSD: (by: UpdateUSDProps) => void;
   updateDominance: (by: UpdateDominanceProps) => void;
@@ -43,11 +42,11 @@ interface BearState {
   setExRate: (exRate: ExRateProps) => void;
   setAmount: (by: string) => void;
   updateFearGreed: (data: FearGreedProps) => void;
-  setTheme: (theme: ThemeTypes) => ThemeTypes;
+  setTheme: (theme: ThemeTypes) => void;
   setCountAnime: (bool: boolean) => boolean;
   toggleLottie: () => void;
   updateBlock: (blockData: BlockProps) => void; // 블록 생성 정보 업데이트
-  setMvrv: (mvrv: MvrvStoreProps) => void; // MVRV 데이터 조회 기록
+  setMarketChartInterval: (interval: MarketChartIntervalType) => void; // 대시보드 차트 인터벌
 }
 
 const useBearStore = create<BearState>()(
@@ -60,9 +59,10 @@ const useBearStore = create<BearState>()(
         30: { date: [], price: [], timeStamp: 0 },
         365: { date: [], price: [], timeStamp: 0 },
       },
-      setBtcChart: (day, data) =>
+      marketChartInterval: 365,
+      setBtcChart: (interval, data) =>
         set((state) => ({
-          btcChart: { ...state.btcChart, [day]: data },
+          btcChart: { ...state.btcChart, [interval]: data },
         })),
       theme: "dark",
       market: "KRW/USD",
@@ -88,24 +88,20 @@ const useBearStore = create<BearState>()(
           remainingHeight: 0,
         },
       },
-      mvrvData: { value: "", date: "", timeStamp: 0 },
       setAmount: (price) => set(() => ({ amount: price })),
       updateKRW: (krw) => set((state) => ({ btc: { ...state.btc, ...krw } })),
       updateUSD: (usd) => set((state) => ({ btc: { ...state.btc, ...usd } })),
       updateDominance: (dominance) => set(() => ({ dominance })),
       setExRate: (exRate) => set(() => ({ exRate })),
       updateFearGreed: (data) => set(() => ({ fearGreed: data })),
-      setTheme: (theme) => {
-        set({ theme });
-        return theme;
-      },
+      setTheme: (theme) => set(() => ({ theme })), // deprecated
       setCountAnime: (isCountAnime) => {
         set({ isCountAnime });
         return isCountAnime;
       },
       toggleLottie: () => set((state) => ({ isLottiePlay: !state.isLottiePlay })),
       updateBlock: (blockData) => set(() => ({ blockData })),
-      setMvrv: (mvrvData: MvrvStoreProps) => set(() => ({ mvrvData })),
+      setMarketChartInterval: (marketChartInterval) => set(() => ({ marketChartInterval })),
     }),
     { name: "bear-storage" } // persist key
   )

@@ -64,13 +64,6 @@ export interface BlockProps {
   nextHalving: NextHalvingProps;
 }
 
-// MVRV Z-Score 이미지 캐싱 처리를 위한 데이터
-export interface MvrvStoreProps {
-  value: string;
-  date: string;
-  timeStamp: number;
-}
-
 // 비트코인 차트 데이터
 export interface ChartData {
   date: number[];
@@ -85,4 +78,6 @@ export interface BtcChart {
   "365": ChartData;
 }
 
-export type MarketChartDays = 1 | 7 | 30 | 365;
+export type MarketChartIntervalType = 1 | 7 | 30 | 365;
+
+export type SetMarketChartIntervalType = (interval: MarketChartIntervalType) => void;
