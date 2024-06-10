@@ -10,7 +10,8 @@
     position: absolute;
     bottom: 12px;
     left: 0;
-    @include flex-row-center;
+    @include flex-col-center;
+    gap: 12px;
     width: 100%;
     height: 32px;
     background-color: $default-background-color;
@@ -22,7 +23,6 @@
 }
 
 .dark {
-
     .only-btc__market-chart__button__group {
         background-color: $dark-background-color;
 
