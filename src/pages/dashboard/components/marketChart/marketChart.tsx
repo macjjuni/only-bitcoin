@@ -3,10 +3,11 @@ import { Button, ButtonGroup } from "@mui/material";
 import { CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Tooltip } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { ChartData, MarketChartIntervalTypeList } from "@/pages/dashboard/components/marketChart/marketChart.interface";
+import NotKeyNotBtc from "@/components/atom/NotKeyNotBtc/NotKeyNotBtc";
 import { getBtcRangeData } from "@/api/coinGeckoChart";
 import { useBearStore } from "@/store";
-import "./marketChart.scss";
 import { MarketChartIntervalType } from "@/store/store.interface";
+import "./marketChart.scss";
 
 // Chart.js 컴포넌트 등록
 ChartJS.register(CategoryScale, LinearScale, PointElement, Tooltip, Legend, LineElement);
@@ -106,6 +107,7 @@ function MarketChart() {
         />
       </div>
       <div className="only-btc__market-chart__button__group">
+        <NotKeyNotBtc />
         <ButtonGroup variant="outlined" aria-label="Basic button group">
           {marketChartIntervalType.map((marketChartDay) => (
             <Button key={marketChartDay.value} color="info" onClick={() => onClickChangeDays(marketChartDay.value)} className={`only-btc__button ${isActiveButtonClass(marketChartDay.value)}`}>

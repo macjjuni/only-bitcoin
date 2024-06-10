@@ -7,7 +7,7 @@ import { LottieProps } from "react-lottie-player";
 import { useBearStore } from "@/store";
 import LottieItem from "@/components/atom/LottieItem";
 import CountText from "../../../../components/atom/countText/countText";
-import NotKeyNotBtc from "./components/NotKeyNotBtc";
+import NotKeyNotBtc from "@/components/atom/NotKeyNotBtc/NotKeyNotBtc";
 import PremiumRate from "@/pages/dashboard/components/premiumRate/premiumRate";
 import btcLottie from "@/assets/bitcoin.json";
 import { type BtcProps, type MarketType } from "@/store/store.interface";
@@ -69,7 +69,7 @@ const MarketPrice = ({ btc, market, isLottiePlay }: IMarketPrice) => {
           )}
         </Stack>
       </Stack>
-      <NotKeyNotBtc />
+      <NotKeyNotBtc fontSize="22px" />
     </Stack>
   );
 };
