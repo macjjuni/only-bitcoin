@@ -1,15 +1,15 @@
 import "./NotKeyNotBtc.scss";
 import { CSSProperties, memo, useMemo } from "react";
 
-function NotKeyNotBtc({ fontSize }: { fontSize?: string }) {
+function NotKeyNotBtc({ fontSize, style }: { fontSize?: string; style?: CSSProperties }) {
   const rootStyle = useMemo(() => {
-    const style: CSSProperties = {};
+    const styles: CSSProperties = { ...style };
 
     if (fontSize) {
-      style.fontSize = fontSize;
+      styles.fontSize = fontSize;
     }
-    return style;
-  }, [fontSize]);
+    return styles;
+  }, [fontSize, style]);
 
   return (
     <h2 className="only-btc__not-key-not-btc" style={rootStyle}>

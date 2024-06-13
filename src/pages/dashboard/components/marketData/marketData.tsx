@@ -28,9 +28,9 @@ function MarketData() {
 
   return (
     <div className="only-btc__market-price">
-      <h1 className="only-btc__market-price__top-area">Bitcoin</h1>
-      {market.includes("KRW") && <p className="only-btc__market-price__top-area__cost">₩{countTextKrw}</p>}
-      {market.includes("USD") && <p className="only-btc__market-price__top-area__cost">${countTextUsd}</p>}
+      <h1 className="only-btc__market-price__signature__text">Bitcoin</h1>
+      {market.includes("KRW") && <h2 className="only-btc__market-price__cost__text">₩{countTextKrw}</h2>}
+      {market.includes("USD") && <h2 className="only-btc__market-price__cost__text">${countTextUsd}</h2>}
 
       <div className="only-btc__market-price__bottom-area">
         <BlockView blockData={blockData} />

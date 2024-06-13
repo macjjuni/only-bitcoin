@@ -34,13 +34,11 @@ export default function App() {
   return (
     <ThemeProvider theme={darkTheme}>
       <Initializer />
-      {/* <div id="only-bitcoin"> */}
       <CssBaseline />
       <Header />
       <Main />
       <Footer />
       <ToastContainer {...toastProps()} />
-      {/* </div> */}
     </ThemeProvider>
   );
 }

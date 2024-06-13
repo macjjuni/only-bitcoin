@@ -3,13 +3,13 @@
     width: 100%;
     height: 160px;
 
-    .only-btc__market-price__top-area {
+    .only-btc__market-price__signature__text {
         @include flex-row-center;
         @include font-sub-title;
         padding: 8px 0;
         font-weight: bold;
     }
-    .only-btc__market-price__top-area__cost {
+    .only-btc__market-price__cost__text {
         @include flex-row-center;
         @include font-heading;
         font-weight: 500;
