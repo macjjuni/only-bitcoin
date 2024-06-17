@@ -1,6 +1,7 @@
 import { Flip, ToastContainerProps } from "react-toastify";
 import { FaBitcoin } from "react-icons/fa";
 import { btcInfo } from "@/data/btcInfo";
+import "@/styles/toastify.scss";
 
 export const toastProps: () => ToastContainerProps = () => {
   const width = window.innerWidth || document.body.clientWidth;
@@ -14,9 +15,9 @@ export const toastProps: () => ToastContainerProps = () => {
     newestOnTop: false,
     closeOnClick: true,
     rtl: false,
-    pauseOnFocusLoss: false,
+    pauseOnFocusLoss: true,
     draggable: true,
     pauseOnHover: false,
-    icon: () => <FaBitcoin fontSize={32} fill={btcInfo.color} />,
+    icon: () => <FaBitcoin fontSize={28} fill={btcInfo.color} />,
   };
 };
