@@ -5,18 +5,29 @@
 
     .only-btc__market-price__signature__text {
         @include flex-row-center;
-        @include font-sub-title;
+        @include font-title;
         padding: 8px 0;
         font-weight: bold;
     }
     .only-btc__market-price__cost__text {
         @include flex-row-center;
-        @include font-heading;
+        @include font-heading-lg;
         font-weight: 500;
     }
-
     .only-btc__market-price__bottom-area {
         @include flex-row-center;
         gap: 4px;
+    }
+}
+
+@media screen and (max-width: $mobile-size) {
+    .only-btc__market-price {
+
+        .only-btc__market-price__signature__text {
+            @include font-sub-title;
+        }
+        .only-btc__market-price__cost__text {
+            @include font-heading-md;
+        }
     }
 }

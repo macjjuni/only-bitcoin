@@ -40,9 +40,14 @@
 
 // region [Font Sizes]
 
-@mixin font-heading {
-    font-size: $font-heading-size;
-    line-height: $line-height-heading-size;
+@mixin font-heading-lg {
+    font-size: $font-heading-lg-size;
+    line-height: $line-height-heading-lg-size;
+}
+
+@mixin font-heading-md {
+    font-size: $font-heading-md-size;
+    line-height: $line-height-heading-md-size;
 }
 @mixin font-title {
     font-size: $font-title-size;
@@ -56,10 +61,7 @@
     font-size: $font-body-size;
     line-height: $line-height-body-size;
 }
-@mixin font-chip {
-    font-size: $font-chip-size;
-    line-height: $line-height-chip-size;
-}
+
 
 // endregion
 
