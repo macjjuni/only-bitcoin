@@ -8,7 +8,7 @@ import CountText from "@/components/atom/countText/countText";
 import PremiumLottie from "@/assets/premium.json";
 import "./premiumRate.scss";
 import PopOver from "@/pages/btc2krw/components/MarketPrice/components/PopOver";
-import { getExRate } from "@/api/exRate";
+import getUsdExchangeRate from "@/api/exchangeRate";
 
 const defaultOption: LottieProps = { loop: true, play: true };
 const lottieOption = { ...defaultOption, style: { width: "28px", height: "28px" } };
@@ -36,7 +36,7 @@ function PremiumRate({ btc, className }: { btc: BtcProps; className?: string }) 
   // region [Transactions]
 
   const getFetchExRate = useCallback(() => {
-    getExRate().then((res) => {
+    getUsdExchangeRate().then((res) => {
       bearStore.setExRate(res);
     });
   }, []);
