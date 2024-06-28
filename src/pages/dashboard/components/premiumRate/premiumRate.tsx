@@ -9,6 +9,7 @@ import PremiumLottie from "@/assets/premium.json";
 import "./premiumRate.scss";
 import PopOver from "@/pages/btc2krw/components/MarketPrice/components/PopOver";
 import getUsdExchangeRate from "@/api/exchangeRate";
+import ExRateDialog from "@/components/modal/ExRateDialog";
 
 const defaultOption: LottieProps = { loop: true, play: true };
 const lottieOption = { ...defaultOption, style: { width: "28px", height: "28px" } };
@@ -17,6 +18,8 @@ function PremiumRate({ btc, className }: { btc: BtcProps; className?: string }) 
   // region [Hooks]
 
   const exRate = useBearStore((state) => state.exRate);
+  const [isEx, setEx] = useState(false); // 환율&김프 모달
+
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
 
   // endregion
@@ -30,6 +33,10 @@ function PremiumRate({ btc, className }: { btc: BtcProps; className?: string }) 
   const handlePopoverClose = useCallback(() => {
     setAnchorEl(null);
   }, []);
+
+  const showDialog = useCallback(() => {
+    setEx(true);
+  }, [isEx]);
 
   // endregion
 
@@ -58,11 +65,13 @@ function PremiumRate({ btc, className }: { btc: BtcProps; className?: string }) 
 
   return (
     <div className={`only-btc__premium-rate ${className}`}>
-      <div className="only-btc__premium-rate__container" onMouseEnter={handlePopoverOpen} onMouseLeave={handlePopoverClose}>
+      <button type="button" className="only-btc__premium-rate__container" onClick={showDialog} onMouseEnter={handlePopoverOpen} onMouseLeave={handlePopoverClose}>
         <LottieItem className="only-btc__premium-rate__lottie" play option={lottieOption} animationData={PremiumLottie} speed={1} />
         <CountText className="only-btc__premium-rate__text" text={calcPerDiff(btc.krw, btc.usd, exRate.basePrice)} duration={0.2} decimals={2} isAnime percent />
-      </div>
+      </button>
       <PopOver anchorEl={anchorEl} open={Boolean(anchorEl)} handlePopoverClose={handlePopoverClose} />
+      {/* 한국 프리미엄 및 환율 정보 */}
+      <ExRateDialog open={isEx} setOpen={setEx} />
     </div>
   );
 }

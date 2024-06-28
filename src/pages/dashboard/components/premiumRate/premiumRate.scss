@@ -4,6 +4,7 @@
         @include flex-row-center;
         gap: 2px;
         cursor: pointer;
+        @include font-body;
 
         .only-btc__premium-rate__text {
             font-size: inherit;
