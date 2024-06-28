@@ -1,12 +1,12 @@
 import { type Dispatch, type SetStateAction, useCallback } from "react";
 import { RiCloseCircleLine } from "react-icons/ri";
-import { DialogTitle, Dialog, Container, Typography, IconButton, Stack } from "@mui/material";
+import { DialogTitle, Dialog, Container, Typography, IconButton, Stack, Box } from "@mui/material";
 import { useBearStore } from "@/store";
 import { comma, calcPerDiff } from "@/utils/common";
 
 const ExRateDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetStateAction<boolean>> }) => {
   const btc = useBearStore((state) => state.btc);
-  const { basePrice, date, provider } = useBearStore((state) => state.exRate);
+  const { basePrice, date } = useBearStore((state) => state.exRate);
   const closeDialog = useCallback(() => {
     setOpen(false);
   }, []);
@@ -34,12 +34,22 @@ const ExRateDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetS
         </Stack>
         <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
           <Typography>제공</Typography>
-          <Typography>{provider}</Typography>
+          <Typography fontSize={16}>
+            <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noreferrer">
+              Free Currency Exchange Rates API
+            </a>
+          </Typography>
         </Stack>
         <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
           <Typography>환율등록일시</Typography>
           <Typography>{date}</Typography>
         </Stack>
+
+        <Box pt="16px" textAlign="left">
+          <Typography fontSize={18} color="#EE4E4E">
+            현재 제공된 환율은 실시간 환율과 다를 수 있습니다.
+          </Typography>
+        </Box>
       </Container>
     </Dialog>
   );

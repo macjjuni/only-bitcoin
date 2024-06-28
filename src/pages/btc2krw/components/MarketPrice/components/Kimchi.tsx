@@ -6,7 +6,7 @@ import CountText from "../../../../../components/atom/countText/countText";
 import { bearStore } from "@/store";
 
 import { calcPerDiff } from "@/utils/common";
-import { getExRate } from "@/api/exRate";
+import getUsdExchangeRate from "@/api/exchangeRate";
 import { type ExRateProps, type BtcProps } from "@/store/store.interface";
 
 interface KimchiProps {
@@ -16,25 +16,45 @@ interface KimchiProps {
 }
 
 const Kimchi = ({ btc, exRate, isAnime }: KimchiProps) => {
+  // region [Hooks]
+
   const [anchorEl, setAnchorEl] = useState<HTMLElement | null>(null);
   const handlePopoverOpen = useCallback((e: React.MouseEvent<HTMLElement>) => {
     setAnchorEl(e.currentTarget);
   }, []);
 
+  // endregion
+
+  // region [Transactions]
+
+  const getFetchExRate = useCallback(() => {
+    getUsdExchangeRate().then((resExRate) => {
+      bearStore.setExRate(resExRate);
+    });
+  }, []);
+
+  // endregion
+
+  // region [Events]
   const handlePopoverClose = useCallback(() => {
     setAnchorEl(null);
   }, []);
 
-  const getFetchExRate = useCallback(async () => {
-    const resExRate = await getExRate();
-    bearStore.setExRate(resExRate);
-  }, []);
+  // endregion
+
+  // region [Life Cycles]
 
   useLayoutEffect(() => {
     getFetchExRate();
   }, []);
 
+  // endregion
+
+  // region [Privates]
+
   const KIcon = useMemo(() => <TbSquareRoundedLetterK fontSize={22} />, []);
+
+  // endregion
 
   if (exRate.basePrice === 0) {
     console.error("환율 데이터 에러");
