@@ -4,10 +4,6 @@
 <div align="center">
 	<img src="https://img.shields.io/badge/React-61DAFB?style=for-the-badge&logo=React&logoColor=white">
 	<img src="https://img.shields.io/badge/TypeScript-3178C6?style=for-the-badge&logo=TypeScript&logoColor=white">
-	<img src="https://img.shields.io/badge/Zustand-443d36?style=for-the-badge&logo=TypeScript&logoColor=white">
-	<img src="https://img.shields.io/badge/Zustand-646CFF?style=for-the-badge&logo=TypeScript&logoColor=white">
-	<img src="https://img.shields.io/badge/ESLint-4B32C3?style=for-the-badge&logo=TypeScript&logoColor=white">
-	<img src="https://img.shields.io/badge/Prettier-F7B93E?style=for-the-badge&logo=TypeScript&logoColor=white">
 	<img src="https://img.shields.io/badge/Firebase-FFCA28?style=for-the-badge&logo=Firebase&logoColor=white" />
 </div>
 
