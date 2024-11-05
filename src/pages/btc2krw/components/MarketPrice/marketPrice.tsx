@@ -9,6 +9,7 @@ import LottieItem from "@/components/atom/LottieItem";
 import CountText from "../../../../components/atom/countText/countText";
 import NotKeyNotBtc from "@/components/atom/NotKeyNotBtc/NotKeyNotBtc";
 import PremiumRate from "@/pages/dashboard/components/premiumRate/premiumRate";
+import btcLottie from "@/assets/lotties/bitcoin.json";
 import { type BtcProps, type MarketType } from "@/store/store.interface";
 import "./marketPrice.scss";
 
@@ -22,7 +23,6 @@ interface IMarketPrice {
   isLottiePlay: boolean;
 }
 
-const btcLottiePath = "/lotties/bitcoin.json";
 const defaultSpeed = 0.3;
 
 const MarketPrice = ({ btc, market, isLottiePlay }: IMarketPrice) => {
@@ -51,7 +51,7 @@ const MarketPrice = ({ btc, market, isLottiePlay }: IMarketPrice) => {
   return (
     <Stack className="box-item" onMouseEnter={mouseEnter} onMouseLeave={mouseLeave} justifyContent="center" height="240px" overflow="hidden">
       <Stack flexDirection="row" justifyContent="space-between" alignItems="center" pr={1}>
-        <LottieItem onClick={onToggleLottie} option={btcOption} play={isLottiePlay} path={btcLottiePath} speed={speed + 0.8} />
+        <LottieItem onClick={onToggleLottie} option={btcOption} play={isLottiePlay} animationData={btcLottie} speed={speed + 0.8} />
 
         <Stack flexDirection="column" justifyContent="flex-end" minWidth="200px" position="relative" mb="12px">
           <PremiumRate btc={btc} className="only-btc__market-price__premium-rate" />
