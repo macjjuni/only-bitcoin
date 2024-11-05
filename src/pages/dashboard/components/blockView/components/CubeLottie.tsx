@@ -2,7 +2,7 @@ import { memo } from "react";
 import { type LottieProps } from "react-lottie-player";
 import { Box } from "@mui/material";
 import LottieItem from "@/components/atom/LottieItem";
-import BlockLottie from "@/assets/block1.json";
+import BlockLottie from "@/assets/block.json";
 
 const defaultOption: LottieProps = { loop: true, play: true };
 const lottieOption = { ...defaultOption, style: { width: "72px", height: "72px" } };
