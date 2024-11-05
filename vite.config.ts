@@ -3,7 +3,9 @@ import { defineConfig, loadEnv, PluginOption } from "vite";
 import react from "@vitejs/plugin-react-swc";
 import { createHtmlPlugin } from "vite-plugin-html";
 import eslint from "vite-plugin-eslint";
+import { compression } from "vite-plugin-compression2";
 import { visualizer } from "rollup-plugin-visualizer";
+
 
 export default defineConfig(({ mode }: { mode: string }) => {
   const env = loadEnv(mode, process.cwd(), "");
@@ -11,6 +13,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
     plugins: [
       react(),
       eslint(),
+      compression(),
       visualizer({
         emitFile: true,
         filename: "stats.html",
@@ -23,7 +26,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
         minify: false,
         template: "index.html",
         inject: { data: { title: env.VITE_TITLE, url: env.VITE_URL } }
-      }),
+      })
     ],
     css: {
       preprocessorOptions: {
@@ -35,7 +38,6 @@ export default defineConfig(({ mode }: { mode: string }) => {
             "@import \"@/styles/animate\";"
         }
       }
-
     },
     build: {
       minify: "terser",
