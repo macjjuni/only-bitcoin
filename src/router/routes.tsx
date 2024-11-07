@@ -1,10 +1,12 @@
+import { lazy } from "react";
+
 import { TbSquareRoundedLetterK } from "react-icons/tb";
 import { AiOutlineBlock } from "react-icons/ai";
 import { MdDashboard } from "react-icons/md";
-import { Btc2KrwPage, HalvingPage, HomePage, PremiumPage } from "@/pages";
 
 import TransIcon from "@/components/icon/TransIcon";
 import { btcColor } from "@/data/btcInfo";
+import withSuspense from "@/components/hoc/withSuspense";
 
 interface IRoute {
   id?: number;
@@ -13,6 +15,11 @@ interface IRoute {
   component: React.ReactNode;
   icon: React.ReactNode;
 }
+
+const Btc2KrwPage = withSuspense(lazy(() => import("@/pages/btc2krw/btc2krw")));
+const HalvingPage = withSuspense(lazy(() => import("@/pages/blockStatus/blockStatus")));
+const HomePage = withSuspense(lazy(() => import("@/pages/dashboard/dashboard")));
+const PremiumPage = withSuspense(lazy(() => import("@/pages/premium/premium")));
 
 export const routesWithIcon: IRoute[] = [
   { id: 0, title: "대시보드", path: "/", component: <HomePage />, icon: <MdDashboard fill={btcColor} size={28} /> },

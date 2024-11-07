@@ -1,6 +1,6 @@
 import { createBrowserRouter, createRoutesFromElements, Route } from "react-router-dom";
 
-import { ErrorPage } from "@/pages";
+import ErrorPage from "@/pages/error/error";
 import routes from "@/router/routes";
 import App from "@/App";
 
