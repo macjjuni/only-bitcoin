@@ -1,6 +1,6 @@
 import axios from "axios";
 import { toast } from "react-toastify";
-import moment from "moment";
+import { getCurrentDate } from "@/utils/date";
 import { FearGreedProps } from "@/store/store.interface";
 
 const fearGreedURI = "https://api.alternative.me/fng/";
@@ -24,11 +24,10 @@ export const getFearGreed = async (): Promise<FearGreedProps> => {
   try {
     const { data } = await axios.get<IResfearGreed>(fearGreedURI);
 
-    const ResponseData = {
+    return {
       value: data.data[0].value,
-      date: moment().format("yyyy.MM.DD HH:mm:ss"),
+      date: getCurrentDate(),
     };
-    return ResponseData;
   } catch (e) {
     console.error(e);
     toast.error("Fear and Greed Index update Error!");

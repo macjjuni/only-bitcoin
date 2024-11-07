@@ -1,10 +1,9 @@
 import { memo, useState, useEffect } from "react";
-import moment from "moment";
 import { Popover, Stack, Typography, useMediaQuery } from "@mui/material";
 import { responsive } from "@/styles/style";
 import Progress from "@/components/molecule/Progress";
 import { useBearStore } from "@/store";
-import { transTimeStampDate } from "@/utils/common";
+import { formatDate, calcCurrentDateDifference } from "@/utils/date";
 
 interface PopOverProps {
   anchorEl: HTMLElement | null;
@@ -12,20 +11,13 @@ interface PopOverProps {
   handlePopoverClose: (e: React.MouseEvent<HTMLElement>) => void;
 }
 
-const diffTimeStamp = (time1: number, time2 = new Date().getTime()) => {
-  return moment
-    .duration(moment(time2).diff(moment.unix(time1)))
-    .asMinutes()
-    .toFixed(0);
-};
-
 const PopOver = ({ anchorEl, open, handlePopoverClose }: PopOverProps) => {
   const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`);
   const blockData = useBearStore((state) => state.blockData);
-  const [diff, setDiff] = useState(diffTimeStamp(blockData.timeStamp));
+  const [diff, setDiff] = useState(calcCurrentDateDifference(blockData.timeStamp, "minute"));
 
   useEffect(() => {
-    setDiff(diffTimeStamp(blockData.timeStamp));
+    setDiff(calcCurrentDateDifference(blockData.timeStamp, "minute"));
   }, [blockData]);
 
   return (
@@ -40,7 +32,7 @@ const PopOver = ({ anchorEl, open, handlePopoverClose }: PopOverProps) => {
     >
       <Stack px="8px" pt="4px" pb="8px" gap="6px">
         <Typography fontSize={matches ? 16 : 14}>
-          블록 생성 시간: {transTimeStampDate(blockData.timeStamp).replace(/-/g, ".")}({diff}분 전)
+          블록 생성 시간: {formatDate(blockData.timeStamp).replace(/-/g, ".")}({diff}분 전)
         </Typography>
         <Progress isMaxNum />
       </Stack>

@@ -1,4 +1,4 @@
-import { useEffect, useState, useCallback, memo } from "react";
+import { useEffect, useState, useCallback, memo, ChangeEvent } from "react";
 import { Stack, Typography, Divider } from "@mui/material";
 // Zustand
 import { useBearStore, bearStore } from "@/store";
@@ -13,7 +13,8 @@ import KrwInput from "./components/KrwInput";
 import TransIcon from "@/components/icon/TransIcon";
 
 import { ecoSystemPyramid } from "@/data/btcInfo";
-import { comma, isSafari } from "@/utils/common";
+import { isSafari } from "@/utils/system";
+import { comma } from "@/utils/string";
 
 const numReg = /^[-+]?(\d+(\.\d*)?|\.\d+)$/;
 const commaLength = 5; // 소숫점
@@ -46,7 +47,7 @@ const BtcToKrw = ({ btc }: { btc: BtcProps }) => {
   );
 
   // 비트코인 개수 변경
-  const handleAmount = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handleAmount = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const amountTxt = e.target.value;
     if (amountTxt === "" || amountTxt === "0") {
       bearStore.setAmount("0");
@@ -61,14 +62,14 @@ const BtcToKrw = ({ btc }: { btc: BtcProps }) => {
     }
   }, []);
   // IOS 전용
-  const iosHandleAmount = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const iosHandleAmount = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const amountTxt = e.target.value;
     bearStore.setAmount(amountTxt);
     setPrice(calcPrice(Number(amountTxt)));
   }, []);
 
   // 원화 금액 변경
-  const handlePrice = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const handlePrice = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     const priceTxt = e.target.value.replace(/(^0+)/, "").replace(/,/g, "");
     if (priceTxt === "" || Number.isNaN(Number(priceTxt))) {
       initialInput();
@@ -78,7 +79,7 @@ const BtcToKrw = ({ btc }: { btc: BtcProps }) => {
     }
   }, []);
 
-  const toggleStandard = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+  const toggleStandard = useCallback((e: ChangeEvent<HTMLInputElement>) => {
     setStandard(e.target.checked);
   }, []);
 

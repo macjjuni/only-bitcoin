@@ -1,5 +1,5 @@
 import { useCallback, useLayoutEffect } from "react";
-import moment from "moment";
+import { calcCurrentDateDifference } from "@/utils/date";
 import { getFearGreed } from "@/api/fearGreed";
 import interval from "@/utils/interval";
 import { useBearStore, bearStore } from "@/store";
@@ -11,21 +11,27 @@ const intervalTime = 300000; // Interval Time(ms): 5분
 const FeargreedInit = () => {
   const fearGreed = useBearStore((state) => state.fearGreed);
   // 공포 탐욕 지수 데이터 초기화
-  const updateFGIndex = useCallback(async () => {
+  const updateFearGreedIndex = useCallback(async () => {
     const data = await getFearGreed();
     bearStore.updateFearGreed(data);
   }, []);
 
   // 업데이트 시간 체크해서 업데이트 실행
-  const updateCheck = useCallback(() => {
-    const minDiff = Math.floor(moment.duration(moment().diff(fearGreed.date)).asMinutes());
-    if (Number.isNaN(minDiff) || minDiff > limitMins) updateFGIndex(); // 10분 이후면 업데이트
+  const updateAction = useCallback(() => {
+    if (!Number.isNaN(fearGreed.date)) {
+      updateFearGreedIndex();
+      return;
+    }
+    const minDiff = calcCurrentDateDifference(fearGreed.date, "minute");
+    if (minDiff > limitMins) {
+      updateFearGreedIndex();
+    }
   }, []);
 
   useLayoutEffect(() => {
     if (isDev) console.log("✅ 공포 탐욕 지수 초기화");
-    updateCheck();
-    const fearGreedInterval = interval(updateFGIndex, intervalTime);
+    updateAction();
+    const fearGreedInterval = interval(updateFearGreedIndex, intervalTime);
     fearGreedInterval.start();
   }, []);
 

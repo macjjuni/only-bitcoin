@@ -2,7 +2,7 @@ import { memo, useCallback } from "react";
 import IconButton from "@mui/material/IconButton";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import { toast } from "react-toastify";
-import { copyText } from "@/utils/common";
+import { clipboardUtil } from "kku-util";
 import { btcInfo } from "@/data/btcInfo";
 
 interface ICopy {
@@ -13,7 +13,7 @@ const CopyButton = ({ txt }: ICopy) => {
   const clickCopy = useCallback(async () => {
     if (!txt) return;
     const target = txt.toString();
-    const isDone = await copyText(target);
+    const isDone = await clipboardUtil.copyToClipboard(target);
     if (isDone) {
       toast.success(`"${txt}" 복사 완료!`);
     } else {

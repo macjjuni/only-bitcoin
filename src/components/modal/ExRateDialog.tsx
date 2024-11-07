@@ -2,7 +2,8 @@ import { type Dispatch, type SetStateAction, useCallback } from "react";
 import { RiCloseCircleLine } from "react-icons/ri";
 import { DialogTitle, Dialog, Container, Typography, IconButton, Stack, Box } from "@mui/material";
 import { useBearStore } from "@/store";
-import { comma, calcPerDiff } from "@/utils/common";
+import { calcPerDiff } from "@/utils/common";
+import { comma } from "@/utils/string";
 
 const ExRateDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetStateAction<boolean>> }) => {
   const btc = useBearStore((state) => state.btc);

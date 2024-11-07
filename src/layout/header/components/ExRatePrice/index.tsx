@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { useBearStore } from "@/store";
-import { comma } from "@/utils/common";
+import { comma } from "@/utils/string";
 import ChipItem from "@/components/atom/chipItem/chipItem";
 
 const ExRatePrice = ({ onClick }: { onClick: () => void }) => {

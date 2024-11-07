@@ -1,7 +1,8 @@
 import { useCallback, useLayoutEffect } from "react";
-import moment from "moment";
 import { getCurrencies } from "@/api/dominance";
-import { getDominace, getNowDate, valueCheck, isDev } from "@/utils/common";
+import { getDominance, isDev } from "@/utils/common";
+import { valueCheck } from "@/utils/string";
+import { calcCurrentDateDifference, getCurrentDate } from "@/utils/date";
 import { useBearStore, bearStore } from "@/store";
 import interval from "@/utils/interval";
 
@@ -14,8 +15,8 @@ const DominanceInit = () => {
   const updateDominance = useCallback(async () => {
     const res = await getCurrencies();
     if (res) {
-      const getDominance = { value: `${getDominace(res)}%`, date: getNowDate() };
-      bearStore.updateDominance(getDominance);
+      const dominanceDate = { value: `${getDominance(res)}%`, date: getCurrentDate() };
+      bearStore.updateDominance(dominanceDate);
     }
   }, []);
 
@@ -23,10 +24,12 @@ const DominanceInit = () => {
   const updateCheck = useCallback(() => {
     const valCheck = valueCheck(dominance.date);
     if (!valCheck) {
-      updateDominance();
+      updateDominance().then();
     } else {
-      const minDiff = Math.floor(moment.duration(moment().diff(dominance.date)).asMinutes());
-      if (minDiff > limitMins) updateDominance(); // 10분 이후면 업데이트
+      const minDiff = calcCurrentDateDifference(dominance.date, "minute");
+      if (minDiff > limitMins) {
+        updateDominance().then();
+      } // 10분 이후면 업데이트
     }
   }, []);
 

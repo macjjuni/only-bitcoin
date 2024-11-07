@@ -1,7 +1,10 @@
 import { toast } from "react-toastify";
 import { useBearStore } from "@/store";
 import { binaceAsset } from "@/data/btcInfo";
-import { isNetwork, transDate, getNowDate, setTitle, comma } from "@/utils/common";
+import { setTitle } from "@/utils/common";
+import { comma } from "@/utils/string";
+import { getCurrentDate, formatDate } from "@/utils/date";
+import { isNetwork } from "@/utils/network";
 
 // Binance API URL
 const binanceURL = `wss://stream.binance.com:9443/ws/${binaceAsset[0]}@ticker`;
@@ -10,7 +13,7 @@ const binanceURL = `wss://stream.binance.com:9443/ws/${binaceAsset[0]}@ticker`;
 const { getState } = useBearStore;
 // Store data reset
 const resetData = () => {
-  const usdDate = getNowDate();
+  const usdDate = getCurrentDate();
   getState().updateUSD({ usd: 0, usdDate, usdColor: true }); // store update
 };
 
@@ -41,7 +44,7 @@ function initBinance() {
   socket.onmessage = ({ data }) => {
     const json = JSON.parse(data);
     const usd = Number(json.c); // 현재 가격
-    const usdDate = transDate(json.C);
+    const usdDate = formatDate(json.C);
     const beforeUsd = getState().btc.usd;
     setTitle(comma(usd.toFixed(0))); // 페이지 타이틀 업데이트
     if (usd > beforeUsd) {

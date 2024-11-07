@@ -1,7 +1,7 @@
 import { memo, useCallback } from "react";
 import { Box } from "@mui/material";
 import { toast } from "react-toastify";
-import { copyText } from "@/utils/common";
+import { clipboardUtil } from "kku-util";
 
 interface ICopy {
   txt: string | number;
@@ -11,7 +11,7 @@ const CopyButton = ({ txt }: ICopy) => {
   const clickCopy = useCallback(async () => {
     if (!txt) return;
     const target = txt.toString();
-    const isDone = await copyText(target);
+    const isDone = await clipboardUtil.copyToClipboard(target);
     if (isDone) {
       toast.success(`"${txt}" 복사 완료!`);
     } else {

@@ -2,7 +2,7 @@ import { memo, useMemo } from "react";
 import { Box, LinearProgress, Typography } from "@mui/material";
 import { btcColor } from "@/data/btcInfo";
 import { useBearStore } from "@/store";
-import { comma } from "@/utils/common";
+import { comma } from "@/utils/string";
 
 const Progress = ({ isMaxNum }: { isMaxNum?: boolean }) => {
   const blockData = useBearStore((state) => state.blockData);

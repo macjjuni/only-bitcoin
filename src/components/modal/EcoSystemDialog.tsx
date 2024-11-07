@@ -1,7 +1,7 @@
 import { memo, useCallback, type Dispatch, type SetStateAction } from "react";
 import { RiCloseCircleLine } from "react-icons/ri";
 import { DialogTitle, Dialog, Container, Typography, IconButton, Stack, Table, TableBody, TableCell, TableContainer, TableRow, Paper } from "@mui/material";
-import { comma } from "@/utils/common";
+import { comma } from "@/utils/string";
 import { ecoSystemPyramid } from "@/data/btcInfo";
 import { useBearStore } from "@/store";
 

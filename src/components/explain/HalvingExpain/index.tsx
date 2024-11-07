@@ -2,7 +2,7 @@ import { memo } from "react";
 import { useMediaQuery, Typography } from "@mui/material";
 import ExplainFrame from "../../molecule/ExplainFrame";
 import { responsive } from "@/styles/style";
-import { comma } from "@/utils/common";
+import { comma } from "@/utils/string";
 
 const HalvingExplain = ({ nextHeight }: { nextHeight: number }) => {
   const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`);

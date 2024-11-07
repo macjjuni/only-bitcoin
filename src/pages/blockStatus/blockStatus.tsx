@@ -9,7 +9,8 @@ import PageSubTitle from "@/components/atom/PageSubTitle/pageSubTitle";
 import CountText from "../../components/atom/countText/countText";
 
 import { useBearStore } from "@/store";
-import { calcRemainingTime, transTimeStampDate } from "@/utils/common";
+import { calcRemainingTime } from "@/utils/common";
+import { formatDate } from "@/utils/date";
 import { responsive } from "@/styles/style";
 import PageLayout from "@/layout/pageLayout/pageLayout";
 
@@ -41,7 +42,7 @@ const BitcoinHalvingPage = () => {
               <Typography fontSize={14} fontWeight="bold" mb={1}>
                 타임스탬프
               </Typography>
-              <div>{transTimeStampDate(blockData.timeStamp).replace(/-/g, ".")}</div>
+              <div>{formatDate(blockData.timeStamp).replace(/-/g, ".")}</div>
             </>
           }
         />

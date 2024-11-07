@@ -1,10 +1,14 @@
 import { toast } from "react-toastify";
 import { useBearStore } from "@/store";
 import { btcInfo } from "@/data/btcInfo";
-import { uuid, isNetwork, transDate, getNowDate } from "@/utils/common";
+import { isNetwork } from "@/utils/network";
+import { generateUUID } from "@/utils/string";
+import LocalStorage from "@/utils/storage";
+import { getCurrentDate, formatDate } from "@/utils/date";
 
 // Upbit API URL
 const upbitURL = import.meta.env.VITE_UPBIT_API_URL || "wss://api.upbit.com/websocket/v1";
+const uuidStorageKey = "uuid";
 
 // Zustand
 const { getState } = useBearStore;
@@ -12,20 +16,25 @@ const { getState } = useBearStore;
 const resetData = () => {
   const cleanData = {
     krw: 0,
-    krwDate: getNowDate(),
+    krwDate: getCurrentDate(),
     krwColor: true,
   };
   getState().updateKRW(cleanData); // store update
 };
 
 // Uuid
-const isUuid = uuid.getUuid();
-if (!isUuid) {
-  const newUuid = uuid.generate();
-  uuid.saveUuid(newUuid);
-}
+const uuidValue = LocalStorage.getItem(uuidStorageKey);
+const getUUID = () => {
+  if (!uuidValue) {
+    const newUuid = generateUUID();
+    LocalStorage.setItem(uuidStorageKey, newUuid);
 
-const currency = [{ ticket: uuid.getUuid() }, { type: "ticker", codes: [btcInfo.ticker] }, { format: "SIMPLE" }];
+    return newUuid;
+  }
+  return uuidValue;
+};
+
+const currency = [{ ticket: getUUID() }, { type: "ticker", codes: [btcInfo.ticker] }, { format: "SIMPLE" }];
 
 let timeout: NodeJS.Timeout | null = null;
 let retryCount = 1;
@@ -59,7 +68,7 @@ function initUpbit() {
     const data = JSON.parse(enc.decode(arr));
 
     const krw = data.tp;
-    const krwDate = transDate(data.ttms);
+    const krwDate = formatDate(data.ttms);
     const beforeKrw = getState().btc.krw;
 
     if (krw > beforeKrw) {

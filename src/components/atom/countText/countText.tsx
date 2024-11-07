@@ -1,7 +1,7 @@
 import { useCallback, memo, CSSProperties, useMemo } from "react";
 import CountUp from "react-countup";
 import { useBearStore } from "@/store";
-import { comma } from "@/utils/common";
+import { comma } from "@/utils/string";
 
 interface ICount {
   text: number;

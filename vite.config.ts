@@ -19,7 +19,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
         filename: "stats.html",
         open: true,
         gzipSize: true,
-        brotliSize: true
+        template: "treemap", // 그래프 유형: treemap, sunburst, network, pie, graph 등
       }) as unknown as PluginOption,
       createHtmlPlugin({
         // HTML Template 설정
