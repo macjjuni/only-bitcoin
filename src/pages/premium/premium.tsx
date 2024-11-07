@@ -87,7 +87,7 @@ const PremiumPage = () => {
         <CardItem
           title={
             <Stack flexDirection="row" alignItems="center" gap={1} mt={matches ? 0 : "4px"}>
-              <img src="/images/upbit_logo.webp" alt="upbit_logo" width={24} height={24} />
+              <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/upbit_logo.webp" alt="upbit_logo" width={24} height={24} />
               <Typography fontSize={18} fontWeight="bold">
                 한국 시세
               </Typography>
@@ -113,7 +113,7 @@ const PremiumPage = () => {
         <CardItem
           title={
             <Stack flexDirection="row" alignItems="center" gap={1} mt={matches ? 0 : "4px"}>
-              <img src="/images/binance_logo.webp" alt="binance_logo" width={24} height={24} />
+              <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/binance_logo.webp" alt="binance_logo" width={24} height={24} />
               <Typography fontSize={18} fontWeight="bold">
                 해외 시세
               </Typography>
