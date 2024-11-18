@@ -2,7 +2,7 @@ import axios from "axios";
 import { toast } from "react-toastify";
 import { type ExRateProps } from "@/store/store.interface";
 
-const apiUrl = "https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.min.json";
+const apiUrl = `https://cdn.jsdelivr.net/npm/@fawazahmed0/currency-api@latest/v1/currencies/usd.min.json?ts=${Date.now()}`;
 
 interface IExRateRes {
   date: string;
