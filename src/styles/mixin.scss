@@ -44,10 +44,17 @@
     font-size: $font-heading-lg-size;
     line-height: $line-height-heading-lg-size;
 }
-
 @mixin font-heading-md {
     font-size: $font-heading-md-size;
     line-height: $line-height-heading-md-size;
+}
+@mixin font-heading-sm {
+    font-size: $font-heading-sm-size;
+    line-height: $line-height-heading-sm-size;
+}
+@mixin font-heading-sm {
+    font-size: $font-heading-sm-size;
+    line-height: $line-height-heading-sm-size;
 }
 @mixin font-title {
     font-size: $font-title-size;

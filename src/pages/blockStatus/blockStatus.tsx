@@ -4,9 +4,9 @@ import HalvingTable from "@/components/molecule/HalvingTable";
 import CubeLottie from "@/pages/dashboard/components/blockView/components/CubeLottie";
 import CardItem from "@/components/molecule/CardItem";
 import Progress from "@/components/molecule/Progress";
-import PageTitle from "@/components/atom/PageTitle/pageTitle";
-import PageSubTitle from "@/components/atom/PageSubTitle/pageSubTitle";
-import CountText from "../../components/atom/countText/countText";
+import PageTitle from "@/components/atom/PageTitle/PageTitle";
+import PageSubTitle from "@/components/atom/PageSubTitle/PageSubTitle";
+import CountText from "@/components/atom/CountText/CountText";
 
 import { useBearStore } from "@/store";
 import { calcRemainingTime } from "@/utils/common";

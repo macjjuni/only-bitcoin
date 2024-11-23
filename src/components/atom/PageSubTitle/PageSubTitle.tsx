@@ -1,5 +1,5 @@
 import { ReactNode, memo } from "react";
-import "./pageSubTitle.scss";
+import "./PageSubTitle.scss";
 
 interface PageSubTitleProps {
   subTitle: string | ReactNode;

@@ -1,5 +1,5 @@
 import { memo } from "react";
-import ChipItem from "@/components/atom/chipItem/chipItem";
+import ChipItem from "@/components/atom/ChipItem/ChipItem";
 import { useBearStore } from "@/store";
 
 const BtcDominance = () => {

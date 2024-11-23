@@ -1,6 +1,6 @@
 import { memo, ReactNode } from "react";
 import BtcIcon from "@/components/icon/BtcIcon";
-import "./pageTitle.scss";
+import "./PageTitle.scss";
 
 function PageTitle({ title }: { title: string | ReactNode }) {
   return (

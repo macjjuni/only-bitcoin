@@ -16,12 +16,11 @@
     "react/react-in-jsx-scope": 0,
     "react/jsx-filename-extension": [1, { "extensions": [".ts", ".tsx"] }],
     "react/function-component-definition": "off",
-    "prettier/prettier": ["error", { "endOfLine": "auto" }],
+    "prettier/prettier": "off",
     "import/prefer-default-export": "off",
     "default-param-last": "off",
     "no-console": "off",
     "import/no-cycle": "off",
-    // "import/no-unresolved": "off", // alias
     "dot-notation": "off",
     "no-alert": "off",
     "import/extensions": "off",
@@ -36,6 +35,6 @@
     "no-plusplus": "off",
     "import/no-extraneous-dependencies": "off",
     "@typescript-eslint/return-await": "off",
-    "no-param-reassign": ["error", { "props": false }]
+    "no-param-reassign": ["error", { "props": false }],
   }
 }

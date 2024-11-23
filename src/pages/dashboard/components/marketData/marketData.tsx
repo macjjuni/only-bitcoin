@@ -1,9 +1,13 @@
-import { memo, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { useBearStore } from "@/store";
 import BlockView from "@/pages/dashboard/components/blockView/blockView";
 import PremiumRate from "@/pages/dashboard/components/premiumRate/premiumRate";
+import CountText from "@/components/atom/CountText/CountText";
+import NetworkStatusButton from "@/pages/dashboard/components/NetworkStatusButton/NetworkStatusButton";
+import Dot from "@/components/atom/Dot/Dot";
+import initUpbit from "@/socket/upbit";
+import initBinance from "@/socket/binance";
 import "./marketData.scss";
-import CountText from "@/components/atom/countText/countText";
 
 function MarketData() {
   // region [Hooks]
@@ -16,12 +20,22 @@ function MarketData() {
 
   // region [Privates]
 
+  const onConnectUpbit = useCallback(() => {
+    initUpbit();
+  }, []);
+
+  const onConnectBinance = useCallback(() => {
+    initBinance();
+  }, []);
+
   const countTextKrw = useMemo(() => {
-    return <CountText text={btc.krw} duration={0.2} isAnime />;
+    return <CountText className="only-btc__market-price__cost__text--center" text={btc.krw} duration={0.2} isAnime
+                      leftText="₩" />;
   }, [btc.krw]);
 
   const countTextUsd = useMemo(() => {
-    return <CountText text={btc.usd} duration={0.2} isAnime />;
+    return <CountText className="only-btc__market-price__cost__text--center" text={btc.usd} duration={0.2} isAnime
+                      leftText="$" />;
   }, [btc.usd]);
 
   // endregion
@@ -29,8 +43,20 @@ function MarketData() {
   return (
     <div className="only-btc__market-price">
       <h1 className="only-btc__market-price__signature__text">Bitcoin</h1>
-      {market.includes("KRW") && <h2 className="only-btc__market-price__cost__text">₩{countTextKrw}</h2>}
-      {market.includes("USD") && <h2 className="only-btc__market-price__cost__text">${countTextUsd}</h2>}
+      {market.includes("KRW") && (
+        <h2 className="only-btc__market-price__cost__text">
+          {countTextKrw}
+          <Dot status={btc.isKrwStatus} />
+          {!btc.isKrwStatus && (<NetworkStatusButton onClick={onConnectUpbit} />)}
+        </h2>
+      )}
+      {market.includes("USD") && (
+        <h2 className="only-btc__market-price__cost__text">
+          {countTextUsd}
+          <Dot status={btc.isKrwStatus} />
+          {!btc.isUsdStatus && (<NetworkStatusButton onClick={onConnectBinance} />)}
+        </h2>
+      )}
 
       <div className="only-btc__market-price__bottom-area">
         <BlockView blockData={blockData} />

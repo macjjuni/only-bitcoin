@@ -2,9 +2,11 @@ export interface BtcProps {
   krw: number;
   krwDate: string;
   krwColor: boolean;
+  isKrwStatus: boolean;
   usd: number;
   usdDate: string;
   usdColor: boolean; // true = green, false = red
+  isUsdStatus: boolean;
 }
 
 export type ThemeTypes = "dark" | "light";
@@ -34,12 +36,14 @@ export interface UpdateKRWProps {
   krw: number;
   krwDate: string;
   krwColor: boolean;
+  isKrwStatus: boolean;
 }
 
 export interface UpdateUSDProps {
   usd: number;
   usdDate: string;
   usdColor: boolean;
+  isUsdStatus: boolean;
 }
 
 // 환율 정보

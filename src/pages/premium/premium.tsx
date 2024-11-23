@@ -10,8 +10,8 @@ import { calcPerDiff } from "@/utils/common";
 import { comma } from "@/utils/string";
 import { responsive } from "@/styles/style";
 import PageLayout from "@/layout/pageLayout/pageLayout";
-import PageTitle from "@/components/atom/PageTitle/pageTitle";
-import CountText from "../../components/atom/countText/countText";
+import PageTitle from "@/components/atom/PageTitle/PageTitle";
+import CountText from "@/components/atom/CountText/CountText";
 import "./premium.scss";
 
 const LabelElement = ({ children }: { children: ReactNode }) => {

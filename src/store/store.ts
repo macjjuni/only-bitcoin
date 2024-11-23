@@ -1,8 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-
-import {
-  type BtcProps,
+import type {
+  BtcProps,
   ThemeTypes,
   DominanceProps,
   MarketType,
@@ -23,60 +22,85 @@ import {
 
 interface BearState {
   btc: BtcProps; // BTC 시세 정보
-  btcChart: BtcChart;
-  setBtcChart: (interval: MarketChartIntervalType, data: ChartData) => void;
-  dominance: DominanceProps; // 도미넌스 정보
-  market: MarketType; // 메인 시세 단위 => 'KRW' | 'USD' | 'KRW/USD'
-  exRate: ExRateProps; // USD/KRW 환율 데이터
-  amount: string; // BTC 개수 Input 값
-  isCountAnime: boolean; // 가격 변동 애니메이션 효과 여부
-  fearGreed: FearGreedProps; // 공포&탐욕 지수
-  theme: ThemeTypes;
-  isLottiePlay: boolean; // 메인 로티 애니메이션
-  blockData: BlockProps; // 블록 생성 정보
-  marketChartInterval: MarketChartIntervalType; // 대시보드 차트 인터벌
   updateKRW: (by: UpdateKRWProps) => void;
   updateUSD: (by: UpdateUSDProps) => void;
+
+  btcChart: BtcChart;
+  setBtcChart: (interval: MarketChartIntervalType, data: ChartData) => void;
+
+  dominance: DominanceProps; // 도미넌스 정보
   updateDominance: (by: UpdateDominanceProps) => void;
+
+  market: MarketType; // 메인 시세 단위 => 'KRW' | 'USD' | 'KRW/USD'
   setMarket: (market: MarketType) => MarketType;
-  setExRate: (exRate: ExRateProps) => void;
-  setAmount: (by: string) => void;
-  updateFearGreed: (data: FearGreedProps) => void;
+
+  theme: ThemeTypes;
   setTheme: (theme: ThemeTypes) => void;
-  setCountAnime: (bool: boolean) => boolean;
+
+  exRate: ExRateProps; // USD/KRW 환율 데이터
+  setExRate: (exRate: ExRateProps) => void;
+
+  amount: string; // BTC 개수 Input 값
+  setAmount: (by: string) => void;
+
+  isCountAnime: boolean; // 가격 변동 애니메이션 효과 여부
+  setCountAnime: (bool: boolean) => void;
+
+  fearGreed: FearGreedProps; // 공포&탐욕 지수
+  updateFearGreed: (data: FearGreedProps) => void;
+
+  isLottiePlay: boolean; // 메인 로티 애니메이션
   toggleLottie: () => void;
+
+  blockData: BlockProps; // 블록 생성 정보
   updateBlock: (blockData: BlockProps) => void; // 블록 생성 정보 업데이트
+
+  marketChartInterval: MarketChartIntervalType; // 대시보드 차트 인터벌
   setMarketChartInterval: (interval: MarketChartIntervalType) => void; // 대시보드 차트 인터벌
 }
 
 const useBearStore = create<BearState>()(
   persist(
     (set) => ({
-      btc: { krw: 0, krwDate: "", krwColor: true, usd: 0, usdDate: "", usdColor: true },
+      btc: { krw: 0, krwDate: "", krwColor: true, usd: 0, usdDate: "", usdColor: true, isKrwStatus: false, isUsdStatus: false },
+      updateKRW: (krw) => set((state) => ({ btc: { ...state.btc, ...krw } })),
+      updateUSD: (usd) => set((state) => ({ btc: { ...state.btc, ...usd } })),
+
       btcChart: {
         1: { date: [], price: [], timeStamp: 0 },
         7: { date: [], price: [], timeStamp: 0 },
         30: { date: [], price: [], timeStamp: 0 },
-        365: { date: [], price: [], timeStamp: 0 },
+        365: { date: [], price: [], timeStamp: 0 }
       },
-      marketChartInterval: 365,
-      setBtcChart: (interval, data) =>
-        set((state) => ({
-          btcChart: { ...state.btcChart, [interval]: data },
-        })),
-      theme: "dark",
+      setBtcChart: (interval, data) => set((state) => ({ btcChart: { ...state.btcChart, [interval]: data }})),
+
+      dominance: { value: "", date: "" },
+      updateDominance: (dominance) => set(() => ({ dominance })),
+
       market: "KRW/USD",
       setMarket: (market: MarketType) => {
         set({ market });
         return market;
       },
-      dominance: { value: "", date: "" },
-      fearGreed: { value: "", date: "" },
+
+      theme: "dark",
+      setTheme: (theme) => set(() => ({ theme })), // deprecated
+
       exRate: { date: "", provider: "", basePrice: 0 },
+      setExRate: (exRate) => set(() => ({ exRate })),
+
       amount: "1",
-      isSetting: false,
+      setAmount: (price) => set(() => ({ amount: price })),
+
       isCountAnime: true,
+      setCountAnime: (isCountAnime) => set(() => ({ isCountAnime })),
+
+      fearGreed: { value: "", date: "" },
+      updateFearGreed: (data) => set(() => ({ fearGreed: data })),
+
       isLottiePlay: true,
+      toggleLottie: () => set((state) => ({ isLottiePlay: !state.isLottiePlay })),
+
       blockData: {
         height: 0,
         timeStamp: 0,
@@ -85,23 +109,13 @@ const useBearStore = create<BearState>()(
         nextHalving: {
           nextHalvingHeight: 0,
           nextHalvingPredictedDate: 0,
-          remainingHeight: 0,
-        },
+          remainingHeight: 0
+        }
       },
-      setAmount: (price) => set(() => ({ amount: price })),
-      updateKRW: (krw) => set((state) => ({ btc: { ...state.btc, ...krw } })),
-      updateUSD: (usd) => set((state) => ({ btc: { ...state.btc, ...usd } })),
-      updateDominance: (dominance) => set(() => ({ dominance })),
-      setExRate: (exRate) => set(() => ({ exRate })),
-      updateFearGreed: (data) => set(() => ({ fearGreed: data })),
-      setTheme: (theme) => set(() => ({ theme })), // deprecated
-      setCountAnime: (isCountAnime) => {
-        set({ isCountAnime });
-        return isCountAnime;
-      },
-      toggleLottie: () => set((state) => ({ isLottiePlay: !state.isLottiePlay })),
       updateBlock: (blockData) => set(() => ({ blockData })),
-      setMarketChartInterval: (marketChartInterval) => set(() => ({ marketChartInterval })),
+
+      marketChartInterval: 365,
+      setMarketChartInterval: (marketChartInterval) => set(() => ({ marketChartInterval }))
     }),
     { name: "bear-storage" } // persist key
   )

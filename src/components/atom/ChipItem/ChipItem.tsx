@@ -1,5 +1,5 @@
 import { memo, ReactNode } from "react";
-import "./chipItem.scss";
+import "./ChipItem.scss";
 
 interface IChip {
   label: string | ReactNode;

@@ -4,7 +4,7 @@ import { bearStore, useBearStore } from "@/store";
 import { calcPerDiff } from "@/utils/common";
 import { BtcProps } from "@/store/store.interface";
 import LottieItem from "@/components/atom/LottieItem";
-import CountText from "@/components/atom/countText/countText";
+import CountText from "@/components/atom/CountText/CountText";
 import PremiumLottie from "@/assets/lotties/premium.json";
 import "./premiumRate.scss";
 import PopOver from "@/pages/btc2krw/components/MarketPrice/components/PopOver";

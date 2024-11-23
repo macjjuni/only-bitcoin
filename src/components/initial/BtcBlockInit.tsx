@@ -19,7 +19,7 @@ const BtcBlockInit = () => {
     return {
       nextHalvingHeight: nextHalv?.blockNum || 0, // 다음 반감기 블록 높이
       nextHalvingPredictedDate: nextHalv?.date || "Not Found", // 다음 반감기 예상일 (현제는 배열 데이터안에서 뽑아오는데, 남은 블록 * 10분 후 날짜로 계산해서 넣어야 함)
-      remainingHeight: Number(nextHalv?.blockNum) - Number(blockData.height), // 다음 반감기까지 남은 블록 수
+      remainingHeight: Number(nextHalv?.blockNum) - Number(blockData.height) // 다음 반감기까지 남은 블록 수
     };
   }, [blockData]);
 

@@ -17,7 +17,7 @@ export const btcInfo: CryptoProp = {
   ticker: "KRW-BTC",
   price: 0,
   icon: (size, color) => <FaBitcoin size={size || 28} color={color || btcColor} />,
-  color: btcColor,
+  color: btcColor
 };
 
 export const upbitAsset = ["BTC/KRW"];
@@ -32,7 +32,7 @@ export const ecoSystemPyramid = [
   { name: "fish", min: 0.26, max: 1, emoji: "🐟" },
   { name: "dolphin", min: 1, max: 3.125, emoji: "🐬" },
   { name: "shark", min: 3.125, max: 6.15, emoji: "🦈" },
-  { name: "whale", min: 6.15, max: 1000000, emoji: "🐳" },
+  { name: "whale", min: 6.15, max: 1000000, emoji: "🐳" }
 ];
 
 // TODO. 반감기 날짜를 멤풀에 조회해서 뿌려주기.
@@ -74,5 +74,5 @@ export const btcHalvingData = [
   { date: 2128, blockNum: 6300000, currentReward: 0.00000004656612873077392578125 },
   { date: 2132, blockNum: 6510000, currentReward: 0.000000023283064365386962890625 },
   { date: 2136, blockNum: 6720000, currentReward: 0.0000000116415321826934814453125 },
-  { date: 2140, blockNum: 6930000, currentReward: 0.00000000582076609134674072265625 },
+  { date: 2140, blockNum: 6930000, currentReward: 0.00000000582076609134674072265625 }
 ];

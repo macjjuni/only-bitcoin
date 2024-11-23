@@ -6,7 +6,7 @@ import { IoLogoUsd } from "react-icons/io";
 import { LottieProps } from "react-lottie-player";
 import { useBearStore } from "@/store";
 import LottieItem from "@/components/atom/LottieItem";
-import CountText from "../../../../components/atom/countText/countText";
+import CountText from "@/components/atom/CountText/CountText";
 import NotKeyNotBtc from "@/components/atom/NotKeyNotBtc/NotKeyNotBtc";
 import PremiumRate from "@/pages/dashboard/components/premiumRate/premiumRate";
 import btcLottie from "@/assets/lotties/bitcoin.json";

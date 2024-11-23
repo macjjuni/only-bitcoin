@@ -2,6 +2,7 @@ import { useCallback, memo, CSSProperties, useMemo } from "react";
 import CountUp from "react-countup";
 import { useBearStore } from "@/store";
 import { comma } from "@/utils/string";
+import "./CountText.scss";
 
 interface ICount {
   text: number;
@@ -11,9 +12,10 @@ interface ICount {
   decimals?: number;
   isAnime: boolean;
   style?: CSSProperties;
+  leftText?: string;
 }
 
-const CountText = ({ text, className, duration = 1, percent, decimals, isAnime, style }: ICount) => {
+const CountText = ({ text, className, duration = 1, percent, decimals, isAnime, style, leftText }: ICount) => {
   // region [Hooks]
 
   const isCountAnimate = useBearStore((state) => state.isCountAnime);
@@ -43,9 +45,13 @@ const CountText = ({ text, className, duration = 1, percent, decimals, isAnime, 
   return (
     <>
       {isCountAnimate ? (
-        <CountUp className={className} style={style} start={getStartText} end={text} decimals={decimals} duration={isCountAnimate && isAnime ? duration : undefined} />
+        <div className="count__text__wrapper">
+          {leftText && <span>{leftText}</span>}
+          <CountUp className={className} style={style} start={getStartText} end={text} decimals={decimals} duration={isCountAnimate && isAnime ? duration : undefined} />
+        </div>
       ) : (
-        <span className={className} style={style}>
+        <span className={`count__text__wrapper ${className}`} style={style}>
+          {leftText && <span>{leftText}</span>}
           {comma(text.toFixed(decimals || 0))}
         </span>
       )}

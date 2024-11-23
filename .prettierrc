@@ -3,6 +3,5 @@
   "tabWidth": 2,
   "singleQuote": false,
   "doubleQuote": true,
-  "tranilingComma": "none",
-  "semi": true
+  "semi": true,
 }

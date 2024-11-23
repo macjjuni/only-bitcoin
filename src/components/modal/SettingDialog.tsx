@@ -3,6 +3,7 @@ import { RiCloseCircleLine } from "react-icons/ri";
 import { Container, Dialog, DialogTitle, IconButton, Stack, Switch, ToggleButton, ToggleButtonGroup, Typography } from "@mui/material";
 import { bearStore } from "@/store/store";
 import { type MarketType } from "@/store/store.interface";
+import { useBearStore } from "@/store";
 
 type DialogType = {
   open: boolean;
@@ -17,14 +18,15 @@ const threeButtons = [
 
 const SettingDialog = ({ open, setOpen }: DialogType) => {
   const [market, setMarket] = useState(bearStore.market);
-  const [isCountAnime, setCountAnime] = useState(bearStore.isCountAnime);
+  const isCountAnime = useBearStore((state) => state.isCountAnime);
+  const setCountAnime = useBearStore((state) => state.setCountAnime);
 
   const closeDialog = useCallback(() => {
     setOpen(false);
   }, []);
 
   const marketChange = useCallback(
-    (e: MouseEvent<HTMLElement>, selectMarket: MarketType) => {
+    (_: MouseEvent<HTMLElement>, selectMarket: MarketType) => {
       if (selectMarket === null) return;
       const getMarket = bearStore.setMarket(selectMarket);
       setMarket(getMarket);
@@ -33,8 +35,7 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
   );
 
   const onToggleAnime = useCallback(() => {
-    const getIsCountAnime = bearStore.setCountAnime(!isCountAnime);
-    setCountAnime(getIsCountAnime);
+    setCountAnime(!isCountAnime);
   }, [isCountAnime]);
 
   return (

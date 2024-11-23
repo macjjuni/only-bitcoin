@@ -4,7 +4,7 @@ import { btcInfo } from "@/data/btcInfo";
 import { isNetwork } from "@/utils/network";
 import { generateUUID } from "@/utils/string";
 import LocalStorage from "@/utils/storage";
-import { getCurrentDate, formatDate } from "@/utils/date";
+import { formatDate } from "@/utils/date";
 
 // Upbit API URL
 const upbitURL = import.meta.env.VITE_UPBIT_API_URL || "wss://api.upbit.com/websocket/v1";
@@ -13,14 +13,14 @@ const uuidStorageKey = "uuid";
 // Zustand
 const { getState } = useBearStore;
 // Store data reset
-const resetData = () => {
-  const cleanData = {
-    krw: 0,
-    krwDate: getCurrentDate(),
-    krwColor: true,
-  };
-  getState().updateKRW(cleanData); // store update
-};
+// const resetData = () => {
+//   const cleanData = {
+//     krw: 0,
+//     krwDate: getCurrentDate(),
+//     krwColor: true,
+//   };
+//   getState().updateKRW(cleanData); // store update
+// };
 
 // Uuid
 const uuidValue = LocalStorage.getItem(uuidStorageKey);
@@ -72,8 +72,10 @@ function initUpbit() {
     const beforeKrw = getState().btc.krw;
 
     if (krw > beforeKrw) {
-      getState().updateKRW({ krw, krwDate, krwColor: true });
-    } else if (krw < beforeKrw) getState().updateKRW({ krw, krwDate, krwColor: false });
+      getState().updateKRW({ krw, krwDate, krwColor: true, isKrwStatus: true });
+    } else if (krw < beforeKrw) {
+      getState().updateKRW({ krw, krwDate, krwColor: false, isKrwStatus: true });
+    }
   };
   // 소켓 에러 핸들링
   socket.onerror = (e) => {
@@ -87,7 +89,10 @@ function initUpbit() {
   };
   // 소켓 닫힘
   socket.onclose = (e) => {
+
     console.dir(`비정상적 종료(Upbit): ${e.code}`);
+    getState().updateKRW({ ...getState().btc, isKrwStatus: false });
+
     if (e.wasClean || e.code === 1000) {
       console.log(`서버 연결 해제(Upbit)`);
     } else if (e.code === 1006) {
@@ -96,6 +101,7 @@ function initUpbit() {
         toast.info(`${setTime / 1000}초 후 재연결 시도합니다. (${retryCount++})`);
         if (retryCount > limitCount) {
           // 제한 횟숨만큼 연결 재시도
+          retryCount = 0;
           clearTimeOut();
           toast.error(`서버가 응답하지 않습니다. 나중에 다시 시도해주세요. (Upbit) 🙏`);
         } else {
@@ -109,7 +115,7 @@ function initUpbit() {
 // 접속 해제
 export const closeUpbit = () => {
   if (!socket) return;
-  resetData();
+  // resetData();
   socket.close(1000);
 };
 

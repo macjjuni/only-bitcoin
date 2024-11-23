@@ -1,7 +1,7 @@
 import { memo, useCallback, useState } from "react";
 import type { LottieProps } from "react-lottie-player";
 import { BlockProps } from "@/store/store.interface";
-import CountText from "@/components/atom/countText/countText";
+import CountText from "@/components/atom/CountText/CountText";
 import LottieItem from "@/components/atom/LottieItem";
 import PopOver from "./components/PopOver";
 import BlockLottie from "@/assets/lotties/block.json";

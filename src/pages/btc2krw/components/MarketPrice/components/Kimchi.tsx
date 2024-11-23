@@ -2,7 +2,7 @@ import { useCallback, useMemo, useLayoutEffect, useState, memo } from "react";
 import { Box } from "@mui/material";
 import { TbSquareRoundedLetterK } from "react-icons/tb";
 import PopOver from "@/pages/btc2krw/components/MarketPrice/components/PopOver";
-import CountText from "../../../../../components/atom/countText/countText";
+import CountText from "@/components/atom/CountText/CountText";
 import { bearStore } from "@/store";
 
 import { calcPerDiff } from "@/utils/common";

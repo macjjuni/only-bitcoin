@@ -1,33 +1,40 @@
 
 .only-btc__market-price {
-    width: 100%;
-    height: 160px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  height: 160px;
 
-    .only-btc__market-price__signature__text {
-        @include flex-row-center;
-        @include font-title;
-        padding: 8px 0;
-        font-weight: bold;
-    }
-    .only-btc__market-price__cost__text {
-        @include flex-row-center;
-        @include font-heading-lg;
-        font-weight: 500;
-    }
-    .only-btc__market-price__bottom-area {
-        @include flex-row-center;
-        gap: 4px;
-    }
+  .only-btc__market-price__signature__text {
+    @include flex-row-center;
+    @include font-title;
+
+    display: inline-flex;
+    padding: 8px 0;
+    font-weight: bold;
+  }
+
+  .only-btc__market-price__cost__text {
+    @include flex-row-center;
+    @include font-heading-lg;
+    font-weight: 500;
+
+    position: relative;
+    display: inline-flex;
+    justify-content: center;
+    gap: 2px;
+  }
+
+  .only-btc__market-price__bottom-area {
+    @include flex-row-center;
+    gap: 4px;
+  }
 }
 
 @media screen and (max-width: $mobile-size) {
-    .only-btc__market-price {
+  .only-btc__market-price {
 
-        .only-btc__market-price__signature__text {
-            @include font-sub-title;
-        }
-        .only-btc__market-price__cost__text {
-            @include font-heading-md;
-        }
-    }
+    .only-btc__market-price__signature__text { @include font-sub-title; }
+    .only-btc__market-price__cost__text { @include font-heading-md; }
+  }
 }
