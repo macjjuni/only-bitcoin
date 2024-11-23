@@ -53,7 +53,7 @@ function MarketData() {
       {market.includes("USD") && (
         <h2 className="only-btc__market-price__cost__text">
           {countTextUsd}
-          <Dot status={btc.isKrwStatus} />
+          <Dot status={btc.isUsdStatus} />
           {!btc.isUsdStatus && (<NetworkStatusButton onClick={onConnectBinance} />)}
         </h2>
       )}

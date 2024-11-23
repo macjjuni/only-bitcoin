@@ -11,13 +11,13 @@
 
 ## 📸 Screen
 
-### Before Migration
+### Before
 <img src="https://github.com/macjjuni/only-bitcoin/assets/38034518/8b7a18eb-822a-491e-a9d6-0451f149ac39" width="23.5%" alt="btc-price initial screen1">
 <img src="https://github.com/macjjuni/only-bitcoin/assets/38034518/faeb311d-7b87-4841-aa80-bc50aa89f1cc" width="23.5%" alt="btc-price initial screen1">
 <img src="https://github.com/macjjuni/only-bitcoin/assets/38034518/9ae8ffa1-b13e-4c5a-a5f4-3644bedccdc5" width="23.5%" alt="btc-price initial screen1">
 <img src="https://github.com/macjjuni/only-bitcoin/assets/38034518/a586d2af-6f78-409d-a2af-572a6e87cf02" width="23.5%" alt="btc-price initial screen1">
 
-### After Migration
+### After
 <img src="https://github.com/user-attachments/assets/e42cf386-bddd-4c82-8f6b-9d4f8d6a7101" width="23.5%" alt="migrate btc-price initial screen1">
 <img src="https://github.com/user-attachments/assets/67b524f6-38fa-4f3b-861f-d89691742fe3" width="23.5%" alt="migrate btc-price initial screen2">
 <img src="https://github.com/user-attachments/assets/cfd28b84-4fa4-4c55-97fb-dbbb00edfcd2" width="23.5%" alt="migrate btc-price initial screen3">
