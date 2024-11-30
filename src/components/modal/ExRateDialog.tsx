@@ -37,7 +37,7 @@ const ExRateDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetS
           <Typography>제공</Typography>
           <Typography fontSize={16}>
             <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noreferrer">
-              Free Currency Exchange Rates API
+              Free Currency Exchange Rates
             </a>
           </Typography>
         </Stack>
@@ -47,7 +47,7 @@ const ExRateDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetS
         </Stack>
 
         <Box pt="16px" textAlign="left">
-          <Typography fontSize={18} color="#EE4E4E">
+          <Typography fontSize={14} color="#EE4E4E">
             현재 제공된 환율은 실시간 환율과 다를 수 있습니다.
           </Typography>
         </Box>
