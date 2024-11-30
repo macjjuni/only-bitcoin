@@ -70,7 +70,7 @@ const Header = () => {
             <FearGreed />
           </Stack>
           <button type="button" className="only-btc__header__refresh-button" onClick={onClickRefresh}>
-            <IoMdRefresh fontSize={32} color={btcInfo.color} />
+            <IoMdRefresh fontSize={28} color={btcInfo.color} />
           </button>
         </div>
 
