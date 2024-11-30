@@ -45,6 +45,8 @@ const clearTimeOut = () => {
   if (!timeout) return;
   clearTimeout(timeout);
   timeout = null;
+  // 제한 횟숨만큼 연결 재시도
+  retryCount = 0;
 };
 
 // 소켓 생성
@@ -57,6 +59,7 @@ function initUpbit() {
 
   // eslint-disable-next-line func-names
   socket.onopen = function () {
+    clearTimeOut();
     retryCount = 1;
     this.send(JSON.stringify(currency));
     toast.success(`서버에 연결되었습니다. (Upbit)`);
@@ -101,7 +104,6 @@ function initUpbit() {
         toast.info(`${setTime / 1000}초 후 재연결 시도합니다. (${retryCount++})`);
         if (retryCount > limitCount) {
           // 제한 횟숨만큼 연결 재시도
-          retryCount = 0;
           clearTimeOut();
           toast.error(`서버가 응답하지 않습니다. 나중에 다시 시도해주세요. (Upbit) 🙏`);
         } else {
