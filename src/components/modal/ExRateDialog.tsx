@@ -7,7 +7,8 @@ import { comma } from "@/utils/string";
 
 const ExRateDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetStateAction<boolean>> }) => {
   const btc = useBearStore((state) => state.btc);
-  const { basePrice, date } = useBearStore((state) => state.exRate);
+  const { basePrice, date, provider } = useBearStore((state) => state.exRate);
+  const isUsdtRateEnabled = useBearStore((state) => state.isUsdtRateEnabled);
   const closeDialog = useCallback(() => {
     setOpen(false);
   }, []);
@@ -30,15 +31,18 @@ const ExRateDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetS
           <Typography>{calcPerDiff(btc.krw, btc.usd, basePrice)}%</Typography>
         </Stack>
         <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-          <Typography>환율(USD/KRW)</Typography>
+          <Typography>환율({isUsdtRateEnabled ? 'USDT' : 'USD'}/KRW)</Typography>
           <Typography>{comma(basePrice.toString())}원</Typography>
         </Stack>
         <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
           <Typography>제공</Typography>
           <Typography fontSize={16}>
-            <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noreferrer">
-              Free Currency Exchange Rates
-            </a>
+            {
+              isUsdtRateEnabled ? provider:
+                <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noreferrer">
+                  {provider}
+                </a>
+            }
           </Typography>
         </Stack>
         <Stack flexDirection="row" justifyContent="space-between" alignItems="center">

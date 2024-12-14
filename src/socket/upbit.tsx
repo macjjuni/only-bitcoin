@@ -12,15 +12,6 @@ const uuidStorageKey = "uuid";
 
 // Zustand
 const { getState } = useBearStore;
-// Store data reset
-// const resetData = () => {
-//   const cleanData = {
-//     krw: 0,
-//     krwDate: getCurrentDate(),
-//     krwColor: true,
-//   };
-//   getState().updateKRW(cleanData); // store update
-// };
 
 // Uuid
 const uuidValue = LocalStorage.getItem(uuidStorageKey);
@@ -34,7 +25,10 @@ const getUUID = () => {
   return uuidValue;
 };
 
-const currency = [{ ticket: getUUID() }, { type: "ticker", codes: [btcInfo.ticker] }, { format: "SIMPLE" }];
+// etc
+const usdtTicker = "KRW-USDT" as const;
+
+const currency = [{ ticket: getUUID() }, { type: "ticker", codes: [btcInfo.ticker, usdtTicker] }, { format: "SIMPLE" }];
 
 let timeout: NodeJS.Timeout | null = null;
 let retryCount = 1;
@@ -58,26 +52,42 @@ function initUpbit() {
   socket.binaryType = "arraybuffer";
 
   // eslint-disable-next-line func-names
-  socket.onopen = function () {
+  socket.onopen = function() {
     clearTimeOut();
     retryCount = 1;
     this.send(JSON.stringify(currency));
     toast.success(`서버에 연결되었습니다. (Upbit)`);
     console.log("✅ 업비트 소켓 연결 초기화");
   };
+
   socket.onmessage = (evt) => {
+
+    const { updateKRW, exRate, setExRate, isUsdtRateEnabled } = getState();
+
     const enc = new TextDecoder("utf-8");
     const arr = new Uint8Array(evt.data);
     const data = JSON.parse(enc.decode(arr));
 
-    const krw = data.tp;
-    const krwDate = formatDate(data.ttms);
-    const beforeKrw = getState().btc.krw;
+    const { cd, tp, ttms } = data;
 
-    if (krw > beforeKrw) {
-      getState().updateKRW({ krw, krwDate, krwColor: true, isKrwStatus: true });
-    } else if (krw < beforeKrw) {
-      getState().updateKRW({ krw, krwDate, krwColor: false, isKrwStatus: true });
+    // KRW-BTC
+    if (cd === btcInfo.ticker) {
+      const btcPrice = tp;
+      const krwDate = formatDate(ttms);
+      const beforeBtcPrice = getState().btc.krw;
+
+      if (btcPrice > beforeBtcPrice) {
+        updateKRW({ krw: btcPrice, krwDate, krwColor: true, isKrwStatus: true });
+      } else if (btcPrice < beforeBtcPrice) {
+        updateKRW({ krw: btcPrice, krwDate, krwColor: false, isKrwStatus: true });
+      }
+    }
+
+    // KRW-USDT
+    const isUsdt = cd === usdtTicker;
+
+    if (isUsdtRateEnabled && isUsdt && exRate.basePrice !== tp) {
+      setExRate({ basePrice: tp, date: formatDate(ttms), provider: "Upbit(KRW/USDT)" });
     }
   };
   // 소켓 에러 핸들링

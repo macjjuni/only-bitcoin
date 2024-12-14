@@ -20,6 +20,8 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
   const [market, setMarket] = useState(bearStore.market);
   const isCountAnime = useBearStore((state) => state.isCountAnime);
   const setCountAnime = useBearStore((state) => state.setCountAnime);
+  const isUsdtEnabled = useBearStore(state => state.isUsdtRateEnabled);
+  const setUsdtRateEnabled = useBearStore(state => state.setUsdtRateEnabled);
 
   const closeDialog = useCallback(() => {
     setOpen(false);
@@ -37,6 +39,10 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
   const onToggleAnime = useCallback(() => {
     setCountAnime(!isCountAnime);
   }, [isCountAnime]);
+
+  const onToggleUsdtEnabled = useCallback(()=> {
+    setUsdtRateEnabled(!isUsdtEnabled);
+  }, [isUsdtEnabled])
 
   return (
     <>
@@ -66,6 +72,13 @@ const SettingDialog = ({ open, setOpen }: DialogType) => {
                   </ToggleButton>
                 ))}
               </ToggleButtonGroup>
+            </Stack>
+
+            <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
+              <Typography fontSize={16} fontWeight="bold">
+                💰 USDT 기준 환율 적용
+              </Typography>
+              <Switch checked={isUsdtEnabled} onChange={onToggleUsdtEnabled} />
             </Stack>
 
             <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
