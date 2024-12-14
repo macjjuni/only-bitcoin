@@ -20,7 +20,6 @@ export default function Initializer() {
   useLayoutEffect(() => {
     initBinance();
     initUpbit();
-    getUsdExchangeRate().then(bearStore.setExRate);
   }, []);
 
   useEffect(() => {
