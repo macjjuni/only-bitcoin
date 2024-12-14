@@ -1,3 +1,54 @@
+
+
+
+/** 📌 Rules!
+ * 1. 설정(ex: 테마)값 업데이트 함수는 변경된 값을 그대로 리턴하도록 작성
+ */
+
+export interface StoreType {
+  btc: BtcProps; // BTC 시세 정보
+  updateKRW: (by: UpdateKRWProps) => void;
+  updateUSD: (by: UpdateUSDProps) => void;
+
+  btcChart: BtcChart;
+  setBtcChart: (interval: MarketChartIntervalType, data: ChartData) => void;
+
+  dominance: DominanceProps; // 도미넌스 정보
+  updateDominance: (by: UpdateDominanceProps) => void;
+
+  market: MarketType; // 메인 시세 단위 => 'KRW' | 'USD' | 'KRW/USD'
+  setMarket: (market: MarketType) => MarketType;
+
+  theme: ThemeTypes;
+  setTheme: (theme: ThemeTypes) => void;
+
+  exRate: ExRateProps; // USD/KRW 환율 데이터
+  setExRate: (exRate: ExRateProps) => void;
+
+  amount: string; // BTC 개수 Input 값
+  setAmount: (by: string) => void;
+
+  isCountAnime: boolean; // 가격 변동 애니메이션 효과 여부
+  setCountAnime: (bool: boolean) => void;
+
+  fearGreed: FearGreedProps; // 공포&탐욕 지수
+  updateFearGreed: (data: FearGreedProps) => void;
+
+  isLottiePlay: boolean; // 메인 로티 애니메이션
+  toggleLottie: () => void;
+
+  blockData: BlockProps; // 블록 생성 정보
+  updateBlock: (blockData: BlockProps) => void; // 블록 생성 정보 업데이트
+
+  marketChartInterval: MarketChartIntervalType; // 대시보드 차트 인터벌
+  setMarketChartInterval: (interval: MarketChartIntervalType) => void; // 대시보드 차트 인터벌
+
+  isUsdtRateEnabled: boolean;
+  setUsdtRateEnabled: (isUsdtRateEnabled: boolean) => void;
+}
+
+
+
 export interface BtcProps {
   krw: number;
   krwDate: string;

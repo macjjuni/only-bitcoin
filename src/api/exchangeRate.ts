@@ -20,7 +20,7 @@ export default async function getUsdExchangeRate(): Promise<ExRateProps> {
       throw new Error("USD 환율 데이터를 찾을 수 없습니다.");
     }
 
-    return { basePrice: usdToKrwExchangeRate, date, provider: "error" };
+    return { basePrice: usdToKrwExchangeRate, date, provider: "Free Currency Exchange Rates" };
   } catch (e) {
     console.error(e);
     toast.error("환율 데이터를 가져올 수 없어 김치 프리미엄 데이터를 표시할 수 없습니다.");
