@@ -1,4 +1,4 @@
-import { useLayoutEffect } from "react";
+import { useEffect, useLayoutEffect } from "react";
 
 import initUpbit from "@/socket/upbit";
 import initBinance from "@/socket/binance";
@@ -8,15 +8,24 @@ import BtcBlockInit from "@/components/initial/BtcBlockInit";
 import DominanceInit from "./DominanceInit";
 import FeargreedInit from "./FeargreedInit";
 import { isDev } from "@/utils/common";
+import getUsdExchangeRate from "@/api/exchangeRate";
+import { bearStore, useBearStore } from "@/store";
 
 // 초기화 HOC
 export default function Initializer() {
   GoogleGA();
 
+  const isUsdtRateEnabled = useBearStore(state => state.isUsdtRateEnabled);
+
   useLayoutEffect(() => {
     initBinance();
     initUpbit();
+    getUsdExchangeRate().then(bearStore.setExRate);
   }, []);
+
+  useEffect(() => {
+    if (!isUsdtRateEnabled) { getUsdExchangeRate().then(bearStore.setExRate); }
+  }, [isUsdtRateEnabled]);
 
   return (
     <>

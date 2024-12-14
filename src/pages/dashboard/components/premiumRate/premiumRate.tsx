@@ -1,6 +1,6 @@
-import React, { memo, useCallback, useLayoutEffect, useState } from "react";
+import React, { memo, useCallback, useState } from "react";
 import type { LottieProps } from "react-lottie-player";
-import { bearStore, useBearStore } from "@/store";
+import { useBearStore } from "@/store";
 import { calcPerDiff } from "@/utils/common";
 import { BtcProps } from "@/store/store.interface";
 import LottieItem from "@/components/atom/LottieItem";
@@ -8,7 +8,6 @@ import CountText from "@/components/atom/CountText/CountText";
 import PremiumLottie from "@/assets/lotties/premium.json";
 import "./premiumRate.scss";
 import PopOver from "@/pages/btc2krw/components/MarketPrice/components/PopOver";
-import getUsdExchangeRate from "@/api/exchangeRate";
 import ExRateDialog from "@/components/modal/ExRateDialog";
 
 const defaultOption: LottieProps = { loop: true, play: true };
@@ -37,24 +36,6 @@ function PremiumRate({ btc, className }: { btc: BtcProps; className?: string }) 
   const showDialog = useCallback(() => {
     setEx(true);
   }, [isEx]);
-
-  // endregion
-
-  // region [Transactions]
-
-  const getFetchExRate = useCallback(() => {
-    getUsdExchangeRate().then((res) => {
-      bearStore.setExRate(res);
-    });
-  }, []);
-
-  // endregion
-
-  // region [Effects]
-
-  useLayoutEffect(() => {
-    getFetchExRate();
-  }, []);
 
   // endregion
 
