@@ -31,14 +31,14 @@ const ExRateDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetS
           <Typography>{calcPerDiff(btc.krw, btc.usd, basePrice)}%</Typography>
         </Stack>
         <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-          <Typography>환율({isUsdtRateEnabled ? 'USDT' : 'USD'}/KRW)</Typography>
+          <Typography>환율({isUsdtRateEnabled ? "USDT" : "USD"}/KRW)</Typography>
           <Typography>{comma(basePrice.toString())}원</Typography>
         </Stack>
         <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
           <Typography>제공</Typography>
           <Typography fontSize={16}>
             {
-              isUsdtRateEnabled ? provider:
+              isUsdtRateEnabled ? provider :
                 <a href="https://github.com/fawazahmed0/exchange-api" target="_blank" rel="noreferrer">
                   {provider}
                 </a>
@@ -46,15 +46,21 @@ const ExRateDialog = ({ open, setOpen }: { open: boolean; setOpen: Dispatch<SetS
           </Typography>
         </Stack>
         <Stack flexDirection="row" justifyContent="space-between" alignItems="center">
-          <Typography>환율등록일시</Typography>
+          <Typography>
+            {isUsdtRateEnabled ? "업데이트 시간" : "환율등록일시"}
+          </Typography>
           <Typography>{date}</Typography>
         </Stack>
 
-        <Box pt="16px" textAlign="left">
-          <Typography fontSize={14} color="#EE4E4E">
-            현재 제공된 환율은 실시간 환율과 다를 수 있습니다.
-          </Typography>
-        </Box>
+        {
+          !isUsdtRateEnabled && (
+            <Box pt="16px" textAlign="left">
+              <Typography fontSize={14} color="#EE4E4E">
+                현재 제공된 환율은 실시간 환율과 다를 수 있습니다.
+              </Typography>
+            </Box>
+          )
+        }
       </Container>
     </Dialog>
   );
