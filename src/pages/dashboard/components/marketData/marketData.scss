@@ -3,7 +3,6 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  height: 160px;
 
   .only-btc__market-price__signature__text {
     @include flex-row-center;
@@ -11,6 +10,7 @@
 
     display: inline-flex;
     padding: 8px 0;
+    margin-bottom: 16px;
     font-weight: bold;
   }
 
