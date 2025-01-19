@@ -22,6 +22,7 @@ const MemoizedLabel = memo(LabelElement);
 const PremiumPage = () => {
   const { krw, usd } = useBearStore((state) => state.btc);
   const { basePrice } = useBearStore((state) => state.exRate);
+  const isUsdtRateEnabled = useBearStore(state => state.isUsdtRateEnabled);
 
   const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`);
 
@@ -43,6 +44,7 @@ const PremiumPage = () => {
     []
   );
 
+  const labelText = useMemo(() => isUsdtRateEnabled ? 'USDT: ' : 'USD/KRW: ', [isUsdtRateEnabled]);
   const koreaUsdPrice = useMemo(() => Number(krw / basePrice), [krw, basePrice]); // 한국 원화 가격
   const usaKrwPrice = useMemo(() => Number(usd * basePrice), [usd, basePrice]); // 해외 원화 가격
   const premiumKrw = useMemo(() => comma((krw - usaKrwPrice).toFixed(0)), [krw, usaKrwPrice]); // 원화 프리미엄 가격
@@ -106,7 +108,7 @@ const PremiumPage = () => {
           }
           bottom={
             <Typography fontSize={16} fontWeight="bold">
-              USD/KRW: {comma(basePrice.toString())}
+              {labelText} {comma(basePrice.toString())}
             </Typography>
           }
         />
@@ -132,12 +134,11 @@ const PremiumPage = () => {
           }
           bottom={
             <Typography fontSize={16} fontWeight="bold">
-              USD/KRW: {comma(basePrice.toString())}
+              {labelText} {comma(basePrice.toString())}
             </Typography>
           }
         />
       </div>
-      {/* </Stack> */}
     </PageLayout>
   );
 };
