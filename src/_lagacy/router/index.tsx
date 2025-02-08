@@ -2,11 +2,11 @@ import { createBrowserRouter, createRoutesFromElements, Route } from "react-rout
 
 import ErrorPage from "@/pages/error/error";
 import routes from "@/router/routes";
-import App from "@/App";
+import Client from "@/app/Client";
 
 const router = createBrowserRouter(
   createRoutesFromElements(
-    <Route path="/" element={<App />}>
+    <Route path="/" element={<Client />}>
       {routes.map((route) => (
         <Route key={route.id} path={route.path} element={route.component} />
       ))}

@@ -3,7 +3,7 @@ import { ToastContainer } from "react-toastify";
 
 import CssBaseline from "@mui/material/CssBaseline";
 import { useCallback, useLayoutEffect } from "react";
-import { Header, Main, Footer } from "@/layout";
+import { Footer, Header, Main } from "@/layout";
 import Initializer from "./components/initial/Initializer";
 
 import { darkTheme } from "./styles/theme";

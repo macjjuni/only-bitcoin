@@ -1,6 +1,6 @@
 import { useEffect, useLayoutEffect } from "react";
 
-import initUpbit from "@/socket/upbit";
+import initUpbit, { reConnectUpbit } from "@/socket/upbit";
 import initBinance from "@/socket/binance";
 import GoogleGA from "@/components/initial/GoogleGA";
 import AdsenseCodeSnippet from "@/components/initial/AdSenseCodeSnippet";
@@ -25,6 +25,21 @@ export default function Initializer() {
   useEffect(() => {
     if (!isUsdtRateEnabled) { getUsdExchangeRate().then(bearStore.setExRate); }
   }, [isUsdtRateEnabled]);
+
+  useEffect(() => {
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === 'visible') {
+        reConnectUpbit();
+      }
+    };
+
+    document.addEventListener('visibilitychange', handleVisibilityChange);
+
+    return () => {
+      document.removeEventListener('visibilitychange', handleVisibilityChange);
+    };
+  }, []);
+
 
   return (
     <>

@@ -102,7 +102,7 @@ function initUpbit() {
   };
   // 소켓 닫힘
   socket.onclose = (e) => {
-
+    console.log(e);
     console.dir(`비정상적 종료(Upbit): ${e.code}`);
     getState().updateKRW({ ...getState().btc, isKrwStatus: false });
 
@@ -125,10 +125,15 @@ function initUpbit() {
 }
 
 // 접속 해제
-export const closeUpbit = () => {
+export const disconnectUpbit = () => {
   if (!socket) return;
-  // resetData();
+  clearTimeOut();
   socket.close(1000);
 };
+
+export const reConnectUpbit = () => {
+  disconnectUpbit();
+  initUpbit();
+}
 
 export default initUpbit;

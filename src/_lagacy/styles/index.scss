@@ -14,8 +14,6 @@ body {
     background-attachment: fixed;
     background-color: $default-background-color;
 
-    &.dark { background-color: $dark-background-color; }
-
     #only-bitcoin {
         position: relative;
         display: flex;

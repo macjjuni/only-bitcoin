@@ -4,6 +4,7 @@ import react from "@vitejs/plugin-react-swc";
 import { createHtmlPlugin } from "vite-plugin-html";
 import eslint from "vite-plugin-eslint";
 import { compression } from "vite-plugin-compression2";
+
 // import { visualizer } from "rollup-plugin-visualizer";
 
 
@@ -26,16 +27,14 @@ export default defineConfig(({ mode }: { mode: string }) => {
         minify: false,
         template: "index.html",
         inject: { data: { title: env.VITE_TITLE, url: env.VITE_URL } }
-      })
+      }),
     ],
     css: {
       preprocessorOptions: {
         scss: {
-          additionalData: "@import \"@/styles/variable\";\n" +
-            "@import \"@/styles/fonts\";\n" +
-            "@import \"@/styles/reset\";\n" +
-            "@import \"@/styles/mixin\";\n" +
-            "@import \"@/styles/animate\";"
+          additionalData: "@import \"@/app/styles/variable\";\n" +
+            "@import \"@/app/styles/fonts\";\n" +
+            "@import \"@/app/styles/mixin\";"
         }
       }
     },
