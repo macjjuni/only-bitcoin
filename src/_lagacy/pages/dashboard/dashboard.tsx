@@ -1,4 +1,4 @@
-import PageLayout from "@/layout/pageLayout/pageLayout";
+import PageLayout from "@/layouts/pageLayout/pageLayout";
 import MarketChart from "@/pages/dashboard/components/marketChart/marketChart";
 import "./dashboard.scss";
 

@@ -1,4 +1,9 @@
 
+@mixin logo-font-style {
+    font-size: 18px;
+    font-weight: bold;
+    color: $font-color;
+}
 
 // region [Font Sizes]
 

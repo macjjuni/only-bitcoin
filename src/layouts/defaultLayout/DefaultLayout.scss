@@ -1,0 +1,12 @@
+
+
+.only-btc__layout {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    min-height: 100dvh;
+    padding: 0;
+    margin: 0 auto;
+    background-color: $body-background-color;
+}

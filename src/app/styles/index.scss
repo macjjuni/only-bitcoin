@@ -47,7 +47,6 @@ button {
 }
 svg {margin: 0; }
 
-
 body {
     margin: 0;
     line-height: 1;
@@ -61,15 +60,4 @@ body {
     background-repeat: no-repeat;
     background-attachment: fixed;
     background-color: $default-background-color;
-
-    #only-bitcoin {
-        position: relative;
-        display: flex;
-        flex-direction: column;
-        width: 100%;
-        min-height: 100dvh;
-        padding: 0;
-        margin: 0 auto;
-        background-color: rgba(0, 0, 0, 0.4);
-    }
 }

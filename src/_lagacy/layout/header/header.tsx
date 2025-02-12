@@ -3,12 +3,12 @@ import { Stack } from "@mui/material";
 import { useLocation, useNavigate } from "react-router-dom";
 import { IoMdRefresh } from "react-icons/io";
 import { CgMenuGridR } from "react-icons/cg";
-import BtcDominance from "@/layout/header/components/BtcDominance";
-import ExRatePrice from "@/layout/header/components/ExRatePrice";
-import FearGreed from "@/layout/header/components/FearGreed";
+import BtcDominance from "@/layouts/header/components/BtcDominance";
+import ExRatePrice from "@/layouts/header/components/ExRatePrice";
+import FearGreed from "@/layouts/header/components/FearGreed";
 import ExRateDialog from "@/components/modal/ExRateDialog";
 import { btcInfo } from "@/data/btcInfo";
-import Drawer from "@/layout/header/components/drawer/drawer";
+import Drawer from "@/layouts/header/components/drawer/drawer";
 import "./header.scss";
 
 const Header = () => {

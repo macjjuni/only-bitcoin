@@ -12,7 +12,7 @@ import { useBearStore } from "@/store";
 import { calcRemainingTime } from "@/utils/common";
 import { formatDate } from "@/utils/date";
 import { responsive } from "@/styles/style";
-import PageLayout from "@/layout/pageLayout/pageLayout";
+import PageLayout from "@/layouts/pageLayout/pageLayout";
 
 const BitcoinHalvingPage = () => {
   const matches = useMediaQuery(`(min-width: ${responsive.mobile}px)`);

@@ -9,7 +9,7 @@ import { useBearStore } from "@/store";
 import { calcPerDiff } from "@/utils/common";
 import { comma } from "@/utils/string";
 import { responsive } from "@/styles/style";
-import PageLayout from "@/layout/pageLayout/pageLayout";
+import PageLayout from "@/layouts/pageLayout/pageLayout";
 import PageTitle from "@/components/atom/PageTitle/PageTitle";
 import CountText from "@/components/atom/CountText/CountText";
 import "./premium.scss";

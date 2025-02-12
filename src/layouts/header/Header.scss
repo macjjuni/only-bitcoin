@@ -1,0 +1,15 @@
+
+
+.only-btc__layout__header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    flex: 0 0 $layout-header-height;
+    padding: $layout-padding-size;
+    border-bottom: 1px solid $border-color;
+
+    .only-btc__layout__header__link {
+        @include logo-font-style;
+        font-weight: bold;
+    }
+}
