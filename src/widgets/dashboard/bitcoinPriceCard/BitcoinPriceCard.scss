@@ -1,0 +1,41 @@
+
+
+
+.dashboard__card__wrapper {
+
+  &.k-card.k-card--contained {
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+
+    padding: 16px;
+    border-color: #000;
+    background-color: $dashboard-card-background-color;
+  }
+
+  .dashboard__card__wrapper__top__area {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+
+    .dashboard__card__wrapper__top__area__top__right {
+      font-size: 20px;
+      color: greenyellow;
+    }
+  }
+
+  .dashboard__card__wrapper__bottom_area {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-end;
+    gap: 8px;
+
+    .dashboard__card__wrapper__bottom_area__price__text {
+      font-size: 24px;
+    }
+    .dashboard__card__wrapper__bottom_area__price__text {
+      font-size: 24px;
+    }
+  }
+}

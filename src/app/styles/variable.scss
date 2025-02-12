@@ -3,7 +3,8 @@
 
 $bitcoin-color: #f7931a !default;
 $font-color: #ffffff;
-$border-color: #2E2E2EA3;
+$border-color: #303030;
+
 //$border-color: #2e2e2e;
 
 // endregion
@@ -39,10 +40,10 @@ $spacing-80: 80px;
 $layout-header-height: 64px !default;
 $layout-content-height: auto !default;
 $layout-footer-height: 56px !default;
-$layout-padding-size: $spacing-16 $spacing-40;
+$layout-padding-y-size: $spacing-16;
+$layout-padding-x-size: $spacing-40;
 
 // endregion
-
 
 $default-font-family: 'Pretendard', ui-sans-serif, system-ui, -apple-system,
 'Segoe UI', Roboto, 'Helvetica Neue', Arial,
@@ -84,6 +85,8 @@ $error-color: #EE4E4E;
 $success-color: #21ff2a;
 
 $body-background-color: rgba(0, 0, 0, 0.64);
+//$dashboard-card-background-color: rgba(24, 24, 24, 0.88);
+$dashboard-card-background-color: rgba(24, 24, 24, 0.8);
 
 // endregion
 

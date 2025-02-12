@@ -1,10 +1,4 @@
 
-@mixin logo-font-style {
-    font-size: 18px;
-    font-weight: bold;
-    color: $font-color;
-}
-
 // region [Font Sizes]
 
 @mixin font-heading-lg {
@@ -34,6 +28,19 @@
 @mixin font-body {
     font-size: $font-body-size;
     line-height: $line-height-body-size;
+}
+
+// endregion
+
+
+// region [Font Styles]
+
+
+@mixin logo-font-style {
+    font-size: 20px;
+    font-weight: bold;
+    color: $font-color;
+    text-decoration: none;
 }
 
 // endregion

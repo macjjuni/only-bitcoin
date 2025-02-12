@@ -4,7 +4,7 @@ import Client from "@/app/Client";
 import withSuspense from "@/widgets/hoc/withSuspence";
 
 
-const DashboardPage = withSuspense(lazy(() => import("@/pages/DashboardPage")));
+const DashboardPage = withSuspense(lazy(() => import("@/pages/dashboardPage/DashboardPage")));
 const BlockStatusPage = withSuspense(lazy(() => import("@/pages/BlockStatusPage")));
 const Btc2KrwPage = withSuspense(lazy(() => import("@/pages/Btc2krwPage")));
 const PremiumPage = withSuspense(lazy(() => import("@/pages/PremiumPage")));

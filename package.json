@@ -26,6 +26,7 @@
     "chart.js": "^4.4.3",
     "firebase": "^9.23.0",
     "firebase-tools": "^12.4.2",
+    "kku-ui": "^0.0.5",
     "kku-util": "^0.0.155",
     "react": "^19.0.0",
     "react-chartjs-2": "^5.2.0",

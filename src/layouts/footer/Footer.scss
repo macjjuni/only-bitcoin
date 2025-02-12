@@ -2,8 +2,9 @@
 
 .only-btc__layout__footer {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-end;
     align-items: center;
     flex: 0 0 $layout-footer-height;
-    padding: $layout-padding-size;
+    padding: $layout-padding-y-size $layout-padding-x-size;
+    font-size: 12px;
 }

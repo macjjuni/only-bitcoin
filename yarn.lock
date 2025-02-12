@@ -4661,6 +4661,15 @@ jws@^4.0.0:
     jwa "^2.0.0"
     safe-buffer "^5.0.1"
 
+kku-ui@^0.0.5:
+  version "0.0.5"
+  resolved "https://registry.yarnpkg.com/kku-ui/-/kku-ui-0.0.5.tgz#936d6a5be768fb4a96499a22c385975ecd12ab7b"
+  integrity sha512-krknmmaYE1VsC3W0VmsmqjqGxnVAvOwpof+4ie+2X8UtZ3vnjPakfOKXGVgnpoFnildCx9zMPnbeNzK1gRjEBw==
+  dependencies:
+    lodash-es "^4.17.21"
+    react "^19.0.0"
+    react-dom "^19.0.0"
+
 kku-util@^0.0.155:
   version "0.0.155"
   resolved "https://registry.npmjs.org/kku-util/-/kku-util-0.0.155.tgz"

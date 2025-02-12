@@ -4,7 +4,7 @@ import "./Footer.scss";
 const Footer = () => {
   return (
     <footer className="only-btc__layout__footer">
-      This is Footer
+      {new Date().getFullYear()} Only Bitcoin.
     </footer>
   );
 }
