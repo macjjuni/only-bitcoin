@@ -1,0 +1,13 @@
+
+
+
+.small-card {
+  grid-row: span 2 / span 2;
+  grid-row-start: 5;
+
+  border: 1px solid #444444;
+  border-radius: 5px;
+  background-color: $dashboard-card-background-color;
+  color: $font-color;
+  box-shadow: 0px 0px 3px 0px  rgba(94,94,94,1);
+}
