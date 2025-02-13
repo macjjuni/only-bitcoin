@@ -4,11 +4,12 @@ import "./Header.scss";
 
 
 const Header = () => {
+
   return (
     <header className="only-btc__layout__header">
-      {/* {import.meta.env.VITE_TITLE} */}
-      <Link to="/" className="only-btc__layout__header__link">Only Bitcoin</Link>
-
+      <Link to="/" className="only-btc__layout__header__link">
+        {import.meta.env.VITE_TITLE}
+      </Link>
     </header>
   );
 };

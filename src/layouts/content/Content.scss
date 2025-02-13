@@ -4,5 +4,11 @@
     display: flex;
     flex: 1 1 auto;
     width: 100%;
-    padding: $layout-padding-x-size;
+    padding: $spacing-40;
+}
+
+@media screen and (max-width: $mobile-size) {
+    .only-btc__layout__content {
+        padding: $spacing-16;
+    }
 }
