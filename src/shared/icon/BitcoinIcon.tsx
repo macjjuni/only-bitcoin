@@ -1,8 +1,18 @@
-import { memo } from "react";
+import { memo, useMemo } from "react";
 
-const BitcoinIcon = ({ size = 24, color = '#f7931a'  }: { size: number; color?: string }) => {
+const signatureColor = '#f7931a';
+const BitcoinIcon = ({ size = 24, color = 'currentColor', isSignatureColor = false  }: { size?: number; color?: string; isSignatureColor?: boolean}) => {
+
+
+  const rootColor = useMemo(() => {
+
+    if (color === 'currentColor' && isSignatureColor) { return signatureColor; }
+
+    return color;
+  }, [color, isSignatureColor])
+
   return (
-      <svg fill={color} width={`${size}px`} height={`${size}px`} viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg">
+      <svg fill={rootColor} width={`${size}px`} height={`${size}px`} viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg">
         <g strokeWidth="0"/>
         <g strokeLinecap="round" strokeLinejoin="round"/>
         <g>

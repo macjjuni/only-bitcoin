@@ -1,0 +1,63 @@
+
+
+.bottom-navigation {
+    display: none;
+    position: relative;
+    width: 100%;
+    height: 80px;
+    border: 1px solid $border-color;
+    border-bottom: none;
+    padding-bottom: 8px;
+    background: $default-background-color;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+
+    .bottom-navigation__list {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+
+        .bottom-navigation__list__item {
+                position: relative;
+            z-index: 0;
+            .bottom-navigation__list__item__link {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: $spacing-8;
+                border-radius: $default-border-radius;
+                font-size: 0;
+                z-index: 1;
+
+                &:before {
+                    position: absolute;
+                    top: 50% ;left: 50%;
+                    transform: translate(-50%, -50%) scale(0.8);
+                    width: 40px;
+                    height: 40px;
+                    background-color: #262626;
+                    border-radius: 8px;
+                    transition: 0.3s;
+                    font-size: 0;
+                    z-index: -1;
+                }
+
+                &.active:before {
+                    content: '';
+                    transform: translate(-50%, -50%) scale(1);
+                }
+
+                & svg { color: #444444; }
+                &.active svg { color: $bitcoin-color; }
+            }
+        }
+    }
+}
+
+
+@media screen and (max-width: $mobile-size) {
+    .bottom-navigation { display: flex; }
+}
+
