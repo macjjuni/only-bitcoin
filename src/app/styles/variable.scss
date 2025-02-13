@@ -37,11 +37,12 @@ $spacing-80: 80px;
 
 // region [Layout Sizes]
 
-$layout-header-height: 64px !default;
-$layout-content-height: auto !default;
-$layout-footer-height: 56px !default;
-$layout-padding-y-size: $spacing-16;
-$layout-padding-x-size: $spacing-40;
+$desktop-layout-header-height: 64px !default;
+$mobile-layout-header-height: 40px !default;
+$desktop-layout-content-height: auto !default;
+$desktop-layout-footer-height: 56px !default;
+$desktop-layout-footer-height: 56px !default;
+$mobile-layout-footer-height: 40px !default;
 
 // endregion
 
@@ -53,7 +54,6 @@ $default-font-family: 'Pretendard', ui-sans-serif, system-ui, -apple-system,
 $default-font-color: #eee;
 $default-background-color: #000;
 $dark-background-color: #171717;
-
 
 // region [fonts]
 
@@ -91,7 +91,9 @@ $dashboard-card-background-color: rgba(24, 24, 24, 0.8);
 // endregion
 
 
-// region [Padding]
+// region [Border Radius]
+
+$default-border-radius: 3px;
 
 // endregion
 
