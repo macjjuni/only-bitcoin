@@ -61,3 +61,7 @@ body {
     background-attachment: fixed;
     background-color: $default-background-color;
 }
+
+@media screen and (max-width: $mobile-size) {
+    body { background-size: 420px; }
+}
