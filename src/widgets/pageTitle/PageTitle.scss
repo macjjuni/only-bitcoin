@@ -1,6 +1,7 @@
 
 
 .page-title {
+    padding: $spacing-16 $spacing-16 0 $spacing-16;
     @include font-heading-sm;
     font-weight: bold;
 }

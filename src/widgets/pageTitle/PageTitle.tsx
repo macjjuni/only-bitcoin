@@ -4,10 +4,7 @@ import "./PageTitle.scss";
 
 const PageTitle = () => {
 
-
-  return (
-    <h2 className="page-title">{useTitle()}</h2>
-  );
+  return (<h2 className="page-title">{useTitle()}</h2>);
 };
 
 export default memo(PageTitle);

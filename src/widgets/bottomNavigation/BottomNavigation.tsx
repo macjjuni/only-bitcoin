@@ -18,6 +18,7 @@ const BottomNavigation = () => {
             <NavLink className="bottom-navigation__list__item__link" to={path} style={style || {}}>
               {icon}
             </NavLink>
+            <span className="bottom-navigation__list__item__focus-bg"/>
           </li>
         ))}
       </ul>

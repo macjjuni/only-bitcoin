@@ -21,8 +21,9 @@
         height: 100%;
 
         .bottom-navigation__list__item {
-                position: relative;
+            position: relative;
             z-index: 0;
+
             .bottom-navigation__list__item__link {
                 display: flex;
                 justify-content: center;
@@ -32,26 +33,31 @@
                 font-size: 0;
                 z-index: 1;
 
-                &:before {
-                    position: absolute;
-                    top: 50% ;left: 50%;
-                    transform: translate(-50%, -50%) scale(0.8);
-                    width: 40px;
-                    height: 40px;
-                    background-color: #262626;
-                    border-radius: 8px;
-                    transition: 0.3s;
-                    font-size: 0;
-                    z-index: -1;
-                }
 
-                &.active:before {
-                    content: '';
-                    transform: translate(-50%, -50%) scale(1);
-                }
 
                 & svg { color: #444444; }
                 &.active svg { color: $bitcoin-color; }
+
+                & + .bottom-navigation__list__item__focus-bg {
+                    position: absolute;
+                    top: 50% ;left: 50%;
+                    width: 36px;
+                    height: 36px;
+                    transform: translate(-50%, -50%) scale(0.88);
+                    background-color: #e3e3e3;
+                    border-radius: 8px;
+                    transition: 0.16s;
+                    font-size: 0;
+                    opacity: 0;
+                    z-index: -1;
+                }
+
+                &.active + .bottom-navigation__list__item__focus-bg {
+                    width: 42px;
+                    height: 42px;
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                }
             }
         }
     }

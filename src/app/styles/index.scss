@@ -15,7 +15,7 @@ time, mark, audio, video {
     padding: 0;
     border: 0;
     font-size: 100%;
-    font: inherit;
+    font-family: $default-font-family;
     vertical-align: baseline;
 }
 
@@ -51,7 +51,6 @@ body {
     margin: 0;
     line-height: 1;
     color: $default-font-color;
-    font-family: $default-font-family;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
     background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif'); /*이미지 경로지정*/

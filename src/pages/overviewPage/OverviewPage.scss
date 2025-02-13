@@ -1,4 +1,11 @@
 
+$half-width: calc(100dvw / 2 - (#{$spacing-16} + #{$spacing-16}));
+
 .overview-page__wrapper {
-  @include PageLayout;
+  display: grid;
+  grid-template-columns: repeat(2, minmax(100px, 1fr));
+  grid-template-rows: repeat(6, 1fr);
+  gap: 16px;
+
+  width: 100%;
 }
