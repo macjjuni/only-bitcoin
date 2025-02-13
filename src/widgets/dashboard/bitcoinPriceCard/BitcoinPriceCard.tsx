@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { KCard } from "kku-ui";
-import BitcoinIcon from "@/shared/icon/BitcoinIcon";
+import { BitcoinIcon } from "@/shared/icon";
 import "./BitcoinPriceCard.scss";
 
 const sizes = { width: "260px", height: "161px" };
@@ -9,7 +9,7 @@ const sizes = { width: "260px", height: "161px" };
 const BitcoinPriceCard = () => {
 
   return (
-    <KCard className="dashboard__card__wrapper" variant="contained" {...sizes}>
+    <KCard className="dashboard__card__wrapper" {...sizes}>
       <div className="dashboard__card__wrapper__top__area">
         <BitcoinIcon size={48} color="#fff" />
         <div className="dashboard__card__wrapper__top__area__top__right">

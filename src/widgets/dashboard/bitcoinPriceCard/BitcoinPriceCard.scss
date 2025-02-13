@@ -3,14 +3,17 @@
 
 .dashboard__card__wrapper {
 
-  &.k-card.k-card--contained {
+  &.k-card.k-card.k-card--outlined {
     display: flex;
     flex-direction: column;
     justify-content: space-between;
 
     padding: 16px;
-    border-color: #000;
+    border-color: #444444;
+    border: none;
     background-color: $dashboard-card-background-color;
+    color: $font-color;
+    box-shadow: 0px 0px 6px 0px  rgba(94,94,94,1);
   }
 
   .dashboard__card__wrapper__top__area {
@@ -31,11 +34,7 @@
     align-items: flex-end;
     gap: 8px;
 
-    .dashboard__card__wrapper__bottom_area__price__text {
-      font-size: 24px;
-    }
-    .dashboard__card__wrapper__bottom_area__price__text {
-      font-size: 24px;
-    }
+    .dashboard__card__wrapper__bottom_area__price__text { font-size: 24px; }
+    .dashboard__card__wrapper__bottom_area__price__text { font-size: 24px; }
   }
 }

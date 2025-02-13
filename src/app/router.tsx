@@ -5,7 +5,7 @@ import withSuspense from "@/widgets/hoc/withSuspence";
 import {DashboardIcon, ExchangeIcon, BlockIcon, PremiumIcon, GearIcon} from "@/shared/icon";
 
 
-const OverviewPage = withSuspense(lazy(() => import("@/pages/dashboardPage/OverviewPage")));
+const OverviewPage = withSuspense(lazy(() => import("@/pages/overviewPage/OverviewPage")));
 const BlockStatusPage = withSuspense(lazy(() => import("@/pages/blockStatusPage/BlockStatusPage")));
 const Btc2KrwPage = withSuspense(lazy(() => import("@/pages/btc2krwPage/Btc2krwPage")));
 const PremiumPage = withSuspense(lazy(() => import("@/pages/premiumPage/PremiumPage")));
@@ -13,7 +13,7 @@ const SettingsPage = withSuspense(lazy(() => import("@/pages/settingsPage/Settin
 
 
 const clientRoutes = [
-  { title: "대시보드", path: "/", element: <OverviewPage />, isNav: true, icon: <DashboardIcon size={28} /> },
+  { title: "Overview", path: "/", element: <OverviewPage />, isNav: true, icon: <DashboardIcon size={28} /> },
   { title: "BTC to KRW", path: "/btc2krw", element: <Btc2KrwPage />, isNav: true, icon: <BlockIcon size={28} /> },
   { title: "블록현황", path: "/block-status", element: <BlockStatusPage />, isNav: true, icon: <ExchangeIcon size={34} />, style: { padding: '5px' } },
   { title: "프리미엄", path: "/premium", element: <PremiumPage />, isNav: true, icon: <PremiumIcon /> },

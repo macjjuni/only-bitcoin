@@ -5,8 +5,8 @@ import "./PremiumPage.scss";
 export default function PremiumPage() {
 
   return (
-    <section>
+    <div className="premium-page__wrapper">
       <PageTitle />
-    </section>
+    </div>
   );
 }

@@ -1,11 +1,11 @@
-import "./SettingsPage.scss";
 import { PageTitle } from "@/widgets";
+import "./SettingsPage.scss";
 
 export default function SettingsPage() {
 
   return (
-    <section className="settings-page">
+    <div className="settings-page__wrapper">
       <PageTitle />
-    </section>
+    </div>
   );
 }
