@@ -1,11 +1,11 @@
 import { memo, ReactNode } from "react";
 import { KCard } from "kku-ui";
-import "./Card.scss";
+import "./SquareCard.scss";
 
 const sizes = { width: "260px", height: "161px"};
 
 
-const Card = ({children}: {children: ReactNode}) => {
+const SquareCard = ({children}: {children: ReactNode}) => {
 
   return (
     <KCard className="dashboard__card__wrapper" variant="contained" {...sizes}>
@@ -14,4 +14,4 @@ const Card = ({children}: {children: ReactNode}) => {
   );
 };
 
-export default memo(Card);
+export default memo(SquareCard);

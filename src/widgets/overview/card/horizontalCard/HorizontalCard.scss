@@ -1,0 +1,14 @@
+$horizontal-card-width: calc(100dvw - (#{$spacing-8} + #{$spacing-8}));
+$golden-ratio: 1.618;
+
+
+@media screen and (max-width: $mobile-size) {
+
+  .horizontal-card {
+    width: $horizontal-card-width;
+    height: calc(#{$horizontal-card-width} / $golden-ratio);
+    border: 1px solid $border-color;
+    background-color: $dashboard-card-background-color;
+    box-shadow: 0px 0px 3px 0px  rgba(94,94,94,1);
+  }
+}

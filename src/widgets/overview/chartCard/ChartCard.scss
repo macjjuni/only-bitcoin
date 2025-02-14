@@ -1,17 +1,65 @@
 
-
 .chart-card {
-  grid-column: span 2 / span 2;
-  grid-row: span 2 / span 2;
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    justify-content: flex-end;
 
-  display: flex;
-  flex-direction: column;
-  justify-content: space-between;
+    padding: $spacing-8;
+    border: 1px solid #4f4f4f;
+    border-radius: 6px;
+    box-shadow: 0px 0px 3px 1px rgba(94,94,94,1);
 
-  padding: 16px;
-  border: 1px solid #444444;
-  border-radius: 5px;
-  background-color: $dashboard-card-background-color;
-  color: $font-color;
-  box-shadow: 0px 0px 3px 0px  rgba(94,94,94,1);
+    user-select: none;
+    overflow: hidden;
+
+    &:before {
+        content: '';
+        position: absolute;
+        top: -10px;
+        left: -10px;
+        width: 104%;
+        height: 104%;
+        background: url('/public/images/backdrop-bg.png') no-repeat center;
+        background-size: cover;
+        z-index: 1;
+        pointer-events: none; /* 클릭 방해 방지 */
+    }
+
+    .chart-card__top__wrapper {
+        position: absolute;
+        top: $spacing-16;
+        left: $spacing-16;
+        display: flex;
+        justify-content: flex-start;
+        align-items: center;
+        gap: $spacing-8;
+
+        color: $font-color;
+        z-index: 3;
+
+        .chart-card__top__wrapper__text__area{
+            display: flex;
+            flex-direction: column;
+
+            .chart-card__top__wrapper__text__area--top {
+                @include font-body;
+            }
+            .chart-card__top__wrapper__text__area--bottom {
+                font-size: 14px;
+            }
+        }
+    }
+
+    .chart-card__chart__wrapper {
+        margin: 0 -#{$spacing-8};
+        width: calc(100% + (2 * #{$spacing-8}));
+        height: 72%;
+        z-index: 0;
+
+        .chartjs-tooltip {
+            z-index: 9999 !important;
+        }
+
+    }
 }
