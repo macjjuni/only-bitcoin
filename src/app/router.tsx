@@ -2,7 +2,7 @@ import { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import Client from "@/app/Client";
 import withSuspense from "@/widgets/hoc/withSuspence";
-import {DashboardIcon, ExchangeIcon, BlockIcon, PremiumIcon, GearIcon} from "@/shared/icon";
+import {DashboardIcon, ExchangeIcon, BlockIcon, PremiumIcon, GearIcon} from "../shared/icons";
 
 
 const OverviewPage = withSuspense(lazy(() => import("@/pages/overviewPage/OverviewPage")));

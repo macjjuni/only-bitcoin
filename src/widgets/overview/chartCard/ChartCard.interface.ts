@@ -1,4 +1,4 @@
-
+import { MarketChartIntervalType } from "@/shared/stores/store.interface";
 
 export interface ChartJsDataType {
   labels: string[];
@@ -19,8 +19,6 @@ export interface ChartData {
 }
 
 
-export type MarketChartIntervalType = 1 | 7 | 30 | 365;
-
 export type BtcChart = {
   [K in MarketChartIntervalType]: ChartData;
 };
@@ -28,4 +26,21 @@ export type BtcChart = {
 export interface MarketChartIntervalTypeList {
   text: string;
   value: MarketChartIntervalType;
+}
+
+
+export interface CoingeckoMarketChartParams {
+  vs_currency: string;
+  days: number;
+}
+
+export interface CoingeckoMarketChartResponseData {
+  market_caps: Array<number[]>;
+  prices: Array<number[]>;
+  total_volumes: Array<number[]>;
+}
+
+export interface CoingeckoMarketChartFormattedData {
+  price: number[];
+  date: number[];
 }
