@@ -12,12 +12,3 @@
         @include logo-font-style;
     }
 }
-
-@media screen and (max-width: $mobile-size) {
-    .only-btc__layout__header {
-        flex: 0 0 $mobile-layout-header-height;
-        padding: $spacing-12 $spacing-12 0 $spacing-12;
-        border-color: transparent;
-    }
-}
-
