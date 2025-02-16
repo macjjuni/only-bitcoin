@@ -3,24 +3,20 @@ import { CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, Poin
 import { Line } from "react-chartjs-2";
 import { KButton } from "kku-ui";
 import HorizontalCard from "@/widgets/overview/card/horizontalCard/HorizontalCard";
-import {
-  ChartJsDataType,
-  MarketChartIntervalTypeList
-} from "@/widgets/overview/chartCard/ChartCard.interface";
-import "./ChartCard.scss";
-import { mockData } from "@/widgets/overview/chartCard/mockData";
-import { btcColor } from "@/shared/constants";
-import { BitcoinIcon } from "../../../shared/icons";
+import { ChartJsDataType, MarketChartIntervalTypeList } from "@/widgets/overview/chartCard/ChartCard.interface";
+import { btcColor } from "@/shared/constants/color";
+import { BitcoinIcon, TriangleDownIcon, TriangleUpIcon } from "@/shared/icons";
 import { initializeCoingeckoMarketChart } from "@/widgets/overview/chartCard/ChartCard.api";
-import useStore from "@/shared/stores/store";
 import { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import { comma } from "@/shared/utils/string";
+import useStore from "@/shared/stores/store";
+import "./ChartCard.scss";
 
 
 // Chart.js 컴포넌트 등록
 ChartJS.register(CategoryScale, LinearScale, PointElement, Tooltip, Legend, LineElement);
 
-const marketChartIntervalType: MarketChartIntervalTypeList[] = [
+const marketChartIntervalOptions: MarketChartIntervalTypeList[] = [
   { text: "1D", value: 1 },
   { text: "1W", value: 7 },
   { text: "1M", value: 30 },
@@ -32,7 +28,7 @@ const getChartDataset = (data: number[], index: number) => {
   return {
     label: "", data, borderColor: "#fff", backgroundColor: "transparent",
     borderWidth: 2, pointBackgroundColor: btcColor, pointHoverRadius: 4,
-    pointRadius: data.map((_, idx) => (idx === index ? 6 : 0)) // 최댓값 위치에 점 표시
+    pointRadius: data.map((_, idx) => (idx === index ? 4 : 0)) // 최댓값 위치에 점 표시
   };
 };
 
@@ -43,17 +39,18 @@ const ChartCard = () => {
   // region [Hooks]
 
   const chartRef = useRef<ChartJS<"line", number[], string>>(null);
+  const usdPrice = useStore(state => state.bitcoinPrice.usd);
 
   const marketChartInterval = useStore(state => state.marketChartInterval);
   const setMarketChartInterval = useStore(state => state.setMarketChartInterval);
   const marketChartData = useStore(state => state.marketChartData);
-
   const maxValueIndex = useMemo(() => {
+    const dataList = marketChartData[marketChartInterval].price;
 
-    const dataList = mockData[marketChartInterval].price;
+    const maxValue = dataList.reduce((max, val) => (val > max ? val : max), -Infinity);
 
-    return dataList.indexOf(Math.max(...dataList));
-  }, [mockData, marketChartInterval]);
+    return dataList.indexOf(maxValue);
+  }, [marketChartData, marketChartInterval]);
 
   const currentChartData = useMemo((): ChartJsDataType => {
 
@@ -65,20 +62,14 @@ const ChartCard = () => {
     };
   }, [marketChartData, marketChartInterval, maxValueIndex]);
 
-  const maxValue = useMemo(() => (
-    comma(currentChartData.datasets[0].data[maxValueIndex])
-  ), [currentChartData, maxValueIndex]);
+  const percentage = useMemo(() => {
 
-  // endregion
+    const factor = 10 ** 2;
+    const maxValue = currentChartData.datasets[0].data[maxValueIndex];
+    const percentValue = (usdPrice - maxValue) / Math.abs(usdPrice) * 100;
 
-
-  // region [Events]
-
-  // const onClickChangeDays = useCallback((day: 1 | 7 | 30 | 365) => {
-  //     setMarketChartInterval(day);
-  //   },
-  //   [setMarketChartInterval]
-  // );
+    return Math.floor(percentValue * factor) / factor;
+  }, [usdPrice, currentChartData, maxValueIndex]);
 
   // endregion
 
@@ -123,6 +114,55 @@ const ChartCard = () => {
 
   // endregion
 
+
+  // region [Templates]
+
+  const ButtonIntervalArea = useMemo(() => (
+    <div className="chart-card__top__first__button-area">
+      {
+        marketChartIntervalOptions.map(({ value, text }) => (
+          <KButton key={value} label={text} variant="contained" size="small"
+                   onClick={() => setMarketChartInterval(value)} className={chartCardButtonClass(value)} />
+        ))
+      }
+    </div>
+  ), [setMarketChartInterval, chartCardButtonClass]);
+
+
+  const ChartArea = useMemo(() => (
+    <>
+      <Line
+        ref={chartRef}
+        data={currentChartData}
+        className="chart-card__chart__wrapper__body"
+        height="120%"
+        options={{
+          plugins: { legend: { display: false }, tooltip: { enabled: true } },
+          elements: { point: { radius: 0 }, line: { tension: 0.4, borderWidth: 2 } },
+          scales: { x: { display: false }, y: { display: false } },
+          animation: { duration: 800, easing: "easeInOutQuart" }
+        }}
+      />
+      <div className="chart-card__chart__wrapper__line__area">
+        {
+          Array.from({ length: 9 }, (_, i) => (
+            <span key={i} className="chart-card__chart__wrapper__line__area--line"
+                  style={{ "left": `${(i + 1) * 10}%` }} />
+          ))
+        }
+      </div>
+    </>
+  ), [currentChartData]);
+
+
+  const UpdownIcon = useMemo(() => (
+
+    percentage > 0 ? <TriangleUpIcon size={8} /> : <TriangleDownIcon size={8} />
+  ), [percentage]);
+
+  // endregion
+
+
   return (
     <HorizontalCard className="chart-card">
 
@@ -138,46 +178,26 @@ const ChartCard = () => {
             </p>
           </div>
 
-          <div className="chart-card__top__first__button-area">
-            {
-              marketChartIntervalType.map(({ value, text }) => (
-                <KButton key={value} label={text} variant="contained" size="small"
-                         onClick={() => setMarketChartInterval(value)} className={chartCardButtonClass(value)} />
-              ))
-            }
-          </div>
+          {ButtonIntervalArea}
+
         </div>
 
         <div className="chart-card__top__second">
           <span className="chart-card__top__second__price">
-            {`$${maxValue}`}
+            {`$${comma(usdPrice)}`}
           </span>
-          {/* <span className="chart-card__top__second__price__rate">11.3%</span> */}
+
+          <span className="chart-card__top__second__rate">
+            {UpdownIcon}
+            {Math.abs(percentage)}%
+          </span>
         </div>
       </div>
 
       <div className="chart-card__bottom">
-        <Line
-          ref={chartRef}
-          data={currentChartData}
-          className="chart-card__chart__wrapper__body"
-          height="116%"
-          options={{
-            plugins: { legend: { display: false }, tooltip: { enabled: true } },
-            elements: { point: { radius: 0 }, line: { tension: 0.4, borderWidth: 2 } },
-            scales: { x: { display: false }, y: { display: false } },
-            animation: { duration: 800, easing: "easeInOutQuart" }
-          }}
-        />
-        <div className="chart-card__chart__wrapper__line__area">
-          {
-            Array.from({ length: 9 }, (_, i) => (
-              <span key={i} className="chart-card__chart__wrapper__line__area--line"
-                    style={{ "left": `${(i + 1) * 10}%` }} />
-            ))
-          }
-        </div>
+        {ChartArea}
       </div>
+
     </HorizontalCard>
   );
 };

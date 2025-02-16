@@ -1,14 +1,14 @@
 import { memo, ReactNode, useMemo } from "react";
+import { ComponentBasePorps } from "@/shared/types/base.interface";
 import "./HorizontalCard.scss";
-import { BaseProps } from "@/shared/types/base.interface";
 
 
-interface HorizontalCardInterface extends BaseProps {
-  children: ReactNode
+interface HorizontalCardInterface extends ComponentBasePorps {
+  children: ReactNode;
+  rows?: number;
 }
 
-const HorizontalCard = ({children, className}: HorizontalCardInterface) => {
-
+const HorizontalCard = ({children, className, rows = 3}: HorizontalCardInterface) => {
 
 
   // region [Hooks]
@@ -19,11 +19,12 @@ const HorizontalCard = ({children, className}: HorizontalCardInterface) => {
 
     if (className) { classArr.push(className); }
 
+    if (rows) { classArr.push(`horizontal-card--row-${rows}`)}
+
     return classArr.join(' ');
-  }, [className]);
+  }, [className, rows]);
 
   // endregion
-
 
 
   return (

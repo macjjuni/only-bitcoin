@@ -6,12 +6,34 @@ import { StoreType } from "@/shared/stores/store.interface";
 const useStore = create<StoreType>()(
   persist(
     (set) => ({
-      // btc: { krw: 0, krwDate: "", krwColor: true, usd: 0, usdDate: "", usdColor: true, isKrwStatus: false, isUsdStatus: false },
-      // updateKRW: (krw) => set((state) => ({ btc: { ...state.btc, ...krw } })),
-      // updateUSD: (usd) => set((state) => ({ btc: { ...state.btc, ...usd } }))
+
+      // region [비트코인 가격 정보]
+
+      bitcoinPrice: {
+        krw: 0,
+        krwUpdateTimestamp: 0,
+        isKrwEnabled: true,
+        isKrwConnected: false,
+        usd: 0,
+        usdUpdateTimestamp: 0,
+        isUsdEnabled: true,
+        isUsdConnected: false
+      },
+      setBitcoinKrwPrice: (krw) => set(({ bitcoinPrice }) => ({
+        bitcoinPrice: { ...bitcoinPrice, ...krw }
+      })),
+      setBitcoinUsdPrice: (usd) => set(({ bitcoinPrice }) => ({
+        bitcoinPrice: { ...bitcoinPrice, ...usd }
+      })),
+
+      // endregion
+
+
+      // region [대시보드 차트]
+
       marketChartInterval: 365,
-      setMarketChartInterval: ((interval)=> set(() => (
-        {...{ marketChartInterval: interval }}
+      setMarketChartInterval: ((interval) => set(() => (
+        { ...{ marketChartInterval: interval } }
       ))),
       marketChartData: {
         1: { date: [], price: [], timeStamp: 0 },
@@ -21,11 +43,54 @@ const useStore = create<StoreType>()(
       },
       setMarketChartData: (interval, data) => set((state) => ({
         marketChartData: { ...state.marketChartData, [interval]: data }
-      }))
-      //
-      // dominance: { value: "", date: "" },
-      // updateDominance: (dominance) => set(() => ({ dominance })),
-      //
+      })),
+
+      // endregion
+
+
+      // region [도미넌스]
+
+      dominance: { value: 0, timestamp: 0 },
+      setDominance: (dominance) => set(() => ({
+        dominance
+      })),
+
+      // endregion
+
+
+      // region [환율 데이터]
+
+      exRate: { value: 0, date: "" },
+      setExRate: (exRate) => set(() => ({ exRate })),
+
+      // endregion
+
+
+      // region [공포탐욕지수]
+
+      fearGreed: { value: 0, timestamp: 0 },
+      setFearGreed: (fearGreed) => set(() => ({ fearGreed })),
+
+      // endregion
+
+
+      // region []
+
+      blockData: {
+        height: 0,
+        timestamp: 0,
+        halvingPercent: 0,
+        nextHalving: {
+          nextHalvingHeight: 0,
+          nextHalvingPredictedDate: 0,
+          remainingHeight: 0
+        }
+      },
+      setBlockData: (blockData) => set(() => ({ blockData })),
+
+      // endregion
+
+
       // market: "KRW/USD",
       // setMarket: (market: MarketType) => {
       //   set({ market });
@@ -35,8 +100,6 @@ const useStore = create<StoreType>()(
       // theme: "dark",
       // setTheme: (theme) => set(() => ({ theme })), // deprecated
       //
-      // exRate: { date: "", provider: "", basePrice: 0 },
-      // setExRate: (exRate) => set(() => ({ exRate })),
       //
       // amount: "1",
       // setAmount: (price) => set(() => ({ amount: price })),
@@ -44,24 +107,10 @@ const useStore = create<StoreType>()(
       // isCountAnime: true,
       // setCountAnime: (isCountAnime) => set(() => ({ isCountAnime })),
       //
-      // fearGreed: { value: "", date: "" },
-      // updateFearGreed: (data) => set(() => ({ fearGreed: data })),
       //
       // isLottiePlay: true,
       // toggleLottie: () => set((state) => ({ isLottiePlay: !state.isLottiePlay })),
       //
-      // blockData: {
-      //   height: 0,
-      //   timeStamp: 0,
-      //   updateTimeStamp: 0,
-      //   halvingPercent: 0,
-      //   nextHalving: {
-      //     nextHalvingHeight: 0,
-      //     nextHalvingPredictedDate: 0,
-      //     remainingHeight: 0
-      //   }
-      // },
-      // updateBlock: (blockData) => set(() => ({ blockData })),
       //
       // marketChartInterval: 365,
       // setMarketChartInterval: (marketChartInterval) => set(() => ({ marketChartInterval })),

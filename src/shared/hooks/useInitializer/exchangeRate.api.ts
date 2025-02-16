@@ -1,5 +1,4 @@
-import axios from "axios";
-import { toast } from "react-toastify";
+// import { toast } from "react-toastify";
 import useStore from "@/shared/stores/store";
 import { isDev } from "@/shared/utils/common";
 
@@ -19,10 +18,16 @@ export default async function initializeUsdExchangeRate(): Promise<void> {
   }
 
   try {
-    const res = await axios.get<IExRateRes>(apiUrl);
+    const response = await fetch(apiUrl);
 
-    const { date } = res.data;
-    const usdToKrwExchangeRate = Math.floor(res.data?.usd?.krw) || 0;
+    if (!response.ok) {
+      throw new Error("Network response was not ok");
+    }
+
+    const data: IExRateRes = await response.json();
+
+    const { date } = data;
+    const usdToKrwExchangeRate = Math.floor(data?.usd?.krw) || 0;
 
     if (usdToKrwExchangeRate === 0) {
       throw new Error("USD 환율 데이터를 찾을 수 없습니다.");
@@ -31,6 +36,6 @@ export default async function initializeUsdExchangeRate(): Promise<void> {
     setExRate({ value: usdToKrwExchangeRate, date });
   } catch (e) {
     console.error(e);
-    toast.error("환율 데이터를 가져올 수 없어 김치 프리미엄 데이터를 표시할 수 없습니다.");
+    // toast.error("환율 데이터를 가져올 수 없어 한국 프리미엄 데이터를 표시할 수 없습니다.");
   }
 }

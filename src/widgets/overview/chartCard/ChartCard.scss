@@ -4,12 +4,7 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-
   padding: $spacing-16 $spacing-16 $spacing-8 $spacing-16;
-  border: 1px solid #4f4f4f;
-  border-radius: 6px;
-  box-shadow: 0px 0px 3px 1px rgba(94, 94, 94, 1);
-
   user-select: none;
   overflow: hidden;
 
@@ -37,7 +32,7 @@
     .chart-card__top__fist {
       display: flex;
       justify-content: space-between;
-      align-items: center;
+      align-items: flex-start;
 
       .chart-card__top__fist__logo {
         display: flex;
@@ -51,6 +46,7 @@
         $chart-card__button-border-color: #fff;
 
         .chart-card__button {
+          padding: 0 $spacing-12;
           border-radius: 0;
           border-color: $chart-card__button-border-color;
           border-left: none;
@@ -76,18 +72,27 @@
 
     .chart-card__top__second {
       display: flex;
-      justify-content: space-between;
-      align-items: center;
+      justify-content: flex-start;
+      align-items: flex-start;
+      gap: 8px;
 
-      .chart-card__top__second__price, .chart-card__top__second__rate {
+      .chart-card__top__second__price{
         @include font-body;
         font-family: $number-font-family;
       }
-      .chart-card__top__second__price {
-
-      }
       .chart-card__top__second__rate {
+        font-family: $number-font-family;
+        font-size: 12px;
+        line-height: 16px;
+      }
 
+      .chart-card__top__second__rate {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: 2px;
+
+        .chart-card__top__second__rate__icon--up { transform: rotate(180deg); }
       }
     }
 

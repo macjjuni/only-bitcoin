@@ -30,7 +30,10 @@ function comma(num: string | number): string {
     throw Error(`숫자 이외에 문자열이 포함됨, ${num}`, );
   }
 
-  return num?.toString()?.replace(commaRegex, ",") || '0';
+  // 소수점 제거
+  const removeDecimalPointValue = Math.floor(num);
+
+  return removeDecimalPointValue?.toString()?.replace(commaRegex, ",") || '0';
 }
 
 export { generateUUID, comma };

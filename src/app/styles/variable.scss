@@ -3,6 +3,7 @@
 
 $bitcoin-color: #f7931a !default;
 $font-color: #ffffff;
+$gray-font-color: #999999;
 $border-color: #242424;
 
 //$border-color: #2e2e2e;
@@ -12,6 +13,7 @@ $border-color: #242424;
 
 // region [Spacing]
 
+$spacing-2: 4px;
 $spacing-4: 4px;
 $spacing-8: 8px;
 $spacing-12: 12px;
@@ -75,11 +77,13 @@ $line-height-heading-sm-size: 34px;
 $font-title-size: 24px;
 $line-height-title-size: 28px;
 
-$font-sub-title-size: 20px;
-$line-height-sub-title-size: 24px;
+$font-sub-title-size: 22px;
+$line-height-sub-title-size: 26px;
 
 $font-body-size: 16px;
 $line-height-body-size: 20px;
+
+$font-small-size: 14px;
 
 // endregion
 

@@ -1,14 +1,23 @@
 $horizontal-card-width: calc(100dvw - (#{$spacing-8} + #{$spacing-8}));
 $golden-ratio: 1.618;
+$one-rows-1-height: calc((#{$horizontal-card-width} / #{$golden-ratio}) / 3);
+$one-rows-2-height: calc((#{$horizontal-card-width} / #{$golden-ratio}) / 2);
+$one-rows-3-height: calc(#{$horizontal-card-width} / $golden-ratio);
 
 
 @media screen and (max-width: $mobile-size) {
 
   .horizontal-card {
     width: $horizontal-card-width;
-    height: calc(#{$horizontal-card-width} / $golden-ratio);
-    border: 1px solid $border-color;
+    padding: $spacing-12;
+    border: 1px solid #4f4f4f;
+    border-radius: 4px;
     background-color: $dashboard-card-background-color;
-    box-shadow: 0px 0px 3px 0px  rgba(94,94,94,1);
+    box-shadow: 0px 0px 4px 0px rgba(94, 94, 94, 1);
+    //box-shadow: 0px 0px 3px 0px  rgba(94,94,94,1);
+
+    &.horizontal-card--row-1 { min-height: $one-rows-1-height; }
+    &.horizontal-card--row-2 { min-height: $one-rows-2-height; }
+    &.horizontal-card--row-3 { min-height: $one-rows-3-height; }
   }
 }
