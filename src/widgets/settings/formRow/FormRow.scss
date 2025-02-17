@@ -17,6 +17,10 @@
         align-items: center;
         width: 100%;
         padding-left: $spacing-12;
+
+        .form-row__area__content__label {
+            @include font-body;
+        }
     }
 
     &:after {
