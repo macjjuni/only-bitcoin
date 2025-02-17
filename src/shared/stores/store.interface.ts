@@ -27,13 +27,13 @@ export interface StoreType {
   setDominance: (by: SetDominanceTypes) => void;
 
   // endregion
-  
-  
+
+
   // region [환율 데이터]
 
   exRate: ExRateTypes; // USD/KRW 환율 데이터
   setExRate: (exRate: ExRateTypes) => void;
-  
+
   // endregion
 
 
@@ -43,19 +43,19 @@ export interface StoreType {
   setFearGreed: (data: FearGreedTypes) => void;
 
   // endregion
-  
-  
+
+
   // region [블록정보]
 
   blockData: BlockTypes;
   setBlockData: (blockData: BlockTypes) => void;
-  
+
   // endregion
 
   // market: MarketType; // 메인 시세 단위 => 'KRW' | 'USD' | 'KRW/USD'
   // setMarket: (market: MarketType) => MarketType;
   //
-  
+
   //
   // amount: string; // BTC 개수 Input 값
   // setAmount: (by: string) => void;
@@ -123,7 +123,7 @@ export interface ExRateTypes {
 
 export interface NextHalvingTypes {
   nextHalvingHeight: number;
-  nextHalvingPredictedDate: number | string;
+  nextHalvingPredictedDate: string;
   remainingHeight: number;
 }
 

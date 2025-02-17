@@ -82,7 +82,7 @@ const useStore = create<StoreType>()(
         halvingPercent: 0,
         nextHalving: {
           nextHalvingHeight: 0,
-          nextHalvingPredictedDate: 0,
+          nextHalvingPredictedDate: '',
           remainingHeight: 0
         }
       },

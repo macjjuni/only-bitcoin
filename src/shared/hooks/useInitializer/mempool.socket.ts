@@ -1,6 +1,6 @@
 import { toast } from "react-toastify";
 import useStore from "@/shared/stores/store";
-import { getNextHalvingData } from "@/shared/utils/common";
+import { calcPercentage, getNextHalvingData } from "@/shared/utils/common";
 
 const MEMPOOL_WS_URL = "wss://mempool.space/api/v1/ws";
 const MAX_RETRIES = 3;
@@ -24,18 +24,16 @@ const handleMempoolData = (blocks: MempoolResponseTypes[]) => {
 
   const { height, timestamp } = blocks[blocks.length-1];
   const { setBlockData } = useStore.getState();
-  const {blockHeight} = getNextHalvingData(height) || { blockHeight: 0 };
-
-  console.log(blockHeight - height);
+  const {blockHeight: nextHalvingHeight, date} = getNextHalvingData(height) || { blockHeight: 0, date: '' };
 
   setBlockData({
     height,
     timestamp,
-    halvingPercent: 0,
+    halvingPercent: calcPercentage(nextHalvingHeight, height),
     nextHalving: {
-      nextHalvingHeight: blockHeight || 0,
-      nextHalvingPredictedDate: 0,
-      remainingHeight: blockHeight - height,
+      nextHalvingHeight: nextHalvingHeight || 0,
+      nextHalvingPredictedDate: date,
+      remainingHeight: nextHalvingHeight - height,
     }
   });
 };
@@ -73,9 +71,7 @@ const socketManager = {
 
     socket.onclose = (e) => {
       console.log(`⛔ WebSocket 종료 (코드: ${e.code})`);
-
-      const { setBitcoinUsdPrice, bitcoinPrice } = useStore.getState();
-      setBitcoinUsdPrice({ ...bitcoinPrice, isUsdConnected: false }); // 연결 해제
+      console.error(e);
 
       if (e.wasClean || e.code === 1000) {
         console.log("🔌 정상적으로 서버 연결 종료");

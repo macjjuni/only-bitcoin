@@ -13,18 +13,16 @@ const PricePannel = () => {
 
   // region [Hooks]
 
-  const { height, nextHalving } = useStore(state => state.blockData);
-
-  const percent = useMemo(() => {
-    return calcPercentage(nextHalving.nextHalvingHeight, height);
-  }, [height, nextHalving]);
+  const { height, nextHalving, halvingPercent } = useStore(state => state.blockData);
 
   // endregion
 
 
-  // region [Hooks]
+  // region [Styles]
 
-  const progressStyle: CSSProperties = useMemo(() => ({left: `calc(${Math.ceil(percent)}% - ${barBallHalfWidth})`}), [percent]);
+  const progressStyle: CSSProperties = useMemo(() => (
+    {left: `calc(${Math.ceil(halvingPercent)}% - ${barBallHalfWidth})`}
+  ), [halvingPercent]);
 
   // endregion
 
@@ -43,7 +41,7 @@ const PricePannel = () => {
 
           <div className="block-card__guage__area__percent__area">
             <span className="block-card__guage__area__percent__area__text">
-              {percent}%
+              {halvingPercent}%
             </span>
           </div>
 
