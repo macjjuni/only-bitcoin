@@ -48,6 +48,8 @@
         .chart-card__button {
           padding: 0 $spacing-12;
           border-radius: 0;
+          border-width: 1px;
+          border-style: solid;
           border-color: $chart-card__button-border-color;
           border-left: none;
           background-color: #242424;
