@@ -1,12 +1,17 @@
 import { memo } from "react";
-import { comma } from "@/shared/utils/string";
-import "./PricePannel.scss";
 import useStore from "@/shared/stores/store";
+import "./PricePannel.scss";
+import { CountText } from "@/widgets";
 
 
 const PricePannel = () => {
 
+  // region [Hooks]
+
   const bitcoinPrice = useStore(state => state.bitcoinPrice);
+
+  // endregion
+
 
   return (
     <div className="bitcoin-price-pannel">
@@ -15,11 +20,11 @@ const PricePannel = () => {
       <div className="bitcoin-price-pannel__price__area">
         <p className="bitcoin-price-pannel__price__area__krw">
           <span className="bitcoin-price-pannel__price__area__krw__sign">₩</span>
-          {comma(bitcoinPrice.krw)}
+          <CountText value={bitcoinPrice.krw} />
         </p>
         <p className="bitcoin-price-pannel__price__area__usd">
           <span className="bitcoin-price-pannel__price__area__usd__sign">$</span>
-          {comma(bitcoinPrice.usd)}
+          <CountText value={bitcoinPrice.usd} />
         </p>
       </div>
     </div>
