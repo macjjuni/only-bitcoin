@@ -52,6 +52,17 @@ export interface StoreType {
 
   // endregion
 
+
+  // region [즐겨찾기]
+
+  setting: SettingTypes;
+  setInitialPath: (path: string) => void;
+  setCurrency: (currency: CurrencyTypes) => void;
+  setUsdtStandard: (isUsdtStandard: boolean) => void;
+
+  // endregion
+
+
   // market: MarketType; // 메인 시세 단위 => 'KRW' | 'USD' | 'KRW/USD'
   // setMarket: (market: MarketType) => MarketType;
   //
@@ -81,7 +92,6 @@ export interface BitcoinPriceTypes extends BitcoinPriceKRWTypes, BitcoinPriceUSD
 export interface BitcoinPriceKRWTypes {
   krw: number;
   krwUpdateTimestamp: number;
-  isKrwEnabled?: boolean; // KRW 설정 허용
   isKrwConnected?: boolean; // 웹 소켓 접속 여부(업비트)
 }
 
@@ -89,12 +99,9 @@ export interface BitcoinPriceKRWTypes {
 export interface BitcoinPriceUSDTypes {
   usd: number;
   usdUpdateTimestamp: number;
-  isUsdEnabled?: boolean; // USD 설정 허용
   isUsdConnected?: boolean; // 웹 소켓 접속 여부(바이낸스)
 }
 
-
-export type MarketType = "KRW" | "USD" | "KRW/USD";
 
 // 도미넌스지수
 export interface DominanceTypes {
@@ -150,4 +157,10 @@ export interface BtcChart {
 
 export type MarketChartIntervalType = 1 | 7 | 30 | 365;
 
-export type SetMarketChartIntervalType = (interval: MarketChartIntervalType) => void;
+export type CurrencyTypes = "KRW" | "USD" | "KRW/USD";
+
+export interface SettingTypes {
+  initialPath: string;
+  currency: CurrencyTypes;
+  isUsdtStandard: boolean;
+}

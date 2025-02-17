@@ -4,4 +4,4 @@ export { default as ChartCard } from "@/widgets/overview/chartCard/ChartCard";
 export { default as PricePannel } from "@/widgets/overview/pricePannel/PricePannel";
 export { default as MacroCard } from "@/widgets/overview/macroCard/MacroCard";
 export { default as BlockCard } from "@/widgets/overview/blockCard/BlockCard";
-export { default as CountText } from "@/widgets/countUp/CountText";
+export { default as CountText } from "@/widgets/CountText/CountText";

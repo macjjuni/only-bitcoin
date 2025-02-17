@@ -12,11 +12,9 @@ const useStore = create<StoreType>()(
       bitcoinPrice: {
         krw: 0,
         krwUpdateTimestamp: 0,
-        isKrwEnabled: true,
         isKrwConnected: false,
         usd: 0,
         usdUpdateTimestamp: 0,
-        isUsdEnabled: true,
         isUsdConnected: false
       },
       setBitcoinKrwPrice: (krw) => set(({ bitcoinPrice }) => ({
@@ -74,7 +72,7 @@ const useStore = create<StoreType>()(
       // endregion
 
 
-      // region []
+      // region [블록 데이터]
 
       blockData: {
         height: 0,
@@ -82,7 +80,7 @@ const useStore = create<StoreType>()(
         halvingPercent: 0,
         nextHalving: {
           nextHalvingHeight: 0,
-          nextHalvingPredictedDate: '',
+          nextHalvingPredictedDate: "",
           remainingHeight: 0
         }
       },
@@ -90,6 +88,25 @@ const useStore = create<StoreType>()(
 
       // endregion
 
+
+      // region [즐겨찾기]
+
+      setting: {
+        initialPath: "/",
+        currency: 'KRW/USD',
+        isUsdtStandard: false,
+      },
+      setInitialPath: (path) => set((state) => ({
+        setting: { ...state.setting, initialPath: path }
+      })),
+      setCurrency: (currency) => set((state) => ({
+        setting: { ...state.setting, currency }
+      })),
+      setUsdtStandard: (isUsdtStandard) => set((state) => ({
+        setting: { ...state.setting, isUsdtStandard }
+      })),
+
+      // endregion
 
       // market: "KRW/USD",
       // setMarket: (market: MarketType) => {

@@ -1,5 +1,5 @@
-import { toast } from "react-toastify";
-import { getCurrentDate } from "@/shared/utils/date";
+// import { toast } from "react-toastify";
+// import { getCurrentDate } from "@/shared/utils/date";
 import useStore from "@/shared/stores/store";
 
 const fearGreedURI = "https://api.alternative.me/fng/";
