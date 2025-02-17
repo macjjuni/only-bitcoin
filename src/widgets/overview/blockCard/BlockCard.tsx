@@ -1,10 +1,10 @@
 import { CSSProperties, memo, useMemo } from "react";
+import { useLottie } from "lottie-react";
 import HorizontalCard from "@/widgets/overview/card/horizontalCard/HorizontalCard";
-import { BlockRemainingIcon } from "@/shared/icons";
 import useStore from "@/shared/stores/store";
 import { comma } from "@/shared/utils/string";
-import { calcPercentage } from "@/shared/utils/common";
 import "./BlockCard.scss";
+import blockLottieJson from "@/shared/assets/lottie/block.json";
 
 
 const barBallHalfWidth = '14px' as const;
@@ -14,6 +14,10 @@ const PricePannel = () => {
   // region [Hooks]
 
   const { height, nextHalving, halvingPercent } = useStore(state => state.blockData);
+  const { View } = useLottie({
+    animationData: blockLottieJson,
+    loop: true,
+  })
 
   // endregion
 
@@ -48,7 +52,10 @@ const PricePannel = () => {
         </div>
 
         <div className="block-card__guage__area__remaining">
-          <BlockRemainingIcon size={28} color="#fff" />
+          {/* <BlockRemainingIcon size={28} color="#fff" /> */}
+          <div className="block-card__guage__area__remaining__lottie">
+            {View}
+          </div>
           <span className="block-card__remaining__text">
             {comma(height)} | {comma(nextHalving.remainingHeight)} remaining
           </span>
