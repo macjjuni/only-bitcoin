@@ -8,3 +8,5 @@ export { default as TetherIcon } from "@/shared/icons/TetherIcon";
 export { default as TriangleUpIcon } from "@/shared/icons/TriangleUpIcon";
 export { default as TriangleDownIcon } from "@/shared/icons/TriangleDownIcon";
 export { default as BlockRemainingIcon } from "@/shared/icons/BlockRemainingIcon";
+export { default as StarIcon } from "@/shared/icons/StarIcon";
+export { default as CurrencyIcon } from "@/shared/icons/CurrencyIcon";
