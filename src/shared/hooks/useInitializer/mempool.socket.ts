@@ -1,6 +1,8 @@
 import { toast } from "react-toastify";
 import useStore from "@/shared/stores/store";
 import { calcPercentage, getNextHalvingData } from "@/shared/utils/common";
+import { MemPoolBlockTypes } from "@/shared/types/block.interface";
+import { BlockTypes } from "@/shared/stores/store.interface";
 
 const MEMPOOL_WS_URL = "wss://mempool.space/api/v1/ws";
 const MAX_RETRIES = 3;
@@ -19,24 +21,28 @@ const resetRetry = () => {
   retryCount = 0;
 };
 
-// BTC 가격 데이터 업데이트
-const handleMempoolData = (blocks: MempoolResponseTypes[]) => {
+// 멤풀 블록 리스트 업데이트
+const handleMempoolBlocks = (blocks: MemPoolBlockTypes[]) => {
 
-  const { height, timestamp } = blocks[blocks.length-1];
   const { setBlockData } = useStore.getState();
-  const {blockHeight: nextHalvingHeight, date} = getNextHalvingData(height) || { blockHeight: 0, date: '' };
+  const sanitizedBlocks: BlockTypes[] = blocks.map(({id, height, timestamp, size, extras}) => ({
+    id, height, timestamp, size, poolName: extras.pool.name
+  })).sort((a, b) => b.timestamp - a.timestamp);
 
-  setBlockData({
-    height,
-    timestamp,
-    halvingPercent: calcPercentage(nextHalvingHeight, height),
-    nextHalving: {
-      nextHalvingHeight: nextHalvingHeight || 0,
-      nextHalvingPredictedDate: date,
-      remainingHeight: nextHalvingHeight - height,
-    }
-  });
+  setBlockData(sanitizedBlocks);
 };
+
+// 새롭게 채굴 된 블록 업데이트
+const handleMempoolBlock = (blocks: MemPoolBlockTypes) => {
+
+  const { blockData, setBlockData } = useStore.getState();
+
+  const { id, height, size, timestamp, extras} = blocks;
+  const sanitizedBlock: BlockTypes = { id, height, size, timestamp, poolName: extras.pool.name }
+
+  setBlockData([sanitizedBlock, ...blockData]);
+};
+
 
 // WebSocket 이벤트 핸들링
 const socketManager = {
@@ -61,7 +67,10 @@ const socketManager = {
       const mempoolData = JSON.parse(data);
 
       if (mempoolData?.blocks) {
-        handleMempoolData(mempoolData.blocks);
+        handleMempoolBlocks(mempoolData.blocks);
+      }
+      if (mempoolData?.block) {
+        handleMempoolBlock(mempoolData.block);
       }
     };
 
@@ -108,11 +117,6 @@ const socketManager = {
   }
 };
 
-
-interface MempoolResponseTypes {
-  height: number,
-  timestamp: number,
-}
 
 
 // WebSocket 초기화

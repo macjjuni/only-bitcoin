@@ -2,8 +2,8 @@ import { dateUtil } from "kku-util";
 
 const { formatConfig, getFormatDate, convertToTimestamp, getCurrentDate, calcCurrentDateDifference } = dateUtil;
 
-function formatDate(date: Date | string | number) {
-  return getFormatDate(date, formatConfig.detail);
+function formatDate(date: Date | string | number, format: string = formatConfig.detail) {
+  return getFormatDate(date, format);
 }
 
 export { formatConfig, formatDate, convertToTimestamp, getCurrentDate, calcCurrentDateDifference };

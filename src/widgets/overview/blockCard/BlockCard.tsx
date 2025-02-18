@@ -5,19 +5,22 @@ import useStore from "@/shared/stores/store";
 import { comma } from "@/shared/utils/string";
 import "./BlockCard.scss";
 import blockLottieJson from "@/shared/assets/lottie/block.json";
+import { calcPercentage, getNextHalvingData } from "@/shared/utils/common";
 
 
-const barBallHalfWidth = '14px' as const;
+const barBallHalfWidth = "14px" as const;
 
 const PricePannel = () => {
 
   // region [Hooks]
 
-  const { height, nextHalving, halvingPercent } = useStore(state => state.blockData);
-  const { View } = useLottie({
-    animationData: blockLottieJson,
-    loop: true,
-  })
+  const blockData = useStore(state => state.blockData);
+  const { View } = useLottie({ animationData: blockLottieJson, loop: true });
+
+  const recentBlockData = useMemo(() => (blockData[0]), [blockData]);
+  const nextHalvingData = useMemo(() => (getNextHalvingData(recentBlockData.height)), [recentBlockData]);
+  const halvingPercent = useMemo(
+    () => calcPercentage(nextHalvingData?.blockHeight, recentBlockData.height), [nextHalvingData, recentBlockData]);
 
   // endregion
 
@@ -25,7 +28,7 @@ const PricePannel = () => {
   // region [Styles]
 
   const progressStyle: CSSProperties = useMemo(() => (
-    {left: `calc(${Math.ceil(halvingPercent)}% - ${barBallHalfWidth})`}
+    { left: `calc(${Math.ceil(halvingPercent)}% - ${barBallHalfWidth})` }
   ), [halvingPercent]);
 
   // endregion
@@ -57,7 +60,7 @@ const PricePannel = () => {
             {View}
           </div>
           <span className="block-card__remaining__text">
-            {comma(height)} | {comma(nextHalving.remainingHeight)} remaining
+            {comma(recentBlockData.height)} | {comma(nextHalvingData.blockHeight - recentBlockData.height)} remaining
           </span>
         </div>
 

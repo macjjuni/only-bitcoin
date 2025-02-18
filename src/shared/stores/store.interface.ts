@@ -47,8 +47,8 @@ export interface StoreType {
 
   // region [블록정보]
 
-  blockData: BlockTypes;
-  setBlockData: (blockData: BlockTypes) => void;
+  blockData: BlockTypes[];
+  setBlockData: (blocks: BlockTypes[]) => void;
 
   // endregion
 
@@ -135,10 +135,12 @@ export interface NextHalvingTypes {
 }
 
 export interface BlockTypes {
+  id: string;
   height: number; // 블록 높이
   timestamp: number; // 블록 생성 타임스탬프
-  halvingPercent: number; // 반감기 진행률
-  nextHalving: NextHalvingTypes;
+  size: number;
+  poolName: string;
+  // nextHalving: NextHalvingTypes;
 }
 
 // 비트코인 차트 데이터

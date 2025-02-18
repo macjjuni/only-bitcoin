@@ -5,3 +5,4 @@ export { default as PricePannel } from "@/widgets/overview/pricePannel/PricePann
 export { default as MacroCard } from "@/widgets/overview/macroCard/MacroCard";
 export { default as BlockCard } from "@/widgets/overview/blockCard/BlockCard";
 export { default as CountText } from "@/widgets/CountText/CountText";
+export { default as BlockVisualizer } from "@/widgets/block/blockVisualizer/BlockVisualizer";

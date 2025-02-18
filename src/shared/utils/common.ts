@@ -35,11 +35,16 @@ export const getIsOverTimeCheck = (timeStamp1: number, timeStamp2: number, limit
 
 // 현재 블록 높이 구하기
 export const getNextHalvingData = (currentHeight: number) => {
-  return blockHalvingData.find(({ blockHeight }) => blockHeight > currentHeight) || null;
+  return blockHalvingData.find(({ blockHeight }) => blockHeight > currentHeight) ||
+    { date: "2140", blockHeight: 6930000, blockReward: 0.00000000582076609134674072265625 };
 };
 
 // 반감기 진행률 계산
-export const calcPercentage = (nextHalvingHeight: number, current: number) => {
+export const calcPercentage = (nextHalvingHeight: number | undefined, current: number) => {
+
+  if (!nextHalvingHeight) {
+    return 0;
+  }
 
   const blockDiff = 210000 as const;
 

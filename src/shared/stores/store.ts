@@ -74,17 +74,8 @@ const useStore = create<StoreType>()(
 
       // region [블록 데이터]
 
-      blockData: {
-        height: 0,
-        timestamp: 0,
-        halvingPercent: 0,
-        nextHalving: {
-          nextHalvingHeight: 0,
-          nextHalvingPredictedDate: "",
-          remainingHeight: 0
-        }
-      },
-      setBlockData: (blockData) => set(() => ({ blockData })),
+      blockData: [{ height: 0, timestamp: 0, size: 0, poolName: '-'}],
+      setBlockData: (blockData) => set(() => ({ blockData: [...blockData] })),
 
       // endregion
 
