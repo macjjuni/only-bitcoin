@@ -11,7 +11,11 @@ interface IExRateRes {
 
 export default async function initializeUsdExchangeRate(): Promise<void> {
 
-  const { setExRate } = useStore.getState();
+  const { setExRate, setting } = useStore.getState();
+
+  if (setting.isUsdtStandard) {
+    return;
+  }
 
   if (isDev) {
     console.log("✅ 환율 데이터 초기화");

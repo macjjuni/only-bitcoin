@@ -13,7 +13,8 @@ const SettingsPage = withSuspense(lazy(() => import("@/pages/settingsPage/Settin
 
 
 const clientRoutes = [
-  { title: "Overview", path: "/", element: <OverviewPage />, isNav: true, icon: <DashboardIcon size={30} /> },
+  { title: "Overview", path: "/", element: <OverviewPage />, isNav: false, icon: <DashboardIcon size={30} /> },
+  { title: "Overview", path: "/overview", element: <OverviewPage />, isNav: true, icon: <DashboardIcon size={30} /> },
   { title: "Block", path: "/btc2krw", element: <BlockPage />, isNav: true, icon: <BlockIcon size={32} /> },
   { title: "BTC to KRW", path: "/block", element: <Btc2KrwPage />, isNav: true, icon: <ExchangeIcon size={40} />, style: { padding: '3px' } },
   { title: "Premium", path: "/premium", element: <PremiumPage />, isNav: true, icon: <PremiumIcon size={28} /> },

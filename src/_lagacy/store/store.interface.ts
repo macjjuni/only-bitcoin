@@ -39,7 +39,7 @@ export interface StoreType {
 
   blockData: BlockProps; // 블록 생성 정보
   updateBlock: (blockData: BlockProps) => void; // 블록 생성 정보 업데이트
-
+w
   marketChartInterval: MarketChartIntervalType; // 대시보드 차트 인터벌
   setMarketChartInterval: (interval: MarketChartIntervalType) => void; // 대시보드 차트 인터벌
 

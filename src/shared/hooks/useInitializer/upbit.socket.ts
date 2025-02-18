@@ -3,6 +3,7 @@ import useStore from "@/shared/stores/store";
 import { isNetwork } from "@/shared/utils/network";
 import LocalStorage from "@/shared/utils/storage";
 import { generateUUID } from "@/shared/utils/string";
+import { formatDate } from "@/shared/utils/date";
 
 // Upbit WebSocket Data
 const UPBIT_URL = import.meta.env.VITE_UPBIT_API_URL || "wss://api.upbit.com/websocket/v1";
@@ -48,21 +49,21 @@ const resetRetry = () => {
 // BTC 가격 업데이트
 const handleBTCUpdate = (price: number, krwUpdateTimestamp: number) => {
 
-  const { setBitcoinKrwPrice, bitcoinPrice } = useStore.getState();
+  const { setBitcoinKrwPrice, bitcoinPrice, setting } = useStore.getState();
 
-  if (bitcoinPrice.isKrwEnabled) {
+  if (setting.currency.includes("KRW")) {
     setBitcoinKrwPrice({ krw: price, krwUpdateTimestamp, isKrwConnected: true });
   }
 };
 
 // USDT 가격 업데이트
-// const handleUSDTUpdate = (price: number, timestamp: number) => {
-//   const { exRate, setExRate, isUsdtRateEnabled } = getState();
-//
-//   if (isUsdtRateEnabled && exRate.basePrice !== price) {
-//     setExRate({ basePrice: price, date: formatDate(timestamp), provider: "Upbit(KRW/USDT)" });
-//   }
-// };
+const handleUSDTUpdate = (price: number, timestamp: number) => {
+  const { setExRate, setting  } = useStore.getState();
+
+  if (setting.isUsdtStandard) {
+    setExRate({ value: price, date: formatDate(timestamp) });
+  }
+};
 
 // WebSocket 이벤트 핸들링
 const socketManager = {
@@ -86,9 +87,9 @@ const socketManager = {
         handleBTCUpdate(data.tp, data.ttms);
       }
 
-      // if (data.cd === UPBIT_USDT_TICKER) {
-      //   handleUSDTUpdate(data.tp, data.ttms);
-      // }
+      if (data.cd === UPBIT_USDT_TICKER) {
+        handleUSDTUpdate(data.tp, data.ttms);
+      }
     };
 
     socket.onerror = (e) => {

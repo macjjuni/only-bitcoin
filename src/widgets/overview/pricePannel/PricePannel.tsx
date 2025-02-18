@@ -9,6 +9,7 @@ const PricePannel = () => {
   // region [Hooks]
 
   const bitcoinPrice = useStore(state => state.bitcoinPrice);
+  const currency = useStore(state => state.setting.currency);
 
   // endregion
 
@@ -18,14 +19,22 @@ const PricePannel = () => {
       <h2 className="bitcoin-price-pannel__signature">₿itcoin</h2>
 
       <div className="bitcoin-price-pannel__price__area">
-        <p className="bitcoin-price-pannel__price__area__krw">
-          <span className="bitcoin-price-pannel__price__area__krw__sign">₩</span>
-          <CountText value={bitcoinPrice.krw} />
-        </p>
-        <p className="bitcoin-price-pannel__price__area__usd">
-          <span className="bitcoin-price-pannel__price__area__usd__sign">$</span>
-          <CountText value={bitcoinPrice.usd} />
-        </p>
+        {
+          currency.includes("KRW") &&
+          (
+            <p className="bitcoin-price-pannel__price__area__krw">
+              <span className="bitcoin-price-pannel__price__area__krw__sign">₩</span>
+              <CountText value={bitcoinPrice.krw} />
+            </p>
+          )
+        }
+        {
+          currency.includes("USD") &&
+          <p className="bitcoin-price-pannel__price__area__usd">
+            <span className="bitcoin-price-pannel__price__area__usd__sign">$</span>
+            <CountText value={bitcoinPrice.usd} />
+          </p>
+        }
       </div>
     </div>
   );
