@@ -74,7 +74,7 @@ const useStore = create<StoreType>()(
 
       // region [블록 데이터]
 
-      blockData: [{ height: 0, timestamp: 0, size: 0, poolName: '-'}],
+      blockData: [{ id: '', height: 0, timestamp: 0, size: 0, poolName: "-" }],
       setBlockData: (blockData) => set(() => ({ blockData: [...blockData] })),
 
       // endregion
@@ -83,9 +83,9 @@ const useStore = create<StoreType>()(
       // region [즐겨찾기]
 
       setting: {
-        initialPath: "/",
-        currency: 'KRW/USD',
-        isUsdtStandard: false,
+        initialPath: "/overview",
+        currency: "KRW/USD",
+        isUsdtStandard: false
       },
       setInitialPath: (path) => set((state) => ({
         setting: { ...state.setting, initialPath: path }
@@ -95,7 +95,7 @@ const useStore = create<StoreType>()(
       })),
       setUsdtStandard: (isUsdtStandard) => set((state) => ({
         setting: { ...state.setting, isUsdtStandard }
-      })),
+      }))
 
       // endregion
 

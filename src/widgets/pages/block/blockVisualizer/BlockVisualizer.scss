@@ -1,0 +1,82 @@
+
+
+.block-visualizer__area {
+    $area-top-padding-size: $spacing-8;
+    $left-area-width: 88px;
+
+    .block-visualizer__area__top {
+        position: relative;
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        flex-wrap: nowrap;
+        gap: 24px;
+        width: calc(100% + (#{$area-top-padding-size} * 2) + #{$left-area-width});
+        padding: $spacing-36 $spacing-12 $spacing-36 $spacing-12;
+        margin: 0 -#{$area-top-padding-size} 0 -#{$left-area-width};
+        overflow: auto;
+
+        scrollbar-width: none;
+        &::-webkit-scrollbar { display: none; }
+
+        $block-size: 160px;
+
+        .block__square__area {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 4px;
+            min-width: $block-size;
+            max-width: $block-size;
+            min-height: $block-size;
+            max-height: $block-size;
+            padding: $spacing-8;
+            border: 1px solid #fff;
+            border-radius: 3px;
+            background-color: #171717;
+
+            @include font-body;
+
+            &.unmined-block {
+                margin-right: $spacing-24;
+                .block__square__area__height {
+                    justify-content: flex-start;
+                }
+
+                &:after {
+                    content: '';
+                    position: absolute;
+                    top: 50%; left: calc(100% + 24px);
+                    transform: translateY(-50%);
+                    width: 1px;
+                    height: 120%;
+                    border-left: 1px dashed #fff;
+                }
+            }
+
+            .block__square__area__height, .block__square__area__size {
+                font-family: $number-font-family;
+                font-weight: bold;
+            }
+
+            .block__square__area__height, .block__square__area__size, .block__square__area__pool-name, .block__square__area__date {
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                gap: 6px;
+                font-weight: bold;
+            }
+            .block__square__area__link {
+                position: absolute;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                bottom: 10px; right: 10px;
+                width: auto;
+            }
+
+        }
+
+    }
+}

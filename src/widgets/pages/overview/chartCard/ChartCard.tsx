@@ -2,15 +2,16 @@ import React, { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef }
 import { CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Tooltip } from "chart.js";
 import { Line } from "react-chartjs-2";
 import { KButton } from "kku-ui";
-import HorizontalCard from "@/widgets/overview/card/horizontalCard/HorizontalCard";
-import { ChartJsDataType, MarketChartIntervalTypeList } from "@/widgets/overview/chartCard/ChartCard.interface";
+
+import { ChartJsDataType, MarketChartIntervalTypeList } from "@/widgets/pages/overview/chartCard/ChartCard.interface";
 import { btcColor } from "@/shared/constants/color";
 import { BitcoinIcon, TriangleDownIcon, TriangleUpIcon } from "@/shared/icons";
-import { initializeCoingeckoMarketChart } from "@/widgets/overview/chartCard/ChartCard.api";
+import { initializeCoingeckoMarketChart } from "@/widgets/pages/overview/chartCard/ChartCard.api";
 import { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import { comma } from "@/shared/utils/string";
 import useStore from "@/shared/stores/store";
 import "./ChartCard.scss";
+import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
 
 
 // Chart.js 컴포넌트 등록

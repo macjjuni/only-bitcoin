@@ -1,5 +1,5 @@
 import { memo, useMemo } from "react";
-import HorizontalCard from "@/widgets/overview/card/horizontalCard/HorizontalCard";
+import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
 import { calcPremiumPercent } from "@/shared/utils/common";
 import { comma } from "@/shared/utils/string";
 import useStore from "@/shared/stores/store";

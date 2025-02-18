@@ -1,12 +1,12 @@
 import { useMemo } from "react";
 import { KButton, KSelect, KSwitch } from "kku-ui";
-import { FormRow } from "@/widgets/settings/formRow/FormRow";
 import { TetherIcon, StarIcon, CurrencyIcon } from "@/shared/icons";
+import { FormRow } from "@/widgets";
 import { btcColor } from "@/shared/constants/color";
 import router from "@/app/router";
-import "./SettingsPage.scss";
 import useStore from "@/shared/stores/store";
 import { currencyOptions } from "@/shared/constants/setting";
+import "./SettingsPage.scss";
 
 
 export default function SettingsPage() {

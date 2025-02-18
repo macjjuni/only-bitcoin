@@ -1,11 +1,11 @@
 import { CSSProperties, memo, useMemo } from "react";
 import { useLottie } from "lottie-react";
-import HorizontalCard from "@/widgets/overview/card/horizontalCard/HorizontalCard";
+import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
 import useStore from "@/shared/stores/store";
 import { comma } from "@/shared/utils/string";
-import "./BlockCard.scss";
 import blockLottieJson from "@/shared/assets/lottie/block.json";
 import { calcPercentage, getNextHalvingData } from "@/shared/utils/common";
+import "./BlockCard.scss";
 
 
 const barBallHalfWidth = "14px" as const;
