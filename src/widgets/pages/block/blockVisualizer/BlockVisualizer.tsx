@@ -1,4 +1,5 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState, UIEvent } from "react";
+import { useLottie } from "lottie-react";
 import { KIcon } from "kku-ui";
 import useStore from "@/shared/stores/store";
 import { calcCurrentDateDifference } from "@/shared/utils/date";
@@ -8,23 +9,25 @@ import "./BlockVisualizer.scss";
 
 
 const BLOCK_SEARCH_URL = "https://mempool.space/ko/block/";
-
+const VERTICAL_LINE_LEFT = 96;
 
 const BlockVisualizer = () => {
 
   // region [Hooks]
 
   const listRef = useRef<HTMLDivElement>(null);
+  const verticalLineRef = useRef<HTMLDivElement>(null);
+
   const timeoutRef = useRef<number | null>(null);
+
   const [renderTrigger, setRenderTrigger] = useState<number>(0);
   const blockData = useStore(state => state.blockData);
-  const setBlockData = useStore(state => state.setBlockData);
 
   // endregion
 
 
   // region [Styles]
-  // const
+
 
   // endregion
 
@@ -32,15 +35,11 @@ const BlockVisualizer = () => {
   // region [Privates]
 
   const initializeListClass = useCallback(() => {
-    listRef.current?.classList.remove('add-block');
+    listRef.current?.classList.remove("add-block");
     setTimeout(() => {
-    listRef.current?.classList.add('add-block');
+      listRef.current?.classList.add("add-block");
     }, 0);
   }, []);
-
-  const test = () => {
-    setBlockData([{id: '123', height: 10000000, size: 1000000, poolName:'test', timestamp: Date.now()},...blockData]);
-  }
 
   const convertMinutes = useCallback((minutes: number) => {
     const hours = Math.floor(minutes / 60); // 시간 계산
@@ -53,6 +52,16 @@ const BlockVisualizer = () => {
     setInterval(() => {
       setRenderTrigger((prev) => prev + 1);
     }, 5 * 1000); // 3초 (60,000ms)
+  }, []);
+
+  // endregion
+
+
+  // region [Events]
+
+  const onScrollTopArea = useCallback((e: UIEvent<HTMLDivElement>) => {
+    const { scrollLeft } = e.currentTarget; // 가로 스크롤 위치
+    verticalLineRef.current?.style.setProperty("left", `${VERTICAL_LINE_LEFT - scrollLeft}px`);
   }, []);
 
   // endregion
@@ -81,9 +90,9 @@ const BlockVisualizer = () => {
             {block.poolName}</div>
           <div className="block__square__area__date">
             <KIcon icon="confirm" color="#fff" size={18} />
-            { diffNowMin === 0 && "조금 전"}
-            { diffNowMin !== 0 && diffNowMin < 60 && `${diffNowMin}분 전`}
-            { diffNowMin !== 0 && diffNowMin >= 60 && `${convertMinutes(diffNowMin)} 전`}
+            {diffNowMin === 0 && "조금 전"}
+            {diffNowMin !== 0 && diffNowMin < 60 && `${diffNowMin}분 전`}
+            {diffNowMin !== 0 && diffNowMin >= 60 && `${convertMinutes(diffNowMin)} 전`}
           </div>
           <a className="block__square__area__link" href={BLOCK_SEARCH_URL + block.id} target="_blank" rel="noreferrer">
             <KIcon icon="open" color="#fff" />
@@ -116,17 +125,11 @@ const BlockVisualizer = () => {
 
   return (
     <div className="block-visualizer__area">
-      <div className="vertical-line" />
-      <div ref={listRef} className="block-visualizer__area__top">
-        <div className="block__square__area unmined-block">
-          <div className="block__square__area__height">
-            <KIcon icon="stack" color="#fff" size={18} />
-            {blockData[0].height + 1}
-          </div>
-        </div>
+      <div ref={verticalLineRef} className="vertical-line" />
+      <div ref={listRef} className="block-visualizer__area__top" onScroll={onScrollTopArea}>
+        <div className="block__square__area unmined-block" />
         {BlockSquareList}
       </div>
-      <button type="button" onClick={test} style={{color: '#fff'}}>TEST</button>
     </div>
   );
 };

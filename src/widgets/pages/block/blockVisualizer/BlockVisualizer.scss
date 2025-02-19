@@ -7,10 +7,10 @@ $left-area-width: 88px;
 
     .vertical-line {
         position: absolute;
-        top: 0; left: 98px;
-        height: 208px;
+        top: 12px; left: 96px;
+        height: 186px;
         width: 1px;
-        border-right: 1px dashed #fff;
+        border: 2px dashed #fff;
     }
 
     .block-visualizer__area__top {
@@ -25,16 +25,10 @@ $left-area-width: 88px;
         margin: 0 -#{$area-top-padding-size} 0 -#{$left-area-width};
         overflow: auto;
         will-change: margin;
-
-        &.add-block {
-            animation: slide-card 1.6s ease-in-out forwards 0.3s;
-        }
-
-
-
-
         scrollbar-width: none;
+
         &::-webkit-scrollbar { display: none; }
+        &.add-block { animation: slide-card 1.6s ease-in-out forwards 0.3s; }
 
         $block-size: 160px;
 
@@ -49,17 +43,16 @@ $left-area-width: 88px;
             min-height: $block-size;
             max-height: $block-size;
             padding: $spacing-8;
-            border: 1px solid #fff;
+            border: 1px solid $border-color;
             border-radius: 3px;
             background-color: #171717;
 
             @include font-body;
 
             &.unmined-block {
+                position: relative;
                 margin-right: $spacing-8;
-                .block__square__area__height {
-                    justify-content: flex-start;
-                }
+                animation: skeleton-loading 1.2s ease-in-out infinite alternate;
             }
 
             .block__square__area__height, .block__square__area__size {
@@ -96,4 +89,9 @@ $left-area-width: 88px;
         width: calc(100% + (#{$area-top-padding-size} * 2) + #{$left-area-width});
         margin: 0 -#{$area-top-padding-size} 0 -#{$left-area-width};
     }
+}
+
+@keyframes skeleton-loading {
+    0% { background-color: #2a2a2a; }
+    100% { background-color: #3a3a3a; }
 }

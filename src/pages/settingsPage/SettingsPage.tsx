@@ -32,7 +32,7 @@ export default function SettingsPage() {
   // region [memo]
 
   const favoriteRouteOptions = useMemo(() => {
-    return router.navigationItems.map(route => ({ title: `${route.title} 페이지`, value: route.path }));
+    return router.favoriteNavigationList.map(route => ({ title: `${route.title} 페이지`, value: route.path }));
   }, []);
 
   // endregion
