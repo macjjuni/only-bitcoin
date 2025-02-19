@@ -51,3 +51,7 @@ export const calcPercentage = (nextHalvingHeight: number | undefined, current: n
   const remain = current % blockDiff;
   return Math.round((remain / blockDiff) * 100 * 100) / 100; // 소수 둘 째 자리까지 남김
 };
+
+export function deepEqual(obj1: object, obj2: object): boolean {
+  return JSON.stringify(obj1, Object.keys(obj1).sort()) === JSON.stringify(obj2, Object.keys(obj2).sort());
+}

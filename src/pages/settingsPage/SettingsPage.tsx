@@ -1,6 +1,5 @@
 import { useMemo } from "react";
-import { KButton, KSelect, KSwitch } from "kku-ui";
-import { TetherIcon, StarIcon, CurrencyIcon } from "@/shared/icons";
+import { KButton, KIcon, KSelect, KSwitch } from "kku-ui";
 import { FormRow } from "@/widgets";
 import { btcColor } from "@/shared/constants/color";
 import router from "@/app/router";
@@ -43,13 +42,13 @@ export default function SettingsPage() {
     <div className="settings-page__area">
 
       <div className="settings-page__area__form__area">
-        <FormRow icon={<StarIcon color={btcColor} />} label="시작 페이지">
+        <FormRow icon={<KIcon icon="star" color={btcColor} />} label="시작 페이지">
           <KSelect value={initialPath} width="176px" onChange={(path) => {
             setInitialPath(path);
           }} items={favoriteRouteOptions} />
         </FormRow>
 
-        <FormRow icon={<CurrencyIcon size={24} color="#c2c2c2" />} label="통화 단위">
+        <FormRow icon={<KIcon icon="currency" color="#c2c2c2" size={24} />} label="통화 단위">
           <div className="settings-page__area__currency__button-group">
             {
               currencyOptions.map(item => (
@@ -61,7 +60,7 @@ export default function SettingsPage() {
           </div>
         </FormRow>
 
-        <FormRow icon={<TetherIcon size={24} />} label="USDT 기준 환율 적용">
+        <FormRow icon={<KIcon icon="tether" size={24} />} label="USDT 기준 환율 적용">
           <KSwitch value={isUsdtStandard} onChange={(e) => {
             setUsdtStandard(e);}} />
         </FormRow>

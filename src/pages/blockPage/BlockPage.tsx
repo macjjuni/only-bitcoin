@@ -1,5 +1,6 @@
 import { BlockExplorer, BlockVisualizer } from "@/widgets";
 import "./BlockPage.scss";
+import TxFeeCard from "@/widgets/pages/block/txFeeCard/TxFeeCard";
 
 export default function BlockPage() {
 
@@ -11,6 +12,7 @@ export default function BlockPage() {
     <section className="block-page__area">
       <BlockVisualizer />
       <BlockExplorer />
+      <TxFeeCard />
     </section>
   );
 }

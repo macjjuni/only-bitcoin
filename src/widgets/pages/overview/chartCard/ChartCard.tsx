@@ -1,11 +1,10 @@
 import React, { memo, useCallback, useEffect, useLayoutEffect, useMemo, useRef } from "react";
 import { CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Tooltip } from "chart.js";
 import { Line } from "react-chartjs-2";
-import { KButton } from "kku-ui";
+import { KButton, KIcon } from "kku-ui";
 
 import { ChartJsDataType, MarketChartIntervalTypeList } from "@/widgets/pages/overview/chartCard/ChartCard.interface";
 import { btcColor } from "@/shared/constants/color";
-import { BitcoinIcon, TriangleDownIcon, TriangleUpIcon } from "@/shared/icons";
 import { initializeCoingeckoMarketChart } from "@/widgets/pages/overview/chartCard/ChartCard.api";
 import { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import { comma } from "@/shared/utils/string";
@@ -158,7 +157,7 @@ const ChartCard = () => {
 
   const UpdownIcon = useMemo(() => (
 
-    percentage > 0 ? <TriangleUpIcon size={8} /> : <TriangleDownIcon size={8} />
+    percentage > 0 ? <KIcon icon="triangleUp" size={8} /> : <KIcon icon="triangleDown" size={8} />
   ), [percentage]);
 
   // endregion
@@ -172,7 +171,7 @@ const ChartCard = () => {
         <div className="chart-card__top__fist">
 
           <div className="chart-card__top__fist__logo">
-            <BitcoinIcon size={30} />
+            <KIcon icon="bitcoin" color="#fff" size={30} />
             <p className="chart-card__top__wrapper__text__area">
               <span className="chart-card__top__wrapper__text__area--top">Bitcoin</span>
               <span className="chart-card__top__wrapper__text__area--bottom">BTC</span>

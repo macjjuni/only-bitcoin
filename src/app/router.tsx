@@ -2,7 +2,6 @@ import { lazy } from "react";
 import { createBrowserRouter } from "react-router-dom";
 import Client from "@/app/Client";
 import withSuspense from "@/widgets/hoc/withSuspence";
-import {DashboardIcon, ExchangeIcon, BlockIcon, PremiumIcon, GearIcon} from "../shared/icons";
 
 
 const OverviewPage = withSuspense(lazy(() => import("@/pages/overviewPage/OverviewPage")));
@@ -13,12 +12,12 @@ const SettingsPage = withSuspense(lazy(() => import("@/pages/settingsPage/Settin
 
 
 const clientRoutes = [
-  { title: "Overview", path: "/", element: <OverviewPage />, isNav: false, icon: <DashboardIcon size={30} /> },
-  { title: "Overview", path: "/overview", element: <OverviewPage />, isNav: true, icon: <DashboardIcon size={30} /> },
-  { title: "Block", path: "/btc2krw", element: <BlockPage />, isNav: true, icon: <BlockIcon size={32} /> },
-  { title: "BTC to KRW", path: "/block", element: <Btc2KrwPage />, isNav: true, icon: <ExchangeIcon size={40} />, style: { padding: '3px' } },
-  { title: "Premium", path: "/premium", element: <PremiumPage />, isNav: true, icon: <PremiumIcon size={28} /> },
-  { title: "Settings", path: "/settings", element: <SettingsPage />, isNav: true, icon: <GearIcon size={30} /> },
+  { title: "Overview", path: "/", element: <OverviewPage />, isNav: false, icon: { name: 'dashboard', size: 30 } },
+  { title: "Overview", path: "/overview", element: <OverviewPage />, isNav: true, icon: { name: 'dashboard', size: 30 } },
+  { title: "Block", path: "/btc2krw", element: <BlockPage />, isNav: true, icon: { name: 'block', size: 32 }},
+  { title: "BTC to KRW", path: "/block", element: <Btc2KrwPage />, isNav: true, icon: { name: 'exchange', size: 40 }, style: { padding: '3px' } },
+  { title: "Premium", path: "/premium", element: <PremiumPage />, isNav: true, icon: { name: 'premium', size: 28 }},
+  { title: "Settings", path: "/settings", element: <SettingsPage />, isNav: true, icon: { name: 'setting', size: 30 } },
   { title: "404 - Not Found", path: "/*", element: <>error</>, isNav: false, icon: null, }
 ];
 

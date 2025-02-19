@@ -1,6 +1,8 @@
 import { memo, useCallback, useMemo, useState } from "react";
-import { KTextField } from "kku-ui";
-import { DetailIcon } from "@/shared/icons";
+import { KIcon, KTextField } from "kku-ui";
+import "./BlockExplorer.scss";
+import { clipboardUtil } from "kku-util";
+
 
 const MEMPOOL_TX_SEARCH_URL = "https://mempool.space/ko/tx/";
 
@@ -14,14 +16,16 @@ const BlockExplorer = () => {
   // endregion
 
 
-  // region [Hooks]
-
-  const onChangeTxInput = useCallback(setTxValue, []);
-
-  // endregion
-
-
   // region [Privates]
+
+  const clearInput = useCallback(() => {
+    setTxValue('');
+  }, []);
+
+  const pasteToInput = useCallback(async () => {
+    const readText = await clipboardUtil.pasteFromClipboard();
+    setTxValue(readText);
+  }, []);
 
   const onRouteMempool = useCallback(() => {
 
@@ -35,12 +39,26 @@ const BlockExplorer = () => {
   // endregion
 
 
+  // region [Events]
+
+  const onChangeTxInput = useCallback(setTxValue, []);
+
+  const onClickPasteIcon = useCallback(() => {
+    pasteToInput().then();
+  }, [txValue]);
+
+  // endregion
+
+
   // region [Template]
 
   const SearchRightAction = useMemo(() => (
-    <button className="block-search-box__area__button" type="button" onClick={onRouteMempool}>
-      <DetailIcon color="#fff" />
-    </button>
+    <div className="search-right__area">
+      {txValue.length !== 0 && (<KIcon icon="close" color="#fff" size={18} onClick={clearInput} />)}
+      <KIcon icon="paste" color="#fff" onClick={onClickPasteIcon} />
+      <KIcon icon="search" color="#fff" onClick={onRouteMempool} />
+    </div>
+
   ), [onRouteMempool]);
 
   // endregion

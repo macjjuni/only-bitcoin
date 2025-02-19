@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { NavLink } from "react-router-dom";
+import { KIcon } from "kku-ui";
 import router from "@/app/router";
 import "./BottomNavigation.scss";
 
@@ -16,7 +17,7 @@ const BottomNavigation = () => {
         {router.navigationItems.map(({ path, icon, style }) => (
           <li key={path} className="bottom-navigation__list__item">
             <NavLink className="bottom-navigation__list__item__link" to={path} style={style || {}}>
-              {icon}
+              <KIcon icon={icon!.name} color="currentColor" size={icon?.size} />
             </NavLink>
             <span className="bottom-navigation__list__item__focus-bg"/>
           </li>
@@ -27,3 +28,4 @@ const BottomNavigation = () => {
 };
 
 export default memo(BottomNavigation);
+

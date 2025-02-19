@@ -4652,19 +4652,19 @@ jws@^4.0.0:
     jwa "^2.0.0"
     safe-buffer "^5.0.1"
 
-kku-ui@^0.0.501:
-  version "0.0.501"
-  resolved "https://registry.yarnpkg.com/kku-ui/-/kku-ui-0.0.501.tgz#8aedf49cc38a6c26cdcf5189076214ba9dd7938a"
-  integrity sha512-/RhYqO1kKZ/4mrXepTmhOEQJdOum5TabB0lQ2Co+cwjUIpWK85rpIamezezZzCCYDB1IrKkKlBkLJXRAb7lifA==
+kku-ui@^0.0.503:
+  version "0.0.503"
+  resolved "https://registry.yarnpkg.com/kku-ui/-/kku-ui-0.0.503.tgz#53321c44f6ffb85896903df19f7ff24e3b310284"
+  integrity sha512-URwEmamSVCftZkdBOVSD5FoAsJNbSzQclgv+IZUSSGQe8SXVY/OMsvytfWNWazzNbooW36OYXCZm3NeX7HxYWw==
   dependencies:
     lodash-es "^4.17.21"
     react "^19.0.0"
     react-dom "^19.0.0"
 
-kku-util@^0.0.155:
-  version "0.0.155"
-  resolved "https://registry.npmjs.org/kku-util/-/kku-util-0.0.155.tgz"
-  integrity sha512-cbmOXaqZrtw3YnkHNBO2FDhPp0mPexrMN+4zsSrlqNbYx+yYRJgI+V/THMk4ZfzALtxT3yt9V20HfIi4eXVybw==
+kku-util@^0.0.156:
+  version "0.0.156"
+  resolved "https://registry.yarnpkg.com/kku-util/-/kku-util-0.0.156.tgz#28b21fc3f16a455e18914b7e58257fa64287f9f9"
+  integrity sha512-H+HxC007jLEkdTTu4g2MtkX5uEzCFdkQUVXctlEtuZIspdPVnqPQzwcHEupGAGsIqZHYJfVUx0ov0txvY60FEQ==
   dependencies:
     dayjs "^1.11.13"
     lodash-es "^4.17.21"

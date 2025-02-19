@@ -1,8 +1,8 @@
 import { toast } from "react-toastify";
 import useStore from "@/shared/stores/store";
-import { calcPercentage, getNextHalvingData } from "@/shared/utils/common";
+import { calcPercentage, deepEqual, getNextHalvingData } from "@/shared/utils/common";
 import { MemPoolBlockTypes } from "@/shared/types/block.interface";
-import { BlockTypes } from "@/shared/stores/store.interface";
+import { BlockTypes, FeesTypes } from "@/shared/stores/store.interface";
 
 const MEMPOOL_WS_URL = "wss://mempool.space/api/v1/ws";
 const MAX_RETRIES = 3;
@@ -33,14 +33,27 @@ const handleMempoolBlocks = (blocks: MemPoolBlockTypes[]) => {
 };
 
 // 새롭게 채굴 된 블록 업데이트
-const handleMempoolBlock = (blocks: MemPoolBlockTypes) => {
+const handleMempoolBlock = (block: MemPoolBlockTypes) => {
 
   const { blockData, setBlockData } = useStore.getState();
 
-  const { id, height, size, timestamp, extras} = blocks;
+  const isContained = blockData.filter(blockItem => blockItem.height === block.height).length > 0;
+
+  // 이미 블록 데이터에 블록이 있는 경우
+  if (isContained) { return; }
+
+  const { id, height, size, timestamp, extras} = block;
   const sanitizedBlock: BlockTypes = { id, height, size, timestamp, poolName: extras.pool.name }
 
   setBlockData([sanitizedBlock, ...blockData]);
+};
+
+const handleMempoolFees = (resFees: FeesTypes) => {
+
+  const { fees, setFees } = useStore.getState();
+  if (!deepEqual(fees, resFees)) {
+    setFees(resFees);
+  }
 };
 
 
@@ -59,7 +72,7 @@ const socketManager = {
       console.log("✅ Mempool 소켓 연결 초기화");
 
       // 데이터 구독 요청
-      socket?.send(JSON.stringify({ action: "want", data: ["blocks"] }));
+      socket?.send(JSON.stringify({ action: "want", data: ["blocks", "stats"] }));
     };
 
     socket.onmessage = ({ data }) => {
@@ -71,6 +84,10 @@ const socketManager = {
       }
       if (mempoolData?.block) {
         handleMempoolBlock(mempoolData.block);
+      }
+
+      if (mempoolData?.fees) {
+        handleMempoolFees(mempoolData?.fees)
       }
     };
 

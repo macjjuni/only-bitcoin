@@ -74,8 +74,10 @@ const useStore = create<StoreType>()(
 
       // region [블록 데이터]
 
-      blockData: [{ id: '', height: 0, timestamp: 0, size: 0, poolName: "-" }],
+      blockData: [{ id: "", height: 0, timestamp: 0, size: 0, poolName: "-" }],
       setBlockData: (blockData) => set(() => ({ blockData: [...blockData] })),
+      fees: { economyFee: 0, fastestFee: 0, halfHourFee: 0, hourFee: 0, minimumFee: 0 },
+      setFees: (fees) => set(() => ({ fees })),
 
       // endregion
 

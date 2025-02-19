@@ -24,13 +24,11 @@ const resetRetry = () => {
 
 // BTC 가격 업데이트
 const handleBTCUpdate = (price: number, usdUpdateTimestamp: number) => {
-  const { setBitcoinUsdPrice, bitcoinPrice } = useStore.getState();
+  const { setBitcoinUsdPrice } = useStore.getState();
 
   // setTitle(comma(price.toFixed(0)));
 
-  if (bitcoinPrice.isUsdEnabled) {
-    setBitcoinUsdPrice({ usd: price, usdUpdateTimestamp, isUsdConnected: true });
-  }
+  setBitcoinUsdPrice({ usd: price, usdUpdateTimestamp, isUsdConnected: true });
 };
 
 // WebSocket 이벤트 핸들링

@@ -1,5 +1,3 @@
-
-
 export interface StoreType {
 
   // region [대시보드 차트]
@@ -13,8 +11,8 @@ export interface StoreType {
 
   // region [대시보드 차트]
 
-  marketChartInterval: MarketChartIntervalType
-  setMarketChartInterval: (interval: MarketChartIntervalType) => void
+  marketChartInterval: MarketChartIntervalType;
+  setMarketChartInterval: (interval: MarketChartIntervalType) => void;
   marketChartData: BtcChart;
   setMarketChartData: (interval: MarketChartIntervalType, data: ChartData) => void;
 
@@ -49,6 +47,8 @@ export interface StoreType {
 
   blockData: BlockTypes[];
   setBlockData: (blocks: BlockTypes[]) => void;
+  fees: FeesTypes;
+  setFees: (fees: FeesTypes) => void;
 
   // endregion
 
@@ -83,7 +83,6 @@ export interface StoreType {
   // isUsdtRateEnabled: boolean;
   // setUsdtRateEnabled: (isUsdtRateEnabled: boolean) => void;
 }
-
 
 
 export interface BitcoinPriceTypes extends BitcoinPriceKRWTypes, BitcoinPriceUSDTypes {}
@@ -165,4 +164,12 @@ export interface SettingTypes {
   initialPath: string;
   currency: CurrencyTypes;
   isUsdtStandard: boolean;
+}
+
+export interface FeesTypes {
+  economyFee: number;
+  fastestFee: number;
+  halfHourFee: number;
+  hourFee: number;
+  minimumFee: number;
 }

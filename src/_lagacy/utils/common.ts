@@ -1,4 +1,5 @@
-import { ICurrency } from "@/api/dominance";
+import { ICurrency } from "@/shared/hooks/useInitializer/dominance.api";
+
 
 const title = import.meta.env.VITE_TITLE;
 export const isDev = import.meta.env.MODE === "development";
