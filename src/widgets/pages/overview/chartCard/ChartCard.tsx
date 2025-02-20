@@ -9,8 +9,8 @@ import { initializeCoingeckoMarketChart } from "@/widgets/pages/overview/chartCa
 import { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import { comma } from "@/shared/utils/string";
 import useStore from "@/shared/stores/store";
-import "./ChartCard.scss";
 import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
+import "./ChartCard.scss";
 
 
 // Chart.js 컴포넌트 등록
@@ -162,7 +162,6 @@ const ChartCard = () => {
 
   // endregion
 
-
   return (
     <HorizontalCard className="chart-card">
 
@@ -189,7 +188,7 @@ const ChartCard = () => {
 
           <span className="chart-card__top__second__rate">
             {UpdownIcon}
-            {Math.abs(percentage)}%
+            {percentage}%
           </span>
         </div>
       </div>

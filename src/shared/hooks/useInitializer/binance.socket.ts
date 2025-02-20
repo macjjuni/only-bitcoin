@@ -1,6 +1,7 @@
 import { toast } from "react-toastify";
 import { isNetwork } from "@/shared/utils/network";
 import useStore from "@/shared/stores/store";
+import { floorToDecimal } from "@/shared/utils/number";
 
 // Binance WebSocket Data
 const BINANCE_URL = `wss://stream.binance.com:9443/ws/btcusdt@ticker`;
@@ -23,12 +24,12 @@ const resetRetry = () => {
 };
 
 // BTC 가격 업데이트
-const handleBTCUpdate = (price: number, usdUpdateTimestamp: number) => {
+const handleBTCUpdate = (price: number, usdUpdateTimestamp: number, usdChange24h: string) => {
   const { setBitcoinUsdPrice } = useStore.getState();
 
   // setTitle(comma(price.toFixed(0)));
-
-  setBitcoinUsdPrice({ usd: price, usdUpdateTimestamp, isUsdConnected: true });
+  const usdChange24hStr = floorToDecimal(Number(usdChange24h), 2).toString();
+  setBitcoinUsdPrice({ usd: price, usdChange24h: usdChange24hStr, usdUpdateTimestamp, isUsdConnected: true });
 };
 
 // WebSocket 이벤트 핸들링
@@ -45,7 +46,7 @@ const socketManager = {
 
     socket.onmessage = ({ data }) => {
       const json = JSON.parse(data);
-      handleBTCUpdate(Number(json.c), json.C);
+      handleBTCUpdate(Number(json.c), json.C, json.P);
     };
 
     socket.onerror = (e) => {

@@ -17,7 +17,7 @@ const BottomNavigation = () => {
         {router.navigationRouteList.map(({ path, icon, style }) => (
           <li key={path} className="bottom-navigation__list__item">
             <NavLink className="bottom-navigation__list__item__link" to={path} style={style || {}}>
-              <KIcon icon={icon!.name} color="currentColor" size={icon?.size} />
+              <KIcon icon={icon.name} color="currentColor" size={icon.size} />
             </NavLink>
             <span className="bottom-navigation__list__item__focus-bg"/>
           </li>

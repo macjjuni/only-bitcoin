@@ -1,6 +1,6 @@
 import { memo, useMemo } from "react";
 import CountUp from "react-countup";
-import "./CountText.scss";
+
 
 interface CountTextTypes {
   value: number;

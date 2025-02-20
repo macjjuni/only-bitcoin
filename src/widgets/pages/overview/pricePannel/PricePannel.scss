@@ -1,46 +1,68 @@
 
-
-
-.bitcoin-price-pannel {
+.price-pannel {
   display: flex;
   flex-direction: column;
   gap: $spacing-2;
   padding: $spacing-24;
 
-  .bitcoin-price-pannel__signature {
+  .price-pannel__signature {
     @include font-heading-lg;
     font-weight: bold;
   }
 
-  .bitcoin-price-pannel__price__area {
+  .price-pannel__price__area {
     display: flex;
     flex-direction: column;
     align-items: flex-start;
     height: 54px;
 
-    .bitcoin-price-pannel__price__area__krw, .bitcoin-price-pannel__price__area__usd {
+    .price-pannel__price__area__krw, .price-pannel__price__area__usd {
       display: flex;
-      justify-content: flex-start;
+      justify-content: space-between;
       align-items: center;
+      width: 100%;
       font-weight: bold;
       white-space: nowrap;
       overflow: hidden;
 
       @include font-sub-title;
       font-family: $number-font-family;
+
+      .price-pannel__price__area__usd__percent, .price-pannel__price__area__krw__percent {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: $spacing-4;
+        font-size: $font-small-size;
+      }
     }
 
-
-    .bitcoin-price-pannel__price__area__krw__sign, .bitcoin-price-pannel__price__area__usd__sign {
-      display: inline-flex;
-      justify-content: flex-start;
+    .price-pannel__price__area__krw__area {
+      display: flex;
+      justify-content: space-between;
       align-items: center;
-      width: 20px;
-    }
-    .bitcoin-price-pannel__price__area__usd__sign {
-      padding-left: 2px;
+
+      .price-pannel__price__area__krw__sign {
+        display: inline-flex;
+        justify-content: flex-start;
+        align-items: center;
+        width: 20px;
+      }
     }
 
+    .price-pannel__price__area__usd__area {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .price-pannel__price__area__usd__sign {
+        display: inline-flex;
+        justify-content: flex-start;
+        align-items: center;
+        width: 20px;
+      }
+    }
+
+    .price-pannel__price__area__usd__sign { padding-left: 2px; }
   }
-
 }

@@ -11,7 +11,7 @@ const TxFeeCard = () => {
   const fees = useStore(state => state.fees);
 
   const feeDataList = useMemo(() => [
-    { label: '최하위', value: fees.economyFee },
+    { label: '최하위 순위', value: fees.economyFee },
     { label: '낮은 우선 순위', value: fees.hourFee },
     { label: '중간 우선 순위', value: fees.halfHourFee },
     { label: '높은 우선 순위', value: fees.fastestFee },

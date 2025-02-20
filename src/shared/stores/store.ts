@@ -7,13 +7,15 @@ const useStore = create<StoreType>()(
   persist(
     (set) => ({
 
-      // region [비트코인 가격 정보]
+      // region [비트코인 실시간 가격]
 
       bitcoinPrice: {
         krw: 0,
+        krwChange24h: '0',
         krwUpdateTimestamp: 0,
         isKrwConnected: false,
         usd: 0,
+        usdChange24h: '0',
         usdUpdateTimestamp: 0,
         isUsdConnected: false
       },

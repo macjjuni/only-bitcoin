@@ -14,11 +14,11 @@ const SettingsPage = withSuspense(lazy(() => import("@/pages/settingsPage/Settin
 const clientRoutes = [
   { title: "Overview", path: "/", element: <OverviewPage />, isNav: false, isFavorite: false, icon: { name: 'dashboard', size: 30 } },
   { title: "Overview", path: "/overview", element: <OverviewPage />, isNav: true, isFavorite: true, icon: { name: 'dashboard', size: 30 } },
-  { title: "Blocks", path: "/btc2krw", element: <BlocksPage />, isNav: true, isFavorite: true, icon: { name: 'block', size: 32 }},
-  { title: "BTC to KRW", path: "/block", element: <Btc2KrwPage />, isNav: true, isFavorite: true,icon: { name: 'exchange', size: 40 }, style: { padding: '3px' } },
+  { title: "Blocks", path: "/blocks", element: <BlocksPage />, isNav: true, isFavorite: true, icon: { name: 'block', size: 32 }},
+  { title: "Btc2Krw", path: "/btc2krw", element: <Btc2KrwPage />, isNav: true, isFavorite: true,icon: { name: 'exchange', size: 40 }, style: { padding: '3px' } },
   { title: "Premium", path: "/premium", element: <PremiumPage />, isNav: true, isFavorite: true,icon: { name: 'premium', size: 28 }},
   { title: "Settings", path: "/settings", element: <SettingsPage />, isNav: true, isFavorite: false ,icon: { name: 'setting', size: 30 } },
-  { title: "404 - Not Found", path: "/*", element: <>error</>, isNav: false, isFavorite: false, icon: null, }
+  { title: "404 - Not Found", path: "/*", element: <>error</>, isNav: false, isFavorite: false, icon: { name: '', size: 30 }, }
 ];
 
 

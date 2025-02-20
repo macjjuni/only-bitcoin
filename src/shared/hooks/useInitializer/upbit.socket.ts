@@ -4,6 +4,7 @@ import { isNetwork } from "@/shared/utils/network";
 import LocalStorage from "@/shared/utils/storage";
 import { generateUUID } from "@/shared/utils/string";
 import { formatDate } from "@/shared/utils/date";
+import { floorToDecimal } from "@/shared/utils/number";
 
 // Upbit WebSocket Data
 const UPBIT_URL = import.meta.env.VITE_UPBIT_API_URL || "wss://api.upbit.com/websocket/v1";
@@ -47,12 +48,14 @@ const resetRetry = () => {
 };
 
 // BTC 가격 업데이트
-const handleBTCUpdate = (price: number, krwUpdateTimestamp: number) => {
+const handleBTCUpdate = (price: number, krwUpdateTimestamp: number, krwChange24h: number) => {
 
-  const { setBitcoinKrwPrice, bitcoinPrice, setting } = useStore.getState();
+  const { setBitcoinKrwPrice, setting } = useStore.getState();
 
   if (setting.currency.includes("KRW")) {
-    setBitcoinKrwPrice({ krw: price, krwUpdateTimestamp, isKrwConnected: true });
+
+    const krwChange24hStr = floorToDecimal(krwChange24h * 100, 2).toString();
+    setBitcoinKrwPrice({ krw: price, krwChange24h: krwChange24hStr, krwUpdateTimestamp, isKrwConnected: true });
   }
 };
 
@@ -84,7 +87,7 @@ const socketManager = {
       const data = JSON.parse(enc.decode(new Uint8Array(evt.data)));
 
       if (data.cd === UPBIT_BTC_TICKER) {
-        handleBTCUpdate(data.tp, data.ttms);
+        handleBTCUpdate(data.tp, data.ttms, data.scr);
       }
 
       if (data.cd === UPBIT_USDT_TICKER) {

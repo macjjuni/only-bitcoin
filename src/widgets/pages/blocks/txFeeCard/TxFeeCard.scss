@@ -25,6 +25,8 @@
             flex-direction: column;
             gap: 4px;
             justify-content: center;
+            width: 80px;
+            white-space: nowrap;
 
             .tx-fee-card__area__item__text {
                 font-size: $font-small-size;

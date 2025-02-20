@@ -1,6 +1,6 @@
 export interface StoreType {
 
-  // region [대시보드 차트]
+  // region [비트코인 실시간 가격]
 
   bitcoinPrice: BitcoinPriceTypes; // BTC 시세 정보
   setBitcoinKrwPrice: (bitcoinPriceKRW: BitcoinPriceKRWTypes) => void;
@@ -90,6 +90,7 @@ export interface BitcoinPriceTypes extends BitcoinPriceKRWTypes, BitcoinPriceUSD
 
 export interface BitcoinPriceKRWTypes {
   krw: number;
+  krwChange24h: string;
   krwUpdateTimestamp: number;
   isKrwConnected?: boolean; // 웹 소켓 접속 여부(업비트)
 }
@@ -97,6 +98,7 @@ export interface BitcoinPriceKRWTypes {
 
 export interface BitcoinPriceUSDTypes {
   usd: number;
+  usdChange24h: string;
   usdUpdateTimestamp: number;
   isUsdConnected?: boolean; // 웹 소켓 접속 여부(바이낸스)
 }
