@@ -45,6 +45,7 @@ $desktop-layout-content-height: auto !default;
 $desktop-layout-footer-height: 56px !default;
 $desktop-layout-footer-height: 56px !default;
 $mobile-layout-footer-height: 40px !default;
+$mobile-bottom-navigation-height: 80px !default;
 
 $mobile-layout-half-width: calc(((100dvw - (#{$spacing-8} + #{$spacing-8})) / 2));
 

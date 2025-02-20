@@ -10,6 +10,6 @@
 @media screen and (max-width: $mobile-size) {
 
     .only-btc__layout__content {
-        padding: $spacing-8;
+        padding: $spacing-8 $spacing-8  calc(#{$mobile-bottom-navigation-height} + #{$spacing-8}) $spacing-8;
     }
 }
