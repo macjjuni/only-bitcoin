@@ -1,13 +1,13 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import { KIcon, KTextField } from "kku-ui";
-import "./BlockExplorer.scss";
 import { clipboardUtil } from "kku-util";
+import "./BlocksExplorer.scss";
 
 
 const MEMPOOL_TX_SEARCH_URL = "https://mempool.space/ko/tx/";
 
 
-const BlockExplorer = () => {
+const BlocksExplorer = () => {
 
   // region [Hooks]
 
@@ -28,6 +28,8 @@ const BlockExplorer = () => {
   }, []);
 
   const onRouteMempool = useCallback(() => {
+
+    if (txValue.trim() === '') { return; }
 
     const anchorTag = document.createElement("a");
     anchorTag.href = MEMPOOL_TX_SEARCH_URL + txValue;
@@ -72,4 +74,4 @@ const BlockExplorer = () => {
   );
 };
 
-export default memo(BlockExplorer);
+export default memo(BlocksExplorer);

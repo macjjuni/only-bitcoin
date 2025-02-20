@@ -1,0 +1,41 @@
+
+.halving-data-card__area {
+
+    .k-accordion__summary {
+        .k-accordion__summary__container {
+            .k-accordion__summary__text {
+                @include font-body;
+                font-weight: bold;
+            }
+        }
+    }
+    .k-accordion__content {
+        .k-accordion__content__wrapper {
+            overflow: auto;
+        }
+    }
+
+    .halving-data-card__area__list {
+        display: flex;
+        flex-direction: row;
+
+
+        .halving-data-card__area__list__item {
+            display: flex;
+            flex-direction: column;
+            width: auto;
+
+            .halving-no, .halving-date, .halving-height, .halving-reward {
+                width: auto;
+                white-space: nowrap;
+                padding: $spacing-2 $spacing-8;
+                border-bottom: 1px solid $border-color;
+                @include font-body;
+                font-family: $number-font-family;
+
+                &:first-child {font-weight: bold;}
+                &:last-child { border: none; }
+            }
+        }
+    }
+}

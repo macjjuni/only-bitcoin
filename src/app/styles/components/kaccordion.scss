@@ -1,0 +1,14 @@
+#only-bitcoin {
+
+    .k-accordion {
+        border: 1px solid $border-color;
+        background-color: transparent;
+        box-shadow: $card-box-shadow;
+
+        &.k-accordion--close .k-accordion__summary { border-bottom: none; }
+        &.k-accordion--open .k-accordion__summary { border-bottom: 1px solid $border-color; }
+
+        .k-accordion__content { background-color: transparent; }
+        .k-accordion__summary, .k-accordion__content { background-color: $dashboard-card-background-color; }
+    }
+}

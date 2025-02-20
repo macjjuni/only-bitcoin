@@ -4,13 +4,13 @@ import useStore from "@/shared/stores/store";
 import { calcCurrentDateDifference } from "@/shared/utils/date";
 import { bytesToMB } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
-import "./BlockVisualizer.scss";
+import "./BlocksVisualizer.scss";
 
 
 const BLOCK_SEARCH_URL = "https://mempool.space/ko/block/";
 const VERTICAL_LINE_LEFT = 56;
 
-const BlockVisualizer = () => {
+const BlocksVisualizer = () => {
 
   // region [Hooks]
 
@@ -123,9 +123,9 @@ const BlockVisualizer = () => {
   // endregion
 
   return (
-    <div className="block-visualizer__area">
+    <div className="blocks-visualizer__area">
       <div ref={verticalLineRef} className="vertical-line" />
-      <div ref={listRef} className="block-visualizer__area__top" onScroll={onScrollTopArea}>
+      <div ref={listRef} className="blocks-visualizer__area__top" onScroll={onScrollTopArea}>
         <div className="block__square__area unmined-block" />
         {BlockSquareList}
       </div>
@@ -133,4 +133,4 @@ const BlockVisualizer = () => {
   );
 };
 
-export default memo(BlockVisualizer);
+export default memo(BlocksVisualizer);

@@ -14,7 +14,7 @@ const BottomNavigation = () => {
   return (
     <div className="bottom-navigation">
       <ul className="bottom-navigation__list">
-        {router.favoriteNavigationList.map(({ path, icon, style }) => (
+        {router.navigationRouteList.map(({ path, icon, style }) => (
           <li key={path} className="bottom-navigation__list__item">
             <NavLink className="bottom-navigation__list__item__link" to={path} style={style || {}}>
               <KIcon icon={icon!.name} color="currentColor" size={icon?.size} />

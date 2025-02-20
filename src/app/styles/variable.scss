@@ -98,7 +98,6 @@ $error-color: #EE4E4E;
 $success-color: #21ff2a;
 
 $body-background-color: rgba(0, 0, 0, 0.64);
-//$dashboard-card-background-color: rgba(24, 24, 24, 0.88);
 $dashboard-card-background-color: rgba(16, 16, 16, 0.8);
 
 // endregion
@@ -114,5 +113,12 @@ $default-border-radius: 3px;
 // region [Media Screen Size]
 
 $mobile-size: 768px;
+
+// endregion
+
+
+// region [Box Shadows]
+
+$card-box-shadow: 0px 0px 4px 0px rgba(94, 94, 94, 1);
 
 // endregion

@@ -4,7 +4,7 @@ $left-area-width: 88px;
 $block-size: 120px;
 $initial-left: 224px;
 
-.block-visualizer__area {
+.blocks-visualizer__area {
     position: relative;
 
     .vertical-line {
@@ -14,14 +14,14 @@ $initial-left: 224px;
         border-left: 1px dashed #fff;
     }
 
-    .block-visualizer__area__top {
+    .blocks-visualizer__area__top {
         position: relative;
         display: flex;
         justify-content: flex-start;
         align-items: flex-start;
         flex-wrap: nowrap;
         gap: $spacing-24;
-        width: calc(100% + (#{$area-top-padding-size} * 2) + #{$left-area-width});
+        width: calc(100% + (#{$area-top-padding-size} * 2) + #{$left-area-width} + #{$initial-left});
         padding: $spacing-12 $spacing-12 0 $spacing-12;
         margin: 0 -#{$area-top-padding-size} 0 -#{$initial-left};
         overflow: auto;

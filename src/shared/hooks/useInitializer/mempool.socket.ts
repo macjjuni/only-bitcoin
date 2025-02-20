@@ -1,6 +1,6 @@
 import { toast } from "react-toastify";
 import useStore from "@/shared/stores/store";
-import { calcPercentage, deepEqual, getNextHalvingData } from "@/shared/utils/common";
+import { deepEqual } from "@/shared/utils/common";
 import { MemPoolBlockTypes } from "@/shared/types/block.interface";
 import { BlockTypes, FeesTypes } from "@/shared/stores/store.interface";
 

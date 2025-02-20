@@ -1,3 +1,5 @@
+@import "@/app/styles/components/kaccordion";
+
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -46,6 +48,7 @@ button {
     cursor: pointer;
 }
 svg {margin: 0; }
+text { font-family: $number-font-family; }
 
 body {
     margin: 0;
@@ -53,7 +56,7 @@ body {
     color: $default-font-color;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    //background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif'); /*이미지 경로지정*/
+    background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif'); /*이미지 경로지정*/
     background-size: 600px;
     background-position: center 50%;
     background-repeat: no-repeat;
@@ -62,5 +65,10 @@ body {
 }
 
 @media screen and (max-width: $mobile-size) {
-    body { background-size: 420px; }
+    html { scrollbar-width: none; &::-webkit-scrollbar { display: none; }}
+    body {
+        background-size: 420px;
+        background-position: center calc((100dvw / 2) + 108px - ($mobile-bottom-navigation-height / 2));
+    }
 }
+
