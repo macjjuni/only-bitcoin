@@ -1,16 +1,17 @@
 
 $area-top-padding-size: $spacing-8;
 $left-area-width: 88px;
+$block-size: 120px;
+$initial-left: 224px;
 
 .block-visualizer__area {
     position: relative;
 
     .vertical-line {
         position: absolute;
-        top: 12px; left: 96px;
-        height: 186px;
-        width: 1px;
-        border: 2px dashed #fff;
+        top: 8px; left: calc(#{$block-size} - #{$left-area-width} + #{$spacing-24} - 1px);
+        height: calc(#{$block-size} + 8px);
+        border-left: 1px dashed #fff;
     }
 
     .block-visualizer__area__top {
@@ -19,18 +20,16 @@ $left-area-width: 88px;
         justify-content: flex-start;
         align-items: flex-start;
         flex-wrap: nowrap;
-        gap: $spacing-20;
+        gap: $spacing-24;
         width: calc(100% + (#{$area-top-padding-size} * 2) + #{$left-area-width});
-        padding: $spacing-24 $spacing-12 $spacing-24 $spacing-12;
-        margin: 0 -#{$area-top-padding-size} 0 -#{$left-area-width};
+        padding: $spacing-12 $spacing-12 0 $spacing-12;
+        margin: 0 -#{$area-top-padding-size} 0 -#{$initial-left};
         overflow: auto;
         will-change: margin;
         scrollbar-width: none;
 
         &::-webkit-scrollbar { display: none; }
         &.add-block { animation: slide-card 1.6s ease-in-out forwards 0.3s; }
-
-        $block-size: 160px;
 
         .block__square__area {
             position: relative;
@@ -43,15 +42,16 @@ $left-area-width: 88px;
             min-height: $block-size;
             max-height: $block-size;
             padding: $spacing-8;
+            margin-left: -8px;
             border: 1px solid $border-color;
             border-radius: 3px;
             background-color: #171717;
+            font-size: 12px;
 
-            @include font-body;
-
+            &:first-child, &:nth-child(2) { margin: 0; }
+            &:nth-child(2) { animation: fadeIn 1.6s ease-in-out forwards; }
             &.unmined-block {
-                position: relative;
-                margin-right: $spacing-8;
+                border: none;
                 animation: skeleton-loading 1.2s ease-in-out infinite alternate;
             }
 
@@ -83,7 +83,7 @@ $left-area-width: 88px;
 @keyframes slide-card {
     0% {
         width: 200%;
-        margin: 0 -#{$area-top-padding-size} 0 -268px;
+        margin: 0 -#{$area-top-padding-size} 0 -#{$initial-left};
     }
     100% {
         width: calc(100% + (#{$area-top-padding-size} * 2) + #{$left-area-width});
@@ -92,6 +92,11 @@ $left-area-width: 88px;
 }
 
 @keyframes skeleton-loading {
-    0% { background-color: #2a2a2a; }
-    100% { background-color: #3a3a3a; }
+    0% { background-color: #474747; }
+    100% { background-color: #000; }
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0 }
+    100% { opacity: 1 }
 }

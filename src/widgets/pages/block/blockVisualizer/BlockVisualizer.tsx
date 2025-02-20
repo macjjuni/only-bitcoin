@@ -1,5 +1,4 @@
-import { memo, useCallback, useEffect, useMemo, useRef, useState, UIEvent } from "react";
-import { useLottie } from "lottie-react";
+import { memo, UIEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { KIcon } from "kku-ui";
 import useStore from "@/shared/stores/store";
 import { calcCurrentDateDifference } from "@/shared/utils/date";
@@ -9,7 +8,7 @@ import "./BlockVisualizer.scss";
 
 
 const BLOCK_SEARCH_URL = "https://mempool.space/ko/block/";
-const VERTICAL_LINE_LEFT = 96;
+const VERTICAL_LINE_LEFT = 56;
 
 const BlockVisualizer = () => {
 
@@ -78,24 +77,24 @@ const BlockVisualizer = () => {
       return (
         <div className="block__square__area" key={block.height}>
           <div className="block__square__area__height">
-            <KIcon icon="stack" color="#fff" size={18} />
+            <KIcon icon="stack" color="#fff" size={14} />
             {comma(block.height)}
           </div>
           <div className="block__square__area__size">
-            <KIcon icon="data" color="#fff" size={18} />
+            <KIcon icon="data" color="#fff" size={14} />
             {bytesToMB(block.size)}MB
           </div>
           <div className="block__square__area__pool-name">
-            <KIcon icon="miner" color="#fff" size={18} />
+            <KIcon icon="miner" color="#fff" size={14} />
             {block.poolName}</div>
           <div className="block__square__area__date">
-            <KIcon icon="confirm" color="#fff" size={18} />
+            <KIcon icon="confirm" color="#fff" size={14} />
             {diffNowMin === 0 && "조금 전"}
             {diffNowMin !== 0 && diffNowMin < 60 && `${diffNowMin}분 전`}
             {diffNowMin !== 0 && diffNowMin >= 60 && `${convertMinutes(diffNowMin)} 전`}
           </div>
           <a className="block__square__area__link" href={BLOCK_SEARCH_URL + block.id} target="_blank" rel="noreferrer">
-            <KIcon icon="open" color="#fff" />
+            <KIcon icon="open" color="#fff" size={18} />
           </a>
         </div>
       );
