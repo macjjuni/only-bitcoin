@@ -13,5 +13,5 @@ export function bytesToMB(bytes: number, decimal = 2) {
 }
 
 export function isNumber(str: string) {
-  return /^\d+$/.test(str);
+  return /^-?\d+(\.\d*)?$/.test(str); // 소숫점 뒤에 숫자가 없어도 허용
 }

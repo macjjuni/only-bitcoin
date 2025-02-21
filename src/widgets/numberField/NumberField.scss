@@ -7,27 +7,40 @@ $number-field-unit-width: 48px;
     display: flex;
     justify-content: flex-end;
     align-items: center;
+    user-select: none;
 
-    &.number-field--readonly {
-        justify-content: center;
-
-        .number-field__input {
-            text-align: center;
-        }
-    }
+    //&.number-field--readonly {
+    //    justify-content: center;
+    //
+    //    .number-field__input {
+    //        text-align: center;
+    //    }
+    //}
 
     .number-field__input {
         width: 100%;
         padding: $spacing-8 $number-field-unit-width $spacing-8 $number-field-unit-width;
+        margin: 0;
         color: #fff;
         outline: 0;
         border: none;
-        background-color: transparent;
         text-align: right;
         font-family: $number-font-family;
-        font-size: $font-heading-lg-size;
+        font-size: $font-heading-sm-size;
+        background-color: transparent;
         caret-color: #fff;
-        margin: 0;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+    }
+
+    .number-field__left-action {
+        position: absolute;
+        top: 50%; left: $spacing-8;
+        transform: translateY(-50%);
+        display: flex;
+        justify-content: flex-end;
+        align-items: center;
+        z-index: 10;
     }
 
     .number-field__unit {
@@ -39,7 +52,7 @@ $number-field-unit-width: 48px;
         align-items: center;
         width: $number-field-unit-width;
         height: 100%;
-        padding: $spacing-24 0 5px;
+        padding: $spacing-24 0 $spacing-12;
         font-family: $number-font-family;
         font-size: $font-body-size;
         font-weight: bold;

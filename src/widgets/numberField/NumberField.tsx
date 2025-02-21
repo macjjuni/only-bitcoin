@@ -10,6 +10,7 @@ interface TextFieldTypes extends ComponentBaseTypes {
   onChange: (value: string) => void;
   unit: ReactNode;
   readonly?: boolean;
+  leftAction?: ReactNode;
 }
 
 
@@ -17,7 +18,7 @@ const NumberField = (props: TextFieldTypes) => {
 
   // region [Hooks]
 
-  const { value, onChange, unit, readonly = false, className } = props;
+  const { value, onChange, unit, readonly = false, className, leftAction } = props;
 
   // endregion
 
@@ -42,12 +43,11 @@ const NumberField = (props: TextFieldTypes) => {
   const preventEvent = useCallback((e: UIEvent) => { e.preventDefault(); }, []);
 
   const disableScroll = useCallback(() => {
-    document.body.scrollTo({top: 0, behavior: 'smooth'});
-    document.body.addEventListener('touchmove', preventEvent, { passive: false });
+    document.body.addEventListener("touchmove", preventEvent, { passive: false });
   }, []);
 
   const enableScroll = useCallback(() => {
-    document.body.removeEventListener('touchmove', preventEvent);
+    document.body.removeEventListener("touchmove", preventEvent);
   }, []);
 
   // endregion
@@ -57,21 +57,19 @@ const NumberField = (props: TextFieldTypes) => {
 
   const onChangeInput = useCallback((e: ChangeEvent<HTMLInputElement>) => {
 
-    const text = e.target.value.replace(/,/g, "");
-    const isNum = isNumber(text);
+    const text = e.target.value.replace(/,/g, ""); // 콤마 제거
 
-    if (text === "") { onChange("0"); }
-    if (!isNum) { return; }
+    if (text === "") {
+      return onChange("0");
+    }
+    if (!isNumber(text)) {
+      return;
+    }
 
-    // 앞자리 0 지우기
-    const textToNumber = Number(text);
-    const numberToText = textToNumber.toString();
+    // `12.` 같은 경우 숫자로 변환하면 `12`가 되어버리므로 그대로 유지해야 함
+    const numberWithComma = text.includes(".") ? text : comma(parseFloat(text).toString());
 
-    // 콤마 추가
-    const numberWithDecimal = comma(numberToText);
-
-    onChange(numberWithDecimal);
-
+    onChange(numberWithComma);
   }, [onChange]);
 
   const onFocus = useCallback(() => {
@@ -90,30 +88,34 @@ const NumberField = (props: TextFieldTypes) => {
   const unitStyle = useMemo(() => {
 
     if (typeof unit !== "string") { return {}; }
-
-    if (["KRW", "USD"].includes(unit)) { return { letterSpacing: "-1px" }; }
-    if (unit.includes("BTC")) { return { letterSpacing: "0.4px" }; }
+    if (unit.includes("KRW")) { return { letterSpacing: "-1px" }; }
+    if (unit.includes("USD")) { return { letterSpacing: "0" }; }
+    if (unit.includes("BTC")) { return { letterSpacing: "0.2px" }; }
 
     return {};
   }, [unit]);
-
 
   // endregion
 
 
   // region [Templates]
 
-  const Unit = useMemo(() => (<div className="number-field__unit" style={unitStyle}>{unit || null}</div>),
-    [unit]
-  );
+  const LeftAction = useMemo(()=> (
+    leftAction ? <div className="number-field__left-action">{leftAction}</div> : null
+  ),[leftAction])
+
+  const Unit = useMemo(() => (
+    unit ? <div className="number-field__unit" style={unitStyle}>{unit}</div> : null
+  ), [unit]);
 
   // endregion
 
 
   return (
     <div className={`number-field${rootClass}`}>
+      {LeftAction}
       <input className="number-field__input" value={value} type="text" pattern="\d*" inputMode="decimal"
-             onChange={onChangeInput} onFocus={onFocus} onBlur={onBlur} />
+             onChange={onChangeInput} onFocus={onFocus} onBlur={onBlur} readOnly={readonly} />
       {Unit}
     </div>
   );

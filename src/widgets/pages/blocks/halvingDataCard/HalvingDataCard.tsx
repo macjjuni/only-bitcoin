@@ -11,7 +11,7 @@ const HalvingDataCard = () => {
   // endregion
 
   return (
-    <KAccordion summary="반감기 데이터" className="halving-data-card__area">
+    <KAccordion summary="반감기 정보" className="halving-data-card__area">
       <ul className="halving-data-card__area__list">
 
         <li className="halving-data-card__area__list__item">
