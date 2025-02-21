@@ -12,4 +12,6 @@ export function bytesToMB(bytes: number, decimal = 2) {
   return floorToDecimal(bytes / MB, decimal);
 }
 
-// 사용 예제
+export function isNumber(str: string) {
+  return /^\d+$/.test(str);
+}

@@ -50,13 +50,16 @@ button {
 svg {margin: 0; }
 text { font-family: $number-font-family; }
 
+// safari 스크롤 탄력적인 움직임 방지
+html, body {overscroll-behavior: none;}
+
 body {
     margin: 0;
     line-height: 1;
     color: $default-font-color;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif'); /*이미지 경로지정*/
+    //background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif'); /*이미지 경로지정*/
     background-size: 600px;
     background-position: center 50%;
     background-repeat: no-repeat;

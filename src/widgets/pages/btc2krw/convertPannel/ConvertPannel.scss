@@ -1,0 +1,13 @@
+
+
+.convert-pannel {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-8;
+    padding-top: $spacing-32;
+
+    .convert-pannel__input:last-child {
+        margin-top: $spacing-32;
+    }
+}

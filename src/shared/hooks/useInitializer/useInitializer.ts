@@ -40,6 +40,23 @@ export default function useInitializer() {
   // 시작 페이지 로직
   useEffect(() => {
     initializePage();
+
+    // 확대 방지
+    // document.addEventListener(
+    //   'gesturestart',
+    //   function (event) {
+    //     event.preventDefault();
+    //   },
+    //   { passive: false }
+    // );
+    //
+    // document.addEventListener(
+    //   'dblclick',
+    //   function (event) {
+    //     event.preventDefault();
+    //   },
+    //   { passive: false }
+    // );
   }, []);
 
   useEffect(() => {

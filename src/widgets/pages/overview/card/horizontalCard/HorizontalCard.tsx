@@ -1,9 +1,9 @@
 import { memo, ReactNode, useMemo } from "react";
-import { ComponentBasePorps } from "@/shared/types/base.interface";
+import { ComponentBaseTypes } from "@/shared/types/base.interface";
 import "./HorizontalCard.scss";
 
 
-interface HorizontalCardInterface extends ComponentBasePorps {
+interface HorizontalCardInterface extends ComponentBaseTypes {
   children: ReactNode;
   rows?: number;
 }
