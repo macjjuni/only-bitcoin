@@ -8,6 +8,7 @@ import initializeUsdExchangeRate from "./exchangeRate.api";
 import initializeFeerGreedIndex from "./feerGreedIndex.api";
 import googleAnalytics from "./googleAnalytics";
 import useStore from "@/shared/stores/store";
+import useDisabledZoom from "@/shared/hooks/useDisabledZoom";
 
 
 export default function useInitializer() {
@@ -18,6 +19,8 @@ export default function useInitializer() {
   const navigate = useNavigate();
   const initialPath = useStore(state => state.setting.initialPath);
   const isUsdtStandard = useStore(state => state.setting.isUsdtStandard);
+
+  useDisabledZoom();
   googleAnalytics();
 
   // endregion
@@ -40,23 +43,6 @@ export default function useInitializer() {
   // 시작 페이지 로직
   useEffect(() => {
     initializePage();
-
-    // 확대 방지
-    // document.addEventListener(
-    //   'gesturestart',
-    //   function (event) {
-    //     event.preventDefault();
-    //   },
-    //   { passive: false }
-    // );
-    //
-    // document.addEventListener(
-    //   'dblclick',
-    //   function (event) {
-    //     event.preventDefault();
-    //   },
-    //   { passive: false }
-    // );
   }, []);
 
   useEffect(() => {
@@ -70,7 +56,6 @@ export default function useInitializer() {
     binanceInitializer();
     mempoolInitializer();
     initializeBitcoinDominance().then();
-    initializeUsdExchangeRate().then();
     initializeFeerGreedIndex().then();
   }, []);
 
