@@ -1,4 +1,4 @@
-const interval = (func: () => void, time: number) => {
+const interval = (func: () => void, intervalTime: number) => {
   /** @type {number} */
   let intervalId: number;
 
@@ -7,7 +7,7 @@ const interval = (func: () => void, time: number) => {
     start: () =>
       (intervalId = window.setInterval(() => {
         func();
-      }, time)),
+      }, intervalTime)),
     clear: () => clearInterval(intervalId),
   };
 };
