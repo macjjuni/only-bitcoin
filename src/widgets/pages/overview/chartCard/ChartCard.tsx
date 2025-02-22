@@ -131,25 +131,18 @@ const ChartCard = () => {
 
   const ChartArea = useMemo(() => (
     <>
-      <Line
-        ref={chartRef}
-        data={currentChartData}
-        className="chart-card__chart__wrapper__body"
-        height="120%"
-        options={{
-          plugins: { legend: { display: false }, tooltip: { enabled: true } },
-          elements: { point: { radius: 0 }, line: { tension: 0.4, borderWidth: 2 } },
-          scales: { x: { display: false }, y: { display: false } },
-          animation: { duration: 800, easing: "easeInOutQuart" }
-        }}
-      />
+      <Line ref={chartRef} data={currentChartData} height="120%"
+            className="chart-card__chart__wrapper__body"
+            options={{
+              plugins: { legend: { display: false }, tooltip: { enabled: true } },
+              elements: { point: { radius: 0 }, line: { tension: 0.4, borderWidth: 2 } },
+              scales: { x: { display: false }, y: { display: false } },
+              animation: { duration: 800, easing: "easeInOutQuart" }
+            }} />
       <div className="chart-card__chart__wrapper__line__area">
-        {
-          Array.from({ length: 9 }, (_, i) => (
-            <span key={i} className="chart-card__chart__wrapper__line__area--line"
-                  style={{ "left": `${(i + 1) * 10}%` }} />
-          ))
-        }
+        {Array.from({ length: 9 }, (_, i) => (
+          <span key={i} className="chart-card__chart__wrapper__line__area--line"
+                style={{ "left": `${(i + 1) * 10}%` }} />))}
       </div>
     </>
   ), [currentChartData]);
