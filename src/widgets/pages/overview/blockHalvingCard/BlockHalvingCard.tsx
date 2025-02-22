@@ -1,20 +1,21 @@
-import { CSSProperties, memo, useMemo } from "react";
+import { CSSProperties, memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useLottie } from "lottie-react";
 import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
 import useStore from "@/shared/stores/store";
 import { comma } from "@/shared/utils/string";
 import blockLottieJson from "@/shared/assets/lottie/block.json";
 import { calcPercentage, getNextHalvingData } from "@/shared/utils/common";
-import "./BlockCard.scss";
+import "./BlockHalvingCard.scss";
 
 
 const barBallHalfWidth = "14px" as const;
 
-const PricePannel = () => {
+const BlockHalvingCard = () => {
 
   // region [Hooks]
 
   const blockData = useStore(state => state.blockData);
+  const [ballLeftSize, setBallLeftSize] = useState<string>('0');
   const { View } = useLottie({ animationData: blockLottieJson, loop: true });
 
   const recentBlockData = useMemo(() => (blockData[0]), [blockData]);
@@ -25,11 +26,27 @@ const PricePannel = () => {
   // endregion
 
 
+  // region [Privates]
+
+  const initializeProgressBallLeftSize = useCallback(() => {
+    setBallLeftSize(`calc(${Math.ceil(halvingPercent)}% - ${barBallHalfWidth})`);
+  }, [halvingPercent]);
+
+  // endregion
+
+
   // region [Styles]
 
-  const progressStyle: CSSProperties = useMemo(() => (
-    { left: `calc(${Math.ceil(halvingPercent)}% - ${barBallHalfWidth})` }
-  ), [halvingPercent]);
+  const progressStyle: CSSProperties = useMemo(() => ({ left: ballLeftSize }), [ballLeftSize]);
+
+  // endregion
+
+
+  // region
+
+  useEffect(() => {
+    initializeProgressBallLeftSize();
+  }, [halvingPercent]);
 
   // endregion
 
@@ -70,4 +87,4 @@ const PricePannel = () => {
   );
 };
 
-export default memo(PricePannel);
+export default memo(BlockHalvingCard);

@@ -1,4 +1,4 @@
-import { ChartCard, MacroCard, BlockCard, PricePannel } from "@/widgets/pages/overview";
+import { ChartCard, MacroCard, BlockHalvingCard, PricePannel } from "@/widgets/pages/overview";
 import "./OverviewPage.scss";
 
 
@@ -8,7 +8,7 @@ export default function OverviewPage() {
     <section className="overview-page__area">
       <PricePannel />
       <MacroCard />
-      <BlockCard />
+      <BlockHalvingCard />
       <ChartCard />
     </section>
   );

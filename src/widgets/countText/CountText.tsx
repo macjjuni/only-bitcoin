@@ -1,8 +1,9 @@
 import { memo, useMemo } from "react";
 import CountUp from "react-countup";
+import { ComponentBaseTypes } from "@/shared/types/base.interface";
 
 
-interface CountTextTypes {
+interface CountTextTypes extends ComponentBaseTypes {
   value: number;
   duration?: number;
   decimals?: number;
@@ -14,7 +15,7 @@ const CountText = (props: CountTextTypes) => {
 
   // region [Hooks]
 
-  const { value, duration = 0.3, decimals= 0, separator = "," } = props;
+  const { className, value, duration = 0.3, decimals= 0, separator = "," } = props;
 
   const startValue = useMemo(() => {
     const isPositive = Math.random() < 0.5; // 50% 확률로 + 또는 -
@@ -26,7 +27,7 @@ const CountText = (props: CountTextTypes) => {
   // endregion
 
 
-  return (<CountUp start={startValue} end={value} duration={duration}
+  return (<CountUp className={className} start={startValue} end={value} duration={duration}
                    decimals={decimals} separator={separator} />);
 };
 

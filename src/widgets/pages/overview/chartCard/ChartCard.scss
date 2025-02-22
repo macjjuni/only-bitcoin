@@ -81,11 +81,7 @@
       .chart-card__top__second__price{
         @include font-body;
         font-family: $number-font-family;
-      }
-      .chart-card__top__second__rate {
-        font-family: $number-font-family;
-        font-size: 12px;
-        line-height: 16px;
+        font-weight: bold;
       }
 
       .chart-card__top__second__rate {
@@ -93,8 +89,13 @@
         justify-content: center;
         align-items: center;
         gap: 2px;
+        font-family: $number-font-family;
+        font-weight: bold;
+        font-size: 12px;
+        line-height: 16px;
 
-        .chart-card__top__second__rate__icon--up { transform: rotate(180deg); }
+        .up { color: $price-long-color; }
+        .down { color: $price-short-color; }
       }
     }
 

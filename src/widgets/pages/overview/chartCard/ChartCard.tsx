@@ -155,10 +155,13 @@ const ChartCard = () => {
   ), [currentChartData]);
 
 
-  const UpdownIcon = useMemo(() => (
+  const UpdownIcon = useMemo(() => {
 
-    percentage > 0 ? <KIcon icon="triangleUp" color="#fff" size={8} /> : <KIcon icon="triangleDown" color="#fff" size={8} />
-  ), [percentage]);
+    if (percentage > 0) {
+      return (<KIcon icon="triangleUp" className="up" color="currentColor" size={8} />)
+    }
+    return (<KIcon icon="triangleDown" className="down" color="currentColor" size={8} />)
+  }, [percentage]);
 
   // endregion
 

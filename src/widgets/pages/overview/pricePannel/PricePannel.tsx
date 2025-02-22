@@ -13,13 +13,23 @@ const PricePannel = () => {
   const currency = useStore(state => state.setting.currency);
 
   const krwChangeIconName = useMemo(() => (
-    bitcoinPrice.usdChange24h.includes('-') ? 'triangleDown' : 'triangleUp'
+    bitcoinPrice.usdChange24h.includes('-') ? {name: 'triangleDown', class: 'down' } : {name:'triangleUp', class:'up'}
   ), [bitcoinPrice.krwChange24h])
 
 
   const usdChangeIconName = useMemo(() => (
-    bitcoinPrice.usdChange24h.includes('-') ? 'triangleDown' : 'triangleUp'
+    bitcoinPrice.usdChange24h.includes('-') ? {name: 'triangleDown', class: 'down' } : {name:'triangleUp', class:'up'}
   ), [bitcoinPrice.usdChange24h])
+
+  // endregion
+
+
+  // region [Templates]
+
+  const Currencies = useMemo(() => [
+    { code: 'KRW', sign: '₩', price: bitcoinPrice.krw, change: bitcoinPrice.krwChange24h, icon: krwChangeIconName },
+    { code: 'USD', sign: '$', price: bitcoinPrice.usd, change: bitcoinPrice.usdChange24h, icon: usdChangeIconName },
+  ],[bitcoinPrice, krwChangeIconName, usdChangeIconName]);
 
   // endregion
 
@@ -30,32 +40,27 @@ const PricePannel = () => {
 
       <div className="price-pannel__price__area">
         {
-          currency.includes("KRW") &&
-          (
-            <div className="price-pannel__price__area__krw">
-              <div className="price-pannel__price__area__krw__area">
-                <span className="price-pannel__price__area__krw__sign">₩</span>
-                <CountText value={bitcoinPrice.krw} />
+          Currencies
+          .filter(({ code }) => currency.includes(code))
+          .map(({ code, sign, price, change, icon }) => (
+            <div key={code} className={`price-pannel__price__area__${code.toLowerCase()}`}>
+
+              <div className={`price-pannel__price__area__${code.toLowerCase()}__area`}>
+
+                <span className={`price-pannel__price__area__${code.toLowerCase()}__sign`}>
+                  {sign}
+                </span>
+                <CountText value={price} />
+
               </div>
-              <div className="price-pannel__price__area__krw__percent">
-                <KIcon icon={krwChangeIconName} color="#fff" size={8} />
-                {bitcoinPrice.krwChange24h}%
+
+              <div className={`price-pannel__price__area__${code.toLowerCase()}__percent`}>
+                <KIcon icon={icon.name} className={icon.class} color="currentColor" size={8} />
+                <span className="percent__text">{change}%</span>
               </div>
+
             </div>
-          )
-        }
-        {
-          currency.includes("USD") &&
-          <div className="price-pannel__price__area__usd">
-            <div className="price-pannel__price__area__usd__area">
-              <span className="price-pannel__price__area__usd__sign">$</span>
-              <CountText value={bitcoinPrice.usd} />
-            </div>
-            <div className="price-pannel__price__area__usd__percent">
-              <KIcon icon={usdChangeIconName} color="#fff" size={8}/>
-              {bitcoinPrice.usdChange24h}%
-            </div>
-          </div>
+          ))
         }
       </div>
     </div>
