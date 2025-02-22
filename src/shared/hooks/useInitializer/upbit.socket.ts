@@ -5,6 +5,7 @@ import LocalStorage from "@/shared/utils/storage";
 import { generateUUID } from "@/shared/utils/string";
 import { formatDate } from "@/shared/utils/date";
 import { floorToDecimal } from "@/shared/utils/number";
+import { isDev } from "@/shared/utils/common";
 
 // Upbit WebSocket Data
 const UPBIT_URL = import.meta.env.VITE_UPBIT_API_URL || "wss://api.upbit.com/websocket/v1";
@@ -78,7 +79,10 @@ const socketManager = {
       resetRetry();
       socket?.send(JSON.stringify(getRequestPayload()));
       toast.success(`서버에 연결되었습니다. (Upbit)`);
-      console.log("✅ 업비트 소켓 연결 초기화");
+
+      if (isDev) {
+        console.log("✅ 업비트 소켓 연결 초기화");
+      }
     };
 
     socket.onmessage = (evt) => {

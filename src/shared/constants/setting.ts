@@ -5,7 +5,6 @@ interface CurrencyOptionTypes {
   value: CurrencyTypes
 }
 
-
 export const currencyOptions: CurrencyOptionTypes[] = [
   { text: 'KRW/USD' , value: 'KRW/USD' },
   { text: 'USD' , value: 'USD' },

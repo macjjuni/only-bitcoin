@@ -2,6 +2,7 @@ import { toast } from "react-toastify";
 import { isNetwork } from "@/shared/utils/network";
 import useStore from "@/shared/stores/store";
 import { floorToDecimal } from "@/shared/utils/number";
+import { isDev } from "@/shared/utils/common";
 
 // Binance WebSocket Data
 const BINANCE_URL = `wss://stream.binance.com:9443/ws/btcusdt@ticker`;
@@ -41,7 +42,10 @@ const socketManager = {
     socket.onopen = () => {
       resetRetry();
       toast.success(`서버에 연결되었습니다. (Binance)`);
-      console.log("✅ 바이낸스 소켓 연결 초기화");
+
+      if (isDev) {
+        console.log("✅ 바이낸스 소켓 연결 초기화");
+      }
     };
 
     socket.onmessage = ({ data }) => {
