@@ -1,4 +1,4 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
 import "./HalvingChartCard.scss";
 import useStore from "@/shared/stores/store";
@@ -20,8 +20,17 @@ const HalvingChartCard = () => {
   const restBlockCount = useMemo(() => (nextHalvingData.blockHeight - currentBlockData.height), [nextHalvingData, currentBlockData]);
   const halvingPercent = useMemo(() => calcPercentage(nextHalvingData.blockHeight, currentBlockData.height), [nextHalvingData, currentBlockData]);
   const expectNextHalvingDate = useMemo(() => calcDate(Date.now(), restBlockCount * 10, "minute", "YYYY.MM.DD"), [restBlockCount]);
+  const [offset, setOffset] = useState<number>(312);
 
-  // const nextHalvingDate = d
+  // endregion
+
+
+  // region [Privates]
+
+  const initializeOffset = useCallback(() => {
+
+    setOffset(circumference - (halvingPercent / 100) * circumference);
+  }, [halvingPercent]);
 
   // endregion
 
@@ -29,19 +38,19 @@ const HalvingChartCard = () => {
   // region [Templates]
 
   const CircleChart = useMemo(() => (
-    <svg width="60%" viewBox="0 0 120 120">
+    <svg className="halving-chart-card__area__content__chart" width="60%" viewBox="0 0 120 120">
       {/* 배경 원 */}
       <circle cx="60" cy="60" r="50" stroke="#4f4f4f" strokeWidth="16" fill="none" />
       {/* 진행 원 */}
       <circle cx="60" cy="60" r="50" stroke="#fff" strokeWidth="16" fill="none"
-              strokeDasharray={circumference} strokeDashoffset={circumference - (halvingPercent / 100) * circumference}
+              strokeDasharray={circumference} strokeDashoffset={offset}
               transform="rotate(-90 60 60)" />
       {/* 퍼센트 텍스트 */}
       <text x="50%" y="50%" textAnchor="middle" dy=".3em" fontSize="18" fontWeight="bold" fill="#fff">
         {halvingPercent}%
       </text>
     </svg>
-  ), [halvingPercent]);
+  ), [halvingPercent, offset]);
 
   const HalvingDataList = useMemo(() => ([
     { label: "현재 블록 높이", value: currentBlockHeight, isCount: true },
@@ -51,6 +60,18 @@ const HalvingChartCard = () => {
   ]), [currentBlockHeight, restBlockCount, nextHalvingData, expectNextHalvingDate]);
 
   // endregion
+
+
+  // region [Life Cycles]
+
+  useEffect(() => {
+
+    initializeOffset();
+  }, [halvingPercent]);
+
+  // endregion
+
+
 
 
   return (
