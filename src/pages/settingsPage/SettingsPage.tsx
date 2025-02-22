@@ -22,6 +22,9 @@ export default function SettingsPage() {
   const isUsdtStandard = useStore(state => state.setting.isUsdtStandard);
   const setUsdtStandard = useStore(state => state.setUsdtStandard);
 
+  const isCountUp = useStore(state => state.setting.isCountUp);
+  const setIsCountUp = useStore(state => state.setIsCountUp);
+
   // endregion
 
 
@@ -63,6 +66,11 @@ export default function SettingsPage() {
         <FormRow icon={<KIcon icon="tether" size={24} />} label="USDT 기준 환율 적용">
           <KSwitch value={isUsdtStandard} onChange={(e) => {
             setUsdtStandard(e);}} />
+        </FormRow>
+
+        <FormRow icon={<KIcon icon="visibility" size={24} color="#c2c2c2" />} label="카운트 업 효과">
+          <KSwitch value={isCountUp} onChange={(e) => {
+            setIsCountUp(e);}} />
         </FormRow>
 
       </div>

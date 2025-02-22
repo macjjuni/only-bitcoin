@@ -59,6 +59,7 @@ export interface StoreType {
   setInitialPath: (path: string) => void;
   setCurrency: (currency: CurrencyTypes) => void;
   setUsdtStandard: (isUsdtStandard: boolean) => void;
+  setIsCountUp: (isCountUp: boolean) => void;
 
   // endregion
 
@@ -166,6 +167,7 @@ export interface SettingTypes {
   initialPath: string;
   currency: CurrencyTypes;
   isUsdtStandard: boolean;
+  isCountUp: boolean;
 }
 
 export interface FeesTypes {

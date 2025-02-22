@@ -89,7 +89,8 @@ const useStore = create<StoreType>()(
       setting: {
         initialPath: "/overview",
         currency: "KRW/USD",
-        isUsdtStandard: false
+        isUsdtStandard: false,
+        isCountUp: true,
       },
       setInitialPath: (path) => set((state) => ({
         setting: { ...state.setting, initialPath: path }
@@ -99,6 +100,9 @@ const useStore = create<StoreType>()(
       })),
       setUsdtStandard: (isUsdtStandard) => set((state) => ({
         setting: { ...state.setting, isUsdtStandard }
+      })),
+      setIsCountUp: (isCountUp) => set((state) => ({
+        setting: { ...state.setting, isCountUp }
       }))
 
       // endregion
