@@ -25,7 +25,7 @@
             flex-direction: column;
             width: auto;
 
-            .halving-no, .halving-date, .halving-height, .halving-reward {
+            .halving__label, .halving__text {
                 width: auto;
                 white-space: nowrap;
                 padding: $spacing-2 $spacing-8;
