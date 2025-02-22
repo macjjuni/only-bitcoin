@@ -1,6 +1,6 @@
 
 
-$number-field-unit-width: 48px;
+$number-field-unit-width: 40px;
 
 .number-field {
     position: relative;
@@ -8,14 +8,6 @@ $number-field-unit-width: 48px;
     justify-content: flex-end;
     align-items: center;
     user-select: none;
-
-    //&.number-field--readonly {
-    //    justify-content: center;
-    //
-    //    .number-field__input {
-    //        text-align: center;
-    //    }
-    //}
 
     .number-field__input {
         width: 100%;

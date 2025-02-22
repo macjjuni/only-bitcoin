@@ -1,13 +1,25 @@
 
-
 .convert-pannel {
-    position: relative;
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: $spacing-12;
+  padding-top: $spacing-36;
+
+  .convert-pannel__item {
     display: flex;
     flex-direction: column;
-    gap: $spacing-8;
-    padding-top: $spacing-48;
 
-    .convert-pannel__input:last-child {
-        margin-top: $spacing-32;
+    .convert-pannel__item__input {
+      .number-field__input { font-weight: bold; }
     }
+    .convert-pannel__item__sub-text {
+      text-align: right;
+      font-size: $font-small-size;
+      color: $gray-font-color;
+      margin-top: -#{$spacing-4};
+    }
+
+    &:last-child { margin-top: $spacing-80; }
+  }
 }
