@@ -7,9 +7,9 @@ import { ChartJsDataType, MarketChartIntervalTypeList } from "@/widgets/pages/ov
 import { btcColor } from "@/shared/constants/color";
 import { initializeCoingeckoMarketChart } from "@/widgets/pages/overview/chartCard/ChartCard.api";
 import { MarketChartIntervalType } from "@/shared/stores/store.interface";
-import { comma } from "@/shared/utils/string";
 import useStore from "@/shared/stores/store";
 import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
+import { CountText, UpdownIcon } from "@/widgets";
 import "./ChartCard.scss";
 
 
@@ -155,14 +155,6 @@ const ChartCard = () => {
   ), [currentChartData]);
 
 
-  const UpdownIcon = useMemo(() => {
-
-    if (percentage > 0) {
-      return (<KIcon icon="triangleUp" className="up" color="currentColor" size={8} />)
-    }
-    return (<KIcon icon="triangleDown" className="down" color="currentColor" size={8} />)
-  }, [percentage]);
-
   // endregion
 
   return (
@@ -186,12 +178,12 @@ const ChartCard = () => {
 
         <div className="chart-card__top__second">
           <span className="chart-card__top__second__price">
-            {`$${comma(usdPrice)}`}
+            <CountText value={usdPrice} />
           </span>
 
           <span className="chart-card__top__second__rate">
-            {UpdownIcon}
-            {percentage}%
+            <UpdownIcon isUp={percentage > 0} />
+            <CountText value={percentage} decimals={2} />%
           </span>
         </div>
       </div>

@@ -29,7 +29,7 @@ $initial-left: 224px;
         scrollbar-width: none;
 
         &::-webkit-scrollbar { display: none; }
-        &.add-block { animation: slide-card 1.6s ease-in-out forwards 0.3s; }
+        &.add-block { animation: slide-card 1.2s ease-in-out forwards 0s; }
 
         .block__square__area {
             position: relative;

@@ -1,0 +1,7 @@
+
+
+.updown-icon {
+
+  &.updown-icon--up { color: $price-long-color; }
+  &.updown-icon--down { color: $price-short-color; }
+}
