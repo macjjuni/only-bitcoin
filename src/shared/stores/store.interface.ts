@@ -60,6 +60,7 @@ export interface StoreType {
   setCurrency: (currency: CurrencyTypes) => void;
   setUsdtStandard: (isUsdtStandard: boolean) => void;
   setIsCountUp: (isCountUp: boolean) => void;
+  setIsBackgroundImg: (isBackgroundImg: boolean) => void;
 
   // endregion
 
@@ -168,6 +169,7 @@ export interface SettingTypes {
   currency: CurrencyTypes;
   isUsdtStandard: boolean;
   isCountUp: boolean;
+  isBackgroundImg: boolean;
 }
 
 export interface FeesTypes {

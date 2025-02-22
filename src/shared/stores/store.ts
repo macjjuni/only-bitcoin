@@ -91,6 +91,7 @@ const useStore = create<StoreType>()(
         currency: "KRW/USD",
         isUsdtStandard: false,
         isCountUp: true,
+        isBackgroundImg: true,
       },
       setInitialPath: (path) => set((state) => ({
         setting: { ...state.setting, initialPath: path }
@@ -103,7 +104,10 @@ const useStore = create<StoreType>()(
       })),
       setIsCountUp: (isCountUp) => set((state) => ({
         setting: { ...state.setting, isCountUp }
-      }))
+      })),
+      setIsBackgroundImg: (isBackgroundImg) => set((state) => ({
+        setting: { ...state.setting, isBackgroundImg }
+      })),
 
       // endregion
 

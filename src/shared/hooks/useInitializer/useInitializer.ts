@@ -19,6 +19,7 @@ export default function useInitializer() {
   const navigate = useNavigate();
   const initialPath = useStore(state => state.setting.initialPath);
   const isUsdtStandard = useStore(state => state.setting.isUsdtStandard);
+  const isBackgroundImg = useStore(state => state.setting.isBackgroundImg);
 
   useDisabledZoom();
   googleAnalytics();
@@ -34,6 +35,14 @@ export default function useInitializer() {
     }
   }, []);
 
+  const initializeBackground = useCallback(() => {
+    if (isBackgroundImg) {
+      document.body.classList.add("show-bg");
+    } else {
+      document.body.classList.remove("show-bg");
+    }
+  }, [isBackgroundImg]);
+
 
   // endregion
 
@@ -46,9 +55,11 @@ export default function useInitializer() {
   }, []);
 
   useEffect(() => {
-    if (!isUsdtStandard) {
-      initializeUsdExchangeRate().then();
-    }
+    initializeBackground();
+  }, [isBackgroundImg]);
+
+  useEffect(() => {
+    if (!isUsdtStandard) { initializeUsdExchangeRate().then(); }
   }, [isUsdtStandard]);
 
   useLayoutEffect(() => {

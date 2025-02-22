@@ -25,6 +25,9 @@ export default function SettingsPage() {
   const isCountUp = useStore(state => state.setting.isCountUp);
   const setIsCountUp = useStore(state => state.setIsCountUp);
 
+  const isBackgroundImg = useStore(state => state.setting.isBackgroundImg);
+  const setIsBackgroundImg = useStore(state => state.setIsBackgroundImg);
+
   // endregion
 
 
@@ -68,9 +71,14 @@ export default function SettingsPage() {
             setUsdtStandard(e);}} />
         </FormRow>
 
-        <FormRow icon={<KIcon icon="visibility" size={24} color="#c2c2c2" />} label="카운트 업 효과">
+        <FormRow icon={<KIcon icon="visibility" size={24} color="#c2c2c2" />} label="카운트 업 애니메이션">
           <KSwitch value={isCountUp} onChange={(e) => {
             setIsCountUp(e);}} />
+        </FormRow>
+
+        <FormRow icon={<KIcon icon="bitcoin_square" size={24} color="#c2c2c2" />} label="배경 이미지">
+          <KSwitch value={isBackgroundImg} onChange={(e) => {
+            setIsBackgroundImg(e);}} />
         </FormRow>
 
       </div>
