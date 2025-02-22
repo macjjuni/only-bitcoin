@@ -23,7 +23,7 @@
         .tx-fee-card__area__item {
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: $spacing-4;
             justify-content: center;
             width: 80px;
             white-space: nowrap;

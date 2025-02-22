@@ -4652,10 +4652,10 @@ jws@^4.0.0:
     jwa "^2.0.0"
     safe-buffer "^5.0.1"
 
-kku-ui@^0.0.507:
-  version "0.0.507"
-  resolved "https://registry.yarnpkg.com/kku-ui/-/kku-ui-0.0.507.tgz#66c577520570d97a02bdc823b37777ae68a3bfa6"
-  integrity sha512-hu3ROoqpCMy9wc3DLDHD5lkkHzv4VbRFbSJuXlvPkmgkIg6USEAyvVkNi2jzkbFvOLBcA70cyC47WihxKQJpTg==
+kku-ui@^0.0.508:
+  version "0.0.508"
+  resolved "https://registry.yarnpkg.com/kku-ui/-/kku-ui-0.0.508.tgz#6ffe4b7db8074e7f50b48569bdd5680f644d9aa8"
+  integrity sha512-cDXOKbLPBk2FLdyJswseTB5xwj7GrE74FHiSiZV6qoRsC2/zZ29leVHAZCF5cJ+mdht8RR7uf8fVeCDpLnBc8w==
   dependencies:
     lodash-es "^4.17.21"
     react "^19.0.0"

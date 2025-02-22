@@ -19,7 +19,7 @@ const BlocksExplorer = () => {
   // region [Privates]
 
   const clearInput = useCallback(() => {
-    setTxValue('');
+    setTxValue("");
   }, []);
 
   const pasteToInput = useCallback(async () => {
@@ -29,7 +29,9 @@ const BlocksExplorer = () => {
 
   const onRouteMempool = useCallback(() => {
 
-    if (txValue.trim() === '') { return; }
+    if (txValue.trim() === "") {
+      return;
+    }
 
     const anchorTag = document.createElement("a");
     anchorTag.href = MEMPOOL_TX_SEARCH_URL + txValue;
@@ -68,8 +70,9 @@ const BlocksExplorer = () => {
 
   return (
     <div className="block-search-box__area">
-      <KTextField value={txValue} onChange={onChangeTxInput} fullWidth rightAction={SearchRightAction}
-                  placeholder="트렌젝션을 검색해 보세요" />
+      <KTextField className="block-search-box__area__input" value={txValue} onChange={onChangeTxInput}
+                  placeholder="트렌젝션을 검색해 보세요" fullWidth rightAction={SearchRightAction}
+                  autoCapitalize="off" autoCorrect="off" autoComplete="off" />
     </div>
   );
 };
