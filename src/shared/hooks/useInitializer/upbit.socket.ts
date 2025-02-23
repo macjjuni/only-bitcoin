@@ -2,8 +2,8 @@ import { toast } from "react-toastify";
 import useStore from "@/shared/stores/store";
 import { isNetwork } from "@/shared/utils/network";
 import LocalStorage from "@/shared/utils/storage";
-import { generateUUID } from "@/shared/utils/string";
-import { formatDate } from "@/shared/utils/date";
+import { generateUUID } from "@/shared/lib/uuid";
+import { formatDate } from "@/shared/lib/date";
 import { floorToDecimal } from "@/shared/utils/number";
 import { isDev } from "@/shared/utils/common";
 

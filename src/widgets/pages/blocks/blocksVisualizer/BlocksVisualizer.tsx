@@ -1,7 +1,7 @@
 import { memo, UIEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { KIcon } from "kku-ui";
 import useStore from "@/shared/stores/store";
-import { calcCurrentDateDifference } from "@/shared/utils/date";
+import { calcCurrentDateDifference } from "@/shared/lib/date";
 import { bytesToMB } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 import "./BlocksVisualizer.scss";
@@ -119,8 +119,8 @@ const BlocksVisualizer = () => {
     initializeListClass();
   }, [blockData]);
 
-
   // endregion
+
 
   return (
     <div className="blocks-visualizer__area">

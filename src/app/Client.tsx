@@ -1,8 +1,10 @@
+import { ToastContainer } from "react-toastify";
 import DefaultLayout from "@/layouts/defaultLayout/DefaultLayout";
 import Header from "@/layouts/header/Header";
 import Footer from "@/layouts/footer/Footer";
 import Content from "@/layouts/content/Content";
 import { useInitializer } from "@/shared/hooks";
+import { toastOptions } from "@/shared/lib/toast";
 
 
 export default function Client() {
@@ -21,6 +23,7 @@ export default function Client() {
         <Content />
         <Footer />
       </DefaultLayout>
+      <ToastContainer {...toastOptions} />
     </>
   );
 }

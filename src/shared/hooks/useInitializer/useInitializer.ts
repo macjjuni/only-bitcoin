@@ -54,6 +54,7 @@ export default function useInitializer() {
     initializePage();
   }, []);
 
+  // 초기 설정 셋팅
   useEffect(() => {
     initializeBackground();
   }, [isBackgroundImg]);

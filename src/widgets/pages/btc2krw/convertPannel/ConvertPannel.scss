@@ -11,13 +11,14 @@
     flex-direction: column;
 
     .convert-pannel__item__input {
+      &.clickable { cursor: pointer; }
       .number-field__input { font-weight: bold; }
     }
     .convert-pannel__item__sub-text {
       text-align: right;
       font-size: $font-small-size;
       color: $gray-font-color;
-      margin-top: -#{$spacing-4};
+      padding: $spacing-2 0;
     }
 
     &:last-child { margin-top: $spacing-80; }

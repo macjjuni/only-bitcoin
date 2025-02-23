@@ -3,6 +3,7 @@ import useStore from "@/shared/stores/store";
 import { deepEqual } from "@/shared/utils/common";
 import { MemPoolBlockTypes } from "@/shared/types/block.interface";
 import { BlockTypes, FeesTypes } from "@/shared/stores/store.interface";
+import { comma } from "@/shared/utils/string";
 
 const MEMPOOL_WS_URL = "wss://mempool.space/api/v1/ws";
 const MAX_RETRIES = 3;
@@ -44,6 +45,7 @@ const handleMempoolBlock = (block: MemPoolBlockTypes) => {
 
   const { id, height, size, timestamp, extras} = block;
   const sanitizedBlock: BlockTypes = { id, height, size, timestamp, poolName: extras.pool.name }
+  toast.info(`${comma(height)}번째 블록 채굴!️`);
 
   setBlockData([sanitizedBlock, ...blockData]);
 };

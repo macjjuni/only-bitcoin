@@ -4,7 +4,7 @@ import "./HalvingChartCard.scss";
 import useStore from "@/shared/stores/store";
 import { calcPercentage, getNextHalvingData } from "@/shared/utils/common";
 import CountText from "@/widgets/countText/CountText";
-import { calcDate } from "@/shared/utils/date";
+import { calcDate } from "@/shared/lib/date";
 
 
 const circumference = 2 * Math.PI * 50; // 원의 둘레

@@ -1,24 +1,28 @@
-import React, { ChangeEvent, memo, ReactNode, useCallback, useMemo } from "react";
+import React, { ChangeEvent, forwardRef, memo, ReactNode, Ref, useCallback, useMemo } from "react";
 import { ComponentBaseTypes } from "@/shared/types/base.interface";
 import { isNumber } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 import "./NumberField.scss";
 
 
-interface TextFieldTypes extends ComponentBaseTypes {
+export interface TextFieldTypes extends ComponentBaseTypes {
   value: string;
   onChange: (value: string) => void;
   unit: ReactNode;
   readonly?: boolean;
   leftAction?: ReactNode;
+  maxLength?: number;
+  dataCopy?: string;
+  onClick?: () => void;
 }
 
 
-const NumberField = (props: TextFieldTypes) => {
+const NumberField = forwardRef((props: TextFieldTypes, ref: Ref<HTMLInputElement>) => {
 
   // region [Hooks]
 
-  const { value, onChange, unit, readonly = false, className, leftAction } = props;
+  const { value, onChange, unit, readonly = false, className,
+    leftAction, maxLength, dataCopy, onClick } = props;
 
   // endregion
 
@@ -27,7 +31,7 @@ const NumberField = (props: TextFieldTypes) => {
 
   const rootClass = useMemo(() => {
 
-    const clazz = [" "];
+    const clazz = ["number-field"];
 
     if (className) { clazz.push(className); }
     if (readonly) { clazz.push("number-field--readonly"); }
@@ -112,13 +116,15 @@ const NumberField = (props: TextFieldTypes) => {
 
 
   return (
-    <div className={`number-field${rootClass}`}>
+    <div className={rootClass}>
       {LeftAction}
-      <input className="number-field__input" value={value} type="text" pattern="\d*" inputMode="decimal"
-             onChange={onChangeInput} onFocus={onFocus} onBlur={onBlur} readOnly={readonly} />
+      <input ref={ref} className="number-field__input" type="text" value={value} onChange={onChangeInput}
+             pattern="\d*" inputMode="decimal" data-copy={dataCopy} onFocus={onFocus} onBlur={onBlur}
+             onClick={onClick} readOnly={readonly} maxLength={maxLength} />
       {Unit}
     </div>
   );
-};
+});
 
+NumberField.displayName = "NumberField";
 export default memo(NumberField);

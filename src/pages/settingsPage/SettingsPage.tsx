@@ -1,6 +1,6 @@
 import { useMemo } from "react";
 import { KButton, KIcon, KSelect, KSwitch } from "kku-ui";
-import { FormRow } from "@/widgets";
+import { FormRow, NotKeyNotYourBitcoin } from "@/widgets";
 import { btcColor } from "@/shared/constants/color";
 import router from "@/app/router";
 import useStore from "@/shared/stores/store";
@@ -82,6 +82,7 @@ export default function SettingsPage() {
         </FormRow>
 
       </div>
+      <NotKeyNotYourBitcoin />
     </div>
   );
 }

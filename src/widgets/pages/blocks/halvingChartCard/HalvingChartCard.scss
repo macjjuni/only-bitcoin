@@ -23,19 +23,26 @@
       display: flex;
       flex-direction: column;
       align-items: flex-start;
-      width: 50%;
-      gap: $spacing-12;
+      justify-content: space-between;
+      width: 50%; height: 100%;
+      padding-bottom: $spacing-4;
 
-      .halving-chart-card__area__content__data-view__item__label {
-        font-size: $font-small-size;
-        font-weight: bold;
-        color: $gray-font-color;
-      }
+      .halving-chart-card__area__content__data-view__item {
+        display: flex;
+        flex-direction: column;
+        gap: 1px;
 
-      .halving-chart-card__area__content__data-view__item__value {
-        @include font-body;
-        font-family: $number-font-family;
-        font-weight: bold;
+        .halving-chart-card__area__content__data-view__item__label {
+          font-size: $font-small-size;
+          font-weight: bold;
+          color: $gray-font-color;
+        }
+
+        .halving-chart-card__area__content__data-view__item__value {
+          @include font-body;
+          font-family: $number-font-family;
+          font-weight: bold;
+        }
       }
     }
   }

@@ -1,8 +1,9 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { KIcon } from "kku-ui";
 import { CountText, NumberField } from "@/widgets";
 import useStore from "@/shared/stores/store";
 import { comma } from "@/shared/utils/string";
+import { useCopyOnClick } from "@/shared/hooks";
 import "./ConvertPannel.scss";
 
 
@@ -13,7 +14,16 @@ const ConvertPannel = () => {
 
   // region [Hooks]
 
-  const currency = useStore(state => state.setting.currency)
+  const krwRef = useRef<HTMLInputElement>(null);
+  const usdRef = useRef<HTMLInputElement>(null);
+  const satRef = useRef<HTMLInputElement>(null);
+
+  const { onClickCopy: onClickCopyToKrw } = useCopyOnClick(krwRef);
+  const { onClickCopy: onClickCopyToUsd } = useCopyOnClick(usdRef);
+  const { onClickCopy: onClickCopyToSat } = useCopyOnClick(satRef);
+
+
+  const currency = useStore(state => state.setting.currency);
   const krwPrice = useStore(state => state.bitcoinPrice.krw);
   const usdPrice = useStore(state => state.bitcoinPrice.usd);
 
@@ -22,7 +32,7 @@ const ConvertPannel = () => {
   const [krw, setKrw] = useState("0");
   const [usd, setUsd] = useState("0");
 
-  const [focusUnit, setFocusUnit] = useState<UnitType>("BTC");
+  const [focusUnit] = useState<UnitType>("BTC");
 
   // endregion
 
@@ -44,7 +54,9 @@ const ConvertPannel = () => {
 
   }, [focusUnit, btcCount, krwPrice, usdPrice]);
 
-  const initializeBtcCount = useCallback(() => { setBtcCount("0"); }, []);
+  const initializeBtcCount = useCallback(() => {
+    setBtcCount("0");
+  }, []);
 
   // endregion
 
@@ -61,10 +73,11 @@ const ConvertPannel = () => {
   // region [Templates]
 
 
-
   const BtcLeftAction = useMemo(() => {
 
-    if (["0", ""].includes(btcCount)) { return null; }
+    if (["0", ""].includes(btcCount)) {
+      return null;
+    }
 
     return (<KIcon icon="close" color="#fff" size={32} onClick={initializeBtcCount} style={{ padding: "6px" }} />);
   }, [btcCount]);
@@ -83,16 +96,22 @@ const ConvertPannel = () => {
 
   // region [templates]
 
+  const SatValue = useMemo(() => (
+    (BigInt(Math.floor(parseFloat(btcCount) * 100000000)) * 1n).toLocaleString()
+  ), [btcCount]);
+
   const KrwNumberField = useMemo(() => (
     <div className="convert-pannel__item">
-      <NumberField className="convert-pannel__item__input" value={krw} onChange={onChangeKrw} unit="KRW" readonly />
+      <NumberField ref={krwRef} className="convert-pannel__item__input clickable" value={krw} onChange={onChangeKrw}
+                   dataCopy={krw} unit="KRW" readonly onClick={onClickCopyToKrw} />
       <span className="convert-pannel__item__sub-text">1BTC / <CountText value={krwPrice} /> KRW</span>
     </div>
   ), [krw, krwPrice]);
 
   const UsdNumberField = useMemo(() => (
     <div className="convert-pannel__item">
-      <NumberField className="convert-pannel__item__input" value={usd} onChange={onChangeUsd} unit="USD" readonly />
+      <NumberField ref={usdRef} className="convert-pannel__item__input clickable" value={usd} onChange={onChangeUsd}
+                   dataCopy={usd} unit="USD" readonly onClick={onClickCopyToUsd} />
       <span className="convert-pannel__item__sub-text">1BTC / <CountText value={usdPrice} /> USD</span>
     </div>
   ), [usd, usdPrice]);
@@ -100,7 +119,12 @@ const ConvertPannel = () => {
   const BtcNumberField = useMemo(() => (
     <div className="convert-pannel__item">
       <NumberField className="convert-pannel__item__input" value={btcCount} onChange={onChangeBtcCount} unit="BTC"
-                   leftAction={BtcLeftAction} />
+                   leftAction={BtcLeftAction} maxLength={15} />
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
+      <span ref={satRef} className="convert-pannel__item__sub-text" data-copy={SatValue} onClick={onClickCopyToSat}>
+        {btcCount}
+        BTC / {SatValue}Sats
+      </span>
     </div>
   ), [btcCount, BtcLeftAction]);
 
@@ -109,8 +133,8 @@ const ConvertPannel = () => {
 
   return (
     <div className="convert-pannel">
-      {currency.includes('KRW') && KrwNumberField}
-      {currency.includes('USD') && UsdNumberField}
+      {currency.includes("KRW") && KrwNumberField}
+      {currency.includes("USD") && UsdNumberField}
       {BtcNumberField}
     </div>
   );

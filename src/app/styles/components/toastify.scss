@@ -1,0 +1,41 @@
+
+:root {
+  --toastify-toast-min-height: 40px;
+  --toastify-color-dark: #212121;
+}
+
+$toast-width: 320px;
+
+.only-btc__toastify.Toastify__toast-container {
+  bottom: calc(env(safe-area-inset-bottom) + 88px);
+  left: 50%;
+  transform: translateX(-50%);
+  width: $toast-width;
+
+  .Toastify__toast {
+    gap: 8px;
+    padding: 6px 22px 7px 8px;
+    border-radius: 1px;
+    font-size: $font-small-size;
+    line-height: 16px;
+    overflow: hidden;
+
+    .Toastify__toast-icon {
+      width: 16px;
+      margin-inline-end: 0;
+    }
+    .confirm__icon { color: $success-color; }
+    .error__icon { color: $error-color; }
+    .block__icon { color: $bitcoin-color; }
+
+    .Toastify__progress-bar--wrp {
+      height: 3px;
+      border-radius: 0;
+    }
+
+    .Toastify__close-button {
+      top: 3px;
+      right: 3px;
+    }
+  }
+}

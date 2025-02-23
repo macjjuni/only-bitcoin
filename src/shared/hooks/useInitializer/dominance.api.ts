@@ -1,6 +1,6 @@
 import { isDev } from "@/shared/utils/common";
 import { valueCheck } from "@/shared/utils/string";
-import { calcCurrentDateDifference } from "@/shared/utils/date";
+import { calcCurrentDateDifference } from "@/shared/lib/date";
 import useStore from "@/shared/stores/store";
 import interval from "@/shared/utils/interval";
 import { floorToDecimal } from "@/shared/utils/number";

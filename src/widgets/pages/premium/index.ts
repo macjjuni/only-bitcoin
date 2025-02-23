@@ -1,0 +1,1 @@
+export { default as PremiumPannel } from "@/widgets/pages/premium/premiumPannel/PremiumPannel"

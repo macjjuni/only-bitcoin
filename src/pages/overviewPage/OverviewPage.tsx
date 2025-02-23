@@ -1,5 +1,6 @@
-import { ChartCard, MacroCard, BlockHalvingCard, PricePannel } from "@/widgets/pages/overview";
+import { BlockHalvingCard, ChartCard, MacroCard, PricePannel } from "@/widgets/pages/overview";
 import "./OverviewPage.scss";
+import { NotKeyNotYourBitcoin } from "@/widgets";
 
 
 export default function OverviewPage() {
@@ -10,6 +11,7 @@ export default function OverviewPage() {
       <MacroCard />
       <BlockHalvingCard />
       <ChartCard />
+      <NotKeyNotYourBitcoin />
     </section>
   );
 }

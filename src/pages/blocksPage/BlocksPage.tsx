@@ -1,9 +1,9 @@
 import { BlocksVisualizer, BlocksExplorer, TxFeeCard, HalvingChartCard, HalvingDataCard } from "@/widgets/pages/blocks";
+import { NotKeyNotYourBitcoin } from "@/widgets";
 import "./BlocksPage.scss";
 
 
 export default function BlocksPage() {
-
 
   // region [Templates]
   // endregion
@@ -15,6 +15,7 @@ export default function BlocksPage() {
       <TxFeeCard />
       <HalvingChartCard />
       <HalvingDataCard />
+      <NotKeyNotYourBitcoin />
     </section>
   );
 }

@@ -1,6 +1,6 @@
 
 
-$number-field-unit-width: 40px;
+$number-field-unit-width: 44px;
 
 .number-field {
     position: relative;
@@ -11,14 +11,14 @@ $number-field-unit-width: 40px;
 
     .number-field__input {
         width: 100%;
-        padding: $spacing-8 $number-field-unit-width $spacing-8 $number-field-unit-width;
+        padding: $spacing-8 $number-field-unit-width $spacing-2 $number-field-unit-width;
         margin: 0;
         color: #fff;
         outline: 0;
         border: none;
         text-align: right;
         font-family: $number-font-family;
-        font-size: $font-heading-sm-size;
+        @include font-heading-sm;
         background-color: transparent;
         caret-color: #fff;
         white-space: nowrap;

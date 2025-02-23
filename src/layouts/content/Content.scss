@@ -4,7 +4,8 @@
     display: flex;
     flex: 1 1 auto;
     width: 100%;
-    padding: $spacing-40;
+    max-width: 1440px;
+    padding: $spacing-40 $spacing-40 0 $spacing-40;
 }
 
 @media screen and (max-width: $mobile-size) {

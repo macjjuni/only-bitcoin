@@ -1,11 +1,5 @@
-import { stringUtil } from "kku-util";
 
-const { getUuid } = stringUtil;
 const commaRegex = /\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g;
-
-function generateUUID() {
-  return getUuid();
-}
 
 export const valueCheck = (val?: string | number | null | object) => {
   return !(val === null || val === undefined || val === "");
@@ -36,4 +30,4 @@ function comma(num: string | number): string {
   return removeDecimalPointValue?.toString()?.replace(commaRegex, ",") || '0';
 }
 
-export { generateUUID, comma };
+export { comma };

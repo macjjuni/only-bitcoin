@@ -1,3 +1,4 @@
+@import "@/app/styles/components/toastify";
 @import "@/app/styles/components/kaccordion";
 
 html, body, div, span, applet, object, iframe,
@@ -104,6 +105,15 @@ body {
     background-position: center 50%;
     background-repeat: no-repeat;
     background-attachment: fixed;
+
+    &::after {
+      content: '';
+      position: absolute;
+      background: #000;
+      z-index: -1;
+      inset: 0;
+      opacity: 0.4;
+    }
   }
 }
 

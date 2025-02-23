@@ -19,10 +19,7 @@ function generateParams(params: CoingeckoMarketChartParams): URLSearchParams {
   });
 }
 
-const params: CoingeckoMarketChartParams = {
-  vs_currency: "usd",
-  days: 0,
-};
+const params: CoingeckoMarketChartParams = { vs_currency: "usd", days: 0 };
 
 
 export async function initializeCoingeckoMarketChart(days: MarketChartIntervalType) {
@@ -30,7 +27,7 @@ export async function initializeCoingeckoMarketChart(days: MarketChartIntervalTy
   const chartData = useStore.getState().marketChartData[days];
   const { setMarketChartData } = useStore.getState();
 
-  // 타임스탬프가 존재하지 않거나 3분이 지났는지 확인
+  // 타임스탬프가 존재하지 않거나 5분이 지났는지 확인
   const isAllow = isFiveMinutesPassed(chartData.timeStamp);
 
   if (isAllow) {
