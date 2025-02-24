@@ -91,7 +91,6 @@ text {
   font-family: variable.$number-font-family;
 }
 
-// safari 스크롤 탄력적인 움직임 방지
 html, body {
   scrollbar-width: none;
   overscroll-behavior: none;
@@ -105,11 +104,12 @@ body {
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: variable.$default-background-color;
+  font-family: variable.$default-font-family;
 
   &.show-bg {
     background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif'); /*이미지 경로지정*/
     background-size: 420px;
-    background-position: center calc(50dvw + 108px - (#{variable.$mobile-bottom-navigation-height} / 2));
+    background-position: center 50%;
     background-repeat: no-repeat;
     background-attachment: fixed;
 

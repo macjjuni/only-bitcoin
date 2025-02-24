@@ -8,7 +8,6 @@ import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 
 const InstallSettingForm = () => {
 
-
   // region [Hooks]
 
   const [isInstallMsg, setIsInstallMsg] = useState(false);
@@ -22,12 +21,12 @@ const InstallSettingForm = () => {
   const onChangeInstallMsg = useCallback((value: boolean) => {
 
     if (value) {
-      setCookie(PWA_COOKIE_KEY, '_', 365);
+      setCookie(PWA_COOKIE_KEY, "_", 365);
     } else {
       deleteCookie(PWA_COOKIE_KEY);
     }
     setIsInstallMsg(value);
-  }, [])
+  }, []);
 
   // endregion
 

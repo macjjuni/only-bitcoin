@@ -38,3 +38,7 @@ export const calcPercentage = (nextHalvingHeight: number | undefined, current: n
 export function deepEqual(obj1: object, obj2: object): boolean {
   return JSON.stringify(obj1, Object.keys(obj1).sort()) === JSON.stringify(obj2, Object.keys(obj2).sort());
 }
+
+export function isSafari() {
+  return (/^((?!chrome|android).)*safari/i.test(navigator.userAgent));
+}

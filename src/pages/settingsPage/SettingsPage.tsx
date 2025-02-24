@@ -7,6 +7,7 @@ import useStore from "@/shared/stores/store";
 import { currencyOptions } from "@/shared/constants/setting";
 import { InstallSettingForm } from "@/widgets/pages/settings";
 import "./SettingsPage.scss";
+import { isSafari } from "@/shared/utils/common";
 
 
 export default function SettingsPage() {
@@ -28,6 +29,8 @@ export default function SettingsPage() {
 
   const isBackgroundImg = useStore(state => state.setting.isBackgroundImg);
   const setIsBackgroundImg = useStore(state => state.setIsBackgroundImg);
+
+  const deferredPrompt = useStore(state => state.setting.deferredPrompt);
 
   // endregion
 
@@ -82,7 +85,7 @@ export default function SettingsPage() {
             setIsBackgroundImg(e);}} />
         </FormRow>
 
-        <InstallSettingForm/>
+        {!isSafari() && deferredPrompt?.userChoice && <InstallSettingForm/>}
 
       </div>
       <NotKeyNotYourBitcoin />

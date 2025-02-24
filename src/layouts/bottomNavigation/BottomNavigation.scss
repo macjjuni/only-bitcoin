@@ -2,9 +2,9 @@
 
 .bottom-navigation {
     display: flex;
-    position: absolute;
-    bottom: 0;
-    left: 0;
+    position: fixed;
+    top: calc(100dvh - #{variable.$mobile-bottom-navigation-height});
+    left: calc((100dvw - #{variable.$max-width-size}) / 2);
     width: 100%;
     max-width: variable.$max-width-size;
     height: variable.$mobile-bottom-navigation-height;
@@ -65,4 +65,8 @@
             }
         }
     }
+}
+
+@media screen and (max-width: variable.$max-width-size) {
+    .bottom-navigation { left: 0; }
 }
