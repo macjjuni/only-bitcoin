@@ -29,14 +29,11 @@
 
 ## 👻 소개
 
-- [x] 비트코인 거래소 시장가 시세 제공(KRW/USD)
-- [x] 한국 프리미엄, 환율(USD/KRW), Fear & Greed Index 지수 제공
-- [x] BTC 계산기
-  - BTC/KRW  <=> KRW/BTC
-  - BTC/USD  <=> USD/BTC
-  - BTC/SAT
-
-<br>
+- [x] 실시간 비트코인 거래소 시장가 제공(KRW/USD)
+- [x] 실시간 비트코인 블록 및 반감기 정보 제공(mempool.space)
+- [x] 비트코인 도미넌스(자체 계산), 한국 프리미엄, 환율(USD/KRW or USDT/KRW), Fear & Greed 지수 제공
+- [x] 실시간 BTC to Fiat 계산기(KRW/USD)
+- 
 
 ## 🪄 리소스 출처
  
@@ -44,16 +41,7 @@
 - [Binance API Docs](https://binance-docs.github.io/apidocs/spot/en/#introduction)
 - [Coin Gecko](https://www.coingecko.com/ko/api/documentation)
 
-<br>
-
-## 📚 업데이트 기록
-
-- MVRV 수치 제거 및 연관 링크로 대체(24.05.06)
-- 프리미엄 페이지 추가(24.05.06) 
-
-
 ## 🏃🏻‍♂️ Getting Started!
-
 ### Package Install
 
 ```
