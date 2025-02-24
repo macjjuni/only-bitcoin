@@ -11,23 +11,43 @@ const PremiumPannel = () => {
 
   // region [Hooks]
 
+  const currency = useStore(state => state.setting.currency);
   const { krw, usd } = useStore(state => state.bitcoinPrice);
   const { value: usdExRate, date } = useStore(state => state.exRate);
+  const isUsdtStandard = useStore(state => state.setting.isUsdtStandard);
 
   // endregion
 
 
   // region [Templates]
 
-  const PremiumDataList = useMemo(() => [
-    { title: "국내 시세", krw, usd: krw / usdExRate },
-    { title: "해외 시세", krw: usd * usdExRate, usd }
-  ], [krw, usd, usdExRate]);
+  const PremiumDataList = useMemo(() => {
+
+    const usdKoreaPrice = krw / usdExRate;
+    const krwGlobalPrice = usd * usdExRate;
+
+    return [
+      { title: "프리미엄", krw: krw - krwGlobalPrice, usd: usdKoreaPrice - usd },
+      { title: "국내 시세", krw, usd: usdKoreaPrice },
+      { title: "해외 시세", krw: krwGlobalPrice, usd }
+    ];
+  }, [krw, usd, usdExRate]);
+
 
   const PremiumLottie = useMemo(() => (
-    <Lottie animationData={premiumData} width="54px" height="54px"
-            style={{ marginLeft: "-8px" }}/>
+    <Lottie animationData={premiumData} width="54px" height="54px" style={{ marginLeft: "-8px" }} />
   ), []);
+
+  const PremiumTopArea = useMemo(() => (
+    <div className="premium-pannel__title">
+      {PremiumLottie}
+      <div className="premium-pannel__title__area">
+        <CountText value={calcPremiumPercent(krw, usd, usdExRate)} decimals={2}
+                   className="premium-pannel__text" />
+        <span className="unit">%</span>
+      </div>
+    </div>
+  ), [krw, usd, usdExRate]);
 
   // endregion
 
@@ -35,14 +55,7 @@ const PremiumPannel = () => {
   return (
     <div className="premium-pannel">
 
-      <div className="premium-pannel__title">
-        {PremiumLottie}
-        <div className="premium-pannel__title__area">
-          <CountText value={calcPremiumPercent(krw, usd, usdExRate)} decimals={2}
-                     className="premium-pannel__text" />
-          <span className="unit">%</span>
-        </div>
-      </div>
+      {PremiumTopArea}
 
       <div className="premium-pannel__content">
         {
@@ -50,26 +63,35 @@ const PremiumPannel = () => {
             <div key={item.title} className="premium-pannel__content__item">
               <div className="premium-pannel__content__item__title">{item.title}</div>
               <div className="premium-pannel__content__item__content">
-                <div className="premium-pannel__content__item__content__item">
-                  <CountText className="price__text" value={item.krw} />
-                  <span className="unit__text">KRW</span>
-                </div>
-                <div className="premium-pannel__content__item__content__item">
-                  <CountText className="price__text" value={item.usd} />
-                  <span className="unit__text">USD</span>
-                </div>
+                {
+                  currency.includes("KRW") && (
+                    <div className="premium-pannel__content__item__content__item">
+                      <CountText className="price__text" value={item.krw} />
+                      <span className="unit__text">KRW</span>
+                    </div>)
+                }
+                {
+                  currency.includes("USD") && (
+                    <div className="premium-pannel__content__item__content__item">
+                      <CountText className="price__text" value={item.usd} />
+                      <span className="unit__text">USD</span>
+                    </div>
+                  )
+                }
               </div>
             </div>
           ))
         }
 
         <div className="premium-pannel__content__item">
-          <div className="premium-pannel__content__item__title">환율(USD/KRW)</div>
+          <div className="premium-pannel__content__item__title">
+            {!isUsdtStandard ? '환율(USD/KRW)' : 'USDT/KRW' }
+          </div>
           <div className="premium-pannel__content__item__content">
             <div className="premium-pannel__content__item__content__item">
               <div className="premium-pannel__content__item__content__item--left">
                 <span className="price__text">1</span>
-                <span className="unit__text">USD</span>
+                <span className="unit__text">{!isUsdtStandard ? 'USD' : 'USDT' }</span>
                 <span className="slash__text">/</span>
                 <CountText className="price__text" value={usdExRate} />
                 <span className="unit__text">KRW</span>
@@ -80,6 +102,7 @@ const PremiumPannel = () => {
             </div>
           </div>
         </div>
+
       </div>
 
     </div>

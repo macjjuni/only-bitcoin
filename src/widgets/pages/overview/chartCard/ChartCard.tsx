@@ -117,6 +117,16 @@ const ChartCard = () => {
 
   // region [Templates]
 
+  const TopLogoArea = useMemo(() => (
+    <div className="chart-card__top__fist__logo">
+      <KIcon icon="bitcoin" color="#fff" size={30} />
+      <p className="chart-card__top__wrapper__text__area">
+        <span className="chart-card__top__wrapper__text__area--top">Bitcoin</span>
+        <span className="chart-card__top__wrapper__text__area--bottom">BTC</span>
+      </p>
+    </div>
+  ), []);
+
   const ButtonIntervalArea = useMemo(() => (
     <div className="chart-card__top__first__button-area">
       {
@@ -156,17 +166,8 @@ const ChartCard = () => {
       <div className="chart-card__top">
 
         <div className="chart-card__top__fist">
-
-          <div className="chart-card__top__fist__logo">
-            <KIcon icon="bitcoin" color="#fff" size={30} />
-            <p className="chart-card__top__wrapper__text__area">
-              <span className="chart-card__top__wrapper__text__area--top">Bitcoin</span>
-              <span className="chart-card__top__wrapper__text__area--bottom">BTC</span>
-            </p>
-          </div>
-
+          {TopLogoArea}
           {ButtonIntervalArea}
-
         </div>
 
         <div className="chart-card__top__second">
