@@ -11,11 +11,11 @@ const useStore = create<StoreType>()(
 
       bitcoinPrice: {
         krw: 0,
-        krwChange24h: '0',
+        krwChange24h: "0",
         krwUpdateTimestamp: 0,
         isKrwConnected: false,
         usd: 0,
-        usdChange24h: '0',
+        usdChange24h: "0",
         usdUpdateTimestamp: 0,
         isUsdConnected: false
       },
@@ -92,6 +92,7 @@ const useStore = create<StoreType>()(
         isUsdtStandard: false,
         isCountUp: true,
         isBackgroundImg: false,
+        deferredPrompt: null
       },
       setInitialPath: (path) => set((state) => ({
         setting: { ...state.setting, initialPath: path }
@@ -108,6 +109,9 @@ const useStore = create<StoreType>()(
       setIsBackgroundImg: (isBackgroundImg) => set((state) => ({
         setting: { ...state.setting, isBackgroundImg }
       })),
+      setDeferredPrompt: (deferredPrompt) => set((state) => ({
+        setting: { ...state.setting, deferredPrompt }
+      }))
 
       // endregion
 

@@ -61,6 +61,7 @@ export interface StoreType {
   setUsdtStandard: (isUsdtStandard: boolean) => void;
   setIsCountUp: (isCountUp: boolean) => void;
   setIsBackgroundImg: (isBackgroundImg: boolean) => void;
+  setDeferredPrompt: (deferredPrompt: BeforeInstallPromptEvent | null) => void;
 
   // endregion
 
@@ -170,6 +171,7 @@ export interface SettingTypes {
   isUsdtStandard: boolean;
   isCountUp: boolean;
   isBackgroundImg: boolean;
+  deferredPrompt: BeforeInstallPromptEvent | null;
 }
 
 export interface FeesTypes {
@@ -178,4 +180,9 @@ export interface FeesTypes {
   halfHourFee: number;
   hourFee: number;
   minimumFee: number;
+}
+
+export interface BeforeInstallPromptEvent extends Event {
+  prompt: () => Promise<void>;
+  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }

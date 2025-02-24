@@ -1,10 +1,13 @@
-import { useMemo } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { KButton, KIcon, KSelect, KSwitch } from "kku-ui";
 import { FormRow, NotKeyNotYourBitcoin } from "@/widgets";
 import { btcColor } from "@/shared/constants/color";
 import router from "@/app/router";
 import useStore from "@/shared/stores/store";
-import { currencyOptions } from "@/shared/constants/setting";
+import { currencyOptions, PWA_COOKIE_KEY } from "@/shared/constants/setting";
+import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
+import { usePwaInstall } from "@/shared/hooks";
+import { InstallSettingForm } from "@/widgets/pages/settings";
 import "./SettingsPage.scss";
 
 
@@ -28,10 +31,34 @@ export default function SettingsPage() {
   const isBackgroundImg = useStore(state => state.setting.isBackgroundImg);
   const setIsBackgroundImg = useStore(state => state.setIsBackgroundImg);
 
+  const [isInstallMsg, setIsInstallMsg] = useState(false);
+
+  const { onClickInstall } = usePwaInstall();
+
   // endregion
 
 
-  // region [styles]
+  // region [Privates]
+
+  const initializeInstallMessage = useCallback(() => {
+    setIsInstallMsg(!!getCookie(PWA_COOKIE_KEY));
+  }, [])
+
+  // endregion
+
+
+  // region [Events]
+
+  const onChangeInstallMsg = useCallback((value: boolean) => {
+
+    if (value) {
+      setCookie(PWA_COOKIE_KEY, '_', 365);
+    } else {
+      deleteCookie(PWA_COOKIE_KEY);
+    }
+    setIsInstallMsg(value);
+  }, [])
+
   // endregion
 
 
@@ -39,6 +66,16 @@ export default function SettingsPage() {
 
   const favoriteRouteOptions = useMemo(() => {
     return router.favoriteRouteList.map(route => ({ title: `${route.title} 페이지`, value: route.path }));
+  }, []);
+
+  // endregion
+
+
+  // region [Life Cycles]
+
+  useEffect(() => {
+
+    initializeInstallMessage();
   }, []);
 
   // endregion
@@ -80,6 +117,8 @@ export default function SettingsPage() {
           <KSwitch value={isBackgroundImg} onChange={(e) => {
             setIsBackgroundImg(e);}} />
         </FormRow>
+
+        <InstallSettingForm/>
 
       </div>
       <NotKeyNotYourBitcoin />
