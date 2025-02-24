@@ -4,10 +4,13 @@ import { CountText, NumberField } from "@/widgets";
 import useStore from "@/shared/stores/store";
 import { comma } from "@/shared/utils/string";
 import { useCopyOnClick } from "@/shared/hooks";
+import storageUitl from "@/shared/utils/storage"
 import "./ConvertPannel.scss";
 
 
 type UnitType = "BTC" | "USD" | "KRW";
+
+const BTC_COUNT_KEY = "BTC_COUNT_KEY" as const;
 
 
 const ConvertPannel = () => {
@@ -58,6 +61,19 @@ const ConvertPannel = () => {
     setBtcCount("0");
   }, []);
 
+  const initializeStorageData = useCallback(() => {
+
+    const btcCountInStorage = storageUitl.getItem(BTC_COUNT_KEY) as string;
+
+    if (btcCountInStorage) {
+      setBtcCount(btcCountInStorage);
+    }
+  }, []);
+
+  const saveStorage = useCallback((value: string) => {
+    storageUitl.setItem(BTC_COUNT_KEY, value);
+  }, []);
+
   // endregion
 
 
@@ -71,7 +87,6 @@ const ConvertPannel = () => {
 
 
   // region [Templates]
-
 
   const BtcLeftAction = useMemo(() => {
 
@@ -88,8 +103,16 @@ const ConvertPannel = () => {
   // region [Life Cycles]
 
   useEffect(() => {
+    initializeStorageData();
+  }, []);
+
+  useEffect(() => {
     synchronizeValue();
   }, [btcCount, krwPrice, usdPrice]);
+
+  useEffect(() => {
+    saveStorage(btcCount);
+  }, [btcCount]);
 
   // endregion
 
