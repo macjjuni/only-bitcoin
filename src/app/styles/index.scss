@@ -1,5 +1,10 @@
-@import "@/app/styles/components/toastify";
-@import "@/app/styles/components/kaccordion";
+@use "@/app/styles/variable";
+@use "@/app/styles/mixin";
+@forward "@/app/styles/fonts";
+
+@use "@/app/styles/components/toastify";
+@use "@/app/styles/components/kaccordion";
+
 
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
@@ -18,7 +23,7 @@ time, mark, audio, video {
   padding: 0;
   border: 0;
   font-size: 100%;
-  font-family: $default-font-family;
+  font-family: variable.$default-font-family;
   vertical-align: baseline;
 }
 
@@ -49,12 +54,12 @@ table {
 
 a {
   width: 100%;
-  color: $link-color;
+  color: variable.$link-color;
   text-decoration: none;
 }
 
 .dark a {
-  color: $link-color;
+  color: variable.$link-color;
   text-decoration: none;
 }
 
@@ -64,8 +69,8 @@ a:hover, a:active {
 
 * {
   box-sizing: border-box;
-  margin: 0 auto;
-  font-family: $default-font-family;
+  margin: 0;
+  font-family: variable.$default-font-family;
 }
 
 button {
@@ -83,7 +88,7 @@ svg {
 }
 
 text {
-  font-family: $number-font-family;
+  font-family: variable.$number-font-family;
 }
 
 // safari 스크롤 탄력적인 움직임 방지
@@ -96,15 +101,15 @@ html, body {
 body {
   margin: 0;
   line-height: 1;
-  color: $default-font-color;
+  color: variable.$default-font-color;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: $default-background-color;
+  background-color: variable.$default-background-color;
 
   &.show-bg {
     background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif'); /*이미지 경로지정*/
     background-size: 420px;
-    background-position: center calc((100dvw / 2) + 108px - ($mobile-bottom-navigation-height / 2));
+    background-position: center calc(50dvw + 108px - (#{variable.$mobile-bottom-navigation-height} / 2));
     background-repeat: no-repeat;
     background-attachment: fixed;
 

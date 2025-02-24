@@ -1,4 +1,4 @@
-
+@use "@/app/styles/variable";
 
 .bottom-navigation {
     display: flex;
@@ -6,14 +6,14 @@
     bottom: 0;
     left: 0;
     width: 100%;
-    max-width: $max-width-size;
-    height: $mobile-bottom-navigation-height;
-    border: 1px solid $border-color;
+    max-width: variable.$max-width-size;
+    height: variable.$mobile-bottom-navigation-height;
+    border: 1px solid variable.$border-color;
     border-bottom: none;
     padding-bottom: 8px;
     border-top-left-radius: 16px;
     border-top-right-radius: 16px;
-    background: $default-background-color;
+    background: variable.$default-background-color;
     overflow: hidden;
     z-index: 9999;
 
@@ -32,15 +32,15 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                padding: $spacing-8;
-                border-radius: $default-border-radius;
+                padding: variable.$spacing-8;
+                border-radius: variable.$default-border-radius;
                 font-size: 0;
                 z-index: 1;
 
 
 
                 & svg { color: #444444; }
-                &.active svg { color: $bitcoin-color; }
+                &.active svg { color: variable.$bitcoin-color; }
 
                 & + .bottom-navigation__list__item__focus-bg {
                     position: absolute;

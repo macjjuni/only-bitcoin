@@ -1,5 +1,5 @@
-
+@use "@/app/styles/mixin";
 
 .btc-2-fiat-page__area {
-    @include PageLayout;
+    @include mixin.PageLayout;
 }

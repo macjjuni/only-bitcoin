@@ -2,6 +2,7 @@ import { memo, useMemo } from "react";
 import CountUp from "react-countup";
 import { ComponentBaseTypes } from "@/shared/types/base.interface";
 import useStore from "@/shared/stores/store";
+import "./CountText.scss";
 
 
 interface CountTextTypes extends ComponentBaseTypes {
@@ -33,7 +34,7 @@ const CountText = (props: CountTextTypes) => {
   // endregion
 
 
-  return (<CountUp className={className} start={startValue} end={value} duration={duration}
+  return (<CountUp className={`count__text ${className}`} start={startValue} end={value} duration={duration}
                    decimals={decimals} separator={separator} />);
 };
 

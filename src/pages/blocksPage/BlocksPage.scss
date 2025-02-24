@@ -1,4 +1,5 @@
+@use "@/app/styles/mixin";
 
 .block-page__area {
-  @include PageLayout;
+  @include mixin.PageLayout;
 }

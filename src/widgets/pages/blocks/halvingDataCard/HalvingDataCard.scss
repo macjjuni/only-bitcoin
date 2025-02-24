@@ -1,10 +1,12 @@
+@use "@/app/styles/variable";
+@use "@/app/styles/mixin";
 
 .halving-data-card__area {
 
     .k-accordion__summary {
         .k-accordion__summary__container {
             .k-accordion__summary__text {
-                @include font-body;
+                @include mixin.font-body;
                 font-weight: bold;
             }
         }
@@ -28,10 +30,10 @@
             .halving__label, .halving__text {
                 width: auto;
                 white-space: nowrap;
-                padding: $spacing-2 $spacing-8;
-                border-bottom: 1px solid $border-color;
-                @include font-body;
-                font-family: $number-font-family;
+                padding: variable.$spacing-2 variable.$spacing-8;
+                border-bottom: 1px solid variable.$border-color;
+                @include mixin.font-body;
+                font-family: variable.$number-font-family;
 
                 &:first-child {font-weight: bold;}
                 &:last-child { border: none; }

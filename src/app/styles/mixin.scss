@@ -1,33 +1,34 @@
+@use "./variable";
 
 // region [Font Sizes]
 
 @mixin font-heading-lg {
-    font-size: $font-heading-lg-size;
-    line-height: $line-height-heading-lg-size;
+    font-size: variable.$font-heading-lg-size;
+    line-height: variable.$line-height-heading-lg-size;
 }
 @mixin font-heading-md {
-    font-size: $font-heading-md-size;
-    line-height: $line-height-heading-md-size;
+    font-size: variable.$font-heading-md-size;
+    line-height: variable.$line-height-heading-md-size;
 }
 @mixin font-heading-sm {
-    font-size: $font-heading-sm-size;
-    line-height: $line-height-heading-sm-size;
+    font-size: variable.$font-heading-sm-size;
+    line-height: variable.$line-height-heading-sm-size;
 }
 @mixin font-heading-sm {
-    font-size: $font-heading-sm-size;
-    line-height: $line-height-heading-sm-size;
+    font-size: variable.$font-heading-sm-size;
+    line-height: variable.$line-height-heading-sm-size;
 }
 @mixin font-title {
-    font-size: $font-title-size;
-    line-height: $line-height-title-size;
+    font-size: variable.$font-title-size;
+    line-height: variable.$line-height-title-size;
 }
 @mixin font-sub-title {
-    font-size: $font-sub-title-size;
-    line-height: $line-height-sub-title-size;
+    font-size: variable.$font-sub-title-size;
+    line-height: variable.$line-height-sub-title-size;
 }
 @mixin font-body {
-    font-size: $font-body-size;
-    line-height: $line-height-body-size;
+    font-size: variable.$font-body-size;
+    line-height: variable.$line-height-body-size;
 }
 
 // endregion
@@ -38,7 +39,7 @@
 @mixin logo-font-style {
     font-size: 20px;
     font-weight: bold;
-    color: $font-color;
+    color: variable.$font-color;
     text-decoration: none;
 }
 
@@ -51,7 +52,7 @@
     display: flex;
     flex-direction: column;
     flex: 0 0 auto;
-    gap: $spacing-12;
+    gap: variable.$spacing-12;
     width: 100%;
 }
 

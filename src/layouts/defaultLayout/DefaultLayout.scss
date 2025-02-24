@@ -1,20 +1,22 @@
+@use "@/app/styles/variable";
+
 
 .only-btc__layout {
     position: relative;
     display: flex;
     flex-direction: column;
-    max-width: $max-width-size;
+    max-width: variable.$max-width-size;
     width: 100%;
     min-height: 100dvh;
     padding: 0;
     margin: 0 auto;
-    border-left: 1px solid $border-color;
-    border-right: 1px solid $border-color;
-    background-color: $body-background-color;
+    border-left: 1px solid variable.$border-color;
+    border-right: 1px solid variable.$border-color;
+    background-color: variable.$body-background-color;
     overflow-x: hidden;
 }
 
-@media screen and (max-width: $max-width-size) {
+@media screen and (max-width: variable.$max-width-size) {
     .only-btc__layout {
         border: none;
     }

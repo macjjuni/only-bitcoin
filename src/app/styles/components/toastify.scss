@@ -1,3 +1,5 @@
+@use "../variable";
+
 
 :root {
   --toastify-toast-min-height: 40px;
@@ -16,7 +18,7 @@ $toast-width: 320px;
     gap: 8px;
     padding: 6px 22px 7px 8px;
     border-radius: 1px;
-    font-size: $font-small-size;
+    font-size: variable.$font-small-size;
     line-height: 16px;
     overflow: hidden;
 
@@ -24,9 +26,9 @@ $toast-width: 320px;
       width: 16px;
       margin-inline-end: 0;
     }
-    .confirm__icon { color: $success-color; }
-    .error__icon { color: $error-color; }
-    .block__icon { color: $bitcoin-color; }
+    .confirm__icon { color: variable.$success-color; }
+    .error__icon { color: variable.$error-color; }
+    .block__icon { color: variable.$bitcoin-color; }
 
     .Toastify__progress-bar--wrp {
       height: 3px;

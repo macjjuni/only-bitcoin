@@ -1,5 +1,5 @@
-
+@use "@/app/styles/mixin";
 
 .premium-page__area {
-    @include PageLayout;
+    @include mixin.PageLayout;
 }

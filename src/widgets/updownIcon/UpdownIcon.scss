@@ -1,7 +1,7 @@
-
+@use "@/app/styles/variable";
 
 .updown-icon {
 
-  &.updown-icon--up { color: $price-long-color; }
-  &.updown-icon--down { color: $price-short-color; }
+  &.updown-icon--up { color: variable.$price-long-color; }
+  &.updown-icon--down { color: variable.$price-short-color; }
 }

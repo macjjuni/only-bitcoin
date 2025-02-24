@@ -1,4 +1,5 @@
-
+@use "@/app/styles/variable";
+@use "@/app/styles/mixin";
 
 .pwa-install__alarm {
     position: fixed;
@@ -6,28 +7,28 @@
     left: 50%;
     transform: translateX(-50%);
     width: 320px;
-    padding: $spacing-32 $spacing-16 $spacing-16 $spacing-16;
-    border: 1px solid $border-color;
+    padding: variable.$spacing-32 variable.$spacing-16 variable.$spacing-16 variable.$spacing-16;
+    border: 1px solid variable.$border-color;
     background-color: #1b1b1b;
     transition: top 0.64s ease;
     box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;
-    border-radius: $default-border-radius;
+    border-radius: variable.$default-border-radius;
     animation: showAlarm 0.6s ease forwards 0.3s;
     z-index: 9999;
 
     .pwa-install__alarm__close-button {
         position: absolute;
-        top: $spacing-8;
-        right: $spacing-8;
+        top: variable.$spacing-8;
+        right: variable.$spacing-8;
     }
 
     .pwa-install__alarm__content {
         display: flex;
         justify-content: space-between;
         align-items: flex-start;
-        gap: $spacing-16;
-        margin-bottom: $spacing-16;
-        @include font-body;
+        gap: variable.$spacing-16;
+        margin-bottom: variable.$spacing-16;
+        @include mixin.font-body;
 
         .pwa-install__alarm__content__icon {
             min-width: 36px;
@@ -38,11 +39,11 @@
         display: flex;
         justify-content: center;
         align-items: center;
-        gap: $spacing-8;
+        gap: variable.$spacing-8;
     }
 }
 
 @keyframes showAlarm {
     0% { top: -160px; }
-    100% { top: $spacing-32; }
+    100% { top: variable.$spacing-32; }
 }

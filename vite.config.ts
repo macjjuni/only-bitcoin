@@ -28,15 +28,6 @@ export default defineConfig(({ mode }: { mode: string }) => {
         inject: { data: { title: env.VITE_TITLE, url: env.VITE_URL } }
       }),
     ],
-    css: {
-      preprocessorOptions: {
-        scss: {
-          additionalData: "@import \"@/app/styles/variable\";\n" +
-            "@import \"@/app/styles/fonts\";\n" +
-            "@import \"@/app/styles/mixin\";"
-        }
-      }
-    },
     build: {
       minify: "terser",
       terserOptions: {
