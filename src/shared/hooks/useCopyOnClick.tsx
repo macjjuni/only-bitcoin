@@ -1,4 +1,4 @@
-import { RefObject, useCallback, useEffect } from "react";
+import { RefObject, useCallback } from "react";
 import { clipboardUtil } from "kku-util";
 import { toast } from "react-toastify";
 

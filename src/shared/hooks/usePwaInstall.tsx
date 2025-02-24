@@ -1,4 +1,4 @@
-import { useCallback, useEffect } from "react";
+import { useCallback } from "react";
 import { setCookie } from "@/shared/utils/cookie";
 import useStore from "@/shared/stores/store";
 import { BeforeInstallPromptEvent } from "@/shared/stores/store.interface";
