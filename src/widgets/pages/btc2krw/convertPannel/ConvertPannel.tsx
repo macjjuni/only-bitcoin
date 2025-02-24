@@ -118,7 +118,7 @@ const ConvertPannel = () => {
 
   const BtcNumberField = useMemo(() => (
     <div className="convert-pannel__item">
-      <NumberField className="convert-pannel__item__input" value={btcCount} onChange={onChangeBtcCount} unit="BTC"
+      <NumberField className="convert-pannel__item__input btc-count__number-field" value={btcCount} onChange={onChangeBtcCount} unit="BTC"
                    leftAction={BtcLeftAction} maxLength={15} />
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
       <span ref={satRef} className="convert-pannel__item__sub-text" data-copy={SatValue} onClick={onClickCopyToSat}>

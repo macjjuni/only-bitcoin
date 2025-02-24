@@ -1,11 +1,12 @@
 
 
 .bottom-navigation {
-    display: none;
-    position: fixed;
+    display: flex;
+    position: absolute;
     bottom: 0;
     left: 0;
     width: 100%;
+    max-width: $max-width-size;
     height: $mobile-bottom-navigation-height;
     border: 1px solid $border-color;
     border-bottom: none;
@@ -65,9 +66,3 @@
         }
     }
 }
-
-
-@media screen and (max-width: $mobile-size) {
-    .bottom-navigation { display: flex; }
-}
-

@@ -88,7 +88,9 @@ text {
 
 // safari 스크롤 탄력적인 움직임 방지
 html, body {
+  scrollbar-width: none;
   overscroll-behavior: none;
+  &::-webkit-scrollbar { display: none; }
 }
 
 body {
@@ -101,8 +103,8 @@ body {
 
   &.show-bg {
     background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif'); /*이미지 경로지정*/
-    background-size: 600px;
-    background-position: center 50%;
+    background-size: 420px;
+    background-position: center calc((100dvw / 2) + 108px - ($mobile-bottom-navigation-height / 2));
     background-repeat: no-repeat;
     background-attachment: fixed;
 
@@ -116,15 +118,3 @@ body {
     }
   }
 }
-
-@media screen and (max-width: $mobile-size) {
-  html {
-    scrollbar-width: none;
-    &::-webkit-scrollbar { display: none; }
-  }
-  body.show-bg {
-    background-size: 420px;
-    background-position: center calc((100dvw / 2) + 108px - ($mobile-bottom-navigation-height / 2));
-  }
-}
-

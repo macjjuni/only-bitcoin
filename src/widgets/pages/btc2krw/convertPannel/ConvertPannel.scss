@@ -13,6 +13,10 @@
     .convert-pannel__item__input {
       &.clickable { cursor: pointer; }
       .number-field__input { font-weight: bold; }
+
+      &.btc-count__number-field > .number-field__input {
+        padding: $spacing-8 $spacing-44 $spacing-8 $spacing-44;
+      }
     }
     .convert-pannel__item__sub-text {
       text-align: right;

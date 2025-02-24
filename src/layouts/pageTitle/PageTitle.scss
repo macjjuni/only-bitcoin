@@ -6,15 +6,9 @@
     justify-content: flex-start;
     align-items: center;
     gap: $spacing-4;
-    padding: $spacing-12 $spacing-16 0 $spacing-16;
+    padding: $spacing-8 $spacing-16 0 $spacing-16;
     color: #fff;
     @include font-heading-sm;
     font-weight: bold;
     font-family: $number-font-family;
 }
-
-@media screen and (max-width: $mobile-size) {
-
-    .page-title { padding: $spacing-8 $spacing-16 0 $spacing-16; }
-}
-
