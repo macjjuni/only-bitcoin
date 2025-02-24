@@ -1,14 +1,10 @@
 import { useCallback, useEffect } from "react";
-import { useResizeOver } from "@/shared/hooks/index";
 
 
 export default function useDisabledZoom() {
 
 
   // region [Privates]
-
-  const { isOver: isDeskTopSize } = useResizeOver();
-
   // endregion
 
 
@@ -34,13 +30,12 @@ export default function useDisabledZoom() {
   // region [LifeCycles]
 
   useEffect(() => {
+    disabledZoomEvent();
 
-    if (!isDeskTopSize) {
-      disabledZoomEvent();
-    } else {
+    return () => {
       enabledZoomEvent();
     }
-  }, [isDeskTopSize]);
+  }, []);
 
   // endregion
 }

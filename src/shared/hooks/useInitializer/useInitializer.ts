@@ -9,6 +9,7 @@ import initializeFeerGreedIndex from "./feerGreedIndex.api";
 import googleAnalytics from "./googleAnalytics";
 import useStore from "@/shared/stores/store";
 import useDisabledZoom from "@/shared/hooks/useDisabledZoom";
+import { usePwaInstall } from "@/shared/hooks";
 
 
 export default function useInitializer() {
@@ -23,6 +24,7 @@ export default function useInitializer() {
 
   useDisabledZoom();
   googleAnalytics();
+  const { initializePwaInstall } = usePwaInstall();
 
   // endregion
 
@@ -52,6 +54,7 @@ export default function useInitializer() {
   // 시작 페이지 로직
   useEffect(() => {
     initializePage();
+    initializePwaInstall();
   }, []);
 
   // 초기 설정 셋팅
