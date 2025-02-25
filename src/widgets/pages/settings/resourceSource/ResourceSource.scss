@@ -1,0 +1,18 @@
+@use "@/app/styles/variable";
+@use "@/app/styles/mixin";
+
+.resource-source {
+
+    .resource-source__list {
+        display: flex;
+        flex-direction: column;
+        gap: variable.$spacing-8;
+        list-style-type: disc;
+        padding-left: variable.$spacing-16;
+
+        .resource-source__list__item {
+            @include mixin.font-body;
+            //font-size: variable.$font-small-size;
+        }
+    }
+}

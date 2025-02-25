@@ -1,0 +1,50 @@
+@use '@/app/styles/variable';
+
+#only-bitcoin {
+
+    .k-accordion.form-row__accordion {
+        position: relative;
+        min-height: 54px;
+        border: none;
+        box-shadow: none;
+        border-radius: 0;
+
+        &:after {
+            content: '';
+            position: absolute;
+            bottom: 0;
+            right: 0;
+            height: 0.5px;
+            width: 88%;
+            background-color: variable.$border-color;
+        }
+
+        &:first-child {
+            border-top-left-radius: 8px;
+            border-top-right-radius: 8px;
+        }
+        &:last-child {
+            border-bottom-left-radius: 8px;
+            border-bottom-right-radius: 8px;
+            &:after { content: none; }
+        }
+
+        .k-accordion__summary {
+            min-height: 54px;
+            padding: 0 variable.$spacing-16;
+            border-bottom: none;
+            background-color: #171717;
+
+            .form-row__accordion__label__area {
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                gap: variable.$spacing-12;
+
+                .form-row__accordion__label__area__text {
+                    font-size: variable.$font-body-size;
+                }
+            }
+        }
+    }
+}

@@ -4,7 +4,7 @@
 :root {
   --toastify-toast-min-height: 40px;
   --toastify-color-dark: #212121;
-  --toastify-font-family: variable.$default-font-family;
+  --toastify-font-family: #{variable.$default-font-family};
 }
 
 $toast-width: 320px;

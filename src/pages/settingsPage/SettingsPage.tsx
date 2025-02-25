@@ -1,11 +1,11 @@
-import { useMemo } from "react";
+import { useCallback, useMemo } from "react";
 import { KButton, KIcon, KSelect, KSwitch } from "kku-ui";
-import { FormRow, NotKeyNotYourBitcoin } from "@/widgets";
+import { NotKeyNotYourBitcoin } from "@/widgets";
 import { btcColor } from "@/shared/constants/color";
 import router from "@/app/router";
 import useStore from "@/shared/stores/store";
 import { currencyOptions } from "@/shared/constants/setting";
-import { InstallSettingForm } from "@/widgets/pages/settings";
+import { InstallSettingForm, FormRow, ResourceSource } from "@/widgets/pages/settings";
 import "./SettingsPage.scss";
 import { isSafari } from "@/shared/utils/common";
 
@@ -36,6 +36,15 @@ export default function SettingsPage() {
 
 
   // region [Privates]
+
+  const onRouteToFeedback= useCallback(() => {
+    const anchorTag = document.createElement('a');
+    anchorTag.href = 'https://x.com/kkusaeng/status/1675907004320333825';
+    anchorTag.target = "_blank";
+    anchorTag.click();
+    anchorTag.remove();
+  }, []);
+
   // endregion
 
 
@@ -72,20 +81,29 @@ export default function SettingsPage() {
 
         <FormRow icon={<KIcon icon="tether" size={24} />} label="USDT 기준 환율 적용">
           <KSwitch value={isUsdtStandard} onChange={(e) => {
-            setUsdtStandard(e);}} />
+            setUsdtStandard(e);
+          }} />
         </FormRow>
 
         <FormRow icon={<KIcon icon="visibility" size={24} color="#c2c2c2" />} label="카운트 업 애니메이션">
           <KSwitch value={isCountUp} onChange={(e) => {
-            setIsCountUp(e);}} />
+            setIsCountUp(e);
+          }} />
         </FormRow>
 
         <FormRow icon={<KIcon icon="bitcoin_square" size={24} color="#c2c2c2" />} label="배경 이미지">
           <KSwitch value={isBackgroundImg} onChange={(e) => {
-            setIsBackgroundImg(e);}} />
+            setIsBackgroundImg(e);
+          }} />
         </FormRow>
 
-        {!isSafari() && deferredPrompt?.userChoice && <InstallSettingForm/>}
+        {!isSafari() && deferredPrompt?.userChoice && <InstallSettingForm />}
+
+        <ResourceSource />
+
+        <FormRow icon={<KIcon icon="x_logo" size={24}/>} label="피드백">
+          <KButton label="이동" onClick={onRouteToFeedback} />
+        </FormRow>
 
       </div>
       <NotKeyNotYourBitcoin />
