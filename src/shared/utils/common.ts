@@ -39,11 +39,3 @@ export function deepEqual(obj1: object, obj2: object): boolean {
   return JSON.stringify(obj1, Object.keys(obj1).sort()) === JSON.stringify(obj2, Object.keys(obj2).sort());
 }
 
-export function isSafari() {
-  return (
-    navigator.userAgent.includes('Safari') &&
-    !navigator.userAgent.includes('Chrome') &&
-    navigator.vendor === 'Apple Computer, Inc.'
-  );
-}
-
