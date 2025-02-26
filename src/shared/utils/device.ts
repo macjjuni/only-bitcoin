@@ -17,8 +17,11 @@ export function isIOSSafari() {
   );
 }
 
+interface NavigatorWithStandalone extends Navigator {
+  standalone?: boolean;
+}
 export function isIOSPWA(): boolean {
-  const navigatorStandalone = (window.navigator as any).standalone;
+  const navigatorStandalone = (window.navigator as NavigatorWithStandalone).standalone;
   const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigatorStandalone;
 
   return Boolean(isStandalone);
