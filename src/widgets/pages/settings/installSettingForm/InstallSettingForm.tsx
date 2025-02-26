@@ -1,8 +1,8 @@
-import { memo, useCallback, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import { KButton, KIcon, KSwitch } from "kku-ui";
 import { FormRow } from "@/widgets/pages/settings";
 import { usePwaInstall } from "@/shared/hooks";
-import { deleteCookie, setCookie } from "@/shared/utils/cookie";
+import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 
 
@@ -12,6 +12,15 @@ const InstallSettingForm = () => {
 
   const [isInstallMsg, setIsInstallMsg] = useState(false);
   const { onClickInstall } = usePwaInstall();
+
+  // endregion
+
+
+  // region [Privates]
+
+  const initializeInstallMsg = useCallback(() => {
+    setIsInstallMsg(!!getCookie(PWA_COOKIE_KEY));
+  }, [])
 
   // endregion
 
@@ -26,6 +35,15 @@ const InstallSettingForm = () => {
       deleteCookie(PWA_COOKIE_KEY);
     }
     setIsInstallMsg(value);
+  }, []);
+
+  // endregion
+
+
+  // region [Life Cycles]
+
+  useEffect(() => {
+    initializeInstallMsg();
   }, []);
 
   // endregion
