@@ -2,11 +2,18 @@ import { memo, useMemo } from "react";
 import { KAccordion } from "kku-ui";
 import { blockHalvingData } from "@/shared/constants/block";
 import "./HalvingDataCard.scss";
+import useStore from "@/shared/stores/store";
 
 
 const HalvingDataCard = () => {
 
   // region [Templates]
+
+  const currentBlockHeight = useStore(state=> state.blockData[0].height || 0);
+
+  const nextHalvingIndex = useMemo(() => (
+    blockHalvingData.findIndex(({ blockHeight }) => blockHeight > currentBlockHeight)
+  ), [currentBlockHeight]);
 
   const HalvingDataList = useMemo(()=> [
     {label: '순서', items: blockHalvingData.map(({ date }, idx) => ({value: idx+1, key: date}))},
@@ -26,8 +33,10 @@ const HalvingDataCard = () => {
 
             <div key={label} className="halving-data-card__area__list__item">
               <div className="halving__label">{label}</div>
-              {items.map(({value, key})=> (
-                <div key={key} className="halving__text">{value}</div>
+              {items.map(({value, key}, idx)=> (
+                <div key={key} className={`halving__text ${nextHalvingIndex === idx ? 'active' : ''}`}>
+                  {value}
+                </div>
               ))}
             </div>
 

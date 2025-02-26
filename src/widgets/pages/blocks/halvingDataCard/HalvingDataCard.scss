@@ -37,6 +37,11 @@
 
                 &:first-child {font-weight: bold;}
                 &:last-child { border: none; }
+
+                &.active {
+                    font-weight: bold;
+                    color: variable.$bitcoin-color;
+                }
             }
         }
     }
