@@ -2,6 +2,12 @@
 
 .updown-icon {
 
-  &.updown-icon--up { color: variable.$price-long-color; }
-  &.updown-icon--down { color: variable.$price-short-color; }
+  &.updown-icon--up {
+    color: variable.$price-long-color;
+    fill: variable.$price-long-color;
+  }
+  &.updown-icon--down {
+    color: variable.$price-short-color;
+    fill: variable.$price-short-color;
+  }
 }

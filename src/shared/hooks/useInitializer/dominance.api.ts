@@ -1,10 +1,11 @@
+import { toast } from "react-toastify";
 import { isDev } from "@/shared/utils/common";
 import { valueCheck } from "@/shared/utils/string";
 import { calcCurrentDateDifference } from "@/shared/lib/date";
 import useStore from "@/shared/stores/store";
 import interval from "@/shared/utils/interval";
 import { floorToDecimal } from "@/shared/utils/number";
-// import { toast } from "react-toastify";
+
 
 const btcDUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false";
 
@@ -82,7 +83,7 @@ export default async function initializeBitcoinDominance(): Promise<void> {
       setDominance({ value: floorToDecimal(dominancePercent, 2), timestamp: Date.now() });
     } catch (e) {
       console.error(e);
-      // toast.error("비트코인 도미넌스 업데이트 오류 🕷️");
+      toast.error("비트코인 도미넌스 업데이트 실패️");
     }
   };
 

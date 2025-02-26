@@ -12,7 +12,7 @@ export default function useCopyOnClick(refElement: RefObject<HTMLElement|null>) 
     const text = refElement.current?.dataset.copy  || '';
     const isCopySuccess = await clipboardUtil.copyToClipboard(text);
 
-    if (isCopySuccess) { toast.success(`"${text}" 복사`); }
+    if (isCopySuccess) { toast.success(`"${text}" 복사 완료`); }
   }, []);
 
 

@@ -36,6 +36,9 @@
             white-space: nowrap;
             font-weight: bold;
         }
+        .underline {
+            text-decoration: underline;
+        }
 
         & > svg{
             min-width: 24px;
