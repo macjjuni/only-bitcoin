@@ -56,7 +56,7 @@ export default function SettingsPage() {
 
   // endregion
 
-
+  
   return (
     <div className="settings-page__area">
 

@@ -40,5 +40,10 @@ export function deepEqual(obj1: object, obj2: object): boolean {
 }
 
 export function isSafari() {
-  return (/^((?!chrome|android).)*safari/i.test(navigator.userAgent));
+  return (
+    navigator.userAgent.includes('Safari') &&
+    !navigator.userAgent.includes('Chrome') &&
+    navigator.vendor === 'Apple Computer, Inc.'
+  );
 }
+

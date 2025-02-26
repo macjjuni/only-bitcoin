@@ -27,6 +27,10 @@ export default function usePwaInstall() {
     window.addEventListener("beforeinstallprompt", initializeDeferredPrompt);
   }, []);
 
+  const clearPwaInstall = useCallback(() => {
+    window.removeEventListener("beforeinstallprompt", initializeDeferredPrompt);
+  }, []);
+
   const onNoRenderOneDay = useCallback(() => {
     setCookie(PWA_COOKIE_KEY, "_", 1);
   }, []);
@@ -46,7 +50,11 @@ export default function usePwaInstall() {
       if (choiceResult?.outcome === "accepted") {
         console.log("사용자가 PWA를 설치했습니다.");
       } else {
-        window.location.reload();
+        clearPwaInstall();
+
+        setTimeout(() => {
+          initializePwaInstall();
+        }, 0)
       }
     }
   }, [deferredPrompt]);
