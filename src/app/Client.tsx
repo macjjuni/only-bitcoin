@@ -5,7 +5,7 @@ import Content from "@/layouts/content/Content";
 import BottomNavigation from "@/layouts/bottomNavigation/BottomNavigation";
 import { useInitializer } from "@/shared/hooks";
 import { toastOptions } from "@/shared/lib/toast";
-import { PwaInstallAlarm } from "@/widgets";
+import { PwaInstallAlarm, PwaInstallAlarmIOS } from "@/widgets";
 
 
 export default function Client() {
@@ -25,6 +25,7 @@ export default function Client() {
         <BottomNavigation />
       </DefaultLayout>
       <PwaInstallAlarm />
+      <PwaInstallAlarmIOS />
       <ToastContainer {...toastOptions} />
     </>
   );

@@ -5,9 +5,9 @@ import { btcColor } from "@/shared/constants/color";
 import router from "@/app/router";
 import useStore from "@/shared/stores/store";
 import { currencyOptions } from "@/shared/constants/setting";
+import { isSafari } from "@/shared/utils/device";
 import { InstallSettingForm, FormRow, ResourceSource } from "@/widgets/pages/settings";
 import "./SettingsPage.scss";
-import { isSafari } from "@/shared/utils/common";
 
 
 export default function SettingsPage() {
@@ -56,11 +56,14 @@ export default function SettingsPage() {
 
   // endregion
 
-  
+
   return (
     <div className="settings-page__area">
 
       <div className="settings-page__area__form__area">
+
+
+
         <FormRow icon={<KIcon icon="star" color={btcColor} />} label="시작 페이지">
           <KSelect value={initialPath} width="176px" onChange={(path) => {
             setInitialPath(path);
@@ -101,10 +104,9 @@ export default function SettingsPage() {
 
         <ResourceSource />
 
-        <FormRow icon={<KIcon icon="x_logo" size={24}/>} label="피드백">
+        <FormRow icon={<KIcon icon="x_logo" size={24} />} label="피드백">
           <KButton label="이동" onClick={onRouteToFeedback} />
         </FormRow>
-
       </div>
       <NotKeyNotYourBitcoin />
     </div>

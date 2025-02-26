@@ -12,8 +12,8 @@ const PwaInstallAlarm = () => {
   // region [Hooks]
 
   const rootRef = useRef<HTMLDivElement>(null);
-  const { deferredPrompt, onClickInstall, onClickDisabled } = usePwaInstall();
   const [isRender, setIsRender] = useState(false);
+  const { deferredPrompt, onClickInstall, onClickDisabled } = usePwaInstall();
 
   // endregion
 
