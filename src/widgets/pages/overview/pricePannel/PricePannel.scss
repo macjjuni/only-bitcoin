@@ -38,8 +38,10 @@
         gap: variable.$spacing-4;
         font-size: variable.$font-small-size;
 
-        .k-icon.up { color: variable.$price-long-color; }
-        .k-icon.down { color: variable.$price-short-color; }
+        .percent__text {
+          width: 60px;
+          text-align: right;
+        }
       }
     }
 

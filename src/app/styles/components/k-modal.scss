@@ -1,0 +1,14 @@
+@use "../variable";
+
+#only-bitcoin ~ .k-modal__wrapper {
+    z-index: 1000;
+
+    .k-modal-wrapper__overlay.k-modal-wrapper__overlay--active {
+        opacity: 1;
+        background-color: rgba(0,0,0, 0.8);
+    }
+
+    .k-modal__container {
+        background-color: #1a1a1a;
+    }
+}

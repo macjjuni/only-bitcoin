@@ -45,6 +45,7 @@ const PricePannel = () => {
               <div className={`price-pannel__price__area__${code.toLowerCase()}__percent`}>
                 <UpdownIcon isUp={percent > 0} />
                 <span className="percent__text">
+                  {percent  > 0 && '+'}
                   <CountText value={percent} decimals={2} />%
                 </span>
               </div>

@@ -1,0 +1,1 @@
+export { default as FeerAndGreedModal } from "@/widgets/modal/feerAndGreedModal/FeerAndGreedModal";

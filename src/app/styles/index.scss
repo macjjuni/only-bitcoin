@@ -3,7 +3,8 @@
 @forward "@/app/styles/fonts";
 
 @use "@/app/styles/components/toastify";
-@use "@/app/styles/components/kaccordion";
+@use "@/app/styles/components/k-modal";
+@use "@/app/styles/components/k-accordion";
 
 
 html, body, div, span, applet, object, iframe,
