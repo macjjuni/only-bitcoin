@@ -26,7 +26,11 @@
 <img src="https://github.com/user-attachments/assets/6d13fc97-691c-47f0-9643-bc9445838e3b" width="23.5%" alt="migrate btc-price initial screen6">
 
 ### v3.0
-
+<img src="https://github.com/user-attachments/assets/27749e41-21ec-4090-8c97-987eca1f01f5" width="18%" alt="renewal initial screen1">
+<img src="https://github.com/user-attachments/assets/9d56d30b-665e-4f7a-8fda-536ee1b942cc" width="18%" alt="renewal initial screen2">
+<img src="https://github.com/user-attachments/assets/9af52a3f-7166-4133-bfbf-10f34b00212f" width="18%" alt="renewal initial screen3">
+<img src="https://github.com/user-attachments/assets/45821ad8-7d29-46d3-84b1-357f9e4d83b9" width="18%" alt="renewal initial screen4">
+<img src="https://github.com/user-attachments/assets/b9331bab-1b57-43ba-8b0e-fb24b6016dcd" width="18%" alt="renewal initial screen5">
 
 <br>
 
