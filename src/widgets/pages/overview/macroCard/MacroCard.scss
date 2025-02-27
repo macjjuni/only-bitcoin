@@ -14,13 +14,14 @@
         min-width: 80px;
 
         .macro-card__item__text {
-            font-size: variable.$font-small-size;
+            font-size: variable.$font-body-size;
             font-weight: bold;
             color: #999999;
         }
 
         .macro-card__item__value {
             font-family: variable.$number-font-family;
+            font-size: 18px;
             font-weight: bold;
         }
     }
