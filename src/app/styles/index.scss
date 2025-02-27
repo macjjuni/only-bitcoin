@@ -23,7 +23,6 @@ time, mark, audio, video {
   padding: 0;
   border: 0;
   font-size: 100%;
-  font-family: variable.$default-font-family;
   vertical-align: baseline;
 }
 
@@ -70,7 +69,6 @@ a:hover, a:active {
 * {
   box-sizing: border-box;
   margin: 0;
-  font-family: variable.$default-font-family;
 }
 
 button {
@@ -100,11 +98,11 @@ html, body {
 body {
   margin: 0;
   line-height: 1;
+  font-family: variable.$default-font-family;
   color: variable.$default-font-color;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
   background-color: variable.$default-background-color;
-  font-family: variable.$default-font-family;
 
   &.show-bg {
     background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif'); /*이미지 경로지정*/

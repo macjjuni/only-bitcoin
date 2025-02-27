@@ -65,7 +65,7 @@ export default function SettingsPage() {
 
 
         <FormRow icon={<KIcon icon="star" color={btcColor} />} label="시작 페이지">
-          <KSelect value={initialPath} width="176px" onChange={(path) => {
+          <KSelect value={initialPath} width="176px" size="small" onChange={(path) => {
             setInitialPath(path);
           }} items={favoriteRouteOptions} />
         </FormRow>
@@ -74,7 +74,7 @@ export default function SettingsPage() {
           <div className="settings-page__area__currency__button-group">
             {
               currencyOptions.map(item => (
-                <KButton key={item.value} label={item.text} size="medium"
+                <KButton key={item.value} label={item.text} size="small"
                          className={currency === item.value ? "currency-active" : ""}
                          onClick={() => setCurrency(item.value)} />
               ))

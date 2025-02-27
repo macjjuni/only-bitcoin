@@ -8,7 +8,7 @@ const sizes = { width: "260px", height: "161px"};
 const SquareCard = ({children}: {children: ReactNode}) => {
 
   return (
-    <KCard className="dashboard__card__wrapper" variant="contained" {...sizes}>
+    <KCard className="dashboard__card__wrapper" {...sizes}>
       {children}
     </KCard>
   );

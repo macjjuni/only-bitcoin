@@ -131,7 +131,7 @@ const ChartCard = () => {
     <div className="chart-card__top__first__button-area">
       {
         marketChartIntervalOptions.map(({ value, text }) => (
-          <KButton key={value} label={text} variant="contained" size="small"
+          <KButton key={value} label={text} size="small"
                    onClick={() => setMarketChartInterval(value)} className={chartCardButtonClass(value)} />
         ))
       }
