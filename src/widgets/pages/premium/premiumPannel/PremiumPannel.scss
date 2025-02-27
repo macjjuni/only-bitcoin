@@ -1,0 +1,83 @@
+@use "@/app/styles/variable";
+@use "@/app/styles/mixin";
+
+.premium-pannel {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  gap: variable.$spacing-32;
+  padding: variable.$spacing-24 variable.$spacing-8;
+
+
+  .premium-pannel__title {
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: variable.$spacing-8;
+    width: 100%;
+
+    .premium-pannel__title__area {
+      display: flex;
+      align-items: center;
+      font-size: 44px;
+      font-weight: bold;
+
+      .unit { @include mixin.font-heading-sm; margin-top: variable.$spacing-8; }
+    }
+  }
+
+  .premium-pannel__content {
+    display: flex;
+    flex-direction: column;
+    gap: variable.$spacing-32;
+    width: 100%;
+
+    .premium-pannel__content__item {
+      display: flex;
+      flex-direction: column;
+      gap: variable.$spacing-2;
+
+      // 하단 환율 영역
+      &:last-child > .premium-pannel__content__item__content {
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-end;
+
+        .premium-pannel__content__item__content__item {
+          display: flex;
+          justify-content: space-between;
+          align-items: flex-end;
+        }
+      }
+
+      .premium-pannel__content__item__title {
+        @include mixin.font-body;
+        font-weight: bold;
+        color: #8a8a8a;
+      }
+
+      .premium-pannel__content__item__content {
+        display: flex;
+        flex-direction: column;
+
+        .premium-pannel__content__item__content__item {
+          width: 100%;
+
+          .price__text { @include mixin.font-heading-sm;  font-weight: bold; }
+          .unit__text {
+            font-size: variable.$font-body-size;
+            font-weight: bold;
+            margin-left: variable.$spacing-4;
+          }
+          .slash__text { font-size: 24px;margin: 0 variable.$spacing-8; }
+          .date__text { font-size: variable.$font-small-size; color: variable.$gray-font-color; }
+
+          .premium-pannel__content__item__content__item--left {}
+          .premium-pannel__content__item__content__item--right { margin-bottom: 3px; }
+        }
+      }
+    }
+  }
+
+}

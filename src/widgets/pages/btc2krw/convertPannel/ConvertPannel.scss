@@ -1,0 +1,31 @@
+@use "@/app/styles/variable";
+
+.convert-pannel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: variable.$spacing-12;
+  padding-top: variable.$spacing-36;
+
+  .convert-pannel__item {
+    display: flex;
+    flex-direction: column;
+
+    .convert-pannel__item__input {
+      &.clickable { cursor: pointer; }
+      .number-field__input { font-weight: bold; }
+
+      &.btc-count__number-field > .number-field__input {
+        padding: variable.$spacing-8 variable.$spacing-44 variable.$spacing-8 variable.$spacing-44;
+      }
+    }
+    .convert-pannel__item__sub-text {
+      text-align: right;
+      font-size: variable.$font-small-size;
+      color: variable.$gray-font-color;
+      padding: variable.$spacing-2 0;
+    }
+
+    &:last-child { margin-top: variable.$spacing-80; }
+  }
+}

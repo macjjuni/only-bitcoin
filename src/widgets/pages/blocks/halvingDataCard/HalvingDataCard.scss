@@ -1,0 +1,48 @@
+@use "@/app/styles/variable";
+@use "@/app/styles/mixin";
+
+.halving-data-card__area {
+
+    .k-accordion__summary {
+        .k-accordion__summary__container {
+            .k-accordion__summary__text {
+                @include mixin.font-body;
+                font-weight: bold;
+            }
+        }
+    }
+    .k-accordion__content {
+        .k-accordion__content__wrapper {
+            overflow: auto;
+        }
+    }
+
+    .halving-data-card__area__list {
+        display: flex;
+        flex-direction: row;
+
+
+        .halving-data-card__area__list__item {
+            display: flex;
+            flex-direction: column;
+            width: auto;
+
+            .halving__label, .halving__text {
+                width: auto;
+                white-space: nowrap;
+                padding: variable.$spacing-2 variable.$spacing-8;
+                border-bottom: 1px solid variable.$border-color;
+                @include mixin.font-body;
+                font-family: variable.$number-font-family;
+
+                &:first-child {font-weight: bold;}
+                &:last-child { border: none; }
+
+                &.active {
+                    font-weight: bold;
+                    color: variable.$bitcoin-color;
+                }
+            }
+        }
+    }
+}

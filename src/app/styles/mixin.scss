@@ -1,0 +1,59 @@
+@use "./variable";
+
+// region [Font Sizes]
+
+@mixin font-heading-lg {
+    font-size: variable.$font-heading-lg-size;
+    line-height: variable.$line-height-heading-lg-size;
+}
+@mixin font-heading-md {
+    font-size: variable.$font-heading-md-size;
+    line-height: variable.$line-height-heading-md-size;
+}
+@mixin font-heading-sm {
+    font-size: variable.$font-heading-sm-size;
+    line-height: variable.$line-height-heading-sm-size;
+}
+@mixin font-heading-sm {
+    font-size: variable.$font-heading-sm-size;
+    line-height: variable.$line-height-heading-sm-size;
+}
+@mixin font-title {
+    font-size: variable.$font-title-size;
+    line-height: variable.$line-height-title-size;
+}
+@mixin font-sub-title {
+    font-size: variable.$font-sub-title-size;
+    line-height: variable.$line-height-sub-title-size;
+}
+@mixin font-body {
+    font-size: variable.$font-body-size;
+    line-height: variable.$line-height-body-size;
+}
+
+// endregion
+
+
+// region [Font Styles]
+
+@mixin logo-font-style {
+    font-size: 20px;
+    font-weight: bold;
+    color: variable.$font-color;
+    text-decoration: none;
+}
+
+// endregion
+
+
+// region [Layouts]
+
+@mixin PageLayout {
+    display: flex;
+    flex-direction: column;
+    flex: 0 0 auto;
+    gap: variable.$spacing-12;
+    width: 100%;
+}
+
+// endregion

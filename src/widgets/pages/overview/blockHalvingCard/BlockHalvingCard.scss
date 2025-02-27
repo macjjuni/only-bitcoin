@@ -1,0 +1,112 @@
+@use "@/app/styles/variable";
+@use "@/app/styles/mixin";
+
+.block-card {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-start;
+  align-items: flex-start;
+  gap: variable.$spacing-16;
+
+  .block-card__title {
+    @include mixin.font-sub-title;
+    font-weight: bold;
+    text-align: left;
+    width: 100%;
+  }
+
+  $percent-text-area-width: 72px;
+
+  .block-card__guage__area {
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: center;
+    gap: variable.$spacing-8;
+    width: 100%;
+
+    .block-card__guage__area__bar__area {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      gap: variable.$spacing-16;
+      width: 100%;
+
+      .block-card__guage__area__bar {
+        position: relative;
+        width: calc(100% - $percent-text-area-width - #{variable.$spacing-16});
+        height: 14px;
+        border-radius: 14px;
+        background-color: rgba(255, 255, 255, 0.24);
+
+        .block-card__guage__area__bar__ball {
+          position: absolute;
+          top: 50%;
+          left: 20%;
+          transform: translateY(-50%);
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          width: 28px;
+          height: 28px;
+          padding-left: variable.$spacing-8;
+          border-radius: 50%;
+          background-color: rgba(255, 255, 255, 0.24);
+          transition: 0.3s ease;
+
+          &:before {
+            content: '';
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            width: 16px;
+            height: 16px;
+            background-color: #fff;
+            border-radius: 50%;
+          }
+        }
+      }
+
+      .block-card__guage__area__percent__area {
+        text-align: right;
+        width: $percent-text-area-width;
+
+        .block-card__guage__area__percent__area__text {
+          @include mixin.font-body;
+          font-family: variable.$number-font-family;
+          font-weight: bold;
+          color: #fff;
+        }
+      }
+    }
+
+    .block-card__guage__area__remaining {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: variable.$spacing-12;
+      width: 100%;
+
+      svg { margin-bottom: variable.$spacing-2; }
+
+      @include mixin.font-body;
+      font-weight: bold;
+
+      .block-card__guage__area__remaining__lottie {
+        position: relative;
+        width: 36px; height: 36px;
+
+        & > div {
+          position: absolute;
+          top: 50%;
+          left: 50%;
+          transform: translate(-50%, -50%);
+          width: 80px;
+          height: 80px;
+        }
+      }
+    }
+
+  }
+}

@@ -1,0 +1,104 @@
+@use "@/app/styles/variable";
+
+
+$area-top-padding-size: variable.$spacing-8;
+$left-area-width: 88px;
+$block-size: 120px;
+$initial-left: 224px;
+
+.blocks-visualizer__area {
+    position: relative;
+
+    .vertical-line {
+        position: absolute;
+        top: 8px; left: calc(#{$block-size} - #{$left-area-width} + #{variable.$spacing-24} - 1px);
+        height: calc(#{$block-size} + 8px);
+        border-left: 1px dashed #fff;
+    }
+
+    .blocks-visualizer__area__top {
+        position: relative;
+        display: flex;
+        justify-content: flex-start;
+        align-items: flex-start;
+        flex-wrap: nowrap;
+        gap: variable.$spacing-24;
+        width: calc(100% + (#{$area-top-padding-size} * 2) + #{$left-area-width} + #{$initial-left});
+        padding: variable.$spacing-12 variable.$spacing-12 0 variable.$spacing-12;
+        margin: 0 -#{$area-top-padding-size} 0 -#{$initial-left};
+        overflow: auto;
+        will-change: margin;
+        scrollbar-width: none;
+
+        &::-webkit-scrollbar { display: none; }
+        &.add-block { animation: slide-card 1.2s ease-in-out forwards 0s; }
+
+        .block__square__area {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
+            gap: 4px;
+            min-width: $block-size;
+            max-width: $block-size;
+            min-height: $block-size;
+            max-height: $block-size;
+            padding: variable.$spacing-8;
+            margin-left: -8px;
+            border: 1px solid variable.$border-color;
+            border-radius: 3px;
+            background-color: #171717;
+            font-size: 12px;
+
+            &:first-child, &:nth-child(2) { margin: 0; }
+            &:nth-child(2) { animation: fadeIn 1.6s ease-in-out forwards; }
+            &.unmined-block {
+                border: none;
+                animation: skeleton-loading 1.2s ease-in-out infinite alternate;
+            }
+
+            .block__square__area__height, .block__square__area__size {
+                font-family: variable.$number-font-family;
+                font-weight: bold;
+            }
+
+            .block__square__area__height, .block__square__area__size, .block__square__area__pool-name, .block__square__area__date {
+                display: flex;
+                justify-content: flex-start;
+                align-items: center;
+                gap: 6px;
+                font-weight: bold;
+            }
+            .block__square__area__link {
+                position: absolute;
+                display: inline-flex;
+                justify-content: center;
+                align-items: center;
+                bottom: 10px; right: 10px;
+                width: auto;
+            }
+        }
+    }
+}
+
+
+@keyframes slide-card {
+    0% {
+        width: 200%;
+        margin: 0 -#{$area-top-padding-size} 0 -#{$initial-left};
+    }
+    100% {
+        width: calc(100% + (#{$area-top-padding-size} * 2) + #{$left-area-width});
+        margin: 0 -#{$area-top-padding-size} 0 -#{$left-area-width};
+    }
+}
+
+@keyframes skeleton-loading {
+    0% { background-color: #474747; }
+    100% { background-color: #000; }
+}
+
+@keyframes fadeIn {
+    0% { opacity: 0 }
+    100% { opacity: 1 }
+}

@@ -1,0 +1,76 @@
+
+@use "@/app/styles/variable";
+@use "@/app/styles/mixin";
+
+.price-pannel {
+  display: flex;
+  flex-direction: column;
+  gap: variable.$spacing-2;
+  padding: variable.$spacing-20 variable.$spacing-8;
+
+  .price-pannel__signature {
+    font-size: 44px;
+    font-weight: bold;
+  }
+
+  .price-pannel__price__area {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    height: 54px;
+
+    .price-pannel__price__area__krw, .price-pannel__price__area__usd {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      width: 100%;
+      font-weight: bold;
+      white-space: nowrap;
+      overflow: hidden;
+
+      @include mixin.font-sub-title;
+      font-family: variable.$number-font-family;
+
+      .price-pannel__price__area__usd__percent, .price-pannel__price__area__krw__percent {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: variable.$spacing-4;
+        font-size: variable.$font-small-size;
+
+        .percent__text {
+          width: 60px;
+          text-align: right;
+        }
+      }
+    }
+
+    .price-pannel__price__area__krw__area {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .price-pannel__price__area__krw__sign {
+        display: inline-flex;
+        justify-content: flex-start;
+        align-items: center;
+        width: 20px;
+      }
+    }
+
+    .price-pannel__price__area__usd__area {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .price-pannel__price__area__usd__sign {
+        display: inline-flex;
+        justify-content: flex-start;
+        align-items: center;
+        width: 20px;
+      }
+    }
+
+    .price-pannel__price__area__usd__sign { padding-left: 2px; }
+  }
+}

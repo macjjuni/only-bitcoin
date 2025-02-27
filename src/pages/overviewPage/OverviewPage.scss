@@ -1,0 +1,5 @@
+@use "@/app/styles/mixin";
+
+.overview-page__area {
+  @include mixin.PageLayout;
+}

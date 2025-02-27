@@ -1,0 +1,28 @@
+@use "@/app/styles/variable";
+
+.macro-card {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+
+    .macro-card__item {
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: flex-start;
+        gap: 6px;
+        min-width: 80px;
+
+        .macro-card__item__text {
+            font-size: variable.$font-body-size;
+            font-weight: bold;
+            color: #999999;
+        }
+
+        .macro-card__item__value {
+            font-family: variable.$number-font-family;
+            font-size: 18px;
+            font-weight: bold;
+        }
+    }
+}

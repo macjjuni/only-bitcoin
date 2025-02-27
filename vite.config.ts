@@ -26,19 +26,8 @@ export default defineConfig(({ mode }: { mode: string }) => {
         minify: false,
         template: "index.html",
         inject: { data: { title: env.VITE_TITLE, url: env.VITE_URL } }
-      })
+      }),
     ],
-    css: {
-      preprocessorOptions: {
-        scss: {
-          additionalData: "@import \"@/styles/variable\";\n" +
-            "@import \"@/styles/fonts\";\n" +
-            "@import \"@/styles/reset\";\n" +
-            "@import \"@/styles/mixin\";\n" +
-            "@import \"@/styles/animate\";"
-        }
-      }
-    },
     build: {
       minify: "terser",
       terserOptions: {

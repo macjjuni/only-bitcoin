@@ -1,0 +1,15 @@
+@use "@/app/styles/variable";
+@use "@/app/styles/mixin";
+
+.page-title {
+    position: relative;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    gap: variable.$spacing-4;
+    padding: variable.$spacing-8 variable.$spacing-16 0 variable.$spacing-16;
+    color: #fff;
+    @include mixin.font-heading-sm;
+    font-weight: bold;
+    font-family: variable.$number-font-family;
+}

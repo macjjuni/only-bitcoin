@@ -1,0 +1,14 @@
+@use "@/app/styles/variable";
+
+.not-your-keys-not-your-bitcoin__area {
+  display: flex;
+  flex-direction: column;
+  justify-content: flex-end;
+  align-items: center;
+  flex: 1 1 auto;
+  padding-bottom: variable.$spacing-4;
+  font-size: variable.$font-small-size;
+  font-weight: bold;
+  color: #cccccc;
+  text-shadow: 0 0 1px #f7931a, 0 0 1px #f7931a, 0 0 1px #ffae42;
+}

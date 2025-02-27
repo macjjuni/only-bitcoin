@@ -1,0 +1,35 @@
+@use "@/app/styles/variable";
+
+$golden-ratio: 1.618;
+$desktop-horizontal-card-width: calc(#{variable.$max-width-size} - (#{variable.$spacing-8} * 2));
+$desktop-one-rows-1-height: calc(($desktop-horizontal-card-width / $golden-ratio) / 3);
+$desktop-one-rows-2-height: calc(($desktop-horizontal-card-width / $golden-ratio) / 2);
+$desktop-one-rows-3-height: calc($desktop-horizontal-card-width / $golden-ratio);
+
+$mobile-horizontal-card-width: calc(100dvw - (#{variable.$spacing-8} * 2));
+$mobile-one-rows-1-height: calc(($mobile-horizontal-card-width / $golden-ratio) / 3);
+$mobile-one-rows-2-height: calc(($mobile-horizontal-card-width / $golden-ratio) / 2);
+$mobile-one-rows-3-height: calc($mobile-horizontal-card-width / $golden-ratio);
+
+.horizontal-card {
+    width: $desktop-horizontal-card-width;
+    padding: variable.$spacing-12;
+    border: 1px solid #4f4f4f;
+    border-radius: 4px;
+    background-color: variable.$dashboard-card-background-color;
+    box-shadow: variable.$card-box-shadow;
+
+    &.horizontal-card--row-1 { min-height: $desktop-one-rows-1-height; }
+    &.horizontal-card--row-2 { min-height: $desktop-one-rows-2-height; }
+    &.horizontal-card--row-3 { min-height: $desktop-one-rows-3-height; }
+}
+
+@media screen and (max-width: variable.$max-width-size) {
+    .horizontal-card {
+        width: $mobile-horizontal-card-width;
+
+        &.horizontal-card--row-1 { min-height: $mobile-one-rows-1-height; }
+        &.horizontal-card--row-2 { min-height: $mobile-one-rows-2-height; }
+        &.horizontal-card--row-3 { min-height: $mobile-one-rows-3-height; }
+    }
+}

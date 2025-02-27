@@ -1,0 +1,19 @@
+@use "@/app/styles/variable";
+
+.block-search-box__area {
+
+  .block-search-box__area__input {
+
+    .k-text-field__input__container {
+      border-color: variable.$border-color;
+      box-shadow: variable.$card-box-shadow;
+    }
+
+    .search-right__area {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 8px;
+    }
+  }
+}

@@ -1,0 +1,43 @@
+@use "@/app/styles/variable";
+@use "@/app/styles/mixin";
+
+.settings-page__area {
+  @include mixin.PageLayout;
+
+
+  .settings-page__area__form__area {
+    margin-top: 24px;
+
+    .settings-page__area__currency__button-group {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: 0;
+
+      .currency-active.k-button {
+        border-color: #fff;
+        background-color: #fff;
+
+        .k-button__content { color: #000; }
+      }
+
+      & .k-button {
+        border-radius: 0;
+        border: 1px solid variable.$border-color;
+        border-left: none;
+        padding: 0 8px;
+
+        &:first-child {
+          border-left: 1px solid variable.$border-color;
+          border-top-left-radius: 3px;
+          border-bottom-left-radius: 3px;
+        }
+
+        &:last-child {
+          border-top-right-radius: 3px;
+          border-bottom-right-radius: 3px;
+        }
+      }
+    }
+  }
+}

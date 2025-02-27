@@ -1,0 +1,72 @@
+@use "@/app/styles/variable";
+
+.bottom-navigation {
+    display: flex;
+    position: fixed;
+    top: calc(100dvh - #{variable.$mobile-bottom-navigation-height});
+    left: calc((100dvw - #{variable.$max-width-size}) / 2);
+    width: 100%;
+    max-width: variable.$max-width-size;
+    height: variable.$mobile-bottom-navigation-height;
+    border: 1px solid variable.$border-color;
+    border-bottom: none;
+    padding-bottom: 8px;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    background: variable.$default-background-color;
+    overflow: hidden;
+    z-index: 999;
+
+    .bottom-navigation__list {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        width: 100%;
+        height: 100%;
+
+        .bottom-navigation__list__item {
+            position: relative;
+            z-index: 0;
+
+            .bottom-navigation__list__item__link {
+                display: flex;
+                justify-content: center;
+                align-items: center;
+                padding: variable.$spacing-8;
+                border-radius: variable.$default-border-radius;
+                font-size: 0;
+                z-index: 1;
+
+
+
+                & svg { color: #444444; }
+                &.active svg { color: variable.$bitcoin-color; }
+
+                & + .bottom-navigation__list__item__focus-bg {
+                    position: absolute;
+                    top: 50% ;left: 50%;
+                    width: 36px;
+                    height: 36px;
+                    transform: translate(-50%, -50%) scale(0.88);
+                    background-color: #e3e3e3;
+                    border-radius: 8px;
+                    transition: 0.16s;
+                    font-size: 0;
+                    opacity: 0;
+                    z-index: -1;
+                }
+
+                &.active + .bottom-navigation__list__item__focus-bg {
+                    width: 42px;
+                    height: 42px;
+                    opacity: 1;
+                    transform: translate(-50%, -50%) scale(1);
+                }
+            }
+        }
+    }
+}
+
+@media screen and (max-width: variable.$max-width-size) {
+    .bottom-navigation { left: 0; }
+}

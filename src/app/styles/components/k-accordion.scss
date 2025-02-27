@@ -1,0 +1,16 @@
+@use "../variable";
+
+#only-bitcoin {
+
+    .k-accordion {
+        border: 1px solid variable.$border-color;
+        background-color: transparent;
+        box-shadow: variable.$card-box-shadow;
+
+        &.k-accordion--close .k-accordion__summary { border-bottom: none; }
+        &.k-accordion--open .k-accordion__summary { border-bottom: 1px solid variable.$border-color; }
+
+        .k-accordion__content { background-color: transparent; }
+        .k-accordion__summary, .k-accordion__content { background-color: variable.$dashboard-card-background-color; }
+    }
+}

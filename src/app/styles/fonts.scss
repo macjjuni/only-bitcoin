@@ -1,0 +1,47 @@
+@font-face {
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/font/pretendard/subset-pretendard-bold.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 400; // normal 대신 명확한 값 사용
+    font-display: swap;
+    src: url('/font/pretendard/subset-pretendard-regular.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Pretendard';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('/font/pretendard/subset-pretendard-thin.woff2') format('woff2'); // 오타 수정
+}
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: normal;
+    font-weight: 700;
+    font-display: swap;
+    src: url('/font/robotoMono/RobotoMono-Bold.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: normal;
+    font-weight: 400;
+    font-display: swap;
+    src: url('/font/robotoMono/RobotoMono-Regular.woff2') format('woff2');
+}
+
+@font-face {
+    font-family: 'Roboto Mono';
+    font-style: normal;
+    font-weight: 300;
+    font-display: swap;
+    src: url('/font/robotoMono/RobotoMono-Thin.woff2') format('woff2');
+}
