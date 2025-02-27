@@ -39,7 +39,7 @@ export default function SettingsPage() {
 
   const onRouteToFeedback = useCallback(() => {
     const anchorTag = document.createElement("a");
-    anchorTag.href = "https://x.com/kkusaeng/status/1675907004320333825";
+    anchorTag.href = import.meta.env.VITE_FEEDBACK_URL;
     anchorTag.target = "_blank";
     anchorTag.click();
     anchorTag.remove();
