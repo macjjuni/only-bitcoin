@@ -4,8 +4,8 @@ import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/Horizon
 import { calcPremiumPercent } from "@/shared/utils/common";
 import { comma } from "@/shared/utils/string";
 import useStore from "@/shared/stores/store";
-import "./MacroCard.scss";
 import { FeerAndGreedModal } from "@/widgets/modal";
+import "./MacroCard.scss";
 
 
 const PricePannel = () => {
