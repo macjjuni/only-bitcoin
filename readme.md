@@ -13,7 +13,6 @@
 
 ### v1.0
 <img src="https://github.com/macjjuni/only-bitcoin/assets/38034518/8b7a18eb-822a-491e-a9d6-0451f149ac39" width="23.5%" alt="btc-price initial screen1">
-<img src="https://github.com/macjjuni/only-bitcoin/assets/38034518/faeb311d-7b87-4841-aa80-bc50aa89f1cc" width="23.5%" alt="btc-price initial screen1">
 <img src="https://github.com/macjjuni/only-bitcoin/assets/38034518/9ae8ffa1-b13e-4c5a-a5f4-3644bedccdc5" width="23.5%" alt="btc-price initial screen1">
 <img src="https://github.com/macjjuni/only-bitcoin/assets/38034518/a586d2af-6f78-409d-a2af-572a6e87cf02" width="23.5%" alt="btc-price initial screen1">
 
