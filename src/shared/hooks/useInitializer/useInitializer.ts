@@ -59,7 +59,7 @@ export default function useInitializer() {
 
   const initializeSocket = useCallback(() => {
 
-    window.addEventListener("visibilitychange", (e) => {
+    window.addEventListener("visibilitychange", () => {
 
       if (document.hidden) {
         // 사용자가 홈 화면으로 이동

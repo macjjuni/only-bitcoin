@@ -3,6 +3,7 @@ import { createBrowserRouter } from "react-router-dom";
 import Client from "@/app/Client";
 import withSuspense from "@/widgets/hoc/withSuspence";
 import ErrorPage from "@/pages/errorPage/ErrorPage";
+import NotFoundPage from "@/pages/notFoundPage/NotFoundPage";
 
 const OverviewPage = withSuspense(lazy(() => import("@/pages/overviewPage/OverviewPage")));
 const BlocksPage = withSuspense(lazy(() => import("@/pages/blocksPage/BlocksPage")));
@@ -17,7 +18,7 @@ const clientRoutes = [
   { title: "BTC To Fiat", path: "/btc2fiat", element: <Btc2FiatPage />, isNav: true, isFavorite: true,icon: { name: 'exchange', size: 40 }, style: { padding: '3px' } },
   { title: "Premium", path: "/premium", element: <PremiumPage />, isNav: true, isFavorite: true,icon: { name: 'premium', size: 28 }},
   { title: "Settings", path: "/settings", element: <SettingsPage />, isNav: true, isFavorite: false ,icon: { name: 'setting', size: 30 } },
-  { title: "404 - Not Found", path: "/*", element: <>error</>, isNav: false, isFavorite: false, icon: { name: '', size: 30 }, }
+  { title: "404 - Not Found", path: "/*", element: <NotFoundPage />, isNav: false, isFavorite: false, icon: { name: '', size: 30 }, }
 ];
 
 

@@ -1,6 +1,6 @@
 @use "@/app/styles/variable";
 
-.error__page {
+.not-found__page {
   display: flex;
   flex-direction: column;
   justify-content: center;
@@ -8,7 +8,7 @@
   width: 100%;
   gap: variable.$spacing-32;
 
-  .error__page__title {
+  .not-found__page__title {
     font-size: variable.$font-sub-title-size;
     font-weight: bold;
   }
