@@ -6,7 +6,7 @@ import router from "@/app/router";
 import useStore from "@/shared/stores/store";
 import { currencyOptions } from "@/shared/constants/setting";
 import { isSafari } from "@/shared/utils/device";
-import { InstallSettingForm, FormRow, ResourceSource } from "@/widgets/pages/settings";
+import { FormRow, InstallSettingForm, ResourceSource } from "@/widgets/pages/settings";
 import "./SettingsPage.scss";
 
 
@@ -59,10 +59,7 @@ export default function SettingsPage() {
 
   return (
     <div className="settings-page__area">
-
       <div className="settings-page__area__form__area">
-
-
         <FormRow icon={<KIcon icon="star" color={btcColor} />} label="시작 페이지">
           <KSelect value={initialPath} width="176px" onChange={(path) => {
             setInitialPath(path);

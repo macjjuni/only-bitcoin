@@ -11,3 +11,4 @@ export const currencyOptions: CurrencyOptionTypes[] = [
 ]
 
 export const PWA_COOKIE_KEY = 'install' as const;
+export const INIT_SOCKET_TIME = 'INIT_SOCKET_TIME' as const;
