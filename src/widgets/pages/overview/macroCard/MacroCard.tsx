@@ -2,10 +2,10 @@ import { memo, useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
 import { calcPremiumPercent } from "@/shared/utils/common";
-import { comma } from "@/shared/utils/string";
 import useStore from "@/shared/stores/store";
 import { FeerAndGreedModal } from "@/widgets/modal";
 import "./MacroCard.scss";
+import { CountText } from "@/widgets";
 
 
 const PricePannel = () => {
@@ -27,7 +27,7 @@ const PricePannel = () => {
   // region [Privates]
 
   const onRoutePremiumPage = useCallback(() => {
-    navigate('/premium');
+    navigate("/premium");
   }, []);
 
   // endregion
@@ -50,10 +50,10 @@ const PricePannel = () => {
 
   const macroDataList = useMemo(() => (
     [
-      { label: "BTC.D", value: dominance, sign: "%", onClick: undefined },
-      { label: "KRW/USD", value: comma(usdExRate), sign: null, onClick: onRoutePremiumPage },
-      { label: "Premium", value: premium, sign: "%", onClick: onRoutePremiumPage },
-      { label: "F&G Index", value: feerGreed, sign: null, onClick: onOpenFeerAndGreedModal }
+      { label: "BTC.D", value: dominance, decimals: 1, sign: "%", onClick: undefined },
+      { label: "KRW/USD", value: usdExRate, decimals: 0, sign: null, onClick: onRoutePremiumPage },
+      { label: "Premium", value: premium, decimals: 2, sign: "%", onClick: onRoutePremiumPage },
+      { label: "F&G Index", value: feerGreed, decimals: 0, sign: null, onClick: onOpenFeerAndGreedModal }
     ]
   ), [dominance, usdExRate, premium, feerGreed]);
 
@@ -64,11 +64,14 @@ const PricePannel = () => {
     <>
       <HorizontalCard className="macro-card" rows={1}>
         {
-          macroDataList.map(({ label, value, sign, onClick }) => (
+          macroDataList.map(({ label, value, sign, onClick, decimals }) => (
             // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions
             <div key={label} className="macro-card__item" onClick={onClick} tabIndex={0}>
               <span className="macro-card__item__text">{label}</span>
-              <span className="macro-card__item__value">{value}{sign}</span>
+              <span className="macro-card__item__value">
+                <CountText value={value} decimals={decimals} />
+                {sign}
+              </span>
             </div>
           ))
         }
