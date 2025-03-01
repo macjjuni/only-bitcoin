@@ -1,5 +1,5 @@
-import { memo, useCallback, useMemo, useState } from "react";
-import { KIcon, KTextField } from "kku-ui";
+import { memo, useCallback, useMemo, useRef, useState } from "react";
+import { KIcon, KTextField, KTextFieldRefs } from "kku-ui";
 import { clipboardUtil } from "kku-util";
 import "./BlocksExplorer.scss";
 
@@ -11,6 +11,7 @@ const BlocksExplorer = () => {
 
   // region [Hooks]
 
+  const searchRef = useRef<KTextFieldRefs>(null);
   const [txValue, setTxValue] = useState("");
 
   // endregion
@@ -30,6 +31,7 @@ const BlocksExplorer = () => {
   const onRouteMempool = useCallback(() => {
 
     if (txValue.trim() === "") {
+      searchRef.current?.focus();
       return;
     }
 
@@ -70,7 +72,7 @@ const BlocksExplorer = () => {
 
   return (
     <div className="block-search-box__area">
-      <KTextField className="block-search-box__area__input" value={txValue} onChange={onChangeTxInput}
+      <KTextField ref={searchRef} className="block-search-box__area__input" value={txValue} onChange={onChangeTxInput}
                   placeholder="트렌젝션을 검색해 보세요" fullWidth rightAction={SearchRightAction}
                   autoCapitalize="off" autoCorrect="off" autoComplete="off" />
     </div>
