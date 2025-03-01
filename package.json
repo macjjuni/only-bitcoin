@@ -16,11 +16,6 @@
       "git add"
     ]
   },
-  "husky": {
-    "hooks": {
-      "pre-commit": "lint-staged"
-    }
-  },
   "dependencies": {
     "chart.js": "^4.4.3",
     "firebase": "^9.23.0",
@@ -58,8 +53,6 @@
     "eslint-plugin-prettier": "^4.2.1",
     "eslint-plugin-react": "^7.32.2",
     "eslint-plugin-react-hooks": "^4.6.0",
-    "husky": "^8.0.3",
-    "lint-staged": "^15.0.2",
     "prettier": "^2.8.3",
     "rollup-plugin-visualizer": "^5.12.0",
     "sass": "^1.77.4",
