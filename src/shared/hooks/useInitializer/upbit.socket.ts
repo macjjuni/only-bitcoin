@@ -18,7 +18,7 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY = 3000; // 3초
 
 let retryCount = 0;
-let timeout: NodeJS.Timeout | null = null;
+let retryTimeout: NodeJS.Timeout | null = null;
 let socket: WebSocket | null = null;
 
 // UUID 가져오기
@@ -41,9 +41,9 @@ const getRequestPayload = () => [
 
 // 재연결 카운트 초기화
 const resetRetry = () => {
-  if (timeout) {
-    clearTimeout(timeout);
-    timeout = null;
+  if (retryTimeout) {
+    clearTimeout(retryTimeout);
+    retryTimeout = null;
   }
   retryCount = 0;
 };
@@ -69,20 +69,21 @@ const handleUSDTUpdate = (price: number, timestamp: number) => {
   }
 };
 
+
 // WebSocket 이벤트 핸들링
 const socketManager = {
   init: () => {
+
     socket = new WebSocket(UPBIT_URL);
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
+
       resetRetry();
       socket?.send(JSON.stringify(getRequestPayload()));
       toast.success(`서버에 연결되었습니다. (Upbit)`);
 
-      if (isDev) {
-        console.log("✅ 업비트 소켓 연결 초기화");
-      }
+      if (isDev) { console.log("✅ 업비트 소켓 연결 초기화"); }
     };
 
     socket.onmessage = (evt) => {
@@ -125,7 +126,7 @@ const socketManager = {
   },
 
   handleReconnect: () => {
-    timeout = setTimeout(() => {
+    retryTimeout = setTimeout(() => {
 
       if (retryCount >= MAX_RETRIES) {
         resetRetry();
@@ -141,6 +142,7 @@ const socketManager = {
 
   disconnect: () => {
     if (!socket) return;
+
     resetRetry();
     socket.close(1000);
   },

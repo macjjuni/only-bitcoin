@@ -10,14 +10,14 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY = 3000; // 3초
 
 let retryCount = 0;
-let timeout: NodeJS.Timeout | null = null;
+let retryTimeout: NodeJS.Timeout | null = null;
 let socket: WebSocket | null = null;
 
 // 재연결 카운트 초기화
 const resetRetry = () => {
-  if (timeout) {
-    clearTimeout(timeout);
-    timeout = null;
+  if (retryTimeout) {
+    clearTimeout(retryTimeout);
+    retryTimeout = null;
   }
   retryCount = 0;
 };
@@ -117,7 +117,7 @@ const socketManager = {
       return;
     }
 
-    timeout = setTimeout(() => {
+    retryTimeout = setTimeout(() => {
       toast.info(`${RETRY_DELAY / 1000}초 후 재연결 시도합니다. (${retryCount + 1}/${MAX_RETRIES})`);
       retryCount++;
       socketManager.init();

@@ -13,14 +13,14 @@ const MAX_RETRIES = 3;
 const RETRY_DELAY = 3000; // 3초
 
 let retryCount = 0;
-let timeout: NodeJS.Timeout | null = null;
+let retryTimeout: NodeJS.Timeout | null = null;
 let socket: WebSocket | null = null;
 
 // 재연결 카운트 초기화
 const resetRetry = () => {
-  if (timeout) {
-    clearTimeout(timeout);
-    timeout = null;
+  if (retryTimeout) {
+    clearTimeout(retryTimeout);
+    retryTimeout = null;
   }
   retryCount = 0;
 };
@@ -38,6 +38,7 @@ const handleBTCUpdate = (price: number, usdUpdateTimestamp: number, usdChange24h
 // WebSocket 이벤트 핸들링
 const socketManager = {
   init: () => {
+
     socket = new WebSocket(BINANCE_URL);
     socket.binaryType = "arraybuffer";
 
@@ -80,7 +81,7 @@ const socketManager = {
   },
 
   handleReconnect: () => {
-    timeout = setTimeout(() => {
+    retryTimeout = setTimeout(() => {
       if (retryCount >= MAX_RETRIES) {
         resetRetry();
         toast.error("서버가 응답하지 않습니다. 나중에 다시 시도해주세요. (Binance) 🙏");
