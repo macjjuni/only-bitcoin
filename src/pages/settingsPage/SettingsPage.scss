@@ -4,7 +4,6 @@
 .settings-page__area {
   @include mixin.PageLayout;
 
-
   .settings-page__area__form__area {
     margin-top: 24px;
 
@@ -19,16 +18,16 @@
         background-color: #fff;
 
         .k-button__content { color: #000; }
+        &:first-child { border-color: #fff; }
       }
 
       & .k-button {
         border-radius: 0;
-        border: 1px solid variable.$border-color;
         border-left: none;
         padding: 0 8px;
 
         &:first-child {
-          border-left: 1px solid variable.$border-color;
+          border-left: 1px solid var(--dark-border-color);
           border-top-left-radius: 3px;
           border-bottom-left-radius: 3px;
         }
