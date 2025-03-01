@@ -1,1 +1,1 @@
-export { default as FeerAndGreedModal } from "@/widgets/modal/feerAndGreedModal/FeerAndGreedModal";
+export { default as FearAndGreedModal } from "@/widgets/modal/fearAndGreedModal/FearAndGreedModal";

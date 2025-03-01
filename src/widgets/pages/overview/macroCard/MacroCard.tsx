@@ -3,7 +3,7 @@ import { useNavigate } from "react-router-dom";
 import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
 import { calcPremiumPercent } from "@/shared/utils/common";
 import useStore from "@/shared/stores/store";
-import { FeerAndGreedModal } from "@/widgets/modal";
+import { FearAndGreedModal } from "@/widgets/modal";
 import "./MacroCard.scss";
 import { CountText } from "@/widgets";
 
@@ -76,7 +76,7 @@ const PricePannel = () => {
           ))
         }
       </HorizontalCard>
-      <FeerAndGreedModal isOpen={IsFeerAndGreedModal} onClose={onCloseFeerAndGreedModal} />
+      <FearAndGreedModal isOpen={IsFeerAndGreedModal} onClose={onCloseFeerAndGreedModal} />
     </>
   );
 };
