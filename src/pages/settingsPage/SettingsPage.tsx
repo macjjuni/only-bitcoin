@@ -8,6 +8,7 @@ import { currencyOptions } from "@/shared/constants/setting";
 import { isSafari } from "@/shared/utils/device";
 import { FormRow, InstallSettingForm, ResourceSource } from "@/widgets/pages/settings";
 import "./SettingsPage.scss";
+import AnimationIcon from "@/widgets/icon/AnimationIcon";
 
 
 export default function SettingsPage() {
@@ -83,7 +84,7 @@ export default function SettingsPage() {
           }} />
         </FormRow>
 
-        <FormRow icon={<KIcon icon="visibility" size={24} color="#c2c2c2" />} label="카운트 업 애니메이션">
+        <FormRow icon={<AnimationIcon size={24} color="#c2c2c2" />} label="카운트 업 애니메이션">
           <KSwitch value={isCountUp} onChange={(e) => {
             setIsCountUp(e);
           }} />

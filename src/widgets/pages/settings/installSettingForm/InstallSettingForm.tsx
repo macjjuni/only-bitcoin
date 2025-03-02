@@ -4,6 +4,7 @@ import { FormRow } from "@/widgets/pages/settings";
 import { useInitializePWA } from "../../../../shared/hooks/initializer";
 import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
+import MessageIcon from "@/widgets/icon/MessageIcon";
 
 
 const InstallSettingForm = () => {
@@ -51,10 +52,10 @@ const InstallSettingForm = () => {
 
   return (
     <>
-      <FormRow icon={<KIcon icon="app" size={24} color="#fff" />} label="앱 설치">
+      <FormRow icon={<KIcon icon="app" size={24} color="#1796EE" />} label="앱 설치">
         <KButton label="설치" onClick={onClickInstall} />
       </FormRow>
-      <FormRow icon={<KIcon icon="page" size={24} color="#fff" />} label="앱 설치 메시지 숨기기">
+      <FormRow icon={<MessageIcon size={24} />} label="앱 설치 메시지 숨기기">
         <KSwitch value={isInstallMsg} onChange={onChangeInstallMsg} />
       </FormRow>
     </>
