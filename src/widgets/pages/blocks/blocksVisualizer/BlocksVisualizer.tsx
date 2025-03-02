@@ -89,7 +89,7 @@ const BlocksVisualizer = () => {
             {block.poolName}</div>
           <div className="block__square__area__date">
             <KIcon icon="confirm" color="#fff" size={14} />
-            {diffNowMin === 0 && "조금 전"}
+            {diffNowMin <= 0 && "조금 전"}
             {diffNowMin !== 0 && diffNowMin < 60 && `${diffNowMin}분 전`}
             {diffNowMin !== 0 && diffNowMin >= 60 && `${convertMinutes(diffNowMin)} 전`}
           </div>
