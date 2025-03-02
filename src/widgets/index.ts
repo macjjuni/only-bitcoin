@@ -6,3 +6,4 @@ export { default as NotKeyNotYourBitcoin } from "@/widgets/notKeyNotYourBitcoin/
 export { default as Lottie } from "@/widgets/lottie/Lottie";
 export { default as PwaInstallAlarm } from "@/widgets/pwaInstallAlarm/PwaInstallAlarm";
 export { default as PwaInstallAlarmIOS } from "@/widgets/pwaInstallAlarm/PwaInstallAlarmIOS";
+export { default as NetworkSwitch } from "@/widgets/networkSwitch/NetworkSwitch";

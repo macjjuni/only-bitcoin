@@ -5,12 +5,15 @@
 .header__area {
     position: relative;
     display: flex;
-    justify-content: flex-start;
+    justify-content: space-between;
     align-items: center;
     gap: variable.$spacing-4;
     padding: variable.$spacing-8 variable.$spacing-16 0 variable.$spacing-16;
-    color: #fff;
-    @include mixin.font-heading-sm;
-    font-weight: bold;
-    font-family: variable.$number-font-family;
+
+    .header__area__text {
+        color: variable.$font-color;
+        font-weight: bold;
+        font-family: variable.$number-font-family;
+        @include mixin.font-heading-sm;
+    }
 }

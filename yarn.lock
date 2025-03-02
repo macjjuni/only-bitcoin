@@ -4868,10 +4868,10 @@ keyv@^4.5.3:
   dependencies:
     json-buffer "3.0.1"
 
-kku-ui@^0.0.512:
-  version "0.0.512"
-  resolved "https://registry.yarnpkg.com/kku-ui/-/kku-ui-0.0.512.tgz#c8ec2202e8670e67a0cd9ff3734d3e42bb1be723"
-  integrity sha512-3fNRB5iyoyYMz7lLNv6432b5hbmGY0zJPlT/qF9V3HrWnzr9uKXnQDojQbLSJZ//zU2bGShSg3saqpWQnpOQ0Q==
+kku-ui@^0.0.513:
+  version "0.0.513"
+  resolved "https://registry.yarnpkg.com/kku-ui/-/kku-ui-0.0.513.tgz#8796dfae8c57ea2954dc435da3f424e769137f98"
+  integrity sha512-TPSSE2StKmfgNMmKjXjYK8v99Hk0Y8Xm/4+M5rXbfAb8xRgyVcNW302J+FX4yQZKu2s0HNtlmpNwOSfKFjjbqA==
   dependencies:
     lodash-es "^4.17.21"
     react "^19.0.0"
