@@ -1,7 +1,8 @@
 @use "@/app/styles/variable";
 @use "@/app/styles/mixin";
 
-.page-title {
+
+.header__area {
     position: relative;
     display: flex;
     justify-content: flex-start;

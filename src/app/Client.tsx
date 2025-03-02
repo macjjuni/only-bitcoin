@@ -1,11 +1,8 @@
 import { ToastContainer } from "react-toastify";
-import DefaultLayout from "@/layouts/defaultLayout/DefaultLayout";
-import PageTitle from "@/layouts/pageTitle/PageTitle";
-import Content from "@/layouts/content/Content";
-import BottomNavigation from "@/layouts/bottomNavigation/BottomNavigation";
 import { useInitializer } from "@/shared/hooks";
 import { toastOptions } from "@/shared/lib/toast";
 import { PwaInstallAlarm, PwaInstallAlarmIOS } from "@/widgets";
+import { DefaultLayout, Header, Content, BottomNavigation} from "@/layouts";
 
 
 export default function Client() {
@@ -20,7 +17,7 @@ export default function Client() {
   return (
     <>
       <DefaultLayout>
-        <PageTitle />
+        <Header />
         <Content />
         <BottomNavigation />
       </DefaultLayout>
