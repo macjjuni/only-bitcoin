@@ -9,8 +9,7 @@ import initializeUsdExchangeRate from "./exchangeRate.api";
 import initializeFeerGreedIndex from "./feerGreedIndex.api";
 import googleAnalytics from "./googleAnalytics";
 import useStore from "@/shared/stores/store";
-import useDisabledZoom from "@/shared/hooks/useDisabledZoom";
-import { usePwaInstall } from "@/shared/hooks";
+import { usePwaInstall, useDisabledZoom, useInitializeBackground } from "@/shared/hooks";
 import storage from "@/shared/utils/storage";
 import { INIT_SOCKET_TIME } from "@/shared/constants/setting";
 
@@ -23,11 +22,11 @@ export default function useInitializer() {
   const navigate = useNavigate();
   const initialPath = useStore(state => state.setting.initialPath);
   const isUsdtStandard = useStore(state => state.setting.isUsdtStandard);
-  const isBackgroundImg = useStore(state => state.setting.isBackgroundImg);
 
+  const { initializePwaInstall } = usePwaInstall();
+  useInitializeBackground();
   useDisabledZoom();
   googleAnalytics();
-  const { initializePwaInstall } = usePwaInstall();
 
   // endregion
 
@@ -39,14 +38,6 @@ export default function useInitializer() {
       navigate(initialPath, { replace: true });
     }
   }, []);
-
-  const initializeBackground = useCallback(() => {
-    if (isBackgroundImg) {
-      document.body.classList.add("show-bg");
-    } else {
-      document.body.classList.remove("show-bg");
-    }
-  }, [isBackgroundImg]);
 
   const checkReconnectTime = () => {
 
@@ -87,11 +78,6 @@ export default function useInitializer() {
     initializePwaInstall();
     initializeSocket();
   }, []);
-
-  // 초기 설정 셋팅
-  useEffect(() => {
-    initializeBackground();
-  }, [isBackgroundImg]);
 
   useEffect(() => {
     if (!isUsdtStandard) {
