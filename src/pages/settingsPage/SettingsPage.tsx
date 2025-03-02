@@ -66,7 +66,7 @@ export default function SettingsPage() {
           }} items={favoriteRouteOptions} />
         </FormRow>
 
-        <FormRow icon={<KIcon icon="currency" color="#c2c2c2" size={24} />} label="통화 단위">
+        <FormRow icon={<KIcon icon="currency" color="#FFD700" size={24} />} label="통화 단위">
           <div className="settings-page__area__currency__button-group">
             {
               currencyOptions.map(item => (
@@ -89,7 +89,7 @@ export default function SettingsPage() {
           }} />
         </FormRow>
 
-        <FormRow icon={<KIcon icon="bitcoin_square" size={24} color="#c2c2c2" />} label="배경 이미지">
+        <FormRow icon={<KIcon icon="bitcoin_square" size={24} />} label="배경 이미지">
           <KSwitch value={isBackgroundImg} onChange={(e) => {
             setIsBackgroundImg(e);
           }} />
@@ -97,11 +97,16 @@ export default function SettingsPage() {
 
         {!isSafari() && deferredPrompt?.userChoice && <InstallSettingForm />}
 
-        <ResourceSource />
-
         <FormRow icon={<KIcon icon="x_logo" size={24} />} label="피드백">
           <KButton label="이동" onClick={onRouteToFeedback} />
         </FormRow>
+
+        <ResourceSource />
+
+        <FormRow icon={<KIcon icon="dev" color="#333" size={24} />} label="버전 정보">
+          {import.meta.env.VITE_VERSION || '-'}
+        </FormRow>
+
       </div>
       <NotKeyNotYourBitcoin />
     </div>
