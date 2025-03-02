@@ -59,7 +59,7 @@
         <img src="https://github.com/user-attachments/assets/9d56d30b-665e-4f7a-8fda-536ee1b942cc" width="160" alt="renewal initial screen2">
         <img src="https://github.com/user-attachments/assets/9af52a3f-7166-4133-bfbf-10f34b00212f" width="160" alt="renewal initial screen3">
         <img src="https://github.com/user-attachments/assets/45821ad8-7d29-46d3-84b1-357f9e4d83b9" width="160" alt="renewal initial screen4">
-        <img src="https://github.com/user-attachments/assets/b9331bab-1b57-43ba-8b0e-fb24b6016dcd" width="160" alt="renewal initial screen5">
+        <img src="https://github.com/user-attachments/assets/91917eaf-1c15-4de8-bdfb-654751b06866" width="160" alt="renewal initial screen5">
 
 - UI 리뉴얼
 - 앱(PWA) 설치 UX 개선
