@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useState } from "react";
 import { KButton, KIcon, KSwitch } from "kku-ui";
 import { FormRow } from "@/widgets/pages/settings";
-import { usePwaInstall } from "@/shared/hooks";
+import { useInitializePWA } from "../../../../shared/hooks/initializer";
 import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 
@@ -11,7 +11,7 @@ const InstallSettingForm = () => {
   // region [Hooks]
 
   const [isInstallMsg, setIsInstallMsg] = useState(false);
-  const { onClickInstall } = usePwaInstall();
+  const { onClickInstall } = useInitializePWA();
 
   // endregion
 

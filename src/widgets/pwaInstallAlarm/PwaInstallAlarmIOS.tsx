@@ -1,7 +1,7 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { KButton, KIcon } from "kku-ui";
 import { isIOSPWA, isIOSSafari } from "@/shared/utils/device";
-import { usePwaInstall } from "@/shared/hooks";
+import { useInitializePWA } from "../../shared/hooks/initializer";
 import { getCookie } from "@/shared/utils/cookie";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import IosShareIcon from "@/widgets/icon/IosShareIcon";
@@ -15,7 +15,7 @@ const PwaInstallAlarmIOS = () => {
 
   const rootRef = useRef<HTMLDivElement>(null);
   const [isRender, setIsRender] = useState(false);
-  const { onClickDisabled } = usePwaInstall();
+  const { onClickDisabled } = useInitializePWA();
 
   // endregion
 

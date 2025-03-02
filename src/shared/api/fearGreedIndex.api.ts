@@ -4,7 +4,7 @@ import useStore from "@/shared/stores/store";
 
 const fearGreedURI = "https://api.alternative.me/fng/";
 
-interface FeerGreedIndexResponseTypes {
+interface FearGreedIndexResponseTypes {
   name: string;
   data: [
     {
@@ -19,7 +19,7 @@ interface FeerGreedIndexResponseTypes {
   };
 }
 
-export default async function initializeFeerGreedIndex(): Promise<void> {
+export default async function initializeFearGreedIndex(): Promise<void> {
 
   const {setFearGreed} = useStore.getState();
 
@@ -30,7 +30,7 @@ export default async function initializeFeerGreedIndex(): Promise<void> {
       throw new Error("Network response was not ok");
     }
 
-    const data: FeerGreedIndexResponseTypes = await response.json();
+    const data: FearGreedIndexResponseTypes = await response.json();
 
     setFearGreed({ value: Number(data.data[0].value), timestamp: Number(data.data[0].timestamp) });
   } catch (e) {

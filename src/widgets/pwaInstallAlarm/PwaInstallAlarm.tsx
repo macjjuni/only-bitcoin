@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { KButton, KIcon } from "kku-ui";
-import { usePwaInstall } from "@/shared/hooks";
+import { useInitializePWA } from "../../shared/hooks/initializer";
 import { getCookie } from "@/shared/utils/cookie";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import "./PwaInstallAlarm.scss";
@@ -13,7 +13,7 @@ const PwaInstallAlarm = () => {
 
   const rootRef = useRef<HTMLDivElement>(null);
   const [isRender, setIsRender] = useState(false);
-  const { deferredPrompt, onClickInstall, onClickDisabled } = usePwaInstall();
+  const { deferredPrompt, onClickInstall, onClickDisabled } = useInitializePWA();
 
   // endregion
 

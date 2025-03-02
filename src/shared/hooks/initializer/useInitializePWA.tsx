@@ -1,11 +1,11 @@
-import { useCallback } from "react";
+import { useCallback, useEffect } from "react";
 import { setCookie } from "@/shared/utils/cookie";
 import useStore from "@/shared/stores/store";
 import { BeforeInstallPromptEvent } from "@/shared/stores/store.interface";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 
 
-export default function usePwaInstall() {
+export default function useInitializePWA() {
 
 
   // region [Hooks]
@@ -67,8 +67,14 @@ export default function usePwaInstall() {
 
 
   // region [Life Cycles]
+
+  useEffect(() => {
+
+    initializePwaInstall();
+  }, []);
+
   // endregion
 
 
-  return { deferredPrompt, onClickInstall, onClickDisabled, initializePwaInstall };
+  return { deferredPrompt, onClickInstall, onClickDisabled };
 }
