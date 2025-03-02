@@ -42,7 +42,7 @@
         <img src="https://github.com/user-attachments/assets/cfd28b84-4fa4-4c55-97fb-dbbb00edfcd2" width="160" alt="migrate btc-price initial screen3">
         <img src="https://github.com/user-attachments/assets/aa2f037a-bf1f-486c-ae37-e22c7224729f" width="160" alt="migrate btc-price initial screen4">
         <img src="https://github.com/user-attachments/assets/e0a5c79e-f2c0-4268-beaf-5135b4f41c50" width="160" alt="migrate btc-price initial screen5">
-        <img src="https://github.com/user-attachments/assets/91917eaf-1c15-4de8-bdfb-654751b06866" width="160" alt="migrate btc-price initial screen6">
+        <img src="https://github.com/user-attachments/assets/6d13fc97-691c-47f0-9643-bc9445838e3b" width="160" alt="migrate btc-price initial screen6">
 
 - 페이지 분리(대시보드/계산기/블록 현황/프리미엄)
 - 비트코인 반감기 정보 추가
