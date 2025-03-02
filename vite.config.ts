@@ -4,11 +4,18 @@ import react from "@vitejs/plugin-react-swc";
 import { createHtmlPlugin } from "vite-plugin-html";
 import eslint from "vite-plugin-eslint";
 import { compression } from "vite-plugin-compression2";
+import { readFileSync } from 'fs';
 // import { visualizer } from "rollup-plugin-visualizer";
+
+const {version} = JSON.parse(readFileSync('./package.json', 'utf-8'));
 
 
 export default defineConfig(({ mode }: { mode: string }) => {
+
   const env = loadEnv(mode, process.cwd(), "");
+
+  env.VITE_VERSION = `v${version}`;
+
   return defineConfig({
     plugins: [
       react(),
@@ -34,6 +41,7 @@ export default defineConfig(({ mode }: { mode: string }) => {
         compress: { drop_console: true, drop_debugger: true }
       }
     },
-    resolve: { alias: [{ find: "@", replacement: path.resolve(__dirname, "src") }] }
+    resolve: { alias: [{ find: "@", replacement: path.resolve(__dirname, "src") }] },
+    define: { 'import.meta.env.VITE_VERSION': JSON.stringify(env.VITE_VERSION) }
   });
 });

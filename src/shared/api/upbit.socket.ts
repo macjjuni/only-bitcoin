@@ -8,7 +8,7 @@ import { floorToDecimal } from "@/shared/utils/number";
 import { isDev } from "@/shared/utils/common";
 
 // Upbit WebSocket Data
-const UPBIT_URL = import.meta.env.VITE_UPBIT_API_URL || "wss://api.upbit.com/websocket/v1";
+const UPBIT_URL = "wss://api.upbit.com/websocket/v1";
 const UUID_STORAGE_KEY = "uuid";
 const UPBIT_BTC_TICKER = "KRW-BTC" as const;
 const UPBIT_USDT_TICKER = "KRW-USDT" as const;
