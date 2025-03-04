@@ -3,18 +3,19 @@
 .block-search-box__area {
 
   .block-search-box__area__input {
+    height: 42px;
 
-    .block-search-box__area__input {
+    .k-text-field__input__container {
+      height: 100%;
       border-color: variable.$border-color;
       box-shadow: variable.$card-box-shadow;
-      height: 42px;
     }
+  }
 
-    .search-right__area {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 8px;
-    }
+  .search-right__area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 8px;
   }
 }
