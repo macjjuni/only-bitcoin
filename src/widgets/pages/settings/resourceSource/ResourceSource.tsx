@@ -15,7 +15,7 @@ const ResourceSource = () => {
             { label: "BTC(USD)", value: "Binance" },
             { label: "Chart", value: "Coin Gecko" },
             { label: "BTC Dominance", value: "Coin Gecko" },
-            { label: "Feer & Greed Index", value: "alternative.me" }
+            { label: "Fear & Greed Index", value: "alternative.me" }
           ].map(({ label, value }) => (
             <li key={label} className="resource-source__list__item">{label}: {value}</li>
           ))

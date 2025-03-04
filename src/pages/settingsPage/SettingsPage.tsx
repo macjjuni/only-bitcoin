@@ -102,10 +102,11 @@ export default function SettingsPage() {
           <KButton label="이동" onClick={onRouteToFeedback} />
         </FormRow>
 
+        {/* 리소스 출처 */}
         <ResourceSource />
 
         <FormRow icon={<KIcon icon="dev" color="#333" size={24} />} label="버전 정보">
-          {import.meta.env.VITE_VERSION || '-'}
+          {import.meta.env.VITE_VERSION || "-"}
         </FormRow>
 
       </div>
