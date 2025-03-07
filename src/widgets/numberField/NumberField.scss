@@ -11,7 +11,7 @@
 
     .number-field__input {
         width: 100%;
-        padding: variable.$spacing-8 variable.$number-field-unit-width variable.$spacing-4 variable.$number-field-unit-width;
+        padding: variable.$spacing-8 variable.$number-field-unit-width variable.$spacing-2 variable.$number-field-unit-width;
         margin: 0;
         color: #fff;
         outline: 0;
@@ -46,7 +46,7 @@
 
         width: variable.$number-field-unit-width;
         height: 100%;
-        padding: variable.$spacing-24 0 variable.$spacing-12 variable.$spacing-8;
+        padding: variable.$spacing-24 0 variable.$spacing-6 variable.$spacing-8;
         font-family: variable.$number-font-family;
         font-size: variable.$font-body-size;
         font-weight: bold;

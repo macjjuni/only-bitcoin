@@ -53,6 +53,18 @@ export interface StoreType {
   // endregion
 
 
+  // region [BTC2Fiat]
+
+  btc2Fiat: { btcCount: string; krw: string; usd: string; };
+  setBtcCount: (btcCount: string) => void;
+  setKrw: (krw: string) => void;
+  setUsd: (usd: string) => void;
+  focusCurrency: UnitType;
+  setFocusCurrency: (currency: UnitType) => void
+
+  // endregion
+
+
   // region [즐겨찾기]
 
   setting: SettingTypes;
@@ -186,3 +198,5 @@ export interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
+
+export type UnitType = "BTC" | "USD" | "KRW";

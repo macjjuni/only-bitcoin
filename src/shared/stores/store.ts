@@ -84,6 +84,18 @@ const useStore = create<StoreType>()(
       // endregion
 
 
+      // region [BTC2Fiat]
+
+      btc2Fiat: { btcCount: '1', krw: '0', usd: '0' },
+      setBtcCount: (btcCount) => set((state) => ({ btc2Fiat: { ...state.btc2Fiat, btcCount } })),
+      setKrw: (krw) => set((state) => ({ btc2Fiat: { ...state.btc2Fiat, krw } })),
+      setUsd: (usd) => set((state) => ({ btc2Fiat: { ...state.btc2Fiat, usd } })),
+      focusCurrency: "BTC",
+      setFocusCurrency: (focusCurrency) => set(() => ({ focusCurrency })),
+
+      // endregion
+
+
       // region [즐겨찾기]
 
       setting: {
@@ -97,9 +109,13 @@ const useStore = create<StoreType>()(
       setInitialPath: (path) => set((state) => ({
         setting: { ...state.setting, initialPath: path }
       })),
-      setCurrency: (currency) => set((state) => ({
-        setting: { ...state.setting, currency }
-      })),
+      setCurrency: (currency) => set((state) => {
+        // BTC2Fiat 페이지 설정 충돌 방지
+        const isNotIncludeCurrency = currency.includes(state.focusCurrency);
+        const focusCurrency = !isNotIncludeCurrency ? "BTC" : state.focusCurrency;
+
+        return { setting: { ...state.setting, currency, }, focusCurrency }
+      }),
       setUsdtStandard: (isUsdtStandard) => set((state) => ({
         setting: { ...state.setting, isUsdtStandard }
       })),
