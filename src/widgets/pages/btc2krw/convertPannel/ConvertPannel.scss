@@ -1,31 +1,81 @@
-@use "@/app/styles/variable";
+@use '@/app/styles/variable';
 
 .convert-pannel {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: variable.$spacing-12;
-  padding-top: variable.$spacing-36;
-
-  .convert-pannel__item {
+    position: relative;
     display: flex;
     flex-direction: column;
+    gap: variable.$spacing-12;
+    padding-top: variable.$spacing-36;
 
-    .convert-pannel__item__input {
-      &.clickable { cursor: pointer; }
-      .number-field__input { font-weight: bold; }
+    .convert-pannel__item {
+        display: flex;
+        flex-direction: column;
 
-      &.btc-count__number-field > .number-field__input {
-        padding: variable.$spacing-8 variable.$spacing-44 variable.$spacing-8 variable.$spacing-44;
-      }
+        .convert-pannel__item__input {
+            &.clickable { cursor: pointer; }
+            .number-field__input { font-weight: bold; }
+
+            .k-drop-holder { padding: variable.$spacing-8 0; }
+        }
+
+        .convert-pannel__item__sub-text {
+            text-align: right;
+            font-size: variable.$font-small-size;
+            font-family: variable.$number-font-family;
+            color: variable.$gray-font-color;
+            padding: variable.$spacing-2 18px 0 0;
+        }
+
+        &:last-child { margin-top: variable.$spacing-80; }
+
+
+        .focus-unit__area {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+            gap: variable.$spacing-2;
+
+            .focus-unit__area__icon {
+                margin-top: variable.$spacing-2;
+                transform: rotate(180deg);
+            }
+        }
     }
-    .convert-pannel__item__sub-text {
-      text-align: right;
-      font-size: variable.$font-small-size;
-      color: variable.$gray-font-color;
-      padding: variable.$spacing-2 0;
-    }
+}
 
-    &:last-child { margin-top: variable.$spacing-80; }
-  }
+.k-drop-holder__anchor__wrapper {
+
+    .k-drop-holder__anchor__container {
+        //box-shadow: rgba(255, 255, 255, 0.12) 0px 2px 4px 0px,
+        //rgba(255, 255, 255, 0.32) 0px 2px 16px 0px;
+
+        border: 1px solid #fff;
+        border-radius: variable.$default-border-radius;
+        background-color: variable.$dark-background-color;
+
+
+        .select-unit__list {
+            .select-unit__list__item {
+
+                .select-unit__list__item__button {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+
+                    width: 100%;
+                    height: 100%;
+                    padding: variable.$spacing-6 variable.$spacing-12;
+                    font-family: variable.$number-font-family;
+                    font-size: variable.$font-body-size;
+                    font-weight: bold;
+                    color: variable.$font-color;
+                    border-bottom: 1px solid #fff;
+                }
+
+                &:last-child .select-unit__list__item__button {
+                    border-bottom: none;
+                }
+            }
+        }
+    }
 }

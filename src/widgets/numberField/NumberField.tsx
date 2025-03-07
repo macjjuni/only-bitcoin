@@ -76,6 +76,13 @@ const NumberField = forwardRef((props: TextFieldTypes, ref: Ref<HTMLInputElement
     onChange(numberWithComma);
   }, [onChange]);
 
+  const onClickInput = useCallback(() => {
+
+    if (readonly) {
+      onClick?.();
+    }
+  }, [onClick, readonly]);
+
   const onFocus = useCallback(() => {
     disableScroll();
   }, []);
@@ -120,7 +127,7 @@ const NumberField = forwardRef((props: TextFieldTypes, ref: Ref<HTMLInputElement
       {LeftAction}
       <input ref={ref} className="number-field__input" type="text" value={value} onChange={onChangeInput}
              pattern="\d*" inputMode="decimal" data-copy={dataCopy} onFocus={onFocus} onBlur={onBlur}
-             onClick={onClick} readOnly={readonly} maxLength={maxLength} />
+             onClick={onClickInput} readOnly={readonly} maxLength={maxLength} />
       {Unit}
     </div>
   );
