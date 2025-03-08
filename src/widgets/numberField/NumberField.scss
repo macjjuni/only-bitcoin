@@ -28,7 +28,7 @@
 
     .number-field__left-action {
         position: absolute;
-        top: 50%; left: variable.$spacing-8;
+        top: calc(50% + #{variable.$spacing-2}); left: variable.$spacing-8;
         transform: translateY(-50%);
         display: flex;
         justify-content: flex-end;
@@ -46,9 +46,9 @@
 
         width: variable.$number-field-unit-width;
         height: 100%;
-        padding: variable.$spacing-24 0 variable.$spacing-6 variable.$spacing-8;
+        padding: variable.$spacing-22 0 variable.$spacing-8 variable.$spacing-8;
         font-family: variable.$number-font-family;
-        font-size: variable.$font-body-size;
+        font-size: 18px;
         font-weight: bold;
     }
 }

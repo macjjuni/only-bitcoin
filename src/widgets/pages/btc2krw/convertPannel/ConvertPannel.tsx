@@ -187,7 +187,7 @@ const ConvertPannel = () => {
     }
 
     return (
-      <KDropHolder content={SelectUnitList} position="top-right" offset="8px">
+      <KDropHolder content={SelectUnitList} position="top-right" offset="12px">
         <div className="focus-unit__area">
           {focusCurrency} <KIcon className="focus-unit__area__icon" icon="keyboard_arrow_down" size={12} />
         </div>

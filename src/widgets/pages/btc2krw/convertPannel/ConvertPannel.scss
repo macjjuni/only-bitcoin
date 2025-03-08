@@ -15,7 +15,7 @@
             &.clickable { cursor: pointer; }
             .number-field__input { font-weight: bold; }
 
-            .k-drop-holder { padding: variable.$spacing-8 0; }
+            .k-drop-holder { padding: variable.$spacing-2; }
         }
 
         .convert-pannel__item__sub-text {
@@ -23,13 +23,23 @@
             font-size: variable.$font-body-size;
             font-family: variable.$number-font-family;
             color: variable.$gray-font-color;
-            padding: variable.$spacing-2 18px 0 0;
+            padding: variable.$spacing-2 variable.$spacing-20 0 0;
 
             .krw { letter-spacing: -1px; }
         }
 
-        &:last-child { margin-top: variable.$spacing-80; }
+        &:last-child {
+            margin-top: variable.$spacing-80;
 
+            .number-field__unit {
+                padding: variable.$spacing-18 0 variable.$spacing-6 variable.$spacing-8;
+
+                .k-drop-holder {
+                    border-radius: variable.$default-border-radius;
+                    background-color: rgba(255, 255, 255, 0.24);
+                }
+            }
+        }
 
         .focus-unit__area {
             display: flex;
@@ -37,10 +47,7 @@
             align-items: center;
             gap: variable.$spacing-2;
 
-            .focus-unit__area__icon {
-                margin-top: variable.$spacing-2;
-                transform: rotate(180deg);
-            }
+            .focus-unit__area__icon { transform: rotate(180deg); }
         }
     }
 }
@@ -48,30 +55,24 @@
 .k-drop-holder__anchor__wrapper {
 
     .k-drop-holder__anchor__container {
-        border: 1px solid #fff;
-        border-radius: variable.$default-border-radius;
-        background-color: variable.$dark-background-color;
-
         .select-unit__list {
             .select-unit__list__item {
 
                 .select-unit__list__item__button {
                     display: flex;
-                    justify-content: center;
+                    justify-content: flex-start;
                     align-items: center;
 
-                    width: 100%;
+                    width: variable.$number-field-unit-width;
                     height: 100%;
-                    padding: variable.$spacing-6 variable.$spacing-12;
+                    padding: variable.$spacing-8 10px;
                     font-family: variable.$number-font-family;
                     font-size: variable.$font-body-size;
                     font-weight: bold;
                     color: variable.$font-color;
-                    border-bottom: 1px solid #fff;
-                }
 
-                &:last-child .select-unit__list__item__button {
-                    border-bottom: none;
+                    text-decoration: underline;
+                    text-underline-offset: 2px;
                 }
             }
         }
