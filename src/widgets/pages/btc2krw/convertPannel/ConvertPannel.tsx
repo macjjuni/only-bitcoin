@@ -158,9 +158,14 @@ const ConvertPannel = () => {
 
   // region [templates]
 
-  const SatValue = useMemo(() => (
-    (BigInt(Math.floor(parseFloat(btcCount) * 100000000)) * 1n).toLocaleString()
-  ), [btcCount]);
+  const SatValue = useMemo(() => {
+
+    if (btcCount === "") {
+      return "0";
+    }
+
+    return (BigInt(Math.floor(parseFloat(btcCount) * 100000000)) * 1n).toLocaleString();
+  }, [btcCount]);
 
 
   const SelectUnitList = useMemo(() => {
@@ -172,7 +177,9 @@ const ConvertPannel = () => {
         {filteredList.map((unit) => (
           <li key={unit} className="select-unit__list__item">
             <button className="select-unit__list__item__button" type="button"
-                    onClick={() => { setFocusCurrency(unit); }}>{unit}</button>
+                    onClick={() => {
+                      setFocusCurrency(unit);
+                    }}>{unit}</button>
           </li>)
         )}
       </ul>
@@ -188,7 +195,7 @@ const ConvertPannel = () => {
 
     return (
       <KDropHolder content={SelectUnitList} position="top-right" offset="12px">
-        <div className="focus-unit__area">
+        <div className={`focus-unit__area${focusCurrency === "KRW" ? " krw" : ""}`}>
           {focusCurrency} <KIcon className="focus-unit__area__icon" icon="keyboard_arrow_down" size={12} />
         </div>
       </KDropHolder>

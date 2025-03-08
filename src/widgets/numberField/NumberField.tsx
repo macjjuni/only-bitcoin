@@ -1,4 +1,4 @@
-import React, { ChangeEvent, forwardRef, memo, ReactNode, Ref, useCallback, useMemo } from "react";
+import React, { ChangeEvent, forwardRef, memo, ReactNode, Ref, useCallback, useMemo, useRef } from "react";
 import { ComponentBaseTypes } from "@/shared/types/base.interface";
 import { isNumber } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
@@ -23,6 +23,7 @@ const NumberField = forwardRef((props: TextFieldTypes, ref: Ref<HTMLInputElement
 
   const { value, onChange, unit, readonly = false, className,
     leftAction, maxLength, dataCopy, onClick } = props;
+  const isFocus = useRef(false);
 
   // endregion
 
@@ -63,12 +64,8 @@ const NumberField = forwardRef((props: TextFieldTypes, ref: Ref<HTMLInputElement
 
     const text = e.target.value.replace(/,/g, ""); // 콤마 제거
 
-    if (text === "") {
-      return onChange("0");
-    }
-    if (!isNumber(text)) {
-      return;
-    }
+    if (text === "") { return onChange("0"); }
+    if (!isNumber(text)) { return; }
 
     // `12.` 같은 경우 숫자로 변환하면 `12`가 되어버리므로 그대로 유지해야 함
     const numberWithComma = text.includes(".") ? text : comma(parseFloat(text).toString());
@@ -78,16 +75,24 @@ const NumberField = forwardRef((props: TextFieldTypes, ref: Ref<HTMLInputElement
 
   const onClickInput = useCallback(() => {
 
-    if (readonly) {
-      onClick?.();
+    if (readonly) { onClick?.(); }
+
+    if (!isFocus.current) {
+      isFocus.current = true;
+
+      if (typeof ref === 'function') { return; }
+
+      const inputRef = ref?.current;
+      if (inputRef) { inputRef.setSelectionRange(inputRef.value.length, inputRef.value.length); }
     }
-  }, [onClick, readonly]);
+  }, [onClick, readonly, ref]);
 
   const onFocus = useCallback(() => {
     disableScroll();
   }, []);
 
   const onBlur = useCallback(() => {
+    isFocus.current = false;
     enableScroll();
   }, []);
 
