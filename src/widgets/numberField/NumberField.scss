@@ -1,7 +1,6 @@
 @use "@/app/styles/variable";
 @use "@/app/styles/mixin";
 
-$number-field-unit-width: 44px;
 
 .number-field {
     position: relative;
@@ -12,7 +11,7 @@ $number-field-unit-width: 44px;
 
     .number-field__input {
         width: 100%;
-        padding: variable.$spacing-8 $number-field-unit-width variable.$spacing-2 $number-field-unit-width;
+        padding: variable.$spacing-8 variable.$number-field-unit-width variable.$spacing-2 variable.$number-field-unit-width;
         margin: 0;
         color: #fff;
         outline: 0;
@@ -24,11 +23,12 @@ $number-field-unit-width: 44px;
         caret-color: #fff;
         white-space: nowrap;
         text-overflow: ellipsis;
+        user-select: none;
     }
 
     .number-field__left-action {
         position: absolute;
-        top: 50%; left: variable.$spacing-8;
+        top: calc(50% + #{variable.$spacing-2}); left: variable.$spacing-8;
         transform: translateY(-50%);
         display: flex;
         justify-content: flex-end;
@@ -41,13 +41,14 @@ $number-field-unit-width: 44px;
         top: 50%; right: 0;
         transform: translateY(-50%);
         display: flex;
-        justify-content: flex-end;
+        justify-content: flex-start;
         align-items: center;
-        width: $number-field-unit-width;
+
+        width: variable.$number-field-unit-width;
         height: 100%;
-        padding: variable.$spacing-24 0 variable.$spacing-12;
+        padding: variable.$spacing-22 0 variable.$spacing-8 variable.$spacing-8;
         font-family: variable.$number-font-family;
-        font-size: variable.$font-body-size;
+        font-size: 18px;
         font-weight: bold;
     }
 }
