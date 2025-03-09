@@ -27,6 +27,7 @@ const ConvertPannel = () => {
   const krwPrice = useStore(state => state.bitcoinPrice.krw);
   const usdPrice = useStore(state => state.bitcoinPrice.usd);
   const exRate = useStore(state => state.exRate.value);
+  const isUsdtStandard = useStore(state => state.setting.isUsdtStandard);
 
   const btcCount = useStore(state => state.btc2Fiat.btcCount);
   const krw = useStore(state => state.btc2Fiat.krw);
@@ -50,8 +51,9 @@ const ConvertPannel = () => {
     if (focusCurrency === "BTC") {
 
       const btcCountNum = parseFloat(btcCount.replace(/,/g, ""));
+      const usdFromBtcCount = (usdPrice * btcCountNum).toFixed(2);
 
-      setUsd(comma(Math.floor(usdPrice * btcCountNum)));
+      setUsd(comma(usdFromBtcCount));
       setKrw(comma(Math.floor(krwPrice * btcCountNum)));
     }
 
@@ -208,7 +210,9 @@ const ConvertPannel = () => {
       <NumberField ref={krwRef} className="convert-pannel__item__input" value={krw} readonly={focusCurrency !== "KRW"}
                    dataCopy={krw} unit={NumberFieldIUnit("KRW")} maxLength={15} onChange={onChangeKrw}
                    onClick={onClickCopyToKrw} leftAction={KrwLeftAction} />
-      <span className="convert-pannel__item__sub-text">1BTC /
+      <span className="convert-pannel__item__sub-text">
+        1BTC
+        {` / `}
         <CountText value={krwPrice} /> <span className="krw">KRW</span>
       </span>
     </div>
@@ -220,9 +224,13 @@ const ConvertPannel = () => {
       <NumberField ref={usdRef} className="convert-pannel__item__input" value={usd} readonly={focusCurrency !== "USD"}
                    dataCopy={usd} unit={NumberFieldIUnit("USD")} maxLength={15} onChange={onChangeUsd}
                    onClick={onClickCopyToUsd} leftAction={UsdLeftAction} />
-      <span className="convert-pannel__item__sub-text">1BTC / <CountText value={usdPrice} /> USD</span>
+      <span className="convert-pannel__item__sub-text">
+        {isUsdtStandard ? '1USDT' : '$1'} / ₩{exRate}
+        {` | `}
+        1BTC / <CountText value={usdPrice} /> USD
+      </span>
     </div>
-  ), [usd, usdPrice, NumberFieldIUnit, focusCurrency]);
+  ), [usd, usdPrice, NumberFieldIUnit, focusCurrency, exRate]);
 
 
   const BtcNumberField = useMemo(() => (
