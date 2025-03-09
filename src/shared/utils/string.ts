@@ -24,12 +24,16 @@ function comma(num: string | number, removeDecimal = true): string {
     throw Error(`숫자 이외에 문자열이 포함됨, ${num}`, );
   }
 
-  // 소수점 제거
-  if (removeDecimal) {
-    return Math.floor(num).toString();
+  const rexReplace = (numStr: string) => {
+    return numStr.replace(commaRegex, ",");
   }
 
-  return num.toString()?.replace(commaRegex, ",") || '0';
+  // 소수점 제거
+  if (removeDecimal) {
+    return rexReplace(Math.floor(num).toString()) || '0';
+  }
+
+  return rexReplace(num.toString()) || '0';
 }
 
 export { comma };

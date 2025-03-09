@@ -55,7 +55,7 @@ const ConvertPannel = () => {
       const usdFromBtcCount = floorToDecimal(usdPrice * btcCountNum, 2);
 
       setUsd(comma(usdFromBtcCount, false));
-      setKrw(comma(Math.floor(krwPrice * btcCountNum)));
+      setKrw(comma(krwPrice * btcCountNum));
     }
 
     if (focusCurrency === "KRW") {
