@@ -5,6 +5,7 @@ import useStore from "@/shared/stores/store";
 import { comma } from "@/shared/utils/string";
 import { useCopyOnClick } from "@/shared/hooks";
 import { UnitType } from "@/shared/stores/store.interface";
+import { floorToDecimal } from "@/shared/utils/number";
 import "./ConvertPannel.scss";
 
 
@@ -51,9 +52,9 @@ const ConvertPannel = () => {
     if (focusCurrency === "BTC") {
 
       const btcCountNum = parseFloat(btcCount.replace(/,/g, ""));
-      const usdFromBtcCount = (usdPrice * btcCountNum).toFixed(2);
+      const usdFromBtcCount = floorToDecimal(usdPrice * btcCountNum, 2);
 
-      setUsd(comma(usdFromBtcCount));
+      setUsd(comma(usdFromBtcCount, false));
       setKrw(comma(Math.floor(krwPrice * btcCountNum)));
     }
 

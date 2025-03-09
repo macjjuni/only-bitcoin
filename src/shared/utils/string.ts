@@ -11,7 +11,7 @@ function isStrNumber(val: string): boolean {
 }
 
 /* ---------- 천 단위 콤마 변환 ---------- */
-function comma(num: string | number): string {
+function comma(num: string | number, removeDecimal = true): string {
 
   if (typeof num === 'string') {
     // 문자형이지만 숫자말고 문자가 포함된 경우 체크
@@ -25,9 +25,11 @@ function comma(num: string | number): string {
   }
 
   // 소수점 제거
-  const removeDecimalPointValue = Math.floor(num);
+  if (removeDecimal) {
+    return Math.floor(num).toString();
+  }
 
-  return removeDecimalPointValue?.toString()?.replace(commaRegex, ",") || '0';
+  return num.toString()?.replace(commaRegex, ",") || '0';
 }
 
 export { comma };
