@@ -74,7 +74,7 @@ const NetworkSwitch = () => {
     <div className="network__switch__area">
       {!isEnabledNetwork && <KIcon icon="disconnect" size={32} className="disconnect__icon" />}
       {
-        !isKrwConnected || !isUsdConnected && (
+        (!isKrwConnected || !isUsdConnected) && (
           <KIcon icon="refresh" size={32} onClick={refreshAction} className="refresh__icon" />
         )
       }
