@@ -1,14 +1,17 @@
 import { useCallback, useMemo } from "react";
+import { useOutletContext } from "react-router";
 import { KButton, KIcon, KSelect, KSwitch } from "kku-ui";
 import { NotKeyNotYourBitcoin } from "@/widgets";
 import { btcColor } from "@/shared/constants/color";
+import AnimationIcon from "@/widgets/icon/AnimationIcon";
 import router from "@/app/router";
 import useStore from "@/shared/stores/store";
+import { usePageAnimation } from "@/shared/hooks";
+import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { currencyOptions } from "@/shared/constants/setting";
 import { isSafari } from "@/shared/utils/device";
 import { FormRow, InstallSettingForm, ResourceSource } from "@/widgets/pages/settings";
 import "./SettingsPage.scss";
-import AnimationIcon from "@/widgets/icon/AnimationIcon";
 
 
 export default function SettingsPage() {
@@ -16,6 +19,7 @@ export default function SettingsPage() {
 
   // region [Hooks]
 
+  usePageAnimation(useOutletContext<UsePageAnimation>());
   const initialPath = useStore(state => state.setting.initialPath);
   const setInitialPath = useStore(state => state.setInitialPath);
 

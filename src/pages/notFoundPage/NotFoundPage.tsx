@@ -1,6 +1,9 @@
+import { useCallback } from "react";
 import { KButton } from "kku-ui";
 import { useNavigate} from "react-router-dom";
-import { useCallback } from "react";
+import { useOutletContext } from "react-router";
+import { usePageAnimation } from "@/shared/hooks";
+import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import "./NotFoundPage.scss";
 
 const NotFoundPage = () => {
@@ -8,6 +11,7 @@ const NotFoundPage = () => {
   // region [Hooks]
 
   const navigation = useNavigate();
+  usePageAnimation(useOutletContext<UsePageAnimation>());
 
   // endregion
 
