@@ -6,15 +6,14 @@ import "./Header.scss";
 const Header = () => {
 
   return (
-    <h2 className="header__area">
-      <div className="header__area__text">
+    <header className="header__area">
+      <h2 className="header__area__text">
         {useTitle().split(" ").map(text => (
           <span key={text} className="header__area__text">{text}</span>)
         )}
-      </div>
-
+      </h2>
       <NetworkSwitch />
-    </h2>
+    </header>
   );
 };
 
