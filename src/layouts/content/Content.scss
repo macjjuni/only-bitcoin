@@ -1,9 +1,42 @@
-@use "@/app/styles/variable";
+@use '@/app/styles/variable';
 
 .only-btc__layout__content {
     display: flex;
     flex: 1 1 auto;
     width: 100%;
     max-width: variable.$max-width-size;
-    padding: variable.$spacing-8 variable.$spacing-8  calc(#{variable.$mobile-bottom-navigation-height} + #{variable.$spacing-8}) variable.$spacing-8;
+    padding: variable.$spacing-8 variable.$spacing-8 calc(#{variable.$mobile-bottom-navigation-height} + #{variable.$spacing-8}) variable.$spacing-8;
+    opacity: 0;
+
+    &.only-btc__layout--enter-first { animation: firstLoad 0.24s ease-in-out forwards; }
+    &.only-btc__layout--enter-right { animation: slideInFromRight 0.24s ease-in-out forwards; }
+    &.only-btc__layout--enter-left { animation: slideInFromLeft 0.24s ease-in-out forwards; }
+}
+
+
+@keyframes slideInFromRight {
+    from {
+        transform: translateX(8px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes slideInFromLeft {
+    from {
+        transform: translateX(-8px);
+        opacity: 0;
+    }
+    to {
+        transform: translateX(0);
+        opacity: 1;
+    }
+}
+
+@keyframes firstLoad {
+    from { opacity: 0; }
+    to { opacity: 1; }
 }
