@@ -32,7 +32,7 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                padding: variable.$spacing-8;
+                padding: variable.$spacing-16;
                 border-radius: variable.$default-border-radius;
                 font-size: 0;
                 z-index: 1;
@@ -57,8 +57,8 @@
                 }
 
                 &.active + .bottom-navigation__list__item__focus-bg {
-                    width: 42px;
-                    height: 42px;
+                    width: 48px;
+                    height: 48px;
                     opacity: 1;
                     transform: translate(-50%, -50%) scale(1);
                 }
