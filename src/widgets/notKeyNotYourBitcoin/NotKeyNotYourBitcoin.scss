@@ -11,4 +11,8 @@
   font-weight: bold;
   color: #cccccc;
   text-shadow: 0 0 1px #f7931a, 0 0 1px #f7931a, 0 0 1px #ffae42;
+  transition: opacity 0.48s ease;
+
+  &.fade-in { opacity: 1; }
+  &.fade-out { opacity: 0; }
 }
