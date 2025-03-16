@@ -2,8 +2,7 @@ import { useOutletContext } from "react-router";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { ConvertPannel } from "@/widgets/pages/btc2krw";
-import { NotKeyNotYourBitcoin } from "@/widgets";
-import "./Btc2FiatPage.scss";
+import { PageLayout } from "@/layouts";
 
 
 export default function Btc2FiatPage() {
@@ -16,9 +15,8 @@ export default function Btc2FiatPage() {
 
 
   return (
-    <section className="btc-2-fiat-page__area">
+    <PageLayout className="btc-2-fiat-page__area">
       <ConvertPannel />
-      <NotKeyNotYourBitcoin />
-    </section>
+    </PageLayout>
   );
 }

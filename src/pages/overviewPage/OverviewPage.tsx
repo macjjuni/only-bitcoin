@@ -2,8 +2,7 @@ import { useOutletContext } from "react-router";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { BlockHalvingCard, ChartCard, MacroCard, PricePannel } from "@/widgets/pages/overview";
-import { NotKeyNotYourBitcoin } from "@/widgets";
-import "./OverviewPage.scss";
+import { PageLayout } from "@/layouts";
 
 
 export default function OverviewPage() {
@@ -16,12 +15,11 @@ export default function OverviewPage() {
 
 
   return (
-    <section className="overview-page__area">
+    <PageLayout className="overview-page__area">
       <PricePannel />
       <MacroCard />
       <BlockHalvingCard />
       <ChartCard />
-      <NotKeyNotYourBitcoin />
-    </section>
+    </PageLayout>
   );
 }

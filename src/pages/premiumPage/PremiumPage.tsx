@@ -1,9 +1,8 @@
 import { useOutletContext } from "react-router";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
-import { NotKeyNotYourBitcoin } from "@/widgets";
 import { PremiumPannel } from "@/widgets/pages/premium";
-import "./PremiumPage.scss";
+import { PageLayout } from "@/layouts";
 
 
 export default function PremiumPage() {
@@ -16,9 +15,8 @@ export default function PremiumPage() {
 
 
   return (
-    <div className="premium-page__area">
+    <PageLayout className="premium-page__area">
       <PremiumPannel />
-      <NotKeyNotYourBitcoin />
-    </div>
+    </PageLayout>
   );
 }

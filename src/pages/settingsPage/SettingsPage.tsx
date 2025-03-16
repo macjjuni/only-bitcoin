@@ -1,11 +1,11 @@
 import { useCallback, useMemo } from "react";
 import { useOutletContext } from "react-router";
 import { KButton, KIcon, KSelect, KSwitch } from "kku-ui";
-import { NotKeyNotYourBitcoin } from "@/widgets";
 import { btcColor } from "@/shared/constants/color";
 import AnimationIcon from "@/widgets/icon/AnimationIcon";
 import router from "@/app/router";
 import useStore from "@/shared/stores/store";
+import { PageLayout } from "@/layouts";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { currencyOptions } from "@/shared/constants/setting";
@@ -63,7 +63,7 @@ export default function SettingsPage() {
 
 
   return (
-    <div className="settings-page__area">
+    <PageLayout className="settings-page__area">
       <div className="settings-page__area__form__area">
         <FormRow icon={<KIcon icon="star" color={btcColor} />} label="시작 페이지">
           <KSelect value={initialPath} width="176px" onChange={(path) => {
@@ -114,7 +114,6 @@ export default function SettingsPage() {
         </FormRow>
 
       </div>
-      <NotKeyNotYourBitcoin />
-    </div>
+    </PageLayout>
   );
 }
