@@ -1,5 +1,5 @@
-@use "@/app/styles/variable";
-@use "@/app/styles/mixin";
+@use "@/app/styles/variable" as *;
+@use "@/app/styles/mixin" as *;
 
 
 .number-field {
@@ -11,14 +11,14 @@
 
     .number-field__input {
         width: 100%;
-        padding: variable.$spacing-8 variable.$number-field-unit-width variable.$spacing-2 variable.$number-field-unit-width;
+        padding: $spacing-8 $number-field-unit-width $spacing-8 $number-field-unit-width;
         margin: 0;
         color: #fff;
         outline: 0;
         border: none;
         text-align: right;
-        font-family: variable.$number-font-family;
-        @include mixin.font-heading-sm;
+        font-family: $number-font-family;
+        @include font-heading-sm;
         background-color: transparent;
         caret-color: #fff;
         white-space: nowrap;
@@ -28,7 +28,7 @@
 
     .number-field__left-action {
         position: absolute;
-        top: calc(50% + #{variable.$spacing-2}); left: variable.$spacing-8;
+        top: calc(50% + #{$spacing-2}); left: $spacing-8;
         transform: translateY(-50%);
         display: flex;
         justify-content: flex-end;
@@ -38,16 +38,15 @@
 
     .number-field__unit {
         position: absolute;
-        top: 50%; right: 0;
-        transform: translateY(-50%);
+        top: 0; right: 0;
         display: flex;
         justify-content: flex-start;
         align-items: center;
 
-        width: variable.$number-field-unit-width;
+        width: $number-field-unit-width;
         height: 100%;
-        padding: variable.$spacing-22 0 variable.$spacing-8 variable.$spacing-8;
-        font-family: variable.$number-font-family;
+        padding: $spacing-22 0 $spacing-12 $spacing-8;
+        font-family: $number-font-family;
         font-size: 18px;
         font-weight: bold;
     }

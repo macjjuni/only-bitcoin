@@ -86,10 +86,11 @@ const useStore = create<StoreType>()(
 
       // region [BTC2Fiat]
 
-      btc2Fiat: { btcCount: '1', krw: '0', usd: '0' },
+      btc2Fiat: { btcCount: '1', krw: '0', usd: '0', sats: '0', },
       setBtcCount: (btcCount) => set((state) => ({ btc2Fiat: { ...state.btc2Fiat, btcCount } })),
       setKrw: (krw) => set((state) => ({ btc2Fiat: { ...state.btc2Fiat, krw } })),
       setUsd: (usd) => set((state) => ({ btc2Fiat: { ...state.btc2Fiat, usd } })),
+      setSats: (sats) => set((state) => ({ btc2Fiat: { ...state.btc2Fiat, sats } })),
       focusCurrency: "BTC",
       setFocusCurrency: (focusCurrency) => set(() => ({ focusCurrency })),
 

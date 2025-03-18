@@ -1,5 +1,3 @@
-
-
 export const floorToDecimal = (num: number, decimal: number): number => {
   const factor = 10 ** decimal;
   return Math.floor(num * factor) / factor;
@@ -14,4 +12,8 @@ export function bytesToMB(bytes: number, decimal = 2) {
 
 export function isNumber(str: string) {
   return /^-?\d+(\.\d*)?$/.test(str); // 소숫점 뒤에 숫자가 없어도 허용
+}
+
+export function btcToSatoshi(btcCount: string | number): string {
+  return BigInt(Math.floor(parseFloat(btcCount.toString()) * 100_000_000)).toLocaleString();
 }

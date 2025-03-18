@@ -1,11 +1,11 @@
-@use '@/app/styles/variable';
+@use '@/app/styles/variable' as *;
 
 .convert-pannel {
     position: relative;
     display: flex;
     flex-direction: column;
-    gap: variable.$spacing-12;
-    padding-top: variable.$spacing-36;
+    gap: $spacing-12;
+    padding-top: $spacing-24;
 
     .convert-pannel__item {
         display: flex;
@@ -15,70 +15,96 @@
             &.clickable { cursor: pointer; }
             .number-field__input { font-weight: bold; }
 
-            .k-drop-holder { padding: variable.$spacing-2; }
+            .select-unit__list {
+                padding: $spacing-2;
+
+                .focus-unit__area { font-size: 18px; }
+            }
+
+            .k-drop-holder__anchor__wrapper {
+                padding: 0;
+                border: none;
+
+                .select-unit__list {
+                    .select-unit__list__item {
+
+                        .select-unit__list__item__button {
+                            display: flex;
+                            justify-content: flex-start;
+                            align-items: center;
+
+                            width: $number-field-unit-width;
+                            height: 100%;
+                            padding: $spacing-6 $spacing-8;
+                            font-family: $number-font-family;
+                            font-size: $font-body-size;
+                            font-weight: bold;
+                            color: $font-color;
+
+                            text-decoration: underline;
+                            text-underline-offset: 2px;
+                        }
+                    }
+                }
+            }
+        }
+
+        &.convert-pannel__item--krw, &.convert-pannel__item--usd {
+            .number-field {
+                .number-field__input { padding-bottom: $spacing-2; }
+                .number-field__unit { padding-bottom: $spacing-8; }
+            }
         }
 
         .convert-pannel__item__sub-text {
             text-align: right;
-            font-size: variable.$font-body-size;
-            font-family: variable.$number-font-family;
-            color: variable.$gray-font-color;
-            padding: variable.$spacing-2 variable.$spacing-20 0 0;
+            font-size: $font-body-size;
+            font-family: $number-font-family;
+            color: $gray-font-color;
+            padding: $spacing-2 $spacing-20 0 0;
 
             .krw { letter-spacing: -1px; }
+
         }
 
         &:last-child {
-            margin-top: variable.$spacing-80;
+            margin-top: $spacing-88;
 
-            .number-field__unit {
-                padding: variable.$spacing-18 0 variable.$spacing-6 variable.$spacing-8;
+            .number-field {
+                .number-field__unit {
+                    padding: $spacing-22 0 $spacing-10 $spacing-8;
 
-                .k-drop-holder {
-                    border-radius: variable.$default-border-radius;
-                    background-color: rgba(255, 255, 255, 0.24);
-                }
+                    .k-drop-holder {
+                        border-radius: $default-border-radius;
+                        background-color: rgba(255, 255, 255, 0.24);
+                    }
 
-                .focus-unit__area.krw {
-                    letter-spacing: -1px;
-                }
-            }
-        }
+                    .focus-unit__area {
+                        display: flex;
+                        justify-content: flex-start;
+                        align-items: center;
+                        gap: $spacing-2;
 
-        .focus-unit__area {
-            display: flex;
-            justify-content: flex-start;
-            align-items: center;
-            gap: variable.$spacing-2;
+                        .focus-unit__area__icon { transform: rotate(180deg); }
 
-            .focus-unit__area__icon { transform: rotate(180deg); }
-        }
-    }
-}
-
-.k-drop-holder__anchor__wrapper {
-
-    .k-drop-holder__anchor__container {
-        .select-unit__list {
-            .select-unit__list__item {
-
-                .select-unit__list__item__button {
-                    display: flex;
-                    justify-content: flex-start;
-                    align-items: center;
-
-                    width: variable.$number-field-unit-width;
-                    height: 100%;
-                    padding: variable.$spacing-8 10px;
-                    font-family: variable.$number-font-family;
-                    font-size: variable.$font-body-size;
-                    font-weight: bold;
-                    color: variable.$font-color;
-
-                    text-decoration: underline;
-                    text-underline-offset: 2px;
+                        &.focus-unit__area--krw { letter-spacing: -1px; }
+                        &.focus-unit__area--sats { letter-spacing: -1px; }
+                    }
                 }
             }
+
+            &.convert-pannel__item--sats, &.convert-pannel__item--btc {
+                .number-field {
+                    .number-field__unit {
+                        padding-bottom: $spacing-18;
+                    }
+
+                    .number-field__left-action {
+                        top: 50%;
+                    }
+                }
+            }
+
         }
     }
 }

@@ -55,10 +55,11 @@ export interface StoreType {
 
   // region [BTC2Fiat]
 
-  btc2Fiat: { btcCount: string; krw: string; usd: string; };
+  btc2Fiat: { btcCount: string; krw: string; usd: string; sats: string; };
   setBtcCount: (btcCount: string) => void;
   setKrw: (krw: string) => void;
   setUsd: (usd: string) => void;
+  setSats: (sats: string) => void;
   focusCurrency: UnitType;
   setFocusCurrency: (currency: UnitType) => void
 
@@ -199,4 +200,4 @@ export interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-export type UnitType = "BTC" | "USD" | "KRW";
+export type UnitType = "BTC" | "USD" | "KRW" | "SATS";
