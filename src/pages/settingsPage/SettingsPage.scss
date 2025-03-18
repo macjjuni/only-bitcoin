@@ -1,8 +1,8 @@
-@use "@/app/styles/variable";
-@use "@/app/styles/mixin";
+@use "@/app/styles/variable" as *;
+@use "@/app/styles/mixin" as *;
 
 .settings-page__area {
-  @include mixin.PageLayout;
+  @include PageLayout;
 
   .settings-page__area__form__area {
     margin-top: 24px;

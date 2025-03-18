@@ -1,5 +1,5 @@
-@use "@/app/styles/variable";
-@use "@/app/styles/mixin";
+@use "@/app/styles/variable" as *;
+@use "@/app/styles/mixin" as *;
 
 
 .header__area {
@@ -7,17 +7,17 @@
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: variable.$spacing-4;
-    padding: variable.$spacing-8 variable.$spacing-16 0 variable.$spacing-16;
+    gap: $spacing-4;
+    padding: $spacing-8 $spacing-16 0 $spacing-16;
 
     .header__area__text {
         display: flex;
         justify-content: flex-start;
         align-items: center;
-        gap: variable.$spacing-8;
-        color: variable.$font-color;
+        gap: $spacing-8;
+        color: $font-color;
         font-weight: bold;
-        font-family: variable.$number-font-family;
-        @include mixin.font-heading-sm;
+        font-family: $number-font-family;
+        @include font-heading-sm;
     }
 }

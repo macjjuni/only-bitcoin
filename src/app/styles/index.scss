@@ -1,5 +1,5 @@
-@use "@/app/styles/variable";
-@use "@/app/styles/mixin";
+@use "@/app/styles/variable" as *;
+@use "@/app/styles/mixin" as *;
 @forward "@/app/styles/fonts";
 
 @use "@/app/styles/components/toastify";
@@ -54,12 +54,12 @@ table {
 
 a {
   width: 100%;
-  color: variable.$link-color;
+  color: $link-color;
   text-decoration: none;
 }
 
 .dark a {
-  color: variable.$link-color;
+  color: $link-color;
   text-decoration: none;
 }
 
@@ -87,7 +87,7 @@ svg {
 }
 
 text {
-  font-family: variable.$number-font-family;
+  font-family: $number-font-family;
 }
 
 html, body {
@@ -99,16 +99,16 @@ html, body {
 body {
   margin: 0;
   line-height: 1;
-  font-family: variable.$default-font-family;
-  color: variable.$default-font-color;
+  font-family: $default-font-family;
+  color: $default-font-color;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
-  background-color: variable.$default-background-color;
+  background-color: $default-background-color;
 
   &.show-bg {
     background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif'); /*이미지 경로지정*/
     background-size: 420px;
-    background-position: center calc(50% - (#{variable.$mobile-bottom-navigation-height} / 2));
+    background-position: center calc(50% - (#{$mobile-bottom-navigation-height} / 2));
     background-repeat: no-repeat;
     background-attachment: fixed;
 

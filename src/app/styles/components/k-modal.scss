@@ -1,4 +1,4 @@
-@use "../variable";
+@use "../variable" as *;
 
 #only-bitcoin ~ .k-modal__wrapper {
     z-index: 1000;
@@ -11,6 +11,6 @@
     }
 
     .k-modal__container {
-        background-color: variable.$dark-background-color;
+        background-color: $dark-background-color;
     }
 }

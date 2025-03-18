@@ -1,11 +1,11 @@
-@use '@/app/styles/variable';
+@use '@/app/styles/variable' as *;
 
 .only-btc__layout__content {
     display: flex;
     flex: 1 1 auto;
     width: 100%;
-    max-width: variable.$max-width-size;
-    padding: variable.$spacing-8 variable.$spacing-8 calc(#{variable.$mobile-bottom-navigation-height} + #{variable.$spacing-8}) variable.$spacing-8;
+    max-width: $max-width-size;
+    padding: $spacing-8 $spacing-8 calc(#{$mobile-bottom-navigation-height} + #{$spacing-8}) $spacing-8;
     opacity: 0;
 
     &.only-btc__layout--enter-first { animation: firstLoad 0.24s ease-in-out forwards; }

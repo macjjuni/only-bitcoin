@@ -1,4 +1,4 @@
-@use "@/app/styles/variable";
+@use "@/app/styles/variable" as *;
 
 .not-found__page {
   display: flex;
@@ -6,10 +6,10 @@
   justify-content: center;
   align-items: center;
   width: 100%;
-  gap: variable.$spacing-32;
+  gap: $spacing-32;
 
   .not-found__page__title {
-    font-size: variable.$font-sub-title-size;
+    font-size: $font-sub-title-size;
     font-weight: bold;
   }
 }

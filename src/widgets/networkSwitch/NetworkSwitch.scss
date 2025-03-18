@@ -1,10 +1,10 @@
-@use "@/app/styles/variable";
+@use "@/app/styles/variable" as *;
 
 .network__switch__area {
   display: flex;
   justify-content: center;
   align-items: center;
-  gap: variable.$spacing-8;
+  gap: $spacing-8;
   height: 100%;
 
   .disconnect__icon, .refresh__icon {

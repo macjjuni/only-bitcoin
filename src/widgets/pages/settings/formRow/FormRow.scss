@@ -1,5 +1,5 @@
-@use "@/app/styles/variable";
-@use "@/app/styles/mixin";
+@use "@/app/styles/variable" as *;
+@use "@/app/styles/mixin" as *;
 
 
 .form-row__area {
@@ -8,7 +8,7 @@
     justify-content: space-between;
     align-items: center;
     min-height: 54px;
-    padding: 0 variable.$spacing-16;
+    padding: 0 $spacing-16;
     border-bottom: none;
     background-color: #171717;
 
@@ -17,10 +17,10 @@
         justify-content: space-between;
         align-items: center;
         width: 100%;
-        padding-left: variable.$spacing-12;
+        padding-left: $spacing-12;
 
         .form-row__area__content__label {
-            @include mixin.font-body;
+            @include font-body;
         }
     }
 
@@ -31,7 +31,7 @@
         right: 0;
         height: 0.5px;
         width: 88%;
-        background-color: variable.$border-color;
+        background-color: $border-color;
     }
 
     &:first-child {

@@ -1,6 +1,6 @@
-@use "@/app/styles/variable";
+@use "@/app/styles/variable" as *;
 
 
 .count__text {
-  font-family: variable.$number-font-family;
+  font-family: $number-font-family;
 }

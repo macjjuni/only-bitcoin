@@ -1,4 +1,4 @@
-@use '@/app/styles/variable';
+@use '@/app/styles/variable' as *;
 
 #only-bitcoin {
 
@@ -16,7 +16,7 @@
             right: 0;
             height: 0.5px;
             width: 88%;
-            background-color: variable.$border-color;
+            background-color: $border-color;
         }
 
         &:first-child {
@@ -31,7 +31,7 @@
 
         .k-accordion__summary {
             min-height: 54px;
-            padding: 0 variable.$spacing-16;
+            padding: 0 $spacing-16;
             border-bottom: none;
             background-color: #171717;
 
@@ -39,10 +39,10 @@
                 display: flex;
                 justify-content: flex-start;
                 align-items: center;
-                gap: variable.$spacing-12;
+                gap: $spacing-12;
 
                 .form-row__accordion__label__area__text {
-                    font-size: variable.$font-body-size;
+                    font-size: $font-body-size;
                 }
             }
         }
