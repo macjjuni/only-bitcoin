@@ -1,14 +1,14 @@
 
 export interface MemeResponseImageData {
-  url: string; // 이미지 URL
+  src: string; // 이미지 URL
+  alt: string; // 이미지 설명
   tags: string[]; // 태그 리스트
-  description: string; // 이미지 설명
-};
+}
 
 
 async function getMemeImageData(): Promise<MemeResponseImageData[]> {
   const JSON_URL =
-    'https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/meme.json';
+    'https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/meme-page/public/images/meme.json';
 
   try {
     const response = await fetch(JSON_URL);

@@ -1,0 +1,42 @@
+@use "@/app/styles/variable" as *;
+
+.lazy-image {
+    position: relative;
+    display: inline-block;
+    border-radius: $default-border-radius;
+    overflow: hidden;
+
+    .lazy-image__skeleton {
+        position: absolute;
+        inset: 0;
+        background-color: #e0e0e0;
+        animation: pulse 1.5s infinite ease-in-out;
+    }
+
+    .lazy-image__img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: opacity 0.3s ease-in-out;
+        opacity: 0;
+        &.lazy-image__img--loaded {
+            opacity: 1;
+
+        }
+        &.lazy-image__img--loading {
+            opacity: 0;
+        }
+    }
+
+}
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 0.8;
+    }
+    100% {
+        opacity: 0.6;
+    }
+}
