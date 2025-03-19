@@ -6,31 +6,38 @@
     width: 100%;
     max-width: $max-width-size;
     padding: $spacing-8 $spacing-8 calc(#{$mobile-bottom-navigation-height} + #{$spacing-8}) $spacing-8;
-    opacity: 0;
+    opacity: 1;
+}
 
-    &.only-btc__layout--enter-first { animation: firstLoad 0.24s ease-in-out forwards; }
-    &.only-btc__layout--enter-right { animation: slideInFromRight 0.24s ease-in-out forwards; }
-    &.only-btc__layout--enter-left { animation: slideInFromLeft 0.24s ease-in-out forwards; }
+
+@media screen and (max-width: $max-width-size) {
+    .only-btc__layout__content {
+        opacity: 0;
+
+        &.only-btc__layout--enter-first { animation: firstLoad 0.24s ease-in-out forwards; }
+        &.only-btc__layout--enter-right { animation: slideInFromRight 0.24s ease-in-out forwards; }
+        &.only-btc__layout--enter-left { animation: slideInFromLeft 0.24s ease-in-out forwards; }
+    }
 }
 
 
 @keyframes slideInFromRight {
-    from {
+    0% {
         transform: translateX(8px);
         opacity: 0;
     }
-    to {
+    100% {
         transform: translateX(0);
         opacity: 1;
     }
 }
 
 @keyframes slideInFromLeft {
-    from {
+    0% {
         transform: translateX(-8px);
         opacity: 0;
     }
-    to {
+    100% {
         transform: translateX(0);
         opacity: 1;
     }
