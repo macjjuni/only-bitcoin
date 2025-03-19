@@ -1,19 +1,34 @@
-import { memo, useEffect, useRef, useState } from "react";
+import { memo, useEffect, useMemo, useRef, useState } from "react";
 import { ComponentBaseTypes } from "@/shared/types/base.interface";
 import "./LazyImage.scss";
 
 interface LazyImageProps extends ComponentBaseTypes {
   src: string;
   alt?: string;
+  tags: string[];
 }
 
-const LazyImage = ({ src, alt = "", className = "" }: LazyImageProps) => {
+const LazyImage = ({ src, alt = "", tags, className = "" }: LazyImageProps) => {
 
   // region [Hooks]
 
   const imgRef = useRef<HTMLImageElement | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
+
+  // endregion
+
+
+  // region [Styles]
+
+  const rootClass = useMemo(() => {
+    const clazz = [];
+
+    if (className) { clazz.push(className); }
+    if (isLoaded) { clazz.push('lazy-image--loaded'); }
+
+    return clazz.join(' ');
+  }, [className, isLoaded]);
 
   // endregion
 
@@ -41,7 +56,7 @@ const LazyImage = ({ src, alt = "", className = "" }: LazyImageProps) => {
   // endregion
 
   return (
-    <div className={`lazy-image ${className}`} ref={imgRef}>
+    <div ref={imgRef} className={`lazy-image ${rootClass}`}>
       {!isLoaded && <div className="lazy-image__skeleton" />}
       {isVisible && (
         <img
@@ -49,6 +64,7 @@ const LazyImage = ({ src, alt = "", className = "" }: LazyImageProps) => {
           alt={alt}
           className={`lazy-image__img ${isLoaded ? "lazy-image__img--loaded" : "lazy-image__img--loading"}`}
           onLoad={() => setIsLoaded(true)}
+          data-tag={tags.join(", ")}
         />
       )}
     </div>

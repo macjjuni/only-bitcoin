@@ -17,12 +17,12 @@ const Gallery = ({ images }: { images: MemeResponseImageData[] }) => {
     <div className="gallery">
         <div className="gallery__column">
           {images.filter((_, index) => index % 2 === 0).map((image) => (
-            <LazyImage key={image.alt} src={image.src} alt={image.alt} className="gallery__image" />
+            <LazyImage key={image.alt} src={image.src} alt={image.alt} tags={image.tags} className="gallery__image" />
           ))}
         </div>
         <div className="gallery__column">
           {images.filter((_, index) => index % 2 !== 0).map((image) => (
-            <LazyImage key={image.alt} src={image.src} alt={image.alt} className="gallery__image" />
+            <LazyImage key={image.alt} src={image.src} alt={image.alt} tags={image.tags} className="gallery__image" />
           ))}
         </div>
     </div>

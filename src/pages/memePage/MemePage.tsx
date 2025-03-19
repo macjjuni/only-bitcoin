@@ -5,6 +5,7 @@ import { usePageAnimation } from "@/shared/hooks";
 import getMemeImageData, { MemeResponseImageData } from "@/shared/api/memeImageData";
 import {Gallery} from "@/widgets/pages/meme";
 import "./MemePage.scss";
+import { shuffleArray } from "@/shared/utils/common";
 
 
 const MemePage = () => {
@@ -22,7 +23,8 @@ const MemePage = () => {
   const getMemeImages = useCallback(async () => {
 
     const data = await getMemeImageData();
-    setImages(data);
+
+    setImages(shuffleArray(data));
   }, []);
 
   // endregion
@@ -35,6 +37,7 @@ const MemePage = () => {
   }, []);
 
   // endregion
+
 
   return (
     <div className="meme__page">
