@@ -56,10 +56,11 @@ const LazyImage = ({ src, alt = "", tags, className = "", onClick }: LazyImagePr
 
   const onLoadedImage = useCallback((e: SyntheticEvent<HTMLImageElement>) => {
 
-    const { width, height } = e.currentTarget;
+    const { width, naturalWidth, naturalHeight } = e.currentTarget;
+    const height = (width / naturalWidth) * naturalHeight;
 
-    setWrapperSize({width: `${width}px`, height: `${height}px`});
-    setIsLoaded(true)
+    setWrapperSize({ width: `${width}px`, height: `${height}px` });
+    setIsLoaded(true);
   }, []);
 
   // endregion
