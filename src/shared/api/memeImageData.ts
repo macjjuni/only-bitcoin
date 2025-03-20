@@ -7,7 +7,7 @@ export interface MemeResponseImageData {
 
 async function getMemeImageData(): Promise<MemeResponseImageData[]> {
   const JSON_URL =
-    'https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/meme-page/public/images/meme.json';
+    'https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/meme.json';
 
   try {
     const response = await fetch(JSON_URL);
