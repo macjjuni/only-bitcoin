@@ -1,11 +1,11 @@
-import { MouseEvent, memo, useCallback, useMemo, useState } from "react";
+import { memo, MouseEvent, useCallback, useMemo } from "react";
 import { shuffleArray } from "@/shared/utils/common";
 import "./TagList.scss";
 
 interface TagListProps {
   tags: string[];
   selected: string;
-  onChangeTag: (tag: string) => void
+  onChangeTag: (tag: string) => void;
 }
 
 
@@ -22,7 +22,7 @@ const TagList = ({ tags, selected, onChangeTag }: TagListProps) => {
   // region [Events]
 
   const onClickTag = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    onChangeTag((e.target as HTMLButtonElement).dataset.tag || '전체');
+    onChangeTag((e.target as HTMLButtonElement).dataset.tag || "전체");
   }, [onChangeTag]);
 
   // endregion
@@ -30,7 +30,7 @@ const TagList = ({ tags, selected, onChangeTag }: TagListProps) => {
 
   // region [Privates]
 
-  const tagItemActive = useCallback((currentTag: string) =>  currentTag === selected ? ' active' : '',[selected])
+  const tagItemActive = useCallback((currentTag: string) => currentTag === selected ? " active" : "", [selected]);
 
   // endregion
 
