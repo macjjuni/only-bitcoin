@@ -6,7 +6,6 @@
     display: flex;
     gap: $spacing-16;
     padding: 0 $spacing-8;
-    margin-top: $spacing-24;
 
     .gallery__column {
         flex: 1;
@@ -15,7 +14,7 @@
         gap: $spacing-16;
 
         .gallery__image {
-            width: 100%; // 컬럼 내에서 꽉 차도록 설정
+            width: 100%;
         }
 
     }

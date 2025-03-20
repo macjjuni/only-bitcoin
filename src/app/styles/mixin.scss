@@ -57,3 +57,16 @@
 }
 
 // endregion
+
+
+// region [Scroll]
+
+@mixin noScroll {
+    scrollbar-width: none;
+    overscroll-behavior: none;
+    &::-webkit-scrollbar { display: none; }
+}
+
+// endregion
+
+

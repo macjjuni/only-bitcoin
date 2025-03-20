@@ -12,8 +12,8 @@ import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { currencyOptions } from "@/shared/constants/setting";
 import { isSafari } from "@/shared/utils/device";
 import { FormRow, InstallSettingForm, ResourceSource } from "@/widgets/pages/settings";
-import "./SettingsPage.scss";
 import MemeIcon from "@/widgets/icon/MemeIcon";
+import "./SettingsPage.scss";
 
 
 export default function SettingsPage() {
@@ -109,12 +109,12 @@ export default function SettingsPage() {
 
         {!isSafari() && deferredPrompt?.userChoice && <InstallSettingForm />}
 
-        <FormRow icon={<KIcon icon="x_logo" size={24} />} label="피드백">
-          <KButton label="이동" onClick={onRouteToFeedback} />
+        <FormRow icon={<MemeIcon size={28} />} label="밈 저장소">
+          <KButton label="이동" onClick={onRouteToMeme} />
         </FormRow>
 
-        <FormRow icon={<MemeIcon size={28} />} label="Meme">
-          <KButton label="이동" onClick={onRouteToMeme} />
+        <FormRow icon={<KIcon icon="x_logo" size={24} />} label="피드백">
+          <KButton label="이동" onClick={onRouteToFeedback} />
         </FormRow>
 
         {/* 리소스 출처 */}

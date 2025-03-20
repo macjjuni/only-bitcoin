@@ -1,7 +1,6 @@
-@use "@/app/styles/variable" as *;
+@use "@/app/styles/mixin" as *;
 
 
 .meme__page {
-    width: 100%;
-    height: 100%;
+    @include PageLayout;
 }
