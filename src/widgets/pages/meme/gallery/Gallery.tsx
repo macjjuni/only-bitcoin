@@ -30,13 +30,13 @@ const Gallery = ({ images, selected }: GalleryProps) => {
   return (
     <div className="gallery">
       <div className="gallery__column">
-        {filterImages.filter((_, index) => index % 2 === 0).map((image) => (
-          <LazyImage key={image.alt} src={image.src} alt={image.alt} tags={image.tags} className="gallery__image" />
+        {filterImages.filter((_, index) => index % 2 === 0).map(({src, tags}) => (
+          <LazyImage key={src.slice(0, -5)} src={src} alt={src.slice(0, -5)} tags={tags} className="gallery__image" />
         ))}
       </div>
       <div className="gallery__column">
-        {filterImages.filter((_, index) => index % 2 !== 0).map((image) => (
-          <LazyImage key={image.alt} src={image.src} alt={image.alt} tags={image.tags} className="gallery__image" />
+        {filterImages.filter((_, index) => index % 2 !== 0).map(({src, tags}) => (
+          <LazyImage key={src.slice(0, -5)} src={src} alt={src.slice(0, -5)} tags={tags} className="gallery__image" />
         ))}
       </div>
     </div>

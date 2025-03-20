@@ -1,7 +1,6 @@
 
 export interface MemeResponseImageData {
   src: string; // 이미지 URL
-  alt: string; // 이미지 설명
   tags: string[]; // 태그 리스트
 }
 
