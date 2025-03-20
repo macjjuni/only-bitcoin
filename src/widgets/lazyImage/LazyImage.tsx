@@ -93,11 +93,10 @@ const LazyImage = ({ src, alt = "", tags, className = "", onClick }: LazyImagePr
       {!isLoaded && <div className="lazy-image__skeleton" />}
       {isVisible && (
         // eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-noninteractive-element-interactions
-        <img ref={rootRef} src={src} alt={alt}
+        <img ref={rootRef} src={src} alt={alt} data-tag={tags?.join(", ")}
              className={`lazy-image__img ${isLoaded ? "lazy-image__img--loaded" : "lazy-image__img--loading"}`}
              onClick={onClickImage}
-             onLoad={onLoadedImage}
-             data-tag={tags?.join(", ")}/>
+             onLoad={onLoadedImage}/>
       )}
     </div>
   );

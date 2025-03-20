@@ -5,7 +5,7 @@
 .gallery {
     display: flex;
     gap: $spacing-16;
-    padding: 0 $spacing-8;
+    padding: 0 $spacing-8 $spacing-12 $spacing-8;
 
     .gallery__column {
         flex: 1;
