@@ -1,0 +1,41 @@
+@use "@/app/styles/variable" as *;
+@use "@/app/styles/mixin" as *;
+
+
+.tag-list {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-12;
+    padding: $spacing-8 $spacing-16;
+    margin: 0 -#{$spacing-8};
+    margin-top: $spacing-24;
+    overflow-x: scroll;
+    @include noScroll;
+
+    .tag-list__item {
+        display: flex;
+        flex-wrap: nowrap;
+        justify-content: flex-start;
+        gap: $spacing-12;
+        width: 100%;
+
+        .tag-list__item__tag {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+
+            padding: $spacing-6 $spacing-10;
+            border: 1px solid #fff;
+            border-radius: 24px;
+            white-space: nowrap;
+            font-size: 18px;
+            color: $font-color;
+
+            &.active {
+                border-color: $bitcoin-color;
+                background-color: $bitcoin-color;
+            }
+        }
+    }
+}

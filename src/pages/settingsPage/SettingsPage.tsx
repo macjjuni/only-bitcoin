@@ -1,5 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useOutletContext } from "react-router";
+import { useNavigate } from "react-router-dom";
 import { KButton, KIcon, KSelect, KSwitch } from "kku-ui";
 import { btcColor } from "@/shared/constants/color";
 import AnimationIcon from "@/widgets/icon/AnimationIcon";
@@ -11,6 +12,7 @@ import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { currencyOptions } from "@/shared/constants/setting";
 import { isSafari } from "@/shared/utils/device";
 import { FormRow, InstallSettingForm, ResourceSource } from "@/widgets/pages/settings";
+import MemeIcon from "@/widgets/icon/MemeIcon";
 import "./SettingsPage.scss";
 
 
@@ -20,6 +22,7 @@ export default function SettingsPage() {
   // region [Hooks]
 
   usePageAnimation(useOutletContext<UsePageAnimation>());
+  const navigate = useNavigate();
   const initialPath = useStore(state => state.setting.initialPath);
   const setInitialPath = useStore(state => state.setInitialPath);
 
@@ -48,6 +51,10 @@ export default function SettingsPage() {
     anchorTag.target = "_blank";
     anchorTag.click();
     anchorTag.remove();
+  }, []);
+
+  const onRouteToMeme = useCallback(() => {
+    navigate('/meme');
   }, []);
 
   // endregion
@@ -101,6 +108,10 @@ export default function SettingsPage() {
         </FormRow>
 
         {!isSafari() && deferredPrompt?.userChoice && <InstallSettingForm />}
+
+        <FormRow icon={<MemeIcon size={28} />} label="밈 저장소">
+          <KButton label="이동" onClick={onRouteToMeme} />
+        </FormRow>
 
         <FormRow icon={<KIcon icon="x_logo" size={24} />} label="피드백">
           <KButton label="이동" onClick={onRouteToFeedback} />

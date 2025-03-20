@@ -1,0 +1,6 @@
+@use "@/app/styles/mixin" as *;
+
+
+.meme__page {
+    @include PageLayout;
+}

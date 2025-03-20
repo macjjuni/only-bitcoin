@@ -91,9 +91,7 @@ text {
 }
 
 html, body {
-  scrollbar-width: none;
-  overscroll-behavior: none;
-  &::-webkit-scrollbar { display: none; }
+  @include noScroll;
 }
 
 body {
