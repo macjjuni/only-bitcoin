@@ -13,7 +13,7 @@
   },
   {
     "src": "https://github.com/user-attachments/assets/aa6791b6-f474-458e-9e10-13a1d3a60c6c",
-    "tags": ["법정화폐", "화폐시스템", "USD"]
+    "tags": ["명목화폐", "화폐시스템", "USD"]
   },
   {
     "src": "https://github.com/user-attachments/assets/7f1efb45-e0f0-4a17-932c-d909c211303d",
@@ -49,7 +49,7 @@
   },
   {
     "src": "https://github.com/user-attachments/assets/583d9bcc-16df-41fd-87b3-d2c601528e90",
-    "tags": ["HODL"]
+    "tags": ["HODL", "Buy"]
   },
   {
     "src": "https://github.com/user-attachments/assets/d96491e0-ff7a-4197-a1c4-95c8c40ae052",
@@ -57,11 +57,11 @@
   },
   {
     "src": "https://github.com/user-attachments/assets/7d6fe986-72f8-4ff4-8f43-841391c06b7b",
-    "tags": ["법정화폐"]
+    "tags": ["명목화폐"]
   },
   {
     "src": "https://github.com/user-attachments/assets/6889ea24-6602-4ab2-a029-40526005ebea",
-    "tags": ["법정화폐"]
+    "tags": ["명목화폐"]
   },
   {
     "src": "https://github.com/user-attachments/assets/9d8c8ce0-47d7-4b6a-8779-554330c35758",
@@ -101,7 +101,7 @@
   },
   {
     "src": "https://github.com/user-attachments/assets/6763fb10-2565-41b2-a5f6-b783942f83a3",
-    "tags": ["비트맥시"]
+    "tags": ["비트맥시", "비트코이너"]
   },
   {
     "src": "https://github.com/user-attachments/assets/10471245-5d13-4192-935b-45938e768709",
@@ -117,7 +117,7 @@
   },
   {
     "src": "https://github.com/user-attachments/assets/234db5e5-e833-436d-af03-ea6f4213dfa1",
-    "tags": ["차트", "법정화폐", "USD"]
+    "tags": ["차트", "명목화폐", "USD"]
   },
   {
     "src": "https://github.com/user-attachments/assets/fa1c47a1-49c1-435c-9adc-2ce37c6cb8e9",
@@ -129,7 +129,7 @@
   },
   {
     "src": "https://github.com/user-attachments/assets/c3ed9ab6-2c8e-4733-a707-4a0cd9ca3dab",
-    "tags": ["HODL", "BuyTheDip"]
+    "tags": ["HODL", "BuyTheDip", "Buy"]
   },
   {
     "src": "https://github.com/user-attachments/assets/415aaaeb-3667-40d4-a782-738e13442844",
@@ -161,7 +161,7 @@
   },
   {
     "src": "https://github.com/user-attachments/assets/30c5addf-8635-4ff4-8a10-61b0cbce758a",
-    "tags": ["심슨", "법정화폐"]
+    "tags": ["심슨", "명목화폐"]
   },
   {
     "src": "https://github.com/user-attachments/assets/a245404c-bd21-4830-a3de-bd22a8f4b41d",
@@ -178,10 +178,6 @@
   {
     "src": "https://github.com/user-attachments/assets/5969e9b6-d599-43a4-979f-3183e1bd2325",
     "tags": ["비트코이너"]
-  },
-  {
-    "src": "https://github.com/user-attachments/assets/ede9af74-3f1d-4783-9cab-312138145364",
-    "tags": ["삼권분립"]
   },
   {
     "src": "https://github.com/user-attachments/assets/9ecc715f-433f-4c2d-9e0a-fc0c2c87be75",
@@ -201,19 +197,15 @@
   },
   {
     "src": "https://github.com/user-attachments/assets/7a17af96-cf0b-4e00-9884-c5d8a5c072bc",
-    "tags": ["역사는 반복된다", "명목화폐", "2100M"]
+    "tags": ["역사는 반복된다", "명목화폐", "2100M", "인플레이션"]
   },
   {
     "src": "https://github.com/user-attachments/assets/ccb20bd1-6cdb-4793-a58f-d3de87d50a8a",
-    "tags": ["역사는 반복된다", "명목화폐", "2100M"]
+    "tags": ["역사는 반복된다", "명목화폐", "2100M", "인플레이션"]
   },
   {
     "src": "https://github.com/user-attachments/assets/534d6ef7-b021-4594-a246-89dcd0d351bd",
     "tags": ["정부", "명목화폐"]
-  },
-  {
-    "src": "https://github.com/user-attachments/assets/d5595c75-d705-4183-a811-5030247f0eeb",
-    "tags": ["쉿코이너", "쉿코인", "정부", "명목화폐", "노답", "2100M"]
   },
   {
     "src": "https://github.com/user-attachments/assets/437ab741-05de-465a-8b2c-152e91f2d9af",
@@ -236,10 +228,6 @@
     "tags": ["비트코이너", "쉿코이너", "쉿코인", "HODL", "정부", "명목화폐"]
   },
   {
-    "src": "https://github.com/user-attachments/assets/5789440d-4ae6-419b-bc10-baeea32943ec",
-    "tags": ["비트코이너", "HODL", "명목화폐"]
-  },
-  {
     "src": "https://github.com/user-attachments/assets/ad07b207-0f62-469c-a6bd-8226ca58bcce",
     "tags": ["혁신", "HODL", "비트코이너"]
   },
@@ -250,5 +238,21 @@
   {
     "src": "https://github.com/user-attachments/assets/3180983c-408d-4f55-864c-696ce3757ede",
     "tags": ["차트", "2100M", "HODL", "투더문"]
+  },
+  {
+    "src": "https://github.com/user-attachments/assets/eb63df5f-20ae-458b-8164-7842a374bb9d",
+    "tags": ["CBDC", "2100M"]
+  },
+  {
+    "src": "https://github.com/user-attachments/assets/4461c44b-ebfa-4547-a362-b5d5131b1991",
+    "tags": ["명목화폐", "2100M", "정부", "사토시"]
+  },
+  {
+    "src": "https://github.com/user-attachments/assets/4c0af0f3-5d4e-4c9e-a5c0-50b0f1edb11c",
+    "tags": ["2100M", "친구"]
+  },
+  {
+    "src": "https://github.com/user-attachments/assets/89412d98-31d9-41e8-b1bb-0f4a35c1aacb",
+    "tags": ["명목화폐", "인플레이션", "USD"]
   }
 ]
