@@ -10,7 +10,6 @@ const MEME_IMAGE_API_URL =
 const fetchMemeImages = async (): Promise<MemeImageResponseData[]> => {
 
   try {
-
     const data = await fetcher<MemeImageResponseData[]>(MEME_IMAGE_API_URL);
 
     if (isDev) { console.log("✅ 공포 탐욕 지수 데이터 초기화!"); }
@@ -27,8 +26,10 @@ function useMemeImages() {
   const { data: images, ...restData }  = useQuery({
     queryKey: ['meme-images'],
     queryFn: fetchMemeImages,
-    staleTime: 1000 * 60 * 3, // 5분 동안 캐싱
+    staleTime: 0,
+    gcTime: 0,
     placeholderData: [],
+    refetchOnMount: true,
     retry: 3,
   });
 
