@@ -10,8 +10,8 @@ interface LazyImageProps extends ComponentBaseTypes {
 }
 
 interface WrapperSizeTypes {
-  width: string;
-  height: string;
+  minWidth: string;
+  minHeight: string;
 }
 
 
@@ -23,7 +23,9 @@ const LazyImage = ({ src, alt = "", tags, className = "", onClick }: LazyImagePr
   const rootRef = useRef<HTMLImageElement | null>(null);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [wrapperSize, setWrapperSize] = useState<WrapperSizeTypes>({ width: 'auto', height: 'auto' });
+  const [wrapperSize, setWrapperSize] = useState<WrapperSizeTypes>(
+    { minWidth: 'auto', minHeight: 'auto' }
+  );
 
   // endregion
 
@@ -57,9 +59,10 @@ const LazyImage = ({ src, alt = "", tags, className = "", onClick }: LazyImagePr
   const onLoadedImage = useCallback((e: SyntheticEvent<HTMLImageElement>) => {
 
     const { width, naturalWidth, naturalHeight } = e.currentTarget;
+    console.log(width);
     const height = (width / naturalWidth) * naturalHeight;
 
-    setWrapperSize({ width: `${width}px`, height: `${height}px` });
+    setWrapperSize({ minWidth: `${width}px`, minHeight: `${height}px` });
     setIsLoaded(true);
   }, []);
 
