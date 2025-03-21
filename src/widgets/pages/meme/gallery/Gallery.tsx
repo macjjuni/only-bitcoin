@@ -1,11 +1,11 @@
 import { memo, useMemo } from "react";
 import { LazyImage } from "@/widgets";
-import { MemeResponseImageData } from "@/shared/api/memeImageData";
+import { MemeImageResponseData } from "@/shared/types/api/memeImage";
 import "./Gallery.scss";
 
 
 interface GalleryProps {
-  images: MemeResponseImageData[];
+  images: MemeImageResponseData[];
   selected: string;
 }
 

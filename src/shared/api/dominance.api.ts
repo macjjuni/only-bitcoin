@@ -45,12 +45,16 @@ const useBitcoinDominanceQuery = () => {
 
   // region [Hooks]
 
+  const STALE_TIME_MIN = 10;
+  const REFETCH_TIME_MIN = 10;
+
   const { data: dominance, error, isSuccess, isError } = useQuery({
     queryKey: ["bitcoin-dominance"],
     queryFn: fetchBitcoinDominance,
-    staleTime: 1000 * 60 * 10, // 10분 동안 데이터 유효
-    refetchInterval: 1000 * 60 * 10, // 10분마다 갱신
+    staleTime: 1000 * 60 * STALE_TIME_MIN, // 10분 동안 데이터 유효
+    refetchInterval: 1000 * 60 * REFETCH_TIME_MIN, // 10분마다 갱신
     placeholderData: 0,
+    retry: 3,
   });
 
   // endregion

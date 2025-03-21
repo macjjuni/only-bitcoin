@@ -23,18 +23,21 @@ const fetchFearGreedIndex = async (): Promise<number | 'Error'> => {
   }
 };
 
-
 const useFearGreedIndex = () => {
 
 
   // region [Hooks]
 
+  const STALE_TIME_MIN = 10;
+  const REFETCH_TIME_MIN = 10;
+
   const { data: fearGreed, isSuccess, isError, error } = useQuery({
     queryKey: ["fear-greed-index"],
     queryFn: fetchFearGreedIndex,
-    staleTime: 1000 * 60 * 10, // 10분 캐싱
-    refetchInterval: 1000 * 60 * 10, // 10분마다 자동 갱신
-    placeholderData: 0
+    staleTime: 1000 * 60 * STALE_TIME_MIN, // 10분 캐싱
+    refetchInterval: 1000 * 60 * REFETCH_TIME_MIN, // 10분마다 자동 갱신
+    placeholderData: 0,
+    retry: 3,
   });
 
   // endregion
