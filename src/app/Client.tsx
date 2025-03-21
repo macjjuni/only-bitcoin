@@ -1,21 +1,17 @@
+import { QueryClientProvider } from '@tanstack/react-query';
 import { ToastContainer } from "react-toastify";
-import { useInitializer } from "@/shared/hooks";
+import { queryClient } from "@/app/queryClient";
 import { toastOptions } from "@/shared/lib/toast";
 import { PwaInstallAlarm, PwaInstallAlarmIOS } from "@/widgets";
 import { DefaultLayout, Header, Content, BottomNavigation} from "@/layouts";
+import Initializer from "@/app/Initializer";
 
 
 export default function Client() {
 
-  // region [Hooks]
-
-  useInitializer();
-
-  // endregion
-
-
   return (
-    <>
+    <QueryClientProvider client={queryClient}>
+      <Initializer />
       <DefaultLayout>
         <Header />
         <Content />
@@ -24,6 +20,6 @@ export default function Client() {
       <PwaInstallAlarm />
       <PwaInstallAlarmIOS />
       <ToastContainer {...toastOptions} />
-    </>
+    </QueryClientProvider>
   );
 }
