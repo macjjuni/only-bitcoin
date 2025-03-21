@@ -1,49 +1,13 @@
+import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
-import { isDev } from "@/shared/utils/common";
-import { valueCheck } from "@/shared/utils/string";
-import { calcCurrentDateDifference } from "@/shared/lib/date";
-import useStore from "@/shared/stores/store";
-import interval from "@/shared/utils/interval";
+import { useEffect } from "react";
+import fetcher from "@/shared/utils/fetcher";
 import { floorToDecimal } from "@/shared/utils/number";
+import { isDev } from "@/shared/utils/common";
+import { ICurrency } from "@/shared/types/api/dominance";
 
+const calculateBitcoinDominance = (list: ICurrency[]) => {
 
-const btcDUrl = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false";
-
-export interface ICurrency {
-  ath: number | null;
-  ath_change_percentage: number | null;
-  ath_date: string | null;
-  atl: number | null;
-  atl_change_percentage: number | null;
-  atl_date: string | null;
-  circulating_supply: number | null;
-  current_price: number | null;
-  fully_diluted_valuation: number | null;
-  high_24h: number | null;
-  id: string | null;
-  image: string | null;
-  last_updated: string | null;
-  low_24h: number | null;
-  market_cap: number;
-  market_cap_change_24h: number | null;
-  market_cap_change_percentage_24h: number | null;
-  market_cap_rank: 1;
-  max_supply: number | null;
-  name: string | null;
-  price_change_24h: number | null;
-  price_change_percentage_24h: number | null;
-  roi: null;
-  symbol: string | null;
-  total_supply: number | null;
-  total_volume: number | null;
-}
-
-const limitMins = 10; // 10분
-const intervalTime = 5 * 60000; // 5분(ms)
-
-
-const getDominance = (list: ICurrency[]) => {
-  // Initializes variables
   let BTCCap = 0;
   let altCap = 0;
 
@@ -55,54 +19,63 @@ const getDominance = (list: ICurrency[]) => {
       altCap += x.market_cap;
     }
   });
+
   return ((BTCCap / altCap) * 100);
 };
 
 
-export default async function initializeBitcoinDominance(): Promise<void> {
+const BTC_DOMINANCE_API_URL = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false";
 
-  if (isDev) {
-    console.log("✅ BTC 도미넌스 초기화");
+const fetchBitcoinDominance = async (): Promise<number | 'Error'> => {
+
+  try {
+
+    const data: ICurrency[] = await fetcher<ICurrency[]>(BTC_DOMINANCE_API_URL);
+
+    if (isDev) { console.log("✅ 도미넌스 데이터 초기화!"); }
+    return floorToDecimal(calculateBitcoinDominance(data), 2);
+
+  } catch {
+    return "Error";
   }
+};
 
-  const { dominance, setDominance } = useStore.getState();
+
+const useBitcoinDominanceQuery = () => {
+
+  // region [Hooks]
+
+  const STALE_TIME_MIN = 10;
+  const REFETCH_TIME_MIN = 10;
+
+  const { data: dominance, error, isSuccess, isError } = useQuery({
+    queryKey: ["bitcoin-dominance"],
+    queryFn: fetchBitcoinDominance,
+    staleTime: 1000 * 60 * STALE_TIME_MIN, // 10분 동안 데이터 유효
+    refetchInterval: 1000 * 60 * REFETCH_TIME_MIN, // 10분마다 갱신
+    placeholderData: 0,
+    retry: 3,
+  });
+
+  // endregion
 
 
-  const updateDominance = async () => {
+  // region [Life Cycles]
 
-    try {
-      const response = await fetch(btcDUrl);
+  useEffect(() => {
 
-      if (!response.ok) {
-        throw new Error("Network response was not ok");
-      }
-
-      const data: ICurrency[] = await response.json();
-      const dominancePercent = getDominance(data);
-
-      setDominance({ value: floorToDecimal(dominancePercent, 2), timestamp: Date.now() });
-    } catch (e) {
-      console.error(e);
-      toast.error("비트코인 도미넌스 업데이트 실패️");
+    if (isError && isDev) {
+      toast.error("도미넌스 데이터 업데이트 에러!");
+      console.log("❌ 도미넌스 데이터 업데이트 에러!", error);
     }
-  };
+  }, [isError]);
 
-  const updateCheck = () => {
+  // endregion
 
-    const valCheck = valueCheck(dominance.timestamp);
 
-    if (!valCheck) {
-      updateDominance();
-    } else {
-      const minDiff = calcCurrentDateDifference(dominance.timestamp, "minute");
+  return { dominance, error, isError, isSuccess };
+};
 
-      if (minDiff > limitMins) {
-        updateDominance();
-      }
-    }
-  };
+export default useBitcoinDominanceQuery;
 
-  updateCheck(); // 최초 실행
-  const blockInterval = interval(updateDominance, intervalTime);
-  blockInterval.start();
-}
+

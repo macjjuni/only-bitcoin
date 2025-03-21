@@ -19,26 +19,10 @@ export interface StoreType {
   // endregion
 
 
-  // region [도미넌스]
-
-  dominance: DominanceTypes;
-  setDominance: (by: SetDominanceTypes) => void;
-
-  // endregion
-
-
   // region [환율 데이터]
 
   exRate: ExRateTypes; // USD/KRW 환율 데이터
   setExRate: (exRate: ExRateTypes) => void;
-
-  // endregion
-
-
-  // region [공포탐욕지수]
-
-  fearGreed: FearGreedTypes;
-  setFearGreed: (data: FearGreedTypes) => void;
 
   // endregion
 
@@ -78,26 +62,6 @@ export interface StoreType {
 
   // endregion
 
-
-  // market: MarketType; // 메인 시세 단위 => 'KRW' | 'USD' | 'KRW/USD'
-  // setMarket: (market: MarketType) => MarketType;
-  //
-
-  //
-  // amount: string; // BTC 개수 Input 값
-  // setAmount: (by: string) => void;
-  //
-  // isCountAnime: boolean; // 가격 변동 애니메이션 효과 여부
-  // setCountAnime: (bool: boolean) => void;
-  //
-  //
-  // isLottiePlay: boolean; // 메인 로티 애니메이션
-  // toggleLottie: () => void;
-  //
-
-  //
-  // isUsdtRateEnabled: boolean;
-  // setUsdtRateEnabled: (isUsdtRateEnabled: boolean) => void;
 }
 
 
@@ -117,25 +81,6 @@ export interface BitcoinPriceUSDTypes {
   usdChange24h: string;
   usdUpdateTimestamp: number;
   isUsdConnected?: boolean; // 웹 소켓 접속 여부(바이낸스)
-}
-
-
-// 도미넌스지수
-export interface DominanceTypes {
-  value: number;
-  timestamp: number;
-}
-
-// 도미넌스 업데이트
-export interface SetDominanceTypes {
-  value: number;
-  timestamp: number;
-}
-
-// 공포탐욕지수
-export interface FearGreedTypes {
-  value: number;
-  timestamp: number;
 }
 
 

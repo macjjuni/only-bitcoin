@@ -3,8 +3,7 @@ import { dateUtil } from "kku-util";
 import { INIT_SOCKET_TIME } from "@/shared/constants/setting";
 import storage from "@/shared/utils/storage";
 import {
-  initializeBinance, initializeBitcoinDominance, initializeFearGreedIndex,
-  initializeMempool, initializeUpbit, reConnectUpbit, reConnectBinance, reconnectMempool
+  initializeBinance, initializeMempool, initializeUpbit, reConnectUpbit, reConnectBinance, reconnectMempool
 } from "@/shared/api";
 
 
@@ -57,8 +56,6 @@ export default function useInitializeAPI() {
     initializeUpbit();
     initializeBinance();
     initializeMempool();
-    initializeBitcoinDominance().then();
-    initializeFearGreedIndex().then();
   }, []);
 
   // endregion

@@ -1,40 +1,63 @@
-// import { toast } from "react-toastify";
-// import { getCurrentDate } from "@/shared/utils/date";
-import useStore from "@/shared/stores/store";
+import { useQuery } from "@tanstack/react-query";
+import { toast } from "react-toastify";
+import { useEffect } from "react";
+import fetcher from "@/shared/utils/fetcher";
+import { FearGreedIndexResponseTypes } from "@/shared/types/api/fearGreedIndex";
+import { isDev } from "@/shared/utils/common";
 
-const fearGreedURI = "https://api.alternative.me/fng/";
 
-interface FearGreedIndexResponseTypes {
-  name: string;
-  data: [
-    {
-      value: string;
-      value_classification: string;
-      timestamp: string;
-      time_until_update: string;
-    }
-  ];
-  metadata: {
-    error: null | string;
-  };
-}
+const FEAR_GREED_INDEX_API_URL = "https://api.alternative.me/fng/";
 
-export default async function initializeFearGreedIndex(): Promise<void> {
 
-  const {setFearGreed} = useStore.getState();
+const fetchFearGreedIndex = async (): Promise<number | 'Error'> => {
 
   try {
-    const response = await fetch(fearGreedURI);
 
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
+    const data = await fetcher<FearGreedIndexResponseTypes>(FEAR_GREED_INDEX_API_URL);
 
-    const data: FearGreedIndexResponseTypes = await response.json();
+    if (isDev) { console.log("✅ 공포 탐욕 지수 데이터 초기화!"); }
+    return Number(data.data[0].value);
 
-    setFearGreed({ value: Number(data.data[0].value), timestamp: Number(data.data[0].timestamp) });
-  } catch (e) {
-    console.error(e);
-    // toast.error("Fear and Greed Index update Error!");
+  } catch {
+    return "Error";
   }
 };
+
+const useFearGreedIndex = () => {
+
+
+  // region [Hooks]
+
+  const STALE_TIME_MIN = 10;
+  const REFETCH_TIME_MIN = 10;
+
+  const { data: fearGreed, isSuccess, isError, error } = useQuery({
+    queryKey: ["fear-greed-index"],
+    queryFn: fetchFearGreedIndex,
+    staleTime: 1000 * 60 * STALE_TIME_MIN, // 10분 캐싱
+    refetchInterval: 1000 * 60 * REFETCH_TIME_MIN, // 10분마다 자동 갱신
+    placeholderData: 0,
+    retry: 3,
+  });
+
+  // endregion
+
+
+  // region [Life Cycles]
+
+  useEffect(() => {
+
+    if (isError && isDev) {
+      toast.error("공포 탐욕지수 데이터 업데이트 에러!");
+      console.log("❌ 공포 탐욕지수 데이터 업데이트 에러!", error);
+    }
+  }, [isError]);
+
+  // endregion
+
+
+  return { fearGreed, isSuccess, isError, error };
+};
+
+
+export default useFearGreedIndex;
