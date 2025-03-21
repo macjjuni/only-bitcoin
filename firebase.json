@@ -1,6 +1,6 @@
 {
   "hosting": {
-    "site": "btc-price-9503c",
+    "site": "btc-price",
     "public": "dist",
     "ignore": ["firebase.json", "**/.*", "**/node_modules/**"],
     "rewrites": [
