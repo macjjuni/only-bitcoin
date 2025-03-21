@@ -6,5 +6,5 @@ export { default as initializeBinance } from "@/shared/api/binance.socket";
 export { default as initializeUpbit } from "@/shared/api/upbit.socket";
 export { default as initializeMempool } from "@/shared/api/mempool.socket";
 export { default as useBitcoinDominanceQuery } from "@/shared/api/dominance.api";
-export { default as initializeFearGreedIndex } from "@/shared/api/fearGreedIndex.api";
+export { default as useFearGreedIndex } from "@/shared/api/fearGreedIndex.api";
 export { reConnectUpbit, reConnectBinance, reconnectMempool };

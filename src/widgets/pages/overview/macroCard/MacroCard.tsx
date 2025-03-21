@@ -6,7 +6,7 @@ import useStore from "@/shared/stores/store";
 import { FearAndGreedModal } from "@/widgets/modal";
 import "./MacroCard.scss";
 import { CountText } from "@/widgets";
-import { useBitcoinDominanceQuery } from "@/shared/api";
+import { useBitcoinDominanceQuery, useFearGreedIndex } from "@/shared/api";
 
 
 const PricePannel = () => {
@@ -14,9 +14,10 @@ const PricePannel = () => {
   // region [Hooks]
 
   const { dominance } = useBitcoinDominanceQuery();
+  const { fearGreed } = useFearGreedIndex();
   const { krw, usd } = useStore(state => state.bitcoinPrice);
   const usdExRate = useStore(state => state.exRate.value);
-  const feerGreed = useStore(state => state.fearGreed.value);
+
   const premium = useMemo(() => (calcPremiumPercent(krw, usd, usdExRate)), [krw, usd, usdExRate]);
 
   const navigate = useNavigate();
@@ -36,11 +37,11 @@ const PricePannel = () => {
 
   // region [Events]
 
-  const onCloseFeerAndGreedModal = useCallback(() => {
+  const onCloseFearAndGreedModal = useCallback(() => {
     setIsFeerAndGreedModal(false);
   }, []);
 
-  const onOpenFeerAndGreedModal = useCallback(() => {
+  const onOpenFearAndGreedModal = useCallback(() => {
     setIsFeerAndGreedModal(true);
   }, []);
 
@@ -54,9 +55,9 @@ const PricePannel = () => {
       { label: "BTC.D", value: dominance, decimals: 1, sign: "%", onClick: undefined },
       { label: "KRW/USD", value: usdExRate, decimals: 0, sign: null, onClick: onRoutePremiumPage },
       { label: "Premium", value: premium, decimals: 2, sign: "%", onClick: onRoutePremiumPage },
-      { label: "F&G Index", value: feerGreed, decimals: 0, sign: null, onClick: onOpenFeerAndGreedModal }
+      { label: "F&G Index", value: fearGreed.value, decimals: 0, sign: null, onClick: onOpenFearAndGreedModal }
     ]
-  ), [dominance, usdExRate, premium, feerGreed]);
+  ), [dominance, usdExRate, premium, fearGreed.value]);
 
   // endregion
 
@@ -70,16 +71,14 @@ const PricePannel = () => {
             <div key={label} className="macro-card__item" onClick={onClick} tabIndex={0}>
               <span className="macro-card__item__text">{label}</span>
               <span className="macro-card__item__value">
-                  {
-                    typeof value === "number" ?
-                      (<><CountText value={value} decimals={decimals} />{sign}</>) : value
-                  }
+                {typeof value === "number" && (<><CountText value={value} decimals={decimals} />{sign}</>)}
+                {typeof value === "string" && value}
                 </span>
             </div>
           ))
         }
       </HorizontalCard>
-      <FearAndGreedModal isOpen={IsFeerAndGreedModal} onClose={onCloseFeerAndGreedModal} />
+      <FearAndGreedModal isOpen={IsFeerAndGreedModal} onClose={onCloseFearAndGreedModal} />
     </>
   );
 };

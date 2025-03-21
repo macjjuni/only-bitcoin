@@ -56,14 +56,6 @@ const useStore = create<StoreType>()(
       // endregion
 
 
-      // region [공포탐욕지수]
-
-      fearGreed: { value: 0, timestamp: 0 },
-      setFearGreed: (fearGreed) => set(() => ({ fearGreed })),
-
-      // endregion
-
-
       // region [블록 데이터]
 
       blockData: [{ id: "", height: 0, timestamp: 0, size: 0, poolName: "-" }],
@@ -121,33 +113,6 @@ const useStore = create<StoreType>()(
       }))
 
       // endregion
-
-      // market: "KRW/USD",
-      // setMarket: (market: MarketType) => {
-      //   set({ market });
-      //   return market;
-      // },
-      //
-      // theme: "dark",
-      // setTheme: (theme) => set(() => ({ theme })), // deprecated
-      //
-      //
-      // amount: "1",
-      // setAmount: (price) => set(() => ({ amount: price })),
-      //
-      // isCountAnime: true,
-      // setCountAnime: (isCountAnime) => set(() => ({ isCountAnime })),
-      //
-      //
-      // isLottiePlay: true,
-      // toggleLottie: () => set((state) => ({ isLottiePlay: !state.isLottiePlay })),
-      //
-      //
-      // marketChartInterval: 365,
-      // setMarketChartInterval: (marketChartInterval) => set(() => ({ marketChartInterval })),
-      //
-      // isUsdtRateEnabled: false,
-      // setUsdtRateEnabled: (isUsdtRateEnabled) => set(() => ({isUsdtRateEnabled})),
     }),
     { name: "only-bitcoin" } // persist key
   )
