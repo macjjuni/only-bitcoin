@@ -4,9 +4,9 @@ import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/Horizon
 import { calcPremiumPercent } from "@/shared/utils/common";
 import useStore from "@/shared/stores/store";
 import { FearAndGreedModal } from "@/widgets/modal";
-import "./MacroCard.scss";
 import { CountText } from "@/widgets";
 import { useBitcoinDominanceQuery, useFearGreedIndex } from "@/shared/api";
+import "./MacroCard.scss";
 
 
 const PricePannel = () => {
@@ -15,13 +15,14 @@ const PricePannel = () => {
 
   const { dominance } = useBitcoinDominanceQuery();
   const { fearGreed } = useFearGreedIndex();
+
   const { krw, usd } = useStore(state => state.bitcoinPrice);
   const usdExRate = useStore(state => state.exRate.value);
 
   const premium = useMemo(() => (calcPremiumPercent(krw, usd, usdExRate)), [krw, usd, usdExRate]);
 
   const navigate = useNavigate();
-  const [IsFeerAndGreedModal, setIsFeerAndGreedModal] = useState(false);
+  const [IsFearAndGreedModal, setIsFearAndGreedModal] = useState(false);
 
   // endregion
 
@@ -38,11 +39,11 @@ const PricePannel = () => {
   // region [Events]
 
   const onCloseFearAndGreedModal = useCallback(() => {
-    setIsFeerAndGreedModal(false);
+    setIsFearAndGreedModal(false);
   }, []);
 
   const onOpenFearAndGreedModal = useCallback(() => {
-    setIsFeerAndGreedModal(true);
+    setIsFearAndGreedModal(true);
   }, []);
 
   // endregion
@@ -55,9 +56,9 @@ const PricePannel = () => {
       { label: "BTC.D", value: dominance, decimals: 1, sign: "%", onClick: undefined },
       { label: "KRW/USD", value: usdExRate, decimals: 0, sign: null, onClick: onRoutePremiumPage },
       { label: "Premium", value: premium, decimals: 2, sign: "%", onClick: onRoutePremiumPage },
-      { label: "F&G Index", value: fearGreed.value, decimals: 0, sign: null, onClick: onOpenFearAndGreedModal }
+      { label: "F&G Index", value: fearGreed, decimals: 0, sign: null, onClick: onOpenFearAndGreedModal }
     ]
-  ), [dominance, usdExRate, premium, fearGreed.value]);
+  ), [dominance, usdExRate, premium, fearGreed]);
 
   // endregion
 
@@ -78,7 +79,7 @@ const PricePannel = () => {
           ))
         }
       </HorizontalCard>
-      <FearAndGreedModal isOpen={IsFeerAndGreedModal} onClose={onCloseFearAndGreedModal} />
+      <FearAndGreedModal isOpen={IsFearAndGreedModal} onClose={onCloseFearAndGreedModal} />
     </>
   );
 };

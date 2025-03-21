@@ -21,18 +21,23 @@ const calculateBitcoinDominance = (list: ICurrency[]) => {
   });
 
   return ((BTCCap / altCap) * 100);
-}
+};
 
 
 const BTC_DOMINANCE_API_URL = "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false";
 
-const fetchBitcoinDominance = async () => {
+const fetchBitcoinDominance = async (): Promise<number | 'Error'> => {
 
-  const data: ICurrency[] = await fetcher<ICurrency[]>(BTC_DOMINANCE_API_URL);
+  try {
 
-  if (isDev) { console.log("✅ 도미넌스 데이터 초기화!"); }
+    const data: ICurrency[] = await fetcher<ICurrency[]>(BTC_DOMINANCE_API_URL);
 
-  return floorToDecimal(calculateBitcoinDominance(data), 2);
+    if (isDev) { console.log("✅ 도미넌스 데이터 초기화!"); }
+    return floorToDecimal(calculateBitcoinDominance(data), 2);
+
+  } catch {
+    return "Error";
+  }
 };
 
 
@@ -44,7 +49,8 @@ const useBitcoinDominanceQuery = () => {
     queryKey: ["bitcoin-dominance"],
     queryFn: fetchBitcoinDominance,
     staleTime: 1000 * 60 * 10, // 10분 동안 데이터 유효
-    refetchInterval: 1000 * 60 * 10 // 10분마다 갱신
+    refetchInterval: 1000 * 60 * 10, // 10분마다 갱신
+    placeholderData: 0,
   });
 
   // endregion
@@ -63,7 +69,7 @@ const useBitcoinDominanceQuery = () => {
   // endregion
 
 
-  return { dominance: isSuccess ? dominance : "Error", error, isError, isSuccess };
+  return { dominance, error, isError, isSuccess };
 };
 
 export default useBitcoinDominanceQuery;
