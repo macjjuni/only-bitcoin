@@ -6,14 +6,15 @@ import useStore from "@/shared/stores/store";
 import { FearAndGreedModal } from "@/widgets/modal";
 import "./MacroCard.scss";
 import { CountText } from "@/widgets";
+import { useBitcoinDominanceQuery } from "@/shared/api";
 
 
 const PricePannel = () => {
 
   // region [Hooks]
 
+  const { dominance } = useBitcoinDominanceQuery();
   const { krw, usd } = useStore(state => state.bitcoinPrice);
-  const dominance = useStore(state => state.dominance.value);
   const usdExRate = useStore(state => state.exRate.value);
   const feerGreed = useStore(state => state.fearGreed.value);
   const premium = useMemo(() => (calcPremiumPercent(krw, usd, usdExRate)), [krw, usd, usdExRate]);
@@ -69,9 +70,11 @@ const PricePannel = () => {
             <div key={label} className="macro-card__item" onClick={onClick} tabIndex={0}>
               <span className="macro-card__item__text">{label}</span>
               <span className="macro-card__item__value">
-                <CountText value={value} decimals={decimals} />
-                {sign}
-              </span>
+                  {
+                    typeof value === "number" ?
+                      (<><CountText value={value} decimals={decimals} />{sign}</>) : value
+                  }
+                </span>
             </div>
           ))
         }

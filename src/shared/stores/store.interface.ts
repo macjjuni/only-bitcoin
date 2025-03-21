@@ -19,14 +19,6 @@ export interface StoreType {
   // endregion
 
 
-  // region [도미넌스]
-
-  dominance: DominanceTypes;
-  setDominance: (by: SetDominanceTypes) => void;
-
-  // endregion
-
-
   // region [환율 데이터]
 
   exRate: ExRateTypes; // USD/KRW 환율 데이터

@@ -48,16 +48,6 @@ const useStore = create<StoreType>()(
       // endregion
 
 
-      // region [도미넌스]
-
-      dominance: { value: 0, timestamp: 0 },
-      setDominance: (dominance) => set(() => ({
-        dominance
-      })),
-
-      // endregion
-
-
       // region [환율 데이터]
 
       exRate: { value: 0, date: "" },
