@@ -3,13 +3,12 @@ import { CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, Poin
 import { Line } from "react-chartjs-2";
 import { KButton, KIcon } from "kku-ui";
 
-import { ChartJsDataType, MarketChartIntervalTypeList } from "@/widgets/pages/overview/chartCard/ChartCard.interface";
+import { ChartJsDataType, MarketChartIntervalTypeList } from "@/pages/overviewPage/components/chartCard/ChartCard.interface";
 import { btcColor } from "@/shared/constants/color";
-import { initializeCoingeckoMarketChart } from "@/widgets/pages/overview/chartCard/ChartCard.api";
 import { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import useStore from "@/shared/stores/store";
-import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
-import { CountText, UpdownIcon } from "@/widgets";
+import { CountText, HorizontalCard, UpdownIcon } from "@/widgets";
+import { useMarketChartData } from "@/shared/api";
 import "./ChartCard.scss";
 
 
@@ -23,44 +22,39 @@ const marketChartIntervalOptions: MarketChartIntervalTypeList[] = [
   { text: "1Y", value: 365 }
 ];
 
-const getChartDataset = (data: number[], index: number) => {
-
-  return {
-    label: "", data, borderColor: "#fff", backgroundColor: "transparent",
-    borderWidth: 2, pointBackgroundColor: btcColor, pointHoverRadius: 4,
-    pointRadius: data.map((_, idx) => (idx === index ? 4 : 0)) // 최댓값 위치에 점 표시
-  };
-};
+const getChartDataset = (data: number[], index: number) => ({
+  label: "", data, borderColor: "#fff", backgroundColor: "transparent",
+  borderWidth: 2, pointBackgroundColor: btcColor, pointHoverRadius: 4,
+  pointRadius: data.map((_, idx) => (idx === index ? 4 : 0)) // 최댓값 위치에 점 표시
+});
 
 
 const ChartCard = () => {
-
 
   // region [Hooks]
 
   const chartRef = useRef<ChartJS<"line", number[], string>>(null);
   const usdPrice = useStore(state => state.bitcoinPrice.usd);
-
   const marketChartInterval = useStore(state => state.marketChartInterval);
   const setMarketChartInterval = useStore(state => state.setMarketChartInterval);
-  const marketChartData = useStore(state => state.marketChartData);
-  const maxValueIndex = useMemo(() => {
-    const dataList = marketChartData[marketChartInterval].price;
+  const { marketChartData } = useMarketChartData(marketChartInterval);
 
+
+  const maxValueIndex = useMemo(() => {
+
+    const dataList = marketChartData?.price || [];
     const maxValue = dataList.reduce((max, val) => (val > max ? val : max), -Infinity);
 
     return dataList.indexOf(maxValue);
   }, [marketChartData, marketChartInterval]);
 
-  const currentChartData = useMemo((): ChartJsDataType => {
 
-    const currentData = marketChartData[marketChartInterval];
+  const currentChartData = useMemo((): ChartJsDataType => ({
 
-    return {
-      labels: currentData.date.map((timestamp) => new Date(timestamp).toLocaleDateString()),
-      datasets: [getChartDataset(currentData.price, maxValueIndex)]
-    };
-  }, [marketChartData, marketChartInterval, maxValueIndex]);
+    labels: marketChartData?.date.map((timestamp) => new Date(timestamp).toLocaleDateString()) || [],
+    datasets: [getChartDataset(marketChartData?.price || [], maxValueIndex)]
+  }), [marketChartData, marketChartInterval, maxValueIndex]);
+
 
   const percentage = useMemo(() => {
 
@@ -106,10 +100,10 @@ const ChartCard = () => {
 
   // region[Life Cycles]
 
-  useEffect(() => initializeTooltip(), [marketChartInterval]);
-
   useEffect(() => {
-    initializeCoingeckoMarketChart(marketChartInterval).then();
+    setTimeout(() => {
+      initializeTooltip();
+    }, 0);
   }, [marketChartInterval]);
 
   // endregion
@@ -127,12 +121,13 @@ const ChartCard = () => {
     </div>
   ), []);
 
+
   const ButtonIntervalArea = useMemo(() => (
     <div className="chart-card__top__first__button-area">
       {
         marketChartIntervalOptions.map(({ value, text }) => (
-          <KButton key={value} label={text} size="small"
-                   onClick={() => setMarketChartInterval(value)} className={chartCardButtonClass(value)} />
+          <KButton key={value} label={text} size="small" className={chartCardButtonClass(value)}
+                   onClick={() => setMarketChartInterval(value)} />
         ))
       }
     </div>
@@ -157,8 +152,8 @@ const ChartCard = () => {
     </>
   ), [currentChartData]);
 
-
   // endregion
+
 
   return (
     <HorizontalCard className="chart-card">
@@ -182,9 +177,7 @@ const ChartCard = () => {
         </div>
       </div>
 
-      <div className="chart-card__bottom">
-        {ChartArea}
-      </div>
+      <div className="chart-card__bottom">{ChartArea}</div>
 
     </HorizontalCard>
   );
