@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
-import { ConvertPannel } from "@/widgets/pages/btc2krw";
+import { ConvertPannel } from "@/pages/btc2fiatPage/components";
 import { PageLayout } from "@/layouts";
 
 

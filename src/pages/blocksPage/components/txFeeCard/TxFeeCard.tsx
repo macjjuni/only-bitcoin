@@ -1,8 +1,7 @@
 import { memo, useMemo } from "react";
-import "./TxFeeCard.scss";
-import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
+import { CountText, HorizontalCard } from "@/widgets";
 import useStore from "@/shared/stores/store";
-import { CountText } from "@/widgets";
+import "./TxFeeCard.scss";
 
 const TxFeeCard = () => {
 

@@ -2,9 +2,9 @@ import { useCallback, useMemo, useState } from "react";
 import { useOutletContext } from "react-router";
 import { type UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { usePageAnimation } from "@/shared/hooks";
-import { Gallery, TagList } from "@/widgets/pages/meme";
-import "./MemePage.scss";
+import { Gallery, TagList } from "@/pages/memePage/components";
 import { useMemeImages } from "@/shared/api";
+import "./MemePage.scss";
 
 
 const MemePage = () => {

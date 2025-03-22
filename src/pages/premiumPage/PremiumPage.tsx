@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
-import { PremiumPannel } from "@/widgets/pages/premium";
+import { PremiumPannel } from "@/pages/premiumPage/components";
 import { PageLayout } from "@/layouts";
 
 

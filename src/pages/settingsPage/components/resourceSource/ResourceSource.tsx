@@ -1,6 +1,6 @@
 import { memo } from "react";
 import { KIcon } from "kku-ui";
-import { FormRowAccordion } from "@/widgets/pages/settings";
+import { FormRowAccordion } from "@/pages/settingsPage/components";
 import "./ResourceSource.scss";
 
 

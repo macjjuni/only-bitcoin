@@ -11,7 +11,7 @@ import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { currencyOptions } from "@/shared/constants/setting";
 import { isSafari } from "@/shared/utils/device";
-import { FormRow, InstallSettingForm, ResourceSource } from "@/widgets/pages/settings";
+import { FormRow, InstallSettingForm, ResourceSource } from "@/pages/settingsPage/components";
 import MemeIcon from "@/widgets/icon/MemeIcon";
 import "./SettingsPage.scss";
 

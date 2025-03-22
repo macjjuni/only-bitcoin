@@ -1,10 +1,10 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
-import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
-import "./HalvingChartCard.scss";
 import useStore from "@/shared/stores/store";
-import { calcPercentage, getNextHalvingData } from "@/shared/utils/common";
 import CountText from "@/widgets/countText/CountText";
+import { HorizontalCard } from "@/widgets";
+import { calcPercentage, getNextHalvingData } from "@/shared/utils/common";
 import { calcDate } from "@/shared/lib/date";
+import "./HalvingChartCard.scss";
 
 
 const circumference = 2 * Math.PI * 50; // 원의 둘레

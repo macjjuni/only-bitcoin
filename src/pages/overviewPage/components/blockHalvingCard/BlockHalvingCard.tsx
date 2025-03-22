@@ -1,10 +1,10 @@
 import { CSSProperties, memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useLottie } from "lottie-react";
-import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
 import useStore from "@/shared/stores/store";
 import { comma } from "@/shared/utils/string";
 import blockLottieJson from "@/shared/assets/lottie/block.json";
 import { calcPercentage, getNextHalvingData } from "@/shared/utils/common";
+import { HorizontalCard } from "@/widgets";
 import "./BlockHalvingCard.scss";
 
 

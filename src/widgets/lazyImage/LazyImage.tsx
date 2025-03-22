@@ -59,7 +59,6 @@ const LazyImage = ({ src, alt = "", tags, className = "", onClick }: LazyImagePr
   const onLoadedImage = useCallback((e: SyntheticEvent<HTMLImageElement>) => {
 
     const { width, naturalWidth, naturalHeight } = e.currentTarget;
-    console.log(width);
     const height = (width / naturalWidth) * naturalHeight;
 
     setWrapperSize({ minWidth: `${width}px`, minHeight: `${height}px` });

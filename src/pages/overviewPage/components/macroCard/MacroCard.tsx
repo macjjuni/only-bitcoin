@@ -1,10 +1,9 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import HorizontalCard from "@/widgets/pages/overview/card/horizontalCard/HorizontalCard";
 import { calcPremiumPercent } from "@/shared/utils/common";
 import useStore from "@/shared/stores/store";
 import { FearAndGreedModal } from "@/widgets/modal";
-import { CountText } from "@/widgets";
+import { CountText, HorizontalCard } from "@/widgets";
 import { useBitcoinDominanceQuery, useFearGreedIndex } from "@/shared/api";
 import "./MacroCard.scss";
 
