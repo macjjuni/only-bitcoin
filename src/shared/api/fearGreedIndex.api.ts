@@ -36,8 +36,9 @@ const useFearGreedIndex = () => {
     queryFn: fetchFearGreedIndex,
     staleTime: 1000 * 60 * STALE_TIME_MIN, // 10분 캐싱
     refetchInterval: 1000 * 60 * REFETCH_TIME_MIN, // 10분마다 자동 갱신
+    refetchOnMount: true,
     placeholderData: 0,
-    retry: 3,
+    retry: 3
   });
 
   // endregion

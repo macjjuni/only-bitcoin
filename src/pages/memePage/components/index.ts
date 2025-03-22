@@ -1,2 +1,2 @@
-export { default as Gallery } from "./gallery/Gallery";
-export { default as TagList } from "./tagList/TagList";
+export { default as Gallery } from "@/pages/memePage/components/gallery/Gallery";
+export { default as TagList } from "@/pages/memePage/components/tagList/TagList";

@@ -53,6 +53,7 @@ const useBitcoinDominanceQuery = () => {
     queryFn: fetchBitcoinDominance,
     staleTime: 1000 * 60 * STALE_TIME_MIN, // 10분 동안 데이터 유효
     refetchInterval: 1000 * 60 * REFETCH_TIME_MIN, // 10분마다 갱신
+    refetchOnMount: true,
     placeholderData: 0,
     retry: 3,
   });
