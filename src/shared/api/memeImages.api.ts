@@ -11,7 +11,7 @@ const fetchMemeImages = async (): Promise<MemeImageResponseData[]> => {
 
   try {
     const data = await fetcher<MemeImageResponseData[]>(MEME_IMAGE_API_URL);
-    console.log(data);
+
     if (isDev) { console.log("✅ meme.json 데이터 초기화!"); }
     return shuffleArray(data);
 

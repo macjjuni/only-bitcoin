@@ -1,4 +1,4 @@
-import { memo, SyntheticEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { ComponentBaseTypes } from "@/shared/types/base.interface";
 import "./LazyImage.scss";
 
@@ -6,67 +6,61 @@ interface LazyImageProps extends ComponentBaseTypes {
   src: string;
   alt?: string;
   tags?: string[];
-  onClick?: () => void;
 }
 
-interface WrapperSizeTypes {
-  minWidth: string;
-  minHeight: string;
-}
+const MAX_RETRY_COUNT = 3;
 
-
-const LazyImage = ({ src, alt = "", tags, className = "", onClick }: LazyImageProps) => {
+const LazyImage = ({ src, alt = "", tags, className = "" }: LazyImageProps) => {
 
   // region [Hooks]
 
   const imgRef = useRef<HTMLImageElement | null>(null);
   const rootRef = useRef<HTMLImageElement | null>(null);
+  const retryCountRef = useRef(0);
   const [isLoaded, setIsLoaded] = useState(false);
+  const [isError, setError] = useState(false);
   const [isVisible, setIsVisible] = useState(false);
-  const [wrapperSize, setWrapperSize] = useState<WrapperSizeTypes>(
-    { minWidth: 'auto', minHeight: 'auto' }
-  );
 
   // endregion
-
 
   // region [Styles]
 
   const rootClass = useMemo(() => {
     const clazz = [];
 
-    if (className) { clazz.push(className); }
-    if (isLoaded) { clazz.push("lazy-image--loaded"); }
+    if (className) {
+      clazz.push(className);
+    }
+    if (isLoaded) {
+      clazz.push("lazy-image--loaded");
+    }
+    if (isError) {
+      clazz.push("lazy-image--error");
+    }
 
     return clazz.join(" ");
-  }, [className, isLoaded]);
+  }, [className, isLoaded, isError]);
 
   // endregion
-
-
-  // region [Privates]
-
-
-  // endregion
-
 
   // region [Events]
 
-  const onClickImage = useCallback(() => {
-    onClick?.();
-  }, []);
-
-  const onLoadedImage = useCallback((e: SyntheticEvent<HTMLImageElement>) => {
-
-    const { width, naturalWidth, naturalHeight } = e.currentTarget;
-    const height = (width / naturalWidth) * naturalHeight;
-
-    setWrapperSize({ minWidth: `${width}px`, minHeight: `${height}px` });
+  const onLoadedImage = useCallback(() => {
     setIsLoaded(true);
   }, []);
 
-  // endregion
+  const onErrorImage = useCallback(() => {
+    if (retryCountRef.current < MAX_RETRY_COUNT) {
+      retryCountRef.current += 1;
+      setIsVisible(false);
+      setTimeout(() => setIsVisible(true), 400);
+    } else {
+      setIsVisible(false);
+      setError(true);
+    }
+  }, []);
 
+  // endregion
 
   // region [Life Cycles]
 
@@ -91,15 +85,20 @@ const LazyImage = ({ src, alt = "", tags, className = "", onClick }: LazyImagePr
   // endregion
 
   return (
-    <div ref={imgRef} className={`lazy-image ${rootClass}`} style={wrapperSize}>
+    <div ref={imgRef} className={`lazy-image ${rootClass}`}>
       {!isLoaded && <div className="lazy-image__skeleton" />}
-      {isVisible && (
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-noninteractive-element-interactions
-        <img ref={rootRef} src={src} alt={alt} data-tag={tags?.join(", ")}
-             className={`lazy-image__img ${isLoaded ? "lazy-image__img--loaded" : "lazy-image__img--loading"}`}
-             onClick={onClickImage}
-             onLoad={onLoadedImage}/>
+      {isVisible && !isError && (
+        <img
+          ref={rootRef}
+          src={src}
+          alt={alt}
+          data-tag={tags?.join(", ")}
+          className={`lazy-image__img ${isLoaded ? "lazy-image__img--loaded" : "lazy-image__img--loading"}`}
+          onLoad={onLoadedImage}
+          onError={onErrorImage}
+        />
       )}
+      {isError && <img src="/images/404.webp" className="lazy-image__error__img" alt="error" />}
     </div>
   );
 };
