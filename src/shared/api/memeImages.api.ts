@@ -3,7 +3,7 @@ import { MemeImageResponseData } from '@/shared/types/api/memeImage';
 import fetcher from "@/shared/utils/fetcher";
 import { isDev, shuffleArray } from "@/shared/utils/common";
 
-const MEME_IMAGE_API_URL = isDev ? '/images/meme.json' :
+const MEME_IMAGE_API_URL = !isDev ? '/images/meme.json' :
   'https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/meme.json';
 
 
@@ -11,11 +11,12 @@ const fetchMemeImages = async (): Promise<MemeImageResponseData[]> => {
 
   try {
     const data = await fetcher<MemeImageResponseData[]>(MEME_IMAGE_API_URL);
-
+    console.log(data);
     if (isDev) { console.log("✅ meme.json 데이터 초기화!"); }
     return shuffleArray(data);
 
-  } catch {
+  } catch (e) {
+    console.error(e);
     return [];
   }
 };
