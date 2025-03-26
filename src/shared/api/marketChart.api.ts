@@ -3,8 +3,8 @@ import { useQuery } from '@tanstack/react-query';
 import { toast } from "react-toastify";
 import { MarketChartIntervalType } from '@/shared/stores/store.interface';
 import fetcher from "@/shared/utils/fetcher";
-import { MarketChartFormattedData, MarketChartResponseData } from "@/shared/types/api/marketChart";
 import { isDev } from "@/shared/utils/common";
+import { MarketChartFormattedData, MarketChartResponseData } from "@/shared/types/api/marketChart";
 
 
 const MARKET_CHART_API_URL = 'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart';

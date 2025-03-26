@@ -43,7 +43,7 @@ const ChartCard = () => {
   const maxValueIndex = useMemo(() => {
 
     const dataList = marketChartData?.price || [];
-    const maxValue = dataList.reduce((max, val) => (val > max ? val : max), -Infinity);
+    const maxValue = dataList.reduce((max: number, val:number) => (val > max ? val : max), -Infinity);
 
     return dataList.indexOf(maxValue);
   }, [marketChartData, marketChartInterval]);
@@ -51,7 +51,7 @@ const ChartCard = () => {
 
   const currentChartData = useMemo((): ChartJsDataType => ({
 
-    labels: marketChartData?.date.map((timestamp) => new Date(timestamp).toLocaleDateString()) || [],
+    labels: marketChartData?.date.map((timestamp: number) => new Date(timestamp).toLocaleDateString()) || [],
     datasets: [getChartDataset(marketChartData?.price || [], maxValueIndex)]
   }), [marketChartData, marketChartInterval, maxValueIndex]);
 
