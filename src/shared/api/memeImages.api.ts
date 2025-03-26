@@ -1,10 +1,9 @@
-import { useQuery } from '@tanstack/react-query';
-import { MemeImageResponseData } from '@/shared/types/api/memeImage';
+import { useQuery } from "@tanstack/react-query";
+import { MemeImageResponseData } from "@/shared/types/api/memeImage";
 import fetcher from "@/shared/utils/fetcher";
 import { isDev, shuffleArray } from "@/shared/utils/common";
 
-const MEME_IMAGE_API_URL = isDev ? '/images/meme.json' :
-  'https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/meme.json';
+const MEME_IMAGE_API_URL = `${import.meta.env.VITE_MEME_IMAGE_URL}/meme.json`;
 
 
 const fetchMemeImages = async (): Promise<MemeImageResponseData[]> => {
@@ -24,17 +23,17 @@ const fetchMemeImages = async (): Promise<MemeImageResponseData[]> => {
 
 function useMemeImages() {
 
-  const { data: images, ...restData }  = useQuery({
-    queryKey: ['meme-images'],
+  const { data: images, ...restData } = useQuery({
+    queryKey: ["meme-images"],
     queryFn: fetchMemeImages,
     staleTime: 0,
     gcTime: 0,
     placeholderData: [],
     refetchOnMount: true,
-    retry: 3,
+    retry: 3
   });
 
-  return { images: images || [], ...restData }
+  return { images: images || [], ...restData };
 }
 
 

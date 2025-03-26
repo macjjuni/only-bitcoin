@@ -23,6 +23,7 @@ const LazyImage = ({ src, alt = "", tags, className = "" }: LazyImageProps) => {
 
   // endregion
 
+
   // region [Styles]
 
   const rootClass = useMemo(() => {

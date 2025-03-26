@@ -28,7 +28,7 @@ const Gallery = ({ images, selected }: GalleryProps) => {
 
   // region [Privates]
 
-  const getImageUrl = useCallback((src: string) => `${imageUrl}/${src}.webp`, [])
+  const getImageUrl = useCallback((src: string) => `${imageUrl}/image/${src}.webp`, [])
 
   // endregion
 
