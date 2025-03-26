@@ -1,4 +1,4 @@
-import { memo, useMemo } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { LazyImage } from "@/widgets";
 import { MemeImageResponseData } from "@/shared/types/api/memeImage";
 import "./Gallery.scss";
@@ -8,6 +8,8 @@ interface GalleryProps {
   images: MemeImageResponseData[];
   selected: string;
 }
+
+const imageUrl = import.meta.env.VITE_MEME_IMAGE_URL;
 
 
 const Gallery = ({ images, selected }: GalleryProps) => {
@@ -24,6 +26,13 @@ const Gallery = ({ images, selected }: GalleryProps) => {
   // endregion
 
 
+  // region [Privates]
+
+  const getImageUrl = useCallback((src: string) => `${imageUrl}/${src}.webp`, [])
+
+  // endregion
+
+
   // region [Life Cycles]
   // endregion
 
@@ -31,12 +40,12 @@ const Gallery = ({ images, selected }: GalleryProps) => {
     <div className="gallery">
       <div className="gallery__column">
         {filterImages.filter((_, index) => index % 2 === 0).map(({src, tags}) => (
-          <LazyImage key={src.slice(0, -5)} src={src} alt={src.slice(0, -5)} tags={tags} className="gallery__image" />
+          <LazyImage key={src} src={getImageUrl(src)} alt={src.slice(0, -5)} tags={tags} className="gallery__image" />
         ))}
       </div>
       <div className="gallery__column">
         {filterImages.filter((_, index) => index % 2 !== 0).map(({src, tags}) => (
-          <LazyImage key={src.slice(0, -5)} src={src} alt={src.slice(0, -5)} tags={tags} className="gallery__image" />
+          <LazyImage key={src} src={getImageUrl(src)} alt={src} tags={tags} className="gallery__image" />
         ))}
       </div>
     </div>

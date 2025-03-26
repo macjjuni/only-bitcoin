@@ -53,7 +53,7 @@ const LazyImage = ({ src, alt = "", tags, className = "" }: LazyImageProps) => {
     if (retryCountRef.current < MAX_RETRY_COUNT) {
       retryCountRef.current += 1;
       setIsVisible(false);
-      setTimeout(() => setIsVisible(true), 400);
+      setTimeout(() => setIsVisible(true), 800);
     } else {
       setIsVisible(false);
       setError(true);
@@ -61,6 +61,7 @@ const LazyImage = ({ src, alt = "", tags, className = "" }: LazyImageProps) => {
   }, []);
 
   // endregion
+
 
   // region [Life Cycles]
 
@@ -98,7 +99,7 @@ const LazyImage = ({ src, alt = "", tags, className = "" }: LazyImageProps) => {
           onError={onErrorImage}
         />
       )}
-      {isError && <img src="/images/404.webp" className="lazy-image__error__img" alt="error" />}
+      {isError && <div className="lazy-image__error__img" />}
     </div>
   );
 };

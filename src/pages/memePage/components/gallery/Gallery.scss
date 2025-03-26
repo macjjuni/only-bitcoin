@@ -18,10 +18,9 @@
         .gallery__image {
             width: 100%;
 
-            .lazy-image__img--loaded {
+            .lazy-image__img--loaded, .lazy-image__error__img {
                 border: 0.5px solid #474747;
             }
         }
-
     }
 }

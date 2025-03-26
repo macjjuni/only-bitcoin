@@ -3,7 +3,7 @@ import { MemeImageResponseData } from '@/shared/types/api/memeImage';
 import fetcher from "@/shared/utils/fetcher";
 import { isDev, shuffleArray } from "@/shared/utils/common";
 
-const MEME_IMAGE_API_URL = !isDev ? '/images/meme.json' :
+const MEME_IMAGE_API_URL = isDev ? '/images/meme.json' :
   'https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/meme.json';
 
 
