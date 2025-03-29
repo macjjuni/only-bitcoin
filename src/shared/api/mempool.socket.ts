@@ -7,7 +7,7 @@ import { comma } from "@/shared/utils/string";
 
 const MEMPOOL_WS_URL = "wss://mempool.space/api/v1/ws";
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 3000; // 3초
+const RETRY_DELAY = 1000; // 3초
 
 let retryCount = 0;
 let retryTimeout: NodeJS.Timeout | null = null;
@@ -70,7 +70,7 @@ const socketManager = {
     socket.onopen = () => {
 
       resetRetry();
-      toast.success(`서버에 연결되었습니다. (Mempool)`);
+      toast.success(`Mempool 연결됨`);
       console.log("✅ Mempool 소켓 연결 초기화");
 
       // 데이터 구독 요청
@@ -113,12 +113,12 @@ const socketManager = {
 
     if (retryCount >= MAX_RETRIES) {
       resetRetry();
-      toast.error("서버가 응답하지 않습니다. 나중에 다시 시도해주세요. (Mempool) 🙏");
+      toast.error("Mempool 연결 오류");
       return;
     }
 
     retryTimeout = setTimeout(() => {
-      toast.info(`${RETRY_DELAY / 1000}초 후 재연결 시도합니다. (${retryCount + 1}/${MAX_RETRIES})`);
+      toast.info(`${RETRY_DELAY / 1000}초 후 재연결(${retryCount + 1}/${MAX_RETRIES})`);
       retryCount++;
       socketManager.init();
     }, RETRY_DELAY);

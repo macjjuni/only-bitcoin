@@ -5,7 +5,8 @@ export const toastOptions: ToastOptions = {
   className: 'only-btc__toastify',
   theme: 'dark',
   autoClose: 2400,
-  position: 'bottom-center',
+  position: 'top-right',
+  hideProgressBar: true,
   transition: Flip,
   closeOnClick: true,
   icon: ({type}) => {

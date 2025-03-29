@@ -15,7 +15,7 @@ const UPBIT_USDT_TICKER = "KRW-USDT" as const;
 
 // 재시도 관련 설정
 const MAX_RETRIES = 3;
-const RETRY_DELAY = 3000; // 3초
+const RETRY_DELAY = 1000; // 1초
 
 let retryCount = 0;
 let retryTimeout: NodeJS.Timeout | null = null;
@@ -81,7 +81,7 @@ const socketManager = {
 
       resetRetry();
       socket?.send(JSON.stringify(getRequestPayload()));
-      toast.success(`서버에 연결되었습니다. (Upbit)`);
+      toast.success(`Upbit 연결됨`);
 
       if (isDev) { console.log("✅ 업비트 소켓 연결 초기화"); }
     };
@@ -105,7 +105,7 @@ const socketManager = {
       console.error(e);
 
       if (!isNetwork()) {
-        toast.warn("인터넷 연결 오류 또는 서버 점검 중입니다. 나중에 다시 시도해 주세요 🙏");
+        toast.warn("Upbit 연결 오류");
         socket?.close();
       }
     };
@@ -130,11 +130,11 @@ const socketManager = {
 
       if (retryCount >= MAX_RETRIES) {
         resetRetry();
-        toast.error("서버가 응답하지 않습니다. 나중에 다시 시도해주세요. (Upbit) 🙏");
+        toast.error("Upbit 연결 오류");
         return;
       }
 
-      toast.info(`${RETRY_DELAY / 1000}초 후 재연결 시도합니다. (${retryCount + 1}/${MAX_RETRIES})`);
+      toast.info(`${RETRY_DELAY / 1000}초 후 재연결 (${retryCount + 1}/${MAX_RETRIES})`);
       retryCount++;
       socketManager.init();
     }, RETRY_DELAY);
