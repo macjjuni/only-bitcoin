@@ -3,7 +3,10 @@ import { CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, Poin
 import { Line } from "react-chartjs-2";
 import { KButton, KIcon } from "kku-ui";
 
-import { ChartJsDataType, MarketChartIntervalTypeList } from "@/pages/overviewPage/components/chartCard/ChartCard.interface";
+import {
+  ChartJsDataType,
+  MarketChartIntervalTypeList
+} from "@/pages/overviewPage/components/chartCard/ChartCard.interface";
 import { btcColor } from "@/shared/constants/color";
 import { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import useStore from "@/shared/stores/store";
@@ -43,7 +46,7 @@ const ChartCard = () => {
   const maxValueIndex = useMemo(() => {
 
     const dataList = marketChartData?.price || [];
-    const maxValue = dataList.reduce((max: number, val:number) => (val > max ? val : max), -Infinity);
+    const maxValue = dataList.reduce((max: number, val: number) => (val > max ? val : max), -Infinity);
 
     return dataList.indexOf(maxValue);
   }, [marketChartData, marketChartInterval]);
@@ -73,10 +76,13 @@ const ChartCard = () => {
   const initializeTooltip = useCallback(() => {
 
     // 데이터가 있을 때 초기화
-    if (currentChartData.labels.length > 0 && chartRef.current) {
-      chartRef.current?.tooltip?.setActiveElements([{ datasetIndex: 0, index: maxValueIndex }], { x: 0, y: 0 });
-      chartRef.current?.update();
-    }
+    setTimeout(() => {
+
+      if (currentChartData.labels.length > 0 && chartRef.current) {
+        chartRef.current?.tooltip?.setActiveElements([{ datasetIndex: 0, index: maxValueIndex }], { x: 0, y: 0 });
+        chartRef.current?.update();
+      }
+    }, 300);
   }, [maxValueIndex, currentChartData]);
 
   // endregion
@@ -101,9 +107,7 @@ const ChartCard = () => {
   // region[Life Cycles]
 
   useEffect(() => {
-    setTimeout(() => {
-      initializeTooltip();
-    }, 0);
+    initializeTooltip();
   }, [marketChartInterval]);
 
   // endregion
