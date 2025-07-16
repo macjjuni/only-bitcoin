@@ -6,7 +6,9 @@ const bitcoinWiseSayingList = [
   'Stay humble and stack sats.',
   'HODL.',
   'Be your own bank.',
-  '1BTC = 1BTC'
+  '1BTC = 1BTC',
+  "Don't Trust, Verify",
+  "You need ₿itcoin.",
 ] as const;
 
 const FADE_OUT_TIME = 500 as const;
