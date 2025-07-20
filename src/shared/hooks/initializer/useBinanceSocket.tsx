@@ -11,7 +11,10 @@ const BINANCE_URL = `wss://stream.binance.com:9443/ws/btcusdt@ticker`;
 
 export default function useBinanceWebSocket() {
 
+  // region [Hooks]
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
+  const setReconnectBinance = useStore(state => state.setReconnectBinance);
+  // endregion
 
   const resetUsdDisconnected = useCallback(() => {
     const { bitcoinPrice, setBitcoinUsdPrice } = useStore.getState();
@@ -53,8 +56,9 @@ export default function useBinanceWebSocket() {
 
     socket.onerror = (e) => {
       console.error("Binance WebSocket Error:", e);
+      toast.error("Binance 연결 오류");
+
       if (!isNetwork()) {
-        toast.warn("Binance 연결 오류");
         socket.close();
       }
     };
@@ -82,8 +86,15 @@ export default function useBinanceWebSocket() {
     connect();
   }, [disconnect, connect]);
 
+
+  // region [Life Cycles]
+  useEffect(() => {
+    setReconnectBinance(reconnect);
+  }, [reconnect]);
+
   useEffect(() => {
     connect();
     return disconnect;
   }, [connect, disconnect]);
+  // endregion
 };

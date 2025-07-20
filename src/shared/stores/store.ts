@@ -8,7 +8,6 @@ const useStore = create<StoreType>()(
     (set) => ({
 
       // region [비트코인 실시간 가격]
-
       bitcoinPrice: {
         krw: 0,
         krwChange24h: "0",
@@ -25,7 +24,10 @@ const useStore = create<StoreType>()(
       setBitcoinUsdPrice: (usd) => set(({ bitcoinPrice }) => ({
         bitcoinPrice: { ...bitcoinPrice, ...usd }
       })),
-
+      reconnectUpbit: () => {},
+      reconnectBinance: () => {},
+      setReconnectUpbit: (reconnectUpbit) => set((store) => ({ ...store, reconnectUpbit })),
+      setReconnectBinance: (reconnectBinance) => set((store) => ({ ...store, reconnectBinance })),
       // endregion
 
 

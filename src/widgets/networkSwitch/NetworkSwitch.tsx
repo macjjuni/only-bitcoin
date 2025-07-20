@@ -11,6 +11,8 @@ const NetworkSwitch = () => {
   const [isEnabledNetwork, setIsEnabledNetwork] = useState<boolean>(true);
   const isKrwConnected = useStore(state => state.bitcoinPrice.isKrwConnected);
   const isUsdConnected = useStore(state => state.bitcoinPrice.isUsdConnected);
+  const reconnectUpbit = useStore(state => state.reconnectUpbit);
+  const reconnectBinance = useStore(state => state.reconnectBinance);
 
   // endregion
 
@@ -36,13 +38,13 @@ const NetworkSwitch = () => {
   const refreshAction = useCallback(() => {
 
     if (!isKrwConnected) {
-      // reConnectUpbit();
+      reconnectUpbit()
     }
 
     if (!isUsdConnected) {
-      // reConnectBinance();
+      reconnectBinance()
     }
-  }, [isKrwConnected, isUsdConnected]);
+  }, [isKrwConnected, isUsdConnected, reconnectUpbit, reconnectBinance]);
 
   const showToastNetworkError = useCallback(() => {
     toast.error('네트워크 연결을 확인해주세요.');

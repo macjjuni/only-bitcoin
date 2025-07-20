@@ -1,4 +1,4 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { toast } from "react-toastify";
 import ReconnectingWebSocket from "reconnecting-websocket";
 import useStore from "@/shared/stores/store";
@@ -32,6 +32,7 @@ const getRequestPayload = () => [
 export default function useUpbitWebSocket() {
 
   // region [Hooks]
+  const setReconnectUpbit = useStore(state => state.setReconnectUpbit);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
   // endregion
 
@@ -90,8 +91,9 @@ export default function useUpbitWebSocket() {
 
     socket.onerror = (e) => {
       console.error("Upbit WebSocket Error:", e);
+      toast.error("Upbit 연결 오류");
+
       if (!isNetwork()) {
-        toast.warn("Upbit 연결 오류");
         socket.close();
       }
     };
@@ -119,8 +121,15 @@ export default function useUpbitWebSocket() {
     connect();
   }, [disconnect, connect]);
 
+
+  // region [Life Cycles]
+  useEffect(() => {
+    setReconnectUpbit(reconnect);
+  }, [reconnect]);
+
   useEffect(() => {
     connect();
     return disconnect;
   }, [connect, disconnect]);
+  // endregion
 };
