@@ -1,7 +1,6 @@
 import { memo, useCallback, useEffect, useState } from "react";
 import { KIcon } from "kku-ui";
 import { toast } from "react-toastify";
-import { reConnectUpbit, reConnectBinance } from "@/shared/api";
 import useStore from "@/shared/stores/store";
 import "./NetworkSwitch.scss";
 
@@ -37,11 +36,11 @@ const NetworkSwitch = () => {
   const refreshAction = useCallback(() => {
 
     if (!isKrwConnected) {
-      reConnectUpbit();
+      // reConnectUpbit();
     }
 
     if (!isUsdConnected) {
-      reConnectBinance();
+      // reConnectBinance();
     }
   }, [isKrwConnected, isUsdConnected]);
 

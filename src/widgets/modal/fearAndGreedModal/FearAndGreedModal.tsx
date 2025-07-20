@@ -1,7 +1,7 @@
-import React, { memo, useMemo } from "react";
+import React, { memo } from "react";
 import { KModal } from "kku-ui";
-import "./FearAndGreedModal.scss";
 import { LazyImage } from "@/widgets";
+import "./FearAndGreedModal.scss";
 
 interface ModalTypes {
   isOpen: boolean;
@@ -11,20 +11,16 @@ interface ModalTypes {
 
 const FearAndGreedModal = ({ isOpen, onClose }: ModalTypes) => {
 
-
-  // region [Templates]
-
-  const Content = useMemo(() => (
-    <LazyImage src={`https://alternative.me/crypto/fear-and-greed-index.png?${Date.now()}`}
-               alt="공포 & 탐욕 지수" className="fear-and-greed-index__image"/>
-  ), []);
-
-  // endregion
-
-
   return (
-    <KModal isOpen={isOpen} title="공포 & 탐욕 지수" content={Content}
-            onClose={onClose} overlayClosable className="feerAndGreed__modal" />
+    <KModal isOpen={isOpen} onClose={onClose} overlayClosable className="feerAndGreed__modal">
+      <KModal.Header>
+        공포 & 탐욕 지수
+      </KModal.Header>
+      <KModal.Content>
+        <LazyImage src={`https://alternative.me/crypto/fear-and-greed-index.png?${Date.now()}`}
+                   alt="공포 & 탐욕 지수" className="fear-and-greed-index__image" />
+      </KModal.Content>
+    </KModal>
   );
 };
 

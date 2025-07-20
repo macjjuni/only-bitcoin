@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
-import { KDropHolder, KDropHolderRefs, KIcon } from "kku-ui";
+import { KDropdown, KIcon } from "kku-ui";
 import { CountText, NumberField } from "@/widgets";
 import useStore from "@/shared/stores/store";
 import { comma } from "@/shared/utils/string";
@@ -9,15 +9,21 @@ import { btcToSatoshi, floorToDecimal } from "@/shared/utils/number";
 import "./ConvertPannel.scss";
 
 
+const closeIconCommonProps = {
+  icon: "close",
+  color: "#fff",
+  size: 32,
+  style: { padding: 6 },
+};
+
+
 const ConvertPannel = () => {
 
   // region [Hooks]
-
   const btcCountInputRef = useRef<HTMLInputElement>(null);
   const krwRef = useRef<HTMLInputElement>(null);
   const usdRef = useRef<HTMLInputElement>(null);
   const satsRef = useRef<HTMLInputElement>(null);
-  const dropdownRef = useRef<KDropHolderRefs>(null);
 
   const { onClickCopy: onClickCopyToBtc } = useCopyOnClick(btcCountInputRef);
   const { onClickCopy: onClickCopyToKrw } = useCopyOnClick(krwRef);
@@ -43,23 +49,24 @@ const ConvertPannel = () => {
   const setFocusCurrency = useStore(state => state.setFocusCurrency);
 
   const unitList = useMemo(() => ["BTC"].concat(currency.split("/")).concat("SATS"), [currency]) as UnitType[];
-
   // endregion
 
 
   // region [Privates]
-
   const btcFormatter = useCallback((btcNum: number) => {
 
-    if (btcNum < 1e-8) { return "0"; }
+    if (btcNum < 1e-8) {
+      return "0";
+    }
     return btcNum.toFixed(8).replace(/\.?0+$/, ""); // 숫자 뒤에 0 제거 정규식
   }, []);
 
   const satoshiFormatter = useCallback((satoshi: number) => {
-    if (satoshi < 1) { return "0"; }
+    if (satoshi < 1) {
+      return "0";
+    }
     return (satoshi / 100_000_000).toFixed(8).replace(/\.?0+$/, "");
   }, []);
-
 
   const synchronizeValue = useCallback(() => {
 
@@ -126,72 +133,80 @@ const ConvertPannel = () => {
     setUsd("0");
     usdRef.current?.focus();
   }, []);
-
   // endregion
 
 
   // region [Events]
-
   const onChangeUsd = useCallback(setUsd, []);
   const onChangeKrw = useCallback(setKrw, []);
   const onChangeBtcCount = useCallback(setBtcCount, []);
   const onChangeSats = useCallback(setSats, []);
-
   // endregion
 
 
   // region [Life Cycles]
-
   useEffect(() => {
     synchronizeValue();
   }, [btcCount, krw, usd, krwPrice, usdPrice, sats]);
 
   useEffect(() => {
-    dropdownRef.current?.close();
+    // dropdownRef.current?.close();
   }, [focusCurrency]);
-
   // endregion
 
 
   // region [Left Action]
-
   const BtcLeftAction = useMemo(() => {
 
-    if (focusCurrency !== "BTC") { return; }
-    if (["0", ""].includes(btcCount)) { return null; }
+    if (focusCurrency !== "BTC") {
+      return;
+    }
+    if (["0", ""].includes(btcCount)) {
+      return null;
+    }
 
-    return (<KIcon icon="close" color="#fff" size={32} onClick={initializeBtcCount} style={{ padding: "6px" }} />);
+    return (<KIcon {...closeIconCommonProps} onClick={initializeBtcCount} />);
   }, [focusCurrency, btcCount]);
 
   const SatsLeftAction = useMemo(() => {
 
-    if (focusCurrency !== "SATS") { return; }
-    if (["0", ""].includes(sats)) { return null; }
+    if (focusCurrency !== "SATS") {
+      return;
+    }
+    if (["0", ""].includes(sats)) {
+      return null;
+    }
 
-    return (<KIcon icon="close" color="#fff" size={32} onClick={initializeSats} style={{ padding: "6px" }} />);
+    return (<KIcon {...closeIconCommonProps} onClick={initializeSats} />);
   }, [focusCurrency, sats]);
 
   const KrwLeftAction = useMemo(() => {
 
-    if (focusCurrency !== "KRW") { return; }
-    if (["0", ""].includes(krw)) { return null; }
+    if (focusCurrency !== "KRW") {
+      return;
+    }
+    if (["0", ""].includes(krw)) {
+      return null;
+    }
 
-    return (<KIcon icon="close" color="#fff" size={32} onClick={initializeKrw} style={{ padding: "6px" }} />);
+    return (<KIcon {...closeIconCommonProps} onClick={initializeKrw} />);
   }, [focusCurrency, krw]);
 
   const UsdLeftAction = useMemo(() => {
 
-    if (focusCurrency !== "USD") { return; }
-    if (["0", ""].includes(usd)) { return null; }
+    if (focusCurrency !== "USD") {
+      return;
+    }
+    if (["0", ""].includes(usd)) {
+      return null;
+    }
 
-    return (<KIcon icon="close" color="#fff" size={32} onClick={initializeUsd} style={{ padding: "6px" }} />);
+    return (<KIcon icon="close" color="#fff" size={32} onClick={initializeUsd} />);
   }, [focusCurrency, usd]);
-
   // endregion
 
 
   // region [templates]
-
   const SelectUnitList = useMemo(() => {
 
     const filteredList = unitList.filter(unit => unit !== focusCurrency);
@@ -201,8 +216,10 @@ const ConvertPannel = () => {
         {filteredList.map((unit) => (
           <li key={unit} className="select-unit__list__item">
             <button className="select-unit__list__item__button" type="button"
-                    onClick={() => { setFocusCurrency(unit); }}>
-              {unit === 'SATS' ? 'Sats' : unit}
+                    onClick={() => {
+                      setFocusCurrency(unit);
+                    }}>
+              {unit === "SATS" ? "Sats" : unit}
             </button>
           </li>
         ))}
@@ -210,21 +227,26 @@ const ConvertPannel = () => {
     );
   }, [unitList, focusCurrency]);
 
-
   const NumberFieldIUnit = useCallback((unit: UnitType) => {
 
-    if (focusCurrency !== unit) { return unit === "SATS" ? "Sats" : unit; }
+    if (focusCurrency !== unit) {
+      return unit === "SATS" ? "Sats" : unit;
+    }
 
     return (
-      <KDropHolder content={SelectUnitList} position="top-center" offset="8px" className="select-unit__list">
-        <div className={`focus-unit__area focus-unit__area--${focusCurrency.toLowerCase()}`}>
-          {focusCurrency === "SATS" ? "Sats" : focusCurrency}
-          <KIcon className="focus-unit__area__icon" icon="keyboard_arrow_down" size={10} />
-        </div>
-      </KDropHolder>
+      <KDropdown trigger="click">
+        <KDropdown.Trigger>
+          <div className={`focus-unit__area focus-unit__area--${focusCurrency.toLowerCase()}`}>
+            {focusCurrency === "SATS" ? "Sats" : focusCurrency}
+            <KIcon className="focus-unit__area__icon" icon="keyboard_arrow_down" size={10} />
+          </div>
+        </KDropdown.Trigger>
+        <KDropdown.Content gap={12} offset={{ x: 8, y: 0 }}>
+          {SelectUnitList}
+        </KDropdown.Content>
+      </KDropdown>
     );
   }, [focusCurrency, SelectUnitList]);
-
 
   const KrwNumberField = useMemo(() => (
     <div className="convert-pannel__item convert-pannel__item--krw">
@@ -280,10 +302,10 @@ const ConvertPannel = () => {
 
       return (
         <>
-          {focusCurrency === "BTC" ? null :BtcNumberField}
+          {focusCurrency === "BTC" ? null : BtcNumberField}
           {KrwNumberField}
           {UsdNumberField}
-          {focusCurrency === "BTC" ? SatsNumberField :null}
+          {focusCurrency === "BTC" ? SatsNumberField : null}
           {focusCurrency === "BTC" ? BtcNumberField : SatsNumberField}
         </>
       );
@@ -303,7 +325,6 @@ const ConvertPannel = () => {
       );
     }
   }, [focusCurrency, currency, BtcNumberField, KrwNumberField, UsdNumberField, SatsNumberField]);
-
   // endregion
 
 

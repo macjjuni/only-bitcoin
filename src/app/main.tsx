@@ -3,7 +3,7 @@ import { RouterProvider } from "react-router-dom";
 import router from "@/app/router";
 
 import "@/app/styles/index.scss";
-import "kku-ui/lib/styles/index.css";
+import "kku-ui/index.css";
 
 const { browserRouter } = router;
 const root = ReactDOM.createRoot(document.getElementById("only-bitcoin") as HTMLElement);

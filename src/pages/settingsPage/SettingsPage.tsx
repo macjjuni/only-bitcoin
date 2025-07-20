@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useOutletContext } from "react-router";
 import { useNavigate } from "react-router-dom";
-import { KButton, KIcon, KSelect, KSwitch } from "kku-ui";
+import { KButton, KButtonGroup, KIcon, KSelect, KSwitch } from "kku-ui";
 import { btcColor } from "@/shared/constants/color";
 import AnimationIcon from "@/widgets/icon/AnimationIcon";
 import router from "@/app/router";
@@ -20,7 +20,6 @@ export default function SettingsPage() {
 
 
   // region [Hooks]
-
   usePageAnimation(useOutletContext<UsePageAnimation>());
   const navigate = useNavigate();
   const initialPath = useStore(state => state.setting.initialPath);
@@ -39,12 +38,9 @@ export default function SettingsPage() {
   const setIsBackgroundImg = useStore(state => state.setIsBackgroundImg);
 
   const deferredPrompt = useStore(state => state.setting.deferredPrompt);
-
   // endregion
 
-
   // region [Privates]
-
   const onRouteToFeedback = useCallback(() => {
     const anchorTag = document.createElement("a");
     anchorTag.href = import.meta.env.VITE_FEEDBACK_URL;
@@ -54,18 +50,14 @@ export default function SettingsPage() {
   }, []);
 
   const onRouteToMeme = useCallback(() => {
-    navigate('/meme');
+    navigate("/meme");
   }, []);
-
   // endregion
 
-
   // region [memo]
-
   const favoriteRouteOptions = useMemo(() => {
-    return router.favoriteRouteList.map(route => ({ title: `${route.title} 페이지`, value: route.path }));
+    return router.favoriteRouteList.map(route => ({ label: route.title, value: route.path }));
   }, []);
-
   // endregion
 
 
@@ -73,19 +65,23 @@ export default function SettingsPage() {
     <PageLayout className="settings-page__area">
       <div className="settings-page__area__form__area">
         <FormRow icon={<KIcon icon="star" color={btcColor} />} label="시작 페이지">
-          <KSelect value={initialPath} width="176px" onChange={(path) => {
-            setInitialPath(path);
-          }} items={favoriteRouteOptions} />
+          <KSelect value={initialPath} items={favoriteRouteOptions} size="medium"
+                   width={164}
+                   onChange={(path) => {
+                     setInitialPath(path as string);
+                   }} />
         </FormRow>
 
         <FormRow icon={<KIcon icon="currency" color="#FFD700" size={24} />} label="통화 단위">
           <div className="settings-page__area__currency__button-group">
+            <KButtonGroup>
             {
               currencyOptions.map(item => (
                 <KButton key={item.value} label={item.text} onClick={() => setCurrency(item.value)}
-                         className={currency === item.value ? "currency-active" : ""} />
+                         className={currency === item.value ? "currency-active" : ""} style={{ padding: '0 8px'}} />
               ))
             }
+            </KButtonGroup>
           </div>
         </FormRow>
 

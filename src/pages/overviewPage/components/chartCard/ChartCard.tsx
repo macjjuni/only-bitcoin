@@ -1,8 +1,7 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Tooltip } from "chart.js";
+import { KButton, KButtonGroup, KIcon } from "kku-ui";
 import { Line } from "react-chartjs-2";
-import { KButton, KIcon } from "kku-ui";
-
 import {
   ChartJsDataType,
   MarketChartIntervalTypeList
@@ -127,14 +126,14 @@ const ChartCard = () => {
 
 
   const ButtonIntervalArea = useMemo(() => (
-    <div className="chart-card__top__first__button-area">
+    <KButtonGroup className="chart-card__top__first__button-area">
       {
         marketChartIntervalOptions.map(({ value, text }) => (
           <KButton key={value} label={text} size="small" className={chartCardButtonClass(value)}
                    onClick={() => setMarketChartInterval(value)} />
         ))
       }
-    </div>
+    </KButtonGroup>
   ), [setMarketChartInterval, chartCardButtonClass]);
 
 

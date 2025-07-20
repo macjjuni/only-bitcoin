@@ -36,5 +36,6 @@
     "import/no-extraneous-dependencies": "off",
     "@typescript-eslint/return-await": "off",
     "no-param-reassign": ["error", { "props": false }],
+    "@typescript-eslint/no-use-before-define": "off"
   }
 }

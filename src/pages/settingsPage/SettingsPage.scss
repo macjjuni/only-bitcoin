@@ -8,35 +8,13 @@
     margin-top: 24px;
 
     .settings-page__area__currency__button-group {
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      gap: 0;
 
       .currency-active.k-button {
+        color: #000;
         border-color: #fff;
         background-color: #fff;
-
-        .k-button__content { color: #000; }
-        &:first-child { border-color: #fff; }
       }
 
-      & .k-button {
-        border-radius: 0;
-        border-left: none;
-        padding: 0 8px;
-
-        &:first-child {
-          border-left: 1px solid var(--dark-border-color);
-          border-top-left-radius: 3px;
-          border-bottom-left-radius: 3px;
-        }
-
-        &:last-child {
-          border-top-right-radius: 3px;
-          border-bottom-right-radius: 3px;
-        }
-      }
     }
   }
 }
