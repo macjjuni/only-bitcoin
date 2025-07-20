@@ -3,16 +3,20 @@
 
 .resource-source {
 
-    .resource-source__list {
-        display: flex;
-        flex-direction: column;
-        gap: $spacing-8;
-        list-style-type: disc;
-        padding-left: $spacing-16;
+  .k-accordion__content {
+    transition-duration: 0.24s;
+  }
 
-        .resource-source__list__item {
-            @include font-body;
-            //font-size: $font-small-size;
-        }
+  .resource-source__list {
+    display: flex;
+    flex-direction: column;
+    gap: $spacing-8;
+    list-style-type: disc;
+    padding-left: $spacing-32;
+
+    .resource-source__list__item {
+      @include font-body;
+      //font-size: $font-small-size;
     }
+  }
 }

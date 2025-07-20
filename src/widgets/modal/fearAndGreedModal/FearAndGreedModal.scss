@@ -1,9 +1,13 @@
 
 
-.feerAndGreed__modal {
+.feerAndGreed__modal.k-modal.k-modal--medium {
+  height: auto;
 
-  .fear-and-greed-index__image {
-    width: 100%;
-    height: 280px;
+  .k-modal__content {
+    .fear-and-greed-index__image {
+      width: 100%;
+      aspect-ratio: 1/0.8;
+      height: auto;
+    }
   }
 }

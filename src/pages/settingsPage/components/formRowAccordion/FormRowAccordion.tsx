@@ -14,10 +14,10 @@ interface FormRowAccordionTypes extends ComponentBaseTypes {
 const FormRowAccordion = ({className ,icon, label, children}: FormRowAccordionTypes) => {
   return (
     <KAccordion className={`form-row__accordion ${className || ''}`} summary={
-      <div className="form-row__accordion__label__area">
+      <span className="form-row__accordion__label__area">
         {icon}
-        <div className="form-row__accordion__label__area__text">{label}</div>
-      </div>
+        <span className="form-row__accordion__label__area__text">{label}</span>
+      </span>
     }>
       {children}
     </KAccordion>

@@ -1,7 +1,7 @@
 {
   "name": "only-bitcoin",
   "private": true,
-  "version": "3.3.4",
+  "version": "3.3.5",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4002",
@@ -24,7 +24,7 @@
     "chart.js": "^4.4.3",
     "firebase": "^9.23.0",
     "firebase-tools": "^12.4.2",
-    "kku-ui": "^0.0.519",
+    "kku-ui": "^0.2.53",
     "kku-util": "^0.0.156",
     "lottie-react": "^2.4.1",
     "react": "^19.0.0",
@@ -35,6 +35,7 @@
     "react-router": "^7.1.5",
     "react-router-dom": "^7.1.5",
     "react-toastify": "^11.0.3",
+    "reconnecting-websocket": "^4.4.0",
     "vite": "^6.1.0",
     "zustand": "^4.3.8"
   },

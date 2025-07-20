@@ -1,44 +1,35 @@
 export interface StoreType {
 
   // region [비트코인 실시간 가격]
-
   bitcoinPrice: BitcoinPriceTypes; // BTC 시세 정보
   setBitcoinKrwPrice: (bitcoinPriceKRW: BitcoinPriceKRWTypes) => void;
   setBitcoinUsdPrice: (bitcoinPriceUSD: BitcoinPriceUSDTypes) => void;
-
+  reconnectUpbit: () => void;
+  reconnectBinance: () => void;
+  setReconnectUpbit: (fn: () => void) => void;
+  setReconnectBinance: (fn: () => void) => void;
   // endregion
 
-
   // region [대시보드 차트]
-
   marketChartInterval: MarketChartIntervalType;
   setMarketChartInterval: (interval: MarketChartIntervalType) => void;
   marketChartData: BtcChart;
   setMarketChartData: (interval: MarketChartIntervalType, data: ChartData) => void;
-
   // endregion
-
 
   // region [환율 데이터]
-
   exRate: ExRateTypes; // USD/KRW 환율 데이터
   setExRate: (exRate: ExRateTypes) => void;
-
   // endregion
 
-
   // region [블록정보]
-
   blockData: BlockTypes[];
   setBlockData: (blocks: BlockTypes[]) => void;
   fees: FeesTypes;
   setFees: (fees: FeesTypes) => void;
-
   // endregion
 
-
   // region [BTC2Fiat]
-
   btc2Fiat: { btcCount: string; krw: string; usd: string; sats: string; };
   setBtcCount: (btcCount: string) => void;
   setKrw: (krw: string) => void;
@@ -46,12 +37,9 @@ export interface StoreType {
   setSats: (sats: string) => void;
   focusCurrency: UnitType;
   setFocusCurrency: (currency: UnitType) => void
-
   // endregion
 
-
   // region [즐겨찾기]
-
   setting: SettingTypes;
   setInitialPath: (path: string) => void;
   setCurrency: (currency: CurrencyTypes) => void;
@@ -59,9 +47,7 @@ export interface StoreType {
   setIsCountUp: (isCountUp: boolean) => void;
   setIsBackgroundImg: (isBackgroundImg: boolean) => void;
   setDeferredPrompt: (deferredPrompt: BeforeInstallPromptEvent | null) => void;
-
   // endregion
-
 }
 
 

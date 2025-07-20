@@ -8,11 +8,8 @@ import { PageLayout } from "@/layouts";
 export default function OverviewPage() {
 
   // region [Hooks]
-
   usePageAnimation(useOutletContext<UsePageAnimation>());
-
   // endregion
-
 
   return (
     <PageLayout className="overview-page__area">

@@ -14,10 +14,10 @@ $mobile-one-rows-3-height: calc($mobile-horizontal-card-width / $golden-ratio);
 .horizontal-card {
     width: $desktop-horizontal-card-width;
     padding: $spacing-12;
-    border: 1px solid #4f4f4f;
-    border-radius: 4px;
+    border: 1px solid $border-color;
+    border-radius: $default-border-radius;
     background-color: $dashboard-card-background-color;
-    box-shadow: $card-box-shadow;
+    //box-shadow: $card-box-shadow;
 
     &.horizontal-card--row-1 { min-height: $desktop-one-rows-1-height; }
     &.horizontal-card--row-2 { min-height: $desktop-one-rows-2-height; }

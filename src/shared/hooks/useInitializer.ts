@@ -5,21 +5,23 @@ import {
   useInitializeUsdExchangeRate,
   useInitializePage,
   useInitializeGA,
-  useInitializeAPI
+  useBinanceSocket,
+  useUpbitSocket,
+  useMempoolSocket,
 } from "@/shared/hooks/initializer";
 
 
 export default function useInitializer() {
 
   // region [Hooks]
-
-  useInitializeAPI();
+  useUpbitSocket();
+  useBinanceSocket();
+  useMempoolSocket();
   useInitializeUsdExchangeRate();
   useInitializeDisabledZoom();
   useInitializeBackground();
   useInitializePage();
   useInitializePWA();
   useInitializeGA();
-
   // endregion
 }

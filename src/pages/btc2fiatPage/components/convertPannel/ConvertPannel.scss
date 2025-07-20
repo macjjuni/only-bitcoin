@@ -24,28 +24,6 @@
             .k-drop-holder__anchor__wrapper {
                 padding: 0;
                 border: none;
-
-                .select-unit__list {
-                    .select-unit__list__item {
-
-                        .select-unit__list__item__button {
-                            display: flex;
-                            justify-content: flex-start;
-                            align-items: center;
-
-                            width: $number-field-unit-width;
-                            height: 100%;
-                            padding: $spacing-6 $spacing-8;
-                            font-family: $number-font-family;
-                            font-size: $font-body-size;
-                            font-weight: bold;
-                            color: $font-color;
-
-                            text-decoration: underline;
-                            text-underline-offset: 2px;
-                        }
-                    }
-                }
             }
         }
 
@@ -74,9 +52,11 @@
                 .number-field__unit {
                     padding: $spacing-22 0 $spacing-10 $spacing-8;
 
-                    .k-drop-holder {
+                    .k-dropdown__trigger {
+                        padding: $spacing-2;
                         border-radius: $default-border-radius;
                         background-color: rgba(255, 255, 255, 0.24);
+                        cursor: pointer;
                     }
 
                     .focus-unit__area {
@@ -105,6 +85,28 @@
                 }
             }
 
+        }
+    }
+}
+
+.select-unit__list {
+    .select-unit__list__item {
+
+        .select-unit__list__item__button {
+            display: flex;
+            justify-content: flex-start;
+            align-items: center;
+
+            width: $number-field-unit-width;
+            height: 100%;
+            padding: $spacing-6 $spacing-8;
+            font-family: $number-font-family;
+            font-size: $font-body-size;
+            font-weight: bold;
+            color: $font-color;
+
+            text-decoration: underline;
+            text-underline-offset: 2px;
         }
     }
 }

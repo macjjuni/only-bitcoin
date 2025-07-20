@@ -3,7 +3,7 @@
 $bitcoin-color: #f7931a !default;
 $font-color: #ffffff !default;
 $gray-font-color: #999999 !default;
-$border-color: #4f4f4f !default;
+$border-color: var(--kku-border-color-default) !default;
 
 $default-font-color: #eee !default;
 $default-background-color: #000 !default;
@@ -110,14 +110,14 @@ $price-long-color: #22d48e;
 $price-short-color: #F6465D;
 
 $body-background-color: rgba(0, 0, 0, 0.64);
-$dashboard-card-background-color: rgba(16, 16, 16, 0.8);
+$dashboard-card-background-color: rgba(0, 0, 0, 0.4);
 
 // endregion
 
 
 // region [Border Radius]
 
-$default-border-radius: 3px;
+$default-border-radius: 4px;
 
 // endregion
 

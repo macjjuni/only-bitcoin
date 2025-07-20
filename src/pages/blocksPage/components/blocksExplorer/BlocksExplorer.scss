@@ -3,7 +3,15 @@
 .block-search-box__area {
 
   .block-search-box__area__input {
-    height: 42px;
+    width: 100%;
+
+    .k-text-field__fieldset {
+      height: 50px;
+
+      .k-text-field__fieldset__container {
+        height: 42px;
+      }
+    }
 
     .k-text-field__input__container {
       height: 100%;

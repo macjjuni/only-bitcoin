@@ -1,48 +1,69 @@
 @use "@/app/styles/variable" as *;
 @use "@/app/styles/mixin" as *;
 
-.halving-data-card__area {
+.k-accordion.halving-data-card__area {
+  border-radius: $default-border-radius;
+
+  &[data-open=true] {
 
     .k-accordion__summary {
-        .k-accordion__summary__container {
-            .k-accordion__summary__text {
-                @include font-body;
-                font-weight: bold;
-            }
-        }
+      border-bottom: 1px solid $border-color;
     }
-    .k-accordion__content {
-        .k-accordion__content__wrapper {
-            overflow: auto;
-        }
+  }
+
+  .k-accordion__summary {
+    padding: $spacing-12;
+    transition: border 0.16s ease;
+    border-bottom: 1px solid transparent;
+
+    .k-accordion__summary__container {
+      .k-accordion__summary__text {
+        @include font-body;
+        font-weight: bold;
+      }
     }
+  }
 
-    .halving-data-card__area__list {
-        display: flex;
-        flex-direction: row;
+  .k-accordion__content {
+    transition-duration: 0.36s;
 
-
-        .halving-data-card__area__list__item {
-            display: flex;
-            flex-direction: column;
-            width: auto;
-
-            .halving__label, .halving__text {
-                width: auto;
-                white-space: nowrap;
-                padding: $spacing-2 $spacing-8;
-                border-bottom: 1px solid $border-color;
-                @include font-body;
-                font-family: $number-font-family;
-
-                &:first-child {font-weight: bold;}
-                &:last-child { border: none; }
-
-                &.active {
-                    font-weight: bold;
-                    color: $bitcoin-color;
-                }
-            }
-        }
+    .k-accordion__content__container {
+      padding: $spacing-12;
+      overflow-x: auto;
     }
+  }
+
+  .halving-data-card__area__list {
+    display: flex;
+    flex-direction: row;
+
+
+    .halving-data-card__area__list__item {
+      display: flex;
+      flex-direction: column;
+      width: auto;
+
+      .halving__label, .halving__text {
+        width: auto;
+        white-space: nowrap;
+        padding: $spacing-2 $spacing-8;
+        border-bottom: 1px solid $border-color;
+        @include font-body;
+        font-family: $number-font-family;
+
+        &:first-child {
+          font-weight: bold;
+        }
+
+        &:last-child {
+          border: none;
+        }
+
+        &.active {
+          font-weight: bold;
+          color: $bitcoin-color;
+        }
+      }
+    }
+  }
 }
