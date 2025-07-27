@@ -12,7 +12,7 @@ interface ModalTypes {
 const FearAndGreedModal = ({ isOpen, onClose }: ModalTypes) => {
 
   return (
-    <KModal isOpen={isOpen} onClose={onClose} overlayClosable className="feerAndGreed__modal">
+    <KModal isOpen={isOpen} onClose={onClose} overlayClosable className="fearAndGreed__modal">
       <KModal.Header>
         공포 & 탐욕 지수
       </KModal.Header>
