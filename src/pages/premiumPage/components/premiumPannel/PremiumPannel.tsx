@@ -38,24 +38,26 @@ const PremiumPannel = () => {
     <Lottie animationData={premiumData} width="54px" height="54px" style={{ marginLeft: "-8px" }} />
   ), []);
 
-  const PremiumTopArea = useMemo(() => (
-    <div className="premium-pannel__title">
-      {PremiumLottie}
-      <div className="premium-pannel__title__area">
-        <CountText value={calcPremiumPercent(krw, usd, usdExRate)} decimals={2}
-                   className="premium-pannel__text" />
-        <span className="unit">%</span>
-      </div>
-    </div>
-  ), [krw, usd, usdExRate]);
-
   // endregion
-
 
   return (
     <div className="premium-pannel">
 
-      {PremiumTopArea}
+      <div className="premium-pannel__title">
+        {PremiumLottie}
+        <div className="premium-pannel__title__area">
+          {
+            usdExRate !== 0 ? (
+                <>
+                  <CountText value={calcPremiumPercent(krw, usd, usdExRate)} decimals={2}
+                             className="premium-pannel__text" />
+                  <span className="unit">%</span>
+                </>
+              ) :
+              <span className="premium-pannel__text">Error</span>
+          }
+        </div>
+      </div>
 
       <div className="premium-pannel__content">
         {
@@ -85,13 +87,13 @@ const PremiumPannel = () => {
 
         <div className="premium-pannel__content__item">
           <div className="premium-pannel__content__item__title">
-            {!isUsdtStandard ? '환율(USD/KRW)' : 'USDT/KRW' }
+            {!isUsdtStandard ? "환율(USD/KRW)" : "USDT/KRW"}
           </div>
           <div className="premium-pannel__content__item__content">
             <div className="premium-pannel__content__item__content__item">
               <div className="premium-pannel__content__item__content__item--left">
                 <span className="price__text">1</span>
-                <span className="unit__text">{!isUsdtStandard ? 'USD' : 'USDT' }</span>
+                <span className="unit__text">{!isUsdtStandard ? "USD" : "USDT"}</span>
                 <span className="slash__text">/</span>
                 <CountText className="price__text" value={usdExRate} />
                 <span className="unit__text">KRW</span>
