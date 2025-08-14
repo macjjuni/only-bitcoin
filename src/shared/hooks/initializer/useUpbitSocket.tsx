@@ -72,7 +72,7 @@ export default function useUpbitWebSocket() {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      toast.success("Upbit 연결됨");
+      toast.success("Upbit 연결!");
       if (isDev) console.log("✅ 업비트 소켓 연결");
       socket.send(JSON.stringify(getRequestPayload()));
     };

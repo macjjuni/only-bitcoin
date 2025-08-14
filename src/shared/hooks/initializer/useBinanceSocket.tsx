@@ -45,7 +45,7 @@ export default function useBinanceWebSocket() {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      toast.success("Binance 연결됨");
+      toast.success("Binance 연결!");
       if (isDev) console.log("✅ 바이낸스 소켓 연결");
     };
 
