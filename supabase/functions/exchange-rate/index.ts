@@ -1,16 +1,16 @@
 import "jsr:@supabase/functions-js/edge-runtime.d.ts";
-import { createClient } from "https://cdn.jsdelivr.net/npm/@supabase/supabase-js/+esm";
+import { createClient } from 'npm:@supabase/supabase-js@2'
 
 const supabase = createClient(
-  Deno.env.get("SUPABASE_URL")!,
-  Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!
+  Deno.env.get("URL")!,
+  Deno.env.get("SERVICE_ROLE_KEY")!
 );
+const env = Deno.env.get("NODE_ENV");
 
-const allowedOrigins = [
-  "http://localhost:4002",           // 로컬 테스트
-  "https://btc-price.web.app",       // 배포 도메인 1
-  "https://btc-price-9503c.web.app" // 배포 도메인 2
-];
+const allowedOrigins = env === "production"
+  ? ["https://btc-price.web.app", "https://btc-price-9503c.web.app"]
+  : ["http://localhost:4002"];
+
 
 Deno.serve(async (req) => {
   const origin = req.headers.get("origin") ?? "";
@@ -19,11 +19,9 @@ Deno.serve(async (req) => {
   const { data, error } = await supabase
     .from("exchange_rate")
     .select("krw, updated")
-    .order("id", { ascending: false })
-    .limit(1)
+    .eq("id", 1)
     .single();
-  console.log(data)
-  console.log(error)
+
   if (error || !data) return new Response("No data", { status: 500 });
 
   return new Response(JSON.stringify(data), {
