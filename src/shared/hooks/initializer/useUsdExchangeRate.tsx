@@ -2,6 +2,7 @@ import { useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { toast } from "react-toastify";
 import useStore from "@/shared/stores/store";
+import { getCurrentDate } from "@/shared/lib/date";
 import { isDev } from "@/shared/utils/common";
 import { ExRateTypes } from "@/shared/stores/store.interface";
 
@@ -46,7 +47,7 @@ export default function useUsdExchangeRate() {
     const value = parseFloat(krwData.value.replace(/,/g, ""));
 
     // 오늘 날짜 YYYY-MM-DD
-    const date = new Date().toISOString().split("T")[0];
+    const date = getCurrentDate();
 
     return { value, date };
   }, []);
