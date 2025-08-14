@@ -87,7 +87,7 @@ const PremiumPannel = () => {
 
         <div className="premium-pannel__content__item">
           <div className="premium-pannel__content__item__title">
-            {!isUsdtStandard ? "환율(USD/KRW)" : "USDT/KRW"}
+            {!isUsdtStandard ? "실시간 환율(USD/KRW)" : "USDT/KRW"}
           </div>
           <div className="premium-pannel__content__item__content">
             <div className="premium-pannel__content__item__content__item">
