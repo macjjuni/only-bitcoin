@@ -2,7 +2,7 @@ import {
   useInitializePWA,
   useInitializeDisabledZoom,
   useInitializeBackground,
-  useInitializeUsdExchangeRate,
+  useUsdExchangeRate,
   useInitializePage,
   useInitializeGA,
   useBinanceSocket,
@@ -17,7 +17,7 @@ export default function useInitializer() {
   useUpbitSocket();
   useBinanceSocket();
   useMempoolSocket();
-  useInitializeUsdExchangeRate();
+  useUsdExchangeRate();
   useInitializeDisabledZoom();
   useInitializeBackground();
   useInitializePage();

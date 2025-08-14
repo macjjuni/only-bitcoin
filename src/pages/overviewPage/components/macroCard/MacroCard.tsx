@@ -18,7 +18,12 @@ const PricePannel = () => {
   const { krw, usd } = useStore(state => state.bitcoinPrice);
   const usdExRate = useStore(state => state.exRate.value);
 
-  const premium = useMemo(() => (calcPremiumPercent(krw, usd, usdExRate)), [krw, usd, usdExRate]);
+  const premium = useMemo(() => {
+    if (usdExRate !== 0) {
+      return calcPremiumPercent(krw, usd, usdExRate);
+    }
+    return 'Error';
+  }, [krw, usd, usdExRate]);
 
   const navigate = useNavigate();
   const [IsFearAndGreedModal, setIsFearAndGreedModal] = useState(false);

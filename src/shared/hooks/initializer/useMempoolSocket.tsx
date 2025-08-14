@@ -66,7 +66,7 @@ export default function useMempoolSocket() {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      toast.success("Mempool 연결됨");
+      toast.success("Mempool 연결!");
       if (process.env.NODE_ENV === "development") {
         console.log("✅ Mempool 소켓 연결");
       }
