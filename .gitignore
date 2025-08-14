@@ -11,6 +11,7 @@ node_modules
 dist
 dist-ssr
 *.local
+.env
 .env.production
 # 중요 데이터가 포함된 경우 주석 해제
 # .env.production

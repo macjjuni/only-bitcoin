@@ -1,4 +1,4 @@
-export { default as useInitializeUsdExchangeRate } from "@/shared/hooks/initializer/useInitializeUsdExchangeRate"
+export { default as useUsdExchangeRate } from "@/shared/hooks/initializer/useUsdExchangeRate"
 export { default as useInitializePage } from "@/shared/hooks/initializer/useInitializePage"
 export { default as useInitializeDisabledZoom } from "@/shared/hooks/initializer/useInitializeDisabledZoom"
 export { default as useInitializePWA } from "@/shared/hooks/initializer/useInitializePWA"
