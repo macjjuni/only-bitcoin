@@ -35,8 +35,9 @@ export default function useUsdExchangeRate() {
     },
     enabled: !isUsdtStandard,
     staleTime: 0,
+    refetchOnMount: 'always',
     refetchInterval: 1000 * 60 * 1,
-    refetchOnWindowFocus: false,
+    refetchOnWindowFocus: true,
   });
 
   const parseExchangeRate = useCallback((res: INaverExchangeRateResponse): ExRateTypes | null => {
