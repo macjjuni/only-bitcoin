@@ -1,4 +1,4 @@
-import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
+import React, { memo, useCallback, useMemo, useRef } from "react";
 import { CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Tooltip } from "chart.js";
 import { KButton, KButtonGroup, KIcon } from "kku-ui";
 import { Line } from "react-chartjs-2";
@@ -103,15 +103,6 @@ const ChartCard = () => {
   // endregion
 
 
-  // region[Life Cycles]
-
-  useEffect(() => {
-    initializeTooltip();
-  }, [marketChartInterval]);
-
-  // endregion
-
-
   // region [Templates]
 
   const TopLogoArea = useMemo(() => (
@@ -145,15 +136,21 @@ const ChartCard = () => {
               plugins: { legend: { display: false }, tooltip: { enabled: true } },
               elements: { point: { radius: 0 }, line: { tension: 0.4, borderWidth: 2 } },
               scales: { x: { display: false }, y: { display: false } },
-              animation: { duration: 800, easing: "easeInOutQuart" }
-            }} />
+              animation: {
+                duration: 800,
+                easing: "easeInOutQuart",
+                onComplete: initializeTooltip
+              }
+            }}
+      />
       <div className="chart-card__chart__wrapper__line__area">
         {Array.from({ length: 9 }, (_, i) => (
-          <span key={i} className="chart-card__chart__wrapper__line__area--line"
-                style={{ "left": `${(i + 1) * 10}%` }} />))}
+          <span key={i} style={{ "left": `${(i + 1) * 10}%` }}
+                className="chart-card__chart__wrapper__line__area--line" />
+        ))}
       </div>
     </>
-  ), [currentChartData]);
+  ), [currentChartData, initializeTooltip]);
 
   // endregion
 
