@@ -9,7 +9,7 @@ import useStore from "@/shared/stores/store";
 import { PageLayout } from "@/layouts";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
-import { currencyOptions } from "@/shared/constants/setting";
+import {currencyOptions, krwMarketOptions} from '@/shared/constants/setting'
 import { isSafari } from "@/shared/utils/device";
 import { FormRow, InstallSettingForm, ResourceSource } from "@/pages/settingsPage/components";
 import MemeIcon from "@/widgets/icon/MemeIcon";
@@ -17,7 +17,6 @@ import "./SettingsPage.scss";
 
 
 export default function SettingsPage() {
-
 
   // region [Hooks]
   usePageAnimation(useOutletContext<UsePageAnimation>());
@@ -27,6 +26,9 @@ export default function SettingsPage() {
 
   const currency = useStore(state => state.setting.currency);
   const setCurrency = useStore(state => state.setCurrency);
+
+  const krwMarket = useStore(state => state.krwMarket);
+  const setKrwMarket = useStore(state => state.setKrwMarket);
 
   const isUsdtStandard = useStore(state => state.setting.isUsdtStandard);
   const setUsdtStandard = useStore(state => state.setUsdtStandard);
@@ -78,9 +80,22 @@ export default function SettingsPage() {
             {
               currencyOptions.map(item => (
                 <KButton key={item.value} label={item.text} onClick={() => setCurrency(item.value)}
-                         className={currency === item.value ? "currency-active" : ""} style={{ padding: '0 8px'}} />
+                         className={currency === item.value ? "active" : ""} style={{ padding: '0 8px'}} />
               ))
             }
+            </KButtonGroup>
+          </div>
+        </FormRow>
+
+        <FormRow icon={<KIcon icon="won" size={24} />} label="거래소">
+          <div className="settings-page__area__currency__button-group">
+            <KButtonGroup>
+              {
+                krwMarketOptions.map(item => (
+                  <KButton key={item.value} label={item.text} onClick={() => setKrwMarket(item.value)}
+                           className={krwMarket === item.value ? "active" : ""} style={{ padding: '0 8px'}} />
+                ))
+              }
             </KButtonGroup>
           </div>
         </FormRow>

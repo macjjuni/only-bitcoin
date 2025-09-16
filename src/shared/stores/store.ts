@@ -24,9 +24,13 @@ const useStore = create<StoreType>()(
       setBitcoinUsdPrice: (usd) => set(({ bitcoinPrice }) => ({
         bitcoinPrice: { ...bitcoinPrice, ...usd }
       })),
+      krwMarket: 'UPBIT',
+      setKrwMarket: (krwMarket) => set((store) => ({...store, krwMarket })),
       reconnectUpbit: () => {},
+      reconnectBithumb: () => {},
       reconnectBinance: () => {},
       setReconnectUpbit: (reconnectUpbit) => set((store) => ({ ...store, reconnectUpbit })),
+      setReconnectBithumb: (reconnectBithumb) => set((store) => ({ ...store, reconnectBithumb })),
       setReconnectBinance: (reconnectBinance) => set((store) => ({ ...store, reconnectBinance })),
       // endregion
 

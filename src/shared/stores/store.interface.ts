@@ -1,12 +1,18 @@
+import {KrwMarketType} from '@/shared/constants/market'
+
 export interface StoreType {
 
   // region [비트코인 실시간 가격]
   bitcoinPrice: BitcoinPriceTypes; // BTC 시세 정보
   setBitcoinKrwPrice: (bitcoinPriceKRW: BitcoinPriceKRWTypes) => void;
   setBitcoinUsdPrice: (bitcoinPriceUSD: BitcoinPriceUSDTypes) => void;
+  krwMarket: KrwMarketType;
+  setKrwMarket: (market: KrwMarketType) => void;
   reconnectUpbit: () => void;
+  reconnectBithumb: () => void;
   reconnectBinance: () => void;
   setReconnectUpbit: (fn: () => void) => void;
+  setReconnectBithumb: (fn: () => void) => void;
   setReconnectBinance: (fn: () => void) => void;
   // endregion
 
