@@ -87,7 +87,7 @@ export default function SettingsPage() {
           </div>
         </FormRow>
 
-        <FormRow icon={<KIcon icon="won" size={24} />} label="거래소">
+        <FormRow icon={<KIcon icon="won" size={24} />} label="국내거래소">
           <div className="settings-page__area__currency__button-group">
             <KButtonGroup>
               {
