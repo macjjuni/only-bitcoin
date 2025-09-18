@@ -6,7 +6,6 @@ const mode = import.meta.env.MODE;
 const GA_TRACKING_ID = import.meta.env.VITE_GA_TRAKING_ID;
 
 export default function useInitializeGA() {
-
   // region [Hooks]
 
   const location = useLocation();

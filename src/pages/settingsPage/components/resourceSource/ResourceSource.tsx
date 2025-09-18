@@ -11,7 +11,7 @@ const ResourceSource = () => {
       <ul className="resource-source__list">
         {
           [
-            { label: "BTC(KRW)", value: "Upbit" },
+            { label: "BTC(KRW)", value: "Upbit, Bithumb" },
             { label: "BTC(USD)", value: "Binance" },
             { label: "Chart", value: "Coin Gecko" },
             { label: "BTC Dominance", value: "Coin Gecko" },

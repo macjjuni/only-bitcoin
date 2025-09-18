@@ -8,6 +8,7 @@ import { generateUUID } from "@/shared/lib/uuid";
 import { formatDate } from "@/shared/lib/date";
 import { floorToDecimal } from "@/shared/utils/number";
 import { isDev } from "@/shared/utils/common";
+import {UPBIT_MARKET_FLAG} from '@/shared/constants/market'
 
 const UPBIT_URL = "wss://api.upbit.com/websocket/v1";
 const UUID_STORAGE_KEY = "uuid";
@@ -32,6 +33,7 @@ const getRequestPayload = () => [
 export default function useUpbitWebSocket() {
 
   // region [Hooks]
+  const krwMarket = useStore(store => store.krwMarket);
   const setReconnectUpbit = useStore(state => state.setReconnectUpbit);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
   // endregion
@@ -128,8 +130,15 @@ export default function useUpbitWebSocket() {
   }, [reconnect]);
 
   useEffect(() => {
-    connect();
-    return disconnect;
-  }, [connect, disconnect]);
+    if (krwMarket === UPBIT_MARKET_FLAG) {
+      connect();
+    } else {
+      disconnect();
+    }
+
+    return () => {
+      disconnect();
+    };
+  }, [krwMarket, connect, disconnect]); // krwMarket 값에 따라 연결/해제
   // endregion
 };

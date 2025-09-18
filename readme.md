@@ -11,9 +11,9 @@
 
 ## 👻 소개
 
-- [x] 실시간 비트코인 거래소 시장가 제공(KRW/USD)
+- [x] 실시간 비트코인 거래소(업비트, 빗썸) 시장가 제공(KRW/USD)
 - [x] 실시간 비트코인 블록 및 반감기 정보 제공(mempool.space)
-- [x] 비트코인 도미넌스(자체 계산), 한국 프리미엄, 환율(USD/KRW or USDT/KRW), Fear & Greed 지수 제공
+- [x] 비트코인 도미넌스(자체 계산: 시총 200위 기준), 한국 프리미엄, 환율(USD/KRW or USDT/KRW), Fear & Greed 지수 제공
 - [x] 실시간 BTC to Fiat 계산기(KRW/USD)
 
 ## 📸 릴리즈 노트
@@ -63,7 +63,7 @@
 
 - UI 리뉴얼
 - 앱(PWA) 설치 UX 개선
-- 비트코인 블록 채굴 현황, 트렌젝션 검색 기능 추가
+- 비트코인 Mempool 현황, 트렌젝션 검색 기능 추가
 - 사용자 설정 개편
     </div>
 </details>
@@ -73,9 +73,10 @@
 
 - [Mempool](https://mempool.space)
 - [Upbit API Docs](https://upbit.com/open_api_agreement)
+- [Bithumb API Docs](https://apidocs.bithumb.com/v2.1.5)
 - [Binance API Docs](https://binance-docs.github.io/apidocs/spot/en/#introduction)
 - [Coin Gecko](https://www.coingecko.com/ko/api/documentation)
-- [환율](https://github.com/fawazahmed0/exchange-api)
+- [환율](https://m.search.naver.com/search.naver?sm=mtp_hty.top&where=m&query=%EB%8B%AC%EB%9F%AC&ackey=j5y3lp9z)
 
 ## 🏃🏻‍♂️ Getting Started!
 

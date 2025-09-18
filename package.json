@@ -1,7 +1,7 @@
 {
   "name": "only-bitcoin",
   "private": true,
-  "version": "3.3.6",
+  "version": "3.3.7",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4002",
@@ -69,5 +69,6 @@
   "description": "feat. SWC",
   "main": "/app/main.tsx",
   "author": "macjjuni <macjjuni@gmail.com>",
-  "license": "MIT"
+  "license": "MIT",
+  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
 }
