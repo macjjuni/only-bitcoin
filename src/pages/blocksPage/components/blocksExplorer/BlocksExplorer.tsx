@@ -73,7 +73,7 @@ const BlocksExplorer = () => {
   return (
     <div className="block-search-box__area">
       <KTextField ref={searchRef} className="block-search-box__area__input" value={txValue}
-                  onChange={onChangeTxInput} placeholder="트렌젝션을 검색해 보세요" width="100%"
+                  onChange={onChangeTxInput} placeholder="트랜잭션을 검색해 보세요" width="100%"
                   rightContent={SearchRightAction} autoCapitalize="off" autoCorrect="off"
                   autoComplete="off" label="Tx ID" />
     </div>

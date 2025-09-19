@@ -21,7 +21,7 @@ const TxFeeCard = () => {
   return (
     <HorizontalCard className="tx-fee-card__area" rows={1}>
       <div className="tx-fee-card__area__title">
-        트렌잭션 수수료
+        트랜잭션 수수료
       </div>
       <div className="tx-fee-card__area__content">
         {
