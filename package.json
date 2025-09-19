@@ -1,7 +1,7 @@
 {
   "name": "only-bitcoin",
   "private": true,
-  "version": "3.3.7",
+  "version": "3.3.8",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4002",
@@ -70,5 +70,5 @@
   "main": "/app/main.tsx",
   "author": "macjjuni <macjjuni@gmail.com>",
   "license": "MIT",
-  "packageManager": "yarn@1.22.22+sha1.ac34549e6aa8e7ead463a7407e1c7390f61a6610"
+  "packageManager": "pnpm@8.15.6+sha1.8105075ad0aa306138be128c017e9c41e28ecffa"
 }
