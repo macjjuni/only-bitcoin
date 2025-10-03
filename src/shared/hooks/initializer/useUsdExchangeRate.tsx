@@ -29,7 +29,6 @@ export default function useUsdExchangeRate() {
     queryKey: ["usd-exchange-rate"],
     queryFn: async () => {
       const res = await fetch(apiUrl);
-      console.log(res);
       if (!res.ok) throw new Error("환율 데이터를 가져올 수 없습니다.");
       return res.json() as Promise<INaverExchangeRateResponse>;
     },
