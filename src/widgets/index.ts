@@ -9,3 +9,4 @@ export { default as PwaInstallAlarmIOS } from "@/widgets/pwaInstallAlarm/PwaInst
 export { default as NetworkSwitch } from "@/widgets/networkSwitch/NetworkSwitch";
 export { default as LazyImage } from "@/widgets/lazyImage/LazyImage";
 export { default as HorizontalCard } from "@/widgets/card/horizontalCard/HorizontalCard";
+export { default as PipWindow } from "@/widgets/pipWindow/PipWindow";

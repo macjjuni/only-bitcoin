@@ -1,13 +1,13 @@
-import { memo, useMemo } from "react";
+import { forwardRef, memo, useImperativeHandle, useMemo, useRef } from "react";
 import useStore from "@/shared/stores/store";
 import { CountText, UpdownIcon } from "@/widgets";
 import "./PricePannel.scss";
 
 
-const PricePannel = () => {
+const PricePannel = forwardRef<HTMLDivElement | null>((props_, ref) => {
 
   // region [Hooks]
-
+  const containerRef = useRef<HTMLDivElement | null>(null);
   const bitcoinPrice = useStore(state => state.bitcoinPrice);
   const currency = useStore(state => state.setting.currency);
 
@@ -23,9 +23,11 @@ const PricePannel = () => {
 
   // endregion
 
+  // eslint-disable-next-line @typescript-eslint/no-non-null-assertion
+  useImperativeHandle(ref, () => containerRef.current!);
 
   return (
-    <div className="price-pannel">
+    <div ref={containerRef} className="price-pannel">
       <h2 className="price-pannel__signature">₿itcoin</h2>
 
       <div className="price-pannel__price__area">
@@ -56,6 +58,8 @@ const PricePannel = () => {
       </div>
     </div>
   );
-};
+});
+
+PricePannel.displayName = 'PricePannel'
 
 export default memo(PricePannel);
