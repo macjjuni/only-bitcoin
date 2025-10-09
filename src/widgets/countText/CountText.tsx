@@ -28,7 +28,7 @@ const CountText = (props: CountTextTypes) => {
         return value;
     }
     const isPositive = Math.random() < 0.5; // 50% 확률로 + 또는 -
-    const difference = value * 0.02; // 2% 차이 계산
+    const difference = value * 0.005; // 0.5% 차이 계산
 
     return isPositive ? value + difference : value - difference;
   }, [value, isCountUp]);
