@@ -2,6 +2,11 @@ import {KrwMarketType} from '@/shared/constants/market'
 
 export interface StoreType {
 
+  // region [Theme]
+  theme: 'light' | 'dark';
+  setTheme: (theme: 'light' | 'dark') => void;
+  // endregion
+
   // region [비트코인 실시간 가격]
   bitcoinPrice: BitcoinPriceTypes; // BTC 시세 정보
   setBitcoinKrwPrice: (bitcoinPriceKRW: BitcoinPriceKRWTypes) => void;

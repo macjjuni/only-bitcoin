@@ -16,13 +16,23 @@
         .macro-card__item__text {
             font-size: $font-body-size;
             font-weight: bold;
-            color: #999999;
+            color: $gray-500;
         }
 
         .macro-card__item__value {
             font-family: $number-font-family;
             font-size: 18px;
             font-weight: bold;
+        }
+    }
+}
+
+.dark {
+    .macro-card {
+        .macro-card__item {
+            .macro-card__item__text {
+                color: $gray-400;
+            }
         }
     }
 }

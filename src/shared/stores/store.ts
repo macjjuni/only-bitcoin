@@ -7,6 +7,11 @@ const useStore = create<StoreType>()(
   persist(
     (set) => ({
 
+      // region [Theme]
+      theme: "light",
+      setTheme: (theme) => set((store) => ({ ...store, theme })),
+      // endregion
+
       // region [비트코인 실시간 가격]
       bitcoinPrice: {
         krw: 0,
@@ -24,11 +29,14 @@ const useStore = create<StoreType>()(
       setBitcoinUsdPrice: (usd) => set(({ bitcoinPrice }) => ({
         bitcoinPrice: { ...bitcoinPrice, ...usd }
       })),
-      krwMarket: 'UPBIT',
-      setKrwMarket: (krwMarket) => set((store) => ({...store, krwMarket })),
-      reconnectUpbit: () => {},
-      reconnectBithumb: () => {},
-      reconnectBinance: () => {},
+      krwMarket: "UPBIT",
+      setKrwMarket: (krwMarket) => set((store) => ({ ...store, krwMarket })),
+      reconnectUpbit: () => {
+      },
+      reconnectBithumb: () => {
+      },
+      reconnectBinance: () => {
+      },
       setReconnectUpbit: (reconnectUpbit) => set((store) => ({ ...store, reconnectUpbit })),
       setReconnectBithumb: (reconnectBithumb) => set((store) => ({ ...store, reconnectBithumb })),
       setReconnectBinance: (reconnectBinance) => set((store) => ({ ...store, reconnectBinance })),
@@ -74,7 +82,7 @@ const useStore = create<StoreType>()(
 
       // region [BTC2Fiat]
 
-      btc2Fiat: { btcCount: '1', krw: '0', usd: '0', sats: '0', },
+      btc2Fiat: { btcCount: "1", krw: "0", usd: "0", sats: "0" },
       setBtcCount: (btcCount) => set((state) => ({ btc2Fiat: { ...state.btc2Fiat, btcCount } })),
       setKrw: (krw) => set((state) => ({ btc2Fiat: { ...state.btc2Fiat, krw } })),
       setUsd: (usd) => set((state) => ({ btc2Fiat: { ...state.btc2Fiat, usd } })),
@@ -103,7 +111,7 @@ const useStore = create<StoreType>()(
         const isNotIncludeCurrency = currency.includes(state.focusCurrency);
         const focusCurrency = !isNotIncludeCurrency ? "BTC" : state.focusCurrency;
 
-        return { setting: { ...state.setting, currency, }, focusCurrency }
+        return { setting: { ...state.setting, currency }, focusCurrency };
       }),
       setUsdtStandard: (isUsdtStandard) => set((state) => ({
         setting: { ...state.setting, isUsdtStandard }

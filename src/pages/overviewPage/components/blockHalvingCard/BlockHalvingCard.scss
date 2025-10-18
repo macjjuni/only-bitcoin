@@ -35,36 +35,25 @@
       .block-card__guage__area__bar {
         position: relative;
         width: calc(100% - $percent-text-area-width - #{$spacing-16});
-        height: 14px;
-        border-radius: 14px;
-        background-color: rgba(255, 255, 255, 0.16);
+        height: 18px;
+        border-radius: 2px;
+        border: 1px solid $default-font-color;
+        background-color: $default-background-color;
 
         .block-card__guage__area__bar__ball {
           position: absolute;
           top: 50%;
-          left: 20%;
+          left: 0;
           transform: translateY(-50%);
           display: flex;
           justify-content: flex-start;
           align-items: center;
           width: 28px;
-          height: 28px;
+          height: 100%;
           padding-left: $spacing-8;
-          border-radius: 50%;
-          background-color: rgba(255, 255, 255, 0.24);
+          border-radius: 1px;
+          background-color: $default-font-color;
           transition: 0.3s ease;
-
-          &:before {
-            content: '';
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 16px;
-            height: 16px;
-            background-color: #fff;
-            border-radius: 50%;
-          }
         }
       }
 
@@ -76,7 +65,7 @@
           @include font-body;
           font-family: $number-font-family;
           font-weight: bold;
-          color: #fff;
+          color: $default-font-color;
         }
       }
     }

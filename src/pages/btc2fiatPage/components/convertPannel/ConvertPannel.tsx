@@ -11,7 +11,7 @@ import "./ConvertPannel.scss";
 
 const closeIconCommonProps = {
   icon: "close",
-  color: "#fff",
+  color: "currentColor",
   size: 32,
   style: { padding: 6 },
 };

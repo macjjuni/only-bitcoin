@@ -15,9 +15,8 @@
         justify-content: flex-start;
         align-items: center;
         gap: $spacing-8;
-        color: $font-color;
+        color: $default-font-color;
         font-weight: bold;
-        font-family: $number-font-family;
         @include font-heading-sm;
     }
 }

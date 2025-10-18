@@ -1,3 +1,4 @@
+export { default as useTheme } from "@/shared/hooks/initializer/useTheme"
 export { default as useUsdExchangeRate } from "@/shared/hooks/initializer/useUsdExchangeRate"
 export { default as useInitializePage } from "@/shared/hooks/initializer/useInitializePage"
 export { default as useInitializeDisabledZoom } from "@/shared/hooks/initializer/useInitializeDisabledZoom"

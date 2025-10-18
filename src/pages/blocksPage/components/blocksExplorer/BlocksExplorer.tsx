@@ -60,9 +60,9 @@ const BlocksExplorer = () => {
 
   const SearchRightAction = useMemo(() => (
     <div className="search-right__area">
-      {txValue.length !== 0 && (<KIcon icon="close" color="#fff" size={18} onClick={clearInput} />)}
-      <KIcon icon="paste" color="#fff" onClick={onClickPasteIcon} />
-      <KIcon icon="search" color="#fff" onClick={onRouteMempool} />
+      {txValue.length !== 0 && (<KIcon icon="close" color="currentColor" size={18} onClick={clearInput} />)}
+      <KIcon icon="paste" color="currentColor" onClick={onClickPasteIcon} />
+      <KIcon icon="search" color="currentColor" onClick={onRouteMempool} />
     </div>
 
   ), [onRouteMempool]);

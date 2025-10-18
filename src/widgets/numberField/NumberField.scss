@@ -20,7 +20,7 @@
         font-family: $number-font-family;
         @include font-heading-sm;
         background-color: transparent;
-        caret-color: #fff;
+        caret-color: $default-font-color;
         white-space: nowrap;
         text-overflow: ellipsis;
         user-select: none;

@@ -10,7 +10,7 @@
     min-height: 54px;
     padding: 0 $spacing-16;
     border-bottom: none;
-    background-color: #171717;
+    background-color: $default-background-cover-color;
 
     .form-row__area__content {
         display: flex;
@@ -31,7 +31,7 @@
         right: 0;
         height: 0.5px;
         width: 88%;
-        background-color: $border-color;
+        background-color: $default-border-color;
     }
 
     &:first-child {

@@ -24,10 +24,10 @@ const marketChartIntervalOptions: MarketChartIntervalTypeList[] = [
   { text: "1Y", value: 365 }
 ];
 
-const getChartDataset = (data: number[], index: number) => ({
-  label: "", data, borderColor: "#fff", backgroundColor: "transparent",
+const getChartDataset = (data: number[], index: number, isDark: boolean) => ({
+  label: "", data, borderColor: isDark ? "#fff" : '#000', backgroundColor: "transparent",
   borderWidth: 2, pointBackgroundColor: btcColor, pointHoverRadius: 4,
-  pointRadius: data.map((_, idx) => (idx === index ? 4 : 0)) // 최댓값 위치에 점 표시
+  pointRadius: data.map((_, idx) => (idx === index ? 3 : 0)) // 최댓값 위치에 점 표시
 });
 
 
@@ -40,6 +40,7 @@ const ChartCard = () => {
   const marketChartInterval = useStore(state => state.marketChartInterval);
   const setMarketChartInterval = useStore(state => state.setMarketChartInterval);
   const { marketChartData } = useMarketChartData(marketChartInterval);
+  const isDark = useStore(store => store.theme) === 'dark';
 
 
   const maxValueIndex = useMemo(() => {
@@ -54,7 +55,7 @@ const ChartCard = () => {
   const currentChartData = useMemo((): ChartJsDataType => ({
 
     labels: marketChartData?.date.map((timestamp: number) => new Date(timestamp).toLocaleDateString()) || [],
-    datasets: [getChartDataset(marketChartData?.price || [], maxValueIndex)]
+    datasets: [getChartDataset(marketChartData?.price || [], maxValueIndex, isDark)]
   }), [marketChartData, marketChartInterval, maxValueIndex]);
 
 
@@ -107,7 +108,7 @@ const ChartCard = () => {
 
   const TopLogoArea = useMemo(() => (
     <div className="chart-card__top__fist__logo">
-      <KIcon icon="bitcoin" color="#fff" size={30} />
+      <KIcon icon="bitcoin" color={isDark ? '#fff' : '#000'} size={30} />
       <p className="chart-card__top__wrapper__text__area">
         <span className="chart-card__top__wrapper__text__area--top">Bitcoin</span>
         <span className="chart-card__top__wrapper__text__area--bottom">BTC</span>

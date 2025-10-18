@@ -77,24 +77,24 @@ const BlocksVisualizer = () => {
       return (
         <div className="block__square__area" key={block.height}>
           <div className="block__square__area__height">
-            <KIcon icon="stack" color="#fff" size={14} />
+            <KIcon icon="stack" color="currentColor" size={14} />
             {comma(block.height)}
           </div>
           <div className="block__square__area__size">
-            <KIcon icon="data" color="#fff" size={14} />
+            <KIcon icon="data" color="currentColor" size={14} />
             {bytesToMB(block.size)}MB
           </div>
           <div className="block__square__area__pool-name">
-            <KIcon icon="miner" color="#fff" size={14} />
+            <KIcon icon="miner" color="currentColor" size={14} />
             {block.poolName}</div>
           <div className="block__square__area__date">
-            <KIcon icon="confirm" color="#fff" size={14} />
+            <KIcon icon="confirm" color="currentColor" size={14} />
             {diffNowMin <= 0 && "조금 전"}
             {diffNowMin !== 0 && diffNowMin < 60 && `${diffNowMin}분 전`}
             {diffNowMin !== 0 && diffNowMin >= 60 && `${convertMinutes(diffNowMin)} 전`}
           </div>
           <a className="block__square__area__link" href={BLOCK_SEARCH_URL + block.id} target="_blank" rel="noreferrer">
-            <KIcon icon="open" color="#fff" size={18} />
+            <KIcon icon="open" color="currentColor" size={18} />
           </a>
         </div>
       );

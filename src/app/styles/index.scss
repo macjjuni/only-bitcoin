@@ -5,6 +5,7 @@
 @use "@/app/styles/components/toastify";
 @use "@/app/styles/components/k-modal";
 @use "@/app/styles/components/k-accordion";
+@use "@/app/styles/components/k-select";
 
 
 html, body, div, span, applet, object, iframe,
@@ -97,7 +98,7 @@ html, body {
 body {
   margin: 0;
   line-height: 1;
-  font-family: $default-font-family;
+  font-family: $default-font-family !important;
   color: $default-font-color;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -113,10 +114,10 @@ body {
     &::after {
       content: '';
       position: absolute;
-      background: #000;
+      background: $default-background-color;
       z-index: -1;
       inset: 0;
-      opacity: 0.4;
+      opacity: 0.8;
     }
   }
 }

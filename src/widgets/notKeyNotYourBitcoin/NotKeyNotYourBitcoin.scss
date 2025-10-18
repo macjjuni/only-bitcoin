@@ -8,10 +8,17 @@
   flex: 1 1 auto;
   font-size: $font-small-size;
   font-weight: bold;
-  color: #cccccc;
+  color: #000;
   text-shadow: 0 0 1px #f7931a, 0 0 1px #f7931a, 0 0 1px #ffae42;
   transition: opacity 0.48s ease;
 
   &.fade-in { opacity: 1; }
   &.fade-out { opacity: 0; }
+}
+
+
+.dark {
+  .not-your-keys-not-your-bitcoin__area {
+    color: #cccccc;
+  }
 }

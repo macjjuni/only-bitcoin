@@ -8,8 +8,6 @@ import { HorizontalCard } from "@/widgets";
 import "./BlockHalvingCard.scss";
 
 
-const barBallHalfWidth = "14px" as const;
-
 const BlockHalvingCard = () => {
 
   // region [Hooks]
@@ -29,7 +27,7 @@ const BlockHalvingCard = () => {
   // region [Privates]
 
   const initializeProgressBallLeftSize = useCallback(() => {
-    setBallLeftSize(`calc(${Math.ceil(halvingPercent)}% - ${barBallHalfWidth})`);
+    setBallLeftSize(`calc(${Math.ceil(halvingPercent)}%)`);
   }, [halvingPercent]);
 
   // endregion
@@ -37,7 +35,7 @@ const BlockHalvingCard = () => {
 
   // region [Styles]
 
-  const progressStyle: CSSProperties = useMemo(() => ({ left: ballLeftSize }), [ballLeftSize]);
+  const progressStyle: CSSProperties = useMemo(() => ({ width: ballLeftSize }), [ballLeftSize]);
 
   // endregion
 
@@ -54,7 +52,7 @@ const BlockHalvingCard = () => {
   return (
     <HorizontalCard className="block-card" rows={1}>
 
-      <h2 className="block-card__title">NEXT HALVING</h2>
+      <h2 className="block-card__title">Next Halving</h2>
 
       <div className="block-card__guage__area">
         <div className="block-card__guage__area__bar__area">
@@ -72,10 +70,7 @@ const BlockHalvingCard = () => {
         </div>
 
         <div className="block-card__guage__area__remaining">
-          {/* <BlockRemainingIcon size={28} color="#fff" /> */}
-          <div className="block-card__guage__area__remaining__lottie">
-            {View}
-          </div>
+          <div className="block-card__guage__area__remaining__lottie">{View}</div>
           <span className="block-card__remaining__text">
             {comma(recentBlockData.height)} | {comma(nextHalvingData.blockHeight - recentBlockData.height)} remaining
           </span>
