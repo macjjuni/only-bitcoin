@@ -1,7 +1,6 @@
 @use "@/app/styles/variable" as *;
 @use "@/app/styles/mixin" as *;
 
-
 .tag-list {
     position: relative;
     display: flex;
@@ -26,7 +25,7 @@
             align-items: center;
 
             padding: $spacing-6 $spacing-10;
-            border: 1px solid #fff;
+            border: 1px solid $default-font-color;
             border-radius: 24px;
             white-space: nowrap;
             font-size: 18px;

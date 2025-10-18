@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { KDropdown, KIcon } from "kku-ui";
-import { CountText, NumberField } from "@/widgets";
+import { CountText, NumberField } from "../../../../components";
 import useStore from "@/shared/stores/store";
 import { comma } from "@/shared/utils/string";
 import { useCopyOnClick } from "@/shared/hooks";

@@ -1,6 +1,6 @@
 import { memo, useMemo } from "react";
 import useStore from "@/shared/stores/store";
-import { CountText, UpdownIcon } from "@/widgets";
+import { CountText, UpdownIcon } from "../../../../components";
 import "./PricePannel.scss";
 
 

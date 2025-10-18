@@ -9,7 +9,7 @@
   font-size: $font-small-size;
   font-weight: bold;
   color: #000;
-  text-shadow: 0 0 1px #f7931a, 0 0 1px #f7931a, 0 0 1px #ffae42;
+  text-shadow: none;
   transition: opacity 0.48s ease;
 
   &.fade-in { opacity: 1; }
@@ -20,5 +20,6 @@
 .dark {
   .not-your-keys-not-your-bitcoin__area {
     color: #cccccc;
+    text-shadow: 0 0 1px #f7931a, 0 0 1px #f7931a, 0 0 1px #ffae42;
   }
 }

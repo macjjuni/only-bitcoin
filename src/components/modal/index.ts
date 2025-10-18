@@ -1,0 +1,1 @@
+export { default as FearAndGreedModal } from "@/components/modal/fearAndGreedModal/FearAndGreedModal";

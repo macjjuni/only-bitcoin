@@ -4,7 +4,7 @@ import { isIOSPWA, isIOSSafari } from "@/shared/utils/device";
 import { useInitializePWA } from "../../shared/hooks/initializer";
 import { getCookie } from "@/shared/utils/cookie";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
-import IosShareIcon from "@/widgets/icon/IosShareIcon";
+import { IosShareIcon } from "@/components/icon";
 import "./PwaInstallAlarmIOS.scss";
 
 

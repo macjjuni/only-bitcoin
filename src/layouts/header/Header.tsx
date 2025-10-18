@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { useTitle } from "@/shared/hooks";
-import { NetworkSwitch } from "@/widgets";
+import { NetworkSwitch, SettingButton } from "@/components";
 import "./Header.scss";
 
 const Header = () => {
@@ -12,7 +12,10 @@ const Header = () => {
           <span key={text} className="header__area__text">{text}</span>)
         )}
       </h2>
-      <NetworkSwitch />
+      <div className="header__area__right">
+        <NetworkSwitch />
+        <SettingButton />
+      </div>
     </header>
   );
 };

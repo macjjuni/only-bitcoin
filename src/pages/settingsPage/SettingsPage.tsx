@@ -1,9 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useOutletContext } from "react-router";
-import { useNavigate } from "react-router-dom";
 import { KButton, KIcon, KSelect, KSwitch } from "kku-ui";
 import { btcColor } from "@/shared/constants/color";
-import AnimationIcon from "@/widgets/icon/AnimationIcon";
 import router from "@/app/router";
 import useStore from "@/shared/stores/store";
 import { PageLayout } from "@/layouts";
@@ -12,16 +10,15 @@ import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { currencyOptions, krwMarketOptions } from "@/shared/constants/setting";
 import { isSafari } from "@/shared/utils/device";
 import { FormRow, InstallSettingForm } from "@/pages/settingsPage/components";
-import MemeIcon from "@/widgets/icon/MemeIcon";
-import "./SettingsPage.scss";
+import { AnimationIcon } from "@/components/icon";
 import { CurrencyTypes } from "@/shared/stores/store.interface";
+import "./SettingsPage.scss";
 
 
 export default function SettingsPage() {
 
   // region [Hooks]
   usePageAnimation(useOutletContext<UsePageAnimation>());
-  const navigate = useNavigate();
   const initialPath = useStore(state => state.setting.initialPath);
   const setInitialPath = useStore(state => state.setInitialPath);
 
@@ -53,10 +50,6 @@ export default function SettingsPage() {
     anchorTag.target = "_blank";
     anchorTag.click();
     anchorTag.remove();
-  }, []);
-
-  const onRouteToMeme = useCallback(() => {
-    navigate("/meme");
   }, []);
   // endregion
 
@@ -95,26 +88,19 @@ export default function SettingsPage() {
           </div>
         </FormRow>
 
-        <FormRow icon={<KIcon icon="won" size={24} />} label="해외거래소(Dev)">
-          <div className="settings-page__area__currency__button-group">
-            <KSelect value={krwMarket} items={krwMarketOptions} size="medium" width={142}
-                     onChange={(value) => {
-                       setKrwMarket(value as CurrencyTypes);
-                     }} />
-          </div>
-        </FormRow>
+        {/* <FormRow icon={<KIcon icon="won" size={24} />} label="해외거래소(Dev)"> */}
+        {/*   <div className="settings-page__area__currency__button-group"> */}
+        {/*     <KSelect value={krwMarket} items={krwMarketOptions} size="medium" width={142} */}
+        {/*              onChange={(value) => { */}
+        {/*                setKrwMarket(value as CurrencyTypes); */}
+        {/*              }} /> */}
+        {/*   </div> */}
+        {/* </FormRow> */}
 
         <FormRow icon={<KIcon icon="tether" size={24} />} label="USDT 기준 환율 적용">
           <KSwitch value={isUsdtStandard} onChange={(e) => {
             setUsdtStandard(e);
           }} />
-        </FormRow>
-
-
-        {!isSafari() && deferredPrompt?.userChoice && <InstallSettingForm />}
-
-        <FormRow icon={<MemeIcon size={28} />} label="밈 저장소">
-          <KButton variant="primary" label="이동" onClick={onRouteToMeme} />
         </FormRow>
       </div>
 
@@ -137,6 +123,11 @@ export default function SettingsPage() {
         </FormRow>
       </div>
 
+      {!isSafari() && deferredPrompt?.userChoice &&
+        <div className="settings-page__area__form__area">
+          <InstallSettingForm />
+        </div>
+      }
 
       <div className="settings-page__area__form__area">
         <FormRow icon={<KIcon icon="x_logo" size={24} />} label="피드백">

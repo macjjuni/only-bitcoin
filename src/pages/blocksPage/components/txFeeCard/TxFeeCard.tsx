@@ -1,5 +1,5 @@
 import { memo, useMemo } from "react";
-import { CountText, HorizontalCard } from "@/widgets";
+import { CountText, HorizontalCard } from "../../../../components";
 import useStore from "@/shared/stores/store";
 import "./TxFeeCard.scss";
 

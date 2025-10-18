@@ -7,18 +7,15 @@ import "./NetworkSwitch.scss";
 const NetworkSwitch = () => {
 
   // region [Hooks]
-
   const [isEnabledNetwork, setIsEnabledNetwork] = useState<boolean>(true);
   const isKrwConnected = useStore(state => state.bitcoinPrice.isKrwConnected);
   const isUsdConnected = useStore(state => state.bitcoinPrice.isUsdConnected);
   const reconnectUpbit = useStore(state => state.reconnectUpbit);
   const reconnectBinance = useStore(state => state.reconnectBinance);
-
   // endregion
 
 
   // region [Privates]
-
   const setInitState = useCallback(({ type }: Event) => {
 
     setIsEnabledNetwork(type === "online");
@@ -49,12 +46,10 @@ const NetworkSwitch = () => {
   const showToastNetworkError = useCallback(() => {
     toast.error('네트워크 연결을 확인해주세요.');
   }, []);
-
   // endregion
 
 
   // region [Life Cycles]
-
   useEffect(() => {
     if (!isEnabledNetwork) {
       showToastNetworkError();
@@ -62,12 +57,9 @@ const NetworkSwitch = () => {
   }, [isEnabledNetwork]);
 
   useEffect(() => {
-
     initializeEvent();
-
     return () => { clearEvent(); }
   }, []);
-
   // endregion
 
 

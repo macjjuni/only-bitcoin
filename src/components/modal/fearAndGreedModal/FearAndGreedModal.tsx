@@ -1,13 +1,12 @@
 import React, { memo } from "react";
 import { KModal } from "kku-ui";
-import { LazyImage } from "@/widgets";
+import LazyImage from "@/components/lazyImage/LazyImage";
 import "./FearAndGreedModal.scss";
 
 interface ModalTypes {
   isOpen: boolean;
   onClose: () => void;
 }
-
 
 const FearAndGreedModal = ({ isOpen, onClose }: ModalTypes) => {
 

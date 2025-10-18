@@ -1,5 +1,5 @@
 import React, { memo, ReactNode, useMemo } from "react";
-import { NotKeyNotYourBitcoin } from "@/widgets";
+import { NotKeyNotYourBitcoin } from "../../components";
 import "./PageLayout.scss";
 
 

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useStore from "@/shared/stores/store";
-import CountText from "@/widgets/countText/CountText";
-import { HorizontalCard } from "@/widgets";
+import CountText from "@/components/countText/CountText";
+import { HorizontalCard } from "../../../../components";
 import { calcPercentage, getNextHalvingData } from "@/shared/utils/common";
 import { calcDate } from "@/shared/lib/date";
 import "./HalvingChartCard.scss";
@@ -41,7 +41,7 @@ const HalvingChartCard = () => {
   const CircleChart = useMemo(() => (
     <svg className="halving-chart-card__area__content__chart" width="60%" viewBox="0 0 120 120">
       {/* 배경 원 */}
-      <circle cx="60" cy="60" r="50" stroke={isDark ? '#fff' : '#ededed'} strokeWidth="16" fill="none" />
+      <circle cx="60" cy="60" r="50" stroke="#ededed" strokeWidth="16" fill="none" />
       {/* 진행 원 */}
       <circle cx="60" cy="60" r="50" stroke="#f7931a" strokeWidth="16.4" fill="none"
               strokeDasharray={circumference} strokeDashoffset={offset}

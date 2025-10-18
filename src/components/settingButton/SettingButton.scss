@@ -1,0 +1,12 @@
+@use "@/app/styles/variable" as *;
+
+.setting-button {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: auto;
+  padding: 0;
+  margin: 0;
+
+  svg { color: $gray-400; }
+}

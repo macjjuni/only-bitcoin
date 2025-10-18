@@ -28,7 +28,7 @@
       white-space: nowrap;
       overflow: hidden;
 
-      @include font-sub-title;
+      @include font-title;
       font-family: $number-font-family;
 
       .price-pannel__price__area__usd__percent, .price-pannel__price__area__krw__percent {

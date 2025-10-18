@@ -2,8 +2,8 @@ import { memo, useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { calcPremiumPercent } from "@/shared/utils/common";
 import useStore from "@/shared/stores/store";
-import { FearAndGreedModal } from "@/widgets/modal";
-import { CountText, HorizontalCard } from "@/widgets";
+import { FearAndGreedModal } from "@/components/modal";
+import { CountText, HorizontalCard } from "../../../../components";
 import { useBitcoinDominanceQuery, useFearGreedIndex } from "@/shared/api";
 import "./MacroCard.scss";
 

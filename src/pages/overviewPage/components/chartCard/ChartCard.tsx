@@ -9,7 +9,7 @@ import {
 import { btcColor } from "@/shared/constants/color";
 import { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import useStore from "@/shared/stores/store";
-import { CountText, HorizontalCard, UpdownIcon } from "@/widgets";
+import { CountText, HorizontalCard, UpdownIcon } from "../../../../components";
 import { useMarketChartData } from "@/shared/api";
 import "./ChartCard.scss";
 

@@ -6,7 +6,7 @@ $number-font-family: 'Roboto Mono', ui-sans-serif, system-ui, -apple-system, 'Se
 'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji' !default;
 // endregion
 
-
+// region [Colors]
 $white-color: #fff;
 $white-cover-color: #F2F1F6;
 
@@ -22,6 +22,7 @@ $gray-600: #525252;
 $gray-700: #404040;
 $gray-800: #262626;
 $gray-900: #171717;
+// endregion
 
 
 // region [Override]
@@ -32,7 +33,7 @@ $kku-dark-mode-signature: 'dark';
     --default-number-font-family: #{$number-font-family};
 
     --default-font-color: #{$black-color};
-    --default-label-font-color: #{$gray-500};
+    --default-label-font-color: #{$gray-600};
     --default-background-color: #{$white-color};
     --default--background-cover-color: #{$white-cover-color};
     --default-border-color: #{$gray-600};
@@ -119,7 +120,7 @@ $desktop-layout-content-height: auto !default;
 $desktop-layout-footer-height: 56px !default;
 $desktop-layout-footer-height: 56px !default;
 $mobile-layout-footer-height: 40px !default;
-$mobile-bottom-navigation-height: 80px !default;
+$mobile-bottom-navigation-height: 82px !default;
 
 $max-width-size: 524px !default;
 $number-field-unit-width: 68px !default;

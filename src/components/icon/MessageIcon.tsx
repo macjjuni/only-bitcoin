@@ -1,10 +1,5 @@
-import { CSSProperties, memo } from "react";
-
-interface IconTypes {
-  size?: number | string;
-  color?: string;
-  style?: CSSProperties;
-}
+import { memo } from "react";
+import { IconTypes } from "@/components/icon/icon";
 
 const MessageIcon = ({ size = "100%", color = "currentColor", style }: IconTypes) => {
   return (

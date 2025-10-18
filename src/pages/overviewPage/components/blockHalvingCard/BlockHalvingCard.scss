@@ -74,7 +74,7 @@
       display: flex;
       justify-content: flex-start;
       align-items: center;
-      gap: $spacing-12;
+      gap: $spacing-16;
       width: 100%;
 
       svg { margin-bottom: $spacing-2; }
@@ -84,7 +84,7 @@
 
       .block-card__guage__area__remaining__lottie {
         position: relative;
-        width: 36px; height: 36px;
+        width: 40px; height: 40px;
 
         & > div {
           position: absolute;

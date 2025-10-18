@@ -53,6 +53,7 @@
 
           &.chart-card__button--active {
             color: $default-background-color;
+            border-color: $default-font-color;
             background-color: $default-font-color;
           }
         }

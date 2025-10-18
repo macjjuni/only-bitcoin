@@ -68,7 +68,7 @@ export default function useUsdExchangeRate() {
       }
     }
     onError();
-  }, [query]);
+  }, [query.data]);
 
   useEffect(() => {
     if (query.error) {
