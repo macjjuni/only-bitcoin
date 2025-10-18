@@ -16,6 +16,7 @@ const citadelCafe = 'https://cafe.naver.com/btcforever' as const;
 const btcMapUrl = 'http://btcmap.kr/' as const;
 const fiatBitcoinUrl = 'https://finished-snake-h7zp8jm.gamma.site' as const;
 
+
 export default function PremiumPage() {
 
   // region [Hooks]

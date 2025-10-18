@@ -9,9 +9,9 @@ import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { currencyOptions, krwMarketOptions } from "@/shared/constants/setting";
 import { isSafari } from "@/shared/utils/device";
-import { FormRow, InstallSettingForm } from "@/pages/settingsPage/components";
 import { AnimationIcon } from "@/components/icon";
 import { CurrencyTypes } from "@/shared/stores/store.interface";
+import { InstallSettingForm, FormRow } from "./components";
 import "./SettingsPage.scss";
 
 
