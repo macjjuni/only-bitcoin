@@ -11,6 +11,8 @@ export default function useTitle() {
   const initializeTheme = useCallback(() => {
 
     const bodyElement = window.document.body;
+    const meta = document.querySelector('meta[name="theme-color"]');
+    const color = theme === "light" ? "#ffffff" : "#000000"; // 원하면 색상 변경 가능
 
     if (theme === "light") {
       bodyElement.classList.add("light");
@@ -18,6 +20,15 @@ export default function useTitle() {
     } else {
       bodyElement.classList.add("dark");
       bodyElement.classList.remove("light");
+    }
+
+    if (meta) {
+      meta.setAttribute("content", color);
+    } else {
+      const newMeta = document.createElement("meta");
+      newMeta.name = "theme-color";
+      newMeta.content = color;
+      document.head.appendChild(newMeta);
     }
   }, [theme]);
   // endregion
