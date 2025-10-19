@@ -27,14 +27,13 @@ const marketChartIntervalOptions: MarketChartIntervalTypeList[] = [
 const getChartDataset = (data: number[], index: number, isDark: boolean) => ({
   label: "", data, borderColor: isDark ? "#fff" : '#000', backgroundColor: "transparent",
   borderWidth: 2, pointBackgroundColor: btcColor, pointHoverRadius: 4,
-  pointRadius: data.map((_, idx) => (idx === index ? 3 : 0)) // 최댓값 위치에 점 표시
+  pointRadius: data.map((_, idx) => (idx === index ? 4 : 0)) // 최댓값 위치에 점 표시
 });
 
 
 const ChartCard = () => {
 
   // region [Hooks]
-
   const chartRef = useRef<ChartJS<"line", number[], string>>(null);
   const usdPrice = useStore(state => state.bitcoinPrice.usd);
   const marketChartInterval = useStore(state => state.marketChartInterval);
@@ -58,21 +57,21 @@ const ChartCard = () => {
     datasets: [getChartDataset(marketChartData?.price || [], maxValueIndex, isDark)]
   }), [marketChartData, marketChartInterval, maxValueIndex]);
 
+  const maxValue = useMemo(() => (
+    currentChartData.datasets[0].data[maxValueIndex]
+  ), [currentChartData, maxValueIndex])
 
   const percentage = useMemo(() => {
 
     const factor = 10 ** 2;
-    const maxValue = currentChartData.datasets[0].data[maxValueIndex];
     const percentValue = (usdPrice - maxValue) / Math.abs(usdPrice) * 100;
 
     return Math.floor(percentValue * factor) / factor;
-  }, [usdPrice, currentChartData, maxValueIndex]);
-
+  }, [usdPrice, maxValue]);
   // endregion
 
 
   // region [Privates]
-
   const initializeTooltip = useCallback(() => {
 
     // 데이터가 있을 때 초기화
@@ -84,12 +83,10 @@ const ChartCard = () => {
       }
     }, 300);
   }, [maxValueIndex, currentChartData]);
-
   // endregion
 
 
   // region [Styles]
-
   const chartCardButtonClass = useCallback((value: MarketChartIntervalType) => {
 
     const clazz = ["chart-card__button"];
@@ -100,12 +97,10 @@ const ChartCard = () => {
 
     return clazz.join(" ");
   }, [marketChartInterval]);
-
   // endregion
 
 
   // region [Templates]
-
   const TopLogoArea = useMemo(() => (
     <div className="chart-card__top__fist__logo">
       <KIcon icon="bitcoin" color={isDark ? '#fff' : '#000'} size={30} />
@@ -129,6 +124,7 @@ const ChartCard = () => {
   ), [setMarketChartInterval, chartCardButtonClass]);
 
 
+  console.log(maxValue);
   const ChartArea = useMemo(() => (
     <>
       <Line ref={chartRef} data={currentChartData} height="120%"
@@ -143,7 +139,7 @@ const ChartCard = () => {
                 }
               },
               elements: { point: { radius: 0 }, line: { tension: 0.3, borderWidth: 2 } },
-              scales: { x: { display: false }, y: { display: false } },
+              scales: { x: { display: false }, y: { display: false, suggestedMax: maxValue * 1.005 } },
               animation: {
                 duration: 800,
                 easing: "easeInOutQuart",
@@ -158,8 +154,7 @@ const ChartCard = () => {
         ))}
       </div>
     </>
-  ), [currentChartData, initializeTooltip]);
-
+  ), [maxValue, currentChartData, initializeTooltip]);
   // endregion
 
 
