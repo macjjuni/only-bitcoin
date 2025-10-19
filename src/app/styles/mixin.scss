@@ -48,6 +48,10 @@
     color: $default-font-color;
     text-decoration: none;
 }
+@mixin user-select {
+    user-select: none;
+    -webkit-user-select: none;
+}
 // endregion
 
 

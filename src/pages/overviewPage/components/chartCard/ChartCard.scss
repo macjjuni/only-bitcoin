@@ -9,6 +9,7 @@
   padding: $spacing-16 $spacing-16 $spacing-8 $spacing-16;
   user-select: none;
   overflow: hidden;
+  @include user-select;
 
   &:before {
     content: '';

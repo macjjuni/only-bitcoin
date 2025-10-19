@@ -1,4 +1,5 @@
 @use "@/app/styles/variable" as *;
+@use "@/app/styles/mixin" as *;
 
 .not-your-keys-not-your-bitcoin__area {
   display: flex;
@@ -11,6 +12,7 @@
   color: #000;
   text-shadow: none;
   transition: opacity 0.48s ease;
+  @include user-select;
 
   &.fade-in { opacity: 1; }
   &.fade-out { opacity: 0; }

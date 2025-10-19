@@ -7,7 +7,7 @@
     display: flex;
     justify-content: flex-end;
     align-items: center;
-    user-select: none;
+    @include user-select;
 
     .number-field__input {
         width: 100%;
@@ -24,6 +24,7 @@
         white-space: nowrap;
         text-overflow: ellipsis;
         user-select: none;
+        -webkit-user-select: none;
     }
 
     .number-field__left-action {

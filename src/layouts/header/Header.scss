@@ -18,6 +18,8 @@
         color: $default-font-color;
         font-weight: bold;
         @include font-heading-sm;
+        user-select: none;
+        -webkit-user-select: none;
     }
 
     .header__area__right {
