@@ -53,6 +53,9 @@ export default function useUsdExchangeRate() {
   }, []);
 
   const onError = useCallback(() => {
+
+    if (!query?.error) { return; }
+
     console.error(query.error);
     setExRate({ value: 0, date: "Update error." });
     toast.error("환율 데이터를 가져올 수 없습니다.");
