@@ -7,12 +7,11 @@
     flex-direction: column;
     max-width: $max-width-size;
     width: 100%;
-    min-height: 100dvh;
+    height: 100dvh;
     padding: 0;
     margin: 0 auto;
-    border-left: 1px solid $border-color;
-    border-right: 1px solid $border-color;
-    background-color: $body-background-color;
+    border-left: 1px solid $default-border-color;
+    border-right: 1px solid $default-border-color;
     overflow-x: hidden;
 }
 

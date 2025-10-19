@@ -1,4 +1,5 @@
 import {
+  useTheme,
   useInitializePWA,
   useInitializeDisabledZoom,
   useInitializeBackground,
@@ -15,6 +16,7 @@ import {
 export default function useInitializer() {
 
   // region [Hooks]
+  useTheme();
   useUpbitSocket();
   useBithumbSocket();
   useBinanceSocket();

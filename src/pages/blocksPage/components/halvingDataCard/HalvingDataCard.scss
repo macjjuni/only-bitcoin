@@ -7,7 +7,7 @@
   &[data-open=true] {
 
     .k-accordion__summary {
-      border-bottom: 1px solid $border-color;
+      border-bottom: 1px solid $default-border-color;
     }
   }
 
@@ -47,7 +47,7 @@
         width: auto;
         white-space: nowrap;
         padding: $spacing-2 $spacing-8;
-        border-bottom: 1px solid $border-color;
+        border-bottom: 1px solid $default-border-color;
         @include font-body;
         font-family: $number-font-family;
 

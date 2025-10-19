@@ -9,6 +9,7 @@
   padding: $spacing-16 $spacing-16 $spacing-8 $spacing-16;
   user-select: none;
   overflow: hidden;
+  @include user-select;
 
   &:before {
     content: '';
@@ -17,7 +18,7 @@
     left: -2%;
     width: 104%;
     height: 104%;
-    background: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/backdrop-bg.webp') no-repeat center;
+    //background: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/backdrop-bg.webp') no-repeat center;
     background-size: cover;
     z-index: 4;
     pointer-events: none; /* 클릭 방해 방지 */
@@ -28,7 +29,7 @@
     flex-direction: column;
     justify-content: flex-start;
     gap: $spacing-8;
-    color: $font-color;
+    color: $default-font-color;
     z-index: 5;
 
     .chart-card__top__fist {
@@ -48,12 +49,13 @@
         .chart-card__button {
           height: 28px;
           padding: 0 $spacing-12;
-          border-color: #fff;
-          background-color: #000;
+          color: $default-font-color;
+          background-color: $default-background-color;
 
           &.chart-card__button--active {
-            color: #000;
-            background-color: #fff;
+            color: $default-background-color;
+            border-color: $default-font-color;
+            background-color: $default-font-color;
           }
         }
 

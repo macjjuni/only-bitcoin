@@ -1,4 +1,5 @@
 @use '@/app/styles/variable' as *;
+@use '@/app/styles/mixin' as *;
 
 .convert-pannel {
     position: relative;
@@ -13,7 +14,11 @@
 
         .convert-pannel__item__input {
             &.clickable { cursor: pointer; }
-            .number-field__input { font-weight: bold; }
+            .number-field__input {
+                font-weight: bold;
+                color: $default-font-color;
+                @include remove-tap-highlight;
+            }
 
             .select-unit__list {
                 padding: $spacing-2;
@@ -38,7 +43,7 @@
             text-align: right;
             font-size: $font-body-size;
             font-family: $number-font-family;
-            color: $gray-font-color;
+            color: $default-label-font-color;
             padding: $spacing-2 $spacing-20 0 0;
 
             .krw { letter-spacing: -1px; }
@@ -103,7 +108,7 @@
             font-family: $number-font-family;
             font-size: $font-body-size;
             font-weight: bold;
-            color: $font-color;
+            color: $default-font-color;
 
             text-decoration: underline;
             text-underline-offset: 2px;

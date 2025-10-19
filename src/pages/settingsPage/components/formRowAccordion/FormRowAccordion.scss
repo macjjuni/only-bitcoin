@@ -14,9 +14,9 @@
             position: absolute;
             bottom: 0;
             right: 0;
-            height: 0.5px;
+            height: 1px;
             width: 88%;
-            background-color: $border-color;
+            background-color: $gray-300;
         }
 
         &:first-child {
@@ -33,7 +33,7 @@
             min-height: 54px;
             padding: 0 $spacing-16;
             border-bottom: none;
-            background-color: #171717;
+            background-color: $default-background-cover-color;
 
             .form-row__accordion__label__area {
                 display: flex;
@@ -44,6 +44,16 @@
                 .form-row__accordion__label__area__text {
                     font-size: $font-body-size;
                 }
+            }
+        }
+    }
+}
+
+.dark {
+    #only-bitcoin {
+        .k-accordion.form-row__accordion {
+            &:after {
+                background-color: $gray-600;
             }
         }
     }

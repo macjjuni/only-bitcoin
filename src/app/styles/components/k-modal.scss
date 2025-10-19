@@ -4,13 +4,4 @@
     z-index: 1000;
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
-
-    .k-modal-wrapper__overlay.k-modal-wrapper__overlay--active {
-        opacity: 1;
-        background-color: rgba(255, 255, 255, 0.24);
-    }
-
-    .k-modal__container {
-        background-color: $dark-background-color;
-    }
 }

@@ -1,7 +1,7 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import useStore from "@/shared/stores/store";
-import CountText from "@/widgets/countText/CountText";
-import { HorizontalCard } from "@/widgets";
+import CountText from "@/components/countText/CountText";
+import { HorizontalCard } from "../../../../components";
 import { calcPercentage, getNextHalvingData } from "@/shared/utils/common";
 import { calcDate } from "@/shared/lib/date";
 import "./HalvingChartCard.scss";
@@ -21,6 +21,7 @@ const HalvingChartCard = () => {
   const halvingPercent = useMemo(() => calcPercentage(nextHalvingData.blockHeight, currentBlockData.height), [nextHalvingData, currentBlockData]);
   const expectNextHalvingDate = useMemo(() => calcDate(Date.now(), restBlockCount * 10, "minute", "YYYY.MM.DD"), [restBlockCount]);
   const [offset, setOffset] = useState<number>(312);
+  const isDark = useStore(state => state.theme) === "dark";
 
   // endregion
 
@@ -40,17 +41,18 @@ const HalvingChartCard = () => {
   const CircleChart = useMemo(() => (
     <svg className="halving-chart-card__area__content__chart" width="60%" viewBox="0 0 120 120">
       {/* 배경 원 */}
-      <circle cx="60" cy="60" r="50" stroke="#4f4f4f" strokeWidth="16" fill="none" />
+      <circle cx="60" cy="60" r="50" stroke="#ededed" strokeWidth="16" fill="none" />
       {/* 진행 원 */}
-      <circle cx="60" cy="60" r="50" stroke="#fff" strokeWidth="16" fill="none"
+      <circle cx="60" cy="60" r="50" stroke="#f7931a" strokeWidth="16.4" fill="none"
               strokeDasharray={circumference} strokeDashoffset={offset}
               transform="rotate(-90 60 60)" />
       {/* 퍼센트 텍스트 */}
-      <text x="50%" y="50%" textAnchor="middle" dy=".3em" fontSize="18" fontWeight="bold" fill="#fff">
+      <text x="50%" y="50%" textAnchor="middle" dy=".3em" fontSize="18" fontWeight="bold"
+            fill={isDark ? "#fff" : "#000"}>
         {halvingPercent}%
       </text>
     </svg>
-  ), [halvingPercent, offset]);
+  ), [halvingPercent, offset, isDark]);
 
   const HalvingDataList = useMemo(() => ([
     { label: "현재 블록 높이", value: currentBlockHeight, isCount: true },
@@ -70,8 +72,6 @@ const HalvingChartCard = () => {
   }, [halvingPercent]);
 
   // endregion
-
-
 
 
   return (

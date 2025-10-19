@@ -1,0 +1,32 @@
+@use "@/app/styles/variable" as *;
+@use "@/app/styles/mixin" as *;
+
+.connection-dot {
+  display: inline-flex;
+  justify-content: center;
+  align-items: center;
+  width: 20px;
+  height: 20px;
+
+  .connection-dot__dot {
+    width: 7px;
+    height: 7px;
+    border-radius: 50%;
+    animation: fade-in-out 2s ease-in-out infinite;
+    @include remove-tap-highlight;
+
+    &.stable {
+      background: $success-color;
+    }
+    &.unstable {
+      background: $error-color;
+    }
+  }
+}
+
+@keyframes fade-in-out {
+  0% { opacity: 0; }
+  25% { opacity: 1; }
+  75% { opacity: 1; }
+  100% { opacity: 0; }
+}

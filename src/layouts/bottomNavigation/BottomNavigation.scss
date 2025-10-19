@@ -8,7 +8,7 @@
     width: 100%;
     max-width: $max-width-size;
     height: $mobile-bottom-navigation-height;
-    border: 1px solid $border-color;
+    border: 1px solid $default-border-color;
     border-bottom: none;
     padding-bottom: 8px;
     border-top-left-radius: 16px;
@@ -32,36 +32,13 @@
                 display: flex;
                 justify-content: center;
                 align-items: center;
-                padding: $spacing-16;
+                padding: $spacing-12;
                 border-radius: $default-border-radius;
                 font-size: 0;
                 z-index: 1;
 
-
-
-                & svg { color: #444444; }
+                & svg { color: $black-color; }
                 &.active svg { color: $bitcoin-color; }
-
-                & + .bottom-navigation__list__item__focus-bg {
-                    position: absolute;
-                    top: 50% ;left: 50%;
-                    width: 36px;
-                    height: 36px;
-                    transform: translate(-50%, -50%) scale(0.88);
-                    background-color: #e3e3e3;
-                    border-radius: 8px;
-                    transition: 0.16s;
-                    font-size: 0;
-                    opacity: 0;
-                    z-index: -1;
-                }
-
-                &.active + .bottom-navigation__list__item__focus-bg {
-                    width: 48px;
-                    height: 48px;
-                    opacity: 1;
-                    transform: translate(-50%, -50%) scale(1);
-                }
             }
         }
     }
@@ -69,4 +46,17 @@
 
 @media screen and (max-width: $max-width-size) {
     .bottom-navigation { left: 0; }
+}
+
+.dark {
+    .bottom-navigation {
+        .bottom-navigation__list {
+            .bottom-navigation__list__item {
+                .bottom-navigation__list__item__link {
+                    & svg { color: $white-color; }
+                    &.active svg { color: $bitcoin-color; }
+                }
+            }
+        }
+    }
 }

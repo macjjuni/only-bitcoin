@@ -15,9 +15,17 @@
         justify-content: flex-start;
         align-items: center;
         gap: $spacing-8;
-        color: $font-color;
+        color: $default-font-color;
         font-weight: bold;
-        font-family: $number-font-family;
         @include font-heading-sm;
+        user-select: none;
+        -webkit-user-select: none;
+    }
+
+    .header__area__right {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        gap: $spacing-8;
     }
 }

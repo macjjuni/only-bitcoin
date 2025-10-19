@@ -61,11 +61,11 @@ export default function useUpbitWebSocket() {
   const connect = useCallback(() => {
     const socket = new ReconnectingWebSocket(UPBIT_URL, [], {
       maxReconnectionDelay: 8000,           // 재연결 최대 지연: 10초
-      minReconnectionDelay: 1000,           // 재연결 최소 지연: 1초
-      reconnectionDelayGrowFactor: 1.5,     // 재시도 간 딜레이 증가 비율
+      minReconnectionDelay: 1000,
+      reconnectionDelayGrowFactor: 1,       // 재시도 간 딜레이 증가 비율
       minUptime: 5000,                      // 연결이 최소 유지되어야 하는 시간 (5초)
       connectionTimeout: 3000,              // 연결 시도 타임아웃: 4초
-      maxRetries: 10,                       // 무한 재시도 (실서비스 기준)
+      maxRetries: 999,                       // 무한 재시도 (실서비스 기준)
       maxEnqueuedMessages: 100,             // 연결 안 된 동안 큐에 쌓을 메시지 수 제한
       startClosed: false,                   // 생성 직후 자동 연결
       debug: false                          // 디버깅 로그 출력 여부

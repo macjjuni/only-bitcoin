@@ -1,10 +1,12 @@
 @use "@/app/styles/variable" as *;
+@use "@/app/styles/root" as *;
 @use "@/app/styles/mixin" as *;
 @forward "@/app/styles/fonts";
 
 @use "@/app/styles/components/toastify";
 @use "@/app/styles/components/k-modal";
 @use "@/app/styles/components/k-accordion";
+@use "@/app/styles/components/k-select";
 
 
 html, body, div, span, applet, object, iframe,
@@ -43,7 +45,6 @@ blockquote, q {
 
 blockquote:before, blockquote:after,
 q:before, q:after {
-  content: '';
   content: none;
 }
 
@@ -56,6 +57,10 @@ a {
   width: 100%;
   color: $link-color;
   text-decoration: none;
+  -webkit-tap-highlight-color: transparent;
+  outline: none;
+  user-select: none;
+  @include remove-tap-highlight;
 }
 
 .dark a {
@@ -80,6 +85,7 @@ button {
   padding: 0;
   overflow: visible;
   cursor: pointer;
+  @include remove-tap-highlight;
 }
 
 svg {
@@ -97,7 +103,7 @@ html, body {
 body {
   margin: 0;
   line-height: 1;
-  font-family: $default-font-family;
+  font-family: $default-font-family !important;
   color: $default-font-color;
   -webkit-font-smoothing: antialiased;
   -moz-osx-font-smoothing: grayscale;
@@ -113,10 +119,10 @@ body {
     &::after {
       content: '';
       position: absolute;
-      background: #000;
+      background: $default-background-color;
       z-index: -1;
       inset: 0;
-      opacity: 0.4;
+      opacity: 0.8;
     }
   }
 }

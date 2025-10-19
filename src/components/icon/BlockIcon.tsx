@@ -1,0 +1,19 @@
+import { memo } from "react";
+import { IconTypes } from "@/components/icon/icon";
+
+const BlockIcon = ({ size = "100%", color = "currentColor", style }: IconTypes) => {
+  return (
+    <svg fill={color} width={size} height={size} viewBox="0 0 36 36" style={style}
+         preserveAspectRatio="xMidYMid meet"
+         xmlns="http://www.w3.org/2000/svg" stroke={color}>
+      <g strokeWidth="0" />
+      <g strokeLinecap="round" strokeLinejoin="round" />
+      <g>
+        <path
+          d="M31.42,9.09l-13-6a1,1,0,0,0-.84,0l-13,6A1,1,0,0,0,4,10V27a1,1,0,0,0,.58.91l13,6a1,1,0,0,0,.84,0l13-6A1,1,0,0,0,32,27V10A1,1,0,0,0,31.42,9.09ZM18,5.1,28.61,10,18,14.9,7.39,10ZM6,11.56l11,5.08v14.8L6,26.36ZM19,31.44V16.64l11-5.08v14.8Z" />
+      </g>
+    </svg>
+  );
+};
+
+export default memo(BlockIcon);

@@ -1,5 +1,5 @@
 import { memo, useCallback, useMemo } from "react";
-import { LazyImage } from "@/widgets";
+import { LazyImage } from "../../../../components";
 import { MemeImageResponseData } from "@/shared/types/api/memeImage";
 import "./Gallery.scss";
 

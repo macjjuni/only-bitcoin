@@ -3,9 +3,11 @@
 
 .settings-page__area {
   @include PageLayout;
+  padding-top: $spacing-24;
+  gap: $spacing-24;
 
   .settings-page__area__form__area {
-    margin-top: 24px;
+
 
     .settings-page__area__currency__button-group {
 

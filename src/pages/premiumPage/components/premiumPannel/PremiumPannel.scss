@@ -54,7 +54,7 @@
       .premium-pannel__content__item__title {
         @include font-body;
         font-weight: bold;
-        color: #bfbfbf;
+        color: $default-label-font-color;;
       }
 
       .premium-pannel__content__item__content {
@@ -71,7 +71,7 @@
             margin-left: $spacing-4;
           }
           .slash__text { font-size: 24px;margin: 0 $spacing-8; }
-          .date__text { font-size: $font-small-size; color: $gray-font-color; }
+          .date__text { font-size: $font-small-size; color: $default-label-font-color; }
 
           .premium-pannel__content__item__content__item--left {}
           .premium-pannel__content__item__content__item--right { margin-bottom: 3px; }
