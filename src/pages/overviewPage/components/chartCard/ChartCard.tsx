@@ -135,7 +135,7 @@ const ChartCard = () => {
             className="chart-card__chart__wrapper__body"
             options={{
               plugins: { legend: { display: false }, tooltip: { enabled: true } },
-              elements: { point: { radius: 0 }, line: { tension: 0.4, borderWidth: 2 } },
+              elements: { point: { radius: 0 }, line: { tension: 0.3, borderWidth: 2 } },
               scales: { x: { display: false }, y: { display: false } },
               animation: {
                 duration: 800,
