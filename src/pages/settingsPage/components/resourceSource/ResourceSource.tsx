@@ -1,22 +1,20 @@
 import { memo } from "react";
-import { KIcon } from "kku-ui";
-import { FormRowAccordion } from "@/pages/settingsPage/components";
+import FormRowAccordion from "../formRowAccordion/FormRowAccordion";
+import { DataIcon } from "@/components/icon";
 import "./ResourceSource.scss";
 
 
 const ResourceSource = () => {
 
   return (
-    <FormRowAccordion label="리소스 출처" icon={<KIcon icon="star" size={20} />} className="resource-source">
+    <FormRowAccordion label="리소스 출처" icon={<DataIcon size={20} />} className="resource-source">
       <ul className="resource-source__list">
         {
           [
-            { label: "BTC(KRW)", value: "Upbit, Bithumb" },
-            { label: "BTC(USD)", value: "Binance" },
-            { label: "Chart", value: "Coin Gecko" },
-            { label: "BTC Dominance", value: "Coin Gecko" },
+            { label: "BTC", value: "Upbit, Bithumb, Binance" },
+            { label: "Dominance & Chart", value: "Coin Gecko" },
             { label: "Fear & Greed Index", value: "alternative.me" },
-            { label: "USD/KRW Exchange Rate", value: "Naver(KEB)" },
+            { label: "USD/KRW Exchange Rate", value: "Naver(KEB)" }
           ].map(({ label, value }) => (
             <li key={label} className="resource-source__list__item">{label}: {value}</li>
           ))

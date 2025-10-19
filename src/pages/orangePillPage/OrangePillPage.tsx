@@ -1,14 +1,12 @@
 import { useCallback } from "react";
-import { useNavigate } from "react-router-dom";
 import { KIcon } from "kku-ui";
-import { useOutletContext } from "react-router";
+import { useOutletContext, useNavigate } from "react-router";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { PageLayout } from "@/layouts";
-import { FormRow } from "@/pages/settingsPage/components";
+import { LazyImage, FormRow } from "@/components";
 import { DiscordIcon, LinkIcon, NaverIcon, PageIcon } from "@/components/icon";
 import "./OrangePillPage.scss";
-import { LazyImage } from "@/components";
 
 
 const citadelDiscordUrl = "https://discord.gg/citadel21" as const;

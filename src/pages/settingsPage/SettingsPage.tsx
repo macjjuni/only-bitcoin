@@ -4,15 +4,17 @@ import { KButton, KIcon, KSelect, KSwitch } from "kku-ui";
 import { btcColor } from "@/shared/constants/color";
 import router from "@/app/router";
 import useStore from "@/shared/stores/store";
+import InstallSettingForm from "./components/installSettingForm/InstallSettingForm";
 import { PageLayout } from "@/layouts";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { currencyOptions, krwMarketOptions } from "@/shared/constants/setting";
 import { isSafari } from "@/shared/utils/device";
 import { AnimationIcon } from "@/components/icon";
+import { FormRow } from "@/components";
 import { CurrencyTypes } from "@/shared/stores/store.interface";
-import { InstallSettingForm, FormRow } from "./components";
 import "./SettingsPage.scss";
+import ResourceSource from "./components/resourceSource/ResourceSource";
 
 
 export default function SettingsPage() {
@@ -133,8 +135,7 @@ export default function SettingsPage() {
         <FormRow icon={<KIcon icon="x_logo" size={24} />} label="피드백">
           <KButton variant="primary" label="이동" onClick={onRouteToFeedback} />
         </FormRow>
-        {/* 리소스 출처 */}
-        {/* <ResourceSource /> */}
+        <ResourceSource />
         <FormRow icon={<KIcon icon="dev" color="#333" size={24} />} label="버전 정보">
           {import.meta.env.VITE_VERSION || "-"}
         </FormRow>

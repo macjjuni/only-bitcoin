@@ -7,7 +7,7 @@ interface FormRowTypes {
   label?: ReactNode;
 }
 
-export const FormRow = ({children, icon, label}: FormRowTypes) => {
+const FormRow = ({children, icon, label}: FormRowTypes) => {
   return (
     <div className="form-row__area">
       {icon && icon}

@@ -8,11 +8,8 @@ import { PageLayout } from "@/layouts";
 export default function PremiumPage() {
 
   // region [Hooks]
-
   usePageAnimation(useOutletContext<UsePageAnimation>());
-
   // endregion
-
 
   return (
     <PageLayout className="premium-page__area">

@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useState } from "react";
 import { KButton, KIcon, KSwitch } from "kku-ui";
-import { FormRow } from "@/pages/settingsPage/components";
+import { FormRow } from "@/components";
 import { useInitializePWA } from "../../../../shared/hooks/initializer";
 import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";

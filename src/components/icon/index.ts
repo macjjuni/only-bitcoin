@@ -5,6 +5,7 @@ export { default as DiscordIcon } from '@/components/icon/DiscordIcon'
 export { default as NaverIcon } from '@/components/icon/NaverIcon'
 export { default as PageIcon } from '@/components/icon/PageIcon'
 export { default as LinkIcon } from '@/components/icon/LinkIcon'
+export { default as DataIcon } from '@/components/icon/DataIcon'
 
 
 // Navigation Icon

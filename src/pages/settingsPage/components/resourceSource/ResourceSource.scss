@@ -16,7 +16,7 @@
 
     .resource-source__list__item {
       @include font-body;
-      //font-size: $font-small-size;
+      letter-spacing: -1px;
     }
   }
 }

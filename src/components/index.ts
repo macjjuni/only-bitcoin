@@ -10,3 +10,4 @@ export { default as LazyImage } from "@/components/lazyImage/LazyImage";
 export { default as HorizontalCard } from "@/components/card/horizontalCard/HorizontalCard";
 export { default as SettingButton } from "@/components/settingButton/SettingButton";
 export { default as ConnectionDot } from "@/components/connectionDot/ConnectionDot";
+export { default as FormRow } from "@/components/formRow/FormRow";

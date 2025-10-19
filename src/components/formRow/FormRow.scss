@@ -29,9 +29,9 @@
         position: absolute;
         bottom: 0;
         right: 0;
-        height: 0.5px;
+        height: 1px;
         width: 88%;
-        background-color: $default-border-color;
+        background-color: $gray-300;
     }
 
     &:first-child {
@@ -42,5 +42,14 @@
         border-bottom-left-radius: 8px;
         border-bottom-right-radius: 8px;
         &:after { content: none; }
+    }
+}
+
+
+.dark {
+    .form-row__area {
+        &:after {
+            background-color: $gray-600;
+        }
     }
 }

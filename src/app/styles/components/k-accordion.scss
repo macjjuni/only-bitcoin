@@ -1,4 +1,5 @@
 @use "../variable" as *;
+@use "../mixin" as *;
 
 #only-bitcoin {
 
@@ -6,9 +7,17 @@
         border: 1px solid $default-border-color;
         background-color: transparent;
 
+        .k-accordion__summary {
+            @include remove-tap-highlight;
+        }
+
         &.k-accordion--close .k-accordion__summary { border-bottom: none; }
         &.k-accordion--open .k-accordion__summary { border-bottom: 1px solid $default-border-color; }
 
         .k-accordion__content { background-color: transparent; }
+
+        .k-accordion__content__container {
+            //background: $gray-100;
+        }
     }
 }
