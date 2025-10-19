@@ -71,7 +71,7 @@ export default function useUsdExchangeRate() {
       }
     }
     onError();
-  }, [query.data]);
+  }, [query.data, isUsdtStandard]);
 
   useEffect(() => {
     if (query.error) {
