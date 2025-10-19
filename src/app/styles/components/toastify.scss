@@ -1,9 +1,10 @@
 @use "../variable" as *;
 
 
-:root {
+:root .Toastify__toast-theme--dark {
   --toastify-toast-min-height: 36px;
-  --toastify-color-dark: #212121;
+  --toastify-color-dark: #{$default-background-color};
+  --toastify-text-color-dark: #{$default-font-color};
   --toastify-font-family: #{$default-font-family};
 }
 
