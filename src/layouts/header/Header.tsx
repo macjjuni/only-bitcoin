@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { useTitle } from "@/shared/hooks";
-import { NetworkSwitch, SettingButton } from "@/components";
+import { ConnectionDot, SettingButton } from "@/components";
 import "./Header.scss";
 
 const Header = () => {
@@ -13,7 +13,7 @@ const Header = () => {
         )}
       </h2>
       <div className="header__area__right">
-        <NetworkSwitch />
+        <ConnectionDot />
         <SettingButton />
       </div>
     </header>

@@ -14,7 +14,9 @@ const SettingButton = () => {
   }, [])
 
   if (location.pathname === '/settings') {
-    return (<KIcon icon="arrow_left" size={30} onClick={onRouteBack} />)
+    return (
+      <KIcon icon="arrow_left" className="back-button" size={34} onClick={onRouteBack} />
+    )
   }
 
   return (

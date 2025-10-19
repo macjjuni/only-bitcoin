@@ -5,8 +5,12 @@
   justify-content: center;
   align-items: center;
   width: auto;
-  padding: 0;
+  padding: $spacing-2;
   margin: 0;
 
   svg { color: $gray-400; }
+}
+
+.back-button {
+  padding: $spacing-2;
 }

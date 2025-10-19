@@ -1,19 +1,15 @@
-import { memo, useCallback, useEffect, useState } from "react";
-import { KIcon } from "kku-ui";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { toast } from "react-toastify";
 import useStore from "@/shared/stores/store";
-import "./NetworkSwitch.scss";
+import "./ConnectionDot.scss";
 
-const NetworkSwitch = () => {
+const ConnectionDot = () => {
 
   // region [Hooks]
   const [isEnabledNetwork, setIsEnabledNetwork] = useState<boolean>(true);
   const isKrwConnected = useStore(state => state.bitcoinPrice.isKrwConnected);
   const isUsdConnected = useStore(state => state.bitcoinPrice.isUsdConnected);
-  const reconnectUpbit = useStore(state => state.reconnectUpbit);
-  const reconnectBinance = useStore(state => state.reconnectBinance);
   // endregion
-
 
   // region [Privates]
   const setInitState = useCallback(({ type }: Event) => {
@@ -32,22 +28,10 @@ const NetworkSwitch = () => {
     window.removeEventListener("offline", setInitState);
   }, [])
 
-  const refreshAction = useCallback(() => {
-
-    if (!isKrwConnected) {
-      reconnectUpbit()
-    }
-
-    if (!isUsdConnected) {
-      reconnectBinance()
-    }
-  }, [isKrwConnected, isUsdConnected, reconnectUpbit, reconnectBinance]);
-
   const showToastNetworkError = useCallback(() => {
     toast.error('네트워크 연결을 확인해주세요.');
   }, []);
   // endregion
-
 
   // region [Life Cycles]
   useEffect(() => {
@@ -63,16 +47,16 @@ const NetworkSwitch = () => {
   // endregion
 
 
+  const isStable = useMemo(() => (
+    !(!isEnabledNetwork || !isKrwConnected || !isUsdConnected)
+  ),[isEnabledNetwork, isKrwConnected, isUsdConnected])
+
+
   return (
-    <div className="network__switch__area">
-      {!isEnabledNetwork && <KIcon icon="disconnect" size={32} className="disconnect__icon" />}
-      {
-        (!isKrwConnected || !isUsdConnected) && (
-          <KIcon icon="refresh" size={32} onClick={refreshAction} className="refresh__icon" />
-        )
-      }
+    <div className="connection-dot">
+      <span className={`connection-dot__dot ${isStable ? 'stable' : 'unstable'}`} />
     </div>
   );
 };
 
-export default memo(NetworkSwitch);
+export default memo(ConnectionDot);
