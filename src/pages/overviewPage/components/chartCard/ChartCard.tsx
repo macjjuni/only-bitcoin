@@ -124,7 +124,6 @@ const ChartCard = () => {
   ), [setMarketChartInterval, chartCardButtonClass]);
 
 
-  console.log(maxValue);
   const ChartArea = useMemo(() => (
     <>
       <Line ref={chartRef} data={currentChartData} height="120%"
