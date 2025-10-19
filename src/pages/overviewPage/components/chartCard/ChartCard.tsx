@@ -134,7 +134,14 @@ const ChartCard = () => {
       <Line ref={chartRef} data={currentChartData} height="120%"
             className="chart-card__chart__wrapper__body"
             options={{
-              plugins: { legend: { display: false }, tooltip: { enabled: true } },
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  enabled: true,
+                  usePointStyle: true,
+                  caretPadding: 6,
+                }
+              },
               elements: { point: { radius: 0 }, line: { tension: 0.3, borderWidth: 2 } },
               scales: { x: { display: false }, y: { display: false } },
               animation: {
