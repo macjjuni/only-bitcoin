@@ -36,9 +36,6 @@
                 border-radius: $default-border-radius;
                 font-size: 0;
                 z-index: 1;
-                -webkit-tap-highlight-color: transparent;
-                outline: none;
-                user-select: none;
 
                 & svg { color: $black-color; }
                 &.active svg { color: $bitcoin-color; }

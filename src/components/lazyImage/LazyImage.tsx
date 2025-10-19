@@ -6,11 +6,13 @@ interface LazyImageProps extends ComponentBaseTypes {
   src: string;
   alt?: string;
   tags?: string[];
+  width?: number;
+  height?: number;
 }
 
 const MAX_RETRY_COUNT = 3;
 
-const LazyImage = ({ src, alt = "", tags, className = "" }: LazyImageProps) => {
+const LazyImage = ({ src, alt = "", tags, className = "", width, height }: LazyImageProps) => {
 
   // region [Hooks]
 
@@ -94,6 +96,8 @@ const LazyImage = ({ src, alt = "", tags, className = "" }: LazyImageProps) => {
           ref={rootRef}
           src={src}
           alt={alt}
+          width={width}
+          height={height}
           data-tag={tags?.join(", ")}
           className={`lazy-image__img ${isLoaded ? "lazy-image__img--loaded" : "lazy-image__img--loading"}`}
           onLoad={onLoadedImage}

@@ -29,7 +29,7 @@ const useStore = create<StoreType>()(
       setBitcoinUsdPrice: (usd) => set(({ bitcoinPrice }) => ({
         bitcoinPrice: { ...bitcoinPrice, ...usd }
       })),
-      krwMarket: "UPBIT",
+      krwMarket: "BITHUMB",
       setKrwMarket: (krwMarket) => set((store) => ({ ...store, krwMarket })),
       reconnectUpbit: () => {
       },

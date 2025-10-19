@@ -1,20 +1,21 @@
 import { useCallback } from "react";
 import { useNavigate } from "react-router-dom";
-import { KButton, KIcon } from "kku-ui";
+import { KIcon } from "kku-ui";
 import { useOutletContext } from "react-router";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { PageLayout } from "@/layouts";
 import { FormRow } from "@/pages/settingsPage/components";
-import { DiscordIcon, MemeIcon, NaverIcon } from "@/components/icon";
+import { DiscordIcon, LinkIcon, NaverIcon, PageIcon } from "@/components/icon";
 import "./OrangePillPage.scss";
+import { LazyImage } from "@/components";
 
 
-const citadelDiscordUrl = 'https://discord.gg/citadel21' as const;
-const atomicNotionUrl = 'http://atomicbtc.kr' as const;
-const citadelCafe = 'https://cafe.naver.com/btcforever' as const;
-const btcMapUrl = 'http://btcmap.kr/' as const;
-const fiatBitcoinUrl = 'https://finished-snake-h7zp8jm.gamma.site' as const;
+const citadelDiscordUrl = "https://discord.gg/citadel21" as const;
+const atomicNotionUrl = "http://atomicbtc.kr" as const;
+const citadelCafe = "https://cafe.naver.com/btcforever" as const;
+const btcMapUrl = "http://btcmap.kr/" as const;
+const fiatBitcoinUrl = "https://finished-snake-h7zp8jm.gamma.site" as const;
 
 
 export default function PremiumPage() {
@@ -27,26 +28,26 @@ export default function PremiumPage() {
 
   // region [Privates]
   const onRouteToExternalLink = useCallback((url: string) => {
-    const anchorTag = document.createElement('a');
+    const anchorTag = document.createElement("a");
     anchorTag.href = url;
-    anchorTag.target = '_blank';
+    anchorTag.target = "_blank";
     anchorTag.click();
-  }, [])
+  }, []);
 
   const onRouteCitadel = useCallback(() => {
     onRouteToExternalLink(citadelDiscordUrl);
   }, []);
 
   const onRouteToAtomicNotion = useCallback(() => {
-    onRouteToExternalLink(atomicNotionUrl)
+    onRouteToExternalLink(atomicNotionUrl);
   }, []);
 
   const onRouteToCitadelCafe = useCallback(() => {
-    onRouteToExternalLink(citadelCafe)
+    onRouteToExternalLink(citadelCafe);
   }, []);
 
   const onRouteToBtcMap = useCallback(() => {
-    onRouteToExternalLink(btcMapUrl)
+    onRouteToExternalLink(btcMapUrl);
   }, []);
 
   const onRouteToFiatAndBitcoin = useCallback(() => {
@@ -62,22 +63,38 @@ export default function PremiumPage() {
     <PageLayout className="orange-pill__page__area">
       <div>
         <FormRow icon={<KIcon icon="notion" size={28} />} label="ATOMIC⚡️₿ITCOIN 노션">
-          <KButton variant="primary" label="이동" onClick={onRouteToAtomicNotion} />
+          <button type="button" onClick={onRouteToAtomicNotion}>
+            <LinkIcon size={24} />
+          </button>
         </FormRow>
-        <FormRow icon={<KIcon icon="book" size={28} />} label="화폐와 정부 그리고 비트코인">
-          <KButton variant="primary" label="이동" onClick={onRouteToFiatAndBitcoin} />
+        <FormRow icon={<PageIcon size={28} style={{ marginTop: "4px" }} />} label="화폐와 정부 그리고 비트코인">
+          <button type="button" onClick={onRouteToFiatAndBitcoin}>
+            <LinkIcon size={24} />
+          </button>
         </FormRow>
         <FormRow icon={<DiscordIcon size={28} />} label="비트코인 지분전쟁: 시타델">
-          <KButton variant="primary" label="이동" onClick={onRouteCitadel} />
+          <button type="button" onClick={onRouteCitadel}>
+            <LinkIcon size={24} />
+          </button>
         </FormRow>
         <FormRow icon={<NaverIcon size={28} />} label="비트코인 지분전쟁 카페">
-          <KButton variant="primary" label="이동" onClick={onRouteToCitadelCafe} />
+          <button type="button" onClick={onRouteToCitadelCafe}>
+            <LinkIcon size={24} />
+          </button>
         </FormRow>
         <FormRow icon={<NaverIcon size={28} />} label="비트코인 결제 매장">
-          <KButton variant="primary" label="이동" onClick={onRouteToBtcMap} />
+          <button type="button" onClick={onRouteToBtcMap}>
+            <LinkIcon size={24} />
+          </button>
         </FormRow>
-        <FormRow icon={<MemeIcon size={28} />} label="밈 저장소">
-          <KButton variant="primary" label="이동" onClick={onRouteToMeme} />
+        <FormRow icon={
+          <div style={{ width: 28, height: 28 }}>
+            <LazyImage src="https://image-store-one.vercel.app/image/ysku.webp" alt="meme" width={28} height={28} />
+          </div>
+        } label="밈 저장소">
+          <button type="button" onClick={onRouteToMeme}>
+            <LinkIcon size={24} />
+          </button>
         </FormRow>
       </div>
     </PageLayout>
