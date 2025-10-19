@@ -9,7 +9,7 @@
     width: 280px;
     padding: $spacing-24 $spacing-16 $spacing-16 $spacing-16;
     border: 1px solid $default-border-color;
-    background-color: #1b1b1b;
+    background-color: $default-background-color;
     transition: top 0.64s ease;
     box-shadow: rgba(0, 0, 0, 0.56) 0px 22px 70px 4px;
     border-radius: $default-border-radius;
