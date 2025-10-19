@@ -1,7 +1,6 @@
 @use "./variable" as *;
 
 // region [Font Sizes]
-
 @mixin font-heading-lg {
     font-size: $font-heading-lg-size;
     line-height: $line-height-heading-lg-size;
@@ -30,24 +29,29 @@
     font-size: $font-body-size;
     line-height: $line-height-body-size;
 }
+// endregion
 
+
+// region [Effects]
+@mixin remove-tap-highlight {
+    -webkit-tap-highlight-color: transparent;
+    outline: none;
+    user-select: none;
+}
 // endregion
 
 
 // region [Font Styles]
-
 @mixin logo-font-style {
     font-size: 20px;
     font-weight: bold;
     color: $default-font-color;
     text-decoration: none;
 }
-
 // endregion
 
 
 // region [Layouts]
-
 @mixin PageLayout {
     display: flex;
     flex-direction: column;
@@ -55,18 +59,15 @@
     gap: $spacing-12;
     width: 100%;
 }
-
 // endregion
 
 
 // region [Scroll]
-
 @mixin noScroll {
     scrollbar-width: none;
     overscroll-behavior: none;
     &::-webkit-scrollbar { display: none; }
 }
-
 // endregion
 
 

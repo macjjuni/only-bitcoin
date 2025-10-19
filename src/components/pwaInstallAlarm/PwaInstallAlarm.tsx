@@ -79,8 +79,8 @@ const PwaInstallAlarm = () => {
       </div>
 
       <div className="pwa-install__alarm__button__area">
-        <KButton label="오늘 하루 안보기" size="small" onClick={onClickClose} />
-        <KButton label="설치" size="small" onClick={onClickInstall} />
+        <KButton variant="subtle" label="오늘 하루 안보기" size="small" onClick={onClickClose} />
+        <KButton variant="primary" label="설치" size="small" onClick={onClickInstall} />
       </div>
     </div>
   );
