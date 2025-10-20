@@ -5,7 +5,8 @@ import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { PageLayout } from "@/layouts";
 import { LazyImage, FormRow } from "@/components";
-import { DiscordIcon, LinkIcon, NaverIcon, PageIcon } from "@/components/icon";
+import { DiscordIcon, LinkIcon, NaverIcon, PageIcon, ListIcon } from "@/components/icon";
+import router from "@/app/router";
 import "./OrangePillPage.scss";
 
 
@@ -57,7 +58,11 @@ export default function PremiumPage() {
   }, []);
 
   const onRouteToBIP39 = useCallback(() => {
-    navigate("/orange-pill/bip39");
+
+    const route = router.clientRoutes.find(item => item.path.includes('bip39'));
+    if (!route) { throw Error('Not found page url.') }
+
+    navigate(route.path);
   }, []);
   // endregion
 
@@ -89,7 +94,7 @@ export default function PremiumPage() {
             <LinkIcon size={24} />
           </button>
         </FormRow>
-        <FormRow icon={<NaverIcon size={28} />} label="BIP39">
+        <FormRow icon={<ListIcon size={32} />} label="BIP39">
           <button type="button" onClick={onRouteToBIP39}>
             <LinkIcon size={24} />
           </button>

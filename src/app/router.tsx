@@ -13,6 +13,7 @@ const PremiumPage = withSuspense(lazy(() => import("@/pages/premiumPage/PremiumP
 const OrangePillPage = withSuspense(lazy(() => import("@/pages/orangePillPage/OrangePillPage")));
 const SettingsPage = withSuspense(lazy(() => import("@/pages/settingsPage/SettingsPage")));
 const MemePage = withSuspense(lazy(() => import("@/pages/memePage/MemePage")));
+const BIP39Page = withSuspense(lazy(() => import("@/pages/bip39/BIP39Page")));
 
 const clientRoutes = [
   { title: "Overview", path: "/", element: <OverviewPage />, isNav: false, isFavorite: false, icon: <DashboardIcon size={32} />  },
@@ -21,6 +22,7 @@ const clientRoutes = [
   { title: "BTC To Fiat", path: "/btc2fiat", element: <Btc2FiatPage />, isNav: true, isFavorite: true,icon: <ExchangeIcon size={34} /> },
   { title: "Premium", path: "/premium", element: <PremiumPage />, isNav: true, isFavorite: true,icon: <PremiumIcon size={30} /> },
   { title: "Orange Pill", path: "/orange-pill", element: <OrangePillPage />, isNav: true, isFavorite: true,icon: <PillIcon size={30} /> },
+  { title: "BIP39", path: "/orange-pill/bip39", element: <BIP39Page />, isNav: false, isFavorite: false, icon: null },
   { title: "Settings", path: "/settings", element: <SettingsPage />, isNav: false, isFavorite: false ,icon: null },
   { title: "Meme", path: "/meme", element: <MemePage />, isNav: false, isFavorite: false ,icon: null },
   { title: "404 - Not Found", path: "/*", element: <NotFoundPage />, isNav: false, isFavorite: false, icon: null }

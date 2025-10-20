@@ -7,6 +7,7 @@ export { default as PageIcon } from '@/components/icon/PageIcon'
 export { default as LinkIcon } from '@/components/icon/LinkIcon'
 export { default as DataIcon } from '@/components/icon/DataIcon'
 export { default as CurrencyIcon } from '@/components/icon/CurrencyIcon'
+export { default as MnemonicIcon } from '@/components/icon/MnemonicIcon'
 
 
 // Navigation Icon

@@ -1,8 +1,0 @@
-@use "@/app/styles/variable" as *;
-@use "@/app/styles/mixin" as *;
-
-.bip39__page__area {
-  @include PageLayout;
-  padding-top: $spacing-24;
-  gap: $spacing-24;
-}
