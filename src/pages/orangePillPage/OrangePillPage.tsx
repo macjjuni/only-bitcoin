@@ -55,6 +55,10 @@ export default function PremiumPage() {
   const onRouteToMeme = useCallback(() => {
     navigate("/meme");
   }, []);
+
+  const onRouteToBIP39 = useCallback(() => {
+    navigate("/orange-pill/bip39");
+  }, []);
   // endregion
 
   return (
@@ -82,6 +86,11 @@ export default function PremiumPage() {
         </FormRow>
         <FormRow icon={<NaverIcon size={28} />} label="비트코인 결제 매장">
           <button type="button" onClick={onRouteToBtcMap}>
+            <LinkIcon size={24} />
+          </button>
+        </FormRow>
+        <FormRow icon={<NaverIcon size={28} />} label="BIP39">
+          <button type="button" onClick={onRouteToBIP39}>
             <LinkIcon size={24} />
           </button>
         </FormRow>
