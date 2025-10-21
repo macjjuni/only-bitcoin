@@ -8,6 +8,7 @@
         background-color: transparent;
 
         .k-accordion__summary {
+            transition: none;
             @include remove-tap-highlight;
         }
 
