@@ -6,10 +6,9 @@ import {
   ChartJsDataType,
   MarketChartIntervalTypeList
 } from "@/pages/overviewPage/components/chartCard/ChartCard.interface";
-import { btcColor } from "@/shared/constants/color";
 import { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import useStore from "@/shared/stores/store";
-import { CountText, HorizontalCard, UpdownIcon } from "../../../../components";
+import { CountText, HorizontalCard, UpdownIcon } from "@/components";
 import { useMarketChartData } from "@/shared/api";
 import "./ChartCard.scss";
 
@@ -26,7 +25,7 @@ const marketChartIntervalOptions: MarketChartIntervalTypeList[] = [
 
 const getChartDataset = (data: number[], index: number, isDark: boolean) => ({
   label: "", data, borderColor: isDark ? "#fff" : '#000', backgroundColor: "transparent",
-  borderWidth: 2, pointBackgroundColor: btcColor, pointHoverRadius: 4,
+  borderWidth: 2, pointBackgroundColor: "#f7931a", pointHoverRadius: 4,
   pointRadius: data.map((_, idx) => (idx === index ? 4 : 0)) // 최댓값 위치에 점 표시
 });
 

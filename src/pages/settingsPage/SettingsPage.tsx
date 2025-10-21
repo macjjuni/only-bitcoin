@@ -1,7 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useOutletContext } from "react-router";
 import { KButton, KIcon, KSelect, KSwitch } from "kku-ui";
-import { btcColor } from "@/shared/constants/color";
 import router from "@/app/router";
 import useStore from "@/shared/stores/store";
 import InstallSettingForm from "./components/installSettingForm/InstallSettingForm";
@@ -10,7 +9,7 @@ import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { currencyOptions, krwMarketOptions } from "@/shared/constants/setting";
 import { isSafari } from "@/shared/utils/device";
-import { AnimationIcon } from "@/components/icon";
+import {AnimationIcon, CurrencyIcon} from '@/components/icon'
 import { FormRow } from "@/components";
 import { CurrencyTypes } from "@/shared/stores/store.interface";
 import "./SettingsPage.scss";
@@ -65,14 +64,14 @@ export default function SettingsPage() {
   return (
     <PageLayout className="settings-page__area">
       <div className="settings-page__area__form__area">
-        <FormRow icon={<KIcon icon="star" color={btcColor} />} label="시작 페이지">
+        <FormRow icon={<KIcon icon="star" color="#f7931a" />} label="시작 페이지">
           <KSelect value={initialPath} items={favoriteRouteOptions} size="medium" width={142}
                    onChange={(path) => {
                      setInitialPath(path as string);
                    }} />
         </FormRow>
 
-        <FormRow icon={<KIcon icon="currency" color="#FFD700" size={24} />} label="통화 단위">
+        <FormRow icon={<CurrencyIcon size={24} />} label="통화 단위">
           <div className="settings-page__area__currency__button-group">
             <KSelect value={currency} items={currencyOptions} size="medium" width={142}
                      onChange={(value) => {
@@ -118,7 +117,7 @@ export default function SettingsPage() {
             setIsBackgroundImg(e);
           }} />
         </FormRow>
-        <FormRow icon={<AnimationIcon size={24} color="#c2c2c2" />} label="카운트 업 애니메이션">
+        <FormRow icon={<AnimationIcon size={24} color="#f7931a" />} label="카운트 업 애니메이션">
           <KSwitch value={isCountUp} onChange={(e) => {
             setIsCountUp(e);
           }} />

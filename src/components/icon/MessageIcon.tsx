@@ -3,17 +3,18 @@ import { IconTypes } from "@/components/icon/icon";
 
 const MessageIcon = ({ size = "100%", color = "currentColor", style }: IconTypes) => {
   return (
-    <svg width={size} height={size} viewBox="0 0 16 16" xmlns="http://www.w3.org/2000/svg" fill="none" style={style}>
-      <g strokeWidth="0" />
-      <g strokeLinecap="round" strokeLinejoin="round" />
+    <svg viewBox="0 0 16 16" width={size} height={size} version="1.1" xmlns="http://www.w3.org/2000/svg" xmlnsXlink="http://www.w3.org/1999/xlink"
+         fill={color} style={style}>
+      <g strokeWidth="0"/>
+      <g strokeLinecap="round" strokeLinejoin="round"/>
       <g>
-        <g fill={color}>
-          <path
-            d="M4 7.75A.75.75 0 014.75 7h3.5a.75.75 0 010 1.5h-3.5A.75.75 0 014 7.75zM4.75 4.5a.75.75 0 000 1.5h6.5a.75.75 0 000-1.5h-6.5z" />
-          <path fillRule="evenodd"
-                d="M15 3.25A2.25 2.25 0 0012.75 1h-9.5A2.25 2.25 0 001 3.25v11a.75.75 0 001.26.55l2.801-2.6a.75.75 0 01.51-.2h7.179A2.25 2.25 0 0015 9.75v-6.5zm-2.25-.75a.75.75 0 01.75.75v6.5a.75.75 0 01-.75.75H5.572a2.25 2.25 0 00-1.531.6L2.5 12.53V3.25a.75.75 0 01.75-.75h9.5z"
-                clipRule="evenodd" />
-        </g>
+        <path fill={color} d="M3 6h2v1h-2v-1z"/>
+        <path fill={color} d="M6 6h7v1h-7v-1z"/>
+        <path fill={color} d="M3 8h2v1h-2v-1z"/>
+        <path fill={color} d="M6 8h7v1h-7v-1z"/>
+        <path fill={color} d="M3 10h2v1h-2v-1z"/>
+        <path fill={color} d="M6 10h7v1h-7v-1z"/>
+        <path fill={color} d="M0 1v14h16v-14h-16zM15 14h-14v-10h14v10zM15 3h-1v-1h1v1z"/>
       </g>
     </svg>
   );

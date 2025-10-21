@@ -3,11 +3,14 @@
 
 
 .form-row__area {
+    $gap-size: $spacing-16;
+    $icon-size: 24px;
+
     position: relative;
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: $spacing-16;
+    gap: $gap-size;
     min-height: 54px;
     padding: 0 $spacing-16;
     border-bottom: none;
@@ -17,10 +20,14 @@
         display: flex;
         justify-content: space-between;
         align-items: center;
-        width: calc(100% - 32px);
+        width: calc(100% - (#{$gap-size} + #{$icon-size}));
 
         .form-row__area__content__label {
             @include font-body;
+        }
+
+        .k-select {
+            margin-top: -#{$spacing-8};
         }
     }
 
