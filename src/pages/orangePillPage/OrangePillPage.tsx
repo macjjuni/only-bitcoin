@@ -5,7 +5,7 @@ import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { PageLayout } from "@/layouts";
 import { LazyImage, FormRow } from "@/components";
-import { DiscordIcon, LinkIcon, NaverIcon, PageIcon, ListIcon } from "@/components/icon";
+import { DiscordIcon, LinkIcon, NaverIcon, PageIcon, MnemonicIcon } from "@/components/icon";
 import router from "@/app/router";
 import "./OrangePillPage.scss";
 
@@ -94,7 +94,7 @@ export default function PremiumPage() {
             <LinkIcon size={24} />
           </button>
         </FormRow>
-        <FormRow icon={<ListIcon size={32} />} label="BIP39">
+        <FormRow icon={<MnemonicIcon size={32} />} label="BIP39">
           <button type="button" onClick={onRouteToBIP39}>
             <LinkIcon size={24} />
           </button>

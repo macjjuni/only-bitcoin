@@ -56,7 +56,7 @@ export default function BIP39Page() {
     <PageLayout className="BIP39__page__area">
       <div className="BIP39__page__area__wrapper">
         {BIP39Columns.map((col, idx) => (
-          <ul key={col[idx]?.word} className="BIP39__page__area__wrapper__list">
+          <ul key={col[idx]?.index} className="BIP39__page__area__wrapper__list">
             {col.map((item) => (
               <li key={item.word} className="BIP39__page__area__wrapper__list__item">
                 <span>{item.index}.</span>
