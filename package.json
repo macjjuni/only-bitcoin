@@ -1,7 +1,7 @@
 {
   "name": "only-bitcoin",
   "private": true,
-  "version": "3.4.0",
+  "version": "3.4.1",
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4002",
