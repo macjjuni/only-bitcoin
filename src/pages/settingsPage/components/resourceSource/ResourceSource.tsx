@@ -7,7 +7,7 @@ import "./ResourceSource.scss";
 const ResourceSource = () => {
 
   return (
-    <FormRowAccordion label="리소스 출처" icon={<DataIcon size={20} />} className="resource-source">
+    <FormRowAccordion label="리소스 출처" icon={<DataIcon size={22} style={{ margin: '0 3px' }} />} className="resource-source">
       <ul className="resource-source__list">
         {
           [

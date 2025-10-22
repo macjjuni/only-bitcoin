@@ -4,7 +4,7 @@
 
 .form-row__area {
     $gap-size: $spacing-16;
-    $icon-size: 24px;
+    $icon-size: 28px;
 
     position: relative;
     display: flex;
@@ -15,6 +15,13 @@
     padding: 0 $spacing-16;
     border-bottom: none;
     background-color: $default-background-cover-color;
+
+    .form-row__area__icon {
+        display: inline-flex;
+        justify-content: center;
+        align-items: center;
+        width: $icon-size;
+    }
 
     .form-row__area__content {
         display: flex;

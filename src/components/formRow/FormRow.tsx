@@ -10,9 +10,9 @@ interface FormRowTypes {
 const FormRow = ({children, icon, label}: FormRowTypes) => {
   return (
     <div className="form-row__area">
-      {icon && icon}
+      { icon && (<div className="form-row__area__icon">{icon}</div>) }
       <div className="form-row__area__content">
-        <div className="form-row__area__content__label">{label}</div>
+      <div className="form-row__area__content__label">{label}</div>
         {children}
       </div>
     </div>
