@@ -1,41 +1,48 @@
-import { useMemo } from "react";
+import { useCallback, useMemo, useState, useDeferredValue } from "react";
 import { useOutletContext } from "react-router";
+import { KIcon, KTextField } from "kku-ui";
 import { useQuery } from "@tanstack/react-query";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { PageLayout } from "@/layouts";
+import { fetchBIP39 } from "@/shared/api";
 import "./BIP39Page.scss";
 
 type BIP39Response = { index: number, word: string };
 
-const BIP39_URL = 'https://raw.githubusercontent.com/bitcoin/bips/refs/heads/master/bip-0039/english.txt' as const;
-
-const fetchBIP39 = async (): Promise<BIP39Response[]> => {
-  try {
-    const res = await fetch(BIP39_URL, { method: "GET", headers: { "Accept": "text/plain" }});
-    const text = await res.text();
-    return text.trim().split("\n").map((word, index) => ({ index: index + 1, word }));
-  } catch (err) {
-    console.error(err);
-    throw new Error("BIP39 불러오기 실패");
-  }
-};
-
+const ENGLISH_REG = /^[A-Za-z]+$/;
 
 export default function BIP39Page() {
 
   // region [Hooks]
   usePageAnimation(useOutletContext<UsePageAnimation>());
-  const { data: bip39List } = useQuery<BIP39Response[], Error>({
+
+  const { data } = useQuery<BIP39Response[], Error>({
     queryKey: ["BIP39"],
     queryFn: fetchBIP39,
-    staleTime: 60 * 1000 * 1000,
+    staleTime: 60 * 1000 * 1000
   });
+
+  const [search, setSearch] = useState("");
+  const deferredSearch = useDeferredValue(search);
+
+  const bip39List = useMemo(() => (
+    data?.filter(item => item.word.startsWith(deferredSearch.toLowerCase()))
+  ), [data, deferredSearch]);
+  // endregion
+
+
+  // region [Events]
+  const onChangeSearch = useCallback((val: string) => {
+    if (ENGLISH_REG.test(val) || val === '') {
+      setSearch(val);
+    }
+  }, []);
   // endregion
 
 
   // region [Templates]
-  const BIP39Columns = useMemo(() => {
+  const BIP39List = useMemo(() => {
     if (!bip39List) return [[], [], []];
 
     const colCount = 3;
@@ -53,12 +60,15 @@ export default function BIP39Page() {
 
 
   return (
-    <PageLayout className="BIP39__page__area">
-      <div className="BIP39__page__area__wrapper">
-        {BIP39Columns.map((col, idx) => (
-          <ul key={col[idx]?.index} className="BIP39__page__area__wrapper__list">
+    <PageLayout className="BIP39__page">
+      <KTextField label="검색(4자리)" value={search} onChange={onChangeSearch}
+                  width="100%" className="BIP39__page__search" maxLength={4}
+                  leftContent={<KIcon icon="search" style={{ marginLeft: 12 }} />} />
+      <div className="BIP39__page__view">
+        {BIP39List.map((col, idx) => (
+          <ul key={col[idx]?.index} className="BIP39__page__view__list">
             {col.map((item) => (
-              <li key={item.word} className="BIP39__page__area__wrapper__list__item">
+              <li key={item.word} className="BIP39__page__view__list__item">
                 <span>{item.index}.</span>
                 <span>{item.word}</span>
               </li>

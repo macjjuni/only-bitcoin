@@ -1,15 +1,27 @@
 @use "@/app/styles/variable" as *;
 @use "@/app/styles/mixin" as *;
 
-.BIP39__page__area {
+.BIP39__page {
   @include PageLayout;
   padding-top: $spacing-16;
   gap: $spacing-24;
 
-  .BIP39__page__area__wrapper {
+  .BIP39__page__search > .k-text-field__fieldset {
+    height: 48px;
+
+    .k-text-field__fieldset__container { height: 40px; }
+    .k-text-field__fieldset__container__left {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100%;
+    }
+  }
+
+  .BIP39__page__view {
     display: flex;
 
-    .BIP39__page__area__wrapper__list {
+    .BIP39__page__view__list {
       flex: 1;
       list-style: none;
       padding: 0;
@@ -19,27 +31,15 @@
       justify-content: flex-start;
       align-items: flex-start;
 
-      &:nth-child(2) {
-        .BIP39__page__area__wrapper__list__item {
-          //border-left: 1px solid $gray-400;
-          //border-right: 1px solid $gray-400;
-        }
-      }
-
-      .BIP39__page__area__wrapper__list__item {
+      .BIP39__page__view__list__item {
         position: relative;
         display: flex;
         justify-content: flex-start;
         align-items: center;
         width: 100%;
-        padding: 3px;
+        padding: $spacing-2;
         letter-spacing: -1px;
         @include font-body;
-        //border-bottom: 1px solid $gray-400;
-
-        &:first-child {
-          //border-top: 1px solid $gray-400;
-        }
 
         & > span:first-child {
           margin-right: 3px;
@@ -51,15 +51,13 @@
 
 .dark {
 
-  .BIP39__page__area {
+  .BIP39__page {
 
-    .BIP39__page__area__wrapper {
+    .BIP39__page__view {
 
-      .BIP39__page__area__wrapper__list {
+      .BIP39__page__view__list {
 
-        .BIP39__page__area__wrapper__list__item {
-          border-color: $gray-500;
-        }
+        .BIP39__page__view__list__item { border-color: $gray-500; }
       }
     }
   }
