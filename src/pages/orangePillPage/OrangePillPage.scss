@@ -7,6 +7,14 @@
   gap: $spacing-24;
 
   .form-row__area {
+
+    .orange-pill__page__area__button {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: $spacing-4;
+    }
+
     button {
       color: $primary-color;
     }

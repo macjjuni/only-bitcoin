@@ -71,32 +71,32 @@ export default function PremiumPage() {
     <PageLayout className="orange-pill__page__area">
       <div>
         <FormRow icon={<KIcon icon="notion" size={28} />} label="ATOMIC⚡️₿ITCOIN 노션">
-          <button type="button" onClick={onRouteToAtomicNotion}>
+          <button type="button" className="orange-pill__page__area__button" onClick={onRouteToAtomicNotion}>
             <LinkIcon size={24} />
           </button>
         </FormRow>
         <FormRow icon={<PageIcon size={28} style={{ marginTop: "4px" }} />} label="화폐와 정부 그리고 비트코인">
-          <button type="button" onClick={onRouteToFiatAndBitcoin}>
+          <button type="button" className="orange-pill__page__area__button" onClick={onRouteToFiatAndBitcoin}>
             <LinkIcon size={24} />
           </button>
         </FormRow>
         <FormRow icon={<DiscordIcon size={28} />} label="비트코인 지분전쟁: 시타델">
-          <button type="button" onClick={onRouteCitadel}>
+          <button type="button" className="orange-pill__page__area__button" onClick={onRouteCitadel}>
             <LinkIcon size={24} />
           </button>
         </FormRow>
         <FormRow icon={<NaverIcon size={28} />} label="비트코인 지분전쟁 카페">
-          <button type="button" onClick={onRouteToCitadelCafe}>
+          <button type="button" className="orange-pill__page__area__button" onClick={onRouteToCitadelCafe}>
             <LinkIcon size={24} />
           </button>
         </FormRow>
         <FormRow icon={<NaverIcon size={28} />} label="비트코인 결제 매장">
-          <button type="button" onClick={onRouteToBtcMap}>
+          <button type="button" className="orange-pill__page__area__button" onClick={onRouteToBtcMap}>
             <LinkIcon size={24} />
           </button>
         </FormRow>
         <FormRow icon={<MnemonicIcon size={24} />} label="BIP39">
-          <button type="button" onClick={onRouteToBIP39}>
+          <button type="button" className="orange-pill__page__area__button" onClick={onRouteToBIP39}>
             <LinkIcon size={24} />
           </button>
         </FormRow>
@@ -105,7 +105,7 @@ export default function PremiumPage() {
             <LazyImage src={BITCOIN_INTERNET_MAGIC_MONEY_IMAGE_URL} alt="meme" width={28} height={28} />
           </div>
         } label="밈 저장소">
-          <button type="button" onClick={onRouteToMeme}>
+          <button type="button" className="orange-pill__page__area__button" onClick={onRouteToMeme}>
             <LinkIcon size={24} />
           </button>
         </FormRow>
