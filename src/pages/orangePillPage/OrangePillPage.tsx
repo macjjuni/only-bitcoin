@@ -10,11 +10,12 @@ import router from "@/app/router";
 import "./OrangePillPage.scss";
 
 
-const citadelDiscordUrl = "https://discord.gg/citadel21" as const;
-const atomicNotionUrl = "http://atomicbtc.kr" as const;
-const citadelCafe = "https://cafe.naver.com/btcforever" as const;
-const btcMapUrl = "http://btcmap.kr/" as const;
-const fiatBitcoinUrl = "https://finished-snake-h7zp8jm.gamma.site" as const;
+const CITADEL_DISCORD_URL = "https://discord.gg/citadel21" as const;
+const ATOMIC_BTC_NOTION_URL = "http://atomicbtc.kr" as const;
+const CITADEL_CAFE_URL = "https://cafe.naver.com/btcforever" as const;
+const BTC_MAP_URL = "http://btcmap.kr/" as const;
+const FIAT_GOV_BITCOIN_DOC_URL = "https://finished-snake-h7zp8jm.gamma.site" as const;
+const BITCOIN_INTERNET_MAGIC_MONEY_IMAGE_URL = 'https://image-store-one.vercel.app/image/ysku.webp' as const;
 
 
 export default function PremiumPage() {
@@ -34,23 +35,23 @@ export default function PremiumPage() {
   }, []);
 
   const onRouteCitadel = useCallback(() => {
-    onRouteToExternalLink(citadelDiscordUrl);
+    onRouteToExternalLink(CITADEL_DISCORD_URL);
   }, []);
 
   const onRouteToAtomicNotion = useCallback(() => {
-    onRouteToExternalLink(atomicNotionUrl);
+    onRouteToExternalLink(ATOMIC_BTC_NOTION_URL);
   }, []);
 
   const onRouteToCitadelCafe = useCallback(() => {
-    onRouteToExternalLink(citadelCafe);
+    onRouteToExternalLink(CITADEL_CAFE_URL);
   }, []);
 
   const onRouteToBtcMap = useCallback(() => {
-    onRouteToExternalLink(btcMapUrl);
+    onRouteToExternalLink(BTC_MAP_URL);
   }, []);
 
   const onRouteToFiatAndBitcoin = useCallback(() => {
-    onRouteToExternalLink(fiatBitcoinUrl);
+    onRouteToExternalLink(FIAT_GOV_BITCOIN_DOC_URL);
   }, []);
 
   const onRouteToMeme = useCallback(() => {
@@ -59,7 +60,7 @@ export default function PremiumPage() {
 
   const onRouteToBIP39 = useCallback(() => {
 
-    const route = router.clientRoutes.find(item => item.path.includes('bip39'));
+    const route = router.clientRoutes.find(item => item.path.includes('/bip39'));
     if (!route) { throw Error('Not found page url.') }
 
     navigate(route.path);
@@ -94,14 +95,14 @@ export default function PremiumPage() {
             <LinkIcon size={24} />
           </button>
         </FormRow>
-        <FormRow icon={<MnemonicIcon size={32} />} label="BIP39">
+        <FormRow icon={<MnemonicIcon size={24} />} label="BIP39">
           <button type="button" onClick={onRouteToBIP39}>
             <LinkIcon size={24} />
           </button>
         </FormRow>
         <FormRow icon={
           <div style={{ width: 28, height: 28 }}>
-            <LazyImage src="https://image-store-one.vercel.app/image/ysku.webp" alt="meme" width={28} height={28} />
+            <LazyImage src={BITCOIN_INTERNET_MAGIC_MONEY_IMAGE_URL} alt="meme" width={28} height={28} />
           </div>
         } label="밈 저장소">
           <button type="button" onClick={onRouteToMeme}>
