@@ -3,7 +3,7 @@ import { IconTypes } from "@/components/icon/icon";
 
 const ListIcon = ({ size = "100%", color = "currentColor", style }: IconTypes) => {
   return (
-    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" xmlns="http://www.w3.org/2000/svg">
+    <svg viewBox="0 0 24 24" width={size} height={size} fill="none" xmlns="http://www.w3.org/2000/svg" style={style}>
       <g strokeWidth="0"/>
       <g strokeLinecap="round" strokeLinejoin="round"/>
       <g >

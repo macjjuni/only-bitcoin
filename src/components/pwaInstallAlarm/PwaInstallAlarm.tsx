@@ -74,7 +74,7 @@ const PwaInstallAlarm = () => {
     <div ref={rootRef} className="pwa-install__alarm">
       <KIcon icon="close" size={14} className="pwa-install__alarm__close-button" onClick={() => { setIsRender(false); }} />
       <div className="pwa-install__alarm__content">
-        <KIcon className="pwa-install__alarm__content__icon" icon="app" size={40} />
+        <KIcon className="pwa-install__alarm__content__icon" icon="app" size={40} color="#1796EE" />
         앱을 설치하시겠습니까? 설정 탭에서 언제든 다시 설치할 수 있습니다.
       </div>
 
