@@ -3,7 +3,7 @@ import { IconTypes } from "@/components/icon/icon";
 
 const MnemonicIcon = ({ size = "100%", color = "currentColor", style }: IconTypes) => {
   return (
-    <svg width={size} height={size} fill={color} viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg">
+    <svg width={size} height={size} fill={color} viewBox="0 0 32 32" version="1.1" xmlns="http://www.w3.org/2000/svg" style={style}>
       <g strokeWidth="0"/>
       <g strokeLinecap="round" strokeLinejoin="round" />
       <g>
