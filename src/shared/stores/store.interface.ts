@@ -21,12 +21,19 @@ export interface StoreType {
   setReconnectBinance: (fn: () => void) => void;
   // endregion
 
-  // region [대시보드 차트]
+
+  // region [대시보드 가격 차트]
   marketChartInterval: MarketChartIntervalType;
   setMarketChartInterval: (interval: MarketChartIntervalType) => void;
   marketChartData: BtcChart;
   setMarketChartData: (interval: MarketChartIntervalType, data: ChartData) => void;
   // endregion
+
+  // region [대시보드 해시레이트 차트]
+  hashrateChartInterval: HashrateChartIntervalType;
+  setHashrateChartInterval: (interval: HashrateChartIntervalType) => void;
+  // endregion
+
 
   // region [환율 데이터]
   exRate: ExRateTypes; // USD/KRW 환율 데이터
@@ -87,11 +94,6 @@ export interface ExRateTypes {
   date: string;
 }
 
-export interface NextHalvingTypes {
-  nextHalvingHeight: number;
-  nextHalvingPredictedDate: string;
-  remainingHeight: number;
-}
 
 export interface BlockTypes {
   id: string;
@@ -99,8 +101,8 @@ export interface BlockTypes {
   timestamp: number; // 블록 생성 타임스탬프
   size: number;
   poolName: string;
-  // nextHalving: NextHalvingTypes;
 }
+
 
 // 비트코인 차트 데이터
 export interface ChartData {
@@ -117,6 +119,7 @@ export interface BtcChart {
 }
 
 export type MarketChartIntervalType = 1 | 7 | 30 | 365;
+export type HashrateChartIntervalType = "3m" | "6m" | "1y" | "2y" | "3y" | "all";
 
 export type CurrencyTypes = "KRW" | "USD" | "KRW/USD";
 

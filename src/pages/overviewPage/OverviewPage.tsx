@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
-import { BlockHalvingCard, ChartCard, MacroCard, PricePannel } from "@/pages/overviewPage/components";
+import { BlockHalvingCard, MarketChart, MacroCard, PricePannel, HashrateChart } from "@/pages/overviewPage/components";
 import { PageLayout } from "@/layouts";
 
 
@@ -16,7 +16,7 @@ export default function OverviewPage() {
       <PricePannel />
       <MacroCard />
       <BlockHalvingCard />
-      <ChartCard />
+      <HashrateChart />
     </PageLayout>
   );
 }

@@ -9,7 +9,7 @@ import { MarketChartFormattedData, MarketChartResponseData } from "@/shared/type
 
 const MARKET_CHART_API_URL = 'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart';
 const STALE_TIME_MIN = 5;
-const INTERVAL_TIME_MIN = 10;
+const INTERVAL_TIME_MIN = 1;
 
 async function fetchMarketChart(days: MarketChartIntervalType): Promise<MarketChartFormattedData> {
 
