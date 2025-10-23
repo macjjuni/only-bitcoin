@@ -37,3 +37,7 @@ function comma(num: string | number, removeDecimal = true): string {
 }
 
 export { comma };
+
+export const removeSpaces = (str: string): string => {
+  return str.replace(/\s+/g, '');
+};

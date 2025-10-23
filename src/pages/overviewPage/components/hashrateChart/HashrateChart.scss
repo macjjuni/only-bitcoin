@@ -1,11 +1,12 @@
 @use '@/app/styles/variable' as *;
 @use '@/app/styles/mixin' as *;
 
-.market-chart {
+.hashrate-chart {
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
+  gap: $spacing-12;
   padding: $spacing-16 $spacing-16 $spacing-8 $spacing-16;
   user-select: none;
   overflow: hidden;
@@ -18,13 +19,12 @@
     left: -2%;
     width: 104%;
     height: 104%;
-    //background: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/backdrop-bg.webp') no-repeat center;
     background-size: cover;
     z-index: 4;
-    pointer-events: none; /* 클릭 방해 방지 */
+    pointer-events: none;
   }
 
-  .market-chart__top {
+  .hashrate-chart__top {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -32,27 +32,31 @@
     color: $default-font-color;
     z-index: 5;
 
-    .market-chart__top__fist {
+    .hashrate-chart__top__fist {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
 
-      .market-chart__top__fist__logo {
+      .hashrate-chart__top__fist__logo {
         display: flex;
         justify-content: flex-start;
         align-items: center;
         gap: $spacing-8;
+
+        .k-icon {
+          @include remove-tap-highlight;
+        }
       }
 
-      .market-chart__top__first__button-area {
+      .hashrate-chart__top__first__button-area {
 
-        .market-chart__button {
+        .hashrate-chart__button {
           height: 28px;
           padding: 0 $spacing-12;
           color: $default-font-color;
           background-color: $default-background-color;
 
-          &.market-chart__button--active {
+          &.hashrate-chart__button--active {
             color: $default-background-color;
             border-color: $default-font-color;
             background-color: $default-font-color;
@@ -71,32 +75,40 @@
       }
     }
 
-    .market-chart__top__wrapper__text__area {
+    .hashrate-chart__top__wrapper__text__area {
       display: flex;
       flex-direction: column;
       gap: 2px;
       font-weight: bold;
 
-      .market-chart__top__wrapper__text__area--top, .market-chart__top__wrapper__text__area--bottom {
+      .hashrate-chart__top__wrapper__text__area--top, .hashrate-chart__top__wrapper__text__area--bottom {
         font-size: 15px;
       }
     }
   }
 
 
-  .market-chart__bottom {
+  .hashrate-chart__bottom {
     position: relative;
-    margin: 0 -#{$spacing-16};
     width: calc(100% + (2 * #{$spacing-16}));
+    margin: 0 -#{$spacing-16} $spacing-8 -#{$spacing-16};
+    padding-bottom: $spacing-16;
     pointer-events: none; /* 클릭 방해 방지 */
     z-index: 3;
 
-    .market-chart__chart__wrapper__body {
+    .hashrate-chart__bottom__spinner {
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+    }
+
+    .hashrate-chart__chart__wrapper__body {
       background-color: transparent;
       z-index: 3;
     }
 
-    .market-chart__chart__wrapper__line__area {
+    .hashrate-chart__chart__wrapper__line__area {
       position: absolute;
       top: 0;
       left: 0;
@@ -104,7 +116,7 @@
       height: 100%;
       z-index: -1;
 
-      .market-chart__chart__wrapper__line__area--line {
+      .hashrate-chart__chart__wrapper__line__area--line {
         position: absolute;
         width: 1px;
         height: 82%;
@@ -112,6 +124,35 @@
         transform: translateY(-50%);
         border-left: 1px dashed #4f4f4f;
         z-index: 1;
+      }
+    }
+
+    .hashrate-chart__bottom__ATH {
+      position: absolute;
+      top: 0;
+      left: $spacing-16;
+      padding: $spacing-2 3px;
+      background: $default-font-color;
+      color: $default-background-color;
+      @include font-body;
+      border-radius: 3px;
+
+      .hashrate-chart__bottom__ATH__number { margin-left: $spacing-4; }
+    }
+
+    .hashrate-chart__bottom__x {
+      position: absolute;
+      bottom: -#{$spacing-2};
+      left: 0;
+      width: 100%;
+      padding: 0 $spacing-8;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .hashrate-chart__bottom__x__first, .hashrate-chart__bottom__x__middle, .hashrate-chart__bottom__x__last {
+        font-size: 12px;
+        font-family: $number-font-family;
       }
     }
   }

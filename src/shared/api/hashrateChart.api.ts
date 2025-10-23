@@ -60,15 +60,11 @@ const useHashrateChartData = (days: HashrateChartIntervalType) => {
 
   // region [Hooks]
 
-  const { data, isSuccess, isError, error} = useQuery<HashrateChartFormattedData>({
+  const { data, isSuccess, isLoading, isError, error} = useQuery<HashrateChartFormattedData>({
     queryKey: ['hashrateChart', days],
     queryFn: () => fetchHashrateChart(days),
     staleTime: 60 * 1000 * STALE_TIME_MIN,
     refetchInterval: 60 * 1000 * INTERVAL_TIME_MIN,
-    placeholderData: {
-      hashrates: { value: [], date: [] },
-      difficulty: { value: [], date: [] },
-    },
     retry: 3,
   });
 
@@ -87,7 +83,7 @@ const useHashrateChartData = (days: HashrateChartIntervalType) => {
 
   // endregion
 
-  return { data, isSuccess, isError, error };
+  return { data, isLoading, isSuccess, isError, error };
 }
 
 export default useHashrateChartData;

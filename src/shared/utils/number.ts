@@ -21,7 +21,7 @@ export function btcToSatoshi(btcCount: string | number): string {
 export function formatHashrate(hashrate: number) {
   // eslint-disable-next-line no-restricted-globals
   if (hashrate === 0 || !isFinite(hashrate)) {
-    return "0.00 H/s";
+    return "0.00H/s";
   }
 
   let hashrateValue = hashrate;
@@ -38,5 +38,5 @@ export function formatHashrate(hashrate: number) {
   }
 
   // 소수점 둘째 자리까지 표시
-  return `${hashrateValue.toFixed(2)} ${units[i]}`;
+  return `${hashrateValue.toFixed(2)}${units[i]}`;
 }
