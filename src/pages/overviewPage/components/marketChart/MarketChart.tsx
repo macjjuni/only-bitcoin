@@ -5,12 +5,12 @@ import { Line } from "react-chartjs-2";
 import {
   ChartJsDataType,
   MarketChartIntervalTypeList
-} from "@/pages/overviewPage/components/chartCard/ChartCard.interface";
+} from "@/pages/overviewPage/components/marketChart/MarketChart.interface";
 import { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import useStore from "@/shared/stores/store";
 import { CountText, HorizontalCard, UpdownIcon } from "@/components";
 import { useMarketChartData } from "@/shared/api";
-import "./ChartCard.scss";
+import "./MarketChart.scss";
 
 
 // Chart.js 컴포넌트 등록
@@ -30,7 +30,7 @@ const getChartDataset = (data: number[], index: number, isDark: boolean) => ({
 });
 
 
-const ChartCard = () => {
+const MarketChart = () => {
 
   // region [Hooks]
   const chartRef = useRef<ChartJS<"line", number[], string>>(null);
@@ -88,10 +88,10 @@ const ChartCard = () => {
   // region [Styles]
   const chartCardButtonClass = useCallback((value: MarketChartIntervalType) => {
 
-    const clazz = ["chart-card__button"];
+    const clazz = ["market-chart__button"];
 
     if (marketChartInterval === value) {
-      clazz.push("chart-card__button--active");
+      clazz.push("market-chart__button--active");
     }
 
     return clazz.join(" ");
@@ -101,18 +101,18 @@ const ChartCard = () => {
 
   // region [Templates]
   const TopLogoArea = useMemo(() => (
-    <div className="chart-card__top__fist__logo">
+    <div className="market-chart__top__fist__logo">
       <KIcon icon="bitcoin" color={isDark ? '#fff' : '#000'} size={30} />
-      <p className="chart-card__top__wrapper__text__area">
-        <span className="chart-card__top__wrapper__text__area--top">Bitcoin</span>
-        <span className="chart-card__top__wrapper__text__area--bottom">BTC</span>
+      <p className="market-chart__top__wrapper__text__area">
+        <span className="market-chart__top__wrapper__text__area--top">Bitcoin</span>
+        <span className="market-chart__top__wrapper__text__area--bottom">BTC</span>
       </p>
     </div>
   ), []);
 
 
   const ButtonIntervalArea = useMemo(() => (
-    <KButtonGroup className="chart-card__top__first__button-area">
+    <KButtonGroup className="market-chart__top__first__button-area">
       {
         marketChartIntervalOptions.map(({ value, text }) => (
           <KButton key={value} label={text} size="small" className={chartCardButtonClass(value)}
@@ -126,7 +126,7 @@ const ChartCard = () => {
   const ChartArea = useMemo(() => (
     <>
       <Line ref={chartRef} data={currentChartData} height="120%"
-            className="chart-card__chart__wrapper__body"
+            className="market-chart__chart__wrapper__body"
             options={{
               plugins: {
                 legend: { display: false },
@@ -145,10 +145,10 @@ const ChartCard = () => {
               }
             }}
       />
-      <div className="chart-card__chart__wrapper__line__area">
+      <div className="market-chart__chart__wrapper__line__area">
         {Array.from({ length: 9 }, (_, i) => (
           <span key={i} style={{ "left": `${(i + 1) * 10}%` }}
-                className="chart-card__chart__wrapper__line__area--line" />
+                className="market-chart__chart__wrapper__line__area--line" />
         ))}
       </div>
     </>
@@ -157,32 +157,32 @@ const ChartCard = () => {
 
 
   return (
-    <HorizontalCard className="chart-card">
+    <HorizontalCard className="market-chart">
 
-      <div className="chart-card__top">
+      <div className="market-chart__top">
 
-        <div className="chart-card__top__fist">
+        <div className="market-chart__top__fist">
           {TopLogoArea}
           {ButtonIntervalArea}
         </div>
 
-        <div className="chart-card__top__second">
-          <span className="chart-card__top__second__price">
+        <div className="market-chart__top__second">
+          <span className="market-chart__top__second__price">
             <CountText value={usdPrice} />
           </span>
 
-          <span className="chart-card__top__second__rate">
+          <span className="market-chart__top__second__rate">
             <UpdownIcon isUp={percentage > 0} />
             <CountText value={percentage} decimals={2} />%
           </span>
         </div>
       </div>
 
-      <div className="chart-card__bottom">{ChartArea}</div>
+      <div className="market-chart__bottom">{ChartArea}</div>
 
     </HorizontalCard>
   );
 };
 
 
-export default memo(ChartCard);
+export default memo(MarketChart);
