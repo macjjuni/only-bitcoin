@@ -100,7 +100,7 @@ const HashrateChart = () => {
       <KIcon icon="bitcoin" color={isDark ? '#fff' : '#000'} size={30} />
       <p className="market-chart__top__wrapper__text__area">
         <span className="market-chart__top__wrapper__text__area--top">Bitcoin</span>
-        <span className="market-chart__top__wrapper__text__area--bottom">BTC</span>
+        <span className="market-chart__top__wrapper__text__area--bottom">Hashrate</span>
       </p>
     </div>
   ), []);
