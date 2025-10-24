@@ -57,10 +57,10 @@ self.onmessage = function (e) {
     });
   }
 
-  // 샘플링 적용 (60% 감소, 약 2400개 목표)
+  // 샘플링 적용 (64% 감소)
   let simplifiedHashrates = hashrates;
   if (hashrates.length > 2000) {
-    const targetCount = Math.floor(hashrates.length * 0.4);
+    const targetCount = Math.floor(hashrates.length * 0.36);
     simplifiedHashrates = uniformSampleByTime(hashrates, targetCount);
   }
 
