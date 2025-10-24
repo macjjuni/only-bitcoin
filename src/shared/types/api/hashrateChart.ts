@@ -20,6 +20,8 @@ export interface HashrateChartResponseData {
 }
 
 export interface HashrateChartFormattedData {
+  currentDifficulty: number;
+  currentHashrate: number;
   hashrates: {
     value: number[];
     date: number[];

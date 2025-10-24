@@ -8,7 +8,6 @@
 @use "@/app/styles/components/k-accordion";
 @use "@/app/styles/components/k-select";
 
-
 html, body, div, span, applet, object, iframe,
 h1, h2, h3, h4, h5, h6, p, blockquote, pre,
 a, abbr, acronym, address, big, cite, code,
@@ -34,24 +33,11 @@ article, aside, details, figcaption, figure,
 footer, header, hgroup, menu, nav, section {
   display: block;
 }
-
-ol, ul {
-  list-style: none;
-}
-
-blockquote, q {
-  quotes: none;
-}
-
+ol, ul { list-style: none; }
+blockquote, q { quotes: none; }
 blockquote:before, blockquote:after,
-q:before, q:after {
-  content: none;
-}
-
-table {
-  border-collapse: collapse;
-  border-spacing: 0;
-}
+q:before, q:after { content: none; }
+table { border-collapse: collapse; border-spacing: 0; }
 
 a {
   width: 100%;
@@ -63,19 +49,9 @@ a {
   @include remove-tap-highlight;
 }
 
-.dark a {
-  color: $link-color;
-  text-decoration: none;
-}
-
-a:hover, a:active {
-  text-decoration: underline;
-}
-
-* {
-  box-sizing: border-box;
-  margin: 0;
-}
+.dark a { color: $link-color; text-decoration: none; }
+a:hover, a:active { text-decoration: underline; }
+* { box-sizing: border-box; margin: 0; }
 
 button {
   background: inherit;
@@ -87,18 +63,11 @@ button {
   cursor: pointer;
   @include remove-tap-highlight;
 }
+svg { margin: 0; }
+text { font-family: $number-font-family; }
+.remove-highlight { @include remove-tap-highlight; }
 
-svg {
-  margin: 0;
-}
-
-text {
-  font-family: $number-font-family;
-}
-
-html, body {
-  @include noScroll;
-}
+html, body { @include noScroll; }
 
 body {
   margin: 0;
@@ -110,7 +79,7 @@ body {
   background-color: $default-background-color;
 
   &.show-bg {
-    background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif'); /*이미지 경로지정*/
+    background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif');
     background-size: 420px;
     background-position: center calc(50% - (#{$mobile-bottom-navigation-height} / 2));
     background-repeat: no-repeat;

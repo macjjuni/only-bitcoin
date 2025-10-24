@@ -7,10 +7,6 @@ import { isDev } from "@/shared/utils/common";
 import { MarketChartFormattedData, MarketChartResponseData } from "@/shared/types/api/marketChart";
 
 
-const MARKET_CHART_API_URL = 'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart';
-const STALE_TIME_MIN = 5;
-const INTERVAL_TIME_MIN = 1;
-
 async function fetchMarketChart(days: MarketChartIntervalType): Promise<MarketChartFormattedData> {
 
   try {
@@ -31,6 +27,10 @@ async function fetchMarketChart(days: MarketChartIntervalType): Promise<MarketCh
   }
 }
 
+const MARKET_CHART_API_URL = 'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart';
+const STALE_TIME_MIN = 5;
+const INTERVAL_TIME_MIN = 5;
+
 const useMarketChart= (days: MarketChartIntervalType) => {
 
   // region [Hooks]
@@ -39,6 +39,7 @@ const useMarketChart= (days: MarketChartIntervalType) => {
     queryKey: ['marketChart', days],
     queryFn: () => fetchMarketChart(days),
     staleTime: 60 * 1000 * STALE_TIME_MIN,
+    refetchOnMount: true,
     refetchInterval: 60 * 1000 * INTERVAL_TIME_MIN,
     placeholderData: { price: [], date: [] },
     retry: 3,

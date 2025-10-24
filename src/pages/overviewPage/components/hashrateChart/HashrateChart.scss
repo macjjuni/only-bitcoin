@@ -6,8 +6,8 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: $spacing-12;
-  padding: $spacing-16 $spacing-16 $spacing-8 $spacing-16;
+  gap: $spacing-2;
+  padding: $spacing-16 $spacing-16 $spacing-4 $spacing-16;
   user-select: none;
   overflow: hidden;
   @include user-select;
@@ -75,10 +75,38 @@
       }
     }
 
+    .hashrate-chart__top__second {
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+
+      .hashrate-chart__top__second__area {
+        display: flex;
+        gap: $spacing-8;
+
+        .hashrate-chart__top__second__area__value {
+          @include font-body;
+          font-family: $number-font-family;
+          font-weight: bold;
+        }
+
+        .hashrate-chart__top__second__area__rate {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: $spacing-2;
+          font-family: $number-font-family;
+          font-weight: bold;
+          font-size: 12px;
+          line-height: 16px;
+        }
+      }
+    }
+
     .hashrate-chart__top__wrapper__text__area {
       display: flex;
       flex-direction: column;
-      gap: 2px;
+      gap: $spacing-2;
       font-weight: bold;
 
       .hashrate-chart__top__wrapper__text__area--top, .hashrate-chart__top__wrapper__text__area--bottom {
@@ -91,8 +119,7 @@
   .hashrate-chart__bottom {
     position: relative;
     width: calc(100% + (2 * #{$spacing-16}));
-    margin: 0 -#{$spacing-16} $spacing-8 -#{$spacing-16};
-    padding-bottom: $spacing-16;
+    margin: 0 -#{$spacing-16} $spacing-4 -#{$spacing-16};
     pointer-events: none; /* 클릭 방해 방지 */
     z-index: 3;
 
@@ -127,22 +154,10 @@
       }
     }
 
-    .hashrate-chart__bottom__ATH {
-      position: absolute;
-      top: 0;
-      left: $spacing-16;
-      padding: $spacing-2 3px;
-      background: $default-font-color;
-      color: $default-background-color;
-      @include font-body;
-      border-radius: 3px;
-
-      .hashrate-chart__bottom__ATH__number { margin-left: $spacing-4; }
-    }
 
     .hashrate-chart__bottom__x {
       position: absolute;
-      bottom: -#{$spacing-2};
+      bottom: $spacing-2;
       left: 0;
       width: 100%;
       padding: 0 $spacing-8;

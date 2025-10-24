@@ -10,6 +10,7 @@ import {MarketChartIntervalType} from '@/shared/stores/store.interface'
 import useStore from '@/shared/stores/store'
 import {CountText, HorizontalCard, UpdownIcon} from '@/components'
 import {useMarketChartData} from '@/shared/api'
+import {ChartChanger} from '@/pages/overviewPage/components'
 import './MarketChart.scss'
 
 
@@ -72,15 +73,10 @@ const MarketChart = () => {
 
   // region [Privates]
   const initializeTooltip = useCallback(() => {
-
-    // 데이터가 있을 때 초기화
-    setTimeout(() => {
-
       if (currentChartData.labels.length > 0 && chartRef.current) {
         chartRef.current?.tooltip?.setActiveElements([{datasetIndex: 0, index: maxValueIndex}], {x: 0, y: 0})
         chartRef.current?.update()
       }
-    }, 300)
   }, [maxValueIndex, currentChartData])
   // endregion
 
@@ -141,11 +137,7 @@ const MarketChart = () => {
               },
               elements: {point: {radius: 0}, line: {tension: 0.3, borderWidth: 2}},
               scales: {x: {display: false}, y: {display: false, suggestedMax: maxValue * 1.005}},
-              animation: {
-                duration: 800,
-                easing: 'easeInOutQuart',
-                onComplete: initializeTooltip,
-              },
+              animation: { duration: 800, easing: 'easeInOutQuart', onComplete: initializeTooltip, },
             }}
       />
       <div className="market-chart__chart__wrapper__line__area">
@@ -170,14 +162,17 @@ const MarketChart = () => {
         </div>
 
         <div className="market-chart__top__second">
-          <span className="market-chart__top__second__price">
+          <div className="market-chart__top__second__area">
+          <span className="market-chart__top__second__area__price">
             <CountText value={usdPrice}/>
           </span>
 
-          <span className="market-chart__top__second__rate">
+            <span className="market-chart__top__second__area__rate">
             <UpdownIcon isUp={percentage > 0}/>
             <CountText value={percentage} decimals={2}/>%
           </span>
+          </div>
+          <ChartChanger />
         </div>
       </div>
 

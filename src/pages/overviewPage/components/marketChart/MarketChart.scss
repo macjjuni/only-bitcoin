@@ -73,25 +73,29 @@
 
     .market-chart__top__second {
       display: flex;
-      justify-content: flex-start;
-      align-items: flex-start;
-      gap: $spacing-8;
+      justify-content: space-between;
+      align-items: center;
 
-      .market-chart__top__second__price {
-        @include font-body;
-        font-family: $number-font-family;
-        font-weight: bold;
-      }
-
-      .market-chart__top__second__rate {
+      .market-chart__top__second__area {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 2px;
-        font-family: $number-font-family;
-        font-weight: bold;
-        font-size: 12px;
-        line-height: 16px;
+        gap: $spacing-8;
+
+        .market-chart__top__second__area__price {
+          @include font-body;
+          font-family: $number-font-family;
+          font-weight: bold;
+        }
+
+        .market-chart__top__second__area__rate {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 2px;
+          font-family: $number-font-family;
+          font-weight: bold;
+          font-size: 12px;
+          line-height: 16px;
+        }
       }
     }
 
