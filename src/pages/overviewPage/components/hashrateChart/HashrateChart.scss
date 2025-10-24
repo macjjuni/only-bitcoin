@@ -125,7 +125,7 @@
 
     .hashrate-chart__bottom__spinner {
       position: absolute;
-      top: 50%;
+      top: calc(50% - 16px);
       left: 50%;
       transform: translate(-50%, -50%);
     }

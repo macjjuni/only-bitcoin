@@ -1,5 +1,5 @@
 import React, {memo, useCallback, useEffect, useMemo, useRef} from 'react'
-import {CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Tooltip} from 'chart.js'
+import {Chart as ChartJS, LinearScale, LineElement, PointElement, Tooltip} from 'chart.js'
 import {KButton, KButtonGroup, KIcon, KSpinner} from 'kku-ui'
 import {Line} from 'react-chartjs-2'
 import {
@@ -17,7 +17,7 @@ import {ChartChanger} from '@/pages/overviewPage/components'
 
 
 // Chart.js 컴포넌트 등록
-ChartJS.register(CategoryScale, LinearScale, PointElement, Tooltip, Legend, LineElement)
+ChartJS.register(LinearScale, PointElement, Tooltip, LineElement)
 
 const hashrateChartIntervalOptions: MarketChartIntervalTypeList[] = [
   {text: '3M', value: '3m'},
@@ -168,6 +168,11 @@ const HashrateChart = () => {
             options={{
               plugins: {
                 legend: {display: false},
+                decimation: {
+                  enabled: true,
+                  algorithm: 'lttb',
+                  samples: 0,
+                },
                 tooltip: {
                   enabled: true,
                   usePointStyle: true,
@@ -180,7 +185,7 @@ const HashrateChart = () => {
                 x: {display: false},
                 y: {display: false, suggestedMax: maxValue * 1.012},
               },
-              animation: {duration: 800, easing: 'easeInOutQuart', onComplete: initializeTooltip},
+              animation: false,
             }}
       />
       <div className="hashrate-chart__chart__wrapper__line__area">
@@ -198,10 +203,15 @@ const HashrateChart = () => {
     initializeBlankHeight()
   }, [])
 
+  useEffect(() => {
+    if (chartRef?.current) {
+      initializeTooltip();
+    }
+  }, [initializeTooltip]); // 데이터가 바뀔 때마다 실행
+
 
   return (
     <HorizontalCard ref={cardRef} className="hashrate-chart" rows={2}>
-
       <div className="hashrate-chart__top">
         <div className="hashrate-chart__top__fist">
           {TopLogoArea}
@@ -221,10 +231,7 @@ const HashrateChart = () => {
 
           <ChartChanger/>
         </div>
-
-
       </div>
-
 
       <div ref={chartBottomRef} className="hashrate-chart__bottom">
         {isLoading && <KSpinner className="hashrate-chart__bottom__spinner"/>}
