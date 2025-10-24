@@ -1,7 +1,7 @@
 @use '@/app/styles/variable' as *;
 @use '@/app/styles/mixin' as *;
 
-.chart-card {
+.market-chart {
   position: relative;
   display: flex;
   flex-direction: column;
@@ -24,7 +24,7 @@
     pointer-events: none; /* 클릭 방해 방지 */
   }
 
-  .chart-card__top {
+  .market-chart__top {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -32,27 +32,27 @@
     color: $default-font-color;
     z-index: 5;
 
-    .chart-card__top__fist {
+    .market-chart__top__fist {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
 
-      .chart-card__top__fist__logo {
+      .market-chart__top__fist__logo {
         display: flex;
         justify-content: flex-start;
         align-items: center;
         gap: $spacing-8;
       }
 
-      .chart-card__top__first__button-area {
+      .market-chart__top__first__button-area {
 
-        .chart-card__button {
+        .market-chart__button {
           height: 28px;
           padding: 0 $spacing-12;
           color: $default-font-color;
           background-color: $default-background-color;
 
-          &.chart-card__button--active {
+          &.market-chart__button--active {
             color: $default-background-color;
             border-color: $default-font-color;
             background-color: $default-font-color;
@@ -71,56 +71,60 @@
       }
     }
 
-    .chart-card__top__second {
+    .market-chart__top__second {
       display: flex;
-      justify-content: flex-start;
-      align-items: flex-start;
-      gap: 8px;
+      justify-content: space-between;
+      align-items: center;
 
-      .chart-card__top__second__price {
-        @include font-body;
-        font-family: $number-font-family;
-        font-weight: bold;
-      }
-
-      .chart-card__top__second__rate {
+      .market-chart__top__second__area {
         display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: 2px;
-        font-family: $number-font-family;
-        font-weight: bold;
-        font-size: 12px;
-        line-height: 16px;
+        gap: $spacing-8;
+
+        .market-chart__top__second__area__price {
+          @include font-body;
+          font-family: $number-font-family;
+          font-weight: bold;
+        }
+
+        .market-chart__top__second__area__rate {
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          gap: 2px;
+          font-family: $number-font-family;
+          font-weight: bold;
+          font-size: 12px;
+          line-height: 16px;
+        }
       }
     }
 
-    .chart-card__top__wrapper__text__area {
+    .market-chart__top__wrapper__text__area {
       display: flex;
       flex-direction: column;
       gap: 2px;
       font-weight: bold;
 
-      .chart-card__top__wrapper__text__area--top, .chart-card__top__wrapper__text__area--bottom {
+      .market-chart__top__wrapper__text__area--top, .market-chart__top__wrapper__text__area--bottom {
         font-size: 15px;
       }
     }
   }
 
 
-  .chart-card__bottom {
+  .market-chart__bottom {
     position: relative;
     margin: 0 -#{$spacing-16};
     width: calc(100% + (2 * #{$spacing-16}));
     pointer-events: none; /* 클릭 방해 방지 */
     z-index: 3;
 
-    .chart-card__chart__wrapper__body {
+    .market-chart__chart__wrapper__body {
       background-color: transparent;
       z-index: 3;
     }
 
-    .chart-card__chart__wrapper__line__area {
+    .market-chart__chart__wrapper__line__area {
       position: absolute;
       top: 0;
       left: 0;
@@ -128,7 +132,7 @@
       height: 100%;
       z-index: -1;
 
-      .chart-card__chart__wrapper__line__area--line {
+      .market-chart__chart__wrapper__line__area--line {
         position: absolute;
         width: 1px;
         height: 82%;

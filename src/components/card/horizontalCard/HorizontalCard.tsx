@@ -1,37 +1,31 @@
-import { memo, ReactNode, useMemo } from "react";
+import { forwardRef, ReactNode, useMemo } from "react";
 import { ComponentBaseTypes } from "@/shared/types/base.interface";
 import "./HorizontalCard.scss";
-
 
 interface HorizontalCardInterface extends ComponentBaseTypes {
   children: ReactNode;
   rows?: number;
 }
 
-const HorizontalCard = ({children, className, rows = 3}: HorizontalCardInterface) => {
+const HorizontalCard = forwardRef<HTMLDivElement, HorizontalCardInterface>(
+  ({ children, className, rows = 3 }, ref) => {
 
+    const rootClass = useMemo(() => {
+      const classArr = ['horizontal-card'];
 
-  // region [Hooks]
+      if (className) classArr.push(className);
+      if (rows) classArr.push(`horizontal-card--row-${rows}`);
 
-  const rootClass = useMemo(() => {
+      return classArr.join(' ');
+    }, [className, rows]);
 
-    const classArr = ['horizontal-card'];
+    return (
+      <div ref={ref} className={rootClass}>
+        {children}
+      </div>
+    );
+  }
+);
 
-    if (className) { classArr.push(className); }
-
-    if (rows) { classArr.push(`horizontal-card--row-${rows}`)}
-
-    return classArr.join(' ');
-  }, [className, rows]);
-
-  // endregion
-
-
-  return (
-    <div className={rootClass}>
-      {children}
-    </div>
-  );
-};
-
-export default memo(HorizontalCard);
+HorizontalCard.displayName = 'HorizontalCard';
+export default HorizontalCard;

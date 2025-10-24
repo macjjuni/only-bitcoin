@@ -21,11 +21,18 @@ export interface StoreType {
   setReconnectBinance: (fn: () => void) => void;
   // endregion
 
-  // region [대시보드 차트]
+  // region [대시보드 가격 차트]
+  overviewChart: 'hashrate' | 'price';
+  setOverviewChart: (chart: 'hashrate' | 'price') => void
   marketChartInterval: MarketChartIntervalType;
   setMarketChartInterval: (interval: MarketChartIntervalType) => void;
   marketChartData: BtcChart;
   setMarketChartData: (interval: MarketChartIntervalType, data: ChartData) => void;
+  // endregion
+
+  // region [대시보드 해시레이트 차트]
+  hashrateChartInterval: HashrateChartIntervalType;
+  setHashrateChartInterval: (interval: HashrateChartIntervalType) => void;
   // endregion
 
   // region [환율 데이터]
@@ -61,9 +68,7 @@ export interface StoreType {
   // endregion
 }
 
-
 export interface BitcoinPriceTypes extends BitcoinPriceKRWTypes, BitcoinPriceUSDTypes {}
-
 
 export interface BitcoinPriceKRWTypes {
   krw: number;
@@ -80,17 +85,10 @@ export interface BitcoinPriceUSDTypes {
   isUsdConnected?: boolean; // 웹 소켓 접속 여부(바이낸스)
 }
 
-
 // 환율 정보
 export interface ExRateTypes {
   value: number;
   date: string;
-}
-
-export interface NextHalvingTypes {
-  nextHalvingHeight: number;
-  nextHalvingPredictedDate: string;
-  remainingHeight: number;
 }
 
 export interface BlockTypes {
@@ -99,7 +97,6 @@ export interface BlockTypes {
   timestamp: number; // 블록 생성 타임스탬프
   size: number;
   poolName: string;
-  // nextHalving: NextHalvingTypes;
 }
 
 // 비트코인 차트 데이터
@@ -110,15 +107,16 @@ export interface ChartData {
 }
 
 export interface BtcChart {
-  "1": ChartData;
-  "7": ChartData;
-  "30": ChartData;
-  "365": ChartData;
+  '1': ChartData;
+  '7': ChartData;
+  '30': ChartData;
+  '365': ChartData;
 }
 
 export type MarketChartIntervalType = 1 | 7 | 30 | 365;
+export type HashrateChartIntervalType = '3m' | '6m' | '1y' | '2y' | '3y' | 'all';
 
-export type CurrencyTypes = "KRW" | "USD" | "KRW/USD";
+export type CurrencyTypes = 'KRW' | 'USD' | 'KRW/USD';
 
 export interface SettingTypes {
   initialPath: string;
@@ -142,4 +140,4 @@ export interface BeforeInstallPromptEvent extends Event {
   userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
 }
 
-export type UnitType = "BTC" | "USD" | "KRW" | "SATS";
+export type UnitType = 'BTC' | 'USD' | 'KRW' | 'SATS';
