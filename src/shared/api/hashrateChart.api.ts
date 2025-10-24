@@ -10,7 +10,7 @@ import {HashrateChartFormattedData, HashrateChartResponseData} from '@/shared/ty
 function processDataInWorker(data: HashrateChartResponseData): Promise<HashrateChartFormattedData> {
 
   return new Promise((resolve, reject) => {
-    const worker = new Worker('/worker/hashrate.js');
+    const worker = new Worker('/worker/hashrate-chart.js');
 
     worker.postMessage(data);
 

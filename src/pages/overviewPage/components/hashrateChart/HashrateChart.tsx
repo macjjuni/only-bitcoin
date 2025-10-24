@@ -32,6 +32,10 @@ const getChartDataset = (data: number[], index: number, isDark: boolean) => ({
   pointRadius: data.map((_, idx) => (idx === index ? 4 : 0)), // 최댓값 위치에 점 표시
 })
 
+/*
+* 해시레이트 모든 차트는 데이터 크기가 많아 시간기반 균일 샘플링으로 최적화(45%) 처리를 했으나,
+* 시간이 지날수록 데이터가 계속 늘어나므로 최적화 양을 늘리거나 알고리즘 변화가 필요함.
+*  */
 
 const HashrateChart = () => {
 
@@ -136,7 +140,6 @@ const HashrateChart = () => {
   }, [data])
   // endregion
 
-
   // region [Templates]
   const TopLogoArea = useMemo(() => (
     <div className="hashrate-chart__top__fist__logo">
@@ -171,19 +174,20 @@ const HashrateChart = () => {
                 decimation: {
                   enabled: true,
                   algorithm: 'lttb',
-                  samples: 0,
+                  samples: 1,
                 },
                 tooltip: {
                   enabled: true,
                   usePointStyle: true,
                   caretPadding: 6,
+                  backgroundColor: 'rgba(0, 0, 0, 0.72)',
                   callbacks: {label: (e) => `${formatHashrate(e.raw as number)}`},
                 },
               },
-              elements: {point: {radius: 0}, line: {tension: 0.3, borderWidth: 2}},
+              elements: {point: {radius: 0}, line: {tension: 0.2, borderWidth: 2}},
               scales: {
                 x: {display: false},
-                y: {display: false, suggestedMax: maxValue * 1.012},
+                y: {display: false, suggestedMax: maxValue * 1.014},
               },
               animation: false,
             }}
@@ -199,16 +203,18 @@ const HashrateChart = () => {
   // endregion
 
 
+  // region [Life Cycles]
   useEffect(() => {
     initializeBlankHeight()
   }, [])
 
   useEffect(() => {
+    // console.log(data?.hashrates)
     if (chartRef?.current) {
-      initializeTooltip();
+      initializeTooltip()
     }
-  }, [initializeTooltip]); // 데이터가 바뀔 때마다 실행
-
+  }, [initializeTooltip])
+  // endregion
 
   return (
     <HorizontalCard ref={cardRef} className="hashrate-chart" rows={2}>
@@ -220,7 +226,7 @@ const HashrateChart = () => {
         <div className="hashrate-chart__top__second">
           <div className="hashrate-chart__top__second__area">
             <span className="hashrate-chart__top__second__area__value">
-              {formatHashrate(data?.hashrates.value[data.hashrates.value.length - 1] || 0)}
+              {formatHashrate(data?.currentHashrate || 0)}
             </span>
 
             <span className="hashrate-chart__top__second__area__rate">
