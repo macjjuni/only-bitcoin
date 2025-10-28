@@ -73,12 +73,12 @@
 <details open>
     <summary><b>v3.5 (25.10.24)</b></summary>
     <div markdown="1">
-        <img src="https://github.com/user-attachments/assets/0a8a36b0-24f4-4f08-a3e0-d1ec518c911d" width="136" alt="3.5.0 initial screen1">
-        <img src="https://github.com/user-attachments/assets/fb0986be-43c8-4b77-ad51-31d508608fdf" width="136" alt="3.5.0 initial screen2">
-        <img src="https://github.com/user-attachments/assets/d51d7b6d-928a-4986-b69d-bce7ff9b0b24" width="136" alt="3.5.0 initial screen3">
-        <img src="https://github.com/user-attachments/assets/a868cb7b-613d-4246-a16e-ecc1d1b200a9" width="136" alt="3.5.0 initial screen4">
-        <img src="https://github.com/user-attachments/assets/59e10ada-aa8d-462a-abc9-19836baa2b0d" width="136" alt="3.5.0 initial screen5">
-        <img src="https://github.com/user-attachments/assets/0f0a29b9-8a8f-47d8-b183-618549126d93" width="136" alt="3.5.0 initial screen6">
+        <img src="https://github.com/user-attachments/assets/0a8a36b0-24f4-4f08-a3e0-d1ec518c911d" width="270" alt="3.5.0 initial screen1">
+        <img src="https://github.com/user-attachments/assets/fb0986be-43c8-4b77-ad51-31d508608fdf" width="270" alt="3.5.0 initial screen2">
+        <img src="https://github.com/user-attachments/assets/d51d7b6d-928a-4986-b69d-bce7ff9b0b24" width="270" alt="3.5.0 initial screen3">
+        <img src="https://github.com/user-attachments/assets/a868cb7b-613d-4246-a16e-ecc1d1b200a9" width="270" alt="3.5.0 initial screen4">
+        <img src="https://github.com/user-attachments/assets/59e10ada-aa8d-462a-abc9-19836baa2b0d" width="270" alt="3.5.0 initial screen5">
+        <img src="https://github.com/user-attachments/assets/0f0a29b9-8a8f-47d8-b183-618549126d93" width="270" alt="3.5.0 initial screen6">
 
 - 팔마2 유저를 위한 기본 화이트 테마 지원
 - Bithumb 거래소 시세 지원(간헐적 업비트 접속 오류로 인한 대체 거래소 지원)  
