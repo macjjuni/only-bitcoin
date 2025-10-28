@@ -103,6 +103,7 @@ const useStore = create<StoreType>()(
         initialPath: '/overview',
         currency: 'KRW/USD',
         isUsdtStandard: false,
+        isBIP177: false,
         isCountUp: true,
         isBackgroundImg: false,
         deferredPrompt: null,

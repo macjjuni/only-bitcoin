@@ -121,6 +121,7 @@ export type CurrencyTypes = 'KRW' | 'USD' | 'KRW/USD';
 export interface SettingTypes {
   initialPath: string;
   currency: CurrencyTypes;
+  isBIP177: boolean,
   isUsdtStandard: boolean;
   isCountUp: boolean;
   isBackgroundImg: boolean;
