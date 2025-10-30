@@ -22,8 +22,8 @@ export interface StoreType {
   // endregion
 
   // region [대시보드 가격 차트]
-  overviewChart: 'hashrate' | 'price';
-  setOverviewChart: (chart: 'hashrate' | 'price') => void
+  overviewChart: OverviewChartType;
+  setOverviewChart: (chart: OverviewChartType) => void
   marketChartInterval: MarketChartIntervalType;
   setMarketChartInterval: (interval: MarketChartIntervalType) => void;
   marketChartData: BtcChart;
@@ -31,8 +31,8 @@ export interface StoreType {
   // endregion
 
   // region [대시보드 해시레이트 차트]
-  hashrateChartInterval: HashrateChartIntervalType;
-  setHashrateChartInterval: (interval: HashrateChartIntervalType) => void;
+  miningMetricChartInterval: MiningMetricChartIntervalType;
+  setMiningMetricChartInterval: (interval: MiningMetricChartIntervalType) => void;
   // endregion
 
   // region [환율 데이터]
@@ -113,8 +113,9 @@ export interface BtcChart {
   '365': ChartData;
 }
 
+export type OverviewChartType = 'hashrate' | 'difficulty' | 'price';
 export type MarketChartIntervalType = 1 | 7 | 30 | 365;
-export type HashrateChartIntervalType = '3m' | '6m' | '1y' | '2y' | '3y' | 'all';
+export type MiningMetricChartIntervalType = '3m' | '6m' | '1y' | '2y' | '3y' | 'all';
 
 export type CurrencyTypes = 'KRW' | 'USD' | 'KRW/USD';
 

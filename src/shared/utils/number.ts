@@ -40,3 +40,26 @@ export function formatHashrate(hashrate: number) {
   // 소수점 둘째 자리까지 표시
   return `${hashrateValue.toFixed(2)}${units[i]}`;
 }
+
+
+/**
+ * 비트코인 난이도 단위 변환 (K, M, G, T, P, E)
+ * @param {number} difficulty - 비트코인 난이도
+ * @returns {string} 예: "25.3 T" (T = 10^12)
+ */
+export function formatDifficulty(difficulty: number) {
+  if (difficulty < 0) {
+    throw Error('"Invalid difficulty"');
+  }
+
+  const units = ["", "K", "M", "G", "T", "P", "E"];
+  let index = 0;
+  let value = difficulty;
+
+  while (value >= 1000 && index < units.length - 1) {
+    value /= 1000;
+    index++;
+  }
+
+  return `${value.toFixed(2)}${units[index]}`;
+}
