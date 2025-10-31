@@ -79,7 +79,9 @@ const BlockHalvingCard = () => {
         <div className="block-card__guage__area__remaining">
           <div className="block-card__guage__area__remaining__lottie">{View}</div>
           <span className="block-card__guage__area__remaining__text">
-            {comma(recentBlockData.height)} | {comma(nextHalvingData.blockHeight - recentBlockData.height)}
+            {comma(recentBlockData.height)}
+            <div className="block-card__guage__area__remaining__text__bar" />
+            {comma(nextHalvingData.blockHeight - recentBlockData.height)}
           </span>
           remaining
         </div>
