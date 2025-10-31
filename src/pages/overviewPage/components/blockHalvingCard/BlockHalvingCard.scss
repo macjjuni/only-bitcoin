@@ -98,7 +98,18 @@
       }
 
       .block-card__guage__area__remaining__text {
+        display: flex;
+        justify-content: center;
+        align-items: center;
         font-family: $number-font-family;
+        gap: $spacing-8;
+
+        .block-card__guage__area__remaining__text__bar {
+          display: inline-block;
+          width: 2px;
+          height: 16px;
+          background: $default-font-color;
+        }
       }
     }
 

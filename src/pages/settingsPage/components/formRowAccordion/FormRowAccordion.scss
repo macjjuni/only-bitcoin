@@ -49,7 +49,7 @@
     }
 }
 
-.dark {
+.#{$kku-dark-mode-signature} {
     #only-bitcoin {
         .k-accordion.form-row__accordion {
             &:after {

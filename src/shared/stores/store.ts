@@ -31,12 +31,9 @@ const useStore = create<StoreType>()(
       })),
       krwMarket: 'BITHUMB',
       setKrwMarket: (krwMarket) => set((store) => ({...store, krwMarket})),
-      reconnectUpbit: () => {
-      },
-      reconnectBithumb: () => {
-      },
-      reconnectBinance: () => {
-      },
+      reconnectUpbit: () => {},
+      reconnectBithumb: () => {},
+      reconnectBinance: () => {},
       setReconnectUpbit: (reconnectUpbit) => set((store) => ({...store, reconnectUpbit})),
       setReconnectBithumb: (reconnectBithumb) => set((store) => ({...store, reconnectBithumb})),
       setReconnectBinance: (reconnectBinance) => set((store) => ({...store, reconnectBinance})),
@@ -59,9 +56,9 @@ const useStore = create<StoreType>()(
       setMarketChartData: (interval, data) => set((store) => ({
         marketChartData: {...store.marketChartData, [interval]: data},
       })),
-      hashrateChartInterval: 'all',
-      setHashrateChartInterval: ((hashrateChartInterval) => set((store) =>
-        ({...store, hashrateChartInterval}),
+      miningMetricChartInterval: 'all',
+      setMiningMetricChartInterval: ((miningMetricChartInterval) => set((store) =>
+        ({...store, miningMetricChartInterval}),
       )),
       // endregion
 

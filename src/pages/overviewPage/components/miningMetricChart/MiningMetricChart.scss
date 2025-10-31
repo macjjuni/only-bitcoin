@@ -1,12 +1,11 @@
 @use '@/app/styles/variable' as *;
 @use '@/app/styles/mixin' as *;
 
-.hashrate-chart {
+.mining-metric-chart {
   position: relative;
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  gap: $spacing-2;
   padding: $spacing-16 $spacing-16 $spacing-4 $spacing-16;
   user-select: none;
   overflow: hidden;
@@ -24,7 +23,7 @@
     pointer-events: none;
   }
 
-  .hashrate-chart__top {
+  .mining-metric-chart__top {
     display: flex;
     flex-direction: column;
     justify-content: flex-start;
@@ -32,12 +31,12 @@
     color: $default-font-color;
     z-index: 5;
 
-    .hashrate-chart__top__fist {
+    .mining-metric-chart__top__fist {
       display: flex;
       justify-content: space-between;
       align-items: flex-start;
 
-      .hashrate-chart__top__fist__logo {
+      .mining-metric-chart__top__fist__logo {
         display: flex;
         justify-content: flex-start;
         align-items: center;
@@ -48,15 +47,15 @@
         }
       }
 
-      .hashrate-chart__top__first__button-area {
+      .mining-metric-chart__top__first__button-area {
 
-        .hashrate-chart__button {
+        .mining-metric-chart__button {
           height: 28px;
           padding: 0 $spacing-12;
           color: $default-font-color;
           background-color: $default-background-color;
 
-          &.hashrate-chart__button--active {
+          &.mining-metric-chart__button--active {
             color: $default-background-color;
             border-color: $default-font-color;
             background-color: $default-font-color;
@@ -75,22 +74,23 @@
       }
     }
 
-    .hashrate-chart__top__second {
+    .mining-metric-chart__top__second {
       display: flex;
       justify-content: space-between;
       align-items: center;
 
-      .hashrate-chart__top__second__area {
+      .mining-metric-chart__top__second__area {
         display: flex;
         gap: $spacing-8;
+        position: relative;
 
-        .hashrate-chart__top__second__area__value {
+        .mining-metric-chart__top__second__area__value {
           @include font-body;
           font-family: $number-font-family;
           font-weight: bold;
         }
 
-        .hashrate-chart__top__second__area__rate {
+        .mining-metric-chart__top__second__area__rate {
           display: flex;
           justify-content: center;
           align-items: center;
@@ -100,42 +100,56 @@
           font-size: 12px;
           line-height: 16px;
         }
+
+        $lightning-size: 40px;
+
+        .mining-metric-chart__top__second__area__ath-lottie {
+          position: absolute;
+          top: 50%;
+          right: calc(-#{$lightning-size} + 6px);
+          transform: translate(0, -46%);
+          display: flex;
+          justify-content: center;
+          align-items: center;
+          width: $lightning-size;
+          height: $lightning-size;
+        }
       }
     }
 
-    .hashrate-chart__top__wrapper__text__area {
+    .mining-metric-chart__top__wrapper__text__area {
       display: flex;
       flex-direction: column;
       gap: $spacing-2;
       font-weight: bold;
 
-      .hashrate-chart__top__wrapper__text__area--top, .hashrate-chart__top__wrapper__text__area--bottom {
+      .mining-metric-chart__top__wrapper__text__area--top, .mining-metric-chart__top__wrapper__text__area--bottom {
         font-size: 15px;
       }
     }
   }
 
 
-  .hashrate-chart__bottom {
+  .mining-metric-chart__bottom {
     position: relative;
     width: calc(100% + (2 * #{$spacing-16}));
     margin: 0 -#{$spacing-16} $spacing-4 -#{$spacing-16};
     pointer-events: none; /* 클릭 방해 방지 */
     z-index: 3;
 
-    .hashrate-chart__bottom__spinner {
+    .mining-metric-chart__bottom__spinner {
       position: absolute;
       top: calc(50% - 16px);
       left: 50%;
       transform: translate(-50%, -50%);
     }
 
-    .hashrate-chart__chart__wrapper__body {
+    .mining-metric-chart__chart__wrapper__body {
       background-color: transparent;
       z-index: 3;
     }
 
-    .hashrate-chart__chart__wrapper__line__area {
+    .mining-metric-chart__chart__wrapper__line__area {
       position: absolute;
       top: 0;
       left: 0;
@@ -143,7 +157,7 @@
       height: 100%;
       z-index: -1;
 
-      .hashrate-chart__chart__wrapper__line__area--line {
+      .mining-metric-chart__chart__wrapper__line__area--line {
         position: absolute;
         width: 1px;
         height: 82%;
@@ -155,7 +169,7 @@
     }
 
 
-    .hashrate-chart__bottom__x {
+    .mining-metric-chart__bottom__x {
       position: absolute;
       bottom: $spacing-2;
       left: 0;
@@ -165,7 +179,7 @@
       justify-content: space-between;
       align-items: center;
 
-      .hashrate-chart__bottom__x__first, .hashrate-chart__bottom__x__middle, .hashrate-chart__bottom__x__last {
+      .mining-metric-chart__bottom__x__first, .mining-metric-chart__bottom__x__middle, .mining-metric-chart__bottom__x__last {
         font-size: 12px;
         font-family: $number-font-family;
       }

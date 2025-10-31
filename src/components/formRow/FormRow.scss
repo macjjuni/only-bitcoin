@@ -60,7 +60,7 @@
 }
 
 
-.dark {
+.#{$kku-dark-mode-signature} {
     .form-row__area {
         &:after {
             background-color: $gray-600;

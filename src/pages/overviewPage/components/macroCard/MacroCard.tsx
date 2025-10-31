@@ -73,7 +73,7 @@ const PricePannel = () => {
         {
           macroDataList.map(({ label, value, sign, onClick, decimals }) => (
             // eslint-disable-next-line jsx-a11y/no-noninteractive-tabindex,jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions
-            <div key={label} className="macro-card__item" onClick={onClick} tabIndex={0}>
+            <div key={label} className="macro-card__item" onClick={onClick} tabIndex={0} style={{ cursor: onClick ? 'pointer' : 'default'  }}>
               <span className="macro-card__item__text">{label}</span>
               <span className="macro-card__item__value">
                 {typeof value === "number" && (<><CountText value={value} decimals={decimals} />{sign}</>)}

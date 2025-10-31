@@ -49,7 +49,7 @@ a {
   @include remove-tap-highlight;
 }
 
-.dark a { color: $link-color; text-decoration: none; }
+.#{$kku-dark-mode-signature} a { color: $link-color; text-decoration: none; }
 a:hover, a:active { text-decoration: underline; }
 * { box-sizing: border-box; margin: 0; }
 

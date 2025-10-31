@@ -1,7 +1,8 @@
+import {useMemo} from 'react'
 import {useOutletContext} from 'react-router'
 import {usePageAnimation} from '@/shared/hooks'
 import {UsePageAnimation} from '@/shared/hooks/usePageAnimation'
-import {BlockHalvingCard, HashrateChart, MacroCard, MarketChart, PricePannel} from '@/pages/overviewPage/components'
+import {BlockHalvingCard, MiningMetricChart, MacroCard, MarketChart, PricePannel} from '@/pages/overviewPage/components'
 import useStore from '@/shared/stores/store'
 import {PageLayout} from '@/layouts'
 
@@ -13,13 +14,18 @@ export default function OverviewPage() {
   usePageAnimation(useOutletContext<UsePageAnimation>())
   // endregion
 
+  // region [Templates]
+  const OverviewChart = useMemo(() => {
+    if (overviewChart === 'price'){ return (<MarketChart/>) }
+    if (['hashrate', 'difficulty'].includes(overviewChart)) { return (<MiningMetricChart/>) }
+  }, [overviewChart]);
+  // endregion
   return (
     <PageLayout className="overview-page__area">
       <PricePannel/>
       <MacroCard/>
       <BlockHalvingCard/>
-      {overviewChart === 'price' && (<MarketChart/>)}
-      {overviewChart === 'hashrate' && (<HashrateChart/>)}
+      {OverviewChart}
     </PageLayout>
   )
 }

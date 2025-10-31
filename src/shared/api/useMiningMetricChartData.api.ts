@@ -1,10 +1,10 @@
 import { useEffect } from "react";
-import { useQuery } from '@tanstack/react-query';
 import { toast } from "react-toastify";
-import { HashrateChartIntervalType } from '@/shared/stores/store.interface';
+import { useQuery } from '@tanstack/react-query';
+import {HashrateChartFormattedData, HashrateChartResponseData} from '@/shared/types/api/hashrateChart'
+import type { MiningMetricChartIntervalType } from '@/shared/stores/store.interface';
 import fetcher from "@/shared/utils/fetcher";
 import { isDev } from "@/shared/utils/common";
-import {HashrateChartFormattedData, HashrateChartResponseData} from '@/shared/types/api/hashrateChart'
 
 
 function processDataInWorker(data: HashrateChartResponseData): Promise<HashrateChartFormattedData> {
@@ -29,7 +29,7 @@ function processDataInWorker(data: HashrateChartResponseData): Promise<HashrateC
 
 
 
-async function fetchHashrateChart(interval: HashrateChartIntervalType): Promise<HashrateChartFormattedData> {
+async function fetchMiningMetricChart(interval: MiningMetricChartIntervalType): Promise<HashrateChartFormattedData> {
 
   try {
     const data: HashrateChartResponseData = await fetcher(MARKET_CHART_API_URL + interval);
@@ -54,13 +54,13 @@ const MARKET_CHART_API_URL = 'https://mempool.space/api/v1/mining/hashrate/';
 const STALE_TIME_MIN = 30;
 const INTERVAL_TIME_MIN = 30;
 
-const useHashrateChartData = (days: HashrateChartIntervalType) => {
+const useMiningMetricChartData = (days: MiningMetricChartIntervalType) => {
 
   // region [Hooks]
 
   const { data, isSuccess, isLoading, isError, error} = useQuery<HashrateChartFormattedData>({
     queryKey: ['hashrateChart', days],
-    queryFn: () => fetchHashrateChart(days),
+    queryFn: () => fetchMiningMetricChart(days),
     staleTime: 60 * 1000 * STALE_TIME_MIN,
     refetchOnMount: true,
     refetchInterval: 60 * 1000 * INTERVAL_TIME_MIN,
@@ -75,8 +75,8 @@ const useHashrateChartData = (days: HashrateChartIntervalType) => {
   useEffect(() => {
 
     if (isError) {
-      console.error('❌ 마켓 차트 데이터 초기화 오류', error);
-      toast.error('마켓 차트 데이터 초기화 오류');
+      console.error('❌ 채굴 지표 차트 데이터 초기화 오류', error);
+      toast.error('채굴 지표 차트 데이터 초기화 오류');
     }
   }, [isError]);
 
@@ -85,4 +85,4 @@ const useHashrateChartData = (days: HashrateChartIntervalType) => {
   return { data, isLoading, isSuccess, isError, error };
 }
 
-export default useHashrateChartData;
+export default useMiningMetricChartData;

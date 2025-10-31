@@ -1,4 +1,4 @@
-import {HashrateChartIntervalType} from '@/shared/stores/store.interface'
+import {MiningMetricChartIntervalType} from '@/shared/stores/store.interface'
 
 export interface ChartJsDataType {
   labels: string[];
@@ -14,5 +14,5 @@ export interface ChartJsDataType {
 
 export interface MarketChartIntervalTypeList {
   text: string;
-  value: HashrateChartIntervalType;
+  value: MiningMetricChartIntervalType;
 }
