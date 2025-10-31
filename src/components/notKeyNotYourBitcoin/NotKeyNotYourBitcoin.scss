@@ -19,7 +19,7 @@
 }
 
 
-.dark {
+.#{$kku-dark-mode-signature} {
   .not-your-keys-not-your-bitcoin__area {
     color: #cccccc;
     text-shadow: 0 0 1px #f7931a, 0 0 1px #f7931a, 0 0 1px #ffae42;

@@ -48,7 +48,7 @@
     .bottom-navigation { left: 0; }
 }
 
-.dark {
+.#{$kku-dark-mode-signature} {
     .bottom-navigation {
         .bottom-navigation__list {
             .bottom-navigation__list__item {

@@ -1,7 +1,6 @@
 @use "./variable" as *;
 
 // region [Override]
-$kku-dark-mode-signature: 'dark';
 
 :root {
     --default-font-family: #{$default-font-family};
