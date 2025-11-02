@@ -55,6 +55,8 @@ export interface StoreType {
   setSats: (sats: string) => void;
   focusCurrency: UnitType;
   setFocusCurrency: (currency: UnitType) => void
+  premium: string;
+  setPremium: (premium: string) => void;
   // endregion
 
   // region [즐겨찾기]

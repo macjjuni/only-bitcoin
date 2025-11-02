@@ -44,6 +44,7 @@ const ConvertPannel = () => {
   const setKrw = useStore(state => state.setKrw);
   const setUsd = useStore(state => state.setUsd);
   const setSats = useStore(state => state.setSats);
+  const { premium, setPremium } = useStore(state => ({ premium: state.premium, setPremium: state.setPremium}));
 
   const focusCurrency = useStore(state => state.focusCurrency);
   const setFocusCurrency = useStore(state => state.setFocusCurrency);
@@ -141,6 +142,7 @@ const ConvertPannel = () => {
   const onChangeKrw = useCallback(setKrw, []);
   const onChangeBtcCount = useCallback(setBtcCount, []);
   const onChangeSats = useCallback(setSats, []);
+  const onChangePremium = useCallback(setPremium, []);
   // endregion
 
 
@@ -275,6 +277,12 @@ const ConvertPannel = () => {
     </div>
   ), [usd, usdPrice, NumberFieldIUnit, focusCurrency, exRate]);
 
+  const PremiumNumberField = useMemo(() => (
+    <div className="convert-pannel__item convert-pannel__item--premium">
+      <NumberField className="convert-pannel__item__input" value={premium}
+                   dataCopy={premium} unit="%" maxLength={4} onChange={onChangePremium} />
+    </div>
+  ), [premium]);
 
   const BtcNumberField = useMemo(() => (
     <div className="convert-pannel__item convert-pannel__item--btc">
@@ -306,6 +314,7 @@ const ConvertPannel = () => {
           {KrwNumberField}
           {UsdNumberField}
           {focusCurrency === "BTC" ? SatsNumberField : null}
+          {PremiumNumberField}
           {focusCurrency === "BTC" ? BtcNumberField : SatsNumberField}
         </>
       );
@@ -316,6 +325,7 @@ const ConvertPannel = () => {
         <>
           {BtcNumberField}
           {SatsNumberField}
+          {PremiumNumberField}
           {
             focusCurrency === "KRW" ?
               <>{UsdNumberField}{KrwNumberField}</> :
@@ -324,7 +334,7 @@ const ConvertPannel = () => {
         </>
       );
     }
-  }, [focusCurrency, currency, BtcNumberField, KrwNumberField, UsdNumberField, SatsNumberField]);
+  }, [focusCurrency, currency, BtcNumberField, KrwNumberField, UsdNumberField, SatsNumberField, PremiumNumberField]);
   // endregion
 
 
