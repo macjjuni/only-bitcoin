@@ -8,6 +8,7 @@ export { default as LinkIcon } from '@/components/icon/LinkIcon'
 export { default as DataIcon } from '@/components/icon/DataIcon'
 export { default as MnemonicIcon } from '@/components/icon/MnemonicIcon'
 export { default as CurrencyIcon } from '@/components/icon/CurrencyIcon'
+export { default as OptionIcon } from '@/components/icon/OptionIcon'
 
 // Navigation Icon
 export { default as DashboardIcon } from '@/components/icon/DashboardIcon'

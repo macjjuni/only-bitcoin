@@ -1,0 +1,44 @@
+@use '@/app/styles/variable' as *;
+@use '@/app/styles/mixin' as *;
+
+
+.premium__field {
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  gap: $spacing-16;
+  padding: 0 $spacing-16;
+}
+
+.premium__field__popover {
+  display: flex;
+  justify-content: flex-start;
+  align-items: flex-start;
+  flex-direction: column;
+  gap: $spacing-8;
+  padding: $spacing-10;
+  border: 1px solid $default-border-color;
+  border-radius: $default-border-radius;
+  background: $default-background-color;
+
+  .premium__field__popover__title {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    @include font-body;
+    width: 100%;
+    height: 26px;
+    font-weight: bold;
+  }
+
+  .premium__field__popover__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+
+    .premium__field__popover__bottom__buttons {
+      .k-button { font-size: 14px; }
+      .k-button + .k-button { margin-left: $spacing-8; }
+    }
+  }
+}

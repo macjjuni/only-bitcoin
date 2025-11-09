@@ -1,8 +1,8 @@
 import { memo, useCallback, useEffect, useMemo, useRef } from "react";
-import { KDropdown, KIcon } from "kku-ui";
+import { KDropdown, KDropdownRefs, KIcon, KMenu } from "kku-ui";
 import { CountText, NumberField } from "../../../../components";
 import useStore from "@/shared/stores/store";
-import { comma } from "@/shared/utils/string";
+import { comma, extractNumbers } from "@/shared/utils/string";
 import { useCopyOnClick } from "@/shared/hooks";
 import { UnitType } from "@/shared/stores/store.interface";
 import { btcToSatoshi, floorToDecimal } from "@/shared/utils/number";
@@ -24,6 +24,7 @@ const ConvertPannel = () => {
   const krwRef = useRef<HTMLInputElement>(null);
   const usdRef = useRef<HTMLInputElement>(null);
   const satsRef = useRef<HTMLInputElement>(null);
+  const KDropdownRef = useRef<KDropdownRefs>(null);
 
   const { onClickCopy: onClickCopyToBtc } = useCopyOnClick(btcCountInputRef);
   const { onClickCopy: onClickCopyToKrw } = useCopyOnClick(krwRef);
@@ -44,7 +45,7 @@ const ConvertPannel = () => {
   const setKrw = useStore(state => state.setKrw);
   const setUsd = useStore(state => state.setUsd);
   const setSats = useStore(state => state.setSats);
-  const { premium, setPremium } = useStore(state => ({ premium: state.premium, setPremium: state.setPremium}));
+  const premium = useStore(state => state.premium);
 
   const focusCurrency = useStore(state => state.focusCurrency);
   const setFocusCurrency = useStore(state => state.setFocusCurrency);
@@ -70,50 +71,48 @@ const ConvertPannel = () => {
   }, []);
 
   const synchronizeValue = useCallback(() => {
+    const premiumMultiplier = 1 + premium / 100; // 프리미엄 적용 비율
 
     if (focusCurrency === "BTC") {
-
       const btcCountNum = parseFloat(btcCount.replace(/,/g, ""));
       const usdFromBtcCount = floorToDecimal(usdPrice * btcCountNum, 2);
 
-      setUsd(comma(usdFromBtcCount, false));
-      setKrw(comma(krwPrice * btcCountNum));
-      setSats(btcToSatoshi(btcCountNum));
+      setUsd(comma(usdFromBtcCount * premiumMultiplier));
+      setKrw(comma(krwPrice * btcCountNum * premiumMultiplier));
+      setSats(btcToSatoshi(btcCountNum * premiumMultiplier));
     }
 
     if (focusCurrency === "KRW") {
-
       const krwNum = parseFloat(krw.replace(/,/g, ""));
       const btcCountFromKrw = floorToDecimal(krwNum / krwPrice, 8);
       const usdFromKrw = (krwNum / exRate).toFixed(2);
 
-      setBtcCount(comma(btcFormatter(btcCountFromKrw)));
-      setUsd(Number(usdFromKrw) === 0 ? "0" : comma(usdFromKrw));
-      setSats(btcToSatoshi(krwNum / krwPrice));
+      setBtcCount(comma(btcFormatter(btcCountFromKrw * premiumMultiplier)));
+      setUsd(Number(usdFromKrw) === 0 ? "0" : comma(Number(usdFromKrw) * premiumMultiplier));
+      setSats(btcToSatoshi(btcCountFromKrw * premiumMultiplier));
     }
 
     if (focusCurrency === "USD") {
-
       const usdNum = parseFloat(usd.replace(/,/g, ""));
       const btcCountFromUsd = floorToDecimal(usdNum / usdPrice, 8);
 
-      setBtcCount(btcFormatter(btcCountFromUsd));
-      setKrw(comma(Math.floor(usdNum * exRate)));
-      setSats(btcToSatoshi(btcCountFromUsd));
+      setBtcCount(btcFormatter(btcCountFromUsd * premiumMultiplier));
+      setKrw(comma(Math.floor(usdNum * exRate * premiumMultiplier)));
+      setSats(btcToSatoshi(btcCountFromUsd * premiumMultiplier));
     }
 
     if (focusCurrency === "SATS") {
-
       const satsNum = parseFloat(sats.replace(/,/g, ""));
-      const btcCountNum = satoshiFormatter(satsNum);
-      const usdFromBtcCount = floorToDecimal(usdPrice * Number(btcCountNum), 2);
+      const btcCountNum = Number(satoshiFormatter(satsNum));
+      const usdFromBtcCount = floorToDecimal(usdPrice * btcCountNum, 2);
 
-      setKrw(comma(krwPrice * Number(btcCountNum)));
-      setUsd(comma(usdFromBtcCount, false));
-      setBtcCount(Number(btcCountNum) === 0 ? "0" : comma(btcCountNum));
+      setKrw(comma(krwPrice * btcCountNum * premiumMultiplier));
+      setUsd(comma(usdFromBtcCount * premiumMultiplier));
+      setBtcCount(btcCountNum === 0 ? "0" : comma(btcCountNum * premiumMultiplier));
     }
 
-  }, [focusCurrency, btcCount, krw, usd, sats, krwPrice, usdPrice, exRate]);
+  }, [focusCurrency, btcCount, krw, usd, sats, krwPrice, usdPrice, exRate, premium]);
+
 
   const initializeBtcCount = useCallback(() => {
     setBtcCount("0");
@@ -134,6 +133,14 @@ const ConvertPannel = () => {
     setUsd("0");
     usdRef.current?.focus();
   }, []);
+
+  const calcPremium = useCallback((price: string): string => {
+    if (premium === 0) { return price; }
+
+    const numPrice = extractNumbers(price)
+
+    return comma(numPrice * (1 + (premium / 100)));
+  }, [premium])
   // endregion
 
 
@@ -142,14 +149,17 @@ const ConvertPannel = () => {
   const onChangeKrw = useCallback(setKrw, []);
   const onChangeBtcCount = useCallback(setBtcCount, []);
   const onChangeSats = useCallback(setSats, []);
-  const onChangePremium = useCallback(setPremium, []);
+  const onClickUnitItem = useCallback((unit: UnitType) => {
+    setFocusCurrency(unit);
+    KDropdownRef.current?.onClose();
+  }, [])
   // endregion
 
 
   // region [Life Cycles]
   useEffect(() => {
     synchronizeValue();
-  }, [btcCount, krw, usd, krwPrice, usdPrice, sats]);
+  }, [btcCount, krw, usd, krwPrice, usdPrice, sats, premium]);
 
   useEffect(() => {
     // dropdownRef.current?.close();
@@ -214,41 +224,34 @@ const ConvertPannel = () => {
     const filteredList = unitList.filter(unit => unit !== focusCurrency);
 
     return (
-      <ul className="select-unit__list">
+      <KMenu size="small" width={68} className="select-unit__list">
         {filteredList.map((unit) => (
-          <li key={unit} className="select-unit__list__item">
-            <button className="select-unit__list__item__button" type="button"
-                    onClick={() => {
-                      setFocusCurrency(unit);
-                    }}>
-              {unit === "SATS" ? "Sats" : unit}
-            </button>
-          </li>
+          <KMenu.Item key={unit} className="select-unit__list__item"
+                      label={unit === "SATS" ? "Sats" : unit} onClick={() => { onClickUnitItem(unit); }} />
         ))}
-      </ul>
+      </KMenu>
     );
   }, [unitList, focusCurrency]);
 
   const NumberFieldIUnit = useCallback((unit: UnitType) => {
 
-    if (focusCurrency !== unit) {
-      return unit === "SATS" ? "Sats" : unit;
-    }
+    if (focusCurrency !== unit) { return unit === "SATS" ? "Sats" : unit; }
 
     return (
-      <KDropdown trigger="click">
+      <KDropdown ref={KDropdownRef} trigger="click">
         <KDropdown.Trigger>
           <div className={`focus-unit__area focus-unit__area--${focusCurrency.toLowerCase()}`}>
             {focusCurrency === "SATS" ? "Sats" : focusCurrency}
             <KIcon className="focus-unit__area__icon" icon="keyboard_arrow_down" size={10} />
           </div>
         </KDropdown.Trigger>
-        <KDropdown.Content gap={12} offset={{ x: 8, y: 0 }}>
+        <KDropdown.Content gap={12} offset={{ x: 0, y: 0 }}>
           {SelectUnitList}
         </KDropdown.Content>
       </KDropdown>
     );
   }, [focusCurrency, SelectUnitList]);
+
 
   const KrwNumberField = useMemo(() => (
     <div className="convert-pannel__item convert-pannel__item--krw">
@@ -256,12 +259,10 @@ const ConvertPannel = () => {
                    dataCopy={krw} unit={NumberFieldIUnit("KRW")} maxLength={15} onChange={onChangeKrw}
                    onClick={onClickCopyToKrw} leftAction={KrwLeftAction} />
       <span className="convert-pannel__item__sub-text">
-        1BTC
-        {` / `}
-        <CountText value={krwPrice} /> <span className="krw">KRW</span>
+        1BTC{` / `}<CountText value={krwPrice} /> <span className="krw">KRW</span>
       </span>
     </div>
-  ), [krw, krwPrice, NumberFieldIUnit, focusCurrency]);
+  ), [krw, krwPrice, NumberFieldIUnit, focusCurrency, calcPremium]);
 
 
   const UsdNumberField = useMemo(() => (
@@ -276,13 +277,6 @@ const ConvertPannel = () => {
       </span>
     </div>
   ), [usd, usdPrice, NumberFieldIUnit, focusCurrency, exRate]);
-
-  const PremiumNumberField = useMemo(() => (
-    <div className="convert-pannel__item convert-pannel__item--premium">
-      <NumberField className="convert-pannel__item__input" value={premium}
-                   dataCopy={premium} unit="%" maxLength={4} onChange={onChangePremium} />
-    </div>
-  ), [premium]);
 
   const BtcNumberField = useMemo(() => (
     <div className="convert-pannel__item convert-pannel__item--btc">
@@ -314,7 +308,6 @@ const ConvertPannel = () => {
           {KrwNumberField}
           {UsdNumberField}
           {focusCurrency === "BTC" ? SatsNumberField : null}
-          {PremiumNumberField}
           {focusCurrency === "BTC" ? BtcNumberField : SatsNumberField}
         </>
       );
@@ -325,7 +318,6 @@ const ConvertPannel = () => {
         <>
           {BtcNumberField}
           {SatsNumberField}
-          {PremiumNumberField}
           {
             focusCurrency === "KRW" ?
               <>{UsdNumberField}{KrwNumberField}</> :
@@ -334,12 +326,12 @@ const ConvertPannel = () => {
         </>
       );
     }
-  }, [focusCurrency, currency, BtcNumberField, KrwNumberField, UsdNumberField, SatsNumberField, PremiumNumberField]);
+  }, [focusCurrency, currency, BtcNumberField, KrwNumberField, UsdNumberField, SatsNumberField]);
   // endregion
 
 
   return (
-    <div className="convert-pannel">
+    <div className={`convert-pannel${premium ? ' premium' : ''}`}>
       {SortNumberField}
     </div>
   );

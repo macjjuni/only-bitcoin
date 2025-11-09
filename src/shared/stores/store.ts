@@ -93,8 +93,8 @@ const useStore = create<StoreType>()(
       setSats: (sats) => set((state) => ({ btc2Fiat: { ...state.btc2Fiat, sats } })),
       focusCurrency: "BTC",
       setFocusCurrency: (focusCurrency) => set(() => ({ focusCurrency })),
-      premium: "0",
-      setPremium: (premium: string) => set(() => ({ premium })),
+      premium: 0,
+      setPremium: (premium: number) => set(() => ({ premium })),
       // endregion
 
 
