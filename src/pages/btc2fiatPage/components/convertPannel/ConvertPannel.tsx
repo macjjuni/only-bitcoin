@@ -160,10 +160,6 @@ const ConvertPannel = () => {
   useEffect(() => {
     synchronizeValue();
   }, [btcCount, krw, usd, krwPrice, usdPrice, sats, premium]);
-
-  useEffect(() => {
-    // dropdownRef.current?.close();
-  }, [focusCurrency]);
   // endregion
 
 
