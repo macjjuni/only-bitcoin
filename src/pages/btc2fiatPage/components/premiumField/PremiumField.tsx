@@ -1,5 +1,5 @@
-import { memo, useCallback, useMemo } from "react";
-import { KButton, KDropdown, KIcon } from "kku-ui";
+import { memo, useCallback, useMemo, useRef } from "react";
+import { KButton, KDropdown, KDropdownRefs, KIcon } from "kku-ui";
 import { OptionIcon } from "@/components/icon";
 import useStore from "@/shared/stores/store";
 import "./PremiumField.scss";
@@ -7,16 +7,17 @@ import "./PremiumField.scss";
 
 const commonButtonProps = { variant: 'subtle', width: 40, size: 'small' } as const;
 const OptionButtons = [
-  { label: '-1.0', value: -1 },
+  { label: '-1', value: -1 },
   { label: '-0.1', value: -0.1 },
   { label: '+0.1', value: 0.1 },
-  { label: '+1.0', value: 1 },
+  { label: '+1', value: 1 },
 ] as const;
 
 
 const PremiumField = () => {
 
   // region [Hooks]
+  const KDropdownRef = useRef<KDropdownRefs>(null);
   const premium = useStore(state => state.premium);
   const setPremium = useStore(state => state.setPremium);
   const isPremium = useMemo(() => (premium !== 0), [premium]);
@@ -29,6 +30,7 @@ const PremiumField = () => {
 
   const onClickReset = useCallback(() => {
     setPremium(0);
+    KDropdownRef.current?.onClose();
   }, [])
   // endregion
 
@@ -40,14 +42,15 @@ const PremiumField = () => {
   return (
     <div className="premium__field">
       {premium !== 0 && ResetButton}
-      <KDropdown position="left" trigger="click">
+      <KDropdown ref={KDropdownRef} position="left" trigger="click">
         <KDropdown.Trigger style={{ cursor: 'pointer' }}>
           <OptionIcon size={30} />
         </KDropdown.Trigger>
-        <KDropdown.Content offset={{ x: -3, y: 19 }} autoClose={false}>
+        <KDropdown.Content offset={{ x: -3, y: 21 }} autoClose={false}>
           <div className="premium__field__popover">
             <h2 className="premium__field__popover__title">프리미엄:
               {premium}%
+              {ResetButton}
             </h2>
             <div className="premium__field__popover__bottom">
               <div className="premium__field__popover__bottom__buttons">

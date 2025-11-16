@@ -41,6 +41,6 @@ export const removeSpaces = (str: string): string => {
 };
 
 export function extractNumbers(input: string): number {
-  const strNumber = input.replace(/[^0-9]/g, '');
+  const strNumber = input.replace(/[^0-9.]/g, '');
   return Number(strNumber);
 }

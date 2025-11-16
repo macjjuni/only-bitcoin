@@ -46,6 +46,7 @@ const ConvertPannel = () => {
   const setUsd = useStore(state => state.setUsd);
   const setSats = useStore(state => state.setSats);
   const premium = useStore(state => state.premium);
+  const setPremium = useStore(state => state.setPremium);
 
   const focusCurrency = useStore(state => state.focusCurrency);
   const setFocusCurrency = useStore(state => state.setFocusCurrency);
@@ -57,61 +58,61 @@ const ConvertPannel = () => {
   // region [Privates]
   const btcFormatter = useCallback((btcNum: number) => {
 
-    if (btcNum < 1e-8) {
-      return "0";
-    }
+    if (btcNum < 1e-8) { return "0"; }
     return btcNum.toFixed(8).replace(/\.?0+$/, ""); // 숫자 뒤에 0 제거 정규식
   }, []);
 
   const satoshiFormatter = useCallback((satoshi: number) => {
-    if (satoshi < 1) {
-      return "0";
-    }
+
+    if (satoshi < 1) { return "0"; }
     return (satoshi / 100_000_000).toFixed(8).replace(/\.?0+$/, "");
   }, []);
 
   const synchronizeValue = useCallback(() => {
-    const premiumMultiplier = 1 + premium / 100; // 프리미엄 적용 비율
 
     if (focusCurrency === "BTC") {
+
       const btcCountNum = parseFloat(btcCount.replace(/,/g, ""));
       const usdFromBtcCount = floorToDecimal(usdPrice * btcCountNum, 2);
 
-      setUsd(comma(usdFromBtcCount * premiumMultiplier));
-      setKrw(comma(krwPrice * btcCountNum * premiumMultiplier));
-      setSats(btcToSatoshi(btcCountNum * premiumMultiplier));
+      setUsd(comma(usdFromBtcCount, false));
+      setKrw(comma(krwPrice * btcCountNum));
+      setSats(btcToSatoshi(btcCountNum));
     }
 
     if (focusCurrency === "KRW") {
+
       const krwNum = parseFloat(krw.replace(/,/g, ""));
       const btcCountFromKrw = floorToDecimal(krwNum / krwPrice, 8);
       const usdFromKrw = (krwNum / exRate).toFixed(2);
 
-      setBtcCount(comma(btcFormatter(btcCountFromKrw * premiumMultiplier)));
-      setUsd(Number(usdFromKrw) === 0 ? "0" : comma(Number(usdFromKrw) * premiumMultiplier));
-      setSats(btcToSatoshi(btcCountFromKrw * premiumMultiplier));
+      setBtcCount(comma(btcFormatter(btcCountFromKrw)));
+      setUsd(Number(usdFromKrw) === 0 ? "0" : comma(usdFromKrw));
+      setSats(btcToSatoshi(krwNum / krwPrice));
     }
 
     if (focusCurrency === "USD") {
+
       const usdNum = parseFloat(usd.replace(/,/g, ""));
       const btcCountFromUsd = floorToDecimal(usdNum / usdPrice, 8);
 
-      setBtcCount(btcFormatter(btcCountFromUsd * premiumMultiplier));
-      setKrw(comma(Math.floor(usdNum * exRate * premiumMultiplier)));
-      setSats(btcToSatoshi(btcCountFromUsd * premiumMultiplier));
+      setBtcCount(btcFormatter(btcCountFromUsd));
+      setKrw(comma(Math.floor(usdNum * exRate)));
+      setSats(btcToSatoshi(btcCountFromUsd));
     }
 
     if (focusCurrency === "SATS") {
-      const satsNum = parseFloat(sats.replace(/,/g, ""));
-      const btcCountNum = Number(satoshiFormatter(satsNum));
-      const usdFromBtcCount = floorToDecimal(usdPrice * btcCountNum, 2);
 
-      setKrw(comma(krwPrice * btcCountNum * premiumMultiplier));
-      setUsd(comma(usdFromBtcCount * premiumMultiplier));
-      setBtcCount(btcCountNum === 0 ? "0" : comma(btcCountNum * premiumMultiplier));
+      const satsNum = parseFloat(sats.replace(/,/g, ""));
+      const btcCountNum = satoshiFormatter(satsNum);
+      const usdFromBtcCount = floorToDecimal(usdPrice * Number(btcCountNum), 2);
+
+      setKrw(comma(krwPrice * Number(btcCountNum)));
+      setUsd(comma(usdFromBtcCount, false));
+      setBtcCount(Number(btcCountNum) === 0 ? "0" : comma(btcCountNum));
     }
 
-  }, [focusCurrency, btcCount, krw, usd, sats, krwPrice, usdPrice, exRate, premium]);
+  }, [focusCurrency, btcCount, krw, usd, sats, krwPrice, usdPrice, exRate]);
 
 
   const initializeBtcCount = useCallback(() => {
@@ -134,13 +135,26 @@ const ConvertPannel = () => {
     usdRef.current?.focus();
   }, []);
 
-  const calcPremium = useCallback((price: string): string => {
+  const calcPremium = useCallback((price: string, unit?: "KRW" | "USD" | "BTC" | "SATS"): string => {
     if (premium === 0) { return price; }
 
-    const numPrice = extractNumbers(price)
+    const numPrice = extractNumbers(price);
+    if (Number.isNaN(numPrice)) return price;
 
-    return comma(numPrice * (1 + (premium / 100)));
-  }, [premium])
+    const applied = numPrice * (1 + premium / 100);
+    const decimalMap = { KRW: 0, SATS: 0, USD: 2, BTC: 8 };
+    const decimals = decimalMap[unit ?? "USD"];
+    const fixed = applied.toFixed(decimals);
+
+    if (applied < 1) {
+      return fixed.replace(/\.?0+$/, "");
+    }
+
+    // 6) comma로 천단위 + 필요 시 소숫점 제거 옵션
+    return comma(Number(fixed), decimals === 0);
+  }, [premium]);
+
+  const resetPremium = useCallback(() => { setPremium(0) }, [])
   // endregion
 
 
@@ -151,6 +165,7 @@ const ConvertPannel = () => {
   const onChangeSats = useCallback(setSats, []);
   const onClickUnitItem = useCallback((unit: UnitType) => {
     setFocusCurrency(unit);
+    resetPremium();
     KDropdownRef.current?.onClose();
   }, [])
   // endregion
@@ -165,50 +180,26 @@ const ConvertPannel = () => {
 
   // region [Left Action]
   const BtcLeftAction = useMemo(() => {
-
-    if (focusCurrency !== "BTC") {
-      return;
-    }
-    if (["0", ""].includes(btcCount)) {
-      return null;
-    }
-
+    if (focusCurrency !== "BTC") { return; }
+    if (["0", ""].includes(btcCount)) { return null; }
     return (<KIcon {...closeIconCommonProps} onClick={initializeBtcCount} />);
   }, [focusCurrency, btcCount]);
 
   const SatsLeftAction = useMemo(() => {
-
-    if (focusCurrency !== "SATS") {
-      return;
-    }
-    if (["0", ""].includes(sats)) {
-      return null;
-    }
-
+    if (focusCurrency !== "SATS") { return; }
+    if (["0", ""].includes(sats)) { return null; }
     return (<KIcon {...closeIconCommonProps} onClick={initializeSats} />);
   }, [focusCurrency, sats]);
 
   const KrwLeftAction = useMemo(() => {
-
-    if (focusCurrency !== "KRW") {
-      return;
-    }
-    if (["0", ""].includes(krw)) {
-      return null;
-    }
-
+    if (focusCurrency !== "KRW") { return; }
+    if (["0", ""].includes(krw)) { return null; }
     return (<KIcon {...closeIconCommonProps} onClick={initializeKrw} />);
   }, [focusCurrency, krw]);
 
   const UsdLeftAction = useMemo(() => {
-
-    if (focusCurrency !== "USD") {
-      return;
-    }
-    if (["0", ""].includes(usd)) {
-      return null;
-    }
-
+    if (focusCurrency !== "USD") { return; }
+    if (["0", ""].includes(usd)) { return null; }
     return (<KIcon icon="close" color="#fff" size={32} onClick={initializeUsd} />);
   }, [focusCurrency, usd]);
   // endregion
@@ -216,7 +207,6 @@ const ConvertPannel = () => {
 
   // region [templates]
   const SelectUnitList = useMemo(() => {
-
     const filteredList = unitList.filter(unit => unit !== focusCurrency);
 
     return (
@@ -241,57 +231,66 @@ const ConvertPannel = () => {
             <KIcon className="focus-unit__area__icon" icon="keyboard_arrow_down" size={10} />
           </div>
         </KDropdown.Trigger>
-        <KDropdown.Content gap={12} offset={{ x: 0, y: 0 }}>
-          {SelectUnitList}
-        </KDropdown.Content>
+        <KDropdown.Content gap={12} offset={{ x: 0, y: 0 }}>{SelectUnitList}</KDropdown.Content>
       </KDropdown>
     );
   }, [focusCurrency, SelectUnitList]);
 
 
-  const KrwNumberField = useMemo(() => (
-    <div className="convert-pannel__item convert-pannel__item--krw">
-      <NumberField ref={krwRef} className="convert-pannel__item__input" value={krw} readonly={focusCurrency !== "KRW"}
-                   dataCopy={krw} unit={NumberFieldIUnit("KRW")} maxLength={15} onChange={onChangeKrw}
-                   onClick={onClickCopyToKrw} leftAction={KrwLeftAction} />
-      <span className="convert-pannel__item__sub-text">
-        1BTC{` / `}<CountText value={krwPrice} /> <span className="krw">KRW</span>
-      </span>
-    </div>
-  ), [krw, krwPrice, NumberFieldIUnit, focusCurrency, calcPremium]);
+  const KrwNumberField = useMemo(() => {
+    const displayValue = focusCurrency === "KRW" ? krw : calcPremium(krw, "KRW"); // readonly일 때만 프리미엄 적용
+
+    return (
+      <div className="convert-pannel__item convert-pannel__item--krw">
+        <NumberField ref={krwRef} className="convert-pannel__item__input" value={displayValue}
+          dataCopy={displayValue} unit={NumberFieldIUnit("KRW")} maxLength={15} readonly={focusCurrency !== "KRW"}
+          onChange={onChangeKrw} onClick={onClickCopyToKrw} leftAction={KrwLeftAction} />
+        <span className="convert-pannel__item__sub-text">
+        1BTC / <CountText value={krwPrice} /> <span className="krw">KRW</span>
+        </span>
+      </div>
+    );
+  }, [krw, krwPrice, NumberFieldIUnit, focusCurrency, calcPremium]);
 
 
-  const UsdNumberField = useMemo(() => (
-    <div className="convert-pannel__item convert-pannel__item--usd">
-      <NumberField ref={usdRef} className="convert-pannel__item__input" value={usd} readonly={focusCurrency !== "USD"}
-                   dataCopy={usd} unit={NumberFieldIUnit("USD")} maxLength={15} onChange={onChangeUsd}
-                   onClick={onClickCopyToUsd} leftAction={UsdLeftAction} />
-      <span className="convert-pannel__item__sub-text">
-        {isUsdtStandard ? "1USDT" : "$1"} / ₩{exRate}
-        {` | `}
-        1BTC / <CountText value={usdPrice} /> USD
-      </span>
-    </div>
-  ), [usd, usdPrice, NumberFieldIUnit, focusCurrency, exRate]);
+  const UsdNumberField = useMemo(() => {
+    const displayValue = focusCurrency === "USD" ? usd : calcPremium(usd, "USD");
 
-  const BtcNumberField = useMemo(() => (
-    <div className="convert-pannel__item convert-pannel__item--btc">
-      <NumberField ref={btcCountInputRef} className="convert-pannel__item__input" value={btcCount}
-                   readonly={focusCurrency !== "BTC"}
-                   dataCopy={btcCount} unit={NumberFieldIUnit("BTC")} maxLength={15} onChange={onChangeBtcCount}
-                   onClick={onClickCopyToBtc} leftAction={BtcLeftAction} />
-    </div>
-  ), [btcCount, NumberFieldIUnit, focusCurrency]);
+    return (
+      <div className="convert-pannel__item convert-pannel__item--usd">
+        <NumberField ref={usdRef} className="convert-pannel__item__input" value={displayValue}
+          readonly={focusCurrency !== "USD"} dataCopy={displayValue} unit={NumberFieldIUnit("USD")} maxLength={15}
+          onChange={onChangeUsd} onClick={onClickCopyToUsd} leftAction={UsdLeftAction} />
+        <span className="convert-pannel__item__sub-text">
+        {isUsdtStandard ? "1USDT" : "$1"} / ₩{exRate} {` | `} 1BTC / <CountText value={usdPrice} /> USD
+        </span>
+      </div>
+    );
+  }, [usd, usdPrice, NumberFieldIUnit, focusCurrency, exRate, calcPremium]);
 
+  const BtcNumberField = useMemo(() => {
+    const displayValue = focusCurrency === "BTC" ? btcCount : calcPremium(btcCount, "BTC");
 
-  const SatsNumberField = useMemo(() => (
-    <div className="convert-pannel__item convert-pannel__item--sats">
-      <NumberField ref={satsRef} className="convert-pannel__item__input" value={sats}
-                   readonly={focusCurrency !== "SATS"}
-                   dataCopy={sats} unit={NumberFieldIUnit("SATS")} maxLength={15} onChange={onChangeSats}
-                   onClick={onClickCopyToSats} leftAction={SatsLeftAction} />
-    </div>
-  ), [sats, SatsLeftAction]);
+    return (
+      <div className="convert-pannel__item convert-pannel__item--btc">
+        <NumberField ref={btcCountInputRef} className="convert-pannel__item__input" value={displayValue}
+          readonly={focusCurrency !== "BTC"} dataCopy={displayValue} unit={NumberFieldIUnit("BTC")}
+          maxLength={15} onChange={onChangeBtcCount} onClick={onClickCopyToBtc} leftAction={BtcLeftAction} />
+      </div>
+    );
+  }, [btcCount, NumberFieldIUnit, focusCurrency, calcPremium]);
+
+  const SatsNumberField = useMemo(() => {
+    const displayValue = focusCurrency === "SATS" ? sats : calcPremium(sats, "SATS");
+
+    return (
+      <div className="convert-pannel__item convert-pannel__item--sats">
+        <NumberField ref={satsRef} className="convert-pannel__item__input" value={displayValue}
+          readonly={focusCurrency !== "SATS"} dataCopy={displayValue} unit={NumberFieldIUnit("SATS")}
+          maxLength={15} onChange={onChangeSats} onClick={onClickCopyToSats} leftAction={SatsLeftAction} />
+      </div>
+    );
+  }, [sats, SatsLeftAction, focusCurrency, calcPremium]);
 
 
   const SortNumberField = useMemo(() => {
@@ -324,7 +323,6 @@ const ConvertPannel = () => {
     }
   }, [focusCurrency, currency, BtcNumberField, KrwNumberField, UsdNumberField, SatsNumberField]);
   // endregion
-
 
   return (
     <div className={`convert-pannel${premium ? ' premium' : ''}`}>

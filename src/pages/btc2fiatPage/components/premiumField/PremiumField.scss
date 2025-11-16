@@ -7,7 +7,17 @@
   justify-content: flex-end;
   align-items: center;
   gap: $spacing-16;
+  margin-top: $spacing-4;
   padding: 0 $spacing-16;
+
+  .k-dropdown__trigger {
+    @include remove-tap-highlight;
+
+    &[aria-expanded="true"] {
+      background: $default-background-cover-color;
+      border-radius: $default-border-radius;
+    }
+  }
 }
 
 .premium__field__popover {
@@ -15,7 +25,8 @@
   justify-content: flex-start;
   align-items: flex-start;
   flex-direction: column;
-  gap: $spacing-8;
+  gap: $spacing-12;
+  width: 208px;
   padding: $spacing-10;
   border: 1px solid $default-border-color;
   border-radius: $default-border-radius;
@@ -37,7 +48,10 @@
     align-items: center;
 
     .premium__field__popover__bottom__buttons {
-      .k-button { font-size: 14px; }
+      .k-button {
+        font-size: 14px;
+        @include remove-tap-highlight;
+      }
       .k-button + .k-button { margin-left: $spacing-8; }
     }
   }
