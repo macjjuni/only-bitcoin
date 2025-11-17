@@ -146,9 +146,8 @@ const ConvertPannel = () => {
     const decimals = decimalMap[unit ?? "USD"];
     const fixed = applied.toFixed(decimals);
 
-    if (applied < 1) {
-      return fixed.replace(/\.?0+$/, "");
-    }
+    if (applied === 0) { return "0"; }
+    if (applied < 1) { return fixed.replace(/\.?0+$/, ""); }
 
     // 6) comma로 천단위 + 필요 시 소숫점 제거 옵션
     return comma(Number(fixed), decimals === 0);
@@ -239,7 +238,7 @@ const ConvertPannel = () => {
 
   const KrwNumberField = useMemo(() => {
     const displayValue = focusCurrency === "KRW" ? krw : calcPremium(krw, "KRW"); // readonly일 때만 프리미엄 적용
-
+    ;
     return (
       <div className="convert-pannel__item convert-pannel__item--krw">
         <NumberField ref={krwRef} className="convert-pannel__item__input" value={displayValue}
