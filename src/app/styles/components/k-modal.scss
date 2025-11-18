@@ -1,6 +1,6 @@
 @use "../variable" as *;
 
-#only-bitcoin ~ .k-modal__wrapper {
+#only-bitcoin ~ .k-backdrop {
     z-index: 1000;
     backdrop-filter: blur(2px);
     -webkit-backdrop-filter: blur(2px);
