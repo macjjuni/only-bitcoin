@@ -74,12 +74,12 @@
 <details open>
     <summary><b>v3.5 (25.10.24)</b></summary>
     <div markdown="1">
-        <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/38034518/506378349-0a8a36b0-24f4-4f08-a3e0-d1ec518c911d.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20251118%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20251118T134028Z&X-Amz-Expires=300&X-Amz-Signature=f47b1fbd6f30df378a66afdfed350badf1bc19ddbb9e5660d804e81b40064439&X-Amz-SignedHeaders=host" width="270" alt="3.5.0 initial screen1">
-        <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/38034518/506378744-fb0986be-43c8-4b77-ad51-31d508608fdf.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20251118%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20251118T134108Z&X-Amz-Expires=300&X-Amz-Signature=3c743c1d45acfe4376c0b192de7b09f06ded24f5f50174699e736c36e9ec68d1&X-Amz-SignedHeaders=host" width="270" alt="3.5.0 initial screen2">
-        <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/38034518/506378855-d51d7b6d-928a-4986-b69d-bce7ff9b0b24.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20251118%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20251118T134123Z&X-Amz-Expires=300&X-Amz-Signature=f7e5eab05596488f5e4abec38d7bce489ea9422c6c060498ee9e6f1763b4c2ee&X-Amz-SignedHeaders=host" width="270" alt="3.5.0 initial screen3">
-        <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/38034518/506378953-a868cb7b-613d-4246-a16e-ecc1d1b200a9.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20251118%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20251118T134146Z&X-Amz-Expires=300&X-Amz-Signature=07d5aa7f3e59b23ddb835a7188e86c29a12119c83e426e7656406a2123272fae&X-Amz-SignedHeaders=host" width="270" alt="3.5.0 initial screen4">
-        <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/38034518/506379071-59e10ada-aa8d-462a-abc9-19836baa2b0d.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20251118%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20251118T134159Z&X-Amz-Expires=300&X-Amz-Signature=48b0efef560f975094579dc2ef455f46cc17e5aae8dd572c26ecbca9a6d8dd1f&X-Amz-SignedHeaders=host" width="270" alt="3.5.0 initial screen5">
-        <img src="https://github-production-user-asset-6210df.s3.amazonaws.com/38034518/506379191-0f0a29b9-8a8f-47d8-b183-618549126d93.jpg?X-Amz-Algorithm=AWS4-HMAC-SHA256&X-Amz-Credential=AKIAVCODYLSA53PQK4ZA%2F20251118%2Fus-east-1%2Fs3%2Faws4_request&X-Amz-Date=20251118T134211Z&X-Amz-Expires=300&X-Amz-Signature=95c3c7fe3f1724217fdc043343c267ff620ab8ca004fe9824ed0d8d880d0ea79&X-Amz-SignedHeaders=host" width="270" alt="3.5.0 initial screen6">
+        <img src="https://github.com/user-attachments/assets/0a8a36b0-24f4-4f08-a3e0-d1ec518c911d" width="270" alt="3.5.0 initial screen1">
+        <img src="https://github.com/user-attachments/assets/fb0986be-43c8-4b77-ad51-31d508608fdf" width="270" alt="3.5.0 initial screen2">
+        <img src="https://github.com/user-attachments/assets/d51d7b6d-928a-4986-b69d-bce7ff9b0b24" width="270" alt="3.5.0 initial screen3">
+        <img src="https://github.com/user-attachments/assets/a868cb7b-613d-4246-a16e-ecc1d1b200a9" width="270" alt="3.5.0 initial screen4">
+        <img src="https://github.com/user-attachments/assets/59e10ada-aa8d-462a-abc9-19836baa2b0d" width="270" alt="3.5.0 initial screen5">
+        <img src="https://github.com/user-attachments/assets/0f0a29b9-8a8f-47d8-b183-618549126d93" width="270" alt="3.5.0 initial screen6">
 
 - 팔마2 유저를 위한 기본 화이트 테마 지원
 - Bithumb 거래소 시세 지원(간헐적 업비트 접속 오류로 인한 대체 거래소 지원)  
