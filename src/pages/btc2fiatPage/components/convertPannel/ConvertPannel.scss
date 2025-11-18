@@ -82,7 +82,7 @@
                     .k-dropdown__trigger {
                         padding: $spacing-2;
                         border-radius: $default-border-radius;
-                        background-color: rgba(255, 255, 255, 0.24);
+                        background: $gray-200;
                         cursor: pointer;
                         @include remove-tap-highlight;
                     }
@@ -131,6 +131,24 @@
             @include font-body;
             text-decoration: underline;
             text-underline-offset: 3px;
+        }
+    }
+}
+
+
+.#{$kku-dark-mode-signature} {
+
+    .convert-pannel {
+        .convert-pannel__item {
+            &:nth-child(4) {
+                .number-field {
+                    .number-field__unit {
+                        .k-dropdown__trigger {
+                            background: $gray-500;
+                        }
+                    }
+                }
+            }
         }
     }
 }
