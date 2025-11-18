@@ -154,6 +154,11 @@ const ConvertPannel = () => {
   }, [premium]);
 
   const resetPremium = useCallback(() => { setPremium(0) }, [])
+
+  const calcStringNumber = useCallback((valueA: string, valueB: string, decimal = 2) => {
+    const strVal = extractNumbers(valueA) - extractNumbers(valueB);
+    return comma(strVal.toFixed(decimal), false)
+  }, [])
   // endregion
 
 
@@ -209,7 +214,7 @@ const ConvertPannel = () => {
     const filteredList = unitList.filter(unit => unit !== focusCurrency);
 
     return (
-      <KMenu size="small" width={68} className="select-unit__list">
+      <KMenu size="medium" width={68} className="select-unit__list">
         {filteredList.map((unit) => (
           <KMenu.Item key={unit} className="select-unit__list__item"
                       label={unit === "SATS" ? "Sats" : unit} onClick={() => { onClickUnitItem(unit); }} />
@@ -237,13 +242,18 @@ const ConvertPannel = () => {
 
 
   const KrwNumberField = useMemo(() => {
-    const displayValue = focusCurrency === "KRW" ? krw : calcPremium(krw, "KRW"); // readonly일 때만 프리미엄 적용
-    ;
+    const isCurrentCurrency = focusCurrency === "KRW";
+    const isShowPremiumExpression = !isCurrentCurrency && premium !== 0;
+    const displayValue = isCurrentCurrency ? krw : calcPremium(krw, "KRW"); // readonly일 때만 프리미엄 적용
+    const incrementValue = calcStringNumber(displayValue, krw, 0);
+
     return (
       <div className="convert-pannel__item convert-pannel__item--krw">
         <NumberField ref={krwRef} className="convert-pannel__item__input" value={displayValue}
           dataCopy={displayValue} unit={NumberFieldIUnit("KRW")} maxLength={15} readonly={focusCurrency !== "KRW"}
           onChange={onChangeKrw} onClick={onClickCopyToKrw} leftAction={KrwLeftAction} />
+        {isShowPremiumExpression &&
+          <span className="convert-pannel__item__top-text"> {incrementValue} + {krw} <span className="krw">KRW</span> </span>}
         <span className="convert-pannel__item__sub-text">
         1BTC / <CountText value={krwPrice} /> <span className="krw">KRW</span>
         </span>
@@ -253,40 +263,60 @@ const ConvertPannel = () => {
 
 
   const UsdNumberField = useMemo(() => {
-    const displayValue = focusCurrency === "USD" ? usd : calcPremium(usd, "USD");
+    const isCurrentCurrency = focusCurrency === "USD";
+    const isShowPremiumExpression = !isCurrentCurrency && premium !== 0;
+    const displayValue = isCurrentCurrency ? usd : calcPremium(usd, "USD");
+    const incrementValue = calcStringNumber(displayValue, usd);
 
     return (
       <div className="convert-pannel__item convert-pannel__item--usd">
         <NumberField ref={usdRef} className="convert-pannel__item__input" value={displayValue}
-          readonly={focusCurrency !== "USD"} dataCopy={displayValue} unit={NumberFieldIUnit("USD")} maxLength={15}
-          onChange={onChangeUsd} onClick={onClickCopyToUsd} leftAction={UsdLeftAction} />
+                     readonly={focusCurrency !== "USD"} dataCopy={displayValue} unit={NumberFieldIUnit("USD")}
+                     maxLength={15}
+                     onChange={onChangeUsd} onClick={onClickCopyToUsd} leftAction={UsdLeftAction} />
+        {isShowPremiumExpression &&
+          <span className="convert-pannel__item__top-text"> {incrementValue} + {usd} <span className="usd">USD</span></span>
+        }
         <span className="convert-pannel__item__sub-text">
-        {isUsdtStandard ? "1USDT" : "$1"} / ₩{exRate} {` | `} 1BTC / <CountText value={usdPrice} /> USD
+        {isUsdtStandard ? "1USDT" : "$1"} / ₩{exRate} {` | `} 1BTC / <CountText value={usdPrice} /> <span className="usd">USD</span>
         </span>
       </div>
     );
   }, [usd, usdPrice, NumberFieldIUnit, focusCurrency, exRate, calcPremium]);
 
   const BtcNumberField = useMemo(() => {
+    const isCurrentCurrency = focusCurrency === "BTC";
+    const isShowPremiumExpression = !isCurrentCurrency && premium !== 0;
     const displayValue = focusCurrency === "BTC" ? btcCount : calcPremium(btcCount, "BTC");
+    const incrementValue = calcStringNumber(displayValue, btcCount, 8);
 
     return (
       <div className="convert-pannel__item convert-pannel__item--btc">
         <NumberField ref={btcCountInputRef} className="convert-pannel__item__input" value={displayValue}
           readonly={focusCurrency !== "BTC"} dataCopy={displayValue} unit={NumberFieldIUnit("BTC")}
           maxLength={15} onChange={onChangeBtcCount} onClick={onClickCopyToBtc} leftAction={BtcLeftAction} />
+        {isShowPremiumExpression &&
+          <span className="convert-pannel__item__top-text"> {incrementValue} + {btcCount}
+            <span className="btc"> BTC</span>
+          </span>
+        }
       </div>
     );
   }, [btcCount, NumberFieldIUnit, focusCurrency, calcPremium]);
 
   const SatsNumberField = useMemo(() => {
+    const isCurrentCurrency = focusCurrency === "SATS";
+    const isShowPremiumExpression = !isCurrentCurrency && premium !== 0;
     const displayValue = focusCurrency === "SATS" ? sats : calcPremium(sats, "SATS");
+    const incrementValue = calcStringNumber(displayValue, sats, 0);
 
     return (
       <div className="convert-pannel__item convert-pannel__item--sats">
         <NumberField ref={satsRef} className="convert-pannel__item__input" value={displayValue}
           readonly={focusCurrency !== "SATS"} dataCopy={displayValue} unit={NumberFieldIUnit("SATS")}
           maxLength={15} onChange={onChangeSats} onClick={onClickCopyToSats} leftAction={SatsLeftAction} />
+        {isShowPremiumExpression &&
+          <span className="convert-pannel__item__top-text"> {incrementValue} + {sats} <span className="sats">Sats</span></span>}
       </div>
     );
   }, [sats, SatsLeftAction, focusCurrency, calcPremium]);
@@ -323,11 +353,7 @@ const ConvertPannel = () => {
   }, [focusCurrency, currency, BtcNumberField, KrwNumberField, UsdNumberField, SatsNumberField]);
   // endregion
 
-  return (
-    <div className={`convert-pannel${premium ? ' premium' : ''}`}>
-      {SortNumberField}
-    </div>
-  );
+  return (<div className={`convert-pannel${premium ? ' premium' : ''}`}>{SortNumberField}</div>);
 };
 
 export default memo(ConvertPannel);

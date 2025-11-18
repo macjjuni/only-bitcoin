@@ -48,8 +48,11 @@ const PremiumField = () => {
         </KDropdown.Trigger>
         <KDropdown.Content offset={{ x: -3, y: 21 }} autoClose={false}>
           <div className="premium__field__popover">
-            <h2 className="premium__field__popover__title">프리미엄:
-              {premium}%
+            <h2 className="premium__field__popover__title">
+              <div className="premium__field__popover__title__left">
+                프리미엄:<span>{premium}%</span>
+              </div>
+
               {ResetButton}
             </h2>
             <div className="premium__field__popover__bottom">

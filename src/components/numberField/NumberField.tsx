@@ -99,21 +99,6 @@ const NumberField = forwardRef((props: TextFieldTypes, ref: Ref<HTMLInputElement
   // endregion
 
 
-  // region [Styles]
-
-  const unitStyle = useMemo(() => {
-
-    if (typeof unit !== "string") { return {}; }
-    if (unit.includes("KRW")) { return { letterSpacing: "-1px" }; }
-    if (unit.includes("USD")) { return { letterSpacing: "0" }; }
-    if (unit.includes("BTC")) { return { letterSpacing: "0.2px" }; }
-
-    return {};
-  }, [unit]);
-
-  // endregion
-
-
   // region [Templates]
 
   const LeftAction = useMemo(()=> (
@@ -121,7 +106,7 @@ const NumberField = forwardRef((props: TextFieldTypes, ref: Ref<HTMLInputElement
   ),[leftAction])
 
   const Unit = useMemo(() => (
-    unit ? <div className="number-field__unit" style={unitStyle}>{unit}</div> : null
+    unit ? <div className="number-field__unit">{unit}</div> : null
   ), [unit]);
 
   // endregion
