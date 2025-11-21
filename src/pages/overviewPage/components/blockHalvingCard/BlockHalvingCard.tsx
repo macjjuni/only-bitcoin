@@ -3,7 +3,7 @@ import { useLottie } from "lottie-react";
 import useStore from "@/shared/stores/store";
 import { comma } from "@/shared/utils/string";
 import blockLottieJson from "@/shared/assets/lottie/blocks.json";
-import { calcPercentage, getNextHalvingData } from "@/shared/utils/common";
+import { calcPercentage, getNextHalvingData } from "@/shared/utils/calculate";
 import { HorizontalCard } from "../../../../components";
 import "./BlockHalvingCard.scss";
 

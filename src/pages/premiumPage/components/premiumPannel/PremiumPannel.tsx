@@ -1,7 +1,7 @@
 import React, { memo, useMemo } from "react";
 import { CountText, Lottie } from "../../../../components";
 import useStore from "@/shared/stores/store";
-import { calcPremiumPercent } from "@/shared/utils/common";
+import { calcPremiumPercent } from "@/shared/utils/calculate";
 import { formatDate } from "@/shared/lib/date";
 import premiumData from "@/shared/assets/lottie/premium.json";
 import "./PremiumPannel.scss";
