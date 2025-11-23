@@ -39,19 +39,59 @@
       flex-direction: column;
       justify-content: flex-start;
       align-items: flex-start;
+      gap: 2px;
 
       .BIP39__page__view__list__item {
         position: relative;
         display: flex;
-        justify-content: flex-start;
+        justify-content: space-between;
         align-items: center;
         width: 100%;
         padding: $spacing-2;
         letter-spacing: -1px;
-        @include font-body;
+        font-size: 18px;
 
-        & > span:first-child {
-          margin-right: 3px;
+        &:first-child { margin-bottom: $spacing-4; }
+
+        & > span:first-child { margin-right: 3px; }
+
+        .title {
+          font-weight: bold;
+          white-space: nowrap;
+          @include font-sub-title;
+        }
+
+        .BIP39__page__view__list__item__left {
+          display: flex;
+          justify-content: flex-start;
+          align-items: center;
+          gap: 3px;
+
+          &.title { width: 116px; }
+        }
+
+        .BIP39__page__view__list__item__right {
+          display: flex;
+          justify-content: flex-end;
+          align-items: center;
+          gap: 2px;
+
+          &.title { margin-right: 160px; }
+
+          & > span {
+            width: 17px;
+            height: 17px;
+            border: 1px solid $default-font-color;
+            border-radius: 50%;
+
+            &:nth-child(6) {
+              margin-right: $spacing-8;
+            }
+          }
+
+          .BIP39__page__view__list__item__right__binary--active {
+            background: $default-font-color;
+          }
         }
       }
     }

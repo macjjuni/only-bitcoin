@@ -1,5 +1,5 @@
 import { lazy } from "react";
-import { createBrowserRouter } from "react-router-dom";
+import { createBrowserRouter, Navigate } from "react-router-dom";
 import Client from "@/app/Client";
 import withSuspense from "@/components/hoc/withSuspence";
 import ErrorPage from "@/pages/errorPage/ErrorPage";
@@ -24,7 +24,8 @@ const clientRoutes = [
   { title: "Orange Pill", path: "/orange-pill", element: <OrangePillPage />, isNav: true, isFavorite: true,icon: <PillIcon size={30} /> },
   { title: "BIP39", path: "/orange-pill/bip39", element: <BIP39Page />, isNav: false, isFavorite: false, icon: null },
   { title: "Settings", path: "/settings", element: <SettingsPage />, isNav: false, isFavorite: false ,icon: null },
-  { title: "Meme", path: "/meme", element: <MemePage />, isNav: false, isFavorite: false ,icon: null },
+  { title: "Meme", path: "/orange-pill/meme", element: <MemePage />, isNav: false, isFavorite: false ,icon: null },
+  { title: "Meme_temp", path: "/meme", element: <Navigate to="/orange-pill/meme" replace />, isNav: false, isFavorite: false ,icon: null },
   { title: "404 - Not Found", path: "/*", element: <NotFoundPage />, isNav: false, isFavorite: false, icon: null }
 ];
 

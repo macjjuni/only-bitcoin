@@ -1,10 +1,6 @@
 
 const commaRegex = /\B(?<!\.\d*)(?=(\d{3})+(?!\d))/g;
 
-export const valueCheck = (val?: string | number | null | object) => {
-  return !(val === null || val === undefined || val === "");
-};
-
 /* ---------- string 형식에 숫자만 포함됐는지 체크 ---------- */
 function isStrNumber(val: string): boolean {
   return !Number.isNaN(Number(val));

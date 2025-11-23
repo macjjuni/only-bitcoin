@@ -6,7 +6,7 @@
   flex-direction: column;
   justify-content: flex-start;
   align-items: flex-start;
-  gap: $spacing-16;
+  gap: $spacing-12;
   @include user-select;
 
   .block-card__title {

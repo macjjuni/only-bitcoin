@@ -9,6 +9,8 @@ export { default as DataIcon } from '@/components/icon/DataIcon'
 export { default as MnemonicIcon } from '@/components/icon/MnemonicIcon'
 export { default as CurrencyIcon } from '@/components/icon/CurrencyIcon'
 export { default as OptionIcon } from '@/components/icon/OptionIcon'
+export { default as EditIcon } from '@/components/icon/EditIcon'
+export { default as SaveIcon } from '@/components/icon/SaveIcon'
 
 // Navigation Icon
 export { default as DashboardIcon } from '@/components/icon/DashboardIcon'

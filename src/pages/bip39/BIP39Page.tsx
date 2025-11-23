@@ -7,6 +7,7 @@ import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { PageLayout } from "@/layouts";
 import { fetchBIP39 } from "@/shared/api";
 import "./BIP39Page.scss";
+import { toBip39Binary } from "@/shared/utils/calculate";
 
 type BIP39Response = { index: number, word: string };
 
@@ -20,17 +21,18 @@ export default function BIP39Page() {
   const { data } = useQuery<BIP39Response[], Error>({
     queryKey: ["BIP39"],
     queryFn: fetchBIP39,
-    staleTime: 60 * 1000 * 1000
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
   });
 
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
 
+
   const bip39List = useMemo(() => (
     data?.filter(item => item.word.startsWith(deferredSearch.toLowerCase()))
   ), [data, deferredSearch]);
   // endregion
-
 
   // region [Events]
   const onChangeSearch = useCallback((val: string) => {
@@ -38,24 +40,6 @@ export default function BIP39Page() {
       setSearch(val);
     }
   }, []);
-  // endregion
-
-
-  // region [Templates]
-  const BIP39List = useMemo(() => {
-    if (!bip39List) return [[], [], []];
-
-    const colCount = 3;
-    const rowCount = Math.ceil(bip39List.length / colCount);
-    const result: BIP39Response[][] = Array.from({ length: colCount }, () => []);
-
-    for (let i = 0; i < bip39List.length; i++) {
-      const colIndex = Math.floor(i / rowCount); // 열 우선 계산
-      result[colIndex].push(bip39List[i]);
-    }
-
-    return result;
-  }, [bip39List]);
   // endregion
 
 
@@ -67,16 +51,25 @@ export default function BIP39Page() {
                     leftContent={<KIcon icon="search" style={{ marginLeft: 12 }} />} />
       </div>
       <div className="BIP39__page__view">
-        {BIP39List.map((col, idx) => (
-          <ul key={col[idx]?.index} className="BIP39__page__view__list">
-            {col.map((item) => (
-              <li key={item.word} className="BIP39__page__view__list__item">
-                <span>{item.index}.</span>
-                <span>{item.word}</span>
-              </li>
-            ))}
-          </ul>
-        ))}
+        <ul className="BIP39__page__view__list">
+          <li className="BIP39__page__view__list__item">
+            <div className="BIP39__page__view__list__item__left title">Word List</div>
+            <div className="BIP39__page__view__list__item__right title">Binary</div>
+          </li>
+          {bip39List?.map(({ word, index }) => (
+            <li key={word} className="BIP39__page__view__list__item">
+              <div className="BIP39__page__view__list__item__left">
+                <span>{index}.</span><span>{word}</span>
+              </div>
+              <div className="BIP39__page__view__list__item__right">
+                {toBip39Binary(index).split('').map(item => (
+                  // eslint-disable-next-line react/jsx-key
+                  <span className={`BIP39__page__view__list__item__right__binary${item === '*' ? '--active' : ''}`} />
+                ))}
+              </div>
+            </li>
+          ))}
+        </ul>
       </div>
     </PageLayout>
   );

@@ -21,6 +21,11 @@ export interface StoreType {
   setReconnectBinance: (fn: () => void) => void;
   // endregion
 
+  // region [대시보드 메크로 순서]
+  macroSequence: number[],
+  setMacroSequence: (macroSequence: number[]) => void,
+  // endregion
+
   // region [대시보드 가격 차트]
   overviewChart: OverviewChartType;
   setOverviewChart: (chart: OverviewChartType) => void

@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { calcPremiumPercent } from "@/shared/utils/common";
+import { calcPremiumPercent } from "@/shared/utils/calculate";
 import useStore from "@/shared/stores/store";
 import { FearAndGreedModal } from "@/components/modal";
 import { CountText, HorizontalCard } from "../../../../components";
