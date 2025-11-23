@@ -2,7 +2,7 @@ import {useMemo} from 'react'
 import {useOutletContext} from 'react-router'
 import {usePageAnimation} from '@/shared/hooks'
 import {UsePageAnimation} from '@/shared/hooks/usePageAnimation'
-import {BlockHalvingCard, MiningMetricChart, MacroCard, MarketChart, PricePannel} from '@/pages/overviewPage/components'
+import {BlockHalvingCard, MiningMetricChart, MacroWidgetPanel, MarketChart, PricePannel} from '@/pages/overviewPage/components'
 import useStore from '@/shared/stores/store'
 import {PageLayout} from '@/layouts'
 
@@ -23,7 +23,10 @@ export default function OverviewPage() {
   return (
     <PageLayout className="overview-page__area">
       <PricePannel/>
-      <MacroCard/>
+      <MacroWidgetPanel />
+      {/* <MacroCard/> */}
+
+
       <BlockHalvingCard/>
       {OverviewChart}
     </PageLayout>

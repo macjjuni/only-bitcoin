@@ -43,6 +43,12 @@ const useStore = create<StoreType>()(
       // endregion
 
 
+      // region [대시보드 메크로 순서]
+      macroSequence: [1, 2, 3, 4],
+      setMacroSequence: (macroSequence) => set((store) => ({ ...store, macroSequence })),
+      // endregion
+
+
       // region [대시보드 차트]
       overviewChart: "price",
       setOverviewChart: ((overviewChart) => set((store) => ({ ...store, overviewChart }))),
@@ -95,6 +101,7 @@ const useStore = create<StoreType>()(
       setFocusCurrency: (focusCurrency) => set(() => ({ focusCurrency })),
       premium: 0,
       setPremium: (premium: number) => set(() => ({ premium })),
+
       // endregion
 
 

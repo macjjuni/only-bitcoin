@@ -25,24 +25,24 @@ const PricePannel = () => {
 
 
   return (
-    <div className="price-pannel">
-      <h2 className="price-pannel__signature">₿itcoin</h2>
+    <div className="price-panel">
+      <h2 className="price-panel__signature">₿itcoin</h2>
 
-      <div className="price-pannel__price__area">
+      <div className="price-panel__price__area">
         {
           Currencies
           .filter(({ code }) => currency.includes(code))
           .map(({ code, sign, price, percent }) => (
-            <div key={code} className={`price-pannel__price__area__${code.toLowerCase()}`}>
+            <div key={code} className={`price-panel__price__area__${code.toLowerCase()}`}>
 
-              <div className={`price-pannel__price__area__${code.toLowerCase()}__area`}>
-                <span className={`price-pannel__price__area__${code.toLowerCase()}__sign`}>
+              <div className={`price-panel__price__area__${code.toLowerCase()}__area`}>
+                <span className={`price-panel__price__area__${code.toLowerCase()}__sign`}>
                   {sign}
                 </span>
                 <CountText value={price} />
               </div>
 
-              <div className={`price-pannel__price__area__${code.toLowerCase()}__percent`}>
+              <div className={`price-panel__price__area__${code.toLowerCase()}__percent`}>
                 <UpdownIcon isUp={percent > 0} />
                 <span className="percent__text">
                   {percent  > 0 && '+'}

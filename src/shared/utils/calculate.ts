@@ -41,3 +41,39 @@ export function toBip39Binary(index: number) {
   const replacedPoint = originStr.replaceAll('1', '*');
   return replacedPoint.replaceAll('0', 'O');
 }
+
+
+// blockHeight: 현재 블록 높이 (정수)
+// 반환값: 발행 완료 비율 (%) - number 타입
+export function minedPercent(blockHeight: number) {
+  const SAT = 100_000_000n;
+  const HALVING_INTERVAL = 210000n;
+  const MAX_BTC = 21_000_000n * SAT;
+
+  const H = BigInt(blockHeight);
+  let totalSat = 0n;
+
+  for (let era = 0n; ; era++) {
+    const start = era * HALVING_INTERVAL;
+    const end = (era + 1n) * HALVING_INTERVAL - 1n;
+
+    if (H < start) break;
+
+    const endBlock = H < end ? H : end;
+    const blocks = endBlock - start + 1n;
+    const subsidy = (50n * SAT) / (2n ** era);
+
+    if (subsidy === 0n) break;
+
+    totalSat += subsidy * blocks;
+
+    if (endBlock === H) break;
+  }
+
+  return Number(totalSat) / Number(MAX_BTC) * 100;
+}
+
+
+export function usdToSats(usd: number, btcPrice: number) {
+  return Math.floor((usd / btcPrice) * 100_000_000);
+}

@@ -21,7 +21,8 @@ export default function BIP39Page() {
   const { data } = useQuery<BIP39Response[], Error>({
     queryKey: ["BIP39"],
     queryFn: fetchBIP39,
-    staleTime: 60 * 1000 * 1000
+    staleTime: Infinity,
+    refetchOnWindowFocus: false,
   });
 
   const [search, setSearch] = useState("");
