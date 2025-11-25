@@ -24,7 +24,7 @@ export default function useMempoolSocket() {
         size,
         poolName: extras.pool.name,
       }))
-      .sort((a, b) => b.timestamp - a.timestamp);
+      .sort((a, b) => b.height - a.height);
 
     setBlockData(sanitizedBlocks);
   }, []);
