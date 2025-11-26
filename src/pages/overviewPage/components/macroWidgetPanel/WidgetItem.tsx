@@ -17,6 +17,8 @@ export interface WidgetItemProps {
 }
 
 const WidgetItem = ({ id, label, value, sign, decimals, onClick, isEditMode, onRemove }: WidgetItemProps) => {
+
+  // region [Events]
   const sortableProps = useSortable({ id });
   const { attributes, listeners, setNodeRef, transform, transition } = sortableProps;
 
@@ -25,6 +27,14 @@ const WidgetItem = ({ id, label, value, sign, decimals, onClick, isEditMode, onR
     transition: isEditMode ? transition : undefined,
     display: "block"
   }), [isEditMode, transition, transform]);
+
+  const widgetClass = useMemo(() => {
+    const clazz = ["widget-item"]
+    if (isEditMode) { clazz.push("wiggle"); }
+    if (onClick) { clazz.push("widget-item--clickable") }
+    return clazz.join(' ');
+  }, [isEditMode, onClick])
+  // endregion
 
   // region [Events]
   const onClickWidget = useCallback(() => {
@@ -54,10 +64,14 @@ const WidgetItem = ({ id, label, value, sign, decimals, onClick, isEditMode, onR
   return (
     <div ref={setNodeRef} style={style} {...(isEditMode ? { ...attributes, ...listeners } : {})}>
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
-      <div className={["widget-item", isEditMode ? "wiggle" : ""].join(" ")} onClick={onClickWidget}>
+      <div className={widgetClass} onClick={onClickWidget}>
         <div className="widget-item__label">{label}</div>
         <div className="widget-item__value">
-          {typeof value === "number" && (<><CountText value={value} decimals={decimals} />{sign}</>)}
+          {typeof value === "number" && (
+            <>
+              <CountText value={value} decimals={decimals} />
+              <span className="widget-item__value__sign">{sign}</span>
+            </>)}
           {typeof value === "string" && value}
         </div>
         {RemoveButton}

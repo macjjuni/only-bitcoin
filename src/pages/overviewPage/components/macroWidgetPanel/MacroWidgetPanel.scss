@@ -20,6 +20,7 @@
     gap: $spacing-4;
 
     div { @include remove-tap-highlight; }
+    &.editable > div { cursor: pointer; }
 
     .macro-widget__panel__empty {
       display: flex;
@@ -50,6 +51,7 @@
     }
     .macro-widget__panel__bottom-list {
       $margin-size: $spacing-8;
+      display: flex;
       width: calc(100% + #{$margin-size} * 2);
       margin: 0 -#{$margin-size};
       padding: 0 $spacing-8 $spacing-8 $spacing-8;

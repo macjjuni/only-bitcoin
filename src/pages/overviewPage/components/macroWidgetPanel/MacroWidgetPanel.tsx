@@ -35,6 +35,7 @@ const MacroWidgetPanel = () => {
   const { krw, usd } = useStore(state => state.bitcoinPrice);
   const usdExRate = useStore(state => state.exRate.value);
   const blockData = useStore(state => state.blockData);
+  const fees = useStore(state => state.fees);
 
   const premium = useMemo(() => {
     if (usdExRate !== 0) {
@@ -129,8 +130,10 @@ const MacroWidgetPanel = () => {
     { id: 3, label: "Premium", value: premium, decimals: 2, sign: "%", onClick: onRoutePremiumPage },
     { id: 4, label: "F&G Index", value: fearGreed, decimals: 0, sign: null, onClick: onOpenFearAndGreedModal },
     { id: 5, label: "Mined %", value: minedPercent(blockData[0].height), decimals: 2, sign: "%", onClick: undefined },
-    { id: 6, label: "Sats/USD", value: usdToSats(1, usd), decimals: 0, sign: null, onClick: undefined }
-  ]), [dominance, usdExRate, premium, fearGreed, blockData, usd]);
+    { id: 6, label: "Sats/USD", value: usdToSats(1, usd), decimals: 0, sign: null, onClick: undefined },
+    { id: 7, label: "Fast Fee", value: fees.fastestFee, decimals: 0, sign: 'sat/vB', onClick: undefined },
+    { id: 8, label: "Eco Fee", value: fees.economyFee, decimals: 0, sign: 'sat/vB', onClick: undefined },
+  ]), [dominance, usdExRate, premium, fearGreed, blockData, usd, fees]);
 
 
   const visibleItems = useMemo(() => (
