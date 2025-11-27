@@ -4,6 +4,7 @@ import { useEffect } from "react";
 import fetcher from "@/shared/utils/fetcher";
 import { FearGreedIndexResponseTypes } from "@/shared/types/api/fearGreedIndex";
 import { isDev } from "@/shared/utils/common";
+import { queryClient } from "@/app/queryClient";
 
 
 const FEAR_GREED_INDEX_API_URL = "https://api.alternative.me/fng/";
@@ -37,7 +38,7 @@ const useFearGreedIndex = () => {
     staleTime: 1000 * 60 * STALE_TIME_MIN, // 10분 캐싱
     refetchInterval: 1000 * 60 * REFETCH_TIME_MIN, // 10분마다 자동 갱신
     refetchOnMount: true,
-    placeholderData: 0,
+    initialData: queryClient.getQueryData(['fear-greed-index']),
     retry: 3
   });
 
