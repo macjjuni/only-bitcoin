@@ -8,7 +8,7 @@ import { CountText } from "@/components";
 export interface WidgetItemProps {
   id: number;
   label: string;
-  value?: number |  "Error";
+  value?: number | string;
   sign: string | null;
   decimals: number;
   onClick?: () => void;

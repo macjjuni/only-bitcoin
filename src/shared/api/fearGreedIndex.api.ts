@@ -4,7 +4,6 @@ import { useEffect } from "react";
 import fetcher from "@/shared/utils/fetcher";
 import { FearGreedIndexResponseTypes } from "@/shared/types/api/fearGreedIndex";
 import { isDev } from "@/shared/utils/common";
-import { queryClient } from "@/app/queryClient";
 
 
 const FEAR_GREED_INDEX_API_URL = "https://api.alternative.me/fng/";
@@ -20,7 +19,7 @@ const fetchFearGreedIndex = async (): Promise<number | 'Error'> => {
     return Number(data.data[0].value);
 
   } catch {
-    return "Error";
+    throw Error("❌ 공포 탐욕 지수 데이터 초기화 실패!")
   }
 };
 
@@ -32,13 +31,12 @@ const useFearGreedIndex = () => {
   const STALE_TIME_MIN = 10;
   const REFETCH_TIME_MIN = 10;
 
-  const { data: fearGreed, isSuccess, isError, error } = useQuery({
+  const { data: fearGreed, isLoading, isError, error } = useQuery({
     queryKey: ["fear-greed-index"],
     queryFn: fetchFearGreedIndex,
     staleTime: 1000 * 60 * STALE_TIME_MIN, // 10분 캐싱
     refetchInterval: 1000 * 60 * REFETCH_TIME_MIN, // 10분마다 자동 갱신
     refetchOnMount: true,
-    initialData: queryClient.getQueryData(['fear-greed-index']),
     retry: 3
   });
 
@@ -57,8 +55,8 @@ const useFearGreedIndex = () => {
 
   // endregion
 
-
-  return { fearGreed, isSuccess, isError, error };
+  const value = isError ? "Error" : (fearGreed || 'Error');
+  return isLoading ? "Loading..." : value;
 };
 
 

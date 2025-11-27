@@ -24,9 +24,6 @@ export default function OverviewPage() {
     <PageLayout className="overview-page__area">
       <PricePannel/>
       <MacroWidgetPanel />
-      {/* <MacroCard/> */}
-
-
       <BlockHalvingCard/>
       {OverviewChart}
     </PageLayout>
