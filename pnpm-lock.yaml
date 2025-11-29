@@ -33,7 +33,7 @@ dependencies:
     specifier: ^12.4.2
     version: 12.9.1(@types/node@18.19.129)
   kku-ui:
-    specifier: ^0.2.55
+    specifier: ^0.2.6
     version: 0.2.55
   kku-util:
     specifier: ^0.0.156
