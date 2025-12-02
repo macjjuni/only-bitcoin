@@ -1,5 +1,5 @@
 import { memo } from "react";
-import { IconTypes } from "@/components/icon/icon";
+import { IconTypes } from "@/components/ui/icon/icon";
 
 const IosShareIcon = ({ size = "100%", color = "currentColor", style }: IconTypes) => {
   return (

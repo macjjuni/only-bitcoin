@@ -5,7 +5,7 @@ import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
 import { PageLayout } from "@/layouts";
 import { LazyImage, FormRow } from "@/components";
-import { DiscordIcon, LinkIcon, NaverIcon, PageIcon, MnemonicIcon } from "@/components/icon";
+import { DiscordIcon, LinkIcon, NaverIcon, PageIcon, MnemonicIcon } from "@/components/ui/icon";
 import router from "@/app/router";
 import "./OrangePillPage.scss";
 

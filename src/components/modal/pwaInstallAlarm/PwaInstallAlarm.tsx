@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { KButton, KIcon } from "kku-ui";
-import { useInitializePWA } from "../../shared/hooks/initializer";
+import { useInitializePWA } from "../../../shared/hooks/initializer";
 import { getCookie } from "@/shared/utils/cookie";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import "./PwaInstallAlarm.scss";

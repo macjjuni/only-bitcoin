@@ -4,7 +4,7 @@ import { FormRow } from "@/components";
 import { useInitializePWA } from "../../../../shared/hooks/initializer";
 import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
-import { MessageIcon } from "@/components/icon";
+import { MessageIcon } from "@/components/ui/icon";
 
 
 const InstallSettingForm = () => {

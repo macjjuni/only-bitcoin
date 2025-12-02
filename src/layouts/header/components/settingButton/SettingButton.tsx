@@ -1,7 +1,7 @@
 import { memo, useCallback } from "react";
 import { KIcon } from "kku-ui";
 import { Link, useLocation, useNavigate } from "react-router";
-import { SettingIcon } from "@/components/icon";
+import { SettingIcon } from "@/components/ui/icon";
 import "./SettingButton.scss";
 
 const SettingButton = () => {

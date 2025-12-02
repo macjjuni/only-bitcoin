@@ -1,4 +1,4 @@
-import React, { ChangeEvent, forwardRef, memo, ReactNode, Ref, useCallback, useMemo, useRef } from "react";
+import { ChangeEvent, forwardRef, memo, ReactNode, Ref, useCallback, useMemo, useRef } from "react";
 import { ComponentBaseTypes } from "@/shared/types/base.interface";
 import { isNumber } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
@@ -123,5 +123,8 @@ const NumberField = forwardRef((props: TextFieldTypes, ref: Ref<HTMLInputElement
   );
 });
 
+const MemoizedNumberField = memo(NumberField);
 NumberField.displayName = "NumberField";
-export default memo(NumberField);
+MemoizedNumberField.displayName = "NumberField";
+
+export default MemoizedNumberField;

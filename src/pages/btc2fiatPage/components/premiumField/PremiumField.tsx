@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo, useRef } from "react";
 import { KButton, KDropdown, KDropdownRefs, KIcon } from "kku-ui";
-import { OptionIcon } from "@/components/icon";
+import { OptionIcon } from "@/components/ui/icon";
 import useStore from "@/shared/stores/store";
 import "./PremiumField.scss";
 

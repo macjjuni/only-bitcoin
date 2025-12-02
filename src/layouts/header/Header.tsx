@@ -1,6 +1,7 @@
 import React, { memo } from "react";
 import { useTitle } from "@/shared/hooks";
-import { ConnectionDot, SettingButton } from "@/components";
+import { ConnectionDot } from "@/components";
+import SettingButton from "@/layouts/header/components/settingButton/SettingButton";
 import "./Header.scss";
 
 const Header = () => {

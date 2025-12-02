@@ -1,6 +1,6 @@
 import { memo } from "react";
 import FormRowAccordion from "../formRowAccordion/FormRowAccordion";
-import { DataIcon } from "@/components/icon";
+import { DataIcon } from "@/components/ui/icon";
 import "./ResourceSource.scss";
 
 

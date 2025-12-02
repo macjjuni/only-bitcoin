@@ -4,7 +4,7 @@ import { toast } from "react-toastify";
 import { KButton } from "kku-ui";
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
-import { EditIcon, SaveIcon } from "@/components/icon";
+import { EditIcon, SaveIcon } from "@/components/ui/icon";
 import { useBitcoinDominanceQuery, useFearGreedIndex } from "@/shared/api";
 import { calcPremiumPercent, minedPercent, usdToSats } from "@/shared/utils/calculate";
 import { FearAndGreedModal } from "@/components/modal";

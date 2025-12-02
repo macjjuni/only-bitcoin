@@ -1,6 +1,6 @@
 import { memo, useMemo } from "react";
 import useStore from "@/shared/stores/store";
-import { PremiumIcon } from "@/components/icon";
+import { PremiumIcon } from "@/components/ui/icon";
 import "./Premium-badge.scss";
 
 const PremiumBadge = () => {

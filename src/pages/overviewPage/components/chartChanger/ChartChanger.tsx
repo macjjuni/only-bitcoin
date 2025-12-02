@@ -1,6 +1,6 @@
 import { memo, useCallback, useRef } from "react";
 import { KDropdown, KDropdownRefs, KMenu } from "kku-ui";
-import { DataIcon } from "@/components/icon";
+import { DataIcon } from "@/components/ui/icon";
 import useStore from "@/shared/stores/store";
 import { OverviewChartType } from "@/shared/stores/store.interface";
 import "./ChartChanger.scss";

@@ -4,7 +4,7 @@ import Client from "@/app/Client";
 import withSuspense from "@/components/hoc/withSuspense";
 import ErrorPage from "@/pages/errorPage/ErrorPage";
 import NotFoundPage from "@/pages/notFoundPage/NotFoundPage";
-import { DashboardIcon, BlockIcon, ExchangeIcon, PremiumIcon, PillIcon } from "@/components/icon";
+import { DashboardIcon, BlockIcon, ExchangeIcon, PremiumIcon, PillIcon } from "@/components/ui/icon";
 
 const OverviewPage = withSuspense(lazy(() => import("@/pages/overviewPage/OverviewPage")));
 const BlocksPage = withSuspense(lazy(() => import("@/pages/blocksPage/BlocksPage")));

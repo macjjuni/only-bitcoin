@@ -1,6 +1,6 @@
 import React, { memo } from "react";
 import { KModal } from "kku-ui";
-import LazyImage from "@/components/lazyImage/LazyImage";
+import LazyImage from "@/components/ui/lazyImage/LazyImage";
 import "./FearAndGreedModal.scss";
 
 interface ModalTypes {
