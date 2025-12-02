@@ -1,7 +1,7 @@
 import { lazy } from "react";
 import { createBrowserRouter, Navigate } from "react-router-dom";
 import Client from "@/app/Client";
-import withSuspense from "@/components/hoc/withSuspence";
+import withSuspense from "@/components/hoc/withSuspense";
 import ErrorPage from "@/pages/errorPage/ErrorPage";
 import NotFoundPage from "@/pages/notFoundPage/NotFoundPage";
 import { DashboardIcon, BlockIcon, ExchangeIcon, PremiumIcon, PillIcon } from "@/components/icon";
