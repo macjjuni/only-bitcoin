@@ -1,5 +1,5 @@
 import React, { memo } from "react";
-import { useTitle } from "@/shared/hooks";
+import { KIcon } from "kku-ui";
 import { ConnectionDot } from "@/components";
 import SettingButton from "@/layouts/header/components/settingButton/SettingButton";
 import "./Header.scss";
@@ -9,9 +9,8 @@ const Header = () => {
   return (
     <header className="header__area">
       <h2 className="header__area__text">
-        {useTitle().split(" ").map(text => (
-          <span key={text} className="header__area__text">{text}</span>)
-        )}
+        <KIcon icon="bitcoin" size={40} color="currentColor" />
+        ₿itcoin
       </h2>
       <div className="header__area__right">
         <ConnectionDot />

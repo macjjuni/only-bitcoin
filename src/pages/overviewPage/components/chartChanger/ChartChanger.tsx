@@ -29,11 +29,11 @@ const ChartChanger = () => {
   // endregion
 
   return (
-    <KDropdown ref={dropdownRef} trigger="click" position="left-start" className="chart-changer">
+    <KDropdown ref={dropdownRef} trigger="click" position="top-end" className="chart-changer">
       <KDropdown.Trigger className="chart-changer__trigger remove-highlight" style={{ cursor: "pointer" }}>
         <DataIcon size={20} style={{ padding: 2 }} />
       </KDropdown.Trigger>
-      <KDropdown.Content zIndex={6} offset={{ x: -8, y: 0 }}>
+      <KDropdown.Content zIndex={6} offset={{ x: 0, y: -4 }}>
         <KMenu size="small">
           { overviewChartOptions.map(item => (
               <KMenu.ItemSelectable key={item.value} selected={item.value === overviewChart} label={item.label}

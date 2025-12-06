@@ -6,23 +6,18 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: $spacing-12 $spacing-12 $spacing-8 $spacing-12;
+  gap: $spacing-8;
+  margin: 0 -#{$spacing-8};
+  width: calc(100% + #{$spacing-8} * 2);
   user-select: none;
   overflow: hidden;
   @include user-select;
 
-  &:before {
-    content: '';
-    position: absolute;
-    top: -2%;
-    left: -2%;
-    width: 104%;
-    height: 104%;
-    //background: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/backdrop-bg.webp') no-repeat center;
-    background-size: cover;
-    z-index: 4;
-    pointer-events: none; /* 클릭 방해 방지 */
+  &.horizontal-card {
+    padding: 0;
+    border: none;
   }
+
 
   .market-chart__top {
     display: flex;
@@ -31,88 +26,10 @@
     gap: $spacing-8;
     color: $default-font-color;
     z-index: 5;
-
-    .market-chart__top__fist {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-
-      .market-chart__top__fist__logo {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        gap: $spacing-8;
-      }
-
-      .market-chart__top__first__button-area {
-
-        .market-chart__button {
-          height: 28px;
-          padding: 0 $spacing-12;
-          color: $default-font-color;
-          background-color: $default-background-color;
-
-          &.market-chart__button--active {
-            color: $default-background-color;
-            border-color: $default-font-color;
-            background-color: $default-font-color;
-          }
-        }
-
-        .k-button:first-child {
-          border-top-left-radius: 2px;
-          border-bottom-left-radius: 2px;
-        }
-        .k-button:last-child {
-          border-top-right-radius: 2px;
-          border-bottom-right-radius: 2px;
-        }
-
-      }
-    }
-
-    .market-chart__top__second {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-
-      .market-chart__top__second__area {
-        display: flex;
-        gap: $spacing-8;
-
-        .market-chart__top__second__area__price {
-          @include font-body;
-          font-family: $number-font-family;
-          font-weight: bold;
-        }
-
-        .market-chart__top__second__area__rate {
-          display: flex;
-          justify-content: center;
-          align-items: center;
-          gap: 2px;
-          font-family: $number-font-family;
-          font-weight: bold;
-          font-size: 12px;
-          line-height: 16px;
-        }
-      }
-    }
-
-    .market-chart__top__wrapper__text__area {
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      font-weight: bold;
-
-      .market-chart__top__wrapper__text__area--top, .market-chart__top__wrapper__text__area--bottom {
-        font-size: 15px;
-      }
-    }
   }
 
 
-  .market-chart__bottom {
+  .market-chart__top {
     position: relative;
     margin: 0 -#{$spacing-16};
     width: calc(100% + (2 * #{$spacing-16}));
@@ -123,24 +40,38 @@
       background-color: transparent;
       z-index: 3;
     }
+  }
 
-    .market-chart__chart__wrapper__line__area {
-      position: absolute;
-      top: 0;
-      left: 0;
+  .market-chart__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 0 $spacing-8;
+
+    .market-chart__bottom__buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: $spacing-32;
       width: 100%;
-      height: 100%;
-      z-index: -1;
+      padding-left: $spacing-12;
 
-      .market-chart__chart__wrapper__line__area--line {
-        position: absolute;
-        width: 1px;
-        height: 82%;
-        top: 50%;
-        transform: translateY(-50%);
-        border-left: 1px dashed #4f4f4f;
-        z-index: 1;
+      .market-chart__button {
+        height: 30px;
+        padding: 0 $spacing-12;
+        color: $default-font-color;
+        border: none;
+        border-radius: $default-border-radius;
+        background: transparent;
+
+        &.market-chart__button--active {
+          color: $default-background-color;
+          border-color: $default-font-color;
+          background-color: rgba(0, 0, 0, 0.4);
+          font-weight: bold;
+        }
       }
+
     }
   }
 }
