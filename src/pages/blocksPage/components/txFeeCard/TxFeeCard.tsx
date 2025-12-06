@@ -29,7 +29,7 @@ const TxFeeCard = () => {
             <div key={label} className="tx-fee-card__area__item">
               <div className="tx-fee-card__area__item__text">{label}</div>
               <div className="tx-fee-card__area__item__value">
-                <CountText value={value} />
+                <CountText value={value} decimals={1} />
                 <span className="tx-fee-card__area__item__value__unit">sat/vB</span>
               </div>
             </div>

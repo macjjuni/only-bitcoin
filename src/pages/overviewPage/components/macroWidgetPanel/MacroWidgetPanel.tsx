@@ -131,7 +131,7 @@ const MacroWidgetPanel = () => {
     { id: 4, label: "F&G Index", value: fearGreedData, decimals: 0, sign: null, onClick: onOpenFearAndGreedModal },
     { id: 5, label: "Mined %", value: minedPercent(blockData[0].height), decimals: 2, sign: "%", onClick: undefined },
     { id: 6, label: "Sats/USD", value: usdToSats(1, usd), decimals: 0, sign: null, onClick: undefined },
-    { id: 7, label: "Fast Fee", value: fees.fastestFee, decimals: 0, sign: 'sat/vB', onClick: undefined },
+    { id: 7, label: "Fast Fee", value: fees.fastestFee, decimals: 1, sign: 'sat/vB', onClick: undefined },
     { id: 8, label: "Eco Fee", value: fees.economyFee, decimals: 0, sign: 'sat/vB', onClick: undefined },
   ]), [dominanceData, usdExRate, premium, fearGreedData, blockData, usd, fees]);
 
