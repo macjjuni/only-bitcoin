@@ -25,11 +25,6 @@
     justify-content: flex-start;
     gap: $spacing-8;
     color: $default-font-color;
-    z-index: 5;
-  }
-
-
-  .market-chart__top {
     position: relative;
     margin: 0 -#{$spacing-16};
     width: calc(100% + (2 * #{$spacing-16}));
@@ -71,7 +66,6 @@
           font-weight: bold;
         }
       }
-
     }
   }
 }

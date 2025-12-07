@@ -10,13 +10,12 @@
     height: 100dvh;
     padding: 0;
     margin: 0 auto;
-    border-left: 1px solid $default-border-color;
-    border-right: 1px solid $default-border-color;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 1px 3px 1px;
     overflow-x: hidden;
 }
 
 @media screen and (max-width: $max-width-size) {
     .only-btc__layout {
-        border: none;
+        box-shadow: none;
     }
 }

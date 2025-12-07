@@ -1,7 +1,7 @@
 import { useCallback, useLayoutEffect } from "react";
 import useStore from "@/shared/stores/store";
 
-export default function useTitle() {
+export default function useTheme() {
 
   // region [Hooks]
   const theme = useStore(state => state.theme);

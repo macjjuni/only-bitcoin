@@ -6,13 +6,17 @@
   display: flex;
   flex-direction: column;
   justify-content: space-between;
-  padding: $spacing-12 $spacing-12 $spacing-8 $spacing-12;
+  gap: $spacing-8;
+  width: calc(100% + #{$spacing-8} * 2);
+  padding: 0;
+  margin: 0 -#{$spacing-8};
+  border: none;
   user-select: none;
   overflow: hidden;
   @include user-select;
 
   &:before {
-    content: '';
+    //content: '';
     position: absolute;
     top: -2%;
     left: -2%;
@@ -29,68 +33,30 @@
     justify-content: flex-start;
     gap: $spacing-8;
     color: $default-font-color;
-    z-index: 5;
+    position: relative;
+    //margin: 0 -#{$spacing-16};
+    //width: calc(100% + (2 * #{$spacing-16}));
+    //pointer-events: none; /* 클릭 방해 방지 */
+    //z-index: 3;
 
-    .mining-metric-chart__top__fist {
+    .mining-metric-chart__top__left {
       display: flex;
-      justify-content: space-between;
-      align-items: flex-start;
-
-      .mining-metric-chart__top__fist__logo {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        gap: $spacing-8;
-
-        .k-icon {
-          @include remove-tap-highlight;
-        }
-      }
-
-      .mining-metric-chart__top__first__button-area {
-
-        .mining-metric-chart__button {
-          height: 28px;
-          padding: 0 $spacing-12;
-          color: $default-font-color;
-          background-color: $default-background-color;
-
-          &.mining-metric-chart__button--active {
-            color: $default-background-color;
-            border-color: $default-font-color;
-            background-color: $default-font-color;
-          }
-        }
-
-        .k-button:first-child {
-          border-top-left-radius: 2px;
-          border-bottom-left-radius: 2px;
-        }
-        .k-button:last-child {
-          border-top-right-radius: 2px;
-          border-bottom-right-radius: 2px;
-        }
-
-      }
-    }
-
-    .mining-metric-chart__top__second {
-      display: flex;
-      justify-content: space-between;
+      justify-content: flex-start;
       align-items: center;
+      padding: 0 $spacing-8;
 
-      .mining-metric-chart__top__second__area {
+      .mining-metric-chart__top__left__area {
         display: flex;
         gap: $spacing-8;
         position: relative;
 
-        .mining-metric-chart__top__second__area__value {
+        .mining-metric-chart__top__left__area__value {
           @include font-body;
           font-family: $number-font-family;
           font-weight: bold;
         }
 
-        .mining-metric-chart__top__second__area__rate {
+        .mining-metric-chart__top__left__area__rate {
           display: flex;
           justify-content: center;
           align-items: center;
@@ -103,7 +69,7 @@
 
         $lightning-size: 40px;
 
-        .mining-metric-chart__top__second__area__ath-lottie {
+        .mining-metric-chart__top__left__area__ath-lottie {
           position: absolute;
           top: 50%;
           right: calc(-#{$lightning-size} + 6px);
@@ -130,14 +96,12 @@
   }
 
 
-  .mining-metric-chart__bottom {
+  .mining-metric-chart__middle {
     position: relative;
-    width: calc(100% + (2 * #{$spacing-16}));
-    margin: 0 -#{$spacing-16} $spacing-4 -#{$spacing-16};
     pointer-events: none; /* 클릭 방해 방지 */
     z-index: 3;
 
-    .mining-metric-chart__bottom__spinner {
+    .mining-metric-chart__middle__spinner {
       position: absolute;
       top: calc(50% - 16px);
       left: 50%;
@@ -169,9 +133,9 @@
     }
 
 
-    .mining-metric-chart__bottom__x {
+    .mining-metric-chart__middle__x {
       position: absolute;
-      bottom: $spacing-2;
+      bottom: -#{$spacing-12};
       left: 0;
       width: 100%;
       padding: 0 $spacing-8;
@@ -179,9 +143,41 @@
       justify-content: space-between;
       align-items: center;
 
-      .mining-metric-chart__bottom__x__first, .mining-metric-chart__bottom__x__middle, .mining-metric-chart__bottom__x__last {
+      .mining-metric-chart__middle__x__first, .mining-metric-chart__middle__x__middle, .mining-metric-chart__middle__x__last {
         font-size: 12px;
         font-family: $number-font-family;
+      }
+    }
+  }
+
+  .mining-metric-chart__bottom {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: $spacing-12 $spacing-8 0 $spacing-8;
+
+    .mining-metric-chart__bottom__buttons {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      gap: $spacing-32;
+      width: 100%;
+      padding-left: $spacing-12;
+
+      .mining-metric-chart__button {
+        height: 30px;
+        padding: 0 $spacing-12;
+        color: $default-font-color;
+        border: none;
+        border-radius: $default-border-radius;
+        background: transparent;
+
+        &.mining-metric-chart__button--active {
+          color: $default-background-color;
+          border-color: $default-font-color;
+          background-color: rgba(0, 0, 0, 0.4);
+          font-weight: bold;
+        }
       }
     }
   }
