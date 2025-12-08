@@ -8,12 +8,10 @@
     width: 100%;
     max-width: $max-width-size;
     height: $mobile-bottom-navigation-height;
-    border: 1px solid $default-border-color;
     border-bottom: none;
     padding-bottom: 8px;
-    border-top-left-radius: 16px;
-    border-top-right-radius: 16px;
     background: $default-background-color;
+    box-shadow: rgba(60, 64, 67, 0.3) 0px 1px 2px 0px, rgba(60, 64, 67, 0.15) 0px 2px 6px 2px;
     overflow: hidden;
     z-index: 999;
 
@@ -50,6 +48,7 @@
 
 .#{$kku-dark-mode-signature} {
     .bottom-navigation {
+      box-shadow: rgba(255, 255, 255, 0.3) 0px 1px 2px 0px, rgba(255, 255, 255, 0.15) 0px 2px 6px 2px;
         .bottom-navigation__list {
             .bottom-navigation__list__item {
                 .bottom-navigation__list__item__link {

@@ -1,10 +1,10 @@
 import { memo, useMemo } from "react";
 import useStore from "@/shared/stores/store";
 import { CountText, UpdownIcon } from "../../../../components";
-import "./PricePannel.scss";
+import "./PricePanel.scss";
 
 
-const PricePannel = () => {
+const PricePanel = () => {
 
   // region [Hooks]
 
@@ -26,8 +26,6 @@ const PricePannel = () => {
 
   return (
     <div className="price-panel">
-      <h2 className="price-panel__signature">₿itcoin</h2>
-
       <div className="price-panel__price__area">
         {
           Currencies
@@ -58,4 +56,8 @@ const PricePannel = () => {
   );
 };
 
-export default memo(PricePannel);
+const MemoizedPricePanel =  memo(PricePanel);
+MemoizedPricePanel.displayName = 'PricePanel'
+PricePanel.displayName = 'PricePanel'
+
+export default MemoizedPricePanel;

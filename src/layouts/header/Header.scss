@@ -8,7 +8,7 @@
     justify-content: space-between;
     align-items: center;
     gap: $spacing-4;
-    padding: $spacing-8 $spacing-16 0 $spacing-16;
+    padding: $spacing-8 $spacing-8 0 $spacing-8;
 
     .header__area__text {
         display: flex;
@@ -17,6 +17,7 @@
         gap: $spacing-8;
         color: $default-font-color;
         font-weight: bold;
+        letter-spacing: -1px;
         @include font-heading-sm;
         user-select: none;
         -webkit-user-select: none;

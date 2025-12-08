@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { Chart as ChartJS, LinearScale, LineElement, PointElement, Tooltip } from "chart.js";
-import { KButton, KButtonGroup, KIcon, KSpinner } from "kku-ui";
+import { KButton, KButtonGroup, KSpinner } from "kku-ui";
 import { Line } from "react-chartjs-2";
 import { useLottie } from "lottie-react";
 import {
@@ -43,7 +43,6 @@ const MiningMetricChart = () => {
 
   // region [Hooks]
   const chartRef = useRef<ChartJS<"line", number[], string>>(null);
-  const cardRef = useRef<HTMLDivElement>(null);
   const chartBottomRef = useRef<HTMLDivElement>(null);
 
   const overviewChart = useStore(store => store.overviewChart);
@@ -99,9 +98,15 @@ const MiningMetricChart = () => {
   }, [data, MaxValue]);
 
   const AllTimeHighValue = useMemo(() => {
-    if (!data) { return ''; }
-    if (overviewChart === "hashrate") { return formatHashrate(data?.currentHashrate || 0); }
-    if (overviewChart === "difficulty") { return formatDifficulty(data?.currentDifficulty || 0); }
+    if (!data) {
+      return "";
+    }
+    if (overviewChart === "hashrate") {
+      return formatHashrate(data?.currentHashrate || 0);
+    }
+    if (overviewChart === "difficulty") {
+      return formatDifficulty(data?.currentDifficulty || 0);
+    }
   }, [data, overviewChart]);
   // endregion
 
@@ -112,17 +117,6 @@ const MiningMetricChart = () => {
     const sanitizedStrArr = removeSpaces(dateStr).split(".");
 
     return `${sanitizedStrArr[0]}.${sanitizedStrArr[1]}`;
-  }, []);
-
-  const initializeBlankHeight = useCallback(() => {
-    if (!chartBottomRef?.current) {
-      return;
-    }
-    if (!cardRef?.current) {
-      chartBottomRef.current.style.setProperty("height", "auto");
-      return;
-    }
-    chartBottomRef.current.style.setProperty("height", `${cardRef.current.clientWidth * 0.444}px`);
   }, []);
 
   const initializeTooltip = useCallback(() => {
@@ -147,7 +141,9 @@ const MiningMetricChart = () => {
   }, [miningMetricChartInterval]);
 
   const xAxisValue = useMemo(() => {
-    if (!data) { return { first: "-", middle: "-", last: "-" }; }
+    if (!data) {
+      return { first: "-", middle: "-", last: "-" };
+    }
 
     return {
       first: getFormatDate(ChartRowData.date[0]),
@@ -159,83 +155,49 @@ const MiningMetricChart = () => {
 
   // region [Templates]
   const LightningLottie = useMemo(() => (
-    <div className="mining-metric-chart__top__second__area__ath-lottie"
+    <div className="mining-metric-chart__top__left__area__ath-lottie"
          style={{ display: data && Percentage === 0 ? "flex" : "none" }}>
       {lightningLottie}
     </div>
   ), [data, Percentage, lightningLottie]);
 
-  const TopLogoArea = useMemo(() => (
-    <div className="mining-metric-chart__top__fist__logo">
-      <KIcon icon="bitcoin" color={isDark ? "#fff" : "#000"} size={33} />
-      <p className="mining-metric-chart__top__wrapper__text__area">
-        <span className="mining-metric-chart__top__wrapper__text__area--top">Bitcoin</span>
-        <span
-          className="mining-metric-chart__top__wrapper__text__area--bottom">{overviewChart.charAt(0).toUpperCase() + overviewChart.slice(1)}</span>
-      </p>
-    </div>
-  ), [overviewChart]);
-
-
-  const ButtonIntervalArea = useMemo(() => (
-    <KButtonGroup className="mining-metric-chart__top__first__button-area">
-      {
-        miningMetricChartIntervalOptions.map(({ value, text }) => (
-          <KButton key={value} label={text} size="small" className={chartCardButtonClass(value)}
-                   onClick={() => setHashrateChartInterval(value)} />
-        ))
-      }
-    </KButtonGroup>
-  ), [chartCardButtonClass]);
-
 
   const ChartArea = useMemo(() => (
-    <>
-      <Line ref={chartRef} data={CurrentChartData} height="120%"
-            className="mining-metric-chart__chart__wrapper__body"
-            options={{
-              plugins: {
-                legend: { display: false },
-                decimation: {
-                  enabled: true,
-                  algorithm: "lttb",
-                  samples: 1
-                },
-                tooltip: {
-                  enabled: true,
-                  usePointStyle: true,
-                  caretPadding: 6,
-                  backgroundColor: "rgba(0, 0, 0, 0.72)",
-                  callbacks: {
-                    label: (e) => `${
-                      overviewChart === "hashrate" ? formatHashrate(e.raw as number) : formatDifficulty(e.raw as number)
-                    }`
-                  }
+    <Line ref={chartRef} data={CurrentChartData} height="150%"
+          className="mining-metric-chart__chart__wrapper__body"
+          options={{
+            plugins: {
+              legend: { display: false },
+              decimation: {
+                enabled: true,
+                algorithm: "lttb",
+                samples: 1
+              },
+              tooltip: {
+                enabled: true,
+                usePointStyle: true,
+                caretPadding: 6,
+                backgroundColor: "rgba(0, 0, 0, 0.72)",
+                callbacks: {
+                  label: (e) => `${
+                    overviewChart === "hashrate" ? formatHashrate(e.raw as number) : formatDifficulty(e.raw as number)
+                  }`
                 }
-              },
-              elements: { point: { radius: 0 }, line: { tension: 0.2, borderWidth: 2 } },
-              scales: {
-                x: { display: false },
-                y: { display: false, suggestedMax: MaxValue * 1.014 }
-              },
-              animation: false
-            }}
-      />
-      <div className="mining-metric-chart__chart__wrapper__line__area">
-        {Array.from({ length: 16 }, (_, i) => (
-          <span key={i} style={{ "left": `${(i + 1) * 6.25}%` }}
-                className="mining-metric-chart__chart__wrapper__line__area--line" />
-        ))}
-      </div>
-    </>
+              }
+            },
+            elements: { point: { radius: 0 }, line: { tension: 0.2, borderWidth: 2 } },
+            scales: {
+              x: { display: false },
+              y: { display: false, suggestedMax: MaxValue * 1.014 }
+            },
+            animation: false
+          }}
+    />
   ), [MaxValue, CurrentChartData]);
   // endregion
 
 
   // region [Life Cycles]
-  useEffect(() => {
-    initializeBlankHeight();
-  }, []);
   useEffect(() => {
     if (chartRef?.current) {
       initializeTooltip();
@@ -244,48 +206,57 @@ const MiningMetricChart = () => {
   // endregion
 
   return (
-    <HorizontalCard ref={cardRef} className="mining-metric-chart" rows={2}>
+    <HorizontalCard className="mining-metric-chart">
+
       <div className="mining-metric-chart__top">
-        <div className="mining-metric-chart__top__fist">
-          {TopLogoArea}
-          {ButtonIntervalArea}
-        </div>
-        <div className="mining-metric-chart__top__second">
-          <div className="mining-metric-chart__top__second__area">
-            <span className="mining-metric-chart__top__second__area__value">
+
+        <div className="mining-metric-chart__top__left">
+          <div className="mining-metric-chart__top__left__area">
+            <span className="mining-metric-chart__top__left__area__value">
               {AllTimeHighValue}
             </span>
             {LightningLottie}
             {Percentage !== 0 && (
-              <span className="mining-metric-chart__top__second__area__rate">
+              <span className="mining-metric-chart__top__left__area__rate">
                   <UpdownIcon isUp={Percentage > 0} />
                   <CountText value={Percentage} decimals={2} />%
                 </span>
             )}
           </div>
-
-          <ChartChanger />
         </div>
       </div>
 
-      <div ref={chartBottomRef} className="mining-metric-chart__bottom">
-        {isLoading && <KSpinner className="mining-metric-chart__bottom__spinner" />}
+      <div ref={chartBottomRef} className="mining-metric-chart__middle">
+        {isLoading && <KSpinner className="mining-metric-chart__middle__spinner" />}
         {
           !isLoading && (
             <>
               {ChartArea}
-              <div className="mining-metric-chart__bottom__x">
-                <span className="mining-metric-chart__bottom__x__first">{xAxisValue.first}</span>
-                <span className="mining-metric-chart__bottom__x__middle">{xAxisValue.middle}</span>
-                <span className="mining-metric-chart__bottom__x__last">{xAxisValue.last}</span>
+              <div className="mining-metric-chart__middle__x">
+                <span className="mining-metric-chart__middle__x__first">{xAxisValue.first}</span>
+                <span className="mining-metric-chart__middle__x__middle">{xAxisValue.middle}</span>
+                <span className="mining-metric-chart__middle__x__last">{xAxisValue.last}</span>
               </div>
             </>
           )
         }
       </div>
+
+      <div className="mining-metric-chart__bottom">
+      <KButtonGroup className="mining-metric-chart__bottom__buttons">
+        {miningMetricChartIntervalOptions.map(({ value, text }) => (
+          <KButton key={value} label={text} size="small" className={chartCardButtonClass(value)}
+                   onClick={() => setHashrateChartInterval(value)} />
+        ))}
+      </KButtonGroup>
+      <ChartChanger />
+      </div>
     </HorizontalCard>
   );
 };
 
+const MemoizedMiningMetricChart = memo(MiningMetricChart);
+MemoizedMiningMetricChart.displayName = 'MiningMetricChart';
+MiningMetricChart.display = 'MiningMetricChart';
 
-export default memo(MiningMetricChart);
+export default MemoizedMiningMetricChart;
