@@ -5,7 +5,7 @@
   "type": "module",
   "scripts": {
     "dev": "vite --host 0.0.0.0 --port 4002",
-    "build": "tsc && vite build",
+    "build": "if [ ! -f .env.production ]; then echo 'Error: .env.production is missing.' && exit 1; fi && tsc && vite build",
     "lint": "eslint .",
     "preview": "vite preview",
     "deploy:prod": "firebase deploy --only hosting:btc-price",
