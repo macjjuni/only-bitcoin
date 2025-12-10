@@ -182,3 +182,20 @@
     }
   }
 }
+
+
+
+.#{$kku-dark-mode-signature} {
+  .mining-metric-chart {
+    .mining-metric-chart__bottom__buttons {
+      .mining-metric-chart__button {
+        &.mining-metric-chart__button--active {
+          color: $default-background-color;
+          border-color: $default-font-color;
+          background-color: rgba(255, 255, 255, 0.8);
+          font-weight: bold;
+        }
+      }
+    }
+  }
+}

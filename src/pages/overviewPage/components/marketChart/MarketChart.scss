@@ -69,3 +69,19 @@
     }
   }
 }
+
+
+.#{$kku-dark-mode-signature} {
+  .market-chart {
+    .market-chart__bottom__buttons {
+      .market-chart__button {
+        &.market-chart__button--active {
+          color: $default-background-color;
+          border-color: $default-font-color;
+          background-color: rgba(255, 255, 255, 0.8);
+          font-weight: bold;
+        }
+      }
+    }
+  }
+}

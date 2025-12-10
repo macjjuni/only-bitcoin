@@ -72,8 +72,7 @@
       transition: all 0.3s ease;
       background-color: transparent;
 
-
-      &.filled {
+      &.filled, &.active {
         background: $default-font-color;
         z-index: 1;
       }
@@ -143,15 +142,15 @@
 // 깜빡임 애니메이션 정의
 @keyframes blink-gold {
   0% {
-    background-color: $white-color;
-    box-shadow: none;
+    opacity: 0;
+    box-shadow: 0 0 0 rgba($default-font-color, 0);
   }
   50% {
-    background-color: $default-font-color;
-    box-shadow: 0 0 10px rgba($default-font-color, 0.6);
+    opacity: 1;
+    box-shadow: 0 0 12px rgba($default-font-color, 0.8);
   }
   100% {
-    background-color: $white-color;
-    box-shadow: none;
+    opacity: 0;
+    box-shadow: 0 0 0 rgba($default-font-color, 0);
   }
 }

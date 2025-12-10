@@ -185,12 +185,17 @@ const MiningMetricChart = () => {
                 }
               }
             },
-            elements: { point: { radius: 0 }, line: { tension: 0.2, borderWidth: 2 } },
+            elements: { point: { radius: 0 }, line: { tension: 0.1, borderWidth: 2 } },
             scales: {
               x: { display: false },
               y: { display: false, suggestedMax: MaxValue * 1.014 }
             },
-            animation: false
+            animation: { duration: 800, easing: "easeInOutQuart", onComplete: initializeTooltip },
+            transitions: { active: { animation: { duration: 0 } } },
+            animations: {
+              x: { duration: 0 },
+              y: { duration: 0 }
+            } as never
           }}
     />
   ), [MaxValue, CurrentChartData]);
@@ -243,20 +248,20 @@ const MiningMetricChart = () => {
       </div>
 
       <div className="mining-metric-chart__bottom">
-      <KButtonGroup className="mining-metric-chart__bottom__buttons">
-        {miningMetricChartIntervalOptions.map(({ value, text }) => (
-          <KButton key={value} label={text} size="small" className={chartCardButtonClass(value)}
-                   onClick={() => setHashrateChartInterval(value)} />
-        ))}
-      </KButtonGroup>
-      <ChartChanger />
+        <KButtonGroup className="mining-metric-chart__bottom__buttons">
+          {miningMetricChartIntervalOptions.map(({ value, text }) => (
+            <KButton key={value} label={text} size="small" className={chartCardButtonClass(value)}
+                     onClick={() => setHashrateChartInterval(value)} />
+          ))}
+        </KButtonGroup>
+        <ChartChanger />
       </div>
     </HorizontalCard>
   );
 };
 
 const MemoizedMiningMetricChart = memo(MiningMetricChart);
-MemoizedMiningMetricChart.displayName = 'MiningMetricChart';
-MiningMetricChart.display = 'MiningMetricChart';
+MemoizedMiningMetricChart.displayName = "MiningMetricChart";
+MiningMetricChart.display = "MiningMetricChart";
 
 export default MemoizedMiningMetricChart;

@@ -45,7 +45,6 @@ const BlockHalvingCard = () => {
   // region [Privates]
   const initializeLottieSpeed = useCallback(() => {
     if (!animationItem) { return; }
-    console.log(animationItem);
     animationItem?.setSpeed(0.48);
   }, [animationItem]);
   // endregion

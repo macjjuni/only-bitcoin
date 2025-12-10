@@ -100,7 +100,12 @@ const MarketChart = () => {
                 },
                 elements: { point: { radius: 0 }, line: { tension: 0.3, borderWidth: 2 } },
                 scales: { x: { display: false }, y: { display: false, suggestedMax: maxValue * 1.005 } },
-                animation: { duration: 800, easing: "easeInOutQuart", onComplete: initializeTooltip }
+                animation: { duration: 800, easing: "easeInOutQuart", onComplete: initializeTooltip },
+                transitions: { active: { animation: { duration: 0 } } },
+                animations: {
+                  x: { duration: 0 },
+                  y: { duration: 0 }
+                } as never
               }}
         />
       </div>
