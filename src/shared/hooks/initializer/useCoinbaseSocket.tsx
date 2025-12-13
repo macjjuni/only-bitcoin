@@ -6,16 +6,16 @@ import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 import { isDev, setTitle } from "@/shared/utils/common";
-import { BINANCE_MARKET_FLAG } from "@/shared/constants/market";
+import { COINBASE_MARKET_FLAG } from "@/shared/constants/market";
 
-const BINANCE_URL = `wss://stream.binance.com:9443/ws/btcusdt@ticker`;
+const COINBASE_URL = `wss://ws-feed.exchange.coinbase.com`;
 
-export default function useBinanceWebSocket() {
+export default function useCoinbaseWebSocket() {
 
   // region [Hooks]
   const usdMarket = useStore(store => store.usdMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
-  const setReconnectBinance = useStore(state => state.setReconnectBinance);
+  const setReconnectCoinbase = useStore(state => state.setReconnectCoinbase);
   // endregion
 
   const resetUsdDisconnected = useCallback(() => {
@@ -25,6 +25,7 @@ export default function useBinanceWebSocket() {
 
   const handleBTCUpdate = useCallback((price: number, usdUpdateTimestamp: number, usdChange24h: string) => {
     const { setBitcoinUsdPrice } = useStore.getState();
+    // 코인베이스는 퍼센트가 아니라 24시간 시가(open_24h)를 줌 -> 변동률 직접 계산 필요
     const usdChange24hStr = floorToDecimal(Number(usdChange24h), 2).toString();
 
     setTitle(comma(price.toFixed(0)));
@@ -32,40 +33,55 @@ export default function useBinanceWebSocket() {
   }, []);
 
   const connect = useCallback(() => {
-    const socket = new ReconnectingWebSocket(BINANCE_URL, [], {
-      maxReconnectionDelay: 8000,           // 재연결 최대 지연: 10초
-      minReconnectionDelay: 1000,           // 재연결 최소 지연: 1초
-      reconnectionDelayGrowFactor: 1.5,     // 재시도 간 딜레이 증가 비율
-      minUptime: 5000,                      // 연결이 최소 유지되어야 하는 시간 (5초)
-      connectionTimeout: 3000,              // 연결 시도 타임아웃: 4초
-      maxRetries: 10,                       // 10회 재시도 (실서비스 기준)
-      maxEnqueuedMessages: 100,             // 연결 안 된 동안 큐에 쌓을 메시지 수 제한
-      startClosed: false,                   // 생성 직후 자동 연결
-      debug: false                          // 디버깅 로그 출력 여부
+    const socket = new ReconnectingWebSocket(COINBASE_URL, [], {
+      maxReconnectionDelay: 8000,
+      minReconnectionDelay: 1000,
+      reconnectionDelayGrowFactor: 1.5,
+      minUptime: 5000,
+      connectionTimeout: 3000,
+      maxRetries: 10,
+      maxEnqueuedMessages: 100,
+      startClosed: false,
+      debug: false
     });
 
-    socket.binaryType = "arraybuffer";
-
     socket.onopen = () => {
-      toast.success("바이낸스 연결!");
-      if (isDev) console.log("✅ 바이낸스 소켓 연결");
+      toast.success("코인베이스 연결!");
+      if (isDev) console.log("✅ 코인베이스 소켓 연결");
+
+      // [중요] 코인베이스는 연결 후 구독 메시지를 보내야 함
+      const subscribeMsg = {
+        type: "subscribe",
+        product_ids: ["BTC-USD"],
+        channels: ["ticker"]
+      };
+      socket.send(JSON.stringify(subscribeMsg));
     };
 
     socket.onmessage = ({ data }) => {
       try {
-        // [안전성] 데이터 파싱 에러 핸들링
         const json = JSON.parse(data as string);
-        if (json?.c) {
-          handleBTCUpdate(Number(json.c), json.C, json.P);
+
+        if (json.type === "ticker" && json.price) {
+          const currentPrice = Number(json.price);
+          const open24h = Number(json.open_24h);
+
+          // [계산] (현재가 - 24시간시가) / 24시간시가 * 100
+          const changePercent = open24h ? ((currentPrice - open24h) / open24h) * 100 : 0;
+
+          // Timestamp ISO string -> UNIX Timestamp 변환 필요시 처리
+          const timestamp = new Date(json.time).getTime();
+
+          handleBTCUpdate(currentPrice, timestamp, changePercent.toString());
         }
       } catch (e) {
-        console.error("Binance Data Parse Error", e);
+        console.error("Coinbase Data Parse Error", e);
       }
     };
 
     socket.onerror = (e) => {
-      console.error("Binance WebSocket Error:", e);
-      toast.error("바이낸스 연결 오류");
+      console.error("Coinbase WebSocket Error:", e);
+      toast.error("코인베이스 연결 오류");
 
       if (!isNetwork()) {
         socket.close();
@@ -73,10 +89,10 @@ export default function useBinanceWebSocket() {
     };
 
     socket.onclose = (e) => {
-      console.warn(`⛔ 바이낸스 소켓 종료: ${e.code}`);
+      console.warn(`⛔ 코인베이스 소켓 종료: ${e.code}`);
       resetUsdDisconnected();
       if (e.wasClean || e.code === 1000) {
-        console.log("🔌 서버 정상 종료(Binance)");
+        console.log("🔌 서버 정상 종료(Coinbase)");
       } else {
         console.log("🔁 재연결 시도중...");
       }
@@ -95,14 +111,13 @@ export default function useBinanceWebSocket() {
     connect();
   }, [disconnect, connect]);
 
-
   // region [Life Cycles]
   useEffect(() => {
-    setReconnectBinance(reconnect);
+    setReconnectCoinbase(reconnect);
   }, [reconnect]);
 
   useEffect(() => {
-    if (usdMarket === BINANCE_MARKET_FLAG) {
+    if (usdMarket === COINBASE_MARKET_FLAG) {
       connect();
     } else {
       disconnect();

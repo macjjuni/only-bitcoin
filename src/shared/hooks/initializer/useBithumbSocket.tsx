@@ -72,7 +72,7 @@ export default function useBithumbWebSocket() {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      toast.success("Bithumb 연결!");
+      toast.success("빗썸 연결!");
       if (isDev) console.log("✅ 빗썸 소켓 연결");
       socket.send(JSON.stringify(getRequestPayload()));
     };
@@ -97,7 +97,7 @@ export default function useBithumbWebSocket() {
 
     socket.onerror = (e) => {
       console.error("Bithumb WebSocket Error:", e);
-      toast.error("Bithumb 연결 오류");
+      toast.error("빗썸 연결 오류");
 
       if (!isNetwork()) {
         socket.close();

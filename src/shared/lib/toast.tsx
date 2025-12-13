@@ -4,7 +4,7 @@ import { ToastOptions, Flip } from "react-toastify";
 export const toastOptions: ToastOptions = {
   className: 'only-btc__toastify',
   theme: 'dark',
-  autoClose: 2400,
+  autoClose: 1600,
   position: 'top-right',
   hideProgressBar: true,
   transition: Flip,

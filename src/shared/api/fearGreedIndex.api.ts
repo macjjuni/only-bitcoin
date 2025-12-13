@@ -56,7 +56,7 @@ const useFearGreedIndex = () => {
   // endregion
 
   const value = isError ? "Error" : (fearGreed || 'Error');
-  return isLoading ? "Loading..." : value;
+  return isLoading ? "Loading.." : value;
 };
 
 

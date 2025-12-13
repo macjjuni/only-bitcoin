@@ -9,7 +9,7 @@ const Header = () => {
   return (
     <header className="header__area">
       <h2 className="header__area__text">
-        <KIcon icon="bitcoin" size={36} color="currentColor" />
+        <KIcon icon="bitcoin" size={36} />
         ₿itcoin
       </h2>
       <div className="header__area__right">

@@ -34,7 +34,7 @@ dependencies:
     version: 12.9.1(@types/node@18.19.129)
   kku-ui:
     specifier: ^0.2.6
-    version: 0.2.55
+    version: 0.2.6
   kku-util:
     specifier: ^0.0.156
     version: 0.0.156
@@ -4265,8 +4265,8 @@ packages:
     engines: {node: '>= 0.6'}
     dev: false
 
-  /framer-motion@12.23.22(react-dom@19.2.1)(react@19.2.1):
-    resolution: {integrity: sha512-ZgGvdxXCw55ZYvhoZChTlG6pUuehecgvEAJz0BHoC5pQKW1EC5xf1Mul1ej5+ai+pVY0pylyFfdl45qnM1/GsA==}
+  /framer-motion@12.23.26(react-dom@19.2.1)(react@19.2.1):
+    resolution: {integrity: sha512-cPcIhgR42xBn1Uj+PzOyheMtZ73H927+uWPDVhUMqxy8UHt6Okavb6xIz9J/phFUHUj0OncR6UvMfJTXoc/LKA==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0 || ^19.0.0
@@ -4279,7 +4279,7 @@ packages:
       react-dom:
         optional: true
     dependencies:
-      motion-dom: 12.23.21
+      motion-dom: 12.23.23
       motion-utils: 12.23.6
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
@@ -5479,11 +5479,11 @@ packages:
       json-buffer: 3.0.1
     dev: true
 
-  /kku-ui@0.2.55:
-    resolution: {integrity: sha512-DYPqyO/S6g3zx+ZbLrz0Y+LFXlPJ4PallYe83lwOB/5RM6Xb3gqB7gyBtqGE7UZq05Rw2AzozhHCZqrM+0NRGg==}
+  /kku-ui@0.2.6:
+    resolution: {integrity: sha512-WapDf86Su3axxTXmIKRrWYuvjj9KsnsRTFdgGICoJ+U7FKY9ihKCCz6EuooYU6U7CZT5qRxfTLb81FeOKWTyeg==}
     dependencies:
       lodash-es: 4.17.21
-      motion: 12.23.22(react-dom@19.2.1)(react@19.2.1)
+      motion: 12.23.26(react-dom@19.2.1)(react@19.2.1)
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
     transitivePeerDependencies:
@@ -5985,8 +5985,8 @@ packages:
       - supports-color
     dev: false
 
-  /motion-dom@12.23.21:
-    resolution: {integrity: sha512-5xDXx/AbhrfgsQmSE7YESMn4Dpo6x5/DTZ4Iyy4xqDvVHWvFVoV+V2Ri2S/ksx+D40wrZ7gPYiMWshkdoqNgNQ==}
+  /motion-dom@12.23.23:
+    resolution: {integrity: sha512-n5yolOs0TQQBRUFImrRfs/+6X4p3Q4n1dUEqt/H58Vx7OW6RF+foWEgmTVDhIWJIMXOuNNL0apKH2S16en9eiA==}
     dependencies:
       motion-utils: 12.23.6
     dev: false
@@ -5995,8 +5995,8 @@ packages:
     resolution: {integrity: sha512-eAWoPgr4eFEOFfg2WjIsMoqJTW6Z8MTUCgn/GZ3VRpClWBdnbjryiA3ZSNLyxCTmCQx4RmYX6jX1iWHbenUPNQ==}
     dev: false
 
-  /motion@12.23.22(react-dom@19.2.1)(react@19.2.1):
-    resolution: {integrity: sha512-iSq6X9vLHbeYwmHvhK//+U74ROaPnZmBuy60XZzqNl0QtZkWfoZyMDHYnpKuWFv0sNMqHgED8aCXk94LCoQPGg==}
+  /motion@12.23.26(react-dom@19.2.1)(react@19.2.1):
+    resolution: {integrity: sha512-Ll8XhVxY8LXMVYTCfme27WH2GjBrCIzY4+ndr5QKxsK+YwCtOi2B/oBi5jcIbik5doXuWT/4KKDOVAZJkeY5VQ==}
     peerDependencies:
       '@emotion/is-prop-valid': '*'
       react: ^18.0.0 || ^19.0.0
@@ -6009,7 +6009,7 @@ packages:
       react-dom:
         optional: true
     dependencies:
-      framer-motion: 12.23.22(react-dom@19.2.1)(react@19.2.1)
+      framer-motion: 12.23.26(react-dom@19.2.1)(react@19.2.1)
       react: 19.2.1
       react-dom: 19.2.1(react@19.2.1)
       tslib: 2.8.1

@@ -10,12 +10,14 @@ import {
   useUpbitSocket,
   useMempoolSocket,
   useBithumbSocket,
+  useCoinbaseSocket,
 } from "@/shared/hooks/initializer";
 
 
 export default function useInitializer() {
 
   // region [Hooks]
+  useCoinbaseSocket()
   useTheme();
   useUpbitSocket();
   useBithumbSocket();

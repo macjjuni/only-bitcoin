@@ -74,7 +74,7 @@ export default function useUpbitWebSocket() {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      toast.success("Upbit 연결!");
+      toast.success("업비트 연결!");
       if (isDev) console.log("✅ 업비트 소켓 연결");
       socket.send(JSON.stringify(getRequestPayload()));
     };
@@ -139,6 +139,6 @@ export default function useUpbitWebSocket() {
     return () => {
       disconnect();
     };
-  }, [krwMarket, connect, disconnect]); // krwMarket 값에 따라 연결/해제
+  }, [krwMarket, connect, disconnect]);
   // endregion
 };

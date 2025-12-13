@@ -9,3 +9,4 @@ export { default as useUpbitSocket } from "@/shared/hooks/initializer/useUpbitSo
 export { default as useBithumbSocket } from "@/shared/hooks/initializer/useBithumbSocket"
 export { default as useBinanceSocket } from "@/shared/hooks/initializer/useBinanceSocket"
 export { default as useMempoolSocket } from "@/shared/hooks/initializer/useMempoolSocket"
+export { default as useCoinbaseSocket } from "@/shared/hooks/initializer/useCoinbaseSocket"

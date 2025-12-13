@@ -1,4 +1,4 @@
-import {KrwMarketType} from '@/shared/constants/market'
+import { KrwMarketType, UsdMarketType } from "@/shared/constants/market";
 
 export interface StoreType {
 
@@ -13,12 +13,17 @@ export interface StoreType {
   setBitcoinUsdPrice: (bitcoinPriceUSD: BitcoinPriceUSDTypes) => void;
   krwMarket: KrwMarketType;
   setKrwMarket: (market: KrwMarketType) => void;
+  usdMarket: UsdMarketType;
+  setUsdMarket: (Market: UsdMarketType) => void;
+
   reconnectUpbit: () => void;
   reconnectBithumb: () => void;
   reconnectBinance: () => void;
+  reconnectCoinbase: () => void;
   setReconnectUpbit: (fn: () => void) => void;
   setReconnectBithumb: (fn: () => void) => void;
   setReconnectBinance: (fn: () => void) => void;
+  setReconnectCoinbase: (fn: () => void) => void;
   // endregion
 
   // region [대시보드 메크로 순서]

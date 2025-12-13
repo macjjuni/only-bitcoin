@@ -81,7 +81,7 @@ body {
   &.show-bg {
     background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif');
     background-size: 420px;
-    background-position: center calc(50% - (#{$mobile-bottom-navigation-height} / 2));
+    background-position: center calc(50% - (#{$layout-bottom-navigation-height} / 2));
     background-repeat: no-repeat;
     background-attachment: fixed;
 

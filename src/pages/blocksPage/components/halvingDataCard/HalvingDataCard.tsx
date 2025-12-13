@@ -1,8 +1,8 @@
 import { memo, useMemo } from "react";
 import { KAccordion } from "kku-ui";
 import { blockHalvingData } from "@/shared/constants/block";
-import "./HalvingDataCard.scss";
 import useStore from "@/shared/stores/store";
+import "./HalvingDataCard.scss";
 
 
 const HalvingDataCard = () => {
@@ -39,7 +39,6 @@ const HalvingDataCard = () => {
                 </div>
               ))}
             </div>
-
           ))
         }
       </ul>
