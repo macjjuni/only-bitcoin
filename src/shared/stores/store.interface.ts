@@ -16,9 +16,11 @@ export interface StoreType {
   reconnectUpbit: () => void;
   reconnectBithumb: () => void;
   reconnectBinance: () => void;
+  reconnectCoinbase: () => void;
   setReconnectUpbit: (fn: () => void) => void;
   setReconnectBithumb: (fn: () => void) => void;
   setReconnectBinance: (fn: () => void) => void;
+  setReconnectCoinbase: (fn: () => void) => void;
   // endregion
 
   // region [대시보드 메크로 순서]

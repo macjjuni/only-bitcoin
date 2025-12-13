@@ -31,15 +31,14 @@ const useStore = create<StoreType>()(
       })),
       krwMarket: "BITHUMB",
       setKrwMarket: (krwMarket) => set((store) => ({ ...store, krwMarket })),
-      reconnectUpbit: () => {
-      },
-      reconnectBithumb: () => {
-      },
-      reconnectBinance: () => {
-      },
+      reconnectUpbit: () => {},
+      reconnectBithumb: () => {},
+      reconnectBinance: () => {},
+      reconnectCoinbase: () => {},
       setReconnectUpbit: (reconnectUpbit) => set((store) => ({ ...store, reconnectUpbit })),
       setReconnectBithumb: (reconnectBithumb) => set((store) => ({ ...store, reconnectBithumb })),
       setReconnectBinance: (reconnectBinance) => set((store) => ({ ...store, reconnectBinance })),
+      setReconnectCoinbase: (reconnectCoinbase) => set((store) => ({ ...store, reconnectCoinbase })),
       // endregion
 
 
