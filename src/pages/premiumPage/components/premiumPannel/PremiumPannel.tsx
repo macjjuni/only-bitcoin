@@ -95,7 +95,7 @@ const PremiumPannel = () => {
                 <span className="price__text">1</span>
                 <span className="unit__text">{!isUsdtStandard ? "USD" : "USDT"}</span>
                 <span className="slash__text">/</span>
-                <CountText className="price__text" value={usdExRate} />
+                <CountText className="price__text" value={usdExRate} decimals={1} />
                 <span className="unit__text">KRW</span>
               </div>
               <div className="premium-pannel__content__item__content__item--right">
