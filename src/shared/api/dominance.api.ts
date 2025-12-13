@@ -72,7 +72,7 @@ const useBitcoinDominanceQuery = (): number | string => {
   // endregion
 
   const value = isError ? "Error" : (dominance || 'Error');
-  return isLoading ? "Loading..." : value;
+  return isLoading ? "Loading.." : value;
 };
 
 export default useBitcoinDominanceQuery;
