@@ -72,14 +72,17 @@
 <br>
 
 <details open>
-    <summary><b>v3.5 (25.10.24)</b></summary>
-    <div markdown="1">
-        <img src="https://github.com/user-attachments/assets/0a8a36b0-24f4-4f08-a3e0-d1ec518c911d" width="270" alt="3.5.0 initial screen1">
-        <img src="https://github.com/user-attachments/assets/fb0986be-43c8-4b77-ad51-31d508608fdf" width="270" alt="3.5.0 initial screen2">
-        <img src="https://github.com/user-attachments/assets/d51d7b6d-928a-4986-b69d-bce7ff9b0b24" width="270" alt="3.5.0 initial screen3">
-        <img src="https://github.com/user-attachments/assets/a868cb7b-613d-4246-a16e-ecc1d1b200a9" width="270" alt="3.5.0 initial screen4">
-        <img src="https://github.com/user-attachments/assets/59e10ada-aa8d-462a-abc9-19836baa2b0d" width="270" alt="3.5.0 initial screen5">
-        <img src="https://github.com/user-attachments/assets/0f0a29b9-8a8f-47d8-b183-618549126d93" width="270" alt="3.5.0 initial screen6">
+    <summary><b>v3.5.92</b></summary>
+    <div markdown="1">    
+        <img src="https://github.com/user-attachments/assets/ff9a26de-fd56-4f0d-9097-46c121061847" width="220" alt="3.5.0 initial screen1">
+        <img src="https://github.com/user-attachments/assets/de83e9ca-a8dc-4db0-82ec-417c31a1e45c" width="220" alt="3.5.0 initial screen2">
+        <img src="https://github.com/user-attachments/assets/5c9c7e96-6b98-4641-b0b8-d4cfe5c1bcbb" width="220" alt="3.5.0 initial screen3">
+        <img src="https://github.com/user-attachments/assets/e7a90302-f7ec-464f-afb0-3d2e32f74a55" width="220" alt="3.5.0 initial screen4">
+        <img src="https://github.com/user-attachments/assets/08a43714-ce06-43c2-99ae-c44a101c86a6" width="220" alt="3.5.0 initial screen5">
+        <img src="https://github.com/user-attachments/assets/81044f7b-6f5e-41e7-9539-78e758b31509" width="220" alt="3.5.0 initial screen6">
+        <img src="https://github.com/user-attachments/assets/bed34127-782b-4407-a325-3ff722477f4a" width="220" alt="3.5.0 initial screen7">
+        <img src="https://github.com/user-attachments/assets/19c82d22-b8d0-492d-8ded-69fbc6df6bfc" width="220" alt="3.5.0 initial screen8">
+    </div>
 
 - 팔마2 유저를 위한 기본 화이트 테마 지원
 - Bithumb 거래소 시세 지원(간헐적 업비트 접속 오류로 인한 대체 거래소 지원)  
