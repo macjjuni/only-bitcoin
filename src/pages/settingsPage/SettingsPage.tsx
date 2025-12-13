@@ -7,7 +7,7 @@ import InstallSettingForm from './components/installSettingForm/InstallSettingFo
 import {PageLayout} from '@/layouts'
 import {usePageAnimation} from '@/shared/hooks'
 import {UsePageAnimation} from '@/shared/hooks/usePageAnimation'
-import {currencyOptions, krwMarketOptions} from '@/shared/constants/setting'
+import {currencyOptions, krwMarketOptions, usdMarketOptions} from '@/shared/constants/setting'
 import {isSafari} from '@/shared/utils/device'
 import {AnimationIcon, CurrencyIcon} from '@/components/ui/icon'
 import {FormRow} from '@/components'
@@ -28,6 +28,9 @@ export default function SettingsPage() {
 
   const krwMarket = useStore(state => state.krwMarket)
   const setKrwMarket = useStore(state => state.setKrwMarket)
+
+  const usdMarket = useStore(state => state.usdMarket)
+  const setUsdMarket = useStore(state => state.setUsdMarket)
 
   const isUsdtStandard = useStore(state => state.setting.isUsdtStandard)
   const setUsdtStandard = useStore(state => state.setUsdtStandard)
@@ -80,7 +83,7 @@ export default function SettingsPage() {
           </div>
         </FormRow>
 
-        <FormRow icon={<KIcon icon="won" size={24}/>} label="국내거래소">
+        <FormRow icon={<KIcon icon="dollar" size={24}/>} label="국내거래소">
           <div className="settings-page__area__currency__button-group">
             <KSelect value={krwMarket} items={krwMarketOptions} size="medium" width={142}
                      onChange={(value) => {
@@ -89,14 +92,14 @@ export default function SettingsPage() {
           </div>
         </FormRow>
 
-        {/* <FormRow icon={<KIcon icon="won" size={24} />} label="해외거래소(Dev)"> */}
-        {/*   <div className="settings-page__area__currency__button-group"> */}
-        {/*     <KSelect value={krwMarket} items={krwMarketOptions} size="medium" width={142} */}
-        {/*              onChange={(value) => { */}
-        {/*                setKrwMarket(value as CurrencyTypes); */}
-        {/*              }} /> */}
-        {/*   </div> */}
-        {/* </FormRow> */}
+        <FormRow icon={<KIcon icon="won" size={24} />} label="해외거래소">
+          <div className="settings-page__area__currency__button-group">
+            <KSelect value={usdMarket} items={usdMarketOptions} size="medium" width={142}
+                     onChange={(value) => {
+                       setUsdMarket(value as CurrencyTypes);
+                     }} />
+          </div>
+        </FormRow>
 
         <FormRow icon={<KIcon icon="tether" size={24}/>} label="USDT 기준 환율 적용">
           <KSwitch value={isUsdtStandard} onChange={(e) => {

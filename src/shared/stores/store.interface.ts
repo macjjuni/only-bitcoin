@@ -1,4 +1,4 @@
-import {KrwMarketType} from '@/shared/constants/market'
+import { KrwMarketType, UsdMarketType } from "@/shared/constants/market";
 
 export interface StoreType {
 
@@ -13,6 +13,9 @@ export interface StoreType {
   setBitcoinUsdPrice: (bitcoinPriceUSD: BitcoinPriceUSDTypes) => void;
   krwMarket: KrwMarketType;
   setKrwMarket: (market: KrwMarketType) => void;
+  usdMarket: UsdMarketType;
+  setUsdMarket: (Market: UsdMarketType) => void;
+
   reconnectUpbit: () => void;
   reconnectBithumb: () => void;
   reconnectBinance: () => void;

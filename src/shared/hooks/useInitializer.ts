@@ -21,7 +21,7 @@ export default function useInitializer() {
   useTheme();
   useUpbitSocket();
   useBithumbSocket();
-  // useBinanceSocket();
+  useBinanceSocket();
   useMempoolSocket();
   useUsdExchangeRate();
   useInitializeDisabledZoom();

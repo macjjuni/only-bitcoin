@@ -6,12 +6,14 @@ import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 import { isDev, setTitle } from "@/shared/utils/common";
+import { BINANCE_MARKET_FLAG } from "@/shared/constants/market";
 
 const BINANCE_URL = `wss://stream.binance.com:9443/ws/btcusdt@ticker`;
 
 export default function useBinanceWebSocket() {
 
   // region [Hooks]
+  const usdMarket = useStore(store => store.usdMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
   const setReconnectBinance = useStore(state => state.setReconnectBinance);
   // endregion
@@ -45,7 +47,7 @@ export default function useBinanceWebSocket() {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      toast.success("Binance 연결!");
+      toast.success("바이낸스 연결!");
       if (isDev) console.log("✅ 바이낸스 소켓 연결");
     };
 
@@ -63,7 +65,7 @@ export default function useBinanceWebSocket() {
 
     socket.onerror = (e) => {
       console.error("Binance WebSocket Error:", e);
-      toast.error("Binance 연결 오류");
+      toast.error("바이낸스 연결 오류");
 
       if (!isNetwork()) {
         socket.close();
@@ -100,8 +102,15 @@ export default function useBinanceWebSocket() {
   }, [reconnect]);
 
   useEffect(() => {
-    connect();
-    return disconnect;
-  }, [connect, disconnect]);
+    if (usdMarket === BINANCE_MARKET_FLAG) {
+      connect();
+    } else {
+      disconnect();
+    }
+
+    return () => {
+      disconnect();
+    };
+  }, [usdMarket, connect, disconnect]);
   // endregion
 };
