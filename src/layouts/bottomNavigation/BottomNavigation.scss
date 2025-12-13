@@ -3,11 +3,11 @@
 .bottom-navigation {
     display: flex;
     position: fixed;
-    top: calc(100dvh - #{$mobile-bottom-navigation-height});
+    top: calc(100dvh - #{$layout-bottom-navigation-height});
     left: calc((100dvw - #{$max-width-size}) / 2);
     width: 100%;
     max-width: $max-width-size;
-    height: $mobile-bottom-navigation-height;
+    height: $layout-bottom-navigation-height;
     border-bottom: none;
     padding-bottom: 8px;
     background: $default-background-color;

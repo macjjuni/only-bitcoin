@@ -16,11 +16,9 @@
     transition: border 0.16s ease;
     border-bottom: 1px solid transparent;
 
-    .k-accordion__summary__container {
-      .k-accordion__summary__text {
-        @include font-body;
-        font-weight: bold;
-      }
+    .k-accordion__summary__text {
+      @include font-body;
+      font-weight: bold;
     }
   }
 

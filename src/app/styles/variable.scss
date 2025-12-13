@@ -87,13 +87,8 @@ $spacing-96: 96px !default;
 
 
 // region [Layout Sizes]
-$desktop-layout-header-height: 64px !default;
-$mobile-layout-header-height: 40px !default;
-$desktop-layout-content-height: auto !default;
-$desktop-layout-footer-height: 56px !default;
-$desktop-layout-footer-height: 56px !default;
-$mobile-layout-footer-height: 40px !default;
-$mobile-bottom-navigation-height: 82px !default;
+$layout-header-height: 52px !default;
+$layout-bottom-navigation-height: 82px !default;
 
 $max-width-size: 524px !default;
 $number-field-unit-width: 68px !default;
