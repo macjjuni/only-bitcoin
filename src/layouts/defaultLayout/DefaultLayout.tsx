@@ -10,4 +10,8 @@ const DefaultLayout = ({ children }: { children: ReactNode }) => {
   );
 };
 
-export default memo(DefaultLayout);
+const MemoizedDefaultLayout = memo(DefaultLayout);
+MemoizedDefaultLayout.displayName = 'DefaultLayout';
+DefaultLayout.displayName = 'DefaultLayout';
+
+export default MemoizedDefaultLayout;

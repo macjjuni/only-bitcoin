@@ -9,18 +9,18 @@ interface PageLayoutProps {
 }
 
 
-const PageLayout = ({children, className}: PageLayoutProps) => {
+const PageLayout = ({ children, className }: PageLayoutProps) => {
 
   // region [Hooks]
 
   const rootClass = useMemo(() => {
-    const clazz = ['page-layout'];
+    const clazz = ["page-layout"];
 
     if (className) {
       clazz.push(className);
     }
 
-    return clazz.join(' ');
+    return clazz.join(" ");
   }, [className]);
 
   // endregion
@@ -34,4 +34,9 @@ const PageLayout = ({children, className}: PageLayoutProps) => {
   );
 };
 
-export default memo(PageLayout);
+
+const MemoizedPageLayout = memo(PageLayout);
+MemoizedPageLayout.displayName = "PageLayout";
+PageLayout.display = "PageLayout";
+
+export default MemoizedPageLayout;

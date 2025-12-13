@@ -5,18 +5,14 @@ import "./Content.scss";
 
 const Content = () => {
 
-
   // region [Hooks]
-
   const prevPathname = useRef<string | null>(null);
   const locate = useLocation();
   const mainRef = useRef<HTMLElement | null>(null);
-
   // endregion
 
 
   // region [Privates]
-
   const initializeAnimation = useCallback(() => {
 
     const navList = router.navigationRouteList;
@@ -37,26 +33,21 @@ const Content = () => {
 
     prevPathname.current = locate.pathname;
   }, [locate.pathname]);
-
   // endregion
 
 
   // region [APIs]
-
   const handlePageLoaded = useCallback(() => {
-
     initializeAnimation();
   }, [initializeAnimation]);
 
   const handlePageUnloaded = useCallback(() => {
-
       mainRef.current?.classList.remove(
         'only-btc__layout--enter-right',
         'only-btc__layout--enter-left',
         'only-btc__layout--enter-first'
       );
   }, []);
-
   // endregion
 
 
@@ -67,4 +58,8 @@ const Content = () => {
   );
 };
 
-export default memo(Content);
+const MemoizedContent = memo(Content);
+MemoizedContent.displayName = "Content";
+Content.displayName = "Content";
+
+export default MemoizedContent;

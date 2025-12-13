@@ -3,52 +3,60 @@
 
 
 .header__area {
+  position: fixed;
+  top: 0;
+  left: 0;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $spacing-4;
+  width: 100%;
+  height: $layout-header-height;
+  padding: $spacing-8;
+  background: $default-background-color;
+  z-index: 1;
+
+  @include remove-tap-highlight;
+
+  &:before {
+    content: '';
     position: fixed;
-    top: 0;
+    top: $layout-header-height;
     left: 0;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    gap: $spacing-4;
     width: 100%;
-    height: $layout-header-height;
-    padding: $spacing-8;
-    background: $default-background-color;
-    z-index: 1;
+    height: 16px;
+    background: linear-gradient(to bottom, rgba(255, 255, 255, 1), rgba(255, 255, 255, 0));
+  }
 
+  .header__area__text {
+    color: $default-font-color;
+    font-weight: bold;
+    letter-spacing: -1px;
     @include remove-tap-highlight;
+    user-select: none;
+    -webkit-user-select: none;
 
-    &:before {
-      content: '';
-      position: fixed;
-      top: $layout-header-height;
-      left: 0;
-      width: 100%;
-      height: 16px;
-      background: linear-gradient(to bottom, rgba(255,255,255, 1), rgba(255,255,255, 0));
+    .header__area__text__link {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      gap: $spacing-8;
+      color: inherit;
+      text-decoration: none;
+      -webkit-tap-highlight-color: transparent;
+      outline: none;
+      user-select: none;
+      @include font-heading-sm;
     }
+  }
 
-    .header__area__text {
-        display: flex;
-        justify-content: flex-start;
-        align-items: center;
-        gap: $spacing-8;
-        color: $default-font-color;
-        font-weight: bold;
-        letter-spacing: -1px;
-        @include font-heading-sm;
-        @include remove-tap-highlight;
-        user-select: none;
-        -webkit-user-select: none;
-    }
-
-    .header__area__right {
-        display: flex;
-        justify-content: center;
-        align-items: center;
-        gap: $spacing-8;
-        @include remove-tap-highlight;
-    }
+  .header__area__right {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: $spacing-8;
+    @include remove-tap-highlight;
+  }
 }
 
 @media screen and (min-width: $max-width-size) {
