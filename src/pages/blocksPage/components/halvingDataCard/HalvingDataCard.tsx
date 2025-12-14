@@ -8,7 +8,6 @@ import "./HalvingDataCard.scss";
 const HalvingDataCard = () => {
 
   // region [Templates]
-
   const currentBlockHeight = useStore(state=> state.blockData[0].height || 0);
 
   const nextHalvingIndex = useMemo(() => (
@@ -16,12 +15,11 @@ const HalvingDataCard = () => {
   ), [currentBlockHeight]);
 
   const HalvingDataList = useMemo(()=> [
-    {label: '순서', items: blockHalvingData.map(({ date }, idx) => ({value: idx+1, key: date}))},
+    {label: 'No.', items: blockHalvingData.map(({ date }, idx) => ({value: idx+1, key: date}))},
     {label: '날짜', items: blockHalvingData.map(({ date }) => ({value: date, key: date}))},
     {label: '블록 높이', items: blockHalvingData.map(({ date, blockHeight }) => ({value: blockHeight, key: date}))},
-    {label: '채굴 보상(단위: btc)', items: blockHalvingData.map(({ blockReward, date }) => ({value: blockReward, key: date}))},
+    {label: '보상(단위: btc)', items: blockHalvingData.map(({ blockReward, date }) => ({value: blockReward, key: date}))},
   ], [])
-
   // endregion
 
 
@@ -46,4 +44,8 @@ const HalvingDataCard = () => {
   );
 };
 
-export default memo(HalvingDataCard);
+const MemoizedHalvingDataCard = memo(HalvingDataCard);
+MemoizedHalvingDataCard.displayName = "HalvingDataCard";
+HalvingDataCard.displayName = "HalvingDataCard";
+
+export default MemoizedHalvingDataCard;

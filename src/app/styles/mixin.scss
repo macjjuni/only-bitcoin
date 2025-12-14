@@ -43,6 +43,11 @@
     user-select: none;
     -webkit-user-select: none;
 }
+@mixin ellipsis {
+  overflow: hidden;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+}
 // endregion
 
 
