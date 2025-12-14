@@ -1,6 +1,7 @@
 @use "@/app/styles/variable" as *;
 
 .block-search-box__area {
+  margin-bottom: $spacing-8;
 
   .block-search-box__area__input {
     width: 100%;

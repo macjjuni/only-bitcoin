@@ -36,7 +36,7 @@
     .premium-pannel__content__item {
       display: flex;
       flex-direction: column;
-      gap: $spacing-2;
+      gap: $spacing-4;
 
       // 하단 환율 영역
       &:last-child > .premium-pannel__content__item__content {
@@ -53,7 +53,7 @@
 
       .premium-pannel__content__item__title {
         @include font-body;
-        font-weight: bold;
+        opacity: 0.72;
         color: $default-label-font-color;;
       }
 

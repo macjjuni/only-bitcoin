@@ -2,22 +2,14 @@
 @use "@/app/styles/mixin" as *;
 
 .k-accordion.halving-data-card__area {
-  border-radius: $default-border-radius;
+  border: none;
 
-  &[data-open=true] {
-
-    .k-accordion__summary {
-      border-bottom: 1px solid $default-border-color;
-    }
-  }
+  &[data-open=true] {}
 
   .k-accordion__summary {
-    padding: $spacing-12;
-    transition: border 0.16s ease;
-    border-bottom: 1px solid transparent;
 
     .k-accordion__summary__text {
-      @include font-body;
+      font-size: 18px;
       font-weight: bold;
     }
   }
@@ -26,7 +18,6 @@
     transition-duration: 0.36s;
 
     .k-accordion__content__container {
-      padding: $spacing-12;
       overflow-x: auto;
     }
   }
@@ -44,7 +35,7 @@
       .halving__label, .halving__text {
         width: auto;
         white-space: nowrap;
-        padding: $spacing-2 $spacing-8;
+        padding: $spacing-2 $spacing-6;
         border-bottom: 1px solid $default-border-color;
         @include font-body;
         font-family: $number-font-family;
