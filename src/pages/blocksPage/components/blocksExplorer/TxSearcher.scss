@@ -1,0 +1,13 @@
+@use "@/app/styles/variable" as *;
+
+.block-search-box__area {
+  margin: $spacing-8 0;
+  border-color: $default-border-color;
+
+  .search-right__area {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    gap: 6px;
+  }
+}

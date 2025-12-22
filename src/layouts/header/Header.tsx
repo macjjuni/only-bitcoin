@@ -6,6 +6,9 @@ import SettingButton from "@/layouts/header/components/settingButton/SettingButt
 import useStore from "@/shared/stores/store";
 import "./Header.scss";
 
+// <KIcon icon="bitcoin" size={36} />
+// ₿itcoin
+
 const Header = () => {
 
   const initialPath = useStore(state => state.setting.initialPath);
@@ -13,10 +16,7 @@ const Header = () => {
   return (
     <header className="header__area">
       <h2 className="header__area__text">
-        <Link to={initialPath} className="header__area__text__link">
-          <KIcon icon="bitcoin" size={36} />
-          ₿itcoin
-        </Link>
+        <Link to={initialPath} className="header__area__text__link"/>
       </h2>
       <div className="header__area__right">
         <ConnectionDot />

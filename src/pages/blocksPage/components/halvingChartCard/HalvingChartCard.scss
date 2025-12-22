@@ -29,12 +29,12 @@
       align-items: flex-start;
       justify-content: space-between;
       width: 50%; height: 100%;
-      padding: $spacing-4 0;
+      //padding: $spacing-4 0;
 
       .halving-chart-card__area__content__data-view__item {
         display: flex;
         flex-direction: column;
-        gap: $spacing-4;
+        gap: $spacing-2;
 
         .halving-chart-card__area__content__data-view__item__label {
           font-size: $font-small-size;
@@ -44,6 +44,7 @@
         .halving-chart-card__area__content__data-view__item__value {
           font-size: 18px;
           font-weight: bold;
+          line-height: 1;
           font-family: $number-font-family;
         }
       }

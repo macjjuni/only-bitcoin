@@ -3,7 +3,7 @@ import { Swiper } from "swiper/react";
 import { FreeMode } from "swiper/modules";
 import BlockSwiperSlide from "./components/BlockSwiperSlide";
 import { GENESIS_BLOCK } from "@/shared/constants/block";
-import { GenesisDataModal } from "@/components";
+import { GenesisDataDialog } from "@/components";
 import useStore from "@/shared/stores/store";
 import "swiper/css";
 import "swiper/css/free-mode";
@@ -21,15 +21,15 @@ const BlocksVisualizer = () => {
   const onOpenGenesisBlockModal = useCallback(() => {
     setIsGenesisBlockModal(true);
   }, [])
-  const onCloseFearAndGreedModal = useCallback(() => {
-    setIsGenesisBlockModal(false);
+  const onChangeOpenFearAndGreedModal = useCallback((val: boolean) => {
+    setIsGenesisBlockModal(val);
   }, []);
   // endregion
 
 
   return (
     <>
-      <GenesisDataModal isOpen={isGenesisBlockModal} onClose={onCloseFearAndGreedModal} />
+      <GenesisDataDialog open={isGenesisBlockModal} setOpen={onChangeOpenFearAndGreedModal} />
       <div className="blocks-visualizer__area">
         <Swiper slidesPerView={3} spaceBetween={6} freeMode modules={[FreeMode]}
                 className="blocks-visualizer__area__slider">

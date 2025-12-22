@@ -169,8 +169,8 @@
         padding: 0 $spacing-12;
         color: $default-font-color;
         border: none;
-        border-radius: $default-border-radius;
         background: transparent;
+        box-shadow: none;
 
         &.mining-metric-chart__button--active {
           color: $default-background-color;

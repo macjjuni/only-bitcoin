@@ -1,7 +1,0 @@
-@use "../variable" as *;
-
-#only-bitcoin .k-select {
-    .k-select__fieldset {
-        background-color: $default-background-color;
-    }
-}

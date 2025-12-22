@@ -26,7 +26,7 @@
   align-items: flex-start;
   flex-direction: column;
   gap: $spacing-12;
-  width: 208px;
+  width: 200px;
   padding: $spacing-10;
   border: 1px solid $default-border-color;
   border-radius: $default-border-radius;
@@ -50,17 +50,12 @@
   }
 
   .premium__field__popover__bottom {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
 
-    .premium__field__popover__bottom__buttons {
-      .k-button {
-        font-size: 14px;
-        @include remove-tap-highlight;
-        font-family: $number-font-family;
-      }
-      .k-button + .k-button { margin-left: $spacing-8; }
+    button {
+      width: 46px;
+      font-size: 14px;
+      font-family: $number-font-family;
+      @include remove-tap-highlight;
     }
   }
 }

@@ -2,11 +2,10 @@
 @use "@/app/styles/mixin" as *;
 
 
-
 .blocks-visualizer__area {
-    position: relative;
-    $block-left-width: 40px;
-    $block-item-translate-x: 64px;
+  position: relative;
+  $block-left-width: 40px;
+  $block-item-translate-x: 64px;
 
   .blocks-visualizer__area__slider {
     width: calc(100% + (#{$spacing-8} * 2));
@@ -26,7 +25,7 @@
         align-items: center;
         gap: $spacing-6;
         height: calc((100dvw - 88px) / 3);
-        padding: $spacing-8;
+        padding: $spacing-6;
         color: white;
         font-weight: bold;
         background: linear-gradient(180deg, #ffb152, #F7931A);
@@ -57,11 +56,16 @@
 
         &.blocks-visualizer__area__slider__block--unmined:not(.blocks-visualizer__area__slider__block--genesis) {
           transform: translateX(-24px);
-          background: rgba(0,0,0, 0.36);
+          background: rgba(0, 0, 0, 0.36);
           animation: mining-pulse 2.4s ease-in-out infinite;
 
-          &:before { background: rgba(0,0,0, 0.24); }
-          &:after { background: rgba(0,0,0, 0.4); }
+          &:before {
+            background: rgba(0, 0, 0, 0.24);
+          }
+
+          &:after {
+            background: rgba(0, 0, 0, 0.4);
+          }
         }
 
         &.blocks-visualizer__area__slider__block--genesis {
@@ -69,12 +73,17 @@
           background: linear-gradient(180deg, #f5e616, #ffd000);
           transform: translateX(#{$block-item-translate-x}) !important;
 
-          &:before { background: #fcee28; }
-          &:after { background: #ebde26; }
+          &:before {
+            background: #fcee28;
+          }
+
+          &:after {
+            background: #ebde26;
+          }
         }
 
         .block-height {
-          font-size: 16px;
+          font-size: 14px;
           font-weight: bold;
           font-family: $number-font-family;
         }
@@ -84,12 +93,18 @@
           flex-direction: column;
           align-items: center;
           justify-content: center;
-          gap: $spacing-8;
+          gap: $spacing-2;
           font-family: $number-font-family;
           font-size: 12px;
+          line-height: 1.2;
 
-          .block-pool-name { @include ellipsis; }
-          .block-timestamp { text-align: center; }
+          .block-pool-name {
+            @include ellipsis;
+          }
+
+          .block-timestamp {
+            text-align: center;
+          }
         }
       }
 
@@ -109,6 +124,7 @@
           background: $default-font-color;
         }
       }
+
       .blocks-visualizer__area__slider__item__genesis__cover {
         position: absolute;
         top: 0;
@@ -154,9 +170,15 @@
 
 
 @keyframes mining-pulse {
-  0% { opacity: 1; }
-  50% { opacity: 0.24; }
-  100% { opacity: 1; }
+  0% {
+    opacity: 1;
+  }
+  50% {
+    opacity: 0.24;
+  }
+  100% {
+    opacity: 1;
+  }
 }
 
 .#{$kku-dark-mode-signature} {
@@ -166,10 +188,50 @@
         .blocks-visualizer__area__slider__block.blocks-visualizer__area__slider__block--unmined {
           background: rgba(255, 255, 255, 0.36);
 
-          &:before { background: rgba(255, 255, 255, 0.24); }
-          &:after { background: rgba(255, 255, 255, 0.4); }
+          &:before {
+            background: rgba(255, 255, 255, 0.24);
+          }
+
+          &:after {
+            background: rgba(255, 255, 255, 0.4);
+          }
         }
       }
     }
   }
 }
+
+
+@media screen and (min-width: $max-width-size) {
+
+  .blocks-visualizer__area {
+
+
+    .blocks-visualizer__area__slider {
+
+      .blocks-visualizer__area__slider__item {
+
+        .blocks-visualizer__area__slider__block {
+          padding: $spacing-8;
+
+          .block-height { font-size: 18px; }
+
+          .block-info {
+            gap: $spacing-6;
+            font-size: 14px;
+
+            .block-pool-name {
+              @include ellipsis;
+            }
+
+            .block-timestamp {
+              text-align: center;
+            }
+          }
+        }
+      }
+    }
+  }
+}
+
+

@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { Chart as ChartJS, LinearScale, LineElement, PointElement, Tooltip } from "chart.js";
-import { KButton, KButtonGroup, KSpinner } from "kku-ui";
+import { KButton, KSpinner } from "kku-ui";
 import { Line } from "react-chartjs-2";
 import { useLottie } from "lottie-react";
 import {
@@ -248,12 +248,14 @@ const MiningMetricChart = () => {
       </div>
 
       <div className="mining-metric-chart__bottom">
-        <KButtonGroup className="mining-metric-chart__bottom__buttons">
+        <div className="mining-metric-chart__bottom__buttons">
           {miningMetricChartIntervalOptions.map(({ value, text }) => (
-            <KButton key={value} label={text} size="small" className={chartCardButtonClass(value)}
-                     onClick={() => setHashrateChartInterval(value)} />
+            <KButton key={value} size="sm" className={chartCardButtonClass(value)}
+                     onClick={() => setHashrateChartInterval(value)}>
+              {text}
+            </KButton>
           ))}
-        </KButtonGroup>
+        </div>
         <ChartChanger />
       </div>
     </HorizontalCard>

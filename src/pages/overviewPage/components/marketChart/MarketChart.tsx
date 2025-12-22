@@ -1,8 +1,11 @@
 import React, { memo, useCallback, useMemo, useRef } from "react";
 import { CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Tooltip } from "chart.js";
-import { KButton, KButtonGroup } from "kku-ui";
+import { KButton } from "kku-ui";
 import { Line } from "react-chartjs-2";
-import { ChartJsDataType, MarketChartIntervalTypeList } from "@/pages/overviewPage/components/marketChart/MarketChart.interface";
+import {
+  ChartJsDataType,
+  MarketChartIntervalTypeList
+} from "@/pages/overviewPage/components/marketChart/MarketChart.interface";
 import { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import useStore from "@/shared/stores/store";
 import { HorizontalCard } from "@/components";
@@ -110,14 +113,14 @@ const MarketChart = () => {
         />
       </div>
       <div className="market-chart__bottom">
-        <KButtonGroup className="market-chart__bottom__buttons">
+        <div className="market-chart__bottom__buttons">
           {
             marketChartIntervalOptions.map(({ value, text }) => (
-              <KButton key={value} label={text} size="small" className={chartCardButtonClass(value)}
-                       onClick={() => setMarketChartInterval(value)} />
+              <KButton key={value} size="sm" className={chartCardButtonClass(value)}
+                       onClick={() => setMarketChartInterval(value)}>{text}</KButton>
             ))
           }
-        </KButtonGroup>
+        </div>
         <ChartChanger />
       </div>
     </HorizontalCard>

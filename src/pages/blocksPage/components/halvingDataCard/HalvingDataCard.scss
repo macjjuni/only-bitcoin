@@ -1,26 +1,17 @@
 @use "@/app/styles/variable" as *;
 @use "@/app/styles/mixin" as *;
 
-.k-accordion.halving-data-card__area {
-  border: none;
+.halving-data-card__area {
 
-  &[data-open=true] {}
-
-  .k-accordion__summary {
-
-    .k-accordion__summary__text {
-      font-size: 18px;
-      font-weight: bold;
-    }
+  .halving-data-card__area__title {
+    font-size: 18px;
+    font-weight: bold;
   }
 
-  .k-accordion__content {
-    transition-duration: 0.36s;
-
-    .k-accordion__content__container {
-      overflow-x: auto;
-    }
+  .halving-data-card__area__content {
+    overflow-x: auto;
   }
+
 
   .halving-data-card__area__list {
     display: flex;

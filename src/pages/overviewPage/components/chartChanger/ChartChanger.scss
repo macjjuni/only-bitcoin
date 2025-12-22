@@ -1,21 +1,22 @@
 @use "@/app/styles/variable" as *;
 
-.chart-changer {
 
-  .chart-changer__trigger {
-    padding: 3px;
-    border-radius: $default-border-radius;
-    transition: background-color 0.16s ease;
+.chart-changer__trigger {
+  padding: 3px;
+  border-radius: $default-border-radius;
+  transition: background-color 0.16s ease;
 
-    &[aria-expanded=true] { background-color: $gray-200; }
+  &[aria-expanded=true] {
+    background-color: $gray-200;
   }
 }
 
-.#{$kku-dark-mode-signature} {
-  .chart-changer {
 
-    .chart-changer__trigger {
-      &[aria-expanded=true] { background-color: $gray-800; }
+.#{$kku-dark-mode-signature} {
+
+  .chart-changer__trigger {
+    &[aria-expanded=true] {
+      background-color: $gray-800;
     }
   }
 }
