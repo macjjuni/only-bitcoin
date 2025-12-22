@@ -13,7 +13,7 @@ const FormRow = ({children, icon, label}: FormRowTypes) => {
       { icon && (<div className="form-row__area__icon">{icon}</div>) }
       <div className="form-row__area__content">
       <div className="form-row__area__content__label">{label}</div>
-        {children}
+      <div className="form-row__area__content__children">{children}</div>
       </div>
     </div>
   );

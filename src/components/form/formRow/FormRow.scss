@@ -3,67 +3,78 @@
 
 
 .form-row__area {
-    $gap-size: $spacing-16;
-    $icon-size: 28px;
+  $gap-size: $spacing-16;
+  $icon-size: 28px;
 
-    position: relative;
+  position: relative;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: $gap-size;
+  min-height: 54px;
+  padding: 0 $spacing-16;
+  border-bottom: none;
+  background-color: $default-background-cover-color;
+
+  .form-row__area__icon {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex: 0 $icon-size;
+  }
+
+  .form-row__area__content {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    gap: $gap-size;
-    min-height: 54px;
-    padding: 0 $spacing-16;
-    border-bottom: none;
-    background-color: $default-background-cover-color;
+    flex: 1 auto;
 
-    .form-row__area__icon {
-        display: inline-flex;
-        justify-content: center;
-        align-items: center;
-        width: $icon-size;
+    .form-row__area__content__label {
+      display: flex;
+      justify-content: flex-start;
+      align-items: center;
+      flex: 0 56%;
+      @include font-body;
+      letter-spacing: -0.5px;
+      white-space: nowrap;
     }
 
-    .form-row__area__content {
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        width: calc(100% - (#{$gap-size} + #{$icon-size}));
-
-        .form-row__area__content__label {
-            @include font-body;
-        }
-
-        .k-select {
-            margin-top: -#{$spacing-8};
-        }
+    .form-row__area__content__children {
+      flex: 1 auto;
+      text-align: right;
     }
+  }
+
+  &:after {
+    content: '';
+    position: absolute;
+    bottom: 0;
+    right: 0;
+    height: 1px;
+    width: 88%;
+    background-color: $gray-300;
+  }
+
+  &:first-child {
+    border-top-left-radius: 8px;
+    border-top-right-radius: 8px;
+  }
+
+  &:last-child {
+    border-bottom-left-radius: 8px;
+    border-bottom-right-radius: 8px;
 
     &:after {
-        content: '';
-        position: absolute;
-        bottom: 0;
-        right: 0;
-        height: 1px;
-        width: 88%;
-        background-color: $gray-300;
+      content: none;
     }
-
-    &:first-child {
-        border-top-left-radius: 8px;
-        border-top-right-radius: 8px;
-    }
-    &:last-child {
-        border-bottom-left-radius: 8px;
-        border-bottom-right-radius: 8px;
-        &:after { content: none; }
-    }
+  }
 }
 
 
 .#{$kku-dark-mode-signature} {
-    .form-row__area {
-        &:after {
-            background-color: $gray-600;
-        }
+  .form-row__area {
+    &:after {
+      background-color: $gray-600;
     }
+  }
 }

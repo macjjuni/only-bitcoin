@@ -53,10 +53,10 @@ const InstallSettingForm = () => {
   return (
     <>
       <FormRow icon={<MessageIcon color="#1796EE" size={24} />} label="앱 설치 메시지 숨기기">
-        <KSwitch value={isInstallMsg} onChange={onChangeInstallMsg} />
+        <KSwitch checked={isInstallMsg} onCheckedChange={onChangeInstallMsg} />
       </FormRow>
       <FormRow icon={<KIcon icon="app" size={24} color="#1796EE" />} label="앱 설치">
-        <KButton variant="primary" label="설치" onClick={onClickInstall} />
+        <KButton variant="primary" size="sm" onClick={onClickInstall}>설치</KButton>
       </FormRow>
     </>
   );

@@ -1,4 +1,4 @@
-import { useCallback, useDeferredValue, useMemo, useState } from "react";
+import { ChangeEvent, useCallback, useDeferredValue, useMemo, useState } from "react";
 import { useOutletContext } from "react-router";
 import { KIcon, KTextField } from "kku-ui";
 import { useQuery } from "@tanstack/react-query";
@@ -35,7 +35,8 @@ export default function BIP39Page() {
   // endregion
 
   // region [Events]
-  const onChangeSearch = useCallback((val: string) => {
+  const onChangeSearch = useCallback((e: ChangeEvent<HTMLInputElement>) => {
+    const val = e.target.value.trim()
     if (ENGLISH_REG.test(val) || val === '') {
       setSearch(val);
     }
@@ -47,8 +48,7 @@ export default function BIP39Page() {
     <PageLayout className="BIP39__page">
       <div className="BIP39__page__top">
         <KTextField label="검색(4자리)" value={search} onChange={onChangeSearch}
-                    width="100%" className="BIP39__page__search" maxLength={4}
-                    leftContent={<KIcon icon="search" style={{ marginLeft: 12 }} />} />
+                    width="full" className="BIP39__page__search" maxLength={4} />
       </div>
       <div className="BIP39__page__view">
         <ul className="BIP39__page__view__list">
