@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { toast } from "react-toastify";
+import { kToast } from "kku-ui";
 import ReconnectingWebSocket from "reconnecting-websocket";
 import useStore from "@/shared/stores/store";
 import { isNetwork } from "@/shared/utils/network";
@@ -46,7 +46,7 @@ export default function useCoinbaseWebSocket() {
     });
 
     socket.onopen = () => {
-      toast.success("코인베이스 연결!");
+      kToast.success("코인베이스 연결!");
       if (isDev) console.log("✅ 코인베이스 소켓 연결");
 
       // [중요] 코인베이스는 연결 후 구독 메시지를 보내야 함
@@ -81,7 +81,7 @@ export default function useCoinbaseWebSocket() {
 
     socket.onerror = (e) => {
       console.error("Coinbase WebSocket Error:", e);
-      toast.error("코인베이스 연결 오류");
+      kToast.error("코인베이스 연결 오류");
 
       if (!isNetwork()) {
         socket.close();

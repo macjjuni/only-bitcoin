@@ -1,7 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { toast } from "react-toastify";
-import { KButton } from "kku-ui";
+import { KButton, kToast } from "kku-ui";
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from "@dnd-kit/sortable";
 import { DndContext, DragEndEvent, closestCenter } from "@dnd-kit/core";
 import { EditIcon, SaveIcon } from "@/components/ui/icon";
@@ -106,7 +105,7 @@ const MacroWidgetPanel = () => {
 
   const onClickAddWidget = useCallback((id: number) => {
     if (macroSequence.length > 3) {
-      toast.error("최대 4개까지 등록할 수 있어요.");
+      kToast.error("최대 4개까지 등록할 수 있어요.");
     } else {
       setMacroSequence([...macroSequence, id]);
     }

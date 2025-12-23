@@ -1,7 +1,6 @@
 import { memo, useCallback, useEffect, useState } from "react";
-import { KButton, KIcon, KListGroup, KListRow, KSwitch } from "kku-ui";
-import { FormRow } from "@/components";
-import { useInitializePWA } from "../../../../shared/hooks/initializer";
+import { KIcon, KListGroup, KListRow, KSwitch } from "kku-ui";
+import { useInitializePWA } from "@/shared/hooks/initializer";
 import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import { MessageIcon } from "@/components/ui/icon";
@@ -54,8 +53,7 @@ const InstallSettingForm = () => {
     <KListGroup header="앱 설치">
       <KListRow icon={<MessageIcon color="#1796EE" size={24} />} label="앱 설치 메시지 숨기기"
                 rightElement={<KSwitch checked={isInstallMsg} onCheckedChange={onChangeInstallMsg} />}/>
-      <KListRow icon={<KIcon icon="app" size={24} color="#1796EE" />}
-                label="앱 설치" rightElement={<KButton variant="primary" size="sm" onClick={onClickInstall}>설치</KButton>}/>
+      <KListRow icon={<KIcon icon="app" size={24} color="#1796EE" />} label="앱 설치" onClick={onClickInstall}/>
     </KListGroup>
   );
 };

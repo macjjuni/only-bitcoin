@@ -1,5 +1,5 @@
 import {useCallback, useEffect, useRef} from 'react'
-import {toast} from 'react-toastify'
+import {kToast} from "kku-ui";
 import ReconnectingWebSocket from 'reconnecting-websocket'
 import useStore from '@/shared/stores/store'
 import {isNetwork} from '@/shared/utils/network'
@@ -72,7 +72,7 @@ export default function useBithumbWebSocket() {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      toast.success("빗썸 연결!");
+      kToast.success("빗썸 연결!");
       if (isDev) console.log("✅ 빗썸 소켓 연결");
       socket.send(JSON.stringify(getRequestPayload()));
     };
@@ -97,7 +97,7 @@ export default function useBithumbWebSocket() {
 
     socket.onerror = (e) => {
       console.error("Bithumb WebSocket Error:", e);
-      toast.error("빗썸 연결 오류");
+      kToast.error("빗썸 연결 오류");
 
       if (!isNetwork()) {
         socket.close();

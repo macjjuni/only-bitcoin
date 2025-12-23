@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { toast } from "react-toastify";
+import {kToast} from "kku-ui";
 import ReconnectingWebSocket from "reconnecting-websocket";
 import useStore from "@/shared/stores/store";
 import { deepEqual } from "@/shared/utils/common";
@@ -38,7 +38,7 @@ export default function useMempoolSocket() {
     const { id, height, size, timestamp, extras } = block;
     const sanitizedBlock: BlockTypes = { id, height, size, timestamp, poolName: extras.pool.name };
 
-    toast.info(`${comma(height)}번째 블록 채굴!️`);
+    kToast.info(`${comma(height)}번째 블록 채굴!️`);
 
     setBlockData([sanitizedBlock, ...blockData]);
   }, []);
@@ -66,7 +66,7 @@ export default function useMempoolSocket() {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      toast.success("Mempool 연결!");
+      kToast.success("Mempool 연결!");
       if (process.env.NODE_ENV === "development") {
         console.log("✅ Mempool 소켓 연결");
       }

@@ -73,7 +73,7 @@ const TxSearcher = () => {
 
 
   return (
-      <KInputGroup className="block-search-box__area">
+      <KInputGroup className="block-search-box__area" size="md">
         <InputGroupAddon align="inline-start">
         <KIcon icon="search" size={20} color="currentColor" />
         </InputGroupAddon>

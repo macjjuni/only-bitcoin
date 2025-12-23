@@ -33,8 +33,8 @@ dependencies:
     specifier: ^12.4.2
     version: 12.9.1(@types/node@18.19.130)
   kku-ui:
-    specifier: ^0.9.953
-    version: 0.9.953(@types/react-dom@19.2.3)(@types/react@19.2.7)
+    specifier: ^0.9.97
+    version: 0.9.97(@types/react-dom@19.2.3)(@types/react@19.2.7)
   kku-util:
     specifier: ^0.0.156
     version: 0.0.156
@@ -62,9 +62,6 @@ dependencies:
   react-router-dom:
     specifier: ^7.10.1
     version: 7.10.1(react-dom@19.2.3)(react@19.2.3)
-  react-toastify:
-    specifier: ^11.0.5
-    version: 11.0.5(react-dom@19.2.3)(react@19.2.3)
   reconnecting-websocket:
     specifier: ^4.4.0
     version: 4.4.0
@@ -6241,8 +6238,8 @@ packages:
       json-buffer: 3.0.1
     dev: true
 
-  /kku-ui@0.9.953(@types/react-dom@19.2.3)(@types/react@19.2.7):
-    resolution: {integrity: sha512-5Dekietlt7sI5SAUqIOfL82sTmtU/IqRnN2wdY0RAyuIG2JYCfuwyuimSKi5hscMP/UIHLqhnQbL9PvAXHjZ6g==}
+  /kku-ui@0.9.97(@types/react-dom@19.2.3)(@types/react@19.2.7):
+    resolution: {integrity: sha512-ofj0hxTYfzPzd/TjkGSnLhnQ2HgttwRB27bJPMz/EwvysOzC/6JmvJGkVjyBo7U4XjPEkDiRlcw1FvphRJzzrg==}
     dependencies:
       '@radix-ui/react-accordion': 1.2.12(@types/react-dom@19.2.3)(@types/react@19.2.7)(react-dom@19.2.3)(react@19.2.3)
       '@radix-ui/react-dialog': 1.1.15(@types/react-dom@19.2.3)(@types/react@19.2.7)(react-dom@19.2.3)(react@19.2.3)
@@ -7641,17 +7638,6 @@ packages:
       get-nonce: 1.0.1
       react: 19.2.3
       tslib: 2.8.1
-    dev: false
-
-  /react-toastify@11.0.5(react-dom@19.2.3)(react@19.2.3):
-    resolution: {integrity: sha512-EpqHBGvnSTtHYhCPLxML05NLY2ZX0JURbAdNYa6BUkk+amz4wbKBQvoKQAB0ardvSarUBuY4Q4s1sluAzZwkmA==}
-    peerDependencies:
-      react: ^18 || ^19
-      react-dom: ^18 || ^19
-    dependencies:
-      clsx: 2.1.1
-      react: 19.2.3
-      react-dom: 19.2.3(react@19.2.3)
     dev: false
 
   /react@19.2.3:

@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useQuery } from '@tanstack/react-query';
-import { toast } from "react-toastify";
+import { kToast } from "kku-ui";
 import { MarketChartIntervalType } from '@/shared/stores/store.interface';
 import fetcher from "@/shared/utils/fetcher";
 import { isDev } from "@/shared/utils/common";
@@ -54,7 +54,7 @@ const useMarketChart= (days: MarketChartIntervalType) => {
 
     if (isError) {
       console.error('❌ 마켓 차트 데이터 초기화 오류', error);
-      toast.error('마켓 차트 데이터 초기화 오류');
+      kToast.error('마켓 차트 데이터 초기화 오류');
     }
   }, [isError]);
 

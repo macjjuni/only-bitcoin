@@ -1,6 +1,6 @@
 import { RefObject, useCallback } from "react";
 import { clipboardUtil } from "kku-util";
-import { toast } from "react-toastify";
+import { kToast } from "kku-ui";
 
 
 export default function useCopyOnClick(refElement: RefObject<HTMLElement|null>) {
@@ -12,7 +12,7 @@ export default function useCopyOnClick(refElement: RefObject<HTMLElement|null>) 
     const text = refElement.current?.dataset.copy  || '';
     const isCopySuccess = await clipboardUtil.copyToClipboard(text);
 
-    if (isCopySuccess) { toast.success(`"${text}" 복사 완료`); }
+    if (isCopySuccess) { kToast.success(`"${text}" 복사 완료`); }
   }, []);
 
 

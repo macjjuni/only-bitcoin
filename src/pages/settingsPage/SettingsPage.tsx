@@ -1,6 +1,6 @@
 import { useCallback, useMemo } from "react";
 import { useOutletContext } from "react-router";
-import { KButton, KIcon, KListRow, KListGroup, KSelect, KSwitch } from "kku-ui";
+import { KIcon, KListRow, KListGroup, KSelect, KSwitch } from "kku-ui";
 import router from "@/app/router";
 import useStore from "@/shared/stores/store";
 import InstallSettingForm from "./components/installSettingForm/InstallSettingForm";
@@ -11,7 +11,7 @@ import { currencyOptions, krwMarketOptions, usdMarketOptions } from "@/shared/co
 import { isSafari } from "@/shared/utils/device";
 import { AnimationIcon, CurrencyIcon } from "@/components/ui/icon";
 import { CurrencyTypes } from "@/shared/stores/store.interface";
-// import ResourceSource from "./components/resourceSource/ResourceSource";
+import ResourceSource from "@/pages/settingsPage/components/resourceSource/ResourceSource";
 import "./SettingsPage.scss";
 
 
@@ -71,11 +71,11 @@ export default function SettingsPage() {
           <KListRow icon={<KIcon icon="star" color="#f7931a"/>} label="시작 페이지"
                     rightElement={<KSelect value={initialPath} options={favoriteRouteOptions} width="sm" onChange={setInitialPath}/>} />
           <KListRow icon={<CurrencyIcon size={24}/>} label="통화 단위"
-                    rightElement={<KSelect value={currency} options={currencyOptions} width="sm" onChange={(v) => setCurrency(v as CurrencyTypes)}/>} />
+                    rightElement={<KSelect value={currency} options={currencyOptions} width="xs" onChange={(v) => setCurrency(v as CurrencyTypes)}/>} />
           <KListRow icon={<KIcon icon="dollar" size={24}/>} label="국내거래소"
-                    rightElement={<KSelect value={krwMarket} options={krwMarketOptions} width="sm" onChange={setKrwMarket}/>} />
+                    rightElement={<KSelect value={krwMarket} options={krwMarketOptions} width="xs" onChange={setKrwMarket}/>} />
           <KListRow icon={<KIcon icon="won" size={24}/>} label="해외거래소"
-                    rightElement={<KSelect value={usdMarket} options={usdMarketOptions} width="sm" onChange={setUsdMarket}/>} />
+                    rightElement={<KSelect value={usdMarket} options={usdMarketOptions} width="xs" onChange={setUsdMarket}/>} />
           <KListRow icon={<KIcon icon="tether" size={24}/>} label="USDT 기준 환율"
                     rightElement={<KSwitch checked={isUsdtStandard} onCheckedChange={setUsdtStandard}/>} />
         </KListGroup>
@@ -96,8 +96,8 @@ export default function SettingsPage() {
 
         {/* 정보 및 기타 그룹 */}
         <KListGroup header="정보">
-          <KListRow icon={<KIcon icon="x_logo" size={24}/>} label="피드백"
-                    rightElement={<KButton variant="primary" size="sm" onClick={onRouteToFeedback}>이동</KButton>} />
+          <KListRow icon={<KIcon icon="x_logo" size={24}/>} label="피드백" onClick={onRouteToFeedback} />
+          <ResourceSource />
           <KListRow icon={<KIcon icon="dev" color="#333" size={24}/>} label="버전 정보"
                     rightElement={<span className="text-[17px] text-muted-foreground">{import.meta.env.VITE_VERSION || "-"}</span>} />
         </KListGroup>

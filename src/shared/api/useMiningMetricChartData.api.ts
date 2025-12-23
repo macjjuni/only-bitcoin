@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { toast } from "react-toastify";
+import { kToast } from "kku-ui";
 import { useQuery } from '@tanstack/react-query';
 import {HashrateChartFormattedData, HashrateChartResponseData} from '@/shared/types/api/hashrateChart'
 import type { MiningMetricChartIntervalType } from '@/shared/stores/store.interface';
@@ -76,7 +76,7 @@ const useMiningMetricChartData = (days: MiningMetricChartIntervalType) => {
 
     if (isError) {
       console.error('❌ 채굴 지표 차트 데이터 초기화 오류', error);
-      toast.error('채굴 지표 차트 데이터 초기화 오류');
+      kToast.error('채굴 지표 차트 데이터 초기화 오류');
     }
   }, [isError]);
 

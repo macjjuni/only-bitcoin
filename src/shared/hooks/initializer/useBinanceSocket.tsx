@@ -1,5 +1,5 @@
 import { useEffect, useRef, useCallback } from "react";
-import { toast } from "react-toastify";
+import { kToast } from "kku-ui";
 import ReconnectingWebSocket from "reconnecting-websocket";
 import useStore from "@/shared/stores/store";
 import { isNetwork } from "@/shared/utils/network";
@@ -47,7 +47,7 @@ export default function useBinanceWebSocket() {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      toast.success("바이낸스 연결!");
+      kToast.success("바이낸스 연결!");
       if (isDev) console.log("✅ 바이낸스 소켓 연결");
     };
 
@@ -65,7 +65,7 @@ export default function useBinanceWebSocket() {
 
     socket.onerror = (e) => {
       console.error("Binance WebSocket Error:", e);
-      toast.error("바이낸스 연결 오류");
+      kToast.error("바이낸스 연결 오류");
 
       if (!isNetwork()) {
         socket.close();

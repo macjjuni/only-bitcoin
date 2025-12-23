@@ -1,14 +1,15 @@
 import { memo } from "react";
-import FormRowAccordion from "../formRowAccordion/FormRowAccordion";
-import { DataIcon } from "@/components/ui/icon";
+import { KListRowAccordion } from "kku-ui";
+import { DataIcon } from "@/components";
 import "./ResourceSource.scss";
 
 
 const ResourceSource = () => {
 
   return (
-    <FormRowAccordion label="리소스 출처" icon={<DataIcon size={22} style={{ margin: "0 3px" }} />}
-                      className="resource-source">
+
+    <KListRowAccordion value="resource" label="리소스 출처" className="resource-source"
+                       icon={<DataIcon size={22} style={{ margin: "0 3px" }} />}>
       <ul className="resource-source__list">
         {
           [
@@ -21,7 +22,7 @@ const ResourceSource = () => {
           ))
         }
       </ul>
-    </FormRowAccordion>
+    </KListRowAccordion>
   );
 };
 

@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "react-toastify";
+import { kToast } from "kku-ui";
 import { useEffect } from "react";
 import fetcher from "@/shared/utils/fetcher";
 import { FearGreedIndexResponseTypes } from "@/shared/types/api/fearGreedIndex";
@@ -48,7 +48,7 @@ const useFearGreedIndex = () => {
   useEffect(() => {
 
     if (isError && isDev) {
-      toast.error("공포 탐욕지수 데이터 업데이트 에러!");
+      kToast.error("공포 탐욕지수 데이터 업데이트 에러!");
       console.log("❌ 공포 탐욕지수 데이터 업데이트 에러!", error);
     }
   }, [isError]);

@@ -1,5 +1,5 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { toast } from "react-toastify";
+import { kToast } from "kku-ui";
 import { Lottie } from "@/components";
 import useStore from "@/shared/stores/store";
 import greenDotLottie from "@/shared/assets/lottie/green-dot.json";
@@ -32,7 +32,7 @@ const ConnectionDot = () => {
   }, []);
 
   const showToastNetworkError = useCallback(() => {
-    toast.error("네트워크 연결을 확인해주세요.");
+    kToast.error("네트워크 연결을 확인해주세요.");
   }, []);
   // endregion
 

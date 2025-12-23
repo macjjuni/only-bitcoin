@@ -16,6 +16,7 @@
 
     .resource-source__list__item {
       @include font-body;
+      color: $default-font-color;
       letter-spacing: -1.5px;
     }
   }
