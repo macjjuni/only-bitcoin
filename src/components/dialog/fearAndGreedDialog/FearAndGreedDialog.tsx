@@ -1,6 +1,5 @@
-import { KDialog, KDialogHeader, KDialogContent, KDialogFooter, KDialogClose, KButton } from "kku-ui";
+import { KDialog, KDialogHeader, KDialogContent, KDialogFooter, KDialogClose, KButton, KAspectRatio } from "kku-ui";
 import LazyImage from "@/components/ui/lazyImage/LazyImage";
-import "./FearAndGreedModal.scss";
 
 interface ModalTypes {
   open: boolean;
@@ -17,15 +16,10 @@ export default function FearAndGreedDialog({open, setOpen}: ModalTypes) {
             <strong>공포 & 탐욕 지수</strong>
           </KDialogHeader>
 
-          <LazyImage src={`https://alternative.me/crypto/fear-and-greed-index.png?${Date.now()}`}
-                     alt="공포 & 탐욕 지수" className="fear-and-greed-index__image"/>
-
-          <KDialogFooter>
-            <KDialogClose>
-              <KButton size="sm" width="full">닫기</KButton>
-            </KDialogClose>
-          </KDialogFooter>
-
+          <KAspectRatio ratio={1.1146}>
+            <LazyImage src={`https://alternative.me/crypto/fear-and-greed-index.png?${Date.now()}`}
+                       alt="공포 & 탐욕 지수" className="fear-and-greed-index__image"/>
+          </KAspectRatio>
         </KDialogContent>
       </KDialog>
   );

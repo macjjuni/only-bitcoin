@@ -1,7 +1,7 @@
 import { QueryClientProvider } from "@tanstack/react-query";
 import { KToast, KToasterProps } from "kku-ui";
 import { queryClient } from "@/app/queryClient";
-import { PwaInstallAlarm, PwaInstallAlarmIOS } from "../components";
+import { PWAInstallAlertBottomSheet, PWAInstallAlertIOSBottomSheet } from "@/components";
 import { DefaultLayout, Header, Content, BottomNavigation } from "@/layouts";
 import Initializer from "@/app/Initializer";
 
@@ -12,6 +12,7 @@ const toastProps: KToasterProps = {
   duration: 2000,
   size: window.innerWidth > 524 ? 'md' : 'sm',
   mobileOffset: 88,
+  style: { zIndex: 999 }
 };
 
 export default function Client() {
@@ -25,8 +26,8 @@ export default function Client() {
         <Content />
         <BottomNavigation />
       </DefaultLayout>
-      <PwaInstallAlarm />
-      <PwaInstallAlarmIOS />
+      <PWAInstallAlertBottomSheet />
+      <PWAInstallAlertIOSBottomSheet />
     </QueryClientProvider>
   );
 }

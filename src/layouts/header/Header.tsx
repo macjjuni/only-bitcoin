@@ -1,11 +1,13 @@
 import { memo } from "react";
 import { Link } from "react-router";
-import { KIcon } from "kku-ui";
+// import { KIcon } from "kku-ui";
 import { ConnectionDot } from "@/components";
 import SettingButton from "@/layouts/header/components/settingButton/SettingButton";
 import useStore from "@/shared/stores/store";
 import "./Header.scss";
 
+          // {/*<KIcon icon="bitcoin" size={36} />*/}
+          // {/*₿itcoin*/}
 
 const Header = () => {
 
@@ -14,10 +16,7 @@ const Header = () => {
   return (
     <header className="header__area">
       <h2 className="header__area__text">
-        <Link to={initialPath} className="header__area__text__link">
-          <KIcon icon="bitcoin" size={36} />
-          ₿itcoin
-        </Link>
+        <Link to={initialPath} className="header__area__text__link"/>
       </h2>
       <div className="header__area__right">
         <ConnectionDot />

@@ -2,7 +2,6 @@ import { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import {
   KDropdownMenu, KDropdownMenuCheckboxItem,
   KDropdownMenuContent,
-  KDropdownMenuItem,
   KDropdownMenuLabel,
   KDropdownMenuTrigger,
   KIcon
