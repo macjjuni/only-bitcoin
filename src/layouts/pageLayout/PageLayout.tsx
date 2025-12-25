@@ -1,4 +1,4 @@
-import React, { memo, ReactNode, useMemo } from "react";
+import React, { memo, ReactNode } from "react";
 import { NotKeyNotYourBitcoin } from "../../components";
 import "./PageLayout.scss";
 
@@ -11,23 +11,8 @@ interface PageLayoutProps {
 
 const PageLayout = ({ children, className }: PageLayoutProps) => {
 
-  // region [Hooks]
-
-  const rootClass = useMemo(() => {
-    const clazz = ["page-layout"];
-
-    if (className) {
-      clazz.push(className);
-    }
-
-    return clazz.join(" ");
-  }, [className]);
-
-  // endregion
-
-
   return (
-    <section className={rootClass}>
+    <section className={["page-layout", className].filter(Boolean).join(" ")}>
       {children}
       <NotKeyNotYourBitcoin />
     </section>

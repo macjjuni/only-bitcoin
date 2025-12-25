@@ -9,7 +9,6 @@ import { calcPremiumPercent, minedPercent, usdToSats } from "@/shared/utils/calc
 import { FearAndGreedDialog } from "@/components/dialog";
 import useStore from "@/shared/stores/store";
 import WidgetItem from "./WidgetItem";
-import "./MacroWidgetPanel.scss";
 
 interface MacroVO {
   id: number;
@@ -81,11 +80,14 @@ const MacroWidgetPanel = () => {
 
   const getEmptyElement = useCallback((length: number) => {
     const emptyCount = 4 - length;
-
     if (emptyCount <= 0) return null;
-    return Array.from({length: emptyCount}, (_, index) => (
-        // eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions
-        <div key={`empty-${index}`} className="macro-widget__panel__empty" onClick={enableEditMode}>+</div>
+    return Array.from({ length: emptyCount }, (_, index) => (
+      // eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions
+      <div key={`empty-${index}`} onClick={enableEditMode}
+        className="flex justify-center items-center relative h-[52px] text-[32px] text-border border border-dashed border-muted-foreground
+         rounded-lg cursor-pointer tap-highlight-transparent">
+        +
+      </div>
     ));
   }, []);
   // endregion
@@ -163,43 +165,54 @@ const MacroWidgetPanel = () => {
 
 
   return (
-      <>
-        <div className="macro-widget__panel">
-          <div className="macro-widget__panel__top">
-            <button type="button" onClick={toggleEditMode} style={{color: "currentColor"}}>
-              {isEditMode ? <SaveIcon size={22}/> : <EditIcon size={22}/>}
-            </button>
-          </div>
+    <>
+      {/* .macro-widget__panel */}
+      <div className="flex flex-col mb-2 -mt-1">
 
-          <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
-            <SortableContext items={macroSequence} strategy={horizontalListSortingStrategy}>
-              <div className={`macro-widget__panel__middle${isEditMode ? " editable" : ""}`}>
-                {visibleItems.map(({id, label, value, sign, decimals, onClick}) =>
-                    <WidgetItem key={id} id={id} label={label} value={value} sign={sign} decimals={decimals}
-                                onClick={onClick} isEditMode={isEditMode} onRemove={() => {
-                      onClickRemoveWidget(id);
-                    }}/>)}
-                {getEmptyElement(visibleItems.length)}
-              </div>
-            </SortableContext>
-          </DndContext>
-
-          {isEditMode && (
-              <div className="macro-widget__panel__bottom">
-                <h2 className="macro-widget__panel__bottom__title">추가 가능 위젯</h2>
-                <div className="macro-widget__panel__bottom-list">
-                  {unselectedItems.map(({id, label}) => (
-                      <KButton key={id} variant="primary" size="sm" onClick={() => {
-                        onClickAddWidget(id);
-                      }}>+ {label}</KButton>
-                  ))}
-                </div>
-              </div>
-          )}
+        {/* .macro-widget__panel__top */}
+        <div className="flex justify-end items-center pb-1">
+          <button type="button" onClick={toggleEditMode} className="text-current mr-1">
+            {isEditMode ? <SaveIcon size={22}/> : <EditIcon size={22}/>}
+          </button>
         </div>
 
-        <FearAndGreedDialog open={IsFearAndGreedDialog} setOpen={onChangeOpenFearAndGreedDialog}/>
-      </>
+        <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
+          <SortableContext items={macroSequence} strategy={horizontalListSortingStrategy}>
+            {/* .macro-widget__panel__middle */}
+            <div className={`grid grid-cols-4 gap-4 ${isEditMode ? "cursor-pointer mt-2" : ""}`}>
+              {visibleItems.map(({id, label, value, sign, decimals, onClick}) => (
+                <div key={id} className="tap-highlight-transparent">
+                  <WidgetItem
+                    id={id} label={label} value={value} sign={sign} decimals={decimals}
+                    onClick={onClick} isEditMode={isEditMode}
+                    onRemove={() => onClickRemoveWidget(id)}
+                  />
+                </div>
+              ))}
+              {getEmptyElement(visibleItems.length)}
+            </div>
+          </SortableContext>
+        </DndContext>
+
+        {/* .macro-widget__panel__bottom */}
+        {isEditMode && (
+          <div className="flex flex-col">
+            <h2 className="text-base font-bold py-2 text-primary underline underline-offset-[3px] decoration-1">추가 가능 위젯</h2>
+
+            {/* .macro-widget__panel__bottom-list */}
+            <div className="w-[calc(100%+4rem)] -mx-8 px-8 whitespace-nowrap overflow-y-auto scrollbar-hide">
+                {unselectedItems.map(({id, label}) => (
+                  <KButton key={id} variant="primary" size="sm" onClick={() => onClickAddWidget(id)} className="[&&+&]:ml-2">
+                    + {label}
+                  </KButton>
+                ))}
+            </div>
+          </div>
+        )}
+      </div>
+
+      <FearAndGreedDialog open={IsFearAndGreedDialog} setOpen={onChangeOpenFearAndGreedDialog}/>
+    </>
   );
 };
 
