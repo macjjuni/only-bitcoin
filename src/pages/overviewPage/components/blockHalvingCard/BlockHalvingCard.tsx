@@ -31,16 +31,15 @@ const BlockHalvingCard = () => {
       const isFilled = index < currentBlockIndex;
       const isActive = index === currentBlockIndex;
 
-      // cn 대신 배열 join 방식 사용
       const className = [
-        "inline-flex h-full w-[calc((100%-50px)/25)] mr-0.5 -translate-x-1 -skew-x-[24deg] transition-all duration-300 bg-transparent",
-        (isFilled || isActive) ? "bg-current z-[1]" : "",
-        isActive ? "animate-blink-gold z-[2]" : ""
+        "inline-flex h-full w-[calc((100%-50px)/25)] mr-0.5 -translate-x-1 -skew-x-[24deg] transition-all duration-300",
+        isFilled ? "bg-current z-[1]" : "bg-transparent", // 채워진 상태
+        isActive ? "!bg-current animate-blink-gold z-[2]" : "" // 현재 진행 상태
       ].filter(Boolean).join(" ");
 
       return <div key={index} className={className} />;
     });
-  }, [currentBlockIndex]);
+  }, [currentBlockIndex, currentBlockIndex]);
   // endregion
 
   // region [Privates]
@@ -78,7 +77,7 @@ const BlockHalvingCard = () => {
           <span className="absolute top-0 right-0 w-[2px] h-full bg-background z-10" />
         </div>
 
-        <span className="text-lg font-bold pr-1 text-current drop-shadow-[0_0_10px_rgba(var(--font-rgb),0.5)]">
+        <span className="text-xl font-bold pr-1 text-current drop-shadow-[0_0_10px_rgba(var(--font-rgb),0.5)]">
           {halvingPercent}%
         </span>
       </div>

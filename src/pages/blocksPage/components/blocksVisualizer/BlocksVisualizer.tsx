@@ -7,36 +7,35 @@ import { GenesisDataDialog } from "@/components";
 import useStore from "@/shared/stores/store";
 import "swiper/css";
 import "swiper/css/free-mode";
-import "./BlocksVisualizer.scss";
 
 
 const BlocksVisualizer = () => {
-
   // region [Hooks]
-  const blockData = useStore(state => state.blockData);
+  const blockData = useStore((state) => state.blockData);
   const [isGenesisBlockModal, setIsGenesisBlockModal] = useState(false);
   // endregion
 
   // region [Privates]
   const onOpenGenesisBlockModal = useCallback(() => {
     setIsGenesisBlockModal(true);
-  }, [])
+  }, []);
+
   const onChangeOpenFearAndGreedModal = useCallback((val: boolean) => {
     setIsGenesisBlockModal(val);
   }, []);
   // endregion
 
-
   return (
     <>
-      <GenesisDataDialog open={isGenesisBlockModal} setOpen={onChangeOpenFearAndGreedModal} />
-      <div className="blocks-visualizer__area">
+      <GenesisDataDialog
+        open={isGenesisBlockModal}
+        setOpen={onChangeOpenFearAndGreedModal}
+      />
+      <div className="relative">
         <Swiper slidesPerView={3} spaceBetween={6} freeMode modules={[FreeMode]}
-                className="blocks-visualizer__area__slider">
+                className="w-[calc(100%+1rem)] !-mx-2 !px-2 !py-2">
           <BlockSwiperSlide isUnmined />
-          {blockData.map(block => (
-            <BlockSwiperSlide key={block.id} {...block} />
-          ))}
+          {blockData.map((block) => <BlockSwiperSlide key={block.id} {...block} />)}
           <BlockSwiperSlide isGenesis {...GENESIS_BLOCK} onOpenModal={onOpenGenesisBlockModal} />
         </Swiper>
       </div>
@@ -44,9 +43,7 @@ const BlocksVisualizer = () => {
   );
 };
 
+const MemoizedBlocksVisualizer = memo(BlocksVisualizer);
+MemoizedBlocksVisualizer.displayName = "BlocksVisualizer";
 
-const MemoizedBLocksVisualizer = memo(BlocksVisualizer);
-MemoizedBLocksVisualizer.displayName = "BlocksVisualizer";
-BlocksVisualizer.displayName = "BlocksVisualizer";
-
-export default MemoizedBLocksVisualizer;
+export default MemoizedBlocksVisualizer;

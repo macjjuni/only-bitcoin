@@ -3,9 +3,9 @@ import { KListRowAccordion } from "kku-ui";
 import { DataIcon } from "@/components";
 
 
-const ResourceSource = () => (
+const ResourceListRow = () => (
   <KListRowAccordion value="resource" label="리소스 출처" className="resource-source"
-                     icon={<DataIcon size={22} style={{ margin: "0 3px" }}/>}>
+                     icon={<DataIcon size={22}/>}>
     <ul>
       {
         [
@@ -14,10 +14,10 @@ const ResourceSource = () => (
           { label: "- Fear & Greed Index", value: "alternative.me" },
           { label: "- USD/KRW Exchange Rate", value: "Naver(KEB)" }
         ].map(({ label, value }) => (
-          <li key={label} className="text-sm tracking-tighter">{label}: {value}</li>
+          <li key={label} className="text-sm text-current tracking-tighter">{label}: {value}</li>
         ))
       }
     </ul>
   </KListRowAccordion>
 )
-export default memo(ResourceSource);
+export default memo(ResourceListRow);

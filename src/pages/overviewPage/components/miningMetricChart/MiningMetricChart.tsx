@@ -146,7 +146,7 @@ const MiningMetricChart = () => {
     return [
       "h-[30px] px-3 border-none text-sm bg-transparent shadow-none rounded-md transition-all",
       isActive
-        ? "font-bold text-white bg-black/30 dark:bg-white/80 dark:text-black"
+        ? "font-bold text-white bg-black/40 dark:bg-white/80 dark:text-black"
         : "text-current"
     ].filter(Boolean).join(" ");
   }, [miningMetricChartInterval]);
@@ -156,7 +156,7 @@ const MiningMetricChart = () => {
 
 
   const ChartArea = useMemo(() => (
-    <Line ref={chartRef} data={CurrentChartData} height="136%"
+    <Line ref={chartRef} data={CurrentChartData} height="150%"
           className="mining-metric-chart__chart__wrapper__body"
           options={{
             plugins: {

@@ -69,27 +69,17 @@ const MarketChart = () => {
   // endregion
 
 
-  // region [Styles]
-  const chartCardButtonClass = useCallback((value: MarketChartIntervalType) => {
-
-    const clazz = ["market-chart__button"];
-
-    if (marketChartInterval === value) {
-      clazz.push("market-chart__button--active");
-    }
-
-    return clazz.join(" ");
-  }, [marketChartInterval]);
-
-  // 버튼 클래스 생성 로직 수정 (useMemo 활용)
+  // region [Styles
   const getButtonClass = useCallback((value: MarketChartIntervalType) => {
     const isActive = marketChartInterval === value;
-    return [
-      "h-[30px] px-3 border-none text-sm bg-transparent shadow-none rounded-md transition-all",
-      isActive
-        ? "font-bold text-white bg-black/30 dark:bg-white/80 dark:text-black"
-        : "text-current"
-    ].filter(Boolean).join(" ");
+
+    const baseClass = "h-[30px] px-3 border-none text-sm rounded-md transition-all";
+
+    const stateClass = isActive
+      ? "font-bold text-white bg-black/40 dark:bg-white/80 dark:text-black"
+      : "text-current hover:bg-gray-100 dark:hover:bg-gray-800";
+
+    return `${baseClass} ${stateClass}`;
   }, [marketChartInterval]);
   // endregion
 
@@ -97,11 +87,11 @@ const MarketChart = () => {
   return (
     <div className="relative flex flex-col justify-between gap-2 -mx-2 w-[calc(100%+1rem)] select-none overflow-hidden">
       <div
-        className="flex flex-col justify-start gap-2 text-current relative -mx-16 w-[calc(100%+8rem)] pointer-events-none z-[3]">
+        className="flex flex-col justify-start gap-2 text-current relative pointer-events-none z-[3]">
         <Line
           ref={chartRef}
           data={currentChartData}
-          height="124%"
+          height="140%"
           className="bg-transparent z-[3]"
           options={{
             plugins: {

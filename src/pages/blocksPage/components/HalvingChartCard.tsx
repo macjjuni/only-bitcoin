@@ -3,7 +3,6 @@ import useStore from "@/shared/stores/store";
 import CountText from "@/components/ui/countText/CountText";
 import { calcPercentage, getNextHalvingData } from "@/shared/utils/calculate";
 import { calcDate } from "@/shared/lib/date";
-import "./HalvingChartCard.scss";
 
 
 const circumference = 2 * Math.PI * 50; // 원의 둘레
@@ -11,7 +10,6 @@ const circumference = 2 * Math.PI * 50; // 원의 둘레
 const HalvingChartCard = () => {
 
   // region [Hooks]
-
   const currentBlockData = useStore(state => state.blockData[0]);
   const currentBlockHeight = useMemo(() => (currentBlockData.height), [currentBlockData]);
 
@@ -20,7 +18,6 @@ const HalvingChartCard = () => {
   const halvingPercent = useMemo(() => calcPercentage(nextHalvingData.blockHeight, currentBlockData.height), [nextHalvingData, currentBlockData]);
   const expectNextHalvingDate = useMemo(() => calcDate(Date.now(), restBlockCount * 10, "minute", "YYYY.MM.DD"), [restBlockCount]);
   const [offset, setOffset] = useState<number>(312);
-  const isDark = useStore(state => state.theme) === "dark";
   // endregion
 
 
@@ -33,20 +30,35 @@ const HalvingChartCard = () => {
 
   // region [Templates]
   const CircleChart = useMemo(() => (
-    <svg className="halving-chart-card__area__content__chart" width="64%" viewBox="0 0 120 120">
-      {/* 배경 원 */}
-      <circle cx="60" cy="60" r="50" stroke="#ededed" strokeWidth="16" fill="none" />
-      {/* 진행 원 */}
-      <circle cx="60" cy="60" r="50" stroke="#f7931a" strokeWidth="16.4" fill="none"
-              strokeDasharray={circumference} strokeDashoffset={offset}
-              transform="rotate(-90 60 60)" />
-      {/* 퍼센트 텍스트 */}
-      <text x="50%" y="50%" textAnchor="middle" dy=".3em" fontSize="18" fontWeight="bold"
-            fill={isDark ? "#fff" : "#000"}>
+    <svg className="w-[64%] h-auto" viewBox="0 0 120 120">
+      {/* 배경 원: 라이트/다크 모드 색상 분리 */}
+      <circle
+        cx="60" cy="60" r="50"
+        stroke="currentColor"
+        className="text-[#ededed] dark:text-white/20"
+        strokeWidth="16" fill="none"
+      />
+      {/* 진행 원: Bitcoin Color 적용 및 transition 추가 */}
+      <circle
+        cx="60" cy="60" r="50"
+        stroke="#f7931a"
+        strokeWidth="16.4"
+        fill="none"
+        strokeDasharray={circumference}
+        strokeDashoffset={offset}
+        className="transition-[stroke-dashoffset] duration-[1200ms] ease-in-out"
+        transform="rotate(-90 60 60)"
+      />
+      {/* 퍼센트 텍스트: text-current로 테마 대응 */}
+      <text
+        x="50%" y="50%" textAnchor="middle" dy=".3em"
+        fontSize="18" fontWeight="bold"
+        className="fill-current"
+      >
         {halvingPercent}%
       </text>
     </svg>
-  ), [halvingPercent, offset, isDark]);
+  ), [halvingPercent, offset]);
 
   const HalvingDataList = useMemo(() => ([
     { label: "현재 블록 높이", value: currentBlockHeight, isCount: true },
@@ -61,24 +73,21 @@ const HalvingChartCard = () => {
   useEffect(initializeOffset, [halvingPercent]);
   // endregion
 
-
   return (
-    <div className="halving-chart-card__area">
+    <div className="flex flex-col gap-4 py-1">
+      <div className="text-[18px] font-bold">반감기 현황</div>
 
-      <div className="halving-chart-card__area__title">반감기 현황</div>
-
-      <div className="halving-chart-card__area__content">
+      <div className="flex justify-between items-start gap-6">
         {CircleChart}
 
-        <div className="halving-chart-card__area__content__data-view">
+        <div className="flex flex-col items-start justify-between w-1/2 min-h-full self-stretch">
           {HalvingDataList.map(data => (
-            <div key={data.label} className="halving-chart-card__area__content__data-view__item">
-              <div className="halving-chart-card__area__content__data-view__item__label">
+            <div key={data.label} className="flex flex-col gap-0.5">
+              <div className="text-sm opacity-80 whitespace-nowrap">
                 {data.label}
               </div>
-              <div className="halving-chart-card__area__content__data-view__item__value">
-                {data.isCount && <CountText value={data.value as number} />}
-                {!data.isCount && data.value}
+              <div className="text-[18px] font-bold leading-none font-number">
+                {data.isCount ? <CountText value={data.value as number} /> : data.value}
               </div>
             </div>
           ))}

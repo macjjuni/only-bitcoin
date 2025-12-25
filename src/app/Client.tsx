@@ -21,11 +21,13 @@ export default function Client() {
     <QueryClientProvider client={queryClient}>
       <Initializer />
       <KToast {...toastProps} offset={120} />
+
       <DefaultLayout>
         <Header />
         <Content />
         <BottomNavigation />
       </DefaultLayout>
+
       <PWAInstallAlertBottomSheet />
       <PWAInstallAlertIOSBottomSheet />
     </QueryClientProvider>

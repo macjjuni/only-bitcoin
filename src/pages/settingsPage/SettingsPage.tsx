@@ -11,8 +11,7 @@ import { currencyOptions, krwMarketOptions, usdMarketOptions } from "@/shared/co
 import { isSafari } from "@/shared/utils/device";
 import { AnimationIcon, CurrencyIcon } from "@/components/ui/icon";
 import { CurrencyTypes } from "@/shared/stores/store.interface";
-import ResourceSource from "@/pages/settingsPage/components/resourceSource/ResourceSource";
-import "./SettingsPage.scss";
+import ResourceSource from "@/pages/settingsPage/components/resource-list-row/ResourceListRow";
 
 
 export default function SettingsPage() {
@@ -64,7 +63,7 @@ export default function SettingsPage() {
 
 
   return (
-    <PageLayout className="settings-page__area">
+    <PageLayout className="pt-0.5">
       <div className="settings-page__area__form__area">
         {/* 가격 설정 그룹 */}
         <KListGroup header="가격 설정">

@@ -9,24 +9,19 @@ import { MessageIcon } from "@/components/ui/icon";
 const InstallSettingForm = () => {
 
   // region [Hooks]
-
   const [isInstallMsg, setIsInstallMsg] = useState(false);
   const { onClickInstall } = useInitializePWA();
-
   // endregion
 
 
   // region [Privates]
-
   const initializeInstallMsg = useCallback(() => {
     setIsInstallMsg(!!getCookie(PWA_COOKIE_KEY));
   }, [])
-
   // endregion
 
 
   // region [Events]
-
   const onChangeInstallMsg = useCallback((value: boolean) => {
 
     if (value) {
@@ -36,16 +31,11 @@ const InstallSettingForm = () => {
     }
     setIsInstallMsg(value);
   }, []);
-
   // endregion
 
 
   // region [Life Cycles]
-
-  useEffect(() => {
-    initializeInstallMsg();
-  }, []);
-
+  useEffect(initializeInstallMsg, []);
   // endregion
 
 

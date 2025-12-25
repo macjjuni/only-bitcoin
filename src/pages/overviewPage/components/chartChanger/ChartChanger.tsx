@@ -40,7 +40,7 @@ const ChartChanger = () => {
           "data-[state=open]:bg-gray-200 dark:data-[state=open]:bg-gray-800"
         ].join(" ")}
       >
-        <DataIcon size={20} style={{ padding: 2 }} />
+        <DataIcon size={22} style={{ padding: 2 }} />
       </KDropdownMenuTrigger>
 
       <KDropdownMenuContent align="end" side="top" sideOffset={12}>

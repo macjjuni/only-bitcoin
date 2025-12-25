@@ -1,5 +1,4 @@
 import React, { useEffect, useState, memo } from 'react';
-import './NotKeyNotYourBitcoin.scss';
 
 const bitcoinWiseSayingList = [
   'Not your keys, not your ₿itcoin.',
@@ -14,7 +13,6 @@ const bitcoinWiseSayingList = [
 const FADE_OUT_TIME = 500 as const;
 const ANIMATION_CHANGE_TIME = 10000 as const;
 
-
 const shuffleArray = <T,>(array: readonly T[]): T[] => {
   const newArray = [...array];
   for (let i = newArray.length - 1; i > 0; i--) {
@@ -25,40 +23,41 @@ const shuffleArray = <T,>(array: readonly T[]): T[] => {
 };
 
 const NotKeyNotYourBitcoin = () => {
-
-
   // region [Hooks]
-
   const [shuffledList] = useState(() => shuffleArray(bitcoinWiseSayingList));
   const [currentIndex, setCurrentIndex] = useState(0);
   const [fade, setFade] = useState(true);
-
   // endregion
 
-
   // region [Life Cycles]
-
   useEffect(() => {
     const interval = setInterval(() => {
-      setFade(false); // 페이드 아웃
+      setFade(false); // 페이드 아웃 시작
 
       setTimeout(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % shuffledList.length);
-        setFade(true);
+        setFade(true); // 페이드 인
       }, FADE_OUT_TIME);
     }, ANIMATION_CHANGE_TIME);
 
     return () => clearInterval(interval);
   }, [shuffledList]);
-
   // endregion
 
-
   return (
-    <div className={`not-your-keys-not-your-bitcoin__area ${fade ? 'fade-in' : 'fade-out'}`}>
-      {shuffledList[currentIndex]}
+    <div
+      className={[
+        "flex flex-col justify-end items-center flex-[1_1_auto] font-bold select-none transition-opacity duration-[480ms] ease-in-out",
+        "text-[13px] text-current",
+        fade ? "opacity-100" : "opacity-0",
+      ].join(" ")}
+    >
+      <p className="flex items-center justify-center w-full h-5 mt-2">{shuffledList[currentIndex]}</p>
     </div>
   );
 };
 
-export default memo(NotKeyNotYourBitcoin);
+const MemoizedNotKeyNotYourBitcoin = memo(NotKeyNotYourBitcoin)
+MemoizedNotKeyNotYourBitcoin.displayName = 'NotKeyNotYourBitcoin';
+
+export default MemoizedNotKeyNotYourBitcoin;

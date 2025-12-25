@@ -30,7 +30,7 @@ const ErrorPage = () => {
       <p>
         <i>{(error as Error)?.message || '알 수 없는 오류가 발생했습니다.'}</i>
       </p>
-      <KButton label="새로고침" onClick={onRouteBack} />
+      <KButton onClick={onRouteBack}>새로고침</KButton>
     </div>
   );
 };

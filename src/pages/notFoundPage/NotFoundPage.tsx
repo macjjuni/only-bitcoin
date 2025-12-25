@@ -27,7 +27,7 @@ const NotFoundPage = () => {
   return (
     <div className="not-found__page">
       <h2 className="not-found__page__title">페이지를 찾을 수 없습니다.</h2>
-      <KButton label="뒤로가기" onClick={onRouteBack} />
+      <KButton onClick={onRouteBack}>뒤로가기</KButton>
     </div>
   );
 };
