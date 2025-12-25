@@ -1,6 +1,6 @@
 import React, { memo, useCallback, useEffect, useMemo, useRef } from "react";
 import { Chart as ChartJS, LinearScale, LineElement, PointElement, Tooltip } from "chart.js";
-import { KButton, KSpinner } from "kku-ui";
+import { KSpinner } from "kku-ui";
 import { Line } from "react-chartjs-2";
 import { useLottie } from "lottie-react";
 import {

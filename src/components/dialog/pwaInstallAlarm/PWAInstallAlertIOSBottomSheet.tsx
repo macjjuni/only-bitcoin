@@ -1,6 +1,7 @@
-import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useState } from "react";
 import {
-  KBottomSheet, KBottomSheetClose,
+  KBottomSheet,
+  KBottomSheetClose,
   KBottomSheetContent,
   KBottomSheetFooter,
   KBottomSheetHeader,
