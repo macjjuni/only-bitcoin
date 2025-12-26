@@ -44,7 +44,6 @@ const MacroWidgetPanel = () => {
 
   const navigate = useNavigate();
   const [IsFearAndGreedDialog, setIsFearAndGreedDialog] = useState(false);
-
   // endregion
 
 
@@ -56,21 +55,21 @@ const MacroWidgetPanel = () => {
     setIsEditMode(p => !p);
   }, [])
 
-  const getLayoutElement = useCallback(() =>
-          document.getElementsByClassName("only-btc__layout")[0] as HTMLElement
-      , []);
+  const getLayoutElement = useCallback(() => (
+    document.getElementsByClassName("only-btc__layout__content")[0] as HTMLElement
+  ), []);
 
   const onScrollDisabled = useCallback(() => {
     const layoutElement = getLayoutElement();
     if (layoutElement instanceof HTMLElement) {
-      layoutElement.style.overflowY = "hidden";
+      layoutElement.style.overflow = "hidden";
     }
   }, []);
 
   const onScrollActive = useCallback(() => {
     const layoutElement = getLayoutElement();
     if (layoutElement instanceof HTMLElement) {
-      layoutElement.style.overflowY = "auto";
+      layoutElement.style.overflow = "auto";
     }
   }, []);
 
@@ -198,11 +197,10 @@ const MacroWidgetPanel = () => {
         {isEditMode && (
           <div className="flex flex-col">
             <h2 className="text-base font-bold py-2 text-primary underline underline-offset-[3px] decoration-1">추가 가능 위젯</h2>
-
             {/* .macro-widget__panel__bottom-list */}
             <div className="w-[calc(100%+4rem)] -mx-8 px-8 whitespace-nowrap overflow-y-auto scrollbar-hide">
                 {unselectedItems.map(({id, label}) => (
-                  <KButton key={id} variant="primary" size="sm" onClick={() => onClickAddWidget(id)} className="[&&+&]:ml-2">
+                  <KButton key={id} variant="primary" size="sm" onClick={() => onClickAddWidget(id)} className="[&&+&]:ml-4">
                     + {label}
                   </KButton>
                 ))}

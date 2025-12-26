@@ -10,13 +10,14 @@ interface PageLayoutProps {
 
 const PageLayout = ({ children, className }: PageLayoutProps) => {
 
-  const combinedClassName = useMemo(() => {
-    return [
+  const combinedClassName = useMemo(() => (
+    [
+      "page-layout",
       "relative w-full max-w-layout mx-auto",
       "flex flex-col gap-2",
       className
-    ].filter(Boolean).join(" ");
-  }, [className]);
+    ].filter(Boolean).join(" ")
+  ), [className]);
 
 
   return (

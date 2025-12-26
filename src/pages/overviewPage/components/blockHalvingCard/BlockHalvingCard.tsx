@@ -59,9 +59,7 @@ const BlockHalvingCard = () => {
     <div className="flex flex-col justify-between gap-2 p-0 mt-2 border-none">
 
       {/* .block-halving-card__header */}
-      <div className="flex justify-between items-end">
-        <h2 className="text-lg font-bold">Bitcoin Halving</h2>
-      </div>
+      <h2 className="text-lg font-bold">Bitcoin Halving</h2>
 
       {/* .block-halving-card__content */}
       <div className="flex justify-between items-center gap-4">

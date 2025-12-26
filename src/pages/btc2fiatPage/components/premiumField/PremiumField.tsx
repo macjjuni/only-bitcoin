@@ -1,6 +1,5 @@
 import { memo, useCallback, useMemo } from "react";
-import { KButton, KButtonGroup, KIcon, KPopover, KPopoverContent, KPopoverTrigger } from "kku-ui";
-import { OptionIcon } from "@/components/ui/icon";
+import { KIcon, KNumberStepper } from "kku-ui";
 import useStore from "@/shared/stores/store";
 import "./PremiumField.scss";
 
@@ -38,36 +37,9 @@ const PremiumField = () => {
 
 
   return (
-      <div className="premium__field">
-        {premium !== 0 && ResetButton}
-        <KPopover>
-          <KPopoverTrigger asChild>
-            <KButton size="icon">
-              <OptionIcon size={60}/>
-            </KButton>
-          </KPopoverTrigger>
-          <KPopoverContent align="start" side="left" sideOffset={5} alignOffset={-5}
-                           className="premium__field__popover">
-            <h2 className="premium__field__popover__title">
-              <div className="premium__field__popover__title__left">
-                프리미엄:<span>{premium}%</span>
-              </div>
-
-              {ResetButton}
-            </h2>
-            <KButtonGroup className="premium__field__popover__bottom">
-              {
-                OptionButtons.map(({label, value}) => (
-                    <KButton size="sm" key={label} onClick={() => {
-                      onClickOptionButton(value)
-                    }}>
-                      {label}
-                    </KButton>
-                ))
-              }
-            </KButtonGroup>
-          </KPopoverContent>
-        </KPopover>
+      <div className="flex justify-between items-center">
+        프리미엄
+        <KNumberStepper value={premium} onChange={setPremium} min={0} step={0.5} max={100} size="lg" />
       </div>
   );
 };

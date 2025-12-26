@@ -144,7 +144,7 @@ const MiningMetricChart = () => {
   const getButtonClass = useCallback((value: MiningMetricChartIntervalType) => {
     const isActive = miningMetricChartInterval === value;
     return [
-      "h-[30px] px-3 border-none text-sm bg-transparent shadow-none rounded-md transition-all",
+      "h-[30px] px-3 border-none text-sm shadow-none rounded-md transition-all",
       isActive
         ? "font-bold text-white bg-black/40 dark:bg-white/80 dark:text-black"
         : "text-current"

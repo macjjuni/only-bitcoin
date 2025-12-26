@@ -1,1 +1,1 @@
-export { default as ConvertPannel } from "@/pages/btc2fiatPage/components/convertPannel/ConvertPannel";
+export { default as ConvertPanel } from "@/pages/btc2fiatPage/components/convertPanel/ConvertPanel";

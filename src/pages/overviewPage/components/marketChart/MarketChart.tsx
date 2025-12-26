@@ -91,7 +91,7 @@ const MarketChart = () => {
         <Line
           ref={chartRef}
           data={currentChartData}
-          height="140%"
+          height="180%"
           className="bg-transparent z-[3]"
           options={{
             plugins: {

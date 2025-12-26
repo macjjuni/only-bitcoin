@@ -1,5 +1,5 @@
 import { ChangeEvent, memo, useCallback, useMemo, useRef, useState } from "react";
-import { InputGroupAddon, InputGroupInput, KButton, KIcon, KInputGroup } from "kku-ui";
+import { KInputGroupAddon, KInputGroupInput, KButton, KIcon, KInputGroup } from "kku-ui";
 import { clipboardUtil } from "kku-util";
 
 
@@ -63,15 +63,15 @@ const TxSearcher = () => {
 
   return (
       <KInputGroup className="mt-0.5 mb-2" size="md">
-        <InputGroupAddon align="inline-start">
+        <KInputGroupAddon align="inline-start">
         <KIcon icon="search" size={20} color="currentColor" />
-        </InputGroupAddon>
-        <InputGroupInput ref={searchRef} value={txValue} onChange={onChangeTxInput}
+        </KInputGroupAddon>
+        <KInputGroupInput ref={searchRef} value={txValue} onChange={onChangeTxInput}
                          placeholder="트랜잭션을 검색해 보세요" width="full"
                          autoCapitalize="off" autoCorrect="off" autoComplete="off" />
-        <InputGroupAddon align="inline-end">
+        <KInputGroupAddon align="inline-end">
           {SearchRightAction}
-        </InputGroupAddon>
+        </KInputGroupAddon>
       </KInputGroup>
   );
 };

@@ -23,13 +23,7 @@
       color: $default-label-font-color;
       @include font-body;
 
-      .btc, .krw, .sats, .usd {
-        font-family: $default-font-family;
-      }
 
-      .sats {
-        margin-right: -#{$spacing-8};
-      }
     }
 
     .convert-pannel__item__input {
@@ -158,10 +152,6 @@
   }
 }
 
-
-.unit__area__content {
-  border: 1px solid $default-border-color;
-}
 
 
 .#{$kku-dark-mode-signature} {

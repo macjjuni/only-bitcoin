@@ -5,18 +5,19 @@ import { bytesToMB } from "@/shared/utils/number";
 import { calcCurrentDateDifference } from "@/shared/lib/date";
 
 interface BlockSwiperSlideProps {
+  id?: string;
   height?: number;
   timestamp?: number;
   size?: number;
   poolName?: string;
   isUnmined?: boolean;
   isGenesis?: boolean;
-  onOpenModal?: () => void;
+  onClick?: (blockNumber: string) => void;
 }
 
 const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
   // region [Hooks]
-  const { isUnmined, isGenesis, height, size, poolName, timestamp, onOpenModal } = props;
+  const { isUnmined, isGenesis, id, height, size, poolName, timestamp, onClick } = props;
 
   const diffNowMin = useMemo(() => calcCurrentDateDifference(timestamp || 0, "minute"), [timestamp]);
   const isDefaultRender = useMemo(() => !isUnmined, [isUnmined]);
@@ -55,11 +56,11 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
   // endregion
 
   // region [Events]
-  const onClickGenesisBlock = useCallback(() => {
-    if (isGenesis) {
-      onOpenModal?.();
+  const onClickBlock = useCallback(() => {
+    if (!isGenesis && id) {
+      onClick?.(id);
     }
-  }, [isGenesis, onOpenModal]);
+  }, [id, isGenesis, onClick]);
   // endregion
 
   // region [Templates]
@@ -75,10 +76,13 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
 
   return (
     <SwiperSlide className="relative pt-[20px] pr-0  pb-2 pl-[20px] !-translate-x-[64px]">
+      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
       <div
+        onClick={onClickBlock}
         className={[
           "relative flex flex-col justify-between items-center gap-1.5 p-1.5 text-white font-bold transition-all duration-300",
           "h-[calc((100dvw-88px)/3)] layout-max:h-[calc((524px-88px)/3)] layout-max:p-2",
+          isUnmined && ' animate-blink-gold',
           // 3D Side (Before - Top)
           "before:content-[''] before:absolute before:-top-[20px] before:left-0 before:w-full before:h-[20px] before:origin-bottom before:skew-x-[45deg]",
           // 3D Side (After - Left)
@@ -91,7 +95,7 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
             <p className="font-number text-[14px] font-bold layout-max:text-[18px]">
               {height}
             </p>
-            <div className="flex flex-col items-center justify-center gap-0.5 font-number text-[12px] leading-[1.2] layout-max:gap-1.5 layout-max:text-[14px]">
+            <div className="flex flex-col items-center justify-center gap-1 font-number text-[12px] leading-[1.2] layout-max:gap-2 layout-max:text-[14px]">
               <p>{isGenesis ? "285B" : `${bytesToMB(size || 0)}MB`}</p>
               <p className="w-full text-center truncate px-1">{poolName}</p>
               <p className="text-center">{timeDisplay}</p>
@@ -110,7 +114,7 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
           <button
             type="button"
             className="absolute top-0 left-[64px] w-full h-full z-[1] cursor-pointer"
-            onClick={onClickGenesisBlock}
+            onClick={onClickBlock}
             aria-label="Genesis Block Details"
           />
         </>
