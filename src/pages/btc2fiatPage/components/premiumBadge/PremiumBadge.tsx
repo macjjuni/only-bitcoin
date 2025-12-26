@@ -1,19 +1,18 @@
 import { memo, useMemo } from "react";
 import useStore from "@/shared/stores/store";
-import { PremiumIcon } from "@/components/ui/icon";
-import "./Premium-badge.scss";
 
 const PremiumBadge = () => {
 
   const premium = useStore(state => state.premium);
-  const numberSign = useMemo(() => (premium > 0 ? '+' : ''), [premium])
+  const numberSign = useMemo(() => (premium > 0 ? "+" : ""), [premium]);
 
-  if (premium === 0) { return null; }
+  if (premium === 0) {
+    return null;
+  }
 
   return (
-    <div className="premium__badge">
-      <PremiumIcon size={20} />
-      {numberSign}{premium}%
+    <div className="absolute top-0 left-[4px] flex items-center justify-start gap-1 text-md font-bold text-bitcoin">
+      Premium: {numberSign}{premium}%
     </div>
   );
 };

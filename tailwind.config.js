@@ -11,6 +11,7 @@ export default {
       screens: { 'layout-max': '524px' },
       spacing: { 'header': '52px', 'bottom-nav': '82px' },
       fontFamily: { number: ['Roboto Mono', 'ui-sans-serif', 'system-ui', '-apple-system'] },
+      colors: { bitcoin: '#f7931a' },
       keyframes: {
         wiggle: {
           '0%, 100%': { transform: 'rotate(-1.6deg)' },

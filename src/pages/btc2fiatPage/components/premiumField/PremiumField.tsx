@@ -1,15 +1,6 @@
-import { memo, useCallback, useMemo } from "react";
-import { KIcon, KNumberStepper } from "kku-ui";
+import { memo } from "react";
+import { KNumberStepper } from "kku-ui";
 import useStore from "@/shared/stores/store";
-import "./PremiumField.scss";
-
-
-const OptionButtons = [
-  {label: '-1', value: -1},
-  {label: '-0.1', value: -0.1},
-  {label: '+0.1', value: 0.1},
-  {label: '+1', value: 1},
-] as const;
 
 
 const PremiumField = () => {
@@ -17,31 +8,31 @@ const PremiumField = () => {
   // region [Hooks]
   const premium = useStore(state => state.premium);
   const setPremium = useStore(state => state.setPremium);
-  const isPremium = useMemo(() => (premium !== 0), [premium]);
   // endregion
 
   // region [Events]
-  const onClickOptionButton = useCallback((value: number) => {
-    setPremium(parseFloat((premium + value).toFixed(10)));
-  }, [premium]);
-
-  const onClickReset = useCallback(() => {
-    setPremium(0);
-  }, [])
+  // const onClickReset = useCallback(() => {
+  //   setPremium(0);
+  // }, [])
   // endregion
 
   // region [Templates]
-  const ResetButton = useMemo(() => (isPremium ?
-      <KIcon icon="refresh" size={26} onClick={onClickReset}/> : null), [isPremium]);
+  // const ResetButton = useMemo(() => (isPremium ?
+  //     <KIcon icon="refresh" size={26} onClick={onClickReset}/> : null), [isPremium]);
   // endregion
 
-
   return (
-      <div className="flex justify-between items-center">
-        프리미엄
-        <KNumberStepper value={premium} onChange={setPremium} min={0} step={0.5} max={100} size="lg" />
+    <div className="flex justify-end items-center gap-5">
+      <div className="flex flex-col items-end gap-0.5">
+        <b className="text-base">Premium</b>
+        <span className="text-sm opacity-80">P(%):</span>
       </div>
+      <KNumberStepper value={premium} onChange={setPremium} min={0} step={0.5} max={100} size="lg" />
+    </div>
   );
 };
 
-export default memo(PremiumField);
+const MemoizedPremiumField = memo(PremiumField)
+MemoizedPremiumField.displayName = 'PremiumField';
+
+export default MemoizedPremiumField;

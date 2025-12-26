@@ -14,7 +14,7 @@ export default function Btc2FiatPage() {
   // endregion
 
   return (
-    <PageLayout className="btc-2-fiat-page__area">
+    <PageLayout>
       <PremiumBadge />
       <ConvertPanel />
       <PremiumField />

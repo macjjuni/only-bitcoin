@@ -4,8 +4,6 @@ import { ComponentBaseTypes } from "@/shared/types/base.interface";
 import { isNumber } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 
-// import "./NumberField.scss";
-
 
 export interface TextFieldTypes extends ComponentBaseTypes {
   value: string;
@@ -14,8 +12,10 @@ export interface TextFieldTypes extends ComponentBaseTypes {
   readonly?: boolean;
   leftAction?: ReactNode | string;
   maxLength?: number;
+  // eslint-disable-next-line react/no-unused-prop-types
   dataCopy?: string;
   onClick?: () => void;
+  isPremium?: boolean;
 }
 
 
@@ -24,7 +24,7 @@ const NumberField = forwardRef((props: TextFieldTypes, ref: Ref<HTMLInputElement
   // region [Hooks]
 
   const {
-    value, onChange, unit, readonly = false, leftAction, maxLength, dataCopy, onClick
+    value, onChange, unit, readonly = false, leftAction, maxLength, onClick, isPremium
   } = props;
   const isFocus = useRef(false);
 
@@ -116,7 +116,7 @@ const NumberField = forwardRef((props: TextFieldTypes, ref: Ref<HTMLInputElement
       <KInputGroupAddon align="inline-start">{LeftAction}</KInputGroupAddon>
       <KInputGroupInput ref={ref} type="text" maxLength={maxLength} value={value}
                         onChange={onChangeInput} className={`font-number ${readonly ? "text-3xl pr-1" : "text-xl"}
-                         font-bold text-right h-full`}
+                         font-bold text-right h-full${isPremium && ' text-bitcoin'}`}
                         readOnly={readonly} onFocus={onFocus} onBlur={onBlur} onClick={onClickInput} />
       <KInputGroupAddon align="inline-end"
                         className={`flex justify-end text-lg font-bold text-current pl-1 w-[68px] h-full 

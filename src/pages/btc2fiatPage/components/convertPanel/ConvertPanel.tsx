@@ -237,7 +237,7 @@ const ConvertPanel = () => {
     if (["0", ""].includes(usd)) {
       return null;
     }
-    return (<KIcon icon="close" color="#fff" size={32} onClick={initializeUsd} />);
+    return (<KIcon {...closeIconCommonProps} onClick={initializeUsd} />);
   }, [focusCurrency, usd]);
   // endregion
 
@@ -293,7 +293,7 @@ const ConvertPanel = () => {
 
     return (
       <div className="flex flex-col font-number">
-        <NumberField ref={krwRef} value={displayValue} dataCopy={displayValue}
+        <NumberField ref={krwRef} value={displayValue} dataCopy={displayValue} isPremium={premium !== 0}
                      unit={NumberFieldIUnit("KRW")} maxLength={15} readonly={focusCurrency !== "KRW"}
                      onChange={onChangeKrw} onClick={onClickCopyToKrw} leftAction={KrwLeftAction} />
         {
@@ -309,7 +309,7 @@ const ConvertPanel = () => {
         </span>
       </div>
     );
-  }, [krw, krwPrice, NumberFieldIUnit, focusCurrency, calcPremium]);
+  }, [krw, krwPrice, NumberFieldIUnit, focusCurrency, calcPremium, premium]);
 
 
   const UsdNumberField = useMemo(() => {
@@ -320,7 +320,7 @@ const ConvertPanel = () => {
 
     return (
       <div className="flex flex-col font-number">
-        <NumberField ref={usdRef} value={displayValue} readonly={focusCurrency !== "USD"}
+        <NumberField ref={usdRef} value={displayValue} readonly={focusCurrency !== "USD"} isPremium={premium !== 0}
                      dataCopy={displayValue} unit={NumberFieldIUnit("USD")} maxLength={15}
                      onChange={onChangeUsd} onClick={onClickCopyToUsd} leftAction={UsdLeftAction} />
         {isShowPremiumExpression &&
@@ -335,7 +335,7 @@ const ConvertPanel = () => {
         </span>
       </div>
     );
-  }, [usd, usdPrice, NumberFieldIUnit, focusCurrency, exRate, calcPremium]);
+  }, [usd, usdPrice, NumberFieldIUnit, focusCurrency, exRate, calcPremium, premium]);
 
   const BtcNumberField = useMemo(() => {
     const isCurrentCurrency = focusCurrency === "BTC";
@@ -346,7 +346,7 @@ const ConvertPanel = () => {
     return (
       <div className="flex flex-col font-number">
         <NumberField ref={btcCountInputRef} value={displayValue} readonly={focusCurrency !== "BTC"}
-                     dataCopy={displayValue} unit={NumberFieldIUnit("BTC")} maxLength={15}
+                     dataCopy={displayValue} unit={NumberFieldIUnit("BTC")} maxLength={15} isPremium={premium !== 0}
                      onChange={onChangeBtcCount} onClick={onClickCopyToBtc} leftAction={BtcLeftAction} />
         {isShowPremiumExpression &&
           <span className="flex justify-end items-center gap-3 text-base px-3">
@@ -355,7 +355,7 @@ const ConvertPanel = () => {
           </span>}
       </div>
     );
-  }, [btcCount, NumberFieldIUnit, focusCurrency, calcPremium]);
+  }, [btcCount, NumberFieldIUnit, focusCurrency, calcPremium, premium]);
 
   const SatsNumberField = useMemo(() => {
     const isCurrentCurrency = focusCurrency === "SATS";
@@ -365,7 +365,7 @@ const ConvertPanel = () => {
 
     return (
       <div className="flex flex-col font-number">
-        <NumberField ref={satsRef} className="convert-pannel__item__input" value={displayValue}
+        <NumberField ref={satsRef} className="convert-pannel__item__input" value={displayValue} isPremium={premium !== 0}
                      readonly={focusCurrency !== "SATS"} dataCopy={displayValue} unit={NumberFieldIUnit("SATS")}
                      maxLength={15} onChange={onChangeSats} onClick={onClickCopyToSats} leftAction={SatsLeftAction} />
         {isShowPremiumExpression &&
@@ -375,7 +375,7 @@ const ConvertPanel = () => {
           </span>}
       </div>
     );
-  }, [sats, SatsLeftAction, focusCurrency, calcPremium]);
+  }, [sats, SatsLeftAction, focusCurrency, calcPremium, premium]);
 
 
   const SortNumberField = useMemo(() => {
@@ -410,7 +410,7 @@ const ConvertPanel = () => {
   // endregion
 
   return (
-    <div className={`flex flex-col gap-2 pt-3 ${premium ? '[&>*:nth-child(4)]:mt-[32px]' : '[&>*:nth-child(4)]:mt-[112px]'}`}>
+    <div className={`flex flex-col gap-2 pt-6 ${premium ? '[&>*:nth-child(4)]:mt-[32px]' : '[&>*:nth-child(4)]:mt-[112px]'}`}>
       {SortNumberField}
     </div>
   );
