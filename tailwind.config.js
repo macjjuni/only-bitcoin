@@ -10,7 +10,16 @@ export default {
       maxWidth: { 'layout': '524px' },
       screens: { 'layout-max': '524px' },
       spacing: { 'header': '52px', 'bottom-nav': '82px' },
-      fontFamily: { number: ['Roboto Mono', 'ui-sans-serif', 'system-ui', '-apple-system'] },
+      fontFamily: {
+        default: [
+          'JetBrains Mono', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue',
+          'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'
+        ],
+        number: [
+          'Roboto Mono', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto',
+          'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji',
+        ],
+      },
       colors: { bitcoin: '#f7931a' },
       keyframes: {
         wiggle: {

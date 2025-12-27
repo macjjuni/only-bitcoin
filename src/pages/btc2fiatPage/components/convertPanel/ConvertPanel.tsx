@@ -1,4 +1,4 @@
-import { memo, ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
+import { memo, ReactNode, useCallback, useEffect, useMemo } from "react";
 import {
   KDropdownMenu,
   KDropdownMenuCheckboxItem,
@@ -7,36 +7,17 @@ import {
   KDropdownMenuTrigger,
   KIcon
 } from "kku-ui";
-import { CountText, NumberField } from "@/components";
 import useStore from "@/shared/stores/store";
 import { comma, extractNumbers } from "@/shared/utils/string";
-import { useCopyOnClick } from "@/shared/hooks";
 import { UnitType } from "@/shared/stores/store.interface";
 import { btcToSatoshi, floorToDecimal } from "@/shared/utils/number";
 import "./ConvertPanel.scss";
-
-
-const closeIconCommonProps = {
-  icon: "close",
-  color: "currentColor",
-  size: 32,
-  style: { padding: 6 }
-};
+import ConvertCard from "@/pages/btc2fiatPage/components/ConvertCard";
 
 
 const ConvertPanel = () => {
 
   // region [Hooks]
-  const btcCountInputRef = useRef<HTMLInputElement>(null);
-  const krwRef = useRef<HTMLInputElement>(null);
-  const usdRef = useRef<HTMLInputElement>(null);
-  const satsRef = useRef<HTMLInputElement>(null);
-
-  const { onClickCopy: onClickCopyToBtc } = useCopyOnClick(btcCountInputRef);
-  const { onClickCopy: onClickCopyToKrw } = useCopyOnClick(krwRef);
-  const { onClickCopy: onClickCopyToUsd } = useCopyOnClick(usdRef);
-  const { onClickCopy: onClickCopyToSats } = useCopyOnClick(satsRef);
-
   const currency = useStore(state => state.setting.currency);
   const krwPrice = useStore(state => state.bitcoinPrice.krw);
   const usdPrice = useStore(state => state.bitcoinPrice.usd);
@@ -124,27 +105,6 @@ const ConvertPanel = () => {
 
   }, [focusCurrency, btcCount, krw, usd, sats, krwPrice, usdPrice, exRate]);
 
-
-  const initializeBtcCount = useCallback(() => {
-    setBtcCount("0");
-    btcCountInputRef.current?.focus();
-  }, []);
-
-  const initializeSats = useCallback(() => {
-    setSats("0");
-    satsRef.current?.focus();
-  }, []);
-
-  const initializeKrw = useCallback(() => {
-    setKrw("0");
-    krwRef.current?.focus();
-  }, []);
-
-  const initializeUsd = useCallback(() => {
-    setUsd("0");
-    usdRef.current?.focus();
-  }, []);
-
   const calcPremium = useCallback((price: string, unit?: "KRW" | "USD" | "BTC" | "SATS"): string => {
     if (premium === 0) {
       return price;
@@ -199,49 +159,6 @@ const ConvertPanel = () => {
   // endregion
 
 
-  // region [Left Action]
-  const BtcLeftAction = useMemo(() => {
-    if (focusCurrency !== "BTC") {
-      return;
-    }
-    if (["0", ""].includes(btcCount)) {
-      return null;
-    }
-    return (<KIcon {...closeIconCommonProps} onClick={initializeBtcCount} />);
-  }, [focusCurrency, btcCount]);
-
-  const SatsLeftAction = useMemo(() => {
-    if (focusCurrency !== "SATS") {
-      return;
-    }
-    if (["0", ""].includes(sats)) {
-      return null;
-    }
-    return (<KIcon {...closeIconCommonProps} onClick={initializeSats} />);
-  }, [focusCurrency, sats]);
-
-  const KrwLeftAction = useMemo(() => {
-    if (focusCurrency !== "KRW") {
-      return;
-    }
-    if (["0", ""].includes(krw)) {
-      return null;
-    }
-    return (<KIcon {...closeIconCommonProps} onClick={initializeKrw} />);
-  }, [focusCurrency, krw]);
-
-  const UsdLeftAction = useMemo(() => {
-    if (focusCurrency !== "USD") {
-      return;
-    }
-    if (["0", ""].includes(usd)) {
-      return null;
-    }
-    return (<KIcon {...closeIconCommonProps} onClick={initializeUsd} />);
-  }, [focusCurrency, usd]);
-  // endregion
-
-
   // region [templates]
   const NumberFieldIUnit = useCallback((unit: UnitType) => {
     const UNIT_DISPLAY: Record<UnitType, ReactNode> = {
@@ -263,7 +180,7 @@ const ConvertPanel = () => {
          bg-neutral-200 dark:bg-neutral-700 data-[state=open]:bg-neutral-300 dark:data-[state=open]:bg-neutral-600
           ${focusCurrency === "SATS" && "tracking-[-1.5px]"}`}>
           {UNIT_DISPLAY[focusCurrency]}
-          <KIcon icon="keyboard_arrow_down" size={10} />
+          <KIcon icon="keyboard_arrow_down" size={10}/>
         </KDropdownMenuTrigger>
 
         <KDropdownMenuContent className="unit__area__content" side="bottom" align="end" sideOffset={16}
@@ -292,22 +209,9 @@ const ConvertPanel = () => {
     const incrementValue = calcStringNumber(displayValue, krw, 0);
 
     return (
-      <div className="flex flex-col font-number">
-        <NumberField ref={krwRef} value={displayValue} dataCopy={displayValue} isPremium={premium !== 0}
-                     unit={NumberFieldIUnit("KRW")} maxLength={15} readonly={focusCurrency !== "KRW"}
-                     onChange={onChangeKrw} onClick={onClickCopyToKrw} leftAction={KrwLeftAction} />
-        {
-          isShowPremiumExpression &&
-          <span className="flex justify-end items-center gap-3 text-base px-3">
-            {incrementValue} + {krw}
-            <span className="pl-3.5 text-lg">KRW</span>
-          </span>
-        }
-        <span className="flex justify-end items-center gap-3 text-base px-3">
-          1BTC = <CountText value={krwPrice} />
-          <span className="pl-3.5 text-lg">KRW</span>
-        </span>
-      </div>
+      <ConvertCard inputActive={isCurrentCurrency} title="KRW(₩):" value={displayValue} unit="KRW"
+                   onChange={onChangeKrw} isPremium={isShowPremiumExpression}
+                   topDescription={`${incrementValue}(Premium) + ${krw}`} bottomDescription={`1BTC = ${krw}`}/>
     );
   }, [krw, krwPrice, NumberFieldIUnit, focusCurrency, calcPremium, premium]);
 
@@ -319,41 +223,23 @@ const ConvertPanel = () => {
     const incrementValue = calcStringNumber(displayValue, usd);
 
     return (
-      <div className="flex flex-col font-number">
-        <NumberField ref={usdRef} value={displayValue} readonly={focusCurrency !== "USD"} isPremium={premium !== 0}
-                     dataCopy={displayValue} unit={NumberFieldIUnit("USD")} maxLength={15}
-                     onChange={onChangeUsd} onClick={onClickCopyToUsd} leftAction={UsdLeftAction} />
-        {isShowPremiumExpression &&
-          <span className="flex justify-end items-center gap-3 text-base px-3">
-            {incrementValue} + {usd}
-            <span className="pl-3.5 text-lg">USD</span>
-          </span>}
-        <span className="flex justify-end items-center gap-3 text-base px-3">
-        {isUsdtStandard ? "1USDT" : "$1"} = ₩{exRate} {` | `}
-          <span>1BTC = <CountText value={usdPrice} /></span>
-          <span className="pl-3.5 text-lg">USD</span>
-        </span>
-      </div>
+      <ConvertCard inputActive={isCurrentCurrency} title="USD($):" value={displayValue}
+                   onChange={onChangeUsd} unit="USD" isPremium={isShowPremiumExpression}
+                   topDescription={`${incrementValue}(Premium) + ${usd}`}
+                   bottomDescription={`${isUsdtStandard ? 'USDT' : 'USD'} : ${exRate} | 1BTC = ${usd}`}/>
     );
   }, [usd, usdPrice, NumberFieldIUnit, focusCurrency, exRate, calcPremium, premium]);
 
   const BtcNumberField = useMemo(() => {
     const isCurrentCurrency = focusCurrency === "BTC";
     const isShowPremiumExpression = !isCurrentCurrency && premium !== 0;
-    const displayValue = focusCurrency === "BTC" ? btcCount : calcPremium(btcCount, "BTC");
+    const displayValue = isCurrentCurrency ? btcCount : calcPremium(btcCount, "BTC");
     const incrementValue = calcStringNumber(displayValue, btcCount, 8);
 
     return (
-      <div className="flex flex-col font-number">
-        <NumberField ref={btcCountInputRef} value={displayValue} readonly={focusCurrency !== "BTC"}
-                     dataCopy={displayValue} unit={NumberFieldIUnit("BTC")} maxLength={15} isPremium={premium !== 0}
-                     onChange={onChangeBtcCount} onClick={onClickCopyToBtc} leftAction={BtcLeftAction} />
-        {isShowPremiumExpression &&
-          <span className="flex justify-end items-center gap-3 text-base px-3">
-            {incrementValue} + {btcCount}
-            <span className="pl-5 pr-0.5">BTC</span>
-          </span>}
-      </div>
+      <ConvertCard inputActive={isCurrentCurrency} title="BTC(₿):" value={displayValue}
+                   onChange={onChangeBtcCount} unit="BTC" isPremium={isShowPremiumExpression}
+                   topDescription={`${incrementValue} + ${btcCount}`} bottomDescription="1BTC = 100,000,000"/>
     );
   }, [btcCount, NumberFieldIUnit, focusCurrency, calcPremium, premium]);
 
@@ -364,18 +250,11 @@ const ConvertPanel = () => {
     const incrementValue = calcStringNumber(displayValue, sats, 0);
 
     return (
-      <div className="flex flex-col font-number">
-        <NumberField ref={satsRef} className="convert-pannel__item__input" value={displayValue} isPremium={premium !== 0}
-                     readonly={focusCurrency !== "SATS"} dataCopy={displayValue} unit={NumberFieldIUnit("SATS")}
-                     maxLength={15} onChange={onChangeSats} onClick={onClickCopyToSats} leftAction={SatsLeftAction} />
-        {isShowPremiumExpression &&
-          <span className="flex justify-end items-center gap-3 text-base px-3">
-            {incrementValue} + {sats}
-            <span className="pl-5 pr-0.5 tracking-[-1px]">Sats</span>
-          </span>}
-      </div>
+      <ConvertCard inputActive={isCurrentCurrency} title="Sats:" unit="Sats"
+                   value={displayValue} onChange={onChangeSats} isPremium={isShowPremiumExpression}
+                   topDescription={`${incrementValue}(Premium) + ${sats}`} bottomDescription="1BTC = 100,000,000"/>
     );
-  }, [sats, SatsLeftAction, focusCurrency, calcPremium, premium]);
+  }, [sats, focusCurrency, calcPremium, premium]);
 
 
   const SortNumberField = useMemo(() => {
@@ -410,7 +289,8 @@ const ConvertPanel = () => {
   // endregion
 
   return (
-    <div className={`flex flex-col gap-2 pt-6 ${premium ? '[&>*:nth-child(4)]:mt-[32px]' : '[&>*:nth-child(4)]:mt-[112px]'}`}>
+    <div
+      className={`flex flex-col gap-2 pt-6 ${premium ? '[&>*:nth-child(4)]:mt-[32px]' : '[&>*:nth-child(4)]:mt-[112px]'}`}>
       {SortNumberField}
     </div>
   );
