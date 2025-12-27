@@ -74,7 +74,7 @@ const ConvertCard = (props: ConverCardProps) => {
                   <KIcon icon="paste" className="text-black dark:text-white"/>
                 </span>)
                 :
-                (<KInputGroup size="lg" className="h-11 my-1 bg-transparent">
+                (<KInputGroup size="lg" className="h-11 my-1 bg-white">
                   <KInputGroupInput type="text" maxLength={maxLength} value={value} onChange={onChangeInput}
                                     className="font-number text-xl font-bold text-right h-full"/>
                 </KInputGroup>)
@@ -83,7 +83,7 @@ const ConvertCard = (props: ConverCardProps) => {
         </KCardTitle>
         {
           (!inputActive && (topDescription || bottomDescription)) && (
-            <KCardDescription className="flex flex-col text-right text-md text-current opacity-70">
+            <KCardDescription className="flex flex-col gap-1.5 text-right text-md text-current opacity-70">
               {isPremium && <span>= {topDescription}</span>}
               {bottomDescription && <span>* {bottomDescription}</span>}
             </KCardDescription>
@@ -97,7 +97,6 @@ const ConvertCard = (props: ConverCardProps) => {
           </KCardContent>
         )
       }
-
     </KCard>
   );
 };

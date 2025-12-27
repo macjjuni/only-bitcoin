@@ -56,7 +56,7 @@ const MacroWidgetPanel = () => {
   }, [])
 
   const getLayoutElement = useCallback(() => (
-    document.getElementsByClassName("only-btc__layout__content")[0] as HTMLElement
+    document.getElementsByClassName("content__layout")[0] as HTMLElement
   ), []);
 
   const onScrollDisabled = useCallback(() => {

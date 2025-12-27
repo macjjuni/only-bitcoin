@@ -7,7 +7,6 @@ import { PageLayout } from "@/layouts";
 import { LazyImage, FormRow } from "@/components";
 import { DiscordIcon, LinkIcon, NaverIcon, PageIcon, MnemonicIcon } from "@/components/ui/icon";
 import router from "@/app/router";
-import "./OrangePillPage.scss";
 
 
 const CITADEL_DISCORD_URL = "https://discord.gg/citadel21" as const;

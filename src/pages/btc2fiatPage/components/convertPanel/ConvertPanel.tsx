@@ -11,7 +11,6 @@ import useStore from "@/shared/stores/store";
 import { comma, extractNumbers } from "@/shared/utils/string";
 import { UnitType } from "@/shared/stores/store.interface";
 import { btcToSatoshi, floorToDecimal } from "@/shared/utils/number";
-import "./ConvertPanel.scss";
 import ConvertCard from "@/pages/btc2fiatPage/components/ConvertCard";
 
 
@@ -226,7 +225,7 @@ const ConvertPanel = () => {
       <ConvertCard inputActive={isCurrentCurrency} title="USD($):" value={displayValue}
                    onChange={onChangeUsd} unit="USD" isPremium={isShowPremiumExpression}
                    topDescription={`${incrementValue}(Premium) + ${usd}`}
-                   bottomDescription={`${isUsdtStandard ? 'USDT' : 'USD'} : ${exRate} | 1BTC = ${usd}`}/>
+                   bottomDescription={`1                                                               ${isUsdtStandard ? 'USDT' : 'USD'} : ${exRate} | 1BTC = ${usd}`}/>
     );
   }, [usd, usdPrice, NumberFieldIUnit, focusCurrency, exRate, calcPremium, premium]);
 
@@ -263,10 +262,12 @@ const ConvertPanel = () => {
 
       return (
         <>
+          <div className="flex flex-col gap-3">
           {focusCurrency === "BTC" ? null : BtcNumberField}
           {KrwNumberField}
           {UsdNumberField}
           {focusCurrency === "BTC" ? SatsNumberField : null}
+          </div>
           {focusCurrency === "BTC" ? BtcNumberField : SatsNumberField}
         </>
       );
@@ -275,8 +276,10 @@ const ConvertPanel = () => {
     if (["KRW", "USD"].includes(focusCurrency)) {
       return (
         <>
+          <div className="flex flex-col gap-3">
           {BtcNumberField}
           {SatsNumberField}
+          </div>
           {
             focusCurrency === "KRW" ?
               <>{UsdNumberField}{KrwNumberField}</> :
@@ -287,10 +290,10 @@ const ConvertPanel = () => {
     }
   }, [focusCurrency, currency, BtcNumberField, KrwNumberField, UsdNumberField, SatsNumberField]);
   // endregion
-
+  // ${premium ? '[&>*:nth-child(4)]:mt-[32px]' : '[&>*:nth-child(4)]:mt-[112px]'}
   return (
     <div
-      className={`flex flex-col gap-2 pt-6 ${premium ? '[&>*:nth-child(4)]:mt-[32px]' : '[&>*:nth-child(4)]:mt-[112px]'}`}>
+      className="flex flex-col justify-between gap-2 pt-6 h-full">
       {SortNumberField}
     </div>
   );

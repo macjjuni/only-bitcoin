@@ -18,8 +18,8 @@ const Header = () => {
         "z-[1] select-none tap-highlight-transparent",
         // 하단 그라데이션
         "after:content-[''] after:fixed after:top-header after:left-0 after:w-full after:h-4",
-        "after:bg-gradient-to-b after:from-white after:to-transparent",
-        "dark:after:from-black dark:after:to-transparent"
+        "after:bg-gradient-to-b after:from-background after:to-transparent",
+        "dark:after:from-background dark:after:to-transparent"
       ].filter(Boolean).join(" ")}
     >
       <h2 className="font-bold tracking-[-1px] text-current">

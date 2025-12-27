@@ -8,13 +8,13 @@ import {
   MarketChartIntervalTypeList
 } from "@/pages/overviewPage/components/miningMetricChart/MiningMetricChart.interface";
 import type { MiningMetricChartIntervalType } from "@/shared/stores/store.interface";
-import { CountText, HorizontalCard, UpdownIcon } from "@/components";
+import { CountText, UpdownIcon } from "@/components";
 import { ChartChanger } from "@/pages/overviewPage/components";
 import { useMiningMetricChartData } from "@/shared/api";
 import { formatDifficulty, formatHashrate } from "@/shared/utils/number";
+import LightningLottieData from "@/shared/assets/lottie/lightning.json";
 import { removeSpaces } from "@/shared/utils/string";
 import useStore from "@/shared/stores/store";
-import LightningLottieData from "@/shared/assets/lottie/lightning.json";
 
 
 // Chart.js 컴포넌트 등록
@@ -143,12 +143,12 @@ const MiningMetricChart = () => {
 
   const getButtonClass = useCallback((value: MiningMetricChartIntervalType) => {
     const isActive = miningMetricChartInterval === value;
-    return [
-      "h-[30px] px-3 border-none text-sm shadow-none rounded-md transition-all",
-      isActive
-        ? "font-bold text-white bg-black/40 dark:bg-white/80 dark:text-black"
-        : "text-current"
-    ].filter(Boolean).join(" ");
+    const baseClass = "h-[30px] px-3 border-none text-sm rounded-md transition-all";
+    const stateClass = isActive
+      ? "font-bold text-white bg-black/40 dark:bg-white/80 dark:text-black"
+      : "text-current hover:bg-gray-100 dark:hover:bg-gray-800";
+
+    return `${baseClass} ${stateClass}`;
   }, [miningMetricChartInterval]);
   // endregion
 
@@ -205,7 +205,7 @@ const MiningMetricChart = () => {
 
   return (
     // .mining-metric-chart
-    <HorizontalCard
+    <div
       className="relative flex flex-col justify-between gap-2 w-[calc(100%+1rem)] p-0 -mx-2 border-none select-none overflow-hidden">
 
       {/* .mining-metric-chart__top */}
@@ -238,7 +238,9 @@ const MiningMetricChart = () => {
       {/* .mining-metric-chart__middle */}
       <div ref={chartBottomRef} className="relative pointer-events-none z-[3]">
         {isLoading ? (
-          <KSpinner className="absolute top-1/2 left-1/2 -translate-x-1/2 -translate-y-1/2" color="#F7931A" />
+          <div className="flex justify-center items-center aspect-[2/1]">
+            <KSpinner color="#F7931A" />
+          </div>
         ) : (
           <>
             {ChartArea}
@@ -264,7 +266,7 @@ const MiningMetricChart = () => {
         </div>
         <ChartChanger />
       </div>
-    </HorizontalCard>
+    </div>
   );
 };
 

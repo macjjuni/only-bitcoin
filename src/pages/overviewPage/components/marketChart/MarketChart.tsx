@@ -72,9 +72,7 @@ const MarketChart = () => {
   // region [Styles
   const getButtonClass = useCallback((value: MarketChartIntervalType) => {
     const isActive = marketChartInterval === value;
-
     const baseClass = "h-[30px] px-3 border-none text-sm rounded-md transition-all";
-
     const stateClass = isActive
       ? "font-bold text-white bg-black/40 dark:bg-white/80 dark:text-black"
       : "text-current hover:bg-gray-100 dark:hover:bg-gray-800";

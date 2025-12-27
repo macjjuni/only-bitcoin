@@ -4,7 +4,6 @@ import { useRouteError } from "react-router-dom";
 import { useOutletContext } from "react-router";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
-import "./ErrorPage.scss";
 
 const ErrorPage = () => {
 

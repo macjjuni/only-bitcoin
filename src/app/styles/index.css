@@ -1,0 +1,61 @@
+@import "kku-ui/index.css";
+@import "@/app/styles/fonts.css";
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer utilities {
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
+}
+
+@layer base {
+
+    :root {
+        --bitcoin-color: #f7931a;
+
+        --background: 0 0% 100%;
+        --header-height: 52px;
+        --navigation-height: 82px;
+
+        --default-font: JetBrains Mono, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+        Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        --number-font: 'Roboto Mono', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+        'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    }
+    .dark { --background: 0 0% 7.1%; }
+
+    html, body {
+        scrollbar-width: none;
+        overscroll-behavior: none;
+    }
+
+    body {
+        @apply relative font-default;
+        margin: 0;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body.show-bg {
+        @apply bg-no-repeat bg-fixed bg-center;
+
+        background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif');
+        background-size: 420px;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center calc(50% - (theme(height.navigation) / 2));
+        z-index: 1;
+
+        &::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            opacity: 0.8;
+            background-color: hsl(var(--background));
+        }
+    }
+}

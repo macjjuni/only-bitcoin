@@ -1,5 +1,5 @@
 import React, { memo, ReactNode, useMemo } from "react";
-import { NotKeyNotYourBitcoin } from "../../components";
+import { NotKeyNotYourBitcoin } from "@/components";
 
 
 interface PageLayoutProps {
@@ -11,14 +11,8 @@ interface PageLayoutProps {
 const PageLayout = ({ children, className }: PageLayoutProps) => {
 
   const combinedClassName = useMemo(() => (
-    [
-      "page-layout",
-      "relative w-full max-w-layout mx-auto",
-      "flex flex-col gap-2",
-      className
-    ].filter(Boolean).join(" ")
+    ["relative w-full max-w-layout mx-auto flex flex-col flex-auto gap-2", className].filter(Boolean).join(" ")
   ), [className]);
-
 
   return (
     <section className={combinedClassName}>

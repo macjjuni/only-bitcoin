@@ -1,5 +1,4 @@
 import { memo, ReactNode } from "react";
-import "./FormRow.scss";
 
 interface FormRowTypes {
   children: ReactNode;

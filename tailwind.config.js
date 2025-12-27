@@ -11,16 +11,17 @@ export default {
       screens: { 'layout-max': '524px' },
       spacing: { 'header': '52px', 'bottom-nav': '82px' },
       fontFamily: {
-        default: [
-          'JetBrains Mono', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto', 'Helvetica Neue',
-          'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji'
-        ],
-        number: [
-          'Roboto Mono', 'ui-sans-serif', 'system-ui', '-apple-system', 'Segoe UI', 'Roboto',
-          'Helvetica Neue', 'Arial', 'Noto Sans', 'sans-serif', 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji',
-        ],
+        default: ['var(--default-font)'],
+        number: ['var(--number-font)'],
       },
-      colors: { bitcoin: '#f7931a' },
+      colors: {
+        bitcoin: 'var(--bitcoin-color)',
+        background: "hsl(var(--background))",
+      },
+      height: {
+        header: "var(--header-height)",
+        navigation: "var(--navigation-height)",
+      },
       keyframes: {
         wiggle: {
           '0%, 100%': { transform: 'rotate(-1.6deg)' },
@@ -30,10 +31,25 @@ export default {
           '0%, 100%': { opacity: '0' },
           '50%': { opacity: '1' },
         },
+        slideInFromRight: {
+          '0%': { transform: 'translateX(8px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        slideInFromLeft: {
+          '0%': { transform: 'translateX(-8px)', opacity: '0' },
+          '100%': { transform: 'translateX(0)', opacity: '1' },
+        },
+        firstLoad: {
+          'from': { opacity: '0' },
+          'to': { opacity: '1' },
+        },
       },
       animation: {
         wiggle: 'wiggle 0.36s ease-in-out infinite',
         'blink-gold': 'blink 1.2s infinite ease-in-out',
+        "enter-right": "slideInFromRight 0.24s ease-in-out forwards",
+        "enter-left": "slideInFromLeft 0.24s ease-in-out forwards",
+        "enter-first": "firstLoad 0.24s ease-in-out forwards",
       }
     },
   },

@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { KSkeleton } from "kku-ui";
 import { ComponentBaseTypes } from "@/shared/types/base.interface";
-import "./LazyImage.scss";
 
 interface LazyImageProps extends ComponentBaseTypes {
   src: string;
@@ -17,7 +17,6 @@ const LazyImage = ({ src, alt = "", tags, className = "", width, height }: LazyI
   // region [Hooks]
 
   const imgRef = useRef<HTMLImageElement | null>(null);
-  const rootRef = useRef<HTMLImageElement | null>(null);
   const retryCountRef = useRef(0);
   const [isLoaded, setIsLoaded] = useState(false);
   const [isError, setError] = useState(false);
@@ -90,21 +89,29 @@ const LazyImage = ({ src, alt = "", tags, className = "", width, height }: LazyI
 
   return (
     <div ref={imgRef} className={`lazy-image ${rootClass}`}>
-      {!isLoaded && <div className="lazy-image__skeleton" />}
+      {!isLoaded && !isError && (
+        <KSkeleton className="absolute inset-0 z-0 h-full w-full" />
+      )}
       {isVisible && !isError && (
         <img
-          ref={rootRef}
           src={src}
           alt={alt}
           width={width}
           height={height}
           data-tag={tags?.join(", ")}
-          className={`lazy-image__img ${isLoaded ? "lazy-image__img--loaded" : "lazy-image__img--loading"}`}
           onLoad={onLoadedImage}
           onError={onErrorImage}
+          className={[
+            "relative z-10 w-full h-full object-cover transition-opacity duration-300",
+            isLoaded ? "opacity-100" : "opacity-0",
+          ].filter(Boolean).join(" ")}
         />
       )}
-      {isError && <div className="lazy-image__error__img" />}
+      {isError && (
+        <div className="relative flex aspect-square w-full items-center justify-center bg-neutral-800">
+          <span className="text-xl font-bold text-white tracking-tighter italic">Not Found</span>
+        </div>
+      )}
     </div>
   );
 };

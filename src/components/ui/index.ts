@@ -1,4 +1,3 @@
-export { default as HorizontalCard } from './card/horizontalCard/HorizontalCard';
 export { default as LazyImage } from './lazyImage/LazyImage';
 export { default as NotKeyNotYourBitcoin } from './notKeyNotYourBitcoin/NotKeyNotYourBitcoin';
 export { default as ConnectionDot } from './connectionDot/ConnectionDot';

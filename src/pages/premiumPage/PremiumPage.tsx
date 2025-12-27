@@ -1,7 +1,7 @@
 import { useOutletContext } from "react-router";
 import { usePageAnimation } from "@/shared/hooks";
 import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
-import { PremiumPannel } from "@/pages/premiumPage/components";
+import { PremiumPanel } from "@/pages/premiumPage/components";
 import { PageLayout } from "@/layouts";
 
 
@@ -13,7 +13,7 @@ export default function PremiumPage() {
 
   return (
     <PageLayout className="premium-page__area">
-      <PremiumPannel />
+      <PremiumPanel />
     </PageLayout>
   );
 }
