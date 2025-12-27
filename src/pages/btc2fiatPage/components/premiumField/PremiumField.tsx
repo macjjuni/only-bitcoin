@@ -1,5 +1,5 @@
-import { memo } from "react";
-import { KNumberStepper } from "kku-ui";
+import { memo, useCallback, useMemo } from "react";
+import { KIcon, KNumberStepper } from "kku-ui";
 import useStore from "@/shared/stores/store";
 
 
@@ -8,21 +8,23 @@ const PremiumField = () => {
   // region [Hooks]
   const premium = useStore(state => state.premium);
   const setPremium = useStore(state => state.setPremium);
+  const isPremium = useMemo(() => (premium !== 0), [premium])
   // endregion
 
   // region [Events]
-  // const onClickReset = useCallback(() => {
-  //   setPremium(0);
-  // }, [])
+  const onClickReset = useCallback(() => {
+    setPremium(0);
+  }, [])
   // endregion
 
   // region [Templates]
-  // const ResetButton = useMemo(() => (isPremium ?
-  //     <KIcon icon="refresh" size={26} onClick={onClickReset}/> : null), [isPremium]);
+  const ResetButton = useMemo(() => (isPremium ?
+      <KIcon icon="refresh" size={32} onClick={onClickReset} className="m-1"/> : null), [isPremium]);
   // endregion
 
   return (
-    <div className="flex justify-end items-center gap-5">
+    <div className="flex justify-end items-center gap-5 -mt-2">
+      {ResetButton}
       <div className="flex flex-col items-end gap-0.5">
         <b className="text-base">Premium</b>
         <span className="text-sm opacity-80">P(%):</span>

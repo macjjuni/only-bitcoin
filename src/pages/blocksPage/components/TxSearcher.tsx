@@ -62,7 +62,7 @@ const TxSearcher = () => {
   // endregion
 
   return (
-      <KInputGroup className="mt-0.5 mb-2" size="md">
+      <KInputGroup className="mt-0.5 mb-2" size="lg">
         <KInputGroupAddon align="inline-start">
         <KIcon icon="search" size={20} color="currentColor" />
         </KInputGroupAddon>
