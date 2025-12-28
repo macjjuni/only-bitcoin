@@ -4,15 +4,12 @@ import { KSkeleton } from "kku-ui";
 interface LazyImageProps {
   src: string;
   alt?: string;
-  tags?: string[];
-  width?: number;
-  height?: number;
   className?: string;
 }
 
 const MAX_RETRY_COUNT = 3;
 
-const LazyImage = ({ src, alt = "", tags, className = "", width, height }: LazyImageProps) => {
+const LazyImage = ({ src, alt = "", className = "" }: LazyImageProps) => {
   // region [Hooks]
   const containerRef = useRef<HTMLDivElement | null>(null);
   const retryCountRef = useRef(0);

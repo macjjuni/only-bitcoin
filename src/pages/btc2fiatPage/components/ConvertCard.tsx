@@ -1,4 +1,4 @@
-import { ChangeEvent, FocusEvent, memo, ReactNode, useCallback, useMemo, useRef } from "react";
+import { ChangeEvent, FocusEvent, memo, ReactNode, useCallback, useRef } from "react";
 import {
   KButton,
   KCard,

@@ -36,7 +36,7 @@ const TagList = ({ tags, selected, onChangeTag }: TagListProps) => {
     classes.filter(Boolean).join(" ");
 
   return (
-    <div className="relative flex flex-col gap-1.5 py-2 px-4 -mx-2 overflow-x-auto no-scrollbar">
+    <div className="relative flex flex-col gap-1.5 py-2 px-4 pb-4 -mx-2 overflow-x-auto no-scrollbar">
       {tagGroups.map((group, groupIndex) => (
         // eslint-disable-next-line react/no-array-index-key
         <div key={`tag-group-${groupIndex}`} className="flex flex-nowrap justify-start gap-1.5 w-full">
