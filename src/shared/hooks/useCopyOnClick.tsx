@@ -16,5 +16,5 @@ export default function useCopyOnClick(refElement: RefObject<HTMLElement|null>) 
   }, []);
 
 
-  return { onClickCopy };
+  return onClickCopy;
 }

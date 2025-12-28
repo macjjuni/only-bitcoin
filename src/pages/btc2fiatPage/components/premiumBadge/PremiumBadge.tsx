@@ -11,7 +11,7 @@ const PremiumBadge = () => {
   }
 
   return (
-    <div className="absolute top-0 left-[4px] flex items-center justify-start gap-1 text-md font-bold text-bitcoin">
+    <div className="absolute top-[2px] left-[4px] flex items-center justify-start gap-1 text-md font-bold text-bitcoin">
       Premium: {numberSign}{premium}%
     </div>
   );

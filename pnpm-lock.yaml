@@ -41,6 +41,9 @@ dependencies:
   lottie-react:
     specifier: ^2.4.1
     version: 2.4.1(react-dom@19.2.3)(react@19.2.3)
+  lucide-react:
+    specifier: ^0.562.0
+    version: 0.562.0(react@19.2.3)
   react:
     specifier: ^19.2.1
     version: 19.2.3

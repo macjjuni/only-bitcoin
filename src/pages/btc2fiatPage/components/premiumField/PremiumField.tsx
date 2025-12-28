@@ -1,5 +1,6 @@
 import { memo, useCallback, useMemo } from "react";
-import { KIcon, KNumberStepper } from "kku-ui";
+import { RotateCcw } from "lucide-react";
+import { KNumberStepper } from "kku-ui";
 import useStore from "@/shared/stores/store";
 
 
@@ -8,18 +9,19 @@ const PremiumField = () => {
   // region [Hooks]
   const premium = useStore(state => state.premium);
   const setPremium = useStore(state => state.setPremium);
-  const isPremium = useMemo(() => (premium !== 0), [premium])
+  const isPremium = useMemo(() => (premium !== 0), [premium]);
   // endregion
 
   // region [Events]
   const onClickReset = useCallback(() => {
     setPremium(0);
-  }, [])
+  }, []);
   // endregion
 
   // region [Templates]
-  const ResetButton = useMemo(() => (isPremium ?
-      <KIcon icon="refresh" size={32} onClick={onClickReset} className="m-1"/> : null), [isPremium]);
+  const ResetButton = useMemo(() => (
+      isPremium ? (<RotateCcw size={28} onClick={onClickReset} className="m-1" />) : null)
+    , [isPremium]);
   // endregion
 
   return (
@@ -34,7 +36,7 @@ const PremiumField = () => {
   );
 };
 
-const MemoizedPremiumField = memo(PremiumField)
-MemoizedPremiumField.displayName = 'PremiumField';
+const MemoizedPremiumField = memo(PremiumField);
+MemoizedPremiumField.displayName = "PremiumField";
 
 export default MemoizedPremiumField;
