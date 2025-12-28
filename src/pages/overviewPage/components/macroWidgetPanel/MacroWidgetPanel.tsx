@@ -106,7 +106,7 @@ const MacroWidgetPanel = () => {
 
   const onClickAddWidget = useCallback((id: number) => {
     if (macroSequence.length > 3) {
-      kToast.error("최대 4개까지 등록할 수 있어요.");
+      kToast.error("최대 4개까지 등록할 수 있어요.", { position: 'top-center', });
     } else {
       setMacroSequence([...macroSequence, id]);
     }

@@ -1,5 +1,5 @@
 import { KAspectRatio, KDialog, KDialogContent, KDialogHeader, KDialogTitle } from "kku-ui";
-import LazyImage from "@/components/ui/lazyImage/LazyImage";
+import LazyImage from "@/components/ui/LazyImage";
 
 interface ModalTypes {
   open: boolean;

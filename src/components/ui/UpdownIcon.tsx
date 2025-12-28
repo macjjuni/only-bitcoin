@@ -1,6 +1,5 @@
 import { memo } from "react";
 import { KIcon } from "kku-ui";
-import "./UpdownIcon.scss";
 
 interface UpdownIconTypes { isUp: boolean; size?: number; }
 

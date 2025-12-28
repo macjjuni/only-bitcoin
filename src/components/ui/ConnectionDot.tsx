@@ -4,7 +4,7 @@ import { Lottie } from "@/components";
 import useStore from "@/shared/stores/store";
 import greenDotLottie from "@/shared/assets/lottie/green-dot.json";
 import redDotLottie from "@/shared/assets/lottie/red-dot.json";
-import "./ConnectionDot.scss";
+
 
 const ConnectionDot = () => {
 
@@ -58,7 +58,7 @@ const ConnectionDot = () => {
 
 
   return (
-    <div className="connection-state">
+    <div className="inline-flex justify-center items-center">
       {isStable ?
         <Lottie animationData={greenDotLottie} width="26px" height="26px" />
         :
@@ -68,4 +68,8 @@ const ConnectionDot = () => {
   );
 };
 
-export default memo(ConnectionDot);
+
+const MemoizedConnectionDot = memo(ConnectionDot);
+MemoizedConnectionDot.displayName = "ConnectionDot";
+
+export default MemoizedConnectionDot;

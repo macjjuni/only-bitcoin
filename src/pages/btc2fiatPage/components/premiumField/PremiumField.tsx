@@ -1,6 +1,6 @@
 import { memo, useCallback, useMemo } from "react";
 import { RotateCcw } from "lucide-react";
-import { KNumberStepper } from "kku-ui";
+import { KButton, KNumberStepper } from "kku-ui";
 import useStore from "@/shared/stores/store";
 
 
@@ -18,15 +18,15 @@ const PremiumField = () => {
   }, []);
   // endregion
 
-  // region [Templates]
-  const ResetButton = useMemo(() => (
-      isPremium ? (<RotateCcw size={28} onClick={onClickReset} className="m-1" />) : null)
-    , [isPremium]);
-  // endregion
-
   return (
     <div className="flex justify-end items-center gap-5 -mt-2">
-      {ResetButton}
+      {
+        isPremium && (
+          <KButton variant="outline" size="icon" onClick={onClickReset}>
+            <RotateCcw />
+          </KButton>
+        )
+      }
       <div className="flex flex-col items-end gap-0.5">
         <b className="text-base">Premium</b>
         <span className="text-sm opacity-80">P(%):</span>

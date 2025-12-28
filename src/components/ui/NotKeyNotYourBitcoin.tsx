@@ -1,4 +1,4 @@
-import React, { useEffect, useState, memo } from 'react';
+import { useEffect, useState, memo } from 'react';
 
 const bitcoinWiseSayingList = [
   'Not your keys, not your ₿itcoin.',

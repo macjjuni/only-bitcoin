@@ -1,6 +1,6 @@
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import useStore from "@/shared/stores/store";
-import CountText from "@/components/ui/countText/CountText";
+import CountText from "@/components/ui/CountText";
 import { calcPercentage, getNextHalvingData } from "@/shared/utils/calculate";
 import { calcDate } from "@/shared/lib/date";
 

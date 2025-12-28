@@ -35,14 +35,14 @@ const useMarketChart= (days: MarketChartIntervalType) => {
 
   // region [Hooks]
 
-  const { data: marketChartData, isSuccess, isError, error} = useQuery<MarketChartFormattedData>({
+  const { data: marketChartData, isPending, isSuccess, isError, error} = useQuery<MarketChartFormattedData>({
     queryKey: ['marketChart', days],
     queryFn: () => fetchMarketChart(days),
     staleTime: 60 * 1000 * STALE_TIME_MIN,
-    refetchOnMount: true,
+    refetchOnWindowFocus: false,
     refetchInterval: 60 * 1000 * INTERVAL_TIME_MIN,
-    placeholderData: { price: [], date: [] },
-    retry: 3,
+    placeholderData: (previousData) => previousData,
+    retry: 1,
   });
 
   // endregion
@@ -60,7 +60,7 @@ const useMarketChart= (days: MarketChartIntervalType) => {
 
   // endregion
 
-  return { marketChartData, isSuccess, isError, error };
+  return { marketChartData, isLoading: isPending, isSuccess, isError, error };
 }
 
 export default useMarketChart;
