@@ -244,7 +244,7 @@ const ConvertPanel = () => {
   // endregion
 
 
-  return (<div className="flex flex-col justify-between gap-2 pt-6 h-full">{SortNumberField}</div>);
+  return (<div className="flex flex-col justify-between gap-2 h-full">{SortNumberField}</div>);
 };
 
 

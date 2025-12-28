@@ -67,7 +67,7 @@ const Content = () => {
         'content__layout', // 스크롤 제어용
         "flex flex-col flex-auto w-full mx-auto max-w-layout opacity-0",
         // Padding: Top(Header+8), Left/Right(8), Bottom(Nav+8)
-        "pt-[calc(theme(height.header)+8px)] px-2 p-[calc(theme(height.bottom-nav)+8px)]",
+        "pt-[calc(theme(height.header)+16px)] pb-[calc(theme(height.bottom-nav)+8px)]",
         "layout-max:opacity-0", // 미디어 쿼리 ($max-width-size 이하일 때 초기 opacity 0)
         "overflow-auto"
       ].filter(Boolean).join(" ")}

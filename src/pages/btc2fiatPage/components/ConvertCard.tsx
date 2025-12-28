@@ -71,13 +71,15 @@ const ConvertCard = (props: ConvertCardProps) => {
 
 
   return (
-    <KCard className="border-border font-number bg-neutral-100/60 dark:bg-neutral-900/60">
+    <KCard className={[
+      'border-border font-number bg-neutral-100/60 dark:bg-neutral-900/60',
+      !inputActive && ' !border-0 !bg-transparent !shadow-none',
+    ].filter(Boolean).join(' ')}>
       <KCardHeader>
         <KCardTitle>
-          <div className="flex justify-between items-center gap-4 min-w-0"> {/* min-w-0 추가: 자식의 truncate 정상 작동 보장 */}
-            {!inputActive && (
-              <span className="text-lg font-default font-bold flex-none">{title}</span> /* flex-none: 타이틀 크기 유지 */
-            )}
+          <div className="flex justify-between items-center gap-4 min-w-0">
+
+            {!inputActive && (<span className="text-lg font-default font-bold flex-none">{title}</span>)}
 
             {!inputActive ? (
               <div className="flex items-center gap-1.5 text-3xl min-w-0 flex-1 justify-end">
@@ -85,14 +87,13 @@ const ConvertCard = (props: ConvertCardProps) => {
                       className={`truncate text-right ${isPremium && "text-bitcoin"}`}>
                   {value}
                 </span>
-                <KButton variant="ghost" size="icon" onClick={onClickCopy}>
-                  <Copy />
-                </KButton>
+                <KButton variant="ghost" size="icon" onClick={onClickCopy}><Copy /></KButton>
               </div>
             ) : (
               <KInputGroup size="lg" className="h-11 my-1 bg-white flex-1">
                 <KInputGroupInput
                   type="text"
+                  inputMode="decimal"
                   maxLength={maxLength}
                   value={value}
                   onChange={onChangeInput}
