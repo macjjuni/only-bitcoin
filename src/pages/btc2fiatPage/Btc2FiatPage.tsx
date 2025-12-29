@@ -1,11 +1,7 @@
 import { useOutletContext } from "react-router";
-import { usePageAnimation } from "@/shared/hooks";
-import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
-import { ConvertPannel } from "@/pages/btc2fiatPage/components";
-import PremiumField from "@/pages/btc2fiatPage/components/premiumField/PremiumField";
-import PremiumBadge from "@/pages/btc2fiatPage/components/premiumBadge/PremiumBadge";
+import { usePageAnimation, type UsePageAnimation } from "@/shared/hooks";
+import { ConvertPanel, PremiumBadge } from "@/pages/btc2fiatPage/components";
 import { PageLayout } from "@/layouts";
-import "./Btc2FiatPage.scss";
 
 
 export default function Btc2FiatPage() {
@@ -15,10 +11,9 @@ export default function Btc2FiatPage() {
   // endregion
 
   return (
-    <PageLayout className="btc-2-fiat-page__area">
+    <PageLayout>
       <PremiumBadge />
-      <ConvertPannel />
-      <PremiumField />
+      <ConvertPanel />
     </PageLayout>
   );
 }

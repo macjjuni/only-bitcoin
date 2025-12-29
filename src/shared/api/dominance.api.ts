@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "react-toastify";
+import { kToast } from "kku-ui";
 import { useEffect } from "react";
 import fetcher from "@/shared/utils/fetcher";
 import { floorToDecimal } from "@/shared/utils/number";
@@ -64,7 +64,7 @@ const useBitcoinDominanceQuery = (): number | string => {
   useEffect(() => {
 
     if (isError && isDev) {
-      toast.error("도미넌스 데이터 업데이트 에러!");
+      kToast.error("도미넌스 데이터 업데이트 에러!");
       console.log("❌ 도미넌스 데이터 업데이트 에러!", error);
     }
   }, [isError]);

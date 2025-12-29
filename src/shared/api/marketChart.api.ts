@@ -1,6 +1,6 @@
 import { useEffect } from "react";
 import { useQuery } from '@tanstack/react-query';
-import { toast } from "react-toastify";
+import { kToast } from "kku-ui";
 import { MarketChartIntervalType } from '@/shared/stores/store.interface';
 import fetcher from "@/shared/utils/fetcher";
 import { isDev } from "@/shared/utils/common";
@@ -35,14 +35,14 @@ const useMarketChart= (days: MarketChartIntervalType) => {
 
   // region [Hooks]
 
-  const { data: marketChartData, isSuccess, isError, error} = useQuery<MarketChartFormattedData>({
+  const { data: marketChartData, isPending, isSuccess, isError, error} = useQuery<MarketChartFormattedData>({
     queryKey: ['marketChart', days],
     queryFn: () => fetchMarketChart(days),
     staleTime: 60 * 1000 * STALE_TIME_MIN,
-    refetchOnMount: true,
+    refetchOnWindowFocus: false,
     refetchInterval: 60 * 1000 * INTERVAL_TIME_MIN,
-    placeholderData: { price: [], date: [] },
-    retry: 3,
+    placeholderData: (previousData) => previousData,
+    retry: 1,
   });
 
   // endregion
@@ -54,13 +54,13 @@ const useMarketChart= (days: MarketChartIntervalType) => {
 
     if (isError) {
       console.error('❌ 마켓 차트 데이터 초기화 오류', error);
-      toast.error('마켓 차트 데이터 초기화 오류');
+      kToast.error('마켓 차트 데이터 초기화 오류');
     }
   }, [isError]);
 
   // endregion
 
-  return { marketChartData, isSuccess, isError, error };
+  return { marketChartData, isLoading: isPending, isSuccess, isError, error };
 }
 
 export default useMarketChart;

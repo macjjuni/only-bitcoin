@@ -1,9 +1,9 @@
 import { memo } from "react";
 import { IconTypes } from "@/components/ui/icon/icon";
 
-const SettingIcon = ({ size = "100%", color = "currentColor", style }: IconTypes) => {
+const SettingIcon = ({ size = "100%", color = "currentColor", style, className }: IconTypes) => {
   return (
-    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" style={style}
+    <svg width={size} height={size} viewBox="0 0 24 24" fill="none" className={className} style={style}
          xmlns="http://www.w3.org/2000/svg">
       <g strokeWidth="0" />
       <g strokeLinecap="round" strokeLinejoin="round" />

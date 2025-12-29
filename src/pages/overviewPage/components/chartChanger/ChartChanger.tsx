@@ -1,15 +1,21 @@
-import { memo, useCallback, useRef } from "react";
-import { KDropdown, KDropdownRefs, KMenu } from "kku-ui";
-import { DataIcon } from "@/components/ui/icon";
+import { memo, useCallback } from "react";
+import {
+  KDropdownMenu,
+  KDropdownMenuCheckboxItem,
+  KDropdownMenuContent,
+  KDropdownMenuGroup,
+  KDropdownMenuLabel,
+  KDropdownMenuTrigger
+} from "kku-ui";
+import { ChartNoAxesCombined } from "lucide-react";
 import useStore from "@/shared/stores/store";
 import { OverviewChartType } from "@/shared/stores/store.interface";
-import "./ChartChanger.scss";
 
 
 const overviewChartOptions = [
-  { label: "Hashrate", value: "hashrate" },
-  { label: "Difficulty", value: "difficulty" },
-  { label: "Price", value: "price" }
+  { label: "가격", value: "price" },
+  { label: "난이도", value: "difficulty" },
+  { label: "해시레이트", value: "hashrate" }
 ] as const;
 
 const ChartChanger = () => {
@@ -17,31 +23,41 @@ const ChartChanger = () => {
   // region [Hooks]
   const overviewChart = useStore(store => store.overviewChart);
   const setOverviewChart = useStore(store => store.setOverviewChart);
-  const dropdownRef = useRef<KDropdownRefs>(null);
   // endregion
 
 
   // region [Events]
   const onClickMenuItem = useCallback((chart: OverviewChartType) => {
     setOverviewChart(chart);
-    dropdownRef.current?.onClose();
   }, []);
   // endregion
 
   return (
-    <KDropdown ref={dropdownRef} trigger="click" position="top-end" className="chart-changer">
-      <KDropdown.Trigger className="chart-changer__trigger remove-highlight" style={{ cursor: "pointer" }}>
-        <DataIcon size={20} style={{ padding: 2 }} />
-      </KDropdown.Trigger>
-      <KDropdown.Content zIndex={6} offset={{ x: 0, y: -4 }}>
-        <KMenu size="small">
-          { overviewChartOptions.map(item => (
-              <KMenu.ItemSelectable key={item.value} selected={item.value === overviewChart} label={item.label}
-                                    onClick={() => { onClickMenuItem(item.value); }} />
+    <KDropdownMenu>
+      <KDropdownMenuTrigger
+        className={[
+          "p-[3px] rounded-lg transition-colors duration-150",
+          "data-[state=open]:bg-gray-200 dark:data-[state=open]:bg-gray-800"
+        ].join(" ")}
+      >
+        <ChartNoAxesCombined />
+      </KDropdownMenuTrigger>
+
+      <KDropdownMenuContent align="end" side="top" sideOffset={12}>
+        <KDropdownMenuLabel>차트 선택</KDropdownMenuLabel>
+        <KDropdownMenuGroup>
+          {overviewChartOptions.map(item => (
+            <KDropdownMenuCheckboxItem
+              key={item.value}
+              checked={item.value === overviewChart}
+              onClick={() => onClickMenuItem(item.value)}
+            >
+              {item.label}
+            </KDropdownMenuCheckboxItem>
           ))}
-        </KMenu>
-      </KDropdown.Content>
-    </KDropdown>
+        </KDropdownMenuGroup>
+      </KDropdownMenuContent>
+    </KDropdownMenu>
   );
 };
 

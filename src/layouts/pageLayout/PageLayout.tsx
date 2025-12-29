@@ -1,6 +1,5 @@
 import React, { memo, ReactNode, useMemo } from "react";
-import { NotKeyNotYourBitcoin } from "../../components";
-import "./PageLayout.scss";
+import { NotKeyNotYourBitcoin } from "@/components";
 
 
 interface PageLayoutProps {
@@ -11,23 +10,12 @@ interface PageLayoutProps {
 
 const PageLayout = ({ children, className }: PageLayoutProps) => {
 
-  // region [Hooks]
-
-  const rootClass = useMemo(() => {
-    const clazz = ["page-layout"];
-
-    if (className) {
-      clazz.push(className);
-    }
-
-    return clazz.join(" ");
-  }, [className]);
-
-  // endregion
-
+  const combinedClassName = useMemo(() => (
+    ["relative w-full max-w-layout mx-auto flex flex-col flex-auto gap-2 px-2", className].filter(Boolean).join(" ")
+  ), [className]);
 
   return (
-    <section className={rootClass}>
+    <section className={combinedClassName}>
       {children}
       <NotKeyNotYourBitcoin />
     </section>

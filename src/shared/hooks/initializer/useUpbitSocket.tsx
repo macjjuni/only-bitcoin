@@ -1,5 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
-import { toast } from "react-toastify";
+import { kToast } from "kku-ui";
 import ReconnectingWebSocket from "reconnecting-websocket";
 import useStore from "@/shared/stores/store";
 import { isNetwork } from "@/shared/utils/network";
@@ -74,7 +74,7 @@ export default function useUpbitWebSocket() {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      toast.success("업비트 연결!");
+      kToast.success("업비트 연결!");
       if (isDev) console.log("✅ 업비트 소켓 연결");
       socket.send(JSON.stringify(getRequestPayload()));
     };
@@ -93,7 +93,7 @@ export default function useUpbitWebSocket() {
 
     socket.onerror = (e) => {
       console.error("Upbit WebSocket Error:", e);
-      toast.error("Upbit 연결 오류");
+      kToast.error("Upbit 연결 오류");
 
       if (!isNetwork()) {
         socket.close();

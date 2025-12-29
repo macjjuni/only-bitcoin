@@ -1,14 +1,16 @@
 import React, { memo, useCallback, useMemo, useRef } from "react";
 import { CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Tooltip } from "chart.js";
-import { KButton, KButtonGroup } from "kku-ui";
 import { Line } from "react-chartjs-2";
-import { ChartJsDataType, MarketChartIntervalTypeList } from "@/pages/overviewPage/components/marketChart/MarketChart.interface";
+import { KSpinner } from "kku-ui";
+import {
+  ChartJsDataType,
+  MarketChartIntervalTypeList
+} from "@/pages/overviewPage/components/marketChart/MarketChart.interface";
 import { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import useStore from "@/shared/stores/store";
-import { HorizontalCard } from "@/components";
 import { useMarketChartData } from "@/shared/api";
 import { ChartChanger } from "@/pages/overviewPage/components";
-import "./MarketChart.scss";
+
 
 
 // Chart.js 컴포넌트 등록
@@ -34,7 +36,7 @@ const MarketChart = () => {
   const chartRef = useRef<ChartJS<"line", number[], string>>(null);
   const marketChartInterval = useStore(state => state.marketChartInterval);
   const setMarketChartInterval = useStore(state => state.setMarketChartInterval);
-  const { marketChartData } = useMarketChartData(marketChartInterval);
+  const { marketChartData, isLoading } = useMarketChartData(marketChartInterval);
   const isDark = useStore(store => store.theme) === "dark";
 
 
@@ -69,58 +71,71 @@ const MarketChart = () => {
   // endregion
 
 
-  // region [Styles]
-  const chartCardButtonClass = useCallback((value: MarketChartIntervalType) => {
+  // region [Styles
+  const getButtonClass = useCallback((value: MarketChartIntervalType) => {
+    const isActive = marketChartInterval === value;
+    const baseClass = "h-[30px] px-3 border-none text-sm rounded-md transition-all";
+    const stateClass = isActive
+      ? "font-bold text-white bg-black/40 dark:bg-white/80 dark:text-black"
+      : "text-current hover:bg-gray-100 dark:hover:bg-gray-800";
 
-    const clazz = ["market-chart__button"];
-
-    if (marketChartInterval === value) {
-      clazz.push("market-chart__button--active");
-    }
-
-    return clazz.join(" ");
+    return `${baseClass} ${stateClass}`;
   }, [marketChartInterval]);
   // endregion
 
 
   return (
-    <HorizontalCard className="market-chart">
-      <div className="market-chart__top">
-        <Line ref={chartRef} data={currentChartData} height="150%"
-              className="market-chart__chart__wrapper__body"
-              options={{
-                plugins: {
-                  legend: { display: false },
-                  tooltip: {
-                    enabled: true,
-                    usePointStyle: true,
-                    caretPadding: 6,
-                    callbacks: { label: (e) => `$${(e.formattedValue)}` }
-                  }
-                },
-                elements: { point: { radius: 0 }, line: { tension: 0.3, borderWidth: 2 } },
-                scales: { x: { display: false }, y: { display: false, suggestedMax: maxValue * 1.005 } },
-                animation: { duration: 800, easing: "easeInOutQuart", onComplete: initializeTooltip },
-                transitions: { active: { animation: { duration: 0 } } },
-                animations: {
-                  x: { duration: 0 },
-                  y: { duration: 0 }
-                } as never
-              }}
-        />
-      </div>
-      <div className="market-chart__bottom">
-        <KButtonGroup className="market-chart__bottom__buttons">
-          {
-            marketChartIntervalOptions.map(({ value, text }) => (
-              <KButton key={value} label={text} size="small" className={chartCardButtonClass(value)}
-                       onClick={() => setMarketChartInterval(value)} />
-            ))
-          }
-        </KButtonGroup>
+    <div className="relative flex flex-col justify-between gap-2 -mx-2 w-[calc(100%+1rem)] select-none overflow-hidden">
+
+      {isLoading ? (
+        <div className="flex justify-center items-center aspect-[2/1]">
+          <KSpinner color="#F7931A" />
+        </div>
+      ) : (
+        <div
+          className="flex flex-col justify-start gap-2 text-current relative pointer-events-none z-[3]">
+          <Line
+            ref={chartRef}
+            data={currentChartData}
+            height="180%"
+            className="bg-transparent z-[3]"
+            options={{
+              plugins: {
+                legend: { display: false },
+                tooltip: {
+                  enabled: true,
+                  usePointStyle: true,
+                  caretPadding: 6,
+                  callbacks: { label: (e) => `$${(e.formattedValue)}` }
+                }
+              },
+              elements: { point: { radius: 0 }, line: { tension: 0.3, borderWidth: 2 } },
+              scales: { x: { display: false }, y: { display: false, suggestedMax: maxValue * 1.005 } },
+              animation: { duration: 800, easing: "easeInOutQuart", onComplete: initializeTooltip },
+              transitions: { active: { animation: { duration: 0 } } },
+              animations: {
+                x: { duration: 0 },
+                y: { duration: 0 }
+              } as never
+            }}
+          />
+        </div>
+      )
+      }
+      {/* .market-chart__bottom */}
+      <div className="relative flex justify-between items-center px-2">
+        {/* .market-chart__bottom__buttons */}
+        <div className="flex justify-center items-center gap-8 w-full pl-3">
+          {marketChartIntervalOptions.map(({ value, text }) => (
+            <button type="button" key={value} className={getButtonClass(value)}
+                    onClick={() => setMarketChartInterval(value)}>
+              {text}
+            </button>
+          ))}
+        </div>
         <ChartChanger />
       </div>
-    </HorizontalCard>
+    </div>
   );
 };
 

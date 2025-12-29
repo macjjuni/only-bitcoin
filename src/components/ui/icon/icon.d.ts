@@ -4,4 +4,5 @@ export interface IconTypes {
   size?: number | string;
   color?: string;
   style?: CSSProperties;
+  className?: string;
 }

@@ -1,6 +1,6 @@
 import { useCallback, useEffect } from "react";
 import { useQuery } from "@tanstack/react-query";
-import { toast } from "react-toastify";
+import { kToast } from "kku-ui";
 import useStore from "@/shared/stores/store";
 import { getCurrentDate } from "@/shared/lib/date";
 import { isDev } from "@/shared/utils/common";
@@ -58,7 +58,7 @@ export default function useUsdExchangeRate() {
 
     console.error(query.error);
     setExRate({ value: 0, date: "Update error." });
-    toast.error("환율 데이터를 가져올 수 없습니다.");
+    kToast.error("환율 데이터를 가져올 수 없습니다.");
   }, [])
 
   useEffect(() => {
