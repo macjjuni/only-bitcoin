@@ -1,3 +1,4 @@
+import { memo } from "react";
 import { KAspectRatio, KDialog, KDialogContent, KDialogHeader, KDialogTitle } from "kku-ui";
 import LazyImage from "@/components/ui/LazyImage";
 
@@ -6,7 +7,7 @@ interface ModalTypes {
   setOpen: (val: boolean) => void;
 }
 
-export default function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
+function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
 
   return (
     <KDialog open={open} onOpenChange={setOpen} blur={2} size="sm">
@@ -18,9 +19,15 @@ export default function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
         </KDialogHeader>
         <KAspectRatio ratio={1.1146}>
           <LazyImage src={`https://alternative.me/crypto/fear-and-greed-index.png?${Date.now()}`}
-                     alt="공포 & 탐욕 지수" className="fear-and-greed-index__image" />
+                     alt="공포 & 탐욕 지수" className="h-full" />
         </KAspectRatio>
       </KDialogContent>
     </KDialog>
   );
 };
+
+
+const MemoizedFearAndGreedDialog = memo(FearAndGreedDialog);
+MemoizedFearAndGreedDialog.displayName = "FearAndGreedDialog";
+
+export default MemoizedFearAndGreedDialog;
