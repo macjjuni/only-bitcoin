@@ -1,7 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useOutletContext } from "react-router";
 import { KIcon, KListGroup, KListRow, KSelect, KSwitch } from "kku-ui";
-import { Star, Moon, CodeXml } from "lucide-react";
+import { Moon, Star } from "lucide-react";
 import router from "@/app/router";
 import useStore from "@/shared/stores/store";
 import InstallSettingForm from "./components/installSettingForm/InstallSettingForm";
