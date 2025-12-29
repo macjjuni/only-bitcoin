@@ -31,7 +31,7 @@ const PremiumField = () => {
         <b className="text-base">Premium</b>
         <span className="text-sm opacity-80">P(%):</span>
       </div>
-      <KNumberStepper value={premium} onChange={setPremium} min={0} step={0.1} precision={1} max={100} size="lg" />
+      <KNumberStepper value={premium} onChange={setPremium} min={0} step={0.1} max={100} size="lg" />
     </div>
   );
 };
