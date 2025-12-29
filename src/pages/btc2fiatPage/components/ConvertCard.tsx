@@ -10,7 +10,7 @@ import {
   KInputGroupAddon,
   KInputGroupInput
 } from "kku-ui";
-import { Copy } from "lucide-react";
+import { Copy, X } from "lucide-react";
 import { isNumber } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 import { PremiumField, UnitDropdownMenu } from "@/pages/btc2fiatPage/components";
@@ -66,18 +66,21 @@ const ConvertCard = (props: ConvertCardProps) => {
       input.setSelectionRange(length, length);
     });
   }, []);
+
+  const onClickClear = useCallback(() => {
+    onChange("0");
+  }, []);
   // endregion
 
 
   return (
     <KCard className={[
-      'border-border font-number bg-neutral-100/60 dark:bg-neutral-900/60',
-      !inputActive && ' !border-0 !bg-transparent !shadow-none',
-    ].filter(Boolean).join(' ')}>
+      "border-border font-number bg-neutral-100/60 dark:bg-neutral-900/60",
+      !inputActive && " !border-0 !bg-transparent !shadow-none"
+    ].filter(Boolean).join(" ")}>
       <KCardHeader>
         <KCardTitle>
           <div className="flex justify-between items-center gap-4 min-w-0">
-
             {!inputActive && (<span className="text-lg font-default font-bold flex-none">{title}</span>)}
 
             {!inputActive ? (
@@ -90,6 +93,13 @@ const ConvertCard = (props: ConvertCardProps) => {
               </div>
             ) : (
               <KInputGroup size="lg" className="h-11 my-1 bg-white flex-1">
+                {
+                  value !== "0" && (
+                    <KInputGroupAddon align="inline-start" className="pr-1">
+                      <X className="cursor-pointer" onClick={onClickClear} />
+                    </KInputGroupAddon>
+                  )
+                }
                 <KInputGroupInput
                   type="text"
                   inputMode="decimal"

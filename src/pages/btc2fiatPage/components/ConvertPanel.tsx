@@ -152,7 +152,7 @@ const ConvertPanel = () => {
     return (
       <ConvertCard inputActive={isCurrentCurrency} title="KRW(₩):" value={displayValue} unit="KRW"
                    onChange={onChangeKrw} onChangeUnit={onChangeUnit} isPremium={isShowPremiumExpression}
-                   topDescription={`${incrementValue}(Premium) + ${krw}`} bottomDescription={`1BTC = ${krw}`} />
+                   topDescription={`${incrementValue}(Premium) + ${krw}`} bottomDescription={`1BTC = ${krwPrice}`} />
     );
   }, [krw, krwPrice, focusCurrency, calcPremium, premium, onChangeKrw, onChangeUnit]);
 
