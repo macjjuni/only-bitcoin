@@ -257,7 +257,7 @@ const MiningMetricChart = () => {
 
       {/* .mining-metric-chart__bottom */}
       <div className="flex justify-between items-center pt-3 px-2">
-        <div className="flex justify-center items-center gap-8 w-full pl-3">
+        <div className="flex justify-center items-center gap-8 w-full pl-3 py-1">
           {miningMetricChartIntervalOptions.map(({ value, text }) => (
             <button type="button" key={value} className={getButtonClass(value)} onClick={() => setHashrateChartInterval(value)}>
               {text}

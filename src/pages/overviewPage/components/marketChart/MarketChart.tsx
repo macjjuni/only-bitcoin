@@ -125,7 +125,7 @@ const MarketChart = () => {
       {/* .market-chart__bottom */}
       <div className="relative flex justify-between items-center px-2">
         {/* .market-chart__bottom__buttons */}
-        <div className="flex justify-center items-center gap-8 w-full pl-3">
+        <div className="flex justify-center items-center gap-8 w-full pl-3 py-1">
           {marketChartIntervalOptions.map(({ value, text }) => (
             <button type="button" key={value} className={getButtonClass(value)}
                     onClick={() => setMarketChartInterval(value)}>
