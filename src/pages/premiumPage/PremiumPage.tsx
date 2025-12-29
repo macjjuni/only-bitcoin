@@ -22,7 +22,7 @@ export default function PremiumPage() {
 
   return (
     <PageLayout className="gap-3 overflow-hidden [perspective:1000px]">
-      <div className="absolute top-[-88px] right-[-172px] opacity-60 -z-[1] animate-swing">
+      <div className="absolute top-[-88px] right-[-160px] opacity-100 -z-[1] animate-swing">
         {PremiumLottie}
       </div>
       <PremiumPanel />

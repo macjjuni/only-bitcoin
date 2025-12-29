@@ -44,8 +44,8 @@ export default {
           'to': { opacity: '1' },
         },
         swing: {
-          '0%, 100%': { transform: 'rotateY(-8deg)' },
-          '50%': { transform: 'rotateY(8deg)' },
+          '0%, 100%': { transform: 'perspective(1000px) rotateY(-8deg)' },
+          '50%': { transform: 'perspective(1000px) rotateY(8deg)' },
         },
       },
       animation: {
