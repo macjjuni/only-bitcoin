@@ -95,7 +95,7 @@ const PremiumPanel = () => {
               <span className="text-base font-bold ml-1">KRW</span>
             </div>
             <div className="mb-[3px]">
-              <span className="text-xs font-number">
+              <span className="font-number text-sm layout-max:text-base">
                 ({formatDate(date, "YYYY.MM.DD")})
               </span>
             </div>

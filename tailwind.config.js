@@ -43,6 +43,10 @@ export default {
           'from': { opacity: '0' },
           'to': { opacity: '1' },
         },
+        swing: {
+          '0%, 100%': { transform: 'rotateY(-8deg)' },
+          '50%': { transform: 'rotateY(8deg)' },
+        },
       },
       animation: {
         wiggle: 'wiggle 0.36s ease-in-out infinite',
@@ -50,6 +54,7 @@ export default {
         "enter-right": "slideInFromRight 0.24s ease-in-out forwards",
         "enter-left": "slideInFromLeft 0.24s ease-in-out forwards",
         "enter-first": "firstLoad 0.24s ease-in-out forwards",
+        swing: 'swing 3.2s ease-in-out infinite',
       }
     },
   },

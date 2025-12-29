@@ -1,7 +1,6 @@
 import { useMemo } from "react";
 import { useOutletContext } from "react-router";
-import { usePageAnimation } from "@/shared/hooks";
-import { UsePageAnimation } from "@/shared/hooks/usePageAnimation";
+import { usePageAnimation, type UsePageAnimation } from "@/shared/hooks";
 import { PremiumPanel } from "@/pages/premiumPage/components";
 import { PageLayout } from "@/layouts";
 import { Lottie } from "@/components";
@@ -22,8 +21,10 @@ export default function PremiumPage() {
   // endregion
 
   return (
-    <PageLayout className="gap-3 overflow-hidden">
-      <div className="absolute top-[-88px] right-[-192px] opacity-60 -z-[1]">{PremiumLottie}</div>
+    <PageLayout className="gap-3 overflow-hidden [perspective:1000px]">
+      <div className="absolute top-[-88px] right-[-172px] opacity-60 -z-[1] animate-swing">
+        {PremiumLottie}
+      </div>
       <PremiumPanel />
     </PageLayout>
   );

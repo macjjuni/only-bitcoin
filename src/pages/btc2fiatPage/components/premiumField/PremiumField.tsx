@@ -19,7 +19,7 @@ const PremiumField = () => {
   // endregion
 
   return (
-    <div className="flex justify-end items-center gap-5 -mt-2">
+    <div className="flex justify-end items-center gap-5 -mt-2 select-none">
       {
         isPremium && (
           <KButton variant="outline" size="icon" onClick={onClickReset}>
@@ -31,7 +31,7 @@ const PremiumField = () => {
         <b className="text-base">Premium</b>
         <span className="text-sm opacity-80">P(%):</span>
       </div>
-      <KNumberStepper defaultValue={premium} onChange={setPremium} min={0} step={0.1} max={100} size="lg" />
+      <KNumberStepper value={premium} onChange={setPremium} min={0} step={0.1} precision={1} max={100} size="lg" />
     </div>
   );
 };
