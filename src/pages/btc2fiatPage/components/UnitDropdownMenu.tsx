@@ -5,12 +5,10 @@ import { UnitType } from "@/shared/stores/store.interface";
 import useStore from "@/shared/stores/store";
 
 
-
 export interface UnitDropdownMenuProps {
   currentUnit: UnitType;
   onChangeUnit: (unit: UnitType) => void
 }
-
 
 const UNIT_DISPLAY: Record<UnitType, ReactNode> = {
   KRW: "KRW",

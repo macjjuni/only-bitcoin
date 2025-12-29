@@ -1,9 +1,9 @@
 import { memo, useCallback, useEffect, useState } from "react";
 import { KIcon, KListGroup, KListRow, KSwitch } from "kku-ui";
+import { MessageSquareWarning } from "lucide-react";
 import { useInitializePWA } from "@/shared/hooks/initializer";
 import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
-import { MessageIcon } from "@/components/ui/icon";
 
 
 const InstallSettingForm = () => {
@@ -17,7 +17,7 @@ const InstallSettingForm = () => {
   // region [Privates]
   const initializeInstallMsg = useCallback(() => {
     setIsInstallMsg(!!getCookie(PWA_COOKIE_KEY));
-  }, [])
+  }, []);
   // endregion
 
 
@@ -41,9 +41,9 @@ const InstallSettingForm = () => {
 
   return (
     <KListGroup header="앱 설치">
-      <KListRow icon={<MessageIcon color="#1796EE" size={24} />} label="앱 설치 메시지 숨기기"
-                rightElement={<KSwitch checked={isInstallMsg} onCheckedChange={onChangeInstallMsg} />}/>
-      <KListRow icon={<KIcon icon="app" size={24} color="#1796EE" />} label="앱 설치" onClick={onClickInstall}/>
+      <KListRow icon={<MessageSquareWarning color="#1796EE" />} label="앱 설치 메시지 숨기기"
+                rightElement={<KSwitch checked={isInstallMsg} onCheckedChange={onChangeInstallMsg} />} />
+      <KListRow icon={<KIcon icon="app" size={24} color="#1796EE" />} label="앱 설치" onClick={onClickInstall} />
     </KListGroup>
   );
 };

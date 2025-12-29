@@ -1,6 +1,7 @@
 import { useCallback, useMemo } from "react";
 import { useOutletContext } from "react-router";
-import { KIcon, KListRow, KListGroup, KSelect, KSwitch } from "kku-ui";
+import { KIcon, KListGroup, KListRow, KSelect, KSwitch } from "kku-ui";
+import { Star, Moon, CodeXml } from "lucide-react";
 import router from "@/app/router";
 import useStore from "@/shared/stores/store";
 import InstallSettingForm from "./components/installSettingForm/InstallSettingForm";
@@ -67,26 +68,31 @@ export default function SettingsPage() {
       <div className="settings-page__area__form__area">
         {/* 가격 설정 그룹 */}
         <KListGroup header="가격 설정">
-          <KListRow icon={<KIcon icon="star" color="#f7931a"/>} label="시작 페이지"
-                    rightElement={<KSelect value={initialPath} options={favoriteRouteOptions} width="sm" onChange={setInitialPath}/>} />
-          <KListRow icon={<CurrencyIcon size={24}/>} label="통화 단위"
-                    rightElement={<KSelect value={currency} options={currencyOptions} width="xs" onChange={(v) => setCurrency(v as CurrencyTypes)}/>} />
-          <KListRow icon={<KIcon icon="dollar" size={24}/>} label="국내거래소"
-                    rightElement={<KSelect value={krwMarket} options={krwMarketOptions} width="xs" onChange={setKrwMarket}/>} />
-          <KListRow icon={<KIcon icon="won" size={24}/>} label="해외거래소"
-                    rightElement={<KSelect value={usdMarket} options={usdMarketOptions} width="xs" onChange={setUsdMarket}/>} />
-          <KListRow icon={<KIcon icon="tether" size={24}/>} label="USDT 기준 환율"
-                    rightElement={<KSwitch checked={isUsdtStandard} onCheckedChange={setUsdtStandard}/>} />
+          <KListRow icon={<Star className="text-bitcoin" />} label="시작 페이지"
+                    rightElement={<KSelect value={initialPath} options={favoriteRouteOptions} width="sm"
+                                           onChange={setInitialPath} />} />
+          <KListRow icon={<CurrencyIcon size={24} />} label="통화 단위"
+                    rightElement={<KSelect value={currency} options={currencyOptions} width="xs"
+                                           onChange={(v) => setCurrency(v as CurrencyTypes)} />} />
+          <KListRow icon={<KIcon icon="won" size={28} color="#F2C84B" />} label="국내거래소"
+                    rightElement={<KSelect value={krwMarket} options={krwMarketOptions} width="xs"
+                                           onChange={setKrwMarket} />} />
+          <KListRow icon={<KIcon icon="dollar" size={28} color="#85BB65" />} label="해외거래소"
+                    rightElement={<KSelect value={usdMarket} options={usdMarketOptions} width="xs"
+                                           onChange={setUsdMarket} />} />
+          <KListRow icon={<KIcon icon="tether" size={24} />} label="USDT 기준 환율"
+                    rightElement={<KSwitch checked={isUsdtStandard} onCheckedChange={setUsdtStandard} />} />
         </KListGroup>
 
         {/* 스타일 및 화면 설정 그룹 */}
         <KListGroup header="스타일 및 화면 설정">
-          <KListRow icon={<KIcon icon="visibility" size={24}/>} label="다크모드"
-                    rightElement={<KSwitch checked={isDark} onCheckedChange={(val) => setTheme(val ? "dark" : "light")}/>} />
-          <KListRow icon={<KIcon icon="bitcoin_square" size={24}/>} label="배경 이미지"
-                    rightElement={<KSwitch checked={isBackgroundImg} onCheckedChange={setIsBackgroundImg}/>} />
-          <KListRow icon={<AnimationIcon size={24} color="#f7931a"/>} label="카운트 업 애니메이션"
-                    rightElement={<KSwitch checked={isCountUp} onCheckedChange={setIsCountUp}/>}
+          <KListRow icon={<Moon />} label="다크모드"
+                    rightElement={<KSwitch checked={isDark}
+                                           onCheckedChange={(val) => setTheme(val ? "dark" : "light")} />} />
+          <KListRow icon={<KIcon icon="bitcoin_square" size={24} color="currentColor" />} label="배경 이미지"
+                    rightElement={<KSwitch checked={isBackgroundImg} onCheckedChange={setIsBackgroundImg} />} />
+          <KListRow icon={<AnimationIcon size={24} />} label="카운트 업 애니메이션"
+                    rightElement={<KSwitch checked={isCountUp} onCheckedChange={setIsCountUp} />}
           />
         </KListGroup>
 
@@ -95,10 +101,11 @@ export default function SettingsPage() {
 
         {/* 정보 및 기타 그룹 */}
         <KListGroup header="정보">
-          <KListRow icon={<KIcon icon="x_logo" size={24}/>} label="피드백" onClick={onRouteToFeedback} />
+          <KListRow icon={<KIcon icon="x_logo" size={24} />} label="피드백" onClick={onRouteToFeedback} />
           <ResourceSource />
-          <KListRow icon={<KIcon icon="dev" color="#333" size={24}/>} label="버전 정보"
-                    rightElement={<span className="text-[17px] text-muted-foreground">{import.meta.env.VITE_VERSION || "-"}</span>} />
+          <KListRow icon={<KIcon icon="dev" color="#333" size={24} />} label="버전 정보"
+                    rightElement={<span
+                      className="text-[17px] text-muted-foreground">{import.meta.env.VITE_VERSION || "-"}</span>} />
         </KListGroup>
       </div>
     </PageLayout>

@@ -1,7 +1,6 @@
 import { useOutletContext } from "react-router";
 import { usePageAnimation, type UsePageAnimation } from "@/shared/hooks";
-import { ConvertPanel } from "@/pages/btc2fiatPage/components";
-import PremiumBadge from "@/pages/btc2fiatPage/components/premiumBadge/PremiumBadge";
+import { ConvertPanel, PremiumBadge } from "@/pages/btc2fiatPage/components";
 import { PageLayout } from "@/layouts";
 
 

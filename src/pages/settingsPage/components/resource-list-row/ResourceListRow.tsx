@@ -1,11 +1,11 @@
 import { memo } from "react";
 import { KListRowAccordion } from "kku-ui";
-import { DataIcon } from "@/components";
+import { CodeXml } from "lucide-react";
 
 
 const ResourceListRow = () => (
   <KListRowAccordion value="resource" label="리소스 출처" className="resource-source"
-                     icon={<DataIcon size={22}/>}>
+                     icon={<CodeXml />}>
     <ul>
       {
         [
@@ -20,4 +20,9 @@ const ResourceListRow = () => (
     </ul>
   </KListRowAccordion>
 )
-export default memo(ResourceListRow);
+
+
+const MemoizedResourceListRow = memo(ResourceListRow);
+MemoizedResourceListRow.displayName = "ResourceListRow";
+
+export default MemoizedResourceListRow;

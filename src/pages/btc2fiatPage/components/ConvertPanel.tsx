@@ -3,7 +3,7 @@ import useStore from "@/shared/stores/store";
 import { comma, extractNumbers } from "@/shared/utils/string";
 import { UnitType } from "@/shared/stores/store.interface";
 import { btcToSatoshi, floorToDecimal } from "@/shared/utils/number";
-import ConvertCard from "@/pages/btc2fiatPage/components/ConvertCard";
+import { ConvertCard } from "@/pages/btc2fiatPage/components";
 
 
 const ConvertPanel = () => {

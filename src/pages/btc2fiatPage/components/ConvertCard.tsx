@@ -13,8 +13,7 @@ import {
 import { Copy } from "lucide-react";
 import { isNumber } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
-import PremiumField from "@/pages/btc2fiatPage/components/premiumField/PremiumField";
-import UnitDropdownMenu from "@/pages/btc2fiatPage/components/UnitDropdownMenu";
+import { PremiumField, UnitDropdownMenu } from "@/pages/btc2fiatPage/components";
 import { UnitType } from "@/shared/stores/store.interface";
 import { useCopyOnClick } from "@/shared/hooks";
 

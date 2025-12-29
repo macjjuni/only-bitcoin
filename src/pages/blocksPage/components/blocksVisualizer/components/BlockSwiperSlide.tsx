@@ -92,7 +92,7 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
       >
         {isDefaultRender && (
           <>
-            <p className="font-number text-[14px] font-bold layout-max:text-[18px]">
+            <p className="font-number text-[14px] font-bold layout-max:text-xl  ">
               {height}
             </p>
             <div className="flex flex-col items-center justify-center gap-1 font-number text-[12px] leading-[1.2] layout-max:gap-2 layout-max:text-[14px]">

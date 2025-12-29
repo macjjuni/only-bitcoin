@@ -1,4 +1,5 @@
 import { ChangeEvent, memo, useCallback, useMemo, useRef, useState } from "react";
+import { X, ClipboardPaste, Search } from 'lucide-react';
 import { KInputGroupAddon, KInputGroupInput, KButton, KIcon, KInputGroup } from "kku-ui";
 import { clipboardUtil } from "kku-util";
 
@@ -52,9 +53,9 @@ const TxSearcher = () => {
 
   // region [Template]
   const SearchRightAction = useMemo(() => (
-    <div className="flex items-center gap-1.5">
-      {txValue.length !== 0 && (<KIcon icon="close" color="currentColor" size={16} onClick={clearInput} />)}
-      <KIcon icon="paste" size={20} color="currentColor" onClick={onClickPasteIcon} />
+    <div className="flex items-center gap-1.5 [&&>svg]:cursor-pointer">
+      {txValue.length !== 0 && <X onClick={clearInput} />}
+      <ClipboardPaste size={24} className="p-0.5" onClick={onClickPasteIcon} />
       <KButton size="icon" variant="link" onClick={onRouteMempool} style={{ color: 'currentColor' }}>검색</KButton>
     </div>
 
@@ -63,8 +64,8 @@ const TxSearcher = () => {
 
   return (
       <KInputGroup className="mt-0.5 mb-2" size="lg">
-        <KInputGroupAddon align="inline-start">
-        <KIcon icon="search" size={20} color="currentColor" />
+        <KInputGroupAddon align="inline-start" className="pr-0">
+          <Search size={20} />
         </KInputGroupAddon>
         <KInputGroupInput ref={searchRef} value={txValue} onChange={onChangeTxInput}
                          placeholder="트랜잭션을 검색해 보세요" width="full"

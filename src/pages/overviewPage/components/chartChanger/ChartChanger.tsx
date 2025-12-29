@@ -1,13 +1,13 @@
 import { memo, useCallback } from "react";
 import {
   KDropdownMenu,
-  KDropdownMenuTrigger,
+  KDropdownMenuCheckboxItem,
   KDropdownMenuContent,
-  KDropdownMenuLabel,
   KDropdownMenuGroup,
-  KDropdownMenuCheckboxItem
+  KDropdownMenuLabel,
+  KDropdownMenuTrigger
 } from "kku-ui";
-import { DataIcon } from "@/components/ui/icon";
+import { ChartNoAxesCombined } from "lucide-react";
 import useStore from "@/shared/stores/store";
 import { OverviewChartType } from "@/shared/stores/store.interface";
 
@@ -40,7 +40,7 @@ const ChartChanger = () => {
           "data-[state=open]:bg-gray-200 dark:data-[state=open]:bg-gray-800"
         ].join(" ")}
       >
-        <DataIcon size={22} style={{ padding: 2 }} />
+        <ChartNoAxesCombined />
       </KDropdownMenuTrigger>
 
       <KDropdownMenuContent align="end" side="top" sideOffset={12}>
