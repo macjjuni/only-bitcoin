@@ -69,7 +69,7 @@ const ConvertCard = (props: ConvertCardProps) => {
 
   const onClickClear = useCallback(() => {
     onChange("0");
-  }, []);
+  }, [onChange]);
   // endregion
 
 
