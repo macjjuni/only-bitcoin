@@ -152,7 +152,7 @@ const ConvertPanel = () => {
     return (
       <ConvertCard inputActive={isCurrentCurrency} title="KRW(₩):" value={displayValue} unit="KRW"
                    onChange={onChangeKrw} onChangeUnit={onChangeUnit} isPremium={isShowPremiumExpression}
-                   topDescription={`${incrementValue}(Premium) + ${krw}`} bottomDescription={`1BTC = ${krwPrice}`} />
+                   topDescription={`${incrementValue}(Premium) + ${krw}`} bottomDescription={`1BTC = ${comma(krwPrice)}`} />
     );
   }, [krw, krwPrice, focusCurrency, calcPremium, premium, onChangeKrw, onChangeUnit]);
 
@@ -167,7 +167,7 @@ const ConvertPanel = () => {
       <ConvertCard inputActive={isCurrentCurrency} title="USD($):" value={displayValue}
                    onChange={onChangeUsd} onChangeUnit={onChangeUnit} unit="USD" isPremium={isShowPremiumExpression}
                    topDescription={`${incrementValue}(Premium) + ${usd}`}
-                   bottomDescription={`1${isUsdtStandard ? "USDT" : "USD"} : ${exRate} | 1BTC = ${usd}`} />
+                   bottomDescription={`1${isUsdtStandard ? "USDT" : "USD"} : ${comma(exRate)} | 1BTC = ${comma(usdPrice)}`} />
     );
   }, [usd, usdPrice, focusCurrency, exRate, calcPremium, premium, onChangeUsd, onChangeUnit]);
 
@@ -180,7 +180,7 @@ const ConvertPanel = () => {
     return (
       <ConvertCard inputActive={isCurrentCurrency} title="BTC(₿):" value={displayValue} unit="BTC"
                    onChange={onChangeBtcCount} onChangeUnit={onChangeUnit} isPremium={isShowPremiumExpression}
-                   topDescription={`${incrementValue} + ${btcCount}`} bottomDescription="1BTC = 100,000,000" />
+                   topDescription={`${incrementValue} + ${btcCount}`} bottomDescription="1BTC = 1BTC" />
     );
   }, [btcCount, focusCurrency, calcPremium, premium, onChangeBtcCount, onChangeUnit]);
 
@@ -193,7 +193,7 @@ const ConvertPanel = () => {
     return (
       <ConvertCard inputActive={isCurrentCurrency} title="Sats:" value={displayValue} unit="SATS"
                    onChange={onChangeSats} onChangeUnit={onChangeUnit} isPremium={isShowPremiumExpression}
-                   topDescription={`${incrementValue}(Premium) + ${sats}`} bottomDescription="1BTC = 100,000,000" />
+                   topDescription={`${incrementValue}(Premium) + ${sats}`} bottomDescription="1BTC = 100,000,000 Sats" />
     );
   }, [sats, focusCurrency, calcPremium, premium, onChangeSats, onChangeUnit]);
 
