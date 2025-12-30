@@ -61,4 +61,7 @@ const ChartChanger = () => {
   );
 };
 
-export default memo(ChartChanger);
+const MemoizedChartChanger = memo(ChartChanger);
+MemoizedChartChanger.displayName = "ChartChanger";
+
+export default MemoizedChartChanger;

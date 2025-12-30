@@ -139,5 +139,7 @@ const MarketChart = () => {
   );
 };
 
+const MemoizedMarketChart = memo(MarketChart);
+MemoizedMarketChart.displayName = "MarketChart";
 
-export default memo(MarketChart);
+export default MemoizedMarketChart;
