@@ -1,10 +1,13 @@
 import { CurrencyTypes } from "@/shared/stores/store.interface";
-import {BITHUMB_MARKET_FLAG, KrwMarketType, UsdMarketType, UPBIT_MARKET_FLAG, BINANCE_MARKET_FLAG, COINBASE_MARKET_FLAG} from '@/shared/constants/market'
+import {BITHUMB_MARKET_FLAG, KrwMarketType, UsdMarketType, UPBIT_MARKET_FLAG,
+  BINANCE_MARKET_FLAG, COINBASE_MARKET_FLAG} from '@/shared/constants/market'
+
 
 interface CurrencyOptionTypes {
   label: string;
   value: CurrencyTypes
 }
+
 export const currencyOptions: CurrencyOptionTypes[] = [
   { label: 'KRW/USD' , value: 'KRW/USD' },
   { label: 'USD' , value: 'USD' },
@@ -20,3 +23,10 @@ export const usdMarketOptions: { label: string; value: UsdMarketType }[] = [
 ]
 
 export const PWA_COOKIE_KEY = 'install' as const;
+
+export const sourceOptions = [
+  { label: "BTC", value: "Upbit, Bithumb, Binance, Coinbase" },
+  { label: "Dominance & Chart", value: "Coin Gecko" },
+  { label: "Fear & Greed Index", value: "alternative.me" },
+  { label: "USD/KRW Exchange Rate", value: "Naver(KEB)" }
+] as const;

@@ -6,7 +6,7 @@ import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 
 
-const InstallSettingForm = () => {
+const InstallListRowGroup = () => {
 
   // region [Hooks]
   const [isInstallMsg, setIsInstallMsg] = useState(false);
@@ -48,4 +48,7 @@ const InstallSettingForm = () => {
   );
 };
 
-export default memo(InstallSettingForm);
+const MemoizedInstallListRowGroup = memo(InstallListRowGroup);
+MemoizedInstallListRowGroup.displayName = "InstallListRowGroup";
+
+export default MemoizedInstallListRowGroup;

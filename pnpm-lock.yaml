@@ -33,8 +33,8 @@ dependencies:
     specifier: ^12.4.2
     version: 12.9.1(@types/node@18.19.130)
   kku-ui:
-    specifier: ^0.9.992
-    version: 0.9.992(@types/react-dom@19.2.3)(@types/react@19.2.7)(tailwindcss@3.4.19)
+    specifier: ^0.9.994
+    version: 0.9.994(@types/react-dom@19.2.3)(@types/react@19.2.7)(tailwindcss@3.4.19)
   kku-util:
     specifier: ^0.0.156
     version: 0.0.156
@@ -59,6 +59,9 @@ dependencies:
   react-ga4:
     specifier: ^2.1.0
     version: 2.1.0
+  react-qrcode-logo:
+    specifier: ^4.0.0
+    version: 4.0.0(react-dom@19.2.3)(react@19.2.3)
   react-router:
     specifier: ^7.10.1
     version: 7.11.0(react-dom@19.2.3)(react@19.2.3)
@@ -6322,8 +6325,8 @@ packages:
       json-buffer: 3.0.1
     dev: true
 
-  /kku-ui@0.9.992(@types/react-dom@19.2.3)(@types/react@19.2.7)(tailwindcss@3.4.19):
-    resolution: {integrity: sha512-hwvo/fEt7PC6AnuH7mh7f6MlyHnSAzf59+p2eYVPrKgvb456juEEmvgozfmO461MWPbZy183tKIDaiyc0oAslQ==}
+  /kku-ui@0.9.994(@types/react-dom@19.2.3)(@types/react@19.2.7)(tailwindcss@3.4.19):
+    resolution: {integrity: sha512-oGp0MzVV9p0IJHrfRKzxib/uJmOSpcfCdrWMtMyq/AfuUzYh//ODNGIQ7nXqK5Gm4KS6b3qtuAMDUawZ7KWgIw==}
     dependencies:
       '@radix-ui/react-accordion': 1.2.12(@types/react-dom@19.2.3)(@types/react@19.2.7)(react-dom@19.2.3)(react@19.2.3)
       '@radix-ui/react-dialog': 1.1.15(@types/react-dom@19.2.3)(@types/react@19.2.7)(react-dom@19.2.3)(react@19.2.3)
@@ -7666,6 +7669,10 @@ packages:
       escape-goat: 2.1.1
     dev: false
 
+  /qrcode-generator@2.0.4:
+    resolution: {integrity: sha512-mZSiP6RnbHl4xL2Ap5HfkjLnmxfKcPWpWe/c+5XxCuetEenqmNFf1FH/ftXPCtFG5/TDobjsjz6sSNL0Sr8Z9g==}
+    dev: false
+
   /qs@6.14.0:
     resolution: {integrity: sha512-YWWTjgABSKcvs/nWBi9PycY/JiPJqOD4JA6o9Sej2AtvSGarXxKC3OQSk4pAarbdQlKAh5D4FCQkJNkW+GAn3w==}
     engines: {node: '>=0.6'}
@@ -7752,6 +7759,17 @@ packages:
   /react-is@16.13.1:
     resolution: {integrity: sha512-24e6ynE2H+OKt4kqsOvNd8kBpV65zoxbA4BVsEOB3ARVWQki/DHzaUoC5KuON/BiccDaCCTZBuOcfZs70kR8bQ==}
     dev: true
+
+  /react-qrcode-logo@4.0.0(react-dom@19.2.3)(react@19.2.3):
+    resolution: {integrity: sha512-TcDdsJQe7P0OY7uA7Do4Z0DfIIjjqx81RbBGQY+90T2Ba42pUCx/cSI2UTwPPoH9WwE0StLb8A98mFgKIAI4JQ==}
+    peerDependencies:
+      react: '>=18.0.0'
+      react-dom: '>=18.0.0'
+    dependencies:
+      qrcode-generator: 2.0.4
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
+    dev: false
 
   /react-remove-scroll-bar@2.3.8(@types/react@19.2.7)(react@19.2.3):
     resolution: {integrity: sha512-9r+yi9+mgU33AKcj6IbT9oRCO78WriSj6t/cF8DWBZJ9aOGPOTEDvdUDz1FwKim7QXWwmHqtdHnRJfhAxEG46Q==}
