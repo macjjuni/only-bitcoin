@@ -1,26 +1,63 @@
-@import "tailwindcss";
+@import "kku-ui/index.css";
+@import "@/styles/fonts.css";
 
-:root {
-  --background: #ffffff;
-  --foreground: #171717;
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+
+@layer utilities {
+    .scrollbar-hide::-webkit-scrollbar { display: none; }
+    .scrollbar-hide { -ms-overflow-style: none; scrollbar-width: none; }
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
 
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+@layer base {
 
-body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+    :root {
+        --bitcoin-color: #f7931a;
+
+        --background: 0 0% 100%;
+        --header-height: 52px;
+        --navigation-height: 82px;
+
+        --default-font: JetBrains Mono, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
+        Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+        --number-font: 'Roboto Mono', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
+        'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
+    }
+    .dark { --background: 0 0% 7.1%; }
+
+    html, body {
+        scrollbar-width: none;
+        overscroll-behavior: none;
+    }
+
+    body {
+        @apply relative font-default;
+        margin: 0;
+        line-height: 1;
+        -webkit-font-smoothing: antialiased;
+        -moz-osx-font-smoothing: grayscale;
+    }
+
+    body.show-bg {
+        @apply bg-no-repeat bg-fixed bg-center;
+
+        background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif');
+        background-size: 420px;
+        background-repeat: no-repeat;
+        background-attachment: fixed;
+        background-position: center calc(50% - (theme(height.navigation) / 2));
+        z-index: 1;
+
+        &::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            z-index: -1;
+            opacity: 0.8;
+            background-color: hsl(var(--background));
+        }
+    }
 }

@@ -1,0 +1,1 @@
+export { default as PremiumPanel } from "@/pages/premiumPage/components/PremiumPanel"
