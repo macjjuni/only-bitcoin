@@ -1,7 +1,7 @@
 'use client'
 
 import { useEffect, useState } from 'react'
-import { useRouter } from 'next/navigation' // 수정됨
+import { useTransitionRouter } from 'next-view-transitions'
 import { KButton, kToast } from 'kku-ui'
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable'
 import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core'
@@ -15,14 +15,14 @@ import WidgetItem from './WidgetItem'
 interface MacroVO {
   id: number;
   label: string;
-  value: number | string;
+  value: number;
   decimals: number;
   sign: string | null;
   onClick?: () => void;
 }
 
 export default function MacroWidgetPanel() {
-  const router = useRouter()
+  const router = useTransitionRouter()
   const [isEditMode, setIsEditMode] = useState(false)
   const [IsFearAndGreedDialog, setIsFearAndGreedDialog] = useState(false)
 
@@ -37,7 +37,7 @@ export default function MacroWidgetPanel() {
   const fearGreedData = useFearGreedIndex()
 
   // 변수 계산 (useMemo 제거)
-  const premium = usdExRate !== 0 ? calcPremiumPercent(krw, usd, usdExRate) : 'Error'
+  const premium = calcPremiumPercent(krw, usd, usdExRate)
 
   // Actions
   const toggleEditMode = () => setIsEditMode((p) => !p)

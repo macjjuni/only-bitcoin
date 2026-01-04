@@ -33,18 +33,18 @@ export default function PricePanel() {
             .filter(({ code }) => currency.includes(code))
             .map(({ code, sign, price, percent, signSize }) => (
               <div key={code}
-                   className="flex justify-between items-center w-full font-bold whitespace-nowrap overflow-hidden text-xl font-number">
+                   className="flex justify-between items-center gap-3 w-full font-bold whitespace-nowrap overflow-hidden text-xl font-number">
 
-                <div className="flex justify-start items-center">
+                <div className="flex items-center gap-1 flex-1">
                   <span className={`flex justify-center content-center w-6 ${signSize}`}>{sign}</span>
                   <CountText value={price} className="text-3xl"/>
                 </div>
 
-                <div className="flex justify-center items-center gap-1 text-sm">
+                <div className="flex justify-end items-center w-[72px] flex-shrink-0 gap-1 text-sm">
                   <UpdownIcon isUp={percent > 0}/>
-                  <span className="w-[60px] text-right">
-                  {percent > 0 && '+'}
-                    <CountText value={percent} decimals={2}/>%
+                  <span className="text-right">
+                    <CountText value={percent} decimals={2}/>
+                    %
                 </span>
                 </div>
 

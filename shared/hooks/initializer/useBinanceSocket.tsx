@@ -64,7 +64,7 @@ export default function useBinanceWebSocket() {
     };
 
     socket.onerror = (e) => {
-      console.error("Binance WebSocket Error:", e);
+      console.warn("Binance WebSocket Error:", e);
       kToast.error("바이낸스 연결 오류");
 
       if (!isNetwork()) {

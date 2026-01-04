@@ -88,7 +88,7 @@ export default function useMempoolSocket() {
     };
 
     socket.onerror = (e) => {
-      console.error("🔴 Mempool WebSocket 오류:", e);
+      console.warn("🔴 Mempool WebSocket 오류:", e);
     };
 
     socket.onclose = (e) => {

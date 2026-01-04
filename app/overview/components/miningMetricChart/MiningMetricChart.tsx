@@ -8,10 +8,10 @@ import { useLottie } from 'lottie-react'
 import {
   ChartJsDataType,
   MarketChartIntervalTypeList,
-} from '@/pages/overviewPage/components/miningMetricChart/MiningMetricChart.interface'
+} from '@/app/overview/components/miningMetricChart/MiningMetricChart.interface'
 import type { MiningMetricChartIntervalType } from '@/shared/stores/store.interface'
 import { CountText, UpdownIcon } from '@/components'
-import { ChartChanger } from '@/pages/overviewPage/components'
+import { ChartChanger } from '@/app/overview/components'
 import { useMiningMetricChartData } from '@/shared/api'
 import { formatDifficulty, formatHashrate } from '@/shared/utils/number'
 import LightningLottieData from '@/shared/assets/lottie/lightning.json'

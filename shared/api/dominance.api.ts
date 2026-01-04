@@ -40,14 +40,14 @@ const fetchBitcoinDominance = async (): Promise<number> => {
 };
 
 
-const useBitcoinDominanceQuery = (): number | string => {
+const useBitcoinDominanceQuery = (): number => {
 
   // region [Hooks]
 
   const STALE_TIME_MIN = 10;
   const REFETCH_TIME_MIN = 10;
 
-  const { data: dominance, error, isLoading, isError } = useQuery<number>({
+  const { data: dominance, error, isError } = useQuery<number>({
     queryKey: ["bitcoin-dominance"],
     queryFn: fetchBitcoinDominance,
     staleTime: 1000 * 60 * STALE_TIME_MIN, // 10분 동안 데이터 유효
@@ -71,8 +71,7 @@ const useBitcoinDominanceQuery = (): number | string => {
 
   // endregion
 
-  const value = isError ? "Error" : (dominance || 'Error');
-  return isLoading ? "Loading.." : value;
+  return isError ? 0 : dominance || 0;
 };
 
 export default useBitcoinDominanceQuery;

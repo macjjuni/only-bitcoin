@@ -1,8 +1,8 @@
 "use client";
 
-import Link from "next/link";
+import { Link } from 'next-view-transitions'
 import { usePathname } from "next/navigation";
-import { navigationRouteList } from "@/shared/constants/config";
+import { navigationRouteList } from "@/shared/constants/route";
 
 export default function BottomNavigation() {
   const pathname = usePathname();

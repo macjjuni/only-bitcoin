@@ -2,6 +2,7 @@
 
 import { KAspectRatio, KDialog, KDialogContent, KDialogHeader, KDialogTitle } from 'kku-ui'
 import LazyImage from '@/components/ui/LazyImage'
+import { useMemo } from 'react'
 
 interface ModalTypes {
   open: boolean;
@@ -9,6 +10,11 @@ interface ModalTypes {
 }
 
 export default function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
+
+  // region [Hooks]
+  // eslint-disable-next-line react-hooks/purity
+  const imageUrl = useMemo(() => (`https://alternative.me/crypto/fear-and-greed-index.png?${Date.now()}`), [open]);
+  // endregion
 
   return (
     <KDialog open={open} onOpenChange={setOpen} blur={2} size="sm">
@@ -19,8 +25,7 @@ export default function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
           </KDialogTitle>
         </KDialogHeader>
         <KAspectRatio ratio={1.1146}>
-          <LazyImage src={`https://alternative.me/crypto/fear-and-greed-index.png?${Date.now()}`}
-                     alt="공포 & 탐욕 지수" className="h-full"/>
+          <LazyImage src={imageUrl} alt="공포 & 탐욕 지수" className="h-full"/>
         </KAspectRatio>
       </KDialogContent>
     </KDialog>

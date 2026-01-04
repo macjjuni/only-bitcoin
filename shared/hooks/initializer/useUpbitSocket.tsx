@@ -92,7 +92,7 @@ export default function useUpbitWebSocket() {
     };
 
     socket.onerror = (e) => {
-      console.error("Upbit WebSocket Error:", e);
+      console.warn("Upbit WebSocket Error:", e);
       kToast.error("Upbit 연결 오류");
 
       if (!isNetwork()) {

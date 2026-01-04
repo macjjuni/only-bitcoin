@@ -1,8 +1,8 @@
-import type { Metadata, Viewport } from 'next'
 import { ReactNode } from 'react'
+import type { Metadata, Viewport } from 'next'
+import { ViewTransitions } from 'next-view-transitions'
+import { BottomNavigation, Content, DefaultLayout, Header } from '@/layouts'
 import QueryProvider from '@/components/provider/QueryProvider'
-import DefaultLayout from '@/layouts/defaultLayout/DefaultLayout'
-import { BottomNavigation, Content, Header } from '@/layouts'
 import { Initializer } from '@/components'
 import './globals.css'
 
@@ -67,19 +67,21 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
 
   return (
-    <html lang="ko">
-    <body>
-    <QueryProvider>
-      <Initializer/>
-      <DefaultLayout>
-        <Header />
-        <Content>
-        {children}
-        </Content>
-        <BottomNavigation />
-      </DefaultLayout>
-    </QueryProvider>
-    </body>
-    </html>
+    <ViewTransitions>
+      <html lang="ko">
+      <body>
+      <QueryProvider>
+        <Initializer/>
+        <DefaultLayout>
+          <Header/>
+          <Content>
+            {children}
+          </Content>
+          <BottomNavigation/>
+        </DefaultLayout>
+      </QueryProvider>
+      </body>
+      </html>
+    </ViewTransitions>
   )
 }

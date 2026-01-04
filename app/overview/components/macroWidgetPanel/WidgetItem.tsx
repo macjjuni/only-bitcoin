@@ -5,11 +5,12 @@ import { useSortable } from '@dnd-kit/sortable'
 import { CSS } from '@dnd-kit/utilities'
 import { KIcon } from 'kku-ui'
 import { CountText } from '@/components'
+import { useMounted } from '@/shared/hooks'
 
 export interface WidgetItemProps {
   id: number;
   label: string;
-  value?: number | string;
+  value: number;
   sign: string | null;
   decimals: number;
   onClick?: () => void;
@@ -17,9 +18,19 @@ export interface WidgetItemProps {
   isEditMode: boolean;
 }
 
-export default function WidgetItem({ id, label, value, sign, decimals, onClick, isEditMode, onRemove }: WidgetItemProps) {
+export default function WidgetItem({
+                                     id,
+                                     label,
+                                     value,
+                                     sign,
+                                     decimals,
+                                     onClick,
+                                     isEditMode,
+                                     onRemove,
+                                   }: WidgetItemProps) {
 
   // region [Hooks]
+  const isMount = useMounted()
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id })
 
   const style = useMemo(() => ({
@@ -57,19 +68,12 @@ export default function WidgetItem({ id, label, value, sign, decimals, onClick, 
       <div className={widgetClass} onClick={onClickWidget}>
 
         {/* Label Area */}
-        <div className="text-[15px] opacity-70 tracking-[-1px]">
-          {label}
-        </div>
+        <div className="text-[15px] opacity-70 tracking-[-1px]">{label}</div>
 
         {/* Value Area */}
         <div className="font-number text-xl font-bold">
-          {typeof value === 'number' && (
-            <>
-              <CountText value={value} decimals={decimals}/>
-              <span className="text-base font-bold ml-0.5">{sign}</span>
-            </>
-          )}
-          {typeof value === 'string' && value}
+          <CountText value={value} decimals={decimals}/>
+          { isMount && <span className="text-base font-bold ml-0.5">{sign}</span> }
         </div>
 
         {/* Remove Button */}

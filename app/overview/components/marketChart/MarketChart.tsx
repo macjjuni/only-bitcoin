@@ -7,11 +7,11 @@ import { KSpinner } from 'kku-ui'
 import {
   ChartJsDataType,
   MarketChartIntervalTypeList,
-} from '@/pages/overviewPage/components/marketChart/MarketChart.interface'
+} from '@/app/overview/components/marketChart/MarketChart.interface'
 import { MarketChartIntervalType } from '@/shared/stores/store.interface'
 import useStore from '@/shared/stores/store'
 import { useMarketChartData } from '@/shared/api'
-import { ChartChanger } from '@/pages/overviewPage/components'
+import { ChartChanger } from '@/app/overview/components'
 
 
 // Chart.js 컴포넌트 등록

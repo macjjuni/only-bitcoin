@@ -17,6 +17,9 @@ importers:
       '@dnd-kit/utilities':
         specifier: ^3.2.2
         version: 3.2.2(react@19.2.3)
+      '@tanstack/query-async-storage-persister':
+        specifier: ^5.90.18
+        version: 5.90.18
       '@tanstack/query-sync-storage-persister':
         specifier: ^5.90.18
         version: 5.90.18
@@ -30,8 +33,8 @@ importers:
         specifier: ^4.5.1
         version: 4.5.1
       kku-ui:
-        specifier: ^0.9.994
-        version: 0.9.994(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(tailwindcss@3.4.19)
+        specifier: ^0.9.995
+        version: 0.9.995(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(tailwindcss@3.4.19)
       kku-util:
         specifier: ^0.0.157
         version: 0.0.157
@@ -44,6 +47,9 @@ importers:
       next:
         specifier: 16.1.1
         version: 16.1.1(@babel/core@7.28.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.1)
+      next-view-transitions:
+        specifier: ^0.3.5
+        version: 0.3.5(next@16.1.1(@babel/core@7.28.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.1))(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       react:
         specifier: 19.2.3
         version: 19.2.3
@@ -69,6 +75,9 @@ importers:
         specifier: ^5.0.9
         version: 5.0.9(@types/react@19.2.7)(react@19.2.3)
     devDependencies:
+      '@tanstack/react-query-devtools':
+        specifier: ^5.91.2
+        version: 5.91.2(@tanstack/react-query@5.90.16(react@19.2.3))(react@19.2.3)
       '@types/node':
         specifier: ^20
         version: 20.19.27
@@ -997,14 +1006,26 @@ packages:
   '@swc/helpers@0.5.15':
     resolution: {integrity: sha512-JQ5TuMi45Owi4/BIMAJBoSQoOJu12oOk/gADqlcUL9JEdHB8vyjUSsxqeNXnmXHjYKMi2WcYtezGEEhqUI/E2g==}
 
+  '@tanstack/query-async-storage-persister@5.90.18':
+    resolution: {integrity: sha512-vCZHpodK3N7MQuRGi79YB/+steiAJnCWD78VbVl79+ysoFHsbD85UX+x40uTicXxml5E2kmxn7Yb4Kbwh6TpLQ==}
+
   '@tanstack/query-core@5.90.16':
     resolution: {integrity: sha512-MvtWckSVufs/ja463/K4PyJeqT+HMlJWtw6PrCpywznd2NSgO3m4KwO9RqbFqGg6iDE8vVMFWMeQI4Io3eEYww==}
+
+  '@tanstack/query-devtools@5.92.0':
+    resolution: {integrity: sha512-N8D27KH1vEpVacvZgJL27xC6yPFUy0Zkezn5gnB3L3gRCxlDeSuiya7fKge8Y91uMTnC8aSxBQhcK6ocY7alpQ==}
 
   '@tanstack/query-persist-client-core@5.91.15':
     resolution: {integrity: sha512-vnPSfQVo41EKJN8v20nkhWNZPyB1dMJIy5icOvCGzcCJzsmRefYY1owtr63ICOcjOiPPTuNEfPsdjdBhkzYnmA==}
 
   '@tanstack/query-sync-storage-persister@5.90.18':
     resolution: {integrity: sha512-tKngFopz/TuAe7LBDg7IOhWPh9blxdQ6QG/vVL2dFzRmlPNcSo4WdCSONqSDioJkcyTwh1YCSlcikmJ1WnSb3Q==}
+
+  '@tanstack/react-query-devtools@5.91.2':
+    resolution: {integrity: sha512-ZJ1503ay5fFeEYFUdo7LMNFzZryi6B0Cacrgr2h1JRkvikK1khgIq6Nq2EcblqEdIlgB/r7XDW8f8DQ89RuUgg==}
+    peerDependencies:
+      '@tanstack/react-query': ^5.90.14
+      react: ^18 || ^19
 
   '@tanstack/react-query-persist-client@5.90.18':
     resolution: {integrity: sha512-ToVRTVpjzTrd9S/p7JIvGdLs+Xtz9aDMM/7+TQGSV9notY8Jt64irfAAAkZ05syftLKS+3KPgyKAnHcVeKVbWQ==}
@@ -1970,8 +1991,8 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
-  kku-ui@0.9.994:
-    resolution: {integrity: sha512-oGp0MzVV9p0IJHrfRKzxib/uJmOSpcfCdrWMtMyq/AfuUzYh//ODNGIQ7nXqK5Gm4KS6b3qtuAMDUawZ7KWgIw==}
+  kku-ui@0.9.995:
+    resolution: {integrity: sha512-UgfV3euS1tianWzL1FQzUxfIrzjbW0ZYnSyF5avaQLdWvlRLSW/iYtIHYo8JO6DgMSsO9iAYyYmONbNg7IDciQ==}
 
   kku-util@0.0.157:
     resolution: {integrity: sha512-hNMOzj9oAdANnUzzvZekL63v6DCw6mA0cojJv6VKjGCwNHdDs6ma7BxTA2Ac3kRMd4DiThTffe+zETMrQMbe4Q==}
@@ -2065,6 +2086,13 @@ packages:
 
   natural-compare@1.4.0:
     resolution: {integrity: sha512-OWND8ei3VtNC9h7V60qff3SVobHr996CTwgxubgyQYEpg290h9J0buyECNNJexkFm5sOajh5G116RYA1c8ZMSw==}
+
+  next-view-transitions@0.3.5:
+    resolution: {integrity: sha512-yP8OPNydLmKpmE94hLurLGEzPsUy1uyl9iSv8oxaC2JwhSXTD86SVwk1NMMQT7Ado4kMENDJ7fNBIXHy3GU/Lg==}
+    peerDependencies:
+      next: '>=14.0.0'
+      react: '>=18.2.0 || ^19.0.0'
+      react-dom: '>=18.2.0 || ^19.0.0'
 
   next@16.1.1:
     resolution: {integrity: sha512-QI+T7xrxt1pF6SQ/JYFz95ro/mg/1Znk5vBebsWwbpejj1T0A23hO7GYEaVac9QUOT2BIMiuzm0L99ooq7k0/w==}
@@ -3551,7 +3579,14 @@ snapshots:
     dependencies:
       tslib: 2.8.1
 
+  '@tanstack/query-async-storage-persister@5.90.18':
+    dependencies:
+      '@tanstack/query-core': 5.90.16
+      '@tanstack/query-persist-client-core': 5.91.15
+
   '@tanstack/query-core@5.90.16': {}
+
+  '@tanstack/query-devtools@5.92.0': {}
 
   '@tanstack/query-persist-client-core@5.91.15':
     dependencies:
@@ -3561,6 +3596,12 @@ snapshots:
     dependencies:
       '@tanstack/query-core': 5.90.16
       '@tanstack/query-persist-client-core': 5.91.15
+
+  '@tanstack/react-query-devtools@5.91.2(@tanstack/react-query@5.90.16(react@19.2.3))(react@19.2.3)':
+    dependencies:
+      '@tanstack/query-devtools': 5.92.0
+      '@tanstack/react-query': 5.90.16(react@19.2.3)
+      react: 19.2.3
 
   '@tanstack/react-query-persist-client@5.90.18(@tanstack/react-query@5.90.16(react@19.2.3))(react@19.2.3)':
     dependencies:
@@ -4694,7 +4735,7 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  kku-ui@0.9.994(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(tailwindcss@3.4.19):
+  kku-ui@0.9.995(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(tailwindcss@3.4.19):
     dependencies:
       '@radix-ui/react-accordion': 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
       '@radix-ui/react-dialog': 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.7))(@types/react@19.2.7)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)
@@ -4799,6 +4840,12 @@ snapshots:
   napi-postinstall@0.3.4: {}
 
   natural-compare@1.4.0: {}
+
+  next-view-transitions@0.3.5(next@16.1.1(@babel/core@7.28.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.1))(react-dom@19.2.3(react@19.2.3))(react@19.2.3):
+    dependencies:
+      next: 16.1.1(@babel/core@7.28.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.1)
+      react: 19.2.3
+      react-dom: 19.2.3(react@19.2.3)
 
   next@16.1.1(@babel/core@7.28.5)(react-dom@19.2.3(react@19.2.3))(react@19.2.3)(sass@1.97.1):
     dependencies:

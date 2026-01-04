@@ -1,5 +1,5 @@
 import { useEffect } from "react";
-import { useQuery } from '@tanstack/react-query';
+import { useQuery, keepPreviousData } from '@tanstack/react-query';
 import { kToast } from "kku-ui";
 import { MarketChartIntervalType } from '@/shared/stores/store.interface';
 import fetcher from "@/shared/utils/fetcher";
@@ -28,21 +28,26 @@ async function fetchMarketChart(days: MarketChartIntervalType): Promise<MarketCh
 }
 
 const MARKET_CHART_API_URL = 'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart';
-const STALE_TIME_MIN = 5;
-const INTERVAL_TIME_MIN = 5;
+const REFRESH_TIME = 1000 * 60 * 5; // 5분
 
 const useMarketChart= (days: MarketChartIntervalType) => {
 
   // region [Hooks]
 
   const { data: marketChartData, isPending, isSuccess, isError, error} = useQuery<MarketChartFormattedData>({
-    queryKey: ['marketChart', days],
+    queryKey: ['marketChart', String(days)],
     queryFn: () => fetchMarketChart(days),
-    staleTime: 60 * 1000 * STALE_TIME_MIN,
+
+    staleTime: REFRESH_TIME,
+    gcTime: REFRESH_TIME,
+
+    refetchOnMount: false,
     refetchOnWindowFocus: false,
-    refetchInterval: 60 * 1000 * INTERVAL_TIME_MIN,
-    placeholderData: (previousData) => previousData,
-    retry: 1,
+    refetchOnReconnect: false,
+
+    refetchInterval: REFRESH_TIME,
+    placeholderData: keepPreviousData,
+    retry: 0,
   });
 
   // endregion

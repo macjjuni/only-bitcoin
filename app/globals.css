@@ -44,6 +44,8 @@
     body.show-bg {
         @apply bg-no-repeat bg-fixed bg-center;
 
+        overflow-x: hidden;
+        overflow-y: auto;
         background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif');
         background-size: 420px;
         background-repeat: no-repeat;
@@ -55,7 +57,7 @@
             content: '';
             position: fixed;
             inset: 0;
-            z-index: -1;
+            z-index: -2;
             opacity: 0.8;
             background-color: hsl(var(--background));
         }
