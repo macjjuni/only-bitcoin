@@ -26,7 +26,7 @@ export default function Header() {
       <h2 className="font-bold tracking-[-1px] text-current">
         <Link href={initialPath} className="flex justify-start items-center gap-2 text-current dark:text-current !no-underline
               text-3xl font-bold">
-          <KIcon icon="bitcoin" size={36}/>
+          <KIcon id="bitcoin" icon="bitcoin" size={36}/>
           ₿itcoin
         </Link>
       </h2>
