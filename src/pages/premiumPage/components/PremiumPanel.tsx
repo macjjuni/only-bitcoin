@@ -38,7 +38,7 @@ const PremiumPanel = () => {
         <KCardContent className="flex items-center gap-1 text-[40px] text-current font-bold">
           {usdExRate !== 0 ? (
             <>
-              <span className="text-3xl">{ PremiumPercent > 0 ? '+' : '-' }</span>
+              <span className="text-3xl">{ PremiumPercent > 0 ? '+' : '' }</span>
               <CountText value={PremiumPercent} decimals={2} />
               %
             </>
