@@ -21,7 +21,7 @@ export default function PremiumPage() {
   // endregion
 
   return (
-    <PageLayout className="gap-3 overflow-hidden [perspective:1000px]">
+    <PageLayout className="gap-1 overflow-x-hidden [perspective:1000px]">
       <div className="absolute top-[-88px] right-[-160px] opacity-100 -z-[1] animate-swing">
         {PremiumLottie}
       </div>
