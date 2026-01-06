@@ -13,11 +13,12 @@ interface BlockSwiperSlideProps {
   isUnmined?: boolean;
   isGenesis?: boolean;
   onClick?: (blockNumber: string) => void;
+  onClickGenesis?: (blockNumber?: string) => void;
 }
 
 const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
   // region [Hooks]
-  const { isUnmined, isGenesis, id, height, size, poolName, timestamp, onClick } = props;
+  const { isUnmined, isGenesis, id, height, size, poolName, timestamp, onClick, onClickGenesis } = props;
 
   const diffNowMin = useMemo(() => calcCurrentDateDifference(timestamp || 0, "minute"), [timestamp]);
   const isDefaultRender = useMemo(() => !isUnmined, [isUnmined]);
@@ -59,8 +60,10 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
   const onClickBlock = useCallback(() => {
     if (!isGenesis && id) {
       onClick?.(id);
+    } else {
+      onClickGenesis?.(id);
     }
-  }, [id, isGenesis, onClick]);
+  }, [id, isGenesis, onClick, onClickGenesis]);
   // endregion
 
   // region [Templates]
@@ -75,7 +78,7 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
   // endregion
 
   return (
-    <SwiperSlide className="relative pt-[20px] pr-0  pb-2 pl-[20px] !-translate-x-[64px]">
+    <SwiperSlide className="relative pt-[20px] pr-0  pb-2 pl-[20px] cursor-pointer !-translate-x-[64px]">
       {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
       <div
         onClick={onClickBlock}
