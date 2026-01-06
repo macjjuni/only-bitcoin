@@ -67,13 +67,11 @@ export default function PremiumPage() {
         />
         <KListRow
           icon={<LazyImage src="https://powbitcoiner.com/favicon.ico"/>}
-          label="포우 POW"
-          rightElement={<ExternalLink size={20} className="text-muted-foreground"/>}
+          label="포우 POW" rightElement={<ExternalLink size={20} className="text-muted-foreground"/>}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.POW)}
         />
         <KListRow
-          icon={<NaverIcon size={28}/>}
-          label="비트코인⚡️지분전쟁: 시타델"
+          icon={<NaverIcon size={28}/>} label="비트코인⚡️지분전쟁: 시타델"
           rightElement={<ExternalLink size={20} className="text-muted-foreground"/>}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_CAFE)}
         />
@@ -83,13 +81,11 @@ export default function PremiumPage() {
       <KListGroup header="서비스">
         <KListRow
           icon={<LazyImage src="https://store.btcmap.kr/static/images/icons/icon-100x100.png"/>}
-          label="BTCmap"
-          rightElement={<ExternalLink size={20} className="text-muted-foreground"/>}
+          label="BTCmap" rightElement={<ExternalLink size={20} className="text-muted-foreground"/>}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.SATOSHOP)}
         />
         <KListRow
-          icon={<NaverIcon size={28}/>}
-          label="비트코인 결제 매장"
+          icon={<NaverIcon size={28}/>} label="비트코인 결제 매장"
           rightElement={<ExternalLink size={20} className="text-muted-foreground"/>}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.BTC_MAP)}
         />
@@ -98,30 +94,24 @@ export default function PremiumPage() {
       {/* 아카데미 */}
       <KListGroup header="아카데미">
         <KListRow
-          icon={<KIcon icon="notion" size={28}/>}
-          label="ATOMIC⚡️₿ITCOIN 노션"
+          icon={<KIcon icon="notion" size={28}/>} label="ATOMIC⚡️₿ITCOIN 노션"
           rightElement={<ExternalLink size={20} className="text-muted-foreground"/>}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.ATOMIC_BTC_NOTION)}
-        />
+          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.ATOMIC_BTC_NOTION)}/>
         <KListRow
-          icon={<PageIcon size={28}/>}
-          label="화폐와 정부 그리고 비트코인"
+          icon={<PageIcon size={28}/>} label="화폐와 정부 그리고 비트코인"
           rightElement={<ExternalLink size={20} className="text-muted-foreground"/>}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.FIAT_GOV_BITCOIN_DOC)}
-        />
+          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.FIAT_GOV_BITCOIN_DOC)}/>
       </KListGroup>
 
       {/* 유틸리티 */}
       <KListGroup header="유틸리티">
         <KListRow
-          icon={<Images size={28}/>}
-          label="밈 저장소"
+          icon={<Images size={28}/>} label="밈 저장소"
           rightElement={<ChevronRight className="text-muted-foreground"/>}
           onClick={handleMemeRoute}
         />
         <KListRow
-          icon={<TableProperties size={28}/>}
-          label="BIP39"
+          icon={<TableProperties size={28}/>} label="BIP39"
           rightElement={<ChevronRight className="text-muted-foreground"/>}
           onClick={handleBIP39Route}
         />

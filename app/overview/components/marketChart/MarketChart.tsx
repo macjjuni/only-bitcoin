@@ -98,7 +98,7 @@ export default function MarketChart() {
           <Line
             ref={chartRef}
             data={currentChartData}
-            height="180%"
+            height="172%"
             className="bg-transparent z-[3]"
             options={{
               plugins: {

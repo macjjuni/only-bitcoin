@@ -158,7 +158,7 @@ export default function MiningMetricChart() {
 
 
   const ChartArea = useMemo(() => (
-    <Line ref={chartRef} data={CurrentChartData} height="150%"
+    <Line ref={chartRef} data={CurrentChartData} height="140%"
           className="mining-metric-chart__chart__wrapper__body"
           options={{
             plugins: {
