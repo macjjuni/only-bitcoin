@@ -1,6 +1,6 @@
 "use client";
 
-import { Link } from 'next-view-transitions'
+import { TransitionLink } from "@/components";
 import { usePathname } from "next/navigation";
 import { navigationRouteList } from "@/shared/constants/route";
 
@@ -8,14 +8,18 @@ export default function BottomNavigation() {
   const pathname = usePathname();
 
   return (
-    <nav className="fixed bottom-0 left-0 z-[1] h-bottom-nav w-full overflow-hidden border-t border-border bg-transparent pb-2 backdrop-blur-[8px] layout-max:left-1/2 layout-max:max-w-[calc(theme(maxWidth.layout)-2px)] layout-max:-translate-x-1/2">
+    <nav className={[
+      'only-btc__bottom-nav',
+      'fixed bottom-0 left-0 z-[1] h-bottom-nav overflow-hidden border-t border-border bg-transparent pb-2 backdrop-blur-[8px]',
+      'w-full layout-max:left-1/2 layout-max:max-w-[calc(theme(maxWidth.layout)-2px)] layout-max:-translate-x-1/2'
+    ].filter(Boolean).join(' ')}>
       <ul className="flex h-full w-full items-center justify-around">
         {navigationRouteList.map(({ path, icon }) => {
           const isActive = pathname === path;
 
           return (
             <li key={path} className="relative z-0">
-              <Link
+              <TransitionLink
                 href={path}
                 className={`flex items-center justify-center rounded-lg p-3 transition-colors tap-highlight-transparent z-10 ${
                   isActive
@@ -26,7 +30,7 @@ export default function BottomNavigation() {
                 <span className="inline-block text-[0px]">
                   {icon}
                 </span>
-              </Link>
+              </TransitionLink>
             </li>
           );
         })}

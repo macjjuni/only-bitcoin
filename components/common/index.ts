@@ -1,0 +1,1 @@
+export { default as TransitionLink } from '@/components/common/TransitionLink';

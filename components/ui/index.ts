@@ -3,6 +3,7 @@ export { default as NotKeyNotYourBitcoin } from './NotKeyNotYourBitcoin';
 export { default as ConnectionDot } from './ConnectionDot';
 export { default as UpdownIcon } from './UpdownIcon';
 export { default as CountText } from "./CountText";
+export { default as Lottie } from "./lottie/Lottie";
 
 export * from './icon';
 

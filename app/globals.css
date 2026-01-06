@@ -12,27 +12,45 @@
 }
 
 
-@layer base {
+.only-btc__header { view-transition-name: main-header; }
+.only-btc__bottom-nav { view-transition-name: bottom-nav; }
 
+::view-transition-old(root),
+::view-transition-new(root) {
+    mix-blend-mode: normal;
+    height: 100vh;
+}
+::view-transition-old(root) {
+    @apply animate-view-exit;
+}
+
+html.slide-left::view-transition-new(root) {
+    @apply animate-view-enter-right;
+    z-index: 1;
+}
+html.slide-right::view-transition-new(root) {
+    @apply animate-view-enter-left;
+    z-index: 1;
+}
+html.slide-first::view-transition-new(root) {
+    @apply animate-view-enter-first;
+}
+/* endregion */
+
+
+@layer base {
     :root {
         --bitcoin-color: #f7931a;
-
         --background: 0 0% 100%;
         --header-height: 52px;
         --navigation-height: 82px;
-
         --default-font: JetBrains Mono, ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue',
         Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
         --number-font: 'Roboto Mono', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', Roboto,
         'Helvetica Neue', Arial, 'Noto Sans', sans-serif, 'Apple Color Emoji', 'Segoe UI Emoji', 'Segoe UI Symbol', 'Noto Color Emoji';
     }
     .dark { --background: 0 0% 7.1%; }
-
-    html, body {
-        scrollbar-width: none;
-        overscroll-behavior: none;
-    }
-
+    html, body { scrollbar-width: none; overscroll-behavior: none; }
     body {
         @apply relative font-default;
         margin: 0;
@@ -43,7 +61,6 @@
 
     body.show-bg {
         @apply bg-no-repeat bg-fixed bg-center;
-
         overflow-x: hidden;
         overflow-y: auto;
         background-image: url('https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif');

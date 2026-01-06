@@ -8,10 +8,10 @@ const clientRoutes = [
   { title: 'Premium', path: '/premium', isNav: true, isFavorite: true, icon: <PremiumIcon size={30}/> },
   { title: 'Orange Pill', path: '/orange-pill', isNav: true, isFavorite: true, icon: <PillIcon size={30}/> },
   { title: 'BIP39', path: '/orange-pill/bip39', isNav: false, isFavorite: false, icon: null },
-  { title: 'Settings', path: '/settings', isNav: false, isFavorite: false, icon: null },
   { title: 'Meme', path: '/orange-pill/meme', isNav: false, isFavorite: false, icon: null },
   { title: 'Meme_temp', path: '/meme', replace: '/orange-pill/meme', isNav: false, isFavorite: false, icon: null },
   { title: '404 - Not Found', path: '/*', isNav: false, isFavorite: false, icon: null },
+  { title: 'Settings', path: '/settings', isNav: false, isFavorite: false, icon: null },
 ]
 
 export const allRouteList = clientRoutes.filter(({ title, ...restProps }) => restProps)

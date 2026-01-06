@@ -1,6 +1,6 @@
 'use client'
 
-import Link from "next/link";
+import { TransitionLink } from "@/components";
 import { KIcon } from 'kku-ui'
 import { ConnectionDot } from '@/components'
 import SettingButton from '@/layouts/header/components/settingButton/SettingButton'
@@ -14,6 +14,7 @@ export default function Header() {
   return (
     <header
       className={[
+        'only-btc__header',
         'fixed top-0 left-0 layout-max:left-1/2 layout-max:-translate-x-1/2 bg-background',
         'flex justify-between items-center gap-1 w-full layout-max:max-w-[calc(theme(maxWidth.layout)_-_2px)] h-header p-2',
         'z-[1] select-none tap-highlight-transparent',
@@ -24,11 +25,11 @@ export default function Header() {
       ].filter(Boolean).join(' ')}
     >
       <h2 className="font-bold tracking-[-1px] text-current">
-        <Link href={initialPath} className="flex justify-start items-center gap-2 text-current dark:text-current !no-underline
+        <TransitionLink href={initialPath} className="flex justify-start items-center gap-2 text-current dark:text-current !no-underline
               text-3xl font-bold">
           <KIcon id="bitcoin" icon="bitcoin" size={36}/>
           ₿itcoin
-        </Link>
+        </TransitionLink>
       </h2>
 
       <div className="flex justify-center items-center gap-2">

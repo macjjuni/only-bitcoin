@@ -92,7 +92,7 @@ export default function MacroWidgetPanel() {
 
   // Scroll 제어 (Next.js layout 대응)
   useEffect(() => {
-    const layoutElement = document.getElementsByClassName('content__layout')[0] as HTMLElement
+    const layoutElement = document.getElementsByClassName('only-btc__content')[0] as HTMLElement
     if (!layoutElement) return
 
     layoutElement.style.overflow = isEditMode ? 'hidden' : 'auto'

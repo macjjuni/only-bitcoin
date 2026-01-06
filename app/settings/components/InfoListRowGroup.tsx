@@ -15,7 +15,7 @@ const InfoListRowGroup = () => {
 
   // region [Privates]
   const onScrollDown = useCallback(() => {
-    const container: HTMLElement | null = document.querySelector('.content__layout')
+    const container: HTMLElement | null = document.querySelector('.only-btc__content')
     if (container) {
       setTimeout(() => {
         container.scrollTo({ top: container.scrollHeight, behavior: 'smooth' })

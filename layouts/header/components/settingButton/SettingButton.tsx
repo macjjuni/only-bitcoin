@@ -1,9 +1,10 @@
 'use client'
 
-import { Link, useTransitionRouter } from 'next-view-transitions'
+import { useTransitionRouter } from 'next-view-transitions'
 import { usePathname } from 'next/navigation'
 import { Undo2Icon } from 'lucide-react'
 import { SettingIcon } from '@/components/ui/icon'
+import { TransitionLink } from "@/components";
 
 export default function SettingButton() {
   const pathname = usePathname()
@@ -24,8 +25,8 @@ export default function SettingButton() {
 
   // 설정 버튼 스타일
   return (
-    <Link href="/settings" className="inline-flex justify-center items-center">
+    <TransitionLink href="/settings" className="inline-flex justify-center items-center">
       <SettingIcon size={32} className="text-gray-400"/>
-    </Link>
+    </TransitionLink>
   )
 }
