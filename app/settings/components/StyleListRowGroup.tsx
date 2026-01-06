@@ -24,8 +24,8 @@ const StyleListRowGroup = () => {
       <KListRow icon={<Moon />} label="다크모드"
                 rightElement={<KSwitch checked={isDark}
                                        onCheckedChange={(val) => setTheme(val ? "dark" : "light")} />} />
-      <KListRow icon={<KIcon icon="bitcoin_square" size={24} color="currentColor" />} label="배경 이미지"
-                rightElement={<KSwitch checked={isBackgroundImg} onCheckedChange={setIsBackgroundImg} />} />
+      <KListRow icon={<KIcon icon="bitcoin_square" size={24} color="currentColor" />} className="dark:text-gray-700"
+                label="배경 이미지" rightElement={<KSwitch checked={isBackgroundImg} onCheckedChange={setIsBackgroundImg} />} />
       <KListRow icon={<AnimationIcon size={24} />} label="카운트 업 애니메이션"
                 rightElement={<KSwitch checked={isCountUp} onCheckedChange={setIsCountUp} />}
       />

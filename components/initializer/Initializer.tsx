@@ -15,6 +15,7 @@ import {
 } from '@/shared/hooks/initializer'
 import { getToastProps } from '@/shared/constants/toast'
 import { KToast } from 'kku-ui'
+import { PWAInstallAlertBottomSheet, PWAInstallAlertIOSBottomSheet } from '@/components'
 
 export default function Initializer() {
 
@@ -31,6 +32,10 @@ export default function Initializer() {
   useInitializePWA()
 
   return (
-    <KToast {...getToastProps()} offset={120}/>
+    <>
+      <KToast {...getToastProps()} offset={120}/>
+      <PWAInstallAlertBottomSheet/>
+      <PWAInstallAlertIOSBottomSheet/>
+    </>
   )
 }

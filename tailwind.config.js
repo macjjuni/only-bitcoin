@@ -60,9 +60,9 @@ export default {
         'blink-gold': 'blink 1.2s infinite ease-in-out',
         swing: 'swing 3.2s ease-in-out infinite',
         'view-exit': 'fadeOut 0.2s ease-in-out forwards',
-        'view-enter-right': 'slideInFromRight 0.24s ease-in-out forwards',
-        'view-enter-left': 'slideInFromLeft 0.24s ease-in-out forwards',
-        'view-enter-first': 'firstLoad 0.24s ease-in-out forwards',
+        'view-enter-right': 'slideInFromRight 0.2s ease-in-out forwards',
+        'view-enter-left': 'slideInFromLeft 0.2s ease-in-out forwards',
+        'view-enter-first': 'firstLoad 0.2s ease-in-out forwards',
       }
     },
   },

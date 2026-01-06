@@ -16,11 +16,13 @@ import { getCookie } from '@/shared/utils/cookie'
 import { PWA_COOKIE_KEY } from '@/shared/constants/setting'
 import { IosShareIcon } from '@/components/ui/icon'
 import { useInitializePWA } from '@/shared/hooks/initializer'
+import { useMounted } from '@/shared/hooks'
 
 
 export default function PWAInstallAlertIOSBottomSheet() {
 
   // region [Hooks]
+  const isMount = useMounted();
   const [open, setOpen] = useState(false)
   const { onClickDisabled } = useInitializePWA()
   // endregion
@@ -56,6 +58,10 @@ export default function PWAInstallAlertIOSBottomSheet() {
   useEffect(initializeRender, [])
   // endregion
 
+
+  if (!isMount) {
+    return null;
+  }
 
   if (isIOSPWA() || !isIOSSafari()) {
     return null
