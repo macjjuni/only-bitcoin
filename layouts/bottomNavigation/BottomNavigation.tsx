@@ -15,7 +15,7 @@ export default function BottomNavigation() {
     ].filter(Boolean).join(' ')}>
       <ul className="flex h-full w-full items-center justify-around">
         {navigationRouteList.map(({ path, icon }) => {
-          const isActive = pathname === path;
+          const isActive = pathname.includes(path);
 
           return (
             <li key={path} className="relative z-0">
