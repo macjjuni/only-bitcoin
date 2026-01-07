@@ -1,6 +1,7 @@
 import { ReactNode } from 'react'
 import type { Metadata, Viewport } from 'next'
 import { ViewTransitions } from 'next-view-transitions'
+import { GoogleAnalytics } from '@next/third-parties/google';
 import { BottomNavigation, Content, DefaultLayout, Header } from '@/layouts'
 import QueryProvider from '@/components/provider/QueryProvider'
 import { Initializer } from '@/components'
@@ -20,10 +21,10 @@ export const viewport: Viewport = {
 export const metadata: Metadata = {
   title: process.env.NEXT_PUBLIC_TITLE || 'Only Bitcoin',
   description: '온리 비트코인 시세 및 사토시, 원화 자동 계산기(BTC/KRW/USD/SAT), Not your keys, not your Bitcoin',
-  keywords: ['비트코인', '사토시', '업비트 시세', '사토시 단위'],
-  authors: [{ name: 'kkussaeng' }],
+  keywords: ['비트코인', '온리 비트코인', '비트코인 계산기', '사토시 계산기', '비트코인 밈'],
+  authors: [{ name: 'a7w2en7z_' }],
   verification: {
-    google: 'NcpMqZPUpri0JyCFt3SV-633FoaSsDKG4PRg2HlgqW8',
+    google: 'NcpMqZPUpri0JyCFt3SV-633FoaSsDKG4PRg2HlgqW8', // 서치 콘솔
   },
   manifest: '/manifest.json',
   appleWebApp: {
@@ -33,9 +34,9 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: 'website',
-    url: 'https://btc-price.web.app',
+    url: process.env.NEXT_PUBLIC_URL,
     title: '온리 비트코인',
-    description: '온리 비트코인 시세 및 사토시, 원화 자동 계산기...',
+    description: '온리 비트코인 시세 및 사토시, 원화 자동 계산기',
     images: [
       {
         url: '/app/og-image.webp', // public 폴더 기준 경로
@@ -58,7 +59,6 @@ export const metadata: Metadata = {
     apple: [
       { url: '/app/icon-128x128.png', sizes: '128x128' },
       { url: '/app/icon-152x152.png', sizes: '152x152' },
-      { url: '/app/icon-180x180.png', sizes: '180x180' }, // 보통 180도 추가함
     ],
   },
 }
@@ -66,10 +66,13 @@ export const metadata: Metadata = {
 
 export default function RootLayout({ children }: Readonly<{ children: ReactNode }>) {
 
+  const isProduction = process.env.NODE_ENV === 'production';
+
   return (
     <ViewTransitions>
       <html lang="ko">
       <body>
+      { isProduction && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_TRACKING_ID || ''} /> }
       <QueryProvider>
         <Initializer/>
         <DefaultLayout>
