@@ -3,7 +3,7 @@ import type { NextConfig } from "next";
 import { readFileSync } from "fs";
 
 const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));
-const APP_VERSION = `v${packageJson.version}`;
+const APP_VERSION = `${packageJson.version}`;
 
 const nextConfig: NextConfig = {
   // region [Env Configuration]
