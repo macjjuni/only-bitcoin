@@ -15,10 +15,14 @@
 .only-btc__header { view-transition-name: main-header; }
 .only-btc__bottom-nav { view-transition-name: bottom-nav; }
 
+
 ::view-transition-old(root),
 ::view-transition-new(root) {
     mix-blend-mode: normal;
-    height: 100vh;
+    height: 100%;
+    width: 100%;
+    object-fit: none;
+    object-position: top center;
 }
 ::view-transition-old(root) {
     @apply animate-view-exit;
