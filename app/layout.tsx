@@ -6,7 +6,6 @@ import { BottomNavigation, Content, DefaultLayout, Header } from "@/layouts";
 import QueryProvider from "@/components/provider/QueryProvider";
 import { Initializer } from "@/components";
 import "./globals.css";
-import PageTransition from "@/components/provider/PageTransition";
 
 
 // 1. Viewport
@@ -79,9 +78,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <DefaultLayout>
           <Header />
           <Content>
-            <PageTransition>
-              {children}
-            </PageTransition>
+            {children}
           </Content>
           <BottomNavigation />
         </DefaultLayout>
