@@ -9,7 +9,15 @@ const useStore = create<StoreType>()(
 
       // region [Theme]
       theme: "light",
-      setTheme: (theme) => set((store) => ({ ...store, theme })),
+      setTheme: (theme) => set((store) => {
+        // DOM 조작을 통해 스타일 즉시 반영
+        if (theme === 'dark') {
+          document.documentElement.classList.add('dark');
+        } else {
+          document.documentElement.classList.remove('dark');
+        }
+        return { ...store, theme };
+      }),
       // endregion
 
       // region [비트코인 실시간 가격]

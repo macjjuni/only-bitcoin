@@ -10,7 +10,6 @@ export default function Content({ children, className }: { children: ReactNode; 
   // endregion
 
   return (
-
     <main
       className={[
         "only-btc__content",

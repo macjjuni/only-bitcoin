@@ -3,6 +3,7 @@ import type { Metadata, Viewport } from "next";
 import { ViewTransitions } from "next-view-transitions";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { BottomNavigation, Content, DefaultLayout, Header } from "@/layouts";
+import { THEME_INITIALIZATION_SCRIPT } from "@/shared/constants/theme";
 import QueryProvider from "@/components/provider/QueryProvider";
 import { Initializer } from "@/components";
 import "./globals.css";
@@ -70,7 +71,10 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
 
   return (
     <ViewTransitions>
-      <html lang="ko">
+      <html lang="ko" suppressHydrationWarning>
+      <head>
+        <script dangerouslySetInnerHTML={{ __html: THEME_INITIALIZATION_SCRIPT }} />
+      </head>
       <body>
       {isProduction && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_TRACKING_ID || ""} />}
       <QueryProvider>
