@@ -1,18 +1,33 @@
 "use client";
 
 import { useEffect } from "react";
-import { useRouter } from "next/navigation";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import useStore from "@/shared/stores/store";
 
 export default function useInitializePage() {
+  // region [Hooks]
   const pathname = usePathname();
   const router = useRouter();
+  const searchParams = useSearchParams();
   const initialPath = useStore((state) => state.setting.initialPath);
+  // endregion
 
-  useEffect(() => {
+
+  // region [Privates]
+  const handleInitialRedirect = () => {
     if (pathname === "/") {
-      router.replace(initialPath);
+      const queryString = searchParams.toString();
+      const redirectUrl = queryString
+        ? `${initialPath}?${queryString}`
+        : initialPath;
+
+      router.replace(redirectUrl);
     }
-  }, [pathname, router, initialPath]);
+  };
+  // endregion
+  // region [Life Cycles]
+  useEffect(() => {
+    handleInitialRedirect();
+  }, [pathname, router, initialPath, searchParams]);
+  // endregion
 }
