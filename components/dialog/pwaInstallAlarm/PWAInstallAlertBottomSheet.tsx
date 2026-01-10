@@ -55,15 +55,40 @@ export default function PWAInstallAlertBottomSheet() {
   }
 
   return (
-    <KBottomSheet open={open} onOpenChange={setOpen}>
-      <KBottomSheetContent style={{ zIndex: 1000 }}>
+    <KBottomSheet open={open} onOpenChange={setOpen} size="sm">
+      <KBottomSheetContent style={{ zIndex: 1000 }} className="border-border">
         <KBottomSheetHeader>
           <KBottomSheetTitle>앱 설치 확인</KBottomSheetTitle>
         </KBottomSheetHeader>
 
-        <div className="flex flex-row justify-center gap-6">
-          <KIcon className="pwa-install__alarm__content__icon" icon="app" size={48} color="#1796EE"/>
-          <p className="flex items-center">앱을 설치하시겠습니까? 설정 탭에서 언제든 다시 설치할 수 있습니다.</p>
+        <div className="flex flex-col gap-4">
+          {/* 상단 아이콘 및 설명 */}
+          <div className="flex flex-row items-center gap-5">
+            <KIcon icon="app" size={48} color="#1796EE" />
+            <p className="flex-1 text-[15px] leading-tight font-medium break-keep text-gray-800">
+              앱으로 설치하여 홈 화면에서 더 빠르고 편리하게 이용해 보세요.
+            </p>
+          </div>
+
+          {/* 안드로이드 가이드 영역 */}
+          <div className="bg-gray-50 rounded-xl px-3 py-4 flex flex-col gap-4 text-[14px] text-gray-700">
+            <div className="flex items-start gap-2">
+              <span className="font-bold text-blue-600 mt-0.5">1.</span>
+              <p className="flex-1 leading-6">
+                아래 <strong>&#39;설치&#39;</strong> 버튼을 클릭해 주세요.
+              </p>
+            </div>
+            <div className="flex items-start gap-2">
+              <span className="font-bold text-blue-600 mt-0.5">2.</span>
+              <p className="flex-1 leading-6">
+                브라우저 팝업창에서 <strong>&#39;설치&#39;</strong> 또는 <strong>&#39;추가&#39;</strong>를 선택하면 완료됩니다.
+              </p>
+            </div>
+          </div>
+
+          <p className="text-xs text-center text-gray-400 font-normal">
+            * 설정 탭에서 언제든 다시 설치할 수 있습니다.
+          </p>
         </div>
 
         <KBottomSheetFooter>
