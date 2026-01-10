@@ -26,7 +26,7 @@ const HalvingDataCard = () => {
 
   return (
     <KAccordion className="w-full" type="single" collapsible>
-      <KAccordionItem value="item-1" className="border-none">
+      <KAccordionItem value="Halving-Data" className="border-none">
         <KAccordionTrigger className="text-[18px] font-bold py-4">
           반감기 정보
         </KAccordionTrigger>

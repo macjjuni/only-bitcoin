@@ -1,15 +1,21 @@
-'use client';
+"use client";
 
 import { memo, ReactNode, useMemo } from "react";
-import { KDropdownMenu, KDropdownMenuCheckboxItem, KDropdownMenuContent, KDropdownMenuLabel,
-  KDropdownMenuTrigger, KIcon } from "kku-ui";
+import {
+  KDropdownMenu,
+  KDropdownMenuCheckboxItem,
+  KDropdownMenuContent,
+  KDropdownMenuLabel,
+  KDropdownMenuTrigger,
+  KIcon
+} from "kku-ui";
 import { UnitType } from "@/shared/stores/store.interface";
 import useStore from "@/shared/stores/store";
 
 
 export interface UnitDropdownMenuProps {
   currentUnit: UnitType;
-  onChangeUnit: (unit: UnitType) => void
+  onChangeUnit: (unit: UnitType) => void;
 }
 
 const UNIT_DISPLAY: Record<UnitType, ReactNode> = {
@@ -32,7 +38,7 @@ const UnitDropdownMenu = (props: UnitDropdownMenuProps) => {
 
   return (
     <KDropdownMenu size="md">
-      <KDropdownMenuTrigger className={`flex gap-0.5 items-center rounded-[3px] text-md font-bold px-1 py-[3px]
+      <KDropdownMenuTrigger id="UnitDropdownMenu" className={`flex gap-0.5 items-center rounded-[3px] text-md font-bold px-1 py-[3px]
          bg-neutral-200 dark:bg-neutral-700 data-[state=open]:bg-neutral-300 dark:data-[state=open]:bg-neutral-500
           ${currentUnit === "SATS" && "tracking-[-1.5px] "}`}>
         {CurrentLabel}

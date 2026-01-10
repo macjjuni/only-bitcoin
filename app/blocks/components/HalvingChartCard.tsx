@@ -3,6 +3,7 @@ import useStore from "@/shared/stores/store";
 import CountText from "@/components/ui/CountText";
 import { calcPercentage, getNextHalvingData } from "@/shared/utils/calculate";
 import { calcDate } from "@/shared/lib/date";
+import { useMounted } from "@/shared/hooks";
 
 
 const circumference = 2 * Math.PI * 50; // 원의 둘레
@@ -10,13 +11,18 @@ const circumference = 2 * Math.PI * 50; // 원의 둘레
 const HalvingChartCard = () => {
 
   // region [Hooks]
+  const isMount = useMounted();
   const currentBlockData = useStore(state => state.blockData[0]);
   const currentBlockHeight = useMemo(() => (currentBlockData.height), [currentBlockData]);
 
   const nextHalvingData = useMemo(() => getNextHalvingData(currentBlockData.height), [currentBlockData]);
   const restBlockCount = useMemo(() => (nextHalvingData.blockHeight - currentBlockData.height), [nextHalvingData, currentBlockData]);
   const halvingPercent = useMemo(() => calcPercentage(nextHalvingData.blockHeight, currentBlockData.height), [nextHalvingData, currentBlockData]);
-  const expectNextHalvingDate = useMemo(() => calcDate(Date.now(), restBlockCount * 10, "minute", "YYYY.MM.DD"), [restBlockCount]);
+  const expectNextHalvingDate = useMemo(() => {
+    if (!isMount) return "YYYY.MM.DD";
+    // eslint-disable-next-line react-hooks/purity
+    return calcDate(Date.now(), restBlockCount * 10, "minute", "YYYY.MM.DD");
+  }, [restBlockCount, isMount]);
   const [offset, setOffset] = useState<number>(312);
   // endregion
 
