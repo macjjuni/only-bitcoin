@@ -15,12 +15,13 @@ import {
 } from "@/shared/hooks/initializer";
 import { getToastProps } from "@/shared/constants/toast";
 import { KToast } from "kku-ui";
-import { PWAInstallAlertBottomSheet, PWAInstallAlertIOSBottomSheet } from "@/components";
+import { DomainNoticeDialog, PWAInstallAlertBottomSheet, PWAInstallAlertIOSBottomSheet } from "@/components";
 import { Suspense } from "react";
 
 
 function BaseInitializer() {
 
+  // region [Hooks]
   useCoinbaseSocket();
   useTheme();
   useUpbitSocket();
@@ -32,12 +33,14 @@ function BaseInitializer() {
   useInitializeBackground();
   useInitializePage();
   useInitializePWA();
+  // endregion
 
   return (
     <>
       <KToast {...getToastProps()} offset={120} />
       <PWAInstallAlertBottomSheet />
       <PWAInstallAlertIOSBottomSheet />
+      <DomainNoticeDialog />
     </>
   );
 }

@@ -8,6 +8,7 @@ import {
   KBottomSheetFooter,
   KBottomSheetHeader,
   KBottomSheetTitle,
+  KBottomSheetOverlay,
   KButton,
   KIcon,
 } from 'kku-ui'
@@ -70,7 +71,8 @@ export default function PWAInstallAlertIOSBottomSheet() {
   if (open) {
     return (
       <KBottomSheet open={open} onOpenChange={setOpen}>
-        <KBottomSheetContent style={{ zIndex: 1000 }} className="border-border">
+        <KBottomSheetOverlay className="z-[50]" />
+        <KBottomSheetContent className="border-border z-[51]">
           <KBottomSheetHeader>
             <KBottomSheetTitle>앱 설치 확인</KBottomSheetTitle>
           </KBottomSheetHeader>

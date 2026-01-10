@@ -19,7 +19,7 @@
     "@tanstack/react-query-persist-client": "^5.90.18",
     "@vidstack/react": "^1.12.13",
     "chart.js": "^4.5.1",
-    "kku-ui": "^0.9.997",
+    "kku-ui": "^0.9.9981",
     "kku-util": "^0.0.157",
     "lottie-react": "^2.4.1",
     "lucide-react": "^0.562.0",

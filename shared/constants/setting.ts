@@ -23,6 +23,7 @@ export const usdMarketOptions: { label: string; value: UsdMarketType }[] = [
 ]
 
 export const PWA_COOKIE_KEY = 'install' as const;
+export const NOTICE_COOKIE_KEY = 'notice' as const;
 
 export const sourceOptions = [
   { label: "BTC", value: "Upbit, Bithumb, Binance, Coinbase" },

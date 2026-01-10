@@ -1,26 +1,26 @@
-'use client'
+"use client";
 
-import { useEffect, useState } from 'react'
+import { useEffect, useState } from "react";
 import {
   KBottomSheet,
   KBottomSheetClose,
   KBottomSheetContent,
   KBottomSheetFooter,
-  KBottomSheetHeader,
+  KBottomSheetHeader, KBottomSheetOverlay,
   KBottomSheetTitle,
   KButton,
-  KIcon,
-} from 'kku-ui'
-import { getCookie } from '@/shared/utils/cookie'
-import { PWA_COOKIE_KEY } from '@/shared/constants/setting'
-import { useInitializePWA } from '@/shared/hooks/initializer'
+  KIcon
+} from "kku-ui";
+import { getCookie } from "@/shared/utils/cookie";
+import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
+import { useInitializePWA } from "@/shared/hooks/initializer";
 
 
 export default function PWAInstallAlertBottomSheet() {
 
   // region [Hooks]
-  const [open, setOpen] = useState(false)
-  const { deferredPrompt, onClickInstall, onClickDisabled } = useInitializePWA()
+  const [open, setOpen] = useState(false);
+  const { deferredPrompt, onClickInstall, onClickDisabled } = useInitializePWA();
   // endregion
 
 
@@ -30,33 +30,34 @@ export default function PWAInstallAlertBottomSheet() {
     if (deferredPrompt?.userChoice && !getCookie(PWA_COOKIE_KEY)) {
       setOpen(true)
     }
-  }
+  };
 
   const hideRender = () => {
-    setOpen(false)
-  }
+    setOpen(false);
+  };
   // endregion
 
 
   // region [Events]
   const onClickClose = () => {
-    hideRender()
-    onClickDisabled()
-  }
+    hideRender();
+    onClickDisabled();
+  };
   // endregion
 
 
   // region [Life Cycles]
-  useEffect(initializeRender, [deferredPrompt])
+  useEffect(initializeRender, [deferredPrompt]);
   // endregion
 
   if (!open) {
-    return null
+    return null;
   }
 
   return (
     <KBottomSheet open={open} onOpenChange={setOpen} size="sm">
-      <KBottomSheetContent style={{ zIndex: 1000 }} className="border-border">
+      <KBottomSheetOverlay className="z-[51]" />
+      <KBottomSheetContent  className="border-border z-[51]">
         <KBottomSheetHeader>
           <KBottomSheetTitle>앱 설치 확인</KBottomSheetTitle>
         </KBottomSheetHeader>
@@ -99,5 +100,5 @@ export default function PWAInstallAlertBottomSheet() {
         </KBottomSheetFooter>
       </KBottomSheetContent>
     </KBottomSheet>
-  )
+  );
 };
