@@ -20,6 +20,7 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
+  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || "https://only-btc.app"),
   title: process.env.NEXT_PUBLIC_TITLE || "Only Bitcoin",
   description: "온리 비트코인 시세 및 사토시, 원화 자동 계산기(BTC/KRW/USD/SAT), Not your keys, not your Bitcoin",
   keywords: ["비트코인", "온리 비트코인", "비트코인 계산기", "사토시 계산기", "비트코인 밈"],
