@@ -2,6 +2,7 @@ import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { StoreType } from "@/shared/stores/store.interface";
 
+export const persistKey = "only-bitcoin";
 
 const useStore = create<StoreType>()(
   persist(
@@ -151,7 +152,7 @@ const useStore = create<StoreType>()(
 
       // endregion
     }),
-    { name: "only-bitcoin" } // persist key
+    { name: persistKey }
   )
 );
 
