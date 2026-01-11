@@ -89,23 +89,19 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           <BottomNavigation />
         </DefaultLayout>
       </QueryProvider>
-
       {isProduction && (
         <Script id="service-worker-loader" strategy="afterInteractive">
           {`
-              if ('serviceWorker' in navigator) {
-                window.addEventListener('load', function() {
-                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
-                    console.log('ServiceWorker registration successful');
-                  }).catch(function(err) {
-                    console.warn('ServiceWorker registration failed: ', err);
-                  });
-                });
-              }
-            `}
+            if ('serviceWorker' in navigator) {
+              navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                console.log('ServiceWorker registration successful');
+              }).catch(function(err) {
+                console.warn('ServiceWorker registration failed: ', err);
+              });
+            }
+          `}
         </Script>
       )}
-
       </body>
       </html>
     </ViewTransitions>
