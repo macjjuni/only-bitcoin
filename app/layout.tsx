@@ -2,12 +2,12 @@ import { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { ViewTransitions } from "next-view-transitions";
 import { GoogleAnalytics } from "@next/third-parties/google";
-import ServiceWorkerRegister from "@/components/initializer/ServiceWorkerRegister";
 import { BottomNavigation, Content, DefaultLayout, Header } from "@/layouts";
 import { THEME_INITIALIZATION_SCRIPT } from "@/shared/constants/theme";
 import QueryProvider from "@/components/provider/QueryProvider";
 import { Initializer } from "@/components";
 import "./globals.css";
+import Script from "next/script";
 
 
 // 1. Viewport
@@ -79,7 +79,6 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       </head>
       <body>
       {isProduction && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_TRACKING_ID || ""} />}
-      <ServiceWorkerRegister />
       <QueryProvider>
         <Initializer />
         <DefaultLayout>
@@ -90,6 +89,23 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           <BottomNavigation />
         </DefaultLayout>
       </QueryProvider>
+
+      {isProduction && (
+        <Script id="service-worker-loader" strategy="afterInteractive">
+          {`
+              if ('serviceWorker' in navigator) {
+                window.addEventListener('load', function() {
+                  navigator.serviceWorker.register('/sw.js').then(function(reg) {
+                    console.log('ServiceWorker registration successful');
+                  }).catch(function(err) {
+                    console.warn('ServiceWorker registration failed: ', err);
+                  });
+                });
+              }
+            `}
+        </Script>
+      )}
+
       </body>
       </html>
     </ViewTransitions>
