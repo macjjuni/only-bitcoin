@@ -11,6 +11,6 @@ export const getToastProps = (): KToasterProps => {
     duration: 2000,
     size: isDesktop ? 'md' : 'sm',
     mobileOffset: 88,
-    style: { zIndex: 999 }
+    style: { zIndex: 30 }
   };
 };
