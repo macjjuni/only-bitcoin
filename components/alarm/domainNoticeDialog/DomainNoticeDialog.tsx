@@ -93,7 +93,7 @@ export default function DomainNoticeDialog() {
           <div className="text-[0.925rem] leading-relaxed text-gray-700 dark:text-neutral-300 space-y-3 px-2 tracking-tight">
             <p>
               더 나은 환경을 위해 서비스 주소가 변경되었습니다. 기존 주소는 자동으로 이동되지만, 기존 설정값은 보안상 이전되지 않습니다.
-              원활한 이용을 위해 새로운 주소에서 설치 및 재설정을 진행해 주시길 부탁드립니다.
+              원활한 이용을 위해 새로운 주소에서 <strong>설치 및 재설정</strong>을 진행해 주시길 부탁드립니다.
             </p>
           </div>
         </div>
