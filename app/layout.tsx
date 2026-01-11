@@ -2,6 +2,7 @@ import { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
 import { ViewTransitions } from "next-view-transitions";
 import { GoogleAnalytics } from "@next/third-parties/google";
+import ServiceWorkerRegister from "@/components/initializer/ServiceWorkerRegister";
 import { BottomNavigation, Content, DefaultLayout, Header } from "@/layouts";
 import { THEME_INITIALIZATION_SCRIPT } from "@/shared/constants/theme";
 import QueryProvider from "@/components/provider/QueryProvider";
@@ -78,6 +79,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       </head>
       <body>
       {isProduction && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_TRACKING_ID || ""} />}
+      <ServiceWorkerRegister />
       <QueryProvider>
         <Initializer />
         <DefaultLayout>

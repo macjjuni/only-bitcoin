@@ -14,7 +14,6 @@ import {
   useUsdExchangeRate
 } from "@/shared/hooks/initializer";
 import { getToastProps } from "@/shared/constants/toast";
-import { useServiceWorker } from "@/shared/hooks";
 import { KToast } from "kku-ui";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
@@ -25,7 +24,6 @@ const AlarmManager = dynamic(() => import("@/components/alarm/AlarmManager"), { 
 function BaseInitializer() {
 
   // region [Hooks]
-  useServiceWorker();
   useCoinbaseSocket();
   useTheme();
   useUpbitSocket();
