@@ -10,6 +10,7 @@ import { isIOSPWA, isIOSSafari, isSafari } from "@/shared/utils/device";
 type DisplayState = "NONE" | "DOMAIN" | "IOS_PWA" | "OTHER_PWA";
 
 const AlarmManager = () => {
+
   // region [Hooks]
   const { deferredPrompt } = useInitializePWA();
   const [displayState, setDisplayState] = useState<DisplayState>("NONE");
