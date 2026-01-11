@@ -2,7 +2,7 @@
 
 // region Imports
 import { useEffect, useState } from "react";
-import { KAspectRatio, KDialog, KDialogContent, KDialogHeader, KDialogTitle } from "kku-ui";
+import { KAspectRatio, KDialog, KDialogContent, KDialogHeader, KDialogOverlay, KDialogTitle } from "kku-ui";
 import { MediaPlayer, MediaProvider, Poster, Track } from "@vidstack/react";
 import { defaultLayoutIcons, DefaultVideoLayout } from "@vidstack/react/player/layouts/default";
 
@@ -16,21 +16,21 @@ interface ModalTypes {
   setOpen: (val: boolean) => void;
 }
 
-const VIDEO_POSTER_URL = 'https://image-store-one.vercel.app/image/l12hjd.webp';
-const VIDEO_URL = 'https://image-store-one.vercel.app/video/bitcoin_genesis.mp4';
-const VIDEO_SUBTITLE_URL = 'https://image-store-one.vercel.app/video/bitcoin_genesis.srt';
+const VIDEO_POSTER_URL = "https://image-store-one.vercel.app/image/l12hjd.webp";
+const VIDEO_URL = "https://image-store-one.vercel.app/video/bitcoin_genesis.mp4";
+const VIDEO_SUBTITLE_URL = "https://image-store-one.vercel.app/video/bitcoin_genesis.srt";
 const BREAKPOINT_WIDTH = 524;
 // endregion
 
 export default function GenesisVideoDialog({ open, setOpen }: ModalTypes) {
   // region Hooks
-  const [vttUrl, setVttUrl] = useState<string>('');
-  const [dialogSize, setDialogSize] = useState<'sm' | 'md'>('sm');
+  const [vttUrl, setVttUrl] = useState<string>("");
+  const [dialogSize, setDialogSize] = useState<"sm" | "md">("sm");
   // endregion
 
   // region Functions
   const handleResize = () => {
-    setDialogSize(window.innerWidth > BREAKPOINT_WIDTH ? 'md' : 'sm');
+    setDialogSize(window.innerWidth > BREAKPOINT_WIDTH ? "md" : "sm");
   };
 
   const fetchAndConvertSubtitle = async (): Promise<Blob | undefined> => {
@@ -39,10 +39,10 @@ export default function GenesisVideoDialog({ open, setOpen }: ModalTypes) {
       const srtText = await response.text();
 
       // SRT 포맷의 쉼표(,)를 VTT용 마침표(.)로 변환
-      const vttText = 'WEBVTT\n\n' + srtText.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, '$1.$2');
-      return new Blob([vttText], { type: 'text/vtt' });
+      const vttText = "WEBVTT\n\n" + srtText.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, "$1.$2");
+      return new Blob([vttText], { type: "text/vtt" });
     } catch (error) {
-      console.error('Subtitle conversion failed:', error);
+      console.error("Subtitle conversion failed:", error);
     }
   };
   // endregion
@@ -51,15 +51,15 @@ export default function GenesisVideoDialog({ open, setOpen }: ModalTypes) {
   // 다이얼로그 반응형 사이즈 처리
   useEffect(() => {
     handleResize();
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
+    window.addEventListener("resize", handleResize);
+    return () => window.removeEventListener("resize", handleResize);
   }, []);
 
   // 자막 데이터 로드 및 URL 정리
   useEffect(() => {
     if (!open) return;
 
-    let objectUrl = '';
+    let objectUrl = "";
 
     fetchAndConvertSubtitle().then((blob) => {
       if (blob) {
@@ -70,13 +70,14 @@ export default function GenesisVideoDialog({ open, setOpen }: ModalTypes) {
 
     return () => {
       if (objectUrl) URL.revokeObjectURL(objectUrl);
-      setVttUrl('');
+      setVttUrl("");
     };
   }, [open]);
   // endregion
 
   return (
     <KDialog open={open} onOpenChange={setOpen} blur={2} size={dialogSize}>
+      <KDialogOverlay />
       <KDialogContent className="p-0 overflow-hidden text-[0]">
         <KDialogHeader className="hidden">
           <KDialogTitle>Genesis Block</KDialogTitle>

@@ -1,8 +1,8 @@
-'use client'
+"use client";
 
-import { KAspectRatio, KDialog, KDialogContent, KDialogHeader, KDialogTitle } from 'kku-ui'
-import LazyImage from '@/components/ui/LazyImage'
-import { useMemo } from 'react'
+import { KAspectRatio, KDialog, KDialogContent, KDialogHeader, KDialogOverlay, KDialogTitle } from "kku-ui";
+import LazyImage from "@/components/ui/LazyImage";
+import { useMemo } from "react";
 
 interface ModalTypes {
   open: boolean;
@@ -18,6 +18,7 @@ export default function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
 
   return (
     <KDialog open={open} onOpenChange={setOpen} blur={2} size="sm">
+      <KDialogOverlay />
       <KDialogContent>
         <KDialogHeader>
           <KDialogTitle>
@@ -25,9 +26,9 @@ export default function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
           </KDialogTitle>
         </KDialogHeader>
         <KAspectRatio ratio={1.1146}>
-          <LazyImage src={imageUrl} alt="공포 & 탐욕 지수" className="h-full"/>
+          <LazyImage src={imageUrl} alt="공포 & 탐욕 지수" className="h-full" />
         </KAspectRatio>
       </KDialogContent>
     </KDialog>
-  )
+  );
 }
