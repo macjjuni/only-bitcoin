@@ -8,7 +8,7 @@ import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core'
 import { EditIcon, SaveIcon } from '@/components/ui/icon'
 import { useBitcoinDominanceQuery, useFearGreedIndex } from '@/shared/api'
 import { calcPremiumPercent, minedPercent, usdToSats } from '@/shared/utils/calculate'
-import { FearAndGreedDialog } from '@/components/dialog'
+import { FearAndGreedDialog } from '@/components/alarm'
 import useStore from '@/shared/stores/store'
 import WidgetItem from './WidgetItem'
 

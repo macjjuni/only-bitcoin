@@ -13,9 +13,9 @@ import {
   useUpbitSocket,
   useUsdExchangeRate
 } from "@/shared/hooks/initializer";
+import AlarmManager from "@/components/alarm/AlarmManager";
 import { getToastProps } from "@/shared/constants/toast";
 import { KToast } from "kku-ui";
-import { DomainNoticeDialog, PWAInstallAlertBottomSheet, PWAInstallAlertIOSBottomSheet } from "@/components";
 import { Suspense } from "react";
 
 
@@ -35,20 +35,14 @@ function BaseInitializer() {
   useInitializePWA();
   // endregion
 
-  return (
-    <>
-      <KToast {...getToastProps()} offset={120} />
-      <PWAInstallAlertBottomSheet />
-      <PWAInstallAlertIOSBottomSheet />
-      <DomainNoticeDialog />
-    </>
-  );
+  return (<KToast {...getToastProps()} offset={120} />);
 }
 
 export default function Initializer() {
   return (
     <Suspense fallback={null}>
       <BaseInitializer />
+      <AlarmManager />
     </Suspense>
   );
 }

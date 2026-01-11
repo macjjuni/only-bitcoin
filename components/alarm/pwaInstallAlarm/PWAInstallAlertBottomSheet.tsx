@@ -1,69 +1,55 @@
+// @/components/PWAInstallAlertBottomSheet.tsx
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   KBottomSheet,
   KBottomSheetClose,
   KBottomSheetContent,
   KBottomSheetFooter,
-  KBottomSheetHeader, KBottomSheetOverlay,
+  KBottomSheetHeader,
+  KBottomSheetOverlay,
   KBottomSheetTitle,
   KButton,
   KIcon
 } from "kku-ui";
-import { getCookie } from "@/shared/utils/cookie";
-import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import { useInitializePWA } from "@/shared/hooks/initializer";
-
+import { setCookie } from "@/shared/utils/cookie";
+import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 
 export default function PWAInstallAlertBottomSheet() {
-
   // region [Hooks]
-  const [open, setOpen] = useState(false);
-  const { deferredPrompt, onClickInstall, onClickDisabled } = useInitializePWA();
+  // AlertManager에 의해 렌더링되면 즉시 열려야 하므로 기본값 true
+  const [open, setOpen] = useState(true);
+  const { onClickInstall, onClickDisabled } = useInitializePWA();
   // endregion
 
-
   // region [Privates]
-  const initializeRender = () => {
+  const handlePointerDownOutside = (e: Event) => e.preventDefault();
+  // endregion
 
-    if (deferredPrompt?.userChoice && !getCookie(PWA_COOKIE_KEY)) {
-      setOpen(true)
-    }
+  // region [Events]
+  const onClickClose = () => {
+    setCookie(PWA_COOKIE_KEY, 'true', 1); // 하루 안보기 쿠키 저장
+    setOpen(false);
+    onClickDisabled();
   };
 
-  const hideRender = () => {
+  const handleInstall = async () => {
+    await onClickInstall();
     setOpen(false);
   };
   // endregion
 
-
-  // region [Events]
-  const onClickClose = () => {
-    hideRender();
-    onClickDisabled();
-  };
-  // endregion
-
-
-  // region [Life Cycles]
-  useEffect(initializeRender, [deferredPrompt]);
-  // endregion
-
-  if (!open) {
-    return null;
-  }
-
   return (
     <KBottomSheet open={open} onOpenChange={setOpen} size="sm">
-      <KBottomSheetOverlay className="z-[51]" />
-      <KBottomSheetContent  className="border-border z-[51]">
+      <KBottomSheetOverlay />
+      <KBottomSheetContent className="border-border z-[51]" onPointerDownOutside={handlePointerDownOutside}>
         <KBottomSheetHeader>
           <KBottomSheetTitle>앱 설치 확인</KBottomSheetTitle>
         </KBottomSheetHeader>
 
         <div className="flex flex-col gap-4">
-          {/* 상단 아이콘 및 설명 */}
           <div className="flex flex-row items-center gap-5">
             <KIcon icon="app" size={48} color="#1796EE" />
             <p className="flex-1 text-[15px] leading-tight font-medium break-keep text-gray-800">
@@ -71,29 +57,20 @@ export default function PWAInstallAlertBottomSheet() {
             </p>
           </div>
 
-          {/* 안드로이드 가이드 영역 */}
-          <div className="bg-gray-50 rounded-xl px-3 py-4 flex flex-col gap-4 text-[14px] text-gray-700">
+          <div className="bg-gray-50 rounded-xl px-3 py-4 flex flex-col gap-2 text-[14px] text-gray-700">
             <div className="flex items-start gap-2">
               <span className="font-bold text-blue-600 mt-0.5">1.</span>
-              <p className="flex-1 leading-6">
-                아래 <strong>&#39;설치&#39;</strong> 버튼을 클릭해 주세요.
-              </p>
+              <p className="flex-1 leading-6">아래 <strong>'설치'</strong> 버튼을 클릭해 주세요.</p>
             </div>
             <div className="flex items-start gap-2">
               <span className="font-bold text-blue-600 mt-0.5">2.</span>
-              <p className="flex-1 leading-6">
-                브라우저 팝업창에서 <strong>&#39;설치&#39;</strong> 또는 <strong>&#39;추가&#39;</strong>를 선택하면 완료됩니다.
-              </p>
+              <p className="flex-1 leading-6">브라우저 팝업창에서 <strong>'설치'</strong> 또는 <strong>'추가'</strong>를 선택하면 완료됩니다.</p>
             </div>
           </div>
-
-          <p className="text-xs text-center text-gray-400 font-normal">
-            * 설정 탭에서 언제든 다시 설치할 수 있습니다.
-          </p>
         </div>
 
         <KBottomSheetFooter>
-          <KButton variant="primary" width="full" onClick={onClickInstall}>설치</KButton>
+          <KButton variant="primary" width="full" onClick={handleInstall}>설치</KButton>
           <KBottomSheetClose asChild>
             <KButton variant="ghost" width="full" onClick={onClickClose}>오늘 하루 안보기</KButton>
           </KBottomSheetClose>
@@ -101,4 +78,4 @@ export default function PWAInstallAlertBottomSheet() {
       </KBottomSheetContent>
     </KBottomSheet>
   );
-};
+}
