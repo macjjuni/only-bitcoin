@@ -1,3 +1,5 @@
+'use client';
+
 import { RefObject, useCallback } from "react";
 import { clipboardUtil } from "kku-util";
 import { kToast } from "kku-ui";

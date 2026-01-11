@@ -1,6 +1,6 @@
 "use client";
 
-import React, { memo, useState, useEffect, useCallback } from "react";
+import React, { memo, useCallback, useLayoutEffect, useState } from "react";
 import { DomainNoticeDialog, PWAInstallAlertBottomSheet, PWAInstallAlertIOSBottomSheet } from "@/components";
 import { useInitializePWA } from "@/shared/hooks/initializer";
 import { getCookie } from "@/shared/utils/cookie";
@@ -45,7 +45,7 @@ const AlarmManager = () => {
   // endregion
 
   // region [Life Cycles]
-  useEffect(() => {
+  useLayoutEffect(() => {
     // 클라이언트 마운트 및 deferredPrompt 갱신 시 상태 업데이트
     const nextState = determineDisplayState();
     setDisplayState(nextState);

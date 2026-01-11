@@ -14,16 +14,18 @@ import {
   useUsdExchangeRate
 } from "@/shared/hooks/initializer";
 import { getToastProps } from "@/shared/constants/toast";
+import { useServiceWorker } from "@/shared/hooks";
 import { KToast } from "kku-ui";
 import { Suspense } from "react";
 import dynamic from "next/dynamic";
 
-const AlarmManager = dynamic(() => import('@/components/alarm/AlarmManager'), { ssr: false});
+const AlarmManager = dynamic(() => import("@/components/alarm/AlarmManager"), { ssr: false });
 
 
 function BaseInitializer() {
 
   // region [Hooks]
+  useServiceWorker();
   useCoinbaseSocket();
   useTheme();
   useUpbitSocket();
