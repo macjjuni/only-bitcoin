@@ -24,9 +24,6 @@ export default function PWAInstallAlertBottomSheet() {
   const { onClickInstall, onClickDisabled } = useInitializePWA();
   // endregion
 
-  // region [Privates]
-  const handlePointerDownOutside = (e: Event) => e.preventDefault();
-  // endregion
 
   // region [Events]
   const onClickClose = () => {
@@ -44,7 +41,7 @@ export default function PWAInstallAlertBottomSheet() {
   return (
     <KBottomSheet open={open} onOpenChange={setOpen} size="sm">
       <KBottomSheetOverlay />
-      <KBottomSheetContent className="border-border z-[51]" onPointerDownOutside={handlePointerDownOutside}>
+      <KBottomSheetContent className="border-border z-[51]">
         <KBottomSheetHeader>
           <KBottomSheetTitle>앱 설치 확인</KBottomSheetTitle>
         </KBottomSheetHeader>
@@ -52,19 +49,19 @@ export default function PWAInstallAlertBottomSheet() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-row items-center gap-5">
             <KIcon icon="app" size={48} color="#1796EE" />
-            <p className="flex-1 text-[15px] leading-tight font-medium break-keep text-gray-800">
+            <p className="flex-1 text-[15px] leading-tight font-medium break-keep text-gray-800 dark:text-gray-300">
               앱으로 설치하여 홈 화면에서 더 빠르고 편리하게 이용해 보세요.
             </p>
           </div>
 
-          <div className="bg-gray-50 rounded-xl px-3 py-4 flex flex-col gap-2 text-[14px] text-gray-700">
+          <div className="bg-gray-50 dark:bg-neutral-800 rounded-xl px-3 py-4 flex flex-col gap-2 text-[14px] text-gray-700">
             <div className="flex items-start gap-2">
               <span className="font-bold text-blue-600 mt-0.5">1.</span>
-              <p className="flex-1 leading-6">아래 <strong>'설치'</strong> 버튼을 클릭해 주세요.</p>
+              <p className="flex-1 leading-6 dark:text-gray-100">아래 <strong>'설치'</strong> 버튼을 클릭해 주세요.</p>
             </div>
             <div className="flex items-start gap-2">
               <span className="font-bold text-blue-600 mt-0.5">2.</span>
-              <p className="flex-1 leading-6">브라우저 팝업창에서 <strong>'설치'</strong> 또는 <strong>'추가'</strong>를 선택하면 완료됩니다.</p>
+              <p className="flex-1 leading-6 dark:text-gray-100">브라우저 팝업창에서 <strong>'설치'</strong> 또는 <strong>'추가'</strong>를 선택하면 완료됩니다.</p>
             </div>
           </div>
         </div>

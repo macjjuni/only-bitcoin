@@ -10,7 +10,7 @@ export default function BottomNavigation() {
   return (
     <nav className={[
       'only-btc__bottom-nav',
-      'fixed bottom-0 left-0 z-[1] h-bottom-nav overflow-hidden border-t border-border bg-transparent pb-2 backdrop-blur-[8px]',
+      'fixed bottom-0 left-0 z-[10] h-bottom-nav overflow-hidden border-t border-border bg-transparent pb-2 backdrop-blur-[8px]',
       'w-full layout-max:left-1/2 layout-max:max-w-[calc(theme(maxWidth.layout)-2px)] layout-max:-translate-x-1/2'
     ].filter(Boolean).join(' ')}>
       <ul className="flex h-full w-full items-center justify-around">

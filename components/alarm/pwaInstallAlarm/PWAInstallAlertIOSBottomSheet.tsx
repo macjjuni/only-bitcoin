@@ -26,13 +26,6 @@ export default function PWAInstallAlertIOSBottomSheet() {
   // endregion
 
 
-  // region [Privates]
-  const handlePointerDownOutside = (e: Event) => {
-    e.preventDefault();
-  };
-  // endregion
-
-
   // region [Events]
   const onClickClose = () => {
     setCookie(PWA_COOKIE_KEY, 'true', 1)
@@ -45,7 +38,7 @@ export default function PWAInstallAlertIOSBottomSheet() {
   return (
     <KBottomSheet open={open} onOpenChange={setOpen}>
       <KBottomSheetOverlay />
-      <KBottomSheetContent className="border-border z-[51]" onPointerDownOutside={handlePointerDownOutside}>
+      <KBottomSheetContent className="border-border z-[51]">
         <KBottomSheetHeader>
           <KBottomSheetTitle>앱 설치 확인</KBottomSheetTitle>
         </KBottomSheetHeader>
