@@ -5,7 +5,7 @@ import { DomainNoticeDialog, PWAInstallAlertBottomSheet, PWAInstallAlertIOSBotto
 import { useInitializePWA } from "@/shared/hooks/initializer";
 import { getCookie } from "@/shared/utils/cookie";
 import { NOTICE_COOKIE_KEY, PWA_COOKIE_KEY } from "@/shared/constants/setting";
-import { isIOSPWA, isIOSSafari } from "@/shared/utils/device";
+import { isIOSPWA, isIOSSafari, isSafari } from "@/shared/utils/device";
 
 type DisplayState = "NONE" | "DOMAIN" | "IOS_PWA" | "OTHER_PWA";
 
@@ -36,7 +36,7 @@ const AlarmManager = () => {
     }
 
     // 4. Android/Desktop PWA 판단 (deferredPrompt가 존재할 때만 표시)
-    if (deferredPrompt) {
+    if (!isSafari() && deferredPrompt?.userChoice) {
       return "OTHER_PWA";
     }
 
