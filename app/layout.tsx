@@ -7,7 +7,6 @@ import { THEME_INITIALIZATION_SCRIPT } from "@/shared/constants/theme";
 import QueryProvider from "@/components/provider/QueryProvider";
 import { Initializer } from "@/components";
 import "./globals.css";
-import Script from "next/script";
 
 
 // 1. Viewport
@@ -89,19 +88,6 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           <BottomNavigation />
         </DefaultLayout>
       </QueryProvider>
-      {isProduction && (
-        <Script id="service-worker-loader" strategy="afterInteractive">
-          {`
-            if ('serviceWorker' in navigator) {
-              navigator.serviceWorker.register('/sw.js').then(function(reg) {
-                console.log('ServiceWorker registration successful');
-              }).catch(function(err) {
-                console.warn('ServiceWorker registration failed: ', err);
-              });
-            }
-          `}
-        </Script>
-      )}
       </body>
       </html>
     </ViewTransitions>
