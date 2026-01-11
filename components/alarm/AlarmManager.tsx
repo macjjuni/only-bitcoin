@@ -1,31 +1,20 @@
 "use client";
 
-import React, { memo, useEffect, useState } from "react";
-import {
-  DomainNoticeDialog,
-  PWAInstallAlertBottomSheet,
-  PWAInstallAlertIOSBottomSheet,
-} from "@/components";
+import React, { memo } from "react";
+import { DomainNoticeDialog, PWAInstallAlertBottomSheet, PWAInstallAlertIOSBottomSheet } from "@/components";
 import { useInitializePWA } from "@/shared/hooks/initializer";
 import { getCookie } from "@/shared/utils/cookie";
 import { NOTICE_COOKIE_KEY, PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import { isIOSPWA, isIOSSafari } from "@/shared/utils/device";
 
 
-
 const AlarmManager = () => {
   // region [Hooks]
   const { deferredPrompt } = useInitializePWA();
-  const [mounted, setMounted] = useState(false);
   // endregion
 
   // region [Privates]
   const getDisplayStates = () => {
-    // 클라이언트 에서만 렌더링 (하이드레이션 방지)
-    if (typeof window === "undefined" || !mounted) {
-      return { showDomain: false, showInstallAlarmIOS: false, showInstallAlarmOther: false };
-    }
-
     // 1. 도메인 이전 공지 판단 (최우선)
     const isHideDomain = !!getCookie(NOTICE_COOKIE_KEY);
     const searchParams = new URLSearchParams(window.location.search);
@@ -64,14 +53,6 @@ const AlarmManager = () => {
   };
   // endregion
 
-  // region [Life Cycles]
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-  // endregion
-
-  // 마운트 전에는 서버와 동일하게 null 반환
-  if (!mounted) return null;
 
   return <>{renderAlarm()}</>;
 };

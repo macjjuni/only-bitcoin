@@ -13,10 +13,12 @@ import {
   useUpbitSocket,
   useUsdExchangeRate
 } from "@/shared/hooks/initializer";
-import AlarmManager from "@/components/alarm/AlarmManager";
 import { getToastProps } from "@/shared/constants/toast";
 import { KToast } from "kku-ui";
 import { Suspense } from "react";
+import dynamic from "next/dynamic";
+
+const AlarmManager = dynamic(() => import('@/components/alarm/AlarmManager'), { ssr: false});
 
 
 function BaseInitializer() {
