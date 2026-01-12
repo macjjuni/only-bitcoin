@@ -14,8 +14,7 @@ export default function Content({ children, className }: { children: ReactNode; 
       className={[
         "only-btc__content",
         "flex flex-col flex-auto w-full mx-auto max-w-layout",
-        "pt-[calc(theme(height.header)+16px)] pb-[calc(theme(height.bottom-nav)+8px)]",
-        "overflow-auto",
+        "pt-[calc(theme(height.header)+16px)] pb-[theme(height.bottom-nav)]",
         "transition-opacity duration-500 ease-in-out",
         fadeInClasses,
         className
