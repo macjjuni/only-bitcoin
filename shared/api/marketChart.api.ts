@@ -41,13 +41,13 @@ const useMarketChart= (days: MarketChartIntervalType) => {
     staleTime: REFRESH_TIME,
     gcTime: REFRESH_TIME,
 
-    refetchOnMount: false,
+    refetchOnMount: true,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
 
     refetchInterval: REFRESH_TIME,
     placeholderData: keepPreviousData,
-    retry: 0,
+    retry: 1,
   });
 
   // endregion

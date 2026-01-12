@@ -61,9 +61,11 @@ const useMiningMetricChartData = (days: MiningMetricChartIntervalType) => {
   const { data, isSuccess, isLoading, isError, error} = useQuery<HashrateChartFormattedData>({
     queryKey: ['hashrateChart', days],
     queryFn: () => fetchMiningMetricChart(days),
+
     staleTime: 60 * 1000 * STALE_TIME_MIN,
     refetchOnMount: true,
     refetchInterval: 60 * 1000 * INTERVAL_TIME_MIN,
+
     retry: 3,
   });
 
