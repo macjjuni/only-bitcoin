@@ -112,7 +112,7 @@ export default function MacroWidgetPanel() {
 
         <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
           <SortableContext items={macroSequence} strategy={horizontalListSortingStrategy}>
-            <div className={`grid grid-cols-4 gap-4 ${isEditMode ? 'cursor-pointer mt-2' : ''}`}>
+            <div className={`grid grid-cols-4 gap-3 ${isEditMode ? 'cursor-pointer mt-2' : ''}`}>
               {visibleItems.map(({ id, label, value, sign, decimals, onClick }) => (
                 <div key={id} className="tap-highlight-transparent">
                   <WidgetItem

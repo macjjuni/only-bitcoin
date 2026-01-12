@@ -34,7 +34,7 @@ const PremiumPanel = () => {
   return (
     <>
       <KCard className="!border-none !bg-transparent !shadow-none">
-        <KCardHeader className="pt-0">
+        <KCardHeader className="pt-0 pb-3">
           <KCardTitle className="flex justify-start items-center text-2xl font-bold">한국 프리미엄</KCardTitle>
         </KCardHeader>
         <KCardContent className="flex items-center gap-1 text-[40px] text-current font-bold">

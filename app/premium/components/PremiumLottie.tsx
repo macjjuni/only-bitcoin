@@ -36,7 +36,7 @@ const PremiumLottie = () => {
   return (
     <div
       className={[
-        'absolute top-[-88px] right-[-160px] -z-[1]',
+        'absolute top-[-72px] right-[-160px] -z-[1]',
         'transition-transform duration-1000 ease-out',
         isAnimationActive && 'animate-swing',
         'layout:[view-transition-name:premium-lottie']

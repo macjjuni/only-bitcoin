@@ -7,7 +7,7 @@ import { PremiumLottie, PremiumPanel } from './components'
 export default function PremiumPage() {
 
   return (
-    <PageLayout className="relative isolation-auto overflow-x-hidden gap-3 [perspective:1000px]">
+    <PageLayout className="relative overflow-x-hidden isolation-auto gap-2.5">
       <PremiumLottie/>
       <PremiumPanel/>
     </PageLayout>
