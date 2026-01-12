@@ -5,7 +5,7 @@ import { PageLayout } from '@/layouts'
 export default function Btc2FiatPage() {
 
   return (
-    <PageLayout>
+    <PageLayout className="!pt-4">
       <PremiumBadge/>
       <ConvertPanel/>
     </PageLayout>
