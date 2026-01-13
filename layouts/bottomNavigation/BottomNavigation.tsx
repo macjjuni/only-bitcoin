@@ -2,7 +2,7 @@
 
 import { TransitionLink } from "@/components";
 import { usePathname } from "next/navigation";
-import { navigationRouteList } from "@/shared/constants/route";
+import { navigationRouteList } from "@/shared/config/route";
 
 export default function BottomNavigation() {
   const pathname = usePathname();

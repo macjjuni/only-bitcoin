@@ -1,32 +1,14 @@
-'use client';
+import { getMemeImages } from "@/shared/api/meme";
+import MemeClientPage from "@/components/features/meme/MemeClientPage";
+import { Metadata } from "next";
+import { env } from "@/shared/config/env";
 
-import { useCallback, useMemo, useState } from 'react'
-import { Gallery, TagList } from '@/app/orange-pill/meme/components'
-import { useMemeImages } from '@/shared/api'
-import { PageLayout } from '@/layouts'
+export const metadata: Metadata = {
+  title: `${env.NEXT_PUBLIC_TITLE} - Meme`,
+  description: "비트코인 밈과 짤방을 확인하고 공유하세요."
+};
 
-
-const Page = () => {
-
-  // region [Hooks]
-  const { images } = useMemeImages()
-  const [selectedTag, setSelectedTag] = useState<string>('전체')
-  const tags = useMemo(() => [...new Set(images.flatMap(image => image.tags))], [images])
-  // endregion
-
-  // region [Events]
-  const onChangeTag = useCallback((tag: string) => {
-    setSelectedTag(tag)
-  }, [])
-  // endregion
-
-
-  return (
-    <PageLayout>
-      <TagList tags={tags} selected={selectedTag} onChangeTag={onChangeTag}/>
-      <Gallery images={images} selected={selectedTag}/>
-    </PageLayout>
-  )
+export default async function Page() {
+  const initialImages = await getMemeImages();
+  return <MemeClientPage initialImages={initialImages} />;
 }
-
-export default Page

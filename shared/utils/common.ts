@@ -1,15 +1,22 @@
-const title = process.env.NEXT_PUBLIC_TITLE || 'Only Bitcoin'
 export const isDev = process.env.NODE_ENV === 'development'
 
+let originalTitle = '';
+
 /**
- * 문서 타이틀 수정
- * 클라이언트 사이드 전용 (Window 객체 체크)
+ * 실시간 가격을 문서 타이틀 앞에 추가
+ * @param price 실시간 가격 (포맷팅 된 문자열 권장)
  */
 export const setTitle = (price: string | number) => {
-  if (typeof window !== 'undefined') {
-    document.title = `${price} | ${title}`
+  if (typeof window === 'undefined') return;
+
+  // 최초 호출 시 기존에 설정된 메타데이터 타이틀 저장
+  if (!originalTitle) {
+    originalTitle = document.title;
   }
-}
+
+  // 요청하신 형식: "가격 | 원래 타이틀"
+  document.title = `${price} | ${originalTitle}`;
+};
 
 /**
  * 객체 깊은 비교

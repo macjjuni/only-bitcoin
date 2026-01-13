@@ -11,6 +11,6 @@ interface UpdownIconTypes {
 export default function UpdownIcon({ isUp, size = 8 }: UpdownIconTypes) {
 
   return (<KIcon className="updown-icon" icon={isUp ? 'triangleUp' : 'triangleDown'}
-                 color={isUp ? '#22d48e' : '#F6465D'} size={size}/>)
+                 color={isUp ? '#22d48e' : '#F6465D'} size={size} suppressHydrationWarning />)
 }
 
