@@ -4,7 +4,7 @@ import { ChangeEvent, useCallback, useDeferredValue, useMemo, useState } from "r
 import { KTextField } from "kku-ui";
 import { useQuery } from "@tanstack/react-query";
 import { PageLayout } from "@/layouts";
-import { fetchBIP39 } from "@/shared/api";
+import { useBIP39Query } from "@/shared/query";
 import { toBip39Binary } from "@/shared/utils/calculate";
 
 type BIP39Response = { index: number, word: string };
@@ -16,7 +16,7 @@ export default function Page() {
 
   const { data } = useQuery<BIP39Response[], Error>({
     queryKey: ["BIP39"],
-    queryFn: fetchBIP39,
+    queryFn: () => useBIP39Query(),
     staleTime: Infinity,
     refetchOnWindowFocus: false,
   });

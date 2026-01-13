@@ -1,4 +1,4 @@
-import { ConvertPanel, PremiumBadge } from '@/app/btc2fiat/components'
+import { ConvertPanel, PremiumBadge } from '@/components/features/btc2fiat'
 import { PageLayout } from '@/layouts'
 
 

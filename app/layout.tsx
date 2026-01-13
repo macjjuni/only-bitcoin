@@ -3,9 +3,10 @@ import type { Metadata, Viewport } from "next";
 import { ViewTransitions } from "next-view-transitions";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { BottomNavigation, Content, DefaultLayout, Header } from "@/layouts";
-import { THEME_INITIALIZATION_SCRIPT } from "@/shared/constants/theme";
+import { THEME_INITIALIZATION_SCRIPT } from "@/shared/config/theme";
 import QueryProvider from "@/components/provider/QueryProvider";
 import { Initializer } from "@/components";
+import { env } from "@/shared/config/env";
 import "./globals.css";
 
 
@@ -20,8 +21,8 @@ export const viewport: Viewport = {
 };
 
 export const metadata: Metadata = {
-  metadataBase: new URL(process.env.NEXT_PUBLIC_URL || "https://only-btc.app"),
-  title: process.env.NEXT_PUBLIC_TITLE || "Only Bitcoin",
+  metadataBase: new URL(env.NEXT_PUBLIC_URL),
+  title: env.NEXT_PUBLIC_TITLE,
   description: "온리 비트코인 시세 및 사토시, 원화 자동 계산기(BTC/KRW/USD/SAT), Not your keys, not your Bitcoin",
   keywords: ["비트코인", "온리 비트코인", "비트코인 계산기", "사토시 계산기", "비트코인 밈"],
   authors: [{ name: "a7w2en7z_" }],
@@ -36,7 +37,7 @@ export const metadata: Metadata = {
   },
   openGraph: {
     type: "website",
-    url: process.env.NEXT_PUBLIC_URL,
+    url: env.NEXT_PUBLIC_URL,
     title: "온리 비트코인",
     description: "온리 비트코인 시세 및 사토시, 원화 자동 계산기",
     images: [
@@ -77,7 +78,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <script dangerouslySetInnerHTML={{ __html: THEME_INITIALIZATION_SCRIPT }} />
       </head>
       <body>
-      {isProduction && <GoogleAnalytics gaId={process.env.NEXT_PUBLIC_GA_TRACKING_ID || ""} />}
+      {isProduction && <GoogleAnalytics gaId={env.NEXT_PUBLIC_GA_TRACKING_ID} />}
       <QueryProvider>
         <Initializer />
         <DefaultLayout>

@@ -1,12 +1,10 @@
-'use client';
-
 import {
   BlocksExplorer,
   BlocksVisualizer,
   BlockTxFees,
   HalvingChartCard,
   HalvingDataCard,
-} from "@/app/blocks/components";
+} from "@/components/features/blocks";
 import { PageLayout } from "@/layouts";
 
 

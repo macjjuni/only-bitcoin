@@ -3,7 +3,7 @@
 import { ComponentPropsWithoutRef, MouseEvent, useCallback } from "react";
 import { useTransitionRouter } from 'next-view-transitions';
 import { usePathname } from 'next/navigation';
-import { allRouteList } from "@/shared/constants/route";
+import { allRouteList } from "@/shared/config/route";
 
 export default function TransitionLink({ href, children, onClick, ...restProps }: ComponentPropsWithoutRef<'a'>) {
 

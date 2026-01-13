@@ -7,10 +7,10 @@ import {
   InfoListRowGroup,
   PriceListRowGroup,
   StyleListRowGroup
-} from "@/app/settings/components";
+} from "@/components/features/settings";
 
 const DynamicInstallListRowGroup = dynamic(
-  () => import("@/app/settings/components").then((mod) => mod.InstallListRowGroup),
+  () => import("@/components/features/settings").then((mod) => mod.InstallListRowGroup),
   { ssr: false }
 );
 

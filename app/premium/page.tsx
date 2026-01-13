@@ -1,7 +1,5 @@
-'use client'
-
 import { PageLayout } from '@/layouts'
-import { PremiumLottie, PremiumPanel } from './components'
+import { PremiumLottie, PremiumPanel } from '@/components/features/premium'
 
 
 export default function PremiumPage() {
