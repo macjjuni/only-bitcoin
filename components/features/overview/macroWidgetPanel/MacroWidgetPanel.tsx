@@ -9,8 +9,8 @@ import { EditIcon, SaveIcon } from '@/components/ui/icon'
 import { useBitcoinDominanceQuery, useFearGreedIndex } from '@/shared/query'
 import { calcPremiumPercent, minedPercent, usdToSats } from '@/shared/utils/calculate'
 import { FearAndGreedDialog } from '@/components/feedbacks'
+import { WidgetItem } from "@/components/features/overview";
 import useStore from '@/shared/stores/store'
-import WidgetItem from './WidgetItem'
 
 interface MacroVO {
   id: number;

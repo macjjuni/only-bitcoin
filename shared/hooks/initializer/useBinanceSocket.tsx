@@ -1,11 +1,10 @@
-import { useEffect, useRef, useCallback } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import { kToast } from "kku-ui";
 import ReconnectingWebSocket from "reconnecting-websocket";
 import useStore from "@/shared/stores/store";
 import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
-import { comma } from "@/shared/utils/string";
-import { isDev, setTitle } from "@/shared/utils/common";
+import { isDev } from "@/shared/utils/common";
 import { BINANCE_MARKET_FLAG } from "@/shared/constants/market";
 
 const BINANCE_URL = `wss://stream.binance.com:9443/ws/btcusdt@ticker`;
@@ -27,7 +26,6 @@ export default function useBinanceWebSocket() {
     const { setBitcoinUsdPrice } = useStore.getState();
     const usdChange24hStr = floorToDecimal(Number(usdChange24h), 2).toString();
 
-    setTitle(comma(price.toFixed(0)));
     setBitcoinUsdPrice({ usd: price, usdChange24h: usdChange24hStr, usdUpdateTimestamp, isUsdConnected: true });
   }, []);
 

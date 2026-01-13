@@ -1,51 +1,19 @@
-'use client';
-
-import dynamic from 'next/dynamic';
-import useStore from "@/shared/stores/store";
 import { PageLayout } from "@/layouts";
-import {
-  InfoListRowGroup,
-  PriceListRowGroup,
-  StyleListRowGroup
-} from "@/components/features/settings";
+import { Metadata } from "next";
+import { env } from "@/shared/config/env";
+import SettingsPage from "@/components/features/settings/SettingsPage";
 
-const DynamicInstallListRowGroup = dynamic(
-  () => import("@/components/features/settings").then((mod) => mod.InstallListRowGroup),
-  { ssr: false }
-);
+
+export const metadata: Metadata = {
+  title: `${env.NEXT_PUBLIC_TITLE} - Settings`
+};
+
 
 export default function Page() {
 
-  // region [Hooks]
-  const deferredPrompt = useStore(state => state.setting.deferredPrompt);
-  // endregion
-
-  // region [Privates]
-  const renderInstallGroup = () => {
-    if (typeof window === 'undefined') return null;
-
-    // eslint-disable-next-line @typescript-eslint/no-require-imports
-    const { isSafari } = require("@/shared/utils/device");
-
-    const canInstall = !isSafari() && deferredPrompt?.userChoice;
-
-    return canInstall ? <DynamicInstallListRowGroup /> : null;
-  };
-  // endregion
-
   return (
     <PageLayout className="pt-0.5">
-      {/* 가격 설정 그룹 */}
-      <PriceListRowGroup />
-
-      {/* 스타일 및 화면 설정 그룹 */}
-      <StyleListRowGroup />
-
-      {/* 설치 설정 (PWA) - SSR 배제 */}
-      {renderInstallGroup()}
-
-      {/* 정보 그룹 */}
-      <InfoListRowGroup />
+      <SettingsPage />
     </PageLayout>
   );
 }

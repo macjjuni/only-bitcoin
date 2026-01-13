@@ -5,3 +5,5 @@ export { default as BlockHalvingCard } from "@/components/features/overview/bloc
 export { default as ChartChanger } from "@/components/features/overview/chartChanger/ChartChanger";
 export { default as MacroWidgetPanel } from "@/components/features/overview/macroWidgetPanel/MacroWidgetPanel";
 export { default as WidgetItem } from "@/components/features/overview/macroWidgetPanel/WidgetItem";
+export { default as ClientChart } from "@/components/features/overview/clientChart/ClientChart";
+

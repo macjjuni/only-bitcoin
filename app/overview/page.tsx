@@ -1,32 +1,23 @@
-"use client";
+import { Metadata } from "next";
+import { BlockHalvingCard, ClientChart, MacroWidgetPanel, PricePanel } from "@/components/features/overview";
 
-import { BlockHalvingCard, MacroWidgetPanel, MarketChart, MiningMetricChart, PricePanel } from "@/components/features/overview";
-import useStore from "@/shared/stores/store";
 import { PageLayout } from "@/layouts";
+import { env } from "@/shared/config/env";
 
 
-// const BlockHalvingCard = dynamic(() =>
-//     import("@/components/features/overview/blockHalvingCard/BlockHalvingCard"),
-//   { ssr: false, loading: () => <KSkeleton className="w-full h-[132px]" /> }
-// );
-//
-// const PricePanel = dynamic(() =>
-//     import("@/components/features/overview/pricePanel/PricePanel"),
-//   { ssr: false, loading: () => <KSkeleton className="w-full h-[74px]" /> }
-// );
+export const metadata: Metadata = {
+  title: `${env.NEXT_PUBLIC_TITLE} - Overview`,
+  description: "비트코인(BTC) 실시간 시세, 해시레이트, 채굴 난이도 및 간략한 차트, 반감기 정보를 한 화면에서 실시간으로 확인하세요.",
+};
+
 
 export default function OverviewPage() {
-
-  // region [Hooks]
-  const overviewChart = useStore(store => store.overviewChart);
-  // endregion
 
   return (
     <PageLayout>
       <PricePanel />
       <MacroWidgetPanel />
-      {overviewChart === "price" && <MarketChart />}
-      {["hashrate", "difficulty"].includes(overviewChart) && <MiningMetricChart />}
+      <ClientChart />
       <BlockHalvingCard />
     </PageLayout>
   );
