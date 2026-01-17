@@ -83,9 +83,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <Initializer />
         <DefaultLayout>
           <Header />
-          <Content>
-            {children}
-          </Content>
+          <Content>{children}</Content>
           <BottomNavigation />
         </DefaultLayout>
       </QueryProvider>
