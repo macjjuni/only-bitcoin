@@ -18,6 +18,7 @@ import {
   useUpbitSocket,
   useUsdExchangeRate
 } from "@/shared/hooks/initializer";
+import SurpriseQuiz from "@/components/feedbacks/surpriseQuiz/SurpriseQuiz";
 
 const AlarmManager = dynamic(() => import("@/components/feedbacks/AlarmManager"), {
   ssr: false
@@ -37,11 +38,11 @@ function BaseInitializer() {
 
   // 앱 설정 및 환경 초기화
   useTheme();
+  useInitializePWA();
   useUsdExchangeRate();
   useInitializeDisabledZoom();
   useInitializeBackground();
   useInitializePage();
-  useInitializePWA();
   // endregion
 
   return <KToast {...getToastProps()} offset={120} />;
@@ -58,6 +59,7 @@ const Initializer = () => {
       <Suspense fallback={null}>
         <PwaRegister />
         <BaseInitializer />
+        <SurpriseQuiz />
       </Suspense>
     </>
   );
