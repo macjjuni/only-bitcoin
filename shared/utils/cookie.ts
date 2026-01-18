@@ -1,9 +1,10 @@
 
-
 export function setCookie(name: string, value: string, days: number) {
   const expires = new Date();
-  expires.setDate(expires.getDate() + days);
-  document.cookie = `${name}=${value}; path=/; expires=${expires.toUTCString()}`;
+  // (일 * 24시간 * 60분 * 60초 * 1000밀리초)로 계산하여 현재 시간에 더함
+  expires.setTime(expires.getTime() + (days * 24 * 60 * 60 * 1000));
+
+  document.cookie = `${name}=${value}; path=/; expires=${expires.toUTCString()}; SameSite=Lax`;
 }
 
 

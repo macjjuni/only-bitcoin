@@ -4,7 +4,7 @@ import * as bolt11 from 'bolt11';
 
 // region [Privates]
 const BLINK_API_URL = "https://api.blink.sv/graphql";
-const BLINK_ACCESS_TOKEN = env.BLINK_ACCESS_TOKEN?.trim();
+const BLINK_ACCESS_TOKEN = process.env?.BLINK_ACCESS_TOKEN || '';
 
 const isDev = process.env.NODE_ENV === 'development';
 const DOMAIN = isDev
