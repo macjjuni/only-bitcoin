@@ -102,7 +102,7 @@ const OrangeFillContent = () => {
       {/* 유틸리티 */}
       <KListGroup header="유틸리티">
         <KListRow
-          icon={<Images size={28} />} label="밈 저장소"
+          icon={<Images size={28} />} label="비트맥시 전용 밈 저장소"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleMemeRoute}
         />
