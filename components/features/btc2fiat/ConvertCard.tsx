@@ -78,7 +78,7 @@ const ConvertCard = (props: ConvertCardProps) => {
   return (
     <KCard className={[
       "border-border font-number bg-neutral-100/60 dark:bg-neutral-900/60",
-      !inputActive && " !border-0 !bg-transparent !shadow-none"
+      !inputActive && " !border-0 !bg-transparent !shadow-none [&>div]:px-2 layout-max:[&>div]:px-4"
     ].filter(Boolean).join(" ")}>
       <KCardHeader>
         <KCardTitle>
