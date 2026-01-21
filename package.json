@@ -28,7 +28,6 @@
     "lucide-react": "^0.562.0",
     "next": "16.1.1",
     "next-view-transitions": "^0.3.5",
-    "ngrok": "5.0.0-beta.2",
     "react": "19.2.3",
     "react-chartjs-2": "^5.3.1",
     "react-countup": "^6.5.3",
@@ -48,9 +47,18 @@
     "autoprefixer": "^10.4.23",
     "eslint": "^9",
     "eslint-config-next": "16.1.1",
+    "ngrok": "5.0.0-beta.2",
     "postcss": "^8.5.6",
     "sass": "^1.97.1",
     "tailwindcss": "3",
     "typescript": "^5.9.3"
+  },
+  "pnpm": {
+    "onlyBuiltDependencies": [
+      "secp256k1"
+    ],
+    "ignoredBuiltDependencies": [
+      "ngrok"
+    ]
   }
 }
