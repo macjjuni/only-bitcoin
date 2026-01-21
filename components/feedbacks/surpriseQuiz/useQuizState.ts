@@ -6,9 +6,9 @@ const useQuizState = () => {
   // region [Hooks]
   const [isVisible, setIsVisible] = useState(false);
   const [quizData, setQuizData] = useState<{
+    id: string;
     question: string;
     options: string[];
-    answer: string;
   } | null>(null);
   // endregion
 

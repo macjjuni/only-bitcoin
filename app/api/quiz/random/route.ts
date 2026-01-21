@@ -6,7 +6,7 @@ import { quizData } from "@/shared/constants/quiz";
 // region [Privates]
 const LIMIT_KEY = `${QUIZ_COOKIE_KEY}_done`;
 const BLINK_API_URL = "https://api.blink.sv/graphql";
-const MIN_BALANCE_SATS = 300;
+const MIN_BALANCE_SATS = 500;
 
 /**
  * 서버 사이드 참여 자격 검증
@@ -78,6 +78,16 @@ const fetchWalletBalance = async (): Promise<number> => {
 
 export async function GET() {
   try {
+    const isDev = process.env.NODE_ENV === "development";
+
+    // 개발 환경: 조건 없이 바로 퀴즈 반환
+    if (isDev) {
+      const quiz = getRandomQuiz();
+      const { answer: _, ...quizWithoutAnswer } = quiz;
+      return NextResponse.json({ success: true, data: quizWithoutAnswer });
+    }
+
+    // 프로덕션 환경: 자격 검증
     // 1. 기본 자격 검증 (쿠키 등)
     const { eligible, reason } = await checkServerEligibility();
     if (!eligible) {
@@ -87,18 +97,19 @@ export async function GET() {
     // 2. 지갑 잔액 확인 (주머니 사정 체크)
     const currentBalance = await fetchWalletBalance();
     console.log('currentBalance', currentBalance);
-    if (currentBalance < MIN_BALANCE_SATS) { // [Quiz] 잔액 부족으로 패스
+    if (currentBalance < MIN_BALANCE_SATS) {
       return NextResponse.json({ success: false, error: "PROBABILITY_FAIL" });
     }
 
     // 3. 서버 확률 계산 (20% 확률)
-    const isWinner = process.env.NODE_ENV === "development" ? true : Math.random() < 0.2;
+    const isWinner = Math.random() < 0.2;
 
     if (isWinner) {
       const quiz = getRandomQuiz();
+      const { answer: _, ...quizWithoutAnswer } = quiz;
       return NextResponse.json({
         success: true,
-        data: quiz
+        data: quizWithoutAnswer
       });
     }
 

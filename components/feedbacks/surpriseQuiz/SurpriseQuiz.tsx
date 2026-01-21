@@ -11,11 +11,13 @@ import {
   KDialogFooter,
   KDialogHeader,
   KDialogOverlay,
-  KDialogTitle
+  KDialogTitle,
+  KSpinner
 } from "kku-ui";
 import { QRCode } from "react-qrcode-logo";
 import useCopyOnClick from "@/shared/hooks/useCopyOnClick";
 import { QUIZ_COOKIE_KEY } from "@/shared/constants/setting";
+
 
 // region [Privates]
 const LIMIT_KEY = `${QUIZ_COOKIE_KEY}_done`;
@@ -24,8 +26,6 @@ const isDev = process.env.NODE_ENV === "development";
 const checkPwaEnv = (): boolean => {
   if (typeof window === "undefined") return false;
 
-  // 개발 환경 확인 (Vite 및 Webpack 대응)
-  const isDev = process.env.NODE_ENV === "development";
 
   // 모바일 여부 확인
   const isMobile = /Mobi|Android|iPhone/i.test(window.navigator.userAgent) || window.innerWidth <= 768;
@@ -54,17 +54,13 @@ export default function SurpriseQuiz() {
   const [isIconVisible, setIsIconVisible] = useState(false);
   const [rewardLnurl, setRewardLnurl] = useState<string | null>(null);
   const [isStepReward, setIsStepReward] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const handleCopyLnurl = useCopyOnClick(qrDivRef);
   // endregion
 
   // region [Events]
   const handleAnswerSelect = (selected: string) => {
-    if (selected === quizData?.answer) {
-      generateReward().then();
-    } else {
-      alert("오답입니다! 🥲");
-      handleClose(); // 틀리면 종료 (리밋 설정)
-    }
+    verifyAnswer(selected).then();
   };
 
   const handleClose = () => {
@@ -77,6 +73,7 @@ export default function SurpriseQuiz() {
     }, 300);
   };
   // endregion
+
 
   // region [Transactions]
   const fetchServerQuiz = async () => {
@@ -95,15 +92,46 @@ export default function SurpriseQuiz() {
     }
   };
 
-  const generateReward = async () => {
+  const verifyAnswer = async (answer: string) => {
+    if (!quizData?.id) return;
+    setIsLoading(true);
+
     try {
-      const response = await fetch("/api/quiz/reward/generate", { method: "POST" });
+      const response = await fetch("/api/quiz/answer", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ quizId: quizData.id, answer })
+      });
+      const result = await response.json();
+
+      if (result.success && result.answerToken) {
+        await generateReward(result.answerToken);
+      } else {
+        alert("오답입니다! 🥲");
+        handleClose();
+      }
+    } catch (error) {
+      console.error("정답 검증 실패:", error);
+      alert("오류가 발생했습니다. 🤖");
+    }
+  };
+
+  const generateReward = async (answerToken: string) => {
+    try {
+      const response = await fetch("/api/quiz/reward/generate", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ answerToken })
+      });
       const result = await response.json();
       if (result.success) {
         setRewardLnurl(result.lnurl);
         setIsStepReward(true);
+      } else {
+        alert("보상 생성 실패");
       }
     } catch (error) {
+      console.error("보상 생성 실패:", error);
       alert("보상 생성 실패");
     }
   };
@@ -111,22 +139,26 @@ export default function SurpriseQuiz() {
 
   // region [Life Cycles]
   useEffect(() => {
-    if (!checkPwaEnv() || getCookie(LIMIT_KEY)) return;
+    // 개발 환경: 조건 없이 바로 퀴즈 시작
+    if (isDev) {
+      const timer = setTimeout(() => fetchServerQuiz(), 2000);
+      return () => clearTimeout(timer);
+    }
 
-    const waitTime = isDev ? 2000 : 30000;
+    // 프로덕션 환경: PWA + 쿨다운 + 방문 횟수 체크
+    if (!checkPwaEnv() || getCookie(LIMIT_KEY)) return;
 
     const timer = setTimeout(() => {
       const currentCount = getVisitCount();
       const nextCount = currentCount + 1;
 
       if (nextCount >= 5) {
-        // 5회를 채우는 즉시 쿠키를 굽고 서버 호출
         setVisitCount(nextCount);
         fetchServerQuiz().then();
       } else {
         setVisitCount(nextCount);
       }
-    }, waitTime);
+    }, 30000);
 
     return () => clearTimeout(timer);
   }, []);
@@ -155,20 +187,25 @@ export default function SurpriseQuiz() {
                 <KDialogTitle className="text-2xl font-black">깜짝 비트코인 퀴즈!</KDialogTitle>
                 <KDialogDescription className="pt-2 text-md">{quizData?.question}</KDialogDescription>
               </KDialogHeader>
-              <div className="grid gap-3 py-4">
+              <div className="relative grid gap-3 py-4">
                 {quizData?.options.map((option) => (
-                  <KButton key={option} variant="outline" width="full" className="font-bold h-10"
+                  <KButton key={option} variant="outline" width="full"
+                           className={`font-bold h-10 ${isLoading && "opacity-0"}`}
+                           disabled={isLoading}
                            onClick={() => handleAnswerSelect(option)}>
                     {option}
                   </KButton>
                 ))}
+                {isLoading &&
+                  <KSpinner size="xl" className="absolute top-1/2 left-1/2 -mt-[26px] -ml-[26px]" />}
               </div>
             </>
           ) : (
             <div className="flex flex-col items-center text-center">
               <KDialogHeader className="items-center">
-                <KDialogTitle className="text-2xl font-black mb-3 text-orange-500">정답입니다! ⚡️</KDialogTitle>
+                <KDialogTitle className="text-2xl font-black mb-3 text-orange-500">⚡️ 정답입니다! ⚡️</KDialogTitle>
                 <KDialogDescription>100 Sats를 받으세요!</KDialogDescription>
+                <KDialogDescription className="text-red-500">창을 닫으면 보상을 받을 수 없습니다.</KDialogDescription>
               </KDialogHeader>
               <div ref={qrDivRef} data-copy={rewardLnurl}
                    className="my-4 rounded-2xl bg-white p-1 border-4 border-orange-400">
