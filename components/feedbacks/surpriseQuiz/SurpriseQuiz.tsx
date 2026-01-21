@@ -158,7 +158,7 @@ export default function SurpriseQuiz() {
       } else {
         setVisitCount(nextCount);
       }
-    }, 30000);
+    }, 15000);
 
     return () => clearTimeout(timer);
   }, []);
