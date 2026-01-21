@@ -3,31 +3,25 @@
 import { ChangeEvent, memo, useCallback, useDeferredValue, useMemo, useState } from "react";
 import { KTextField } from "kku-ui";
 import { toBip39Binary } from "@/shared/utils/calculate";
-import { useQuery } from "@tanstack/react-query";
-import { useBIP39Query } from "@/shared/query";
+import type { BIP39Item } from "@/shared/query/useBip39Query";
 
-type BIP39Response = { index: number, word: string };
+interface BIP39PageProps {
+  initialData: BIP39Item[];
+}
 
 const ENGLISH_REG = /^[A-Za-z]+$/;
 
 
-const Bip39Page = () => {
+const Bip39Page = ({ initialData }: BIP39PageProps) => {
 
   // region [Hooks]
-
-  const { data } = useQuery<BIP39Response[], Error>({
-    queryKey: ["BIP39"],
-    queryFn: () => useBIP39Query(),
-    staleTime: Infinity,
-    refetchOnWindowFocus: false
-  });
 
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
 
   const bip39List = useMemo(() => (
-    data?.filter(item => item.word.startsWith(deferredSearch.toLowerCase()))
-  ), [data, deferredSearch]);
+    initialData.filter(item => item.word.startsWith(deferredSearch.toLowerCase()))
+  ), [initialData, deferredSearch]);
   // endregion
 
   // region [Events]

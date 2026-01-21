@@ -1,9 +1,8 @@
-
-type BIP39Response = { index: number, word: string };
+export type BIP39Item = { index: number, word: string };
 
 const BIP39_URL = "https://raw.githubusercontent.com/bitcoin/bips/refs/heads/master/bip-0039/english.txt" as const;
 
-const useBIP39Query = async (): Promise<BIP39Response[]> => {
+const useBIP39Query = async (): Promise<BIP39Item[]> => {
   try {
     const res = await fetch(BIP39_URL, { method: "GET", headers: { "Accept": "text/plain" } });
     const text = await res.text();
