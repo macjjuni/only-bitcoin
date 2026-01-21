@@ -1,7 +1,7 @@
 import { PageLayout } from "@/layouts";
 import { Metadata } from "next";
 import { env } from "@/shared/config/env";
-import OrangeFillContent from "@/components/features/orange-pill/orangeFillContent/OrangeFillContent";
+import OrangePillContent from "@/components/features/orange-pill/orangePillContent/OrangePillContent";
 
 
 export const metadata: Metadata = {
@@ -14,7 +14,7 @@ export default function PremiumPage() {
 
   return (
     <PageLayout className="pt-0.5">
-      <OrangeFillContent />
+      <OrangePillContent />
     </PageLayout>
   );
 }

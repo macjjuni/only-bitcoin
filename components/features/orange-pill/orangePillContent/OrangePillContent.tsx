@@ -22,7 +22,7 @@ const EXTERNAL_LINKS = {
 // endregion
 
 
-const OrangeFillContent = () => {
+const OrangePillContent = () => {
 
   // region [Hooks]
   const router = useTransitionRouter();
@@ -116,7 +116,7 @@ const OrangeFillContent = () => {
   );
 };
 
-const MemoizedOrangeFillContent = memo(OrangeFillContent);
-MemoizedOrangeFillContent.displayName = "OrangeFillContent";
+const MemoizedOrangePillContent = memo(OrangePillContent);
+MemoizedOrangePillContent.displayName = "OrangePillContent";
 
-export default MemoizedOrangeFillContent;
+export default MemoizedOrangePillContent;
