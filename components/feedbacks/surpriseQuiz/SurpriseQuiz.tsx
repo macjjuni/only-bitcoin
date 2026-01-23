@@ -152,7 +152,7 @@ export default function SurpriseQuiz() {
       const currentCount = getVisitCount();
       const nextCount = currentCount + 1;
 
-      if (nextCount >= 5) {
+      if (nextCount >= 3) {
         setVisitCount(nextCount);
         fetchServerQuiz().then();
       } else {
