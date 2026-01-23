@@ -20,9 +20,12 @@ export function isIOSSafari() {
 interface NavigatorWithStandalone extends Navigator {
   standalone?: boolean;
 }
-export function isIOSPWA(): boolean {
-  const navigatorStandalone = (window.navigator as NavigatorWithStandalone).standalone;
-  const isStandalone = window.matchMedia("(display-mode: standalone)").matches || navigatorStandalone;
 
-  return Boolean(isStandalone);
+export function isPWAInstalled(): boolean {
+  const navigatorStandalone = (window.navigator as NavigatorWithStandalone).standalone;
+  return window.matchMedia("(display-mode: standalone)").matches || navigatorStandalone === true;
+}
+
+export function isIOSPWA(): boolean {
+  return isPWAInstalled();
 }

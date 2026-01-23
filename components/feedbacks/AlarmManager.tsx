@@ -5,7 +5,7 @@ import { DomainNoticeDialog, PWAInstallAlertBottomSheet, PWAInstallAlertIOSBotto
 import { getCookie } from "@/shared/utils/cookie";
 import { NOTICE_COOKIE_KEY, PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import { useInitializePWA } from "@/shared/hooks/initializer";
-import { isIOSPWA, isIOSSafari, isSafari } from "@/shared/utils/device";
+import { isIOSPWA, isIOSSafari, isPWAInstalled, isSafari } from "@/shared/utils/device";
 
 const AlarmManager = () => {
   type DisplayState = "NONE" | "DOMAIN" | "IOS_PWA" | "OTHER_PWA";
@@ -30,9 +30,8 @@ const AlarmManager = () => {
     // 3. IOS PWA (Safari)
     if (isIOSSafari() && !isIOSPWA()) return "IOS_PWA";
 
-    // 4. Android/Desktop PWA (deferredPrompt 존재 여부만 체크)
-    // .userChoice는 내부 Promise이므로 존재 여부만 확인하는 것이 안전합니다.
-    if (!isSafari() && !!deferredPrompt) {
+    // 4. Android/Desktop PWA (deferredPrompt 존재 + standalone 모드가 아닌 경우만 체크)
+    if (!isSafari() && !!deferredPrompt && !isPWAInstalled()) {
       return "OTHER_PWA";
     }
 
