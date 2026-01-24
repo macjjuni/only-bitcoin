@@ -46,7 +46,7 @@ const setCountCooldown = () => setCookie(COUNT_COOLDOWN_KEY, "true", 1 / 24); //
 
 const finishQuizSession = () => {
   deleteCookie(QUIZ_COOKIE_KEY); // 누적 카운트 삭제
-  setCookie(LIMIT_KEY, "true", 1); // 1일 쿨다운 쿠키 생성
+  setCookie(LIMIT_KEY, "true", 0.5); // 12시간 쿨다운 쿠키 생성
 };
 // endregion
 
