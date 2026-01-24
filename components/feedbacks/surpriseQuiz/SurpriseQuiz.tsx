@@ -53,6 +53,7 @@ const finishQuizSession = () => {
 export default function SurpriseQuiz() {
   // region [Hooks]
   const qrDivRef = useRef<HTMLDivElement>(null);
+  const isProcessingRef = useRef(false);
   const { isVisible, setIsVisible, quizData, setQuizData } = useQuizState();
   const [isIconVisible, setIsIconVisible] = useState(false);
   const [rewardLnurl, setRewardLnurl] = useState<string | null>(null);
@@ -116,6 +117,7 @@ export default function SurpriseQuiz() {
     } catch (error) {
       console.error("정답 검증 실패:", error);
       alert("오류가 발생했습니다. 🤖");
+      setIsLoading(false);
     }
   };
 
@@ -131,21 +133,28 @@ export default function SurpriseQuiz() {
         setRewardLnurl(result.lnurl);
         setIsStepReward(true);
       } else {
-        alert("보상 생성 실패");
+        handleClose();
+        throw Error('알 수 없는 오류가 발생했습니다. 불편을 드려 죄송합니다. 🙇‍♂️')
       }
     } catch (error) {
       console.error("보상 생성 실패:", error);
       alert("보상 생성 실패");
+    } finally {
+      setIsLoading(false);
     }
   };
   // endregion
 
   // region [Privates]
   const tryIncrementCount = () => {
+    // 중복 실행 방지
+    if (isProcessingRef.current) return;
     // 퀴즈 완료 쿨다운 체크
     if (getCookie(LIMIT_KEY)) return;
     // 카운트 증가 쿨다운 체크
     if (!canIncrementCount()) return;
+    console.log('up');
+    isProcessingRef.current = true;
 
     const currentCount = getVisitCount();
     const nextCount = currentCount + 1;
@@ -156,6 +165,11 @@ export default function SurpriseQuiz() {
     if (nextCount >= QUIZ_MIN_COUNT) {
       fetchServerQuiz().then();
     }
+
+    // 다음 사이클을 위해 플래그 해제 (쿨다운 쿠키가 실제 중복 방지 역할)
+    setTimeout(() => {
+      isProcessingRef.current = false;
+    }, 1000);
   };
   // endregion
 
@@ -205,7 +219,7 @@ export default function SurpriseQuiz() {
 
       <KDialog open={isVisible} onOpenChange={handleClose} size="sm" blur={4}>
         <KDialogOverlay />
-        <KDialogContent className="p-4">
+        <KDialogContent className="p-4" onPointerDownOutside={(e) => { e.preventDefault(); }}>
           {!isStepReward ? (
             <>
               <KDialogHeader className="items-center text-center">
