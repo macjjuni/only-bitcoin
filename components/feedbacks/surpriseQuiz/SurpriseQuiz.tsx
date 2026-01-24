@@ -153,7 +153,6 @@ export default function SurpriseQuiz() {
     if (getCookie(LIMIT_KEY)) return;
     // 카운트 증가 쿨다운 체크
     if (!canIncrementCount()) return;
-    console.log('up');
     isProcessingRef.current = true;
 
     const currentCount = getVisitCount();
