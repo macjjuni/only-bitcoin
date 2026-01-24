@@ -21,11 +21,11 @@ import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/shared/constants/setting";
 
 // region [Privates]
 const LIMIT_KEY = `${QUIZ_COOKIE_KEY}_done`;
+const COUNT_COOLDOWN_KEY = `${QUIZ_COOKIE_KEY}_cd`;
 const isDev = process.env.NODE_ENV === "development";
 
 const checkPwaEnv = (): boolean => {
   if (typeof window === "undefined") return false;
-
 
   // 모바일 여부 확인
   const isMobile = /Mobi|Android|iPhone/i.test(window.navigator.userAgent) || window.innerWidth <= 768;
@@ -41,9 +41,12 @@ const checkPwaEnv = (): boolean => {
 const getVisitCount = () => parseInt(getCookie(QUIZ_COOKIE_KEY) || "0");
 const setVisitCount = (count: number) => setCookie(QUIZ_COOKIE_KEY, count.toString(), 1);
 
+const canIncrementCount = () => !getCookie(COUNT_COOLDOWN_KEY);
+const setCountCooldown = () => setCookie(COUNT_COOLDOWN_KEY, "true", 1 / 24); // 1시간 쿨다운
+
 const finishQuizSession = () => {
   deleteCookie(QUIZ_COOKIE_KEY); // 누적 카운트 삭제
-  setCookie(LIMIT_KEY, "true", 1); // 0.125일 = 3시간 쿨다운 쿠키 생성
+  setCookie(LIMIT_KEY, "true", 1); // 1일 쿨다운 쿠키 생성
 };
 // endregion
 
@@ -137,6 +140,26 @@ export default function SurpriseQuiz() {
   };
   // endregion
 
+  // region [Privates]
+  const tryIncrementCount = () => {
+    // 퀴즈 완료 쿨다운 체크
+    if (getCookie(LIMIT_KEY)) return;
+    // 카운트 증가 쿨다운 체크
+    if (!canIncrementCount()) return;
+
+    const currentCount = getVisitCount();
+    const nextCount = currentCount + 1;
+
+    setVisitCount(nextCount);
+    setCountCooldown(); // 1시간 카운트 증가 쿨다운 설정
+
+    if (nextCount >= QUIZ_MIN_COUNT) {
+      fetchServerQuiz().then();
+    }
+  };
+  // endregion
+
+
   // region [Life Cycles]
   useEffect(() => {
     // 개발 환경: 조건 없이 바로 퀴즈 시작
@@ -145,22 +168,25 @@ export default function SurpriseQuiz() {
       return () => clearTimeout(timer);
     }
 
-    // 프로덕션 환경: PWA + 쿨다운 + 방문 횟수 체크
-    if (!checkPwaEnv() || getCookie(LIMIT_KEY)) return;
+    // 프로덕션 환경: PWA 환경만 허용
+    if (!checkPwaEnv()) return;
 
-    const timer = setTimeout(() => {
-      const currentCount = getVisitCount();
-      const nextCount = currentCount + 1;
+    // 초기 마운트 시 카운트 증가 시도 (15초 후)
+    const timer = setTimeout(tryIncrementCount, 15000);
 
-      if (nextCount >= QUIZ_MIN_COUNT) {
-        setVisitCount(nextCount);
-        fetchServerQuiz().then();
-      } else {
-        setVisitCount(nextCount);
+    // 백그라운드에서 복귀 시 카운트 증가 시도
+    const handleVisibilityChange = () => {
+      if (document.visibilityState === "visible") {
+        tryIncrementCount();
       }
-    }, 15000);
+    };
 
-    return () => clearTimeout(timer);
+    document.addEventListener("visibilitychange", handleVisibilityChange);
+
+    return () => {
+      clearTimeout(timer);
+      document.removeEventListener("visibilitychange", handleVisibilityChange);
+    };
   }, []);
   // endregion
 
