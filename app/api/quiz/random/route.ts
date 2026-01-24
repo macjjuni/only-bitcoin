@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { QUIZ_COOKIE_KEY } from "@/shared/constants/setting";
+import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/shared/constants/setting";
 import { quizData } from "@/shared/constants/quiz";
 
 // region [Privates]
@@ -23,7 +23,7 @@ const checkServerEligibility = async () => {
   const countRaw = cookieStore.get(QUIZ_COOKIE_KEY)?.value;
   const count = parseInt(countRaw || "0");
 
-  if (count < 5) {
+  if (count < QUIZ_MIN_COUNT) {
     return { eligible: false, reason: "INSUFFICIENT_COUNT" };
   }
 

@@ -24,6 +24,7 @@ export const usdMarketOptions: { label: string; value: UsdMarketType }[] = [
 
 export const PWA_COOKIE_KEY = 'install' as const;
 export const QUIZ_COOKIE_KEY = '_ga_ss_v2' as const;
+export const QUIZ_MIN_COUNT = 3 as const;
 export const NOTICE_COOKIE_KEY = 'notice' as const;
 
 export const sourceOptions = [

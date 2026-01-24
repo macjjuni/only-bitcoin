@@ -16,7 +16,7 @@ import {
 } from "kku-ui";
 import { QRCode } from "react-qrcode-logo";
 import useCopyOnClick from "@/shared/hooks/useCopyOnClick";
-import { QUIZ_COOKIE_KEY } from "@/shared/constants/setting";
+import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/shared/constants/setting";
 
 
 // region [Privates]
@@ -152,7 +152,7 @@ export default function SurpriseQuiz() {
       const currentCount = getVisitCount();
       const nextCount = currentCount + 1;
 
-      if (nextCount >= 3) {
+      if (nextCount >= QUIZ_MIN_COUNT) {
         setVisitCount(nextCount);
         fetchServerQuiz().then();
       } else {
