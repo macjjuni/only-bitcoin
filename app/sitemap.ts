@@ -2,7 +2,7 @@ import { MetadataRoute } from "next";
 
 const BASE_URL = "https://only-btc.app";
 
-export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
+export default function sitemap(): MetadataRoute.Sitemap {
   // #region 1. Static Routes
   const staticRoutes = [
     "",
@@ -24,7 +24,7 @@ export default async function sitemap(): Promise<MetadataRoute.Sitemap> {
 
   // #region 2. Dynamic Routes (예: 비트코인 관련 동적 페이지)
   // 실제 API 호출이나 DB 조회 코드가 들어가는 부분입니다.
-  // const dynamicRoutes = await fetchDynamicCoinRoutes();
+  // const dynamicRoutes = fetchDynamicCoinRoutes();
   // #endregion
 
   return staticRoutes;
