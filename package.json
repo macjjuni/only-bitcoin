@@ -1,6 +1,6 @@
 {
   "name": "only-btc",
-  "version": "v4.0.0",
+  "version": "v4.0.1",
   "private": true,
   "scripts": {
     "dev": "next dev",
