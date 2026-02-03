@@ -116,14 +116,26 @@ const ConvertPanel = () => {
 
 
   // region [Life Cycles]
-  useEffect(synchronizeValue, [btcCount, krw, usd, krwPrice, usdPrice, sats, premium]);
+  useEffect(synchronizeValue, [synchronizeValue]);
   // endregion
 
 
   const KrwNumberField = useMemo(() => {
     const isCurrentCurrency = focusCurrency === "KRW";
-    const premiumKrwPrice = krwPrice * (1 + premium / 100);
-    const premiumMultiplier = (1 + premium / 100).toFixed(2);
+    const premiumAmount = Math.floor(krwPrice * (premium / 100));
+
+    let topDescription = undefined;
+    if (premium !== 0 && focusCurrency !== "USD") {
+      topDescription = (
+        <>
+          <span>{comma(krwPrice)}</span>
+          <span className="mx-1">+</span>
+          <span className="text-bitcoin font-bold">
+            {comma(premiumAmount)}({premium}%)
+          </span>
+        </>
+      )
+    }
 
     return (
       <ConvertCard
@@ -133,18 +145,30 @@ const ConvertPanel = () => {
         unit="KRW"
         onChange={onChangeKrw}
         onChangeUnit={onChangeUnit}
-        isPremium={premium !== 0}
-        topDescription={`${comma(krwPrice)} × ${premiumMultiplier} = ${comma(premiumKrwPrice)}`}
-        bottomDescription={`1BTC = ${comma(premiumKrwPrice)}`}
+        isPremium={focusCurrency !== 'USD' && premium !== 0}
+        topDescription={topDescription}
+        bottomDescription={`1BTC = ${comma(krwPrice)} ${focusCurrency === 'USD' && `| 1$ = ₩${comma(exRate)}`}`}
       />
     );
-  }, [krw, krwPrice, focusCurrency, premium, onChangeKrw, onChangeUnit]);
+  }, [krw, krwPrice, focusCurrency, premium, onChangeKrw, onChangeUnit, exRate]);
 
 
   const UsdNumberField = useMemo(() => {
     const isCurrentCurrency = focusCurrency === "USD";
-    const premiumUsdPrice = usdPrice * (1 + premium / 100);
-    const premiumMultiplier = (1 + premium / 100).toFixed(2);
+    const premiumAmount = floorToDecimal(usdPrice * (premium / 100), 2);
+
+    let topDescription = undefined;
+    if (premium !== 0 && focusCurrency !== "KRW") {
+      topDescription = (
+        <>
+          <span>{comma(usdPrice)}</span>
+          <span className="mx-1">+</span>
+          <span className="text-bitcoin font-bold">
+            {comma(premiumAmount)}({premium}%)
+          </span>
+        </>
+      )
+    }
 
     return (
       <ConvertCard
@@ -154,15 +178,46 @@ const ConvertPanel = () => {
         unit="USD"
         onChange={onChangeUsd}
         onChangeUnit={onChangeUnit}
-        isPremium={premium !== 0}
-        topDescription={`${comma(usdPrice)} × ${premiumMultiplier} = ${comma(premiumUsdPrice)}`}
-        bottomDescription={`1${isUsdtStandard ? "USDT" : "USD"} : ${comma(exRate)} | 1BTC = ${comma(premiumUsdPrice)}`}
+        isPremium={focusCurrency !== 'KRW' && premium !== 0}
+        topDescription={topDescription}
+        bottomDescription={`1BTC = ${comma(usdPrice)} | 1${isUsdtStandard ? "USDT" : "USD"} : ${comma(exRate)}`}
       />
     );
   }, [usd, usdPrice, focusCurrency, exRate, premium, isUsdtStandard, onChangeUsd, onChangeUnit]);
 
   const BtcNumberField = useMemo(() => {
     const isCurrentCurrency = focusCurrency === "BTC";
+
+    let topDescription = undefined;
+    if (premium !== 0 && focusCurrency === "KRW") {
+      const krwNum = parseFloat(krw.replace(/,/g, ""));
+      const btcCountWithoutPremium = krwNum / krwPrice;
+      const btcCountWithPremium = parseFloat(btcCount.replace(/,/g, ""));
+      const btcDifference = btcCountWithoutPremium - btcCountWithPremium;
+
+      topDescription = (
+        <>
+          <span>{btcFormatter(btcCountWithoutPremium)}</span>
+          <span className="mx-1">-</span>
+          <span className="text-bitcoin">{btcFormatter(btcDifference)}({premium}%)</span>
+        </>
+      )
+    }
+
+    if (premium !== 0 && focusCurrency === "USD") {
+      const usdNum = parseFloat(usd.replace(/,/g, ""));
+      const btcCountWithoutPremium = usdNum / usdPrice;
+      const btcCountWithPremium = parseFloat(btcCount.replace(/,/g, ""));
+      const btcDifference = btcCountWithoutPremium - btcCountWithPremium;
+
+      topDescription = (
+        <>
+          <span>{btcFormatter(btcCountWithoutPremium)}</span>
+          <span className="mx-1">-</span>
+          <span className="text-bitcoin">{btcFormatter(btcDifference)}({premium}%)</span>
+        </>
+      )
+    }
 
     return (
       <ConvertCard
@@ -172,14 +227,46 @@ const ConvertPanel = () => {
         unit="BTC"
         onChange={onChangeBtcCount}
         onChangeUnit={onChangeUnit}
-        isPremium={premium !== 0}
+        isPremium={focusCurrency !== 'SATS' && premium !== 0}
+        topDescription={topDescription}
         bottomDescription="1BTC = 1BTC"
       />
     );
-  }, [btcCount, focusCurrency, premium, onChangeBtcCount, onChangeUnit]);
+  }, [btcCount, focusCurrency, premium, onChangeBtcCount, onChangeUnit, krw, krwPrice, usd, usdPrice, btcFormatter]);
 
   const SatsNumberField = useMemo(() => {
     const isCurrentCurrency = focusCurrency === "SATS";
+
+    let topDescription = undefined;
+    if (premium !== 0 && focusCurrency === "KRW") {
+      const krwNum = parseFloat(krw.replace(/,/g, ""));
+      const satsWithoutPremium = parseFloat(btcToSatoshi(krwNum / krwPrice).replace(/,/g, ""));
+      const satsWithPremium = parseFloat(sats.replace(/,/g, ""));
+      const satsDifference = satsWithoutPremium - satsWithPremium;
+
+      topDescription = (
+        <>
+          <span>{comma(satsWithoutPremium)}</span>
+          <span className="mx-1">-</span>
+          <span className="text-bitcoin">{comma(satsDifference)}({premium}%)</span>
+        </>
+      )
+    }
+
+    if (premium !== 0 && focusCurrency === "USD") {
+      const usdNum = parseFloat(usd.replace(/,/g, ""));
+      const satsWithoutPremium = parseFloat(btcToSatoshi(usdNum / usdPrice).replace(/,/g, ""));
+      const satsWithPremium = parseFloat(sats.replace(/,/g, ""));
+      const satsDifference = satsWithoutPremium - satsWithPremium;
+
+      topDescription = (
+        <>
+            <span>{comma(satsWithoutPremium)}</span>
+            <span className="mx-1">-</span>
+            <span className="text-bitcoin">{comma(satsDifference)}({premium}%)</span>
+        </>
+      )
+    }
 
     return (
       <ConvertCard
@@ -189,11 +276,12 @@ const ConvertPanel = () => {
         unit="SATS"
         onChange={onChangeSats}
         onChangeUnit={onChangeUnit}
-        isPremium={premium !== 0}
+        isPremium={focusCurrency !== 'BTC' && premium !== 0}
+        topDescription={topDescription}
         bottomDescription="1BTC = 100,000,000 Sats"
       />
     );
-  }, [sats, focusCurrency, premium, onChangeSats, onChangeUnit]);
+  }, [sats, focusCurrency, premium, onChangeSats, onChangeUnit, krw, krwPrice, usd, usdPrice]);
 
 
   const SortNumberField = useMemo(() => {
