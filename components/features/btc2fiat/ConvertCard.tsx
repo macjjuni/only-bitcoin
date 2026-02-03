@@ -120,9 +120,9 @@ const ConvertCard = (props: ConvertCardProps) => {
         </KCardTitle>
         {
           (!inputActive && (topDescription || bottomDescription)) && (
-            <KCardDescription className="flex flex-col gap-1.5 text-right text-md text-current opacity-70">
-              {isPremium && <span>= {topDescription}</span>}
-              {bottomDescription && <span>* {bottomDescription}</span>}
+            <KCardDescription className="flex flex-col gap-1.5 text-right text-md text-current">
+              {isPremium && topDescription && <span className="font-bold">= {topDescription}</span>}
+              {bottomDescription && <span className="font-bold">* {bottomDescription}</span>}
             </KCardDescription>
           )
         }
