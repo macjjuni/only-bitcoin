@@ -81,6 +81,16 @@ export default function SurpriseQuiz() {
 
   // region [Transactions]
   const fetchServerQuiz = async () => {
+    // 서버 호출 전 클라이언트에서 선제적 체크 (불필요한 Edge Request 방지)
+    if (getCookie(LIMIT_KEY)) {
+      return;
+    }
+
+    const currentCount = getVisitCount();
+    if (currentCount < QUIZ_MIN_COUNT) {
+      return;
+    }
+
     try {
       const response = await fetch("/api/quiz/random");
       const result = await response.json();
@@ -187,17 +197,22 @@ export default function SurpriseQuiz() {
     // 초기 마운트 시 카운트 증가 시도 (15초 후)
     const timer = setTimeout(tryIncrementCount, 15000);
 
-    // 백그라운드에서 복귀 시 카운트 증가 시도
+    // 백그라운드에서 복귀 시 카운트 증가 시도 (디바운싱 적용)
+    let visibilityTimeout: NodeJS.Timeout;
     const handleVisibilityChange = () => {
-      if (document.visibilityState === "visible") {
-        tryIncrementCount();
-      }
+      clearTimeout(visibilityTimeout);
+      visibilityTimeout = setTimeout(() => {
+        if (document.visibilityState === "visible") {
+          tryIncrementCount();
+        }
+      }, 3000); // 3초 디바운스 - 빠른 탭 전환 시 중복 호출 방지
     };
 
     document.addEventListener("visibilitychange", handleVisibilityChange);
 
     return () => {
       clearTimeout(timer);
+      clearTimeout(visibilityTimeout);
       document.removeEventListener("visibilitychange", handleVisibilityChange);
     };
   }, []);
