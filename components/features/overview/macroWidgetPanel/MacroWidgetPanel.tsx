@@ -22,6 +22,8 @@ interface MacroVO {
 }
 
 export default function MacroWidgetPanel() {
+
+  // region [Hooks]
   const router = useTransitionRouter()
   const [isEditMode, setIsEditMode] = useState(false)
   const [IsFearAndGreedDialog, setIsFearAndGreedDialog] = useState(false)
@@ -32,18 +34,59 @@ export default function MacroWidgetPanel() {
   const usdExRate = useStore((state) => state.exRate.value)
   const blockData = useStore((state) => state.blockData)
   const fees = useStore((state) => state.fees)
+  // endregion
 
+
+  // region [Transactions]
   const dominanceData = useBitcoinDominanceQuery()
   const fearGreedData = useFearGreedIndex()
+  // endregion
 
-  // 변수 계산 (useMemo 제거)
+
+  // region [Privates]
   const premium = calcPremiumPercent(krw, usd, usdExRate)
 
-  // Actions
-  const toggleEditMode = () => setIsEditMode((p) => !p)
   const onRoutePremiumPage = () => router.push('/premium')
 
-  const handleDragEnd = (event: DragEndEvent) => {
+  const onClickOpenFearAndGreedDialog = () => setIsFearAndGreedDialog(true)
+
+  /**
+   * 매크로 데이터 리스트 정의
+   */
+  const macroDataList: MacroVO[] = [
+    { id: 1, label: 'BTC.D', value: dominanceData, decimals: 1, sign: '%' },
+    { id: 2, label: 'KRW/USD', value: usdExRate, decimals: 0, sign: null, onClick: onRoutePremiumPage },
+    { id: 3, label: 'Premium', value: premium, decimals: 2, sign: '%', onClick: onRoutePremiumPage },
+    {
+      id: 4,
+      label: 'F&G Index',
+      value: fearGreedData,
+      decimals: 0,
+      sign: null,
+      onClick: onClickOpenFearAndGreedDialog,
+    },
+    { id: 5, label: 'Mined %', value: minedPercent(blockData[0].height), decimals: 2, sign: '%' },
+    { id: 6, label: 'Sats/USD', value: usdToSats(1, usd), decimals: 0, sign: null },
+    { id: 7, label: 'Fast Fee', value: fees.fastestFee, decimals: 1, sign: 'sat/vB' },
+    { id: 8, label: 'Eco Fee', value: fees.economyFee, decimals: 1, sign: 'sat/vB' },
+  ]
+
+  const visibleItems = macroSequence
+    .map((id) => macroDataList.find((item) => item.id === id))
+    .filter(Boolean) as MacroVO[]
+
+  const unselectedItems = macroDataList.filter((i) => !macroSequence.includes(i.id))
+  // endregion
+
+
+  // region [Events]
+  const onClickEditToggle = () => setIsEditMode((p) => !p)
+
+  /**
+   * 위젯 드래그 종료 이벤트 핸들러
+   * 위젯 순서를 변경합니다.
+   */
+  const onDragEnd = (event: DragEndEvent) => {
     if (!isEditMode) return
     const { active, over } = event
     if (!over || active.id === over.id) return
@@ -64,33 +107,14 @@ export default function MacroWidgetPanel() {
   const onClickRemoveWidget = (id: number) => {
     setMacroSequence(macroSequence.filter((v) => v !== id))
   }
+  // endregion
 
-  // Data List 정의
-  const macroDataList: MacroVO[] = [
-    { id: 1, label: 'BTC.D', value: dominanceData, decimals: 1, sign: '%' },
-    { id: 2, label: 'KRW/USD', value: usdExRate, decimals: 0, sign: null, onClick: onRoutePremiumPage },
-    { id: 3, label: 'Premium', value: premium, decimals: 2, sign: '%', onClick: onRoutePremiumPage },
-    {
-      id: 4,
-      label: 'F&G Index',
-      value: fearGreedData,
-      decimals: 0,
-      sign: null,
-      onClick: () => setIsFearAndGreedDialog(true),
-    },
-    { id: 5, label: 'Mined %', value: minedPercent(blockData[0].height), decimals: 2, sign: '%' },
-    { id: 6, label: 'Sats/USD', value: usdToSats(1, usd), decimals: 0, sign: null },
-    { id: 7, label: 'Fast Fee', value: fees.fastestFee, decimals: 1, sign: 'sat/vB' },
-    { id: 8, label: 'Eco Fee', value: fees.economyFee, decimals: 1, sign: 'sat/vB' },
-  ]
 
-  const visibleItems = macroSequence
-    .map((id) => macroDataList.find((item) => item.id === id))
-    .filter(Boolean) as MacroVO[]
-
-  const unselectedItems = macroDataList.filter((i) => !macroSequence.includes(i.id))
-
-  // Scroll 제어 (Next.js layout 대응)
+  // region [Life Cycles]
+  /**
+   * 편집 모드 시 스크롤 제어
+   * Next.js layout 요소의 overflow를 조작합니다.
+   */
   useEffect(() => {
     const layoutElement = document.getElementsByClassName('only-btc__content')[0] as HTMLElement
     if (!layoutElement) return
@@ -100,17 +124,18 @@ export default function MacroWidgetPanel() {
       layoutElement.style.overflow = 'auto'
     }
   }, [isEditMode])
+  // endregion
 
   return (
     <>
       <div className="flex flex-col mb-2 -mt-1">
         <div className="flex justify-end items-center pb-1">
-          <button type="button" onClick={toggleEditMode} className="text-current mr-1">
+          <button type="button" onClick={onClickEditToggle} className="text-current mr-1">
             {isEditMode ? <SaveIcon size={22}/> : <EditIcon size={22}/>}
           </button>
         </div>
 
-        <DndContext onDragEnd={handleDragEnd} collisionDetection={closestCenter}>
+        <DndContext onDragEnd={onDragEnd} collisionDetection={closestCenter}>
           <SortableContext items={macroSequence} strategy={horizontalListSortingStrategy}>
             <div className={`grid grid-cols-4 gap-3 ${isEditMode ? 'cursor-pointer mt-2' : ''}`}>
               {visibleItems.map(({ id, label, value, sign, decimals, onClick }) => (

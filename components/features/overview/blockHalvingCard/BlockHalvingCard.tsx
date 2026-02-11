@@ -26,9 +26,13 @@ export default function BlockHalvingCard() {
   // endregion
 
 
-  // region [Render Logic]
+  // region [Privates]
   const currentBlockIndex = Math.floor(halvingPercent / 4)
 
+  /**
+   * 반감기 진행도 세그먼트 렌더링
+   * 25개의 세그먼트를 생성하고 현재 진행도에 따라 스타일을 적용합니다.
+   */
   const renderSegments = useMemo(() => {
     return Array.from({ length: totalSegments }, (_, index) => {
       const isFilled = index < currentBlockIndex
@@ -36,16 +40,14 @@ export default function BlockHalvingCard() {
 
       const className = [
         'inline-flex h-full w-[calc((100%-50px)/25)] mr-0.5 -translate-x-1 -skew-x-[24deg] transition-all duration-300',
-        isFilled ? 'bg-current z-[1]' : 'bg-transparent', // 채워진 상태
-        isActive ? '!bg-current animate-blink-gold z-[2]' : '', // 현재 진행 상태
+        isFilled ? 'bg-current z-[1]' : 'bg-transparent',
+        isActive ? '!bg-current animate-blink-gold z-[2]' : '',
       ].filter(Boolean).join(' ')
 
       return <div key={index} className={className}/>
     })
-  }, [currentBlockIndex, currentBlockIndex])
-  // endregion
+  }, [currentBlockIndex])
 
-  // region [Privates]
   const initializeLottieSpeed = useCallback(() => {
     if (!animationItem) {
       return

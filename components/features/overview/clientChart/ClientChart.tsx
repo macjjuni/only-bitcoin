@@ -3,11 +3,13 @@
 import { memo } from "react";
 import { MarketChart, MiningMetricChart } from "@/components/features/overview";
 import useStore from "@/shared/stores/store";
+
 const ClientChart = () => {
 
   // region [Hooks]
   const overviewChart = useStore(store => store.overviewChart);
   // endregion
+
 
   return (
     <>

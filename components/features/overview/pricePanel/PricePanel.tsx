@@ -5,6 +5,8 @@ import useStore from '@/shared/stores/store'
 import { CountText, UpdownIcon } from '@/components'
 
 export default function PricePanel() {
+
+  // region [Hooks]
   const bitcoinPrice = useStore(state => state.bitcoinPrice)
   const currency = useStore(state => state.setting.currency)
 
@@ -24,6 +26,7 @@ export default function PricePanel() {
       signSize: 'text-[28px]',
     },
   ], [bitcoinPrice])
+  // endregion
 
   return (
     <div className="flex flex-col gap-2 px-2">

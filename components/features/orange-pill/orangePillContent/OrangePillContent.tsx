@@ -54,7 +54,7 @@ const OrangePillContent = () => {
   return (
     <>
       {/* 커뮤니티 그룹 */}
-      <KListGroup header="커뮤니티">
+      <KListGroup header="커뮤니티" className="mt-1">
         <KListRow
           icon={<DiscordIcon size={28} />}
           label="BITCOIN⚡️CITADEL"
