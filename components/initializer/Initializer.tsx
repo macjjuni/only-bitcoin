@@ -18,7 +18,6 @@ import {
   useUpbitSocket,
   useUsdExchangeRate
 } from "@/shared/hooks/initializer";
-import SurpriseQuiz from "@/components/feedbacks/surpriseQuiz/SurpriseQuiz";
 
 const AlarmManager = dynamic(() => import("@/components/feedbacks/AlarmManager"), {
   ssr: false
@@ -59,7 +58,7 @@ const Initializer = () => {
       <Suspense fallback={null}>
         <PwaRegister />
         <BaseInitializer />
-        <SurpriseQuiz />
+        {/* <SurpriseQuiz /> */}
       </Suspense>
     </>
   );
