@@ -44,43 +44,58 @@ export default function MiningMetricChart() {
     loop: true,
   })
 
-  const ChartRowData = useMemo(() => {
+  /**
+   * 차트 타입에 따른 데이터 반환
+   */
+  const chartRowData = useMemo(() => {
     if (!data) return { value: [] as number[], date: [] as number[] }
     if (overviewChart === 'hashrate') return data.hashrates
     if (overviewChart === 'difficulty') return data.difficulty
-    throw Error('Invalid overview chart.')
+
+    // 예외 발생 대신 빈 데이터 반환
+    console.error('Invalid overview chart type:', overviewChart)
+    return { value: [] as number[], date: [] as number[] }
   }, [overviewChart, data])
 
   const seriesData = useMemo(() => {
-    if (!ChartRowData.date?.length) return []
+    if (!chartRowData.date?.length) return []
     // mempool.space 타임스탬프는 초 단위 → ApexCharts datetime은 ms 단위
-    return ChartRowData.date.map((timestamp, idx) => ({
+    return chartRowData.date.map((timestamp, idx) => ({
       x: timestamp * 1000,
-      y: ChartRowData.value[idx],
+      y: chartRowData.value[idx],
     }))
-  }, [ChartRowData])
+  }, [chartRowData])
 
+  /**
+   * 최대값 인덱스를 한 번의 순회로 계산
+   */
   const maxValueIndex = useMemo(() => {
-    const values = ChartRowData.value
+    const values = chartRowData.value
     if (!values.length) return -1
-    const maxValue = values.reduce((max, val) => (val > max ? val : max), -Infinity)
-    return values.indexOf(maxValue)
-  }, [ChartRowData])
+    return values.reduce((maxIdx, val, idx, arr) =>
+      val > arr[maxIdx] ? idx : maxIdx, 0)
+  }, [chartRowData])
 
-  const MaxValue = useMemo(() => ChartRowData.value[maxValueIndex] ?? 0, [ChartRowData, maxValueIndex])
+  const maxValue = useMemo(() =>
+    chartRowData.value[maxValueIndex] ?? 0,
+  [chartRowData, maxValueIndex])
 
-  const Percentage = useMemo(() => {
+  /**
+   * 현재값 대비 최대값의 변화율 계산
+   */
+  const percentage = useMemo(() => {
     if (!data) return 0
     const factor = 10 ** 2
     const targetCurrentValue = overviewChart === 'hashrate' ? data.currentHashrate : data.currentDifficulty
-    const percentValue = (targetCurrentValue - MaxValue) / Math.abs(targetCurrentValue) * 100
+    const percentValue = (targetCurrentValue - maxValue) / Math.abs(targetCurrentValue) * 100
     return Math.floor(percentValue * factor) / factor
-  }, [data, MaxValue, overviewChart])
+  }, [data, maxValue, overviewChart])
 
-  const AllTimeHighValue = useMemo(() => {
+  const allTimeHighValue = useMemo(() => {
     if (!data) return ''
     if (overviewChart === 'hashrate') return `Hashrate: ${formatHashrate(data.currentHashrate || 0)}`
     if (overviewChart === 'difficulty') return `Difficulty: ${formatDifficulty(data.currentDifficulty || 0)}`
+    return ''
   }, [data, overviewChart])
 
   const maxPoint = useMemo(() => {
@@ -99,26 +114,35 @@ export default function MiningMetricChart() {
         toolbar: { show: false },
         zoom: { enabled: false },
         background: 'transparent',
-        animations: { enabled: true, easing: 'easeInOutQuart', speed: 800 },
+        animations: { enabled: false },
       },
       theme: { mode: isDark ? 'dark' : 'light' },
       colors: [isDark ? '#ffffff' : '#000000'],
-      stroke: { curve: 'smooth', width: 2 },
+      stroke: { curve: 'smooth', width: 1.8 },
       fill: {
         type: 'gradient',
+        colors: ['#f7931a'],
         gradient: {
           shadeIntensity: 1,
-          opacityFrom: isDark ? 0.25 : 0.12,
-          opacityTo: 0,
-          stops: [0, 100],
+          opacityFrom: isDark ? 0.66 : 0.7,
+          opacityTo: isDark ? 0.06 : 0.9,
+          stops: [0, 80]
         },
       },
-      markers: { size: 0 },
+      markers: {
+        size: 0,
+        colors: ['#f7931a'],
+        hover: { size: 4, sizeOffset: 0 },
+      },
       tooltip: {
         theme: isDark ? 'dark' : 'light',
-        x: { show: true, format: "MMM 'yy" },
+        x: {
+          show: true,
+          format: 'yyyy.MM.dd',
+        },
         y: { formatter },
         marker: { show: false },
+        style: { fontSize: '12px', fontFamily: 'Roboto Mono' },
       },
       xaxis: {
         type: 'datetime',
@@ -127,7 +151,7 @@ export default function MiningMetricChart() {
         axisTicks: { show: false },
         crosshairs: {
           stroke: {
-            color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+            color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
             width: 1,
             dashArray: 3,
           },
@@ -148,10 +172,31 @@ export default function MiningMetricChart() {
           x: maxPoint.x,
           y: maxPoint.y,
           marker: {
-            size: 5,
+            size: 4,
             fillColor: '#f7931a',
-            strokeColor: '#f7931a',
-            strokeWidth: 0,
+            strokeColor: '#fff',
+            strokeWidth: 2,
+          },
+          label: {
+            text: overviewChart === 'hashrate'
+              ? formatHashrate(maxPoint.y)
+              : formatDifficulty(maxPoint.y),
+            borderColor: isDark ? '#fff' : '#000',
+            borderWidth: 1,
+            borderRadius: 4,
+            fontFamily: 'Roboto Mono',
+            style: {
+              background: isDark ? 'hsl(0 0% 7.1%)' : '#fff',
+              color: isDark ? '#fff' : '#000',
+              fontSize: '12px',
+              fontWeight: 600,
+              padding: {
+                left: 8,
+                right: 8,
+                top: 3,
+                bottom: 4,
+              },
+            },
           },
         }],
       } : undefined,
@@ -160,7 +205,10 @@ export default function MiningMetricChart() {
   // endregion
 
 
-  // region [Styles]
+  // region [Privates]
+  /**
+   * 차트 기간 버튼의 스타일 클래스를 생성
+   */
   const getButtonClass = useCallback((value: MiningMetricChartIntervalType) => {
     const isActive = miningMetricChartInterval === value
     const baseClass = 'h-[30px] px-3 border-none text-sm rounded-md transition-all'
@@ -183,21 +231,19 @@ export default function MiningMetricChart() {
           {/* .mining-metric-chart__top__left__area */}
           <div className="flex gap-2 relative">
             <span className="text-base font-number font-bold">
-              {AllTimeHighValue}
+              {allTimeHighValue}
             </span>
 
-            <div className="absolute top-1/2 -right-8 -translate-y-[46%] flex justify-center items-center w-10 h-10"
-                 style={{ display: data && Percentage === 0 ? 'flex' : 'none' }}>
-              <div className="absolute top-1/2 -right-8 -translate-y-[46%] flex justify-center items-center w-10 h-10"
-                   style={{ display: data && Percentage === 0 ? 'flex' : 'none' }}>
+            {data && percentage === 0 && (
+              <div className="absolute top-1/2 -right-8 -translate-y-[46%] flex justify-center items-center w-10 h-10">
                 {lightningLottie}
               </div>
-            </div>
+            )}
 
-            {Percentage !== 0 && (
+            {Math.abs(percentage) > 0.01 && (
               <span className="flex justify-center items-center gap-0.5 font-number font-bold text-[12px] leading-4">
-                <UpdownIcon isUp={Percentage > 0}/>
-                <CountText value={Percentage} decimals={2}/>%
+                <UpdownIcon isUp={percentage > 0}/>
+                <CountText value={percentage} decimals={2}/>%
               </span>
             )}
           </div>
