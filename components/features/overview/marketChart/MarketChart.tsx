@@ -68,8 +68,8 @@ export default function MarketChart() {
       gradient: {
         shadeIntensity: 1,
         opacityFrom: isDark ? 0.66 : 0.7,
-        opacityTo: isDark ? 0.06 : 0.9,
-        stops: [0, 80]
+        opacityTo: isDark ? 0.06 : 0.6,
+        stops: [0, 90]
       },
     },
     markers: {
