@@ -1,21 +1,17 @@
 'use client'
 
-import { useCallback, useMemo, useRef } from 'react'
-import { CategoryScale, Chart as ChartJS, Legend, LinearScale, LineElement, PointElement, Tooltip } from 'chart.js'
-import { Line } from 'react-chartjs-2'
+import { useCallback, useMemo } from 'react'
+import dynamic from 'next/dynamic'
+import type { ApexOptions } from 'apexcharts'
 import { KSpinner } from 'kku-ui'
-import {
-  ChartJsDataType,
-  MarketChartIntervalTypeList,
-} from '@/components/features/overview/marketChart/MarketChart.interface'
+import { MarketChartIntervalTypeList } from '@/components/features/overview/marketChart/MarketChart.interface'
 import { MarketChartIntervalType } from '@/shared/stores/store.interface'
 import useStore from '@/shared/stores/store'
 import { useMarketChartData } from '@/shared/query'
 import { ChartChanger } from '@/components/features/overview'
 
 
-// Chart.js 컴포넌트 등록
-ChartJS.register(CategoryScale, LinearScale, PointElement, Tooltip, Legend, LineElement)
+const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
 const marketChartIntervalOptions: MarketChartIntervalTypeList[] = [
   { text: '1D', value: 1 },
@@ -24,55 +20,135 @@ const marketChartIntervalOptions: MarketChartIntervalTypeList[] = [
   { text: '1Y', value: 365 },
 ]
 
-const getChartDataset = (data: number[], index: number, isDark: boolean) => ({
-  label: '', data, borderColor: isDark ? '#fff' : '#000', backgroundColor: 'transparent',
-  borderWidth: 2, pointBackgroundColor: '#f7931a', pointHoverRadius: 4,
-  pointRadius: data.map((_, idx) => (idx === index ? 4 : 0)), // 최댓값 위치에 점 표시
-})
-
 
 export default function MarketChart() {
 
   // region [Hooks]
-  const chartRef = useRef<ChartJS<'line', number[], string>>(null)
   const marketChartInterval = useStore(state => state.marketChartInterval)
   const setMarketChartInterval = useStore(state => state.setMarketChartInterval)
   const { marketChartData, isLoading } = useMarketChartData(marketChartInterval)
   const isDark = useStore(store => store.theme) === 'dark'
 
+  const seriesData = useMemo(() => {
+    if (!marketChartData?.date?.length) return []
+    return marketChartData.date.map((timestamp, idx) => ({
+      x: timestamp,
+      y: marketChartData.price[idx],
+    }))
+  }, [marketChartData])
 
-  const maxValueIndex = useMemo(() => {
+  /**
+   * 최대값 인덱스를 한 번의 순회로 계산
+   */
+  const maxPointIndex = useMemo(() => {
+    if (!seriesData.length) return -1
+    return seriesData.reduce((maxIdx, item, idx, arr) =>
+      item.y > arr[maxIdx].y ? idx : maxIdx, 0)
+  }, [seriesData])
 
-    const dataList = marketChartData?.price || []
-    const maxValue = dataList.reduce((max: number, val: number) => (val > max ? val : max), -Infinity)
+  const maxPoint = useMemo(() => {
+    if (maxPointIndex < 0 || !seriesData[maxPointIndex]) return null
+    return seriesData[maxPointIndex]
+  }, [maxPointIndex, seriesData])
 
-    return dataList.indexOf(maxValue)
-  }, [marketChartData, marketChartInterval])
-
-
-  const currentChartData = useMemo((): ChartJsDataType => ({
-
-    labels: marketChartData?.date.map((timestamp: number) => new Date(timestamp).toLocaleDateString()) || [],
-    datasets: [getChartDataset(marketChartData?.price || [], maxValueIndex, isDark)],
-  }), [marketChartData, marketChartInterval, maxValueIndex])
-
-  const maxValue = useMemo(() => (
-    currentChartData.datasets[0].data[maxValueIndex]
-  ), [currentChartData, maxValueIndex])
+  const chartOptions = useMemo<ApexOptions>(() => ({
+    chart: {
+      type: 'area',
+      toolbar: { show: false },
+      zoom: { enabled: false },
+      background: 'transparent',
+      animations: { enabled: false },
+    },
+    theme: { mode: isDark ? 'dark' : 'light' },
+    colors: [isDark ? '#ffffff' : '#000000'],
+    stroke: { curve: 'smooth', width: 1.48 },
+    fill: {
+      type: 'gradient',
+      colors: ['#f7931a'],
+      gradient: {
+        shadeIntensity: 1,
+        opacityFrom: isDark ? 0.66 : 0.7,
+        opacityTo: isDark ? 0.06 : 0.6,
+        stops: [0, 90]
+      },
+    },
+    markers: {
+      size: 0,
+      colors: ['#f7931a'],
+      hover: { size: 4, sizeOffset: 0 },
+    },
+    tooltip: {
+      theme: isDark ? 'dark' : 'light',
+      x: {
+        show: true,
+        format: 'yyyy.MM.dd',
+      },
+      y: { formatter: (val: number) => `$${Math.floor(val).toLocaleString()}` },
+      marker: { show: false },
+      style: { fontSize: '12px', fontFamily: 'Roboto Mono' },
+    },
+    xaxis: {
+      type: 'datetime',
+      labels: { show: false },
+      axisBorder: { show: false },
+      axisTicks: { show: false },
+      crosshairs: {
+        stroke: {
+          color: isDark ? 'rgba(255,255,255,0.4)' : 'rgba(0,0,0,0.4)',
+          width: 1,
+          dashArray: 3,
+        },
+      },
+      tooltip: { enabled: false },
+    },
+    yaxis: { show: false },
+    grid: {
+      borderColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)',
+      strokeDashArray: 3,
+      xaxis: { lines: { show: false } },
+      yaxis: { lines: { show: true } },
+      padding: { left: 0, right: 0, top: -10, bottom: 0 },
+    },
+    dataLabels: { enabled: false },
+    annotations: maxPoint ? {
+      points: [{
+        x: maxPoint.x,
+        y: maxPoint.y,
+        marker: {
+          size: 4,
+          fillColor: '#f7931a',
+          strokeColor: '#fff',
+          strokeWidth: 2,
+        },
+        label: {
+          text: `$${Math.floor(maxPoint.y).toLocaleString()}`,
+          borderColor: isDark ? '#fff' : '#000',
+          borderWidth: 1,
+          borderRadius: 4,
+          fontFamily: 'Roboto Mono',
+          style: {
+            background: isDark ? 'hsl(0 0% 7.1%)' : '#fff',
+            color: isDark ? '#fff' : '#000',
+            fontSize: '12px',
+            fontWeight: 600,
+            padding: {
+              left: 8,
+              right: 8,
+              top: 3,
+              bottom: 4,
+            },
+          },
+        },
+      }],
+    } : undefined,
+  }), [isDark, maxPoint])
   // endregion
 
 
   // region [Privates]
-  const initializeTooltip = useCallback(() => {
-    if (currentChartData.labels.length > 0 && chartRef.current) {
-      chartRef.current?.tooltip?.setActiveElements([{ datasetIndex: 0, index: maxValueIndex }], { x: 0, y: 0 })
-      chartRef.current?.update()
-    }
-  }, [maxValueIndex, currentChartData])
-  // endregion
-
-
-  // region [Styles
+  /**
+   * 차트 기간 버튼의 스타일 클래스를 생성
+   */
   const getButtonClass = useCallback((value: MarketChartIntervalType) => {
     const isActive = marketChartInterval === value
     const baseClass = 'h-[30px] px-3 border-none text-sm rounded-md transition-all'
@@ -88,41 +164,22 @@ export default function MarketChart() {
   return (
     <div className="relative flex flex-col justify-between gap-2 -mx-2 w-[calc(100%+1rem)] select-none overflow-hidden">
 
-      {isLoading ? (
-        <div className="flex justify-center items-center aspect-[2/1]">
-          <KSpinner color="#F7931A"/>
-        </div>
-      ) : (
-        <div
-          className="flex flex-col justify-start gap-2 text-current relative pointer-events-none z-[3]">
-          <Line
-            ref={chartRef}
-            data={currentChartData}
-            height="172%"
-            className="bg-transparent z-[3]"
-            options={{
-              plugins: {
-                legend: { display: false },
-                tooltip: {
-                  enabled: true,
-                  usePointStyle: true,
-                  caretPadding: 6,
-                  callbacks: { label: (e) => `$${(e.formattedValue)}` },
-                },
-              },
-              elements: { point: { radius: 0 }, line: { tension: 0.3, borderWidth: 2 } },
-              scales: { x: { display: false }, y: { display: false, suggestedMax: maxValue * 1.005 } },
-              animation: { duration: 800, easing: 'easeInOutQuart', onComplete: initializeTooltip },
-              transitions: { active: { animation: { duration: 0 } } },
-              animations: {
-                x: { duration: 0 },
-                y: { duration: 0 },
-              } as never,
-            }}
+      <div className="relative w-full h-[200px]">
+        {isLoading ? (
+          <div className="flex justify-center items-center w-full h-full">
+            <KSpinner color="#F7931A"/>
+          </div>
+        ) : (
+          <ReactApexChart
+            type="area"
+            series={[{ name: 'Price', data: seriesData }]}
+            options={chartOptions}
+            height={200}
+            width="100%"
           />
-        </div>
-      )
-      }
+        )}
+      </div>
+
       {/* .market-chart__bottom */}
       <div className="relative flex justify-between items-center px-2">
         {/* .market-chart__bottom__buttons */}
@@ -138,4 +195,4 @@ export default function MarketChart() {
       </div>
     </div>
   )
-};
+}
