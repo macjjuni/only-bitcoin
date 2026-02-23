@@ -1,26 +1,26 @@
 'use client'
 
-import { useCallback, useEffect, useMemo, useRef } from 'react'
-import { Chart as ChartJS, LinearScale, LineElement, PointElement, Tooltip } from 'chart.js'
+import { useCallback, useMemo } from 'react'
+import dynamic from 'next/dynamic'
+import type { ApexOptions } from 'apexcharts'
 import { KSpinner } from 'kku-ui'
-import { Line } from 'react-chartjs-2'
 import { useLottie } from 'lottie-react'
-import {
-  ChartJsDataType,
-  MarketChartIntervalTypeList,
-} from '@/components/features/overview/miningMetricChart/MiningMetricChart.interface'
+import { MarketChartIntervalTypeList } from '@/components/features/overview/miningMetricChart/MiningMetricChart.interface'
 import type { MiningMetricChartIntervalType } from '@/shared/stores/store.interface'
 import { CountText, UpdownIcon } from '@/components'
 import { ChartChanger } from '@/components/features/overview'
 import { useMiningMetricChartData } from '@/shared/query'
 import { formatDifficulty, formatHashrate } from '@/shared/utils/number'
 import LightningLottieData from '@/shared/assets/lottie/lightning.json'
-import { removeSpaces } from '@/shared/utils/string'
 import useStore from '@/shared/stores/store'
 
 
-// Chart.js 컴포넌트 등록
-ChartJS.register(LinearScale, PointElement, Tooltip, LineElement)
+/*
+* 해시레이트 모든 차트는 데이터 크기가 많아 시간기반 균일 샘플링으로 최적화(64%) 했으나,
+* 시간이 지날수록 데이터가 계속 늘어나므로 최적화 양을 늘리거나 알고리즘 변화가 필요함.
+*  */
+
+const ReactApexChart = dynamic(() => import('react-apexcharts'), { ssr: false })
 
 const miningMetricChartIntervalOptions: MarketChartIntervalTypeList[] = [
   { text: '3M', value: '3m' },
@@ -29,181 +29,148 @@ const miningMetricChartIntervalOptions: MarketChartIntervalTypeList[] = [
   { text: 'All', value: 'all' },
 ]
 
-const getChartDataset = (data: number[], index: number, isDark: boolean) => ({
-  label: '', data, borderColor: isDark ? '#fff' : '#000', backgroundColor: 'transparent',
-  borderWidth: 2, pointBackgroundColor: '#f7931a',
-  pointRadius: data.map((_, idx) => (idx === index ? 4 : 0)), // 최댓값 위치에 점 표시
-})
-
-/*
-* 해시레이트 모든 차트는 데이터 크기가 많아 시간기반 균일 샘플링으로 최적화(64%) 했으나,
-* 시간이 지날수록 데이터가 계속 늘어나므로 최적화 양을 늘리거나 알고리즘 변화가 필요함.
-*  */
 
 export default function MiningMetricChart() {
 
   // region [Hooks]
-  const chartRef = useRef<ChartJS<'line', number[], string>>(null)
-  const chartBottomRef = useRef<HTMLDivElement>(null)
-
   const overviewChart = useStore(store => store.overviewChart)
   const miningMetricChartInterval = useStore(state => state.miningMetricChartInterval)
   const setHashrateChartInterval = useStore(state => state.setMiningMetricChartInterval)
   const { data, isLoading } = useMiningMetricChartData(miningMetricChartInterval)
+  const isDark = useStore(store => store.theme) === 'dark'
 
   const { View: lightningLottie } = useLottie({
     animationData: LightningLottieData,
     loop: true,
   })
-  const isDark = useStore(store => store.theme) === 'dark'
 
   const ChartRowData = useMemo(() => {
-
-    if (!data) {
-      return { value: [], date: [] }
-    }
-
-    if (overviewChart === 'hashrate') {
-      return data.hashrates
-    } else if (overviewChart === 'difficulty') {
-      return data.difficulty
-    } else {
-      throw Error('Invalid overview chart.')
-    }
+    if (!data) return { value: [] as number[], date: [] as number[] }
+    if (overviewChart === 'hashrate') return data.hashrates
+    if (overviewChart === 'difficulty') return data.difficulty
+    throw Error('Invalid overview chart.')
   }, [overviewChart, data])
 
-  const MaxValueIndex = useMemo(() => {
-    const dataList = ChartRowData.value || []
-    const MaxValue = dataList.reduce((max: number, val: number) => (val > max ? val : max), -Infinity)
+  const seriesData = useMemo(() => {
+    if (!ChartRowData.date?.length) return []
+    // mempool.space 타임스탬프는 초 단위 → ApexCharts datetime은 ms 단위
+    return ChartRowData.date.map((timestamp, idx) => ({
+      x: timestamp * 1000,
+      y: ChartRowData.value[idx],
+    }))
+  }, [ChartRowData])
 
-    return dataList.indexOf(MaxValue)
-  }, [ChartRowData, miningMetricChartInterval])
+  const maxValueIndex = useMemo(() => {
+    const values = ChartRowData.value
+    if (!values.length) return -1
+    const maxValue = values.reduce((max, val) => (val > max ? val : max), -Infinity)
+    return values.indexOf(maxValue)
+  }, [ChartRowData])
 
-  const CurrentChartData = useMemo((): ChartJsDataType => ({
+  const MaxValue = useMemo(() => ChartRowData.value[maxValueIndex] ?? 0, [ChartRowData, maxValueIndex])
 
-    labels: ChartRowData.date.map((timestamp: number) => new Date(timestamp * 1000).toLocaleDateString()) || [],
-    datasets: [getChartDataset(ChartRowData.value || [], MaxValueIndex, isDark)],
-  }), [ChartRowData, miningMetricChartInterval, MaxValueIndex])
-
-  const MaxValue = useMemo(() => (CurrentChartData.datasets[0].data[MaxValueIndex]), [CurrentChartData, MaxValueIndex])
   const Percentage = useMemo(() => {
-
-    if (!data) {
-      return 0
-    }
+    if (!data) return 0
     const factor = 10 ** 2
     const targetCurrentValue = overviewChart === 'hashrate' ? data.currentHashrate : data.currentDifficulty
     const percentValue = (targetCurrentValue - MaxValue) / Math.abs(targetCurrentValue) * 100
-
     return Math.floor(percentValue * factor) / factor
-  }, [data, MaxValue])
+  }, [data, MaxValue, overviewChart])
 
   const AllTimeHighValue = useMemo(() => {
-    if (!data) {
-      return ''
-    }
-    if (overviewChart === 'hashrate') {
-      return `Hashrate: ${formatHashrate(data?.currentHashrate || 0)}`
-    }
-    if (overviewChart === 'difficulty') {
-      return `Difficulty: ${formatDifficulty(data?.currentDifficulty || 0)}`
-    }
+    if (!data) return ''
+    if (overviewChart === 'hashrate') return `Hashrate: ${formatHashrate(data.currentHashrate || 0)}`
+    if (overviewChart === 'difficulty') return `Difficulty: ${formatDifficulty(data.currentDifficulty || 0)}`
   }, [data, overviewChart])
-  // endregion
 
+  const maxPoint = useMemo(() => {
+    if (!seriesData.length || maxValueIndex < 0) return null
+    return seriesData[maxValueIndex]
+  }, [seriesData, maxValueIndex])
 
-  // region [Privates]
-  const getFormatDate = useCallback((timestamp: number) => {
-    const dateStr = new Date(timestamp * 1000).toLocaleDateString()
-    const sanitizedStrArr = removeSpaces(dateStr).split('.')
+  const chartOptions = useMemo<ApexOptions>(() => {
+    const formatter = (val: number) => overviewChart === 'hashrate'
+      ? formatHashrate(val)
+      : formatDifficulty(val)
 
-    return `${sanitizedStrArr[0]}.${sanitizedStrArr[1]}`
-  }, [])
-
-  const initializeTooltip = useCallback(() => {
-
-    if (CurrentChartData.labels.length > 0 && chartRef.current) {
-      chartRef.current?.tooltip?.setActiveElements([{ datasetIndex: 0, index: MaxValueIndex }], { x: 0, y: 0 })
-      chartRef.current?.update()
+    return {
+      chart: {
+        type: 'area',
+        toolbar: { show: false },
+        zoom: { enabled: false },
+        background: 'transparent',
+        animations: { enabled: true, easing: 'easeInOutQuart', speed: 800 },
+      },
+      theme: { mode: isDark ? 'dark' : 'light' },
+      colors: [isDark ? '#ffffff' : '#000000'],
+      stroke: { curve: 'smooth', width: 2 },
+      fill: {
+        type: 'gradient',
+        gradient: {
+          shadeIntensity: 1,
+          opacityFrom: isDark ? 0.25 : 0.12,
+          opacityTo: 0,
+          stops: [0, 100],
+        },
+      },
+      markers: { size: 0 },
+      tooltip: {
+        theme: isDark ? 'dark' : 'light',
+        x: { show: true, format: "MMM 'yy" },
+        y: { formatter },
+        marker: { show: false },
+      },
+      xaxis: {
+        type: 'datetime',
+        labels: { show: false },
+        axisBorder: { show: false },
+        axisTicks: { show: false },
+        crosshairs: {
+          stroke: {
+            color: isDark ? 'rgba(255,255,255,0.3)' : 'rgba(0,0,0,0.3)',
+            width: 1,
+            dashArray: 3,
+          },
+        },
+        tooltip: { enabled: false },
+      },
+      yaxis: { show: false },
+      grid: {
+        borderColor: isDark ? 'rgba(255,255,255,0.07)' : 'rgba(0,0,0,0.06)',
+        strokeDashArray: 3,
+        xaxis: { lines: { show: false } },
+        yaxis: { lines: { show: true } },
+        padding: { left: 0, right: 0, top: -10, bottom: 0 },
+      },
+      dataLabels: { enabled: false },
+      annotations: maxPoint ? {
+        points: [{
+          x: maxPoint.x,
+          y: maxPoint.y,
+          marker: {
+            size: 5,
+            fillColor: '#f7931a',
+            strokeColor: '#f7931a',
+            strokeWidth: 0,
+          },
+        }],
+      } : undefined,
     }
-  }, [MaxValueIndex, CurrentChartData])
+  }, [isDark, overviewChart, maxPoint])
   // endregion
 
 
   // region [Styles]
-  const xAxisValue = useMemo(() => {
-    if (!data) {
-      return { first: '-', middle: '-', last: '-' }
-    }
-
-    return {
-      first: getFormatDate(ChartRowData.date[0]),
-      middle: getFormatDate(ChartRowData.date[Math.floor(ChartRowData.date.length / 2)]),
-      last: getFormatDate(ChartRowData.date[ChartRowData.date.length - 1]),
-    }
-  }, [ChartRowData])
-
   const getButtonClass = useCallback((value: MiningMetricChartIntervalType) => {
     const isActive = miningMetricChartInterval === value
     const baseClass = 'h-[30px] px-3 border-none text-sm rounded-md transition-all'
     const stateClass = isActive
       ? 'font-bold text-white bg-black/40 dark:bg-white/80 dark:text-black'
       : 'text-current hover:bg-gray-100 dark:hover:bg-gray-800'
-
     return `${baseClass} ${stateClass}`
   }, [miningMetricChartInterval])
   // endregion
 
-  // region [Templates]
-
-
-  const ChartArea = useMemo(() => (
-    <Line ref={chartRef} data={CurrentChartData} height="140%"
-          className="mining-metric-chart__chart__wrapper__body"
-          options={{
-            plugins: {
-              legend: { display: false },
-              decimation: {
-                enabled: true,
-                algorithm: 'lttb',
-                samples: 1,
-              },
-              tooltip: {
-                enabled: true,
-                usePointStyle: true,
-                caretPadding: 6,
-                backgroundColor: 'rgba(0, 0, 0, 0.72)',
-                callbacks: {
-                  label: (e) => `${
-                    overviewChart === 'hashrate' ? formatHashrate(e.raw as number) : formatDifficulty(e.raw as number)
-                  }`,
-                },
-              },
-            },
-            elements: { point: { radius: 0 }, line: { tension: 0.1, borderWidth: 2 } },
-            scales: {
-              x: { display: false },
-              y: { display: false, suggestedMax: MaxValue * 1.014 },
-            },
-            animation: { duration: 800, easing: 'easeInOutQuart', onComplete: initializeTooltip },
-            transitions: { active: { animation: { duration: 0 } } },
-            animations: {
-              x: { duration: 0 },
-              y: { duration: 0 },
-            } as never,
-          }}
-    />
-  ), [MaxValue, CurrentChartData])
-  // endregion
-
-
-  // region [Life Cycles]
-  useEffect(() => {
-    if (chartRef?.current) {
-      initializeTooltip()
-    }
-  }, [initializeTooltip])
-  // endregion
 
   return (
     // .mining-metric-chart
@@ -238,22 +205,19 @@ export default function MiningMetricChart() {
       </div>
 
       {/* .mining-metric-chart__middle */}
-      <div ref={chartBottomRef} className="relative pointer-events-none z-[3]">
+      <div className="relative z-[3]">
         {isLoading ? (
           <div className="flex justify-center items-center aspect-[2/1]">
             <KSpinner color="#F7931A"/>
           </div>
         ) : (
-          <>
-            {ChartArea}
-            {/* .mining-metric-chart__middle__x */}
-            <div
-              className="absolute -bottom-4 left-0 w-full px-2 flex justify-between items-center text-[12px] font-number">
-              <span>{xAxisValue.first}</span>
-              <span>{xAxisValue.middle}</span>
-              <span>{xAxisValue.last}</span>
-            </div>
-          </>
+          <ReactApexChart
+            type="area"
+            series={[{ name: overviewChart === 'hashrate' ? 'Hashrate' : 'Difficulty', data: seriesData }]}
+            options={chartOptions}
+            height={185}
+            width="100%"
+          />
         )}
       </div>
 
