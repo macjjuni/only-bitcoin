@@ -21,8 +21,8 @@ const PremiumField = () => {
   // endregion
 
   return (
-    <div className="flex justify-between items-center gap-5 -mt-2 select-none">
-      <div className="ml-20 layout-max:ml-0 flex flex-col items-end justify-start gap-0.5">
+    <div className="flex justify-end items-center gap-4 -mt-2 select-none">
+      <div className="layout-max:ml-0 flex flex-col items-end justify-start">
         <b className="text-base">Premium</b>
         <div className="flex items-center gap-2 text-sm w-full">
           <KPopover>
