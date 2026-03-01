@@ -3,7 +3,7 @@
 <br>
 <div align="center">
 
-[![My Skills](https://skillicons.dev/icons?i=react,ts,sass,vite,firebase)](https://skillicons.dev)
+[![My Skills](https://skillicons.dev/icons?i=react,ts,nextjs)](https://skillicons.dev)
 
 </div>
 
@@ -71,9 +71,9 @@
 
 <br>
 
-<details open>
+<details>
     <summary><b>v3.5.92</b></summary>
-    <div markdown="1">    
+    <div markdown="1">
         <img src="https://github.com/user-attachments/assets/ff9a26de-fd56-4f0d-9097-46c121061847" width="220" alt="3.5.0 initial screen1">
         <img src="https://github.com/user-attachments/assets/de83e9ca-a8dc-4db0-82ec-417c31a1e45c" width="220" alt="3.5.0 initial screen2">
         <img src="https://github.com/user-attachments/assets/5c9c7e96-6b98-4641-b0b8-d4cfe5c1bcbb" width="220" alt="3.5.0 initial screen3">
@@ -91,6 +91,30 @@
 - BTC to Fiat 추가 프리미엄 계산 기능 지원 - (v3.5.2)
 - 해외 거래소(코인베이스) 시세 지원(3.5.92)
 - Next.js 마이그레이션
+  </div>
+</details>
+
+<br>
+
+<details open>
+    <summary><b>v4.0.1 (2026.03.01)</b></summary>
+    <div markdown="1">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/overview.jpg" width="220" alt="v4.0.1 overview">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/blocks.jpg" width="220" alt="v4.0.1 blocks">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/btc2fiat.jpg" width="220" alt="v4.0.1 btc2fiat">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/premium.jpg" width="220" alt="v4.0.1 premium">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/orange-pill.jpg" width="220" alt="v4.0.1 orange-pill">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/meme.jpg" width="220" alt="v4.0.1 meme">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/bip39.jpg" width="220" alt="v4.0.1 bip39">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/settings.jpg" width="220" alt="v4.0.1 settings">
+    </div>
+
+- UI 전면 개편 및 Next.js App Router 기반으로 마이그레이션
+- BIP39 니모닉 단어 검색 페이지 추가
+- 밈(Meme) 페이지 이미지 다운로드 기능 추가
+- 비트코인 퀴즈(SurpriseQuiz) 기능 추가
+- 차트 라이브러리 마이그레이션 및 해시레이트/난이도 차트 개선
+- 페이지별 SEO 메타데이터 및 동적 사이트맵 적용
   </div>
 </details>
 
