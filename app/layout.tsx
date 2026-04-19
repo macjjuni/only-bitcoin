@@ -1,5 +1,6 @@
 import { ReactNode } from "react";
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { ViewTransitions } from "next-view-transitions";
 import { GoogleAnalytics } from "@next/third-parties/google";
 import { BottomNavigation, Content, DefaultLayout, Header } from "@/layouts";
@@ -79,6 +80,14 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       </head>
       <body>
       {isProduction && <GoogleAnalytics gaId={env.NEXT_PUBLIC_GA_TRACKING_ID} />}
+      {isProduction && env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
+        <Script
+          async
+          strategy="afterInteractive"
+          src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
+          crossOrigin="anonymous"
+        />
+      )}
       <QueryProvider>
         <Initializer />
         <DefaultLayout>
