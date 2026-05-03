@@ -64,19 +64,10 @@ const useStore = create<StoreType>()(
       // region [대시보드 차트]
       overviewChart: "price",
       setOverviewChart: ((overviewChart) => set((store) => ({ ...store, overviewChart }))),
-      marketChartInterval: 365,
+      marketChartInterval: 'all',
       setMarketChartInterval: ((interval) => set(() => (
         { ...{ marketChartInterval: interval } }
       ))),
-      marketChartData: {
-        1: { date: [], price: [], timeStamp: 0 },
-        7: { date: [], price: [], timeStamp: 0 },
-        30: { date: [], price: [], timeStamp: 0 },
-        365: { date: [], price: [], timeStamp: 0 }
-      },
-      setMarketChartData: (interval, data) => set((store) => ({
-        marketChartData: { ...store.marketChartData, [interval]: data }
-      })),
       miningMetricChartInterval: "all",
       setMiningMetricChartInterval: ((miningMetricChartInterval) => set((store) =>
         ({ ...store, miningMetricChartInterval })

@@ -1,42 +1,53 @@
-import { useEffect } from "react";
+import { useEffect } from 'react';
 import { useQuery, keepPreviousData } from '@tanstack/react-query';
-import { kToast } from "kku-ui";
-import { MarketChartIntervalType } from '@/shared/stores/store.interface';
-import fetcher from "@/shared/utils/fetcher";
-import { isDev } from "@/shared/utils/common";
-import { MarketChartFormattedData, MarketChartResponseData } from "@/shared/types/api/marketChart";
+import { kToast } from 'kku-ui';
+import type { MarketChartIntervalType } from '@/shared/stores/store.interface';
+import type { MarketChartFormattedData } from '@/shared/types/api/marketChart';
+import { fetchBinanceKlines, type BinanceInterval } from '@/shared/utils/api/binance';
+import { fetchBlockchainMarketPriceAll } from '@/shared/utils/api/blockchain';
+import { isDev } from '@/shared/utils/common';
 
 
-async function fetchMarketChart(days: MarketChartIntervalType): Promise<MarketChartFormattedData> {
+/**
+ * 인터벌별 Binance Klines 파라미터 매핑
+ * - 1D: 5분봉 × 288 (24h)
+ * - 7D: 1시간봉 × 168 (7일)
+ * - 1M: 4시간봉 × 180 (30일)
+ */
+const BINANCE_INTERVAL_MAP: Record<Exclude<MarketChartIntervalType, 'all'>, { interval: BinanceInterval; limit: number }> = {
+  '1d': { interval: '5m', limit: 288 },
+  '7d': { interval: '1h', limit: 168 },
+  '1m': { interval: '4h', limit: 180 },
+};
+
+
+async function fetchMarketChart(interval: MarketChartIntervalType): Promise<MarketChartFormattedData> {
 
   try {
-    const searchParams = new URLSearchParams({ vs_currency: 'usd', days: days.toString() });
-    const data: MarketChartResponseData = await fetcher(`${MARKET_CHART_API_URL}?${searchParams.toString()}`);
+    const data = interval === 'all'
+      ? await fetchBlockchainMarketPriceAll()
+      : await fetchBinanceKlines(BINANCE_INTERVAL_MAP[interval].interval, BINANCE_INTERVAL_MAP[interval].limit);
 
     if (isDev) {
-      console.log("✅ 마켓 차트 데이터 초기화!");
+      console.log('✅ 마켓 차트 데이터 초기화!');
     }
 
-    // 데이터 추출 및 가공
-    return {
-      date: data.prices.map((price) => price[0]),
-      price: data.prices.map((price) => Math.floor(price[1])),
-    };
+    return data;
   } catch {
-    return { date: [], price: [] }
+    return { date: [], price: [] };
   }
 }
 
-const MARKET_CHART_API_URL = 'https://api.coingecko.com/api/v3/coins/bitcoin/market_chart';
+
 const REFRESH_TIME = 1000 * 60 * 5; // 5분
 
-const useMarketChart= (days: MarketChartIntervalType) => {
+const useMarketChart = (interval: MarketChartIntervalType) => {
 
   // region [Hooks]
 
-  const { data: marketChartData, isPending, isSuccess, isError, error} = useQuery<MarketChartFormattedData>({
-    queryKey: ['marketChart', String(days)],
-    queryFn: () => fetchMarketChart(days),
+  const { data: marketChartData, isPending, isSuccess, isError, error } = useQuery<MarketChartFormattedData>({
+    queryKey: ['marketChart', interval],
+    queryFn: () => fetchMarketChart(interval),
 
     staleTime: REFRESH_TIME,
     gcTime: REFRESH_TIME,
@@ -66,6 +77,6 @@ const useMarketChart= (days: MarketChartIntervalType) => {
   // endregion
 
   return { marketChartData, isLoading: isPending, isSuccess, isError, error };
-}
+};
 
 export default useMarketChart;

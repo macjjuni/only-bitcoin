@@ -36,8 +36,6 @@ export interface StoreType {
   setOverviewChart: (chart: OverviewChartType) => void
   marketChartInterval: MarketChartIntervalType;
   setMarketChartInterval: (interval: MarketChartIntervalType) => void;
-  marketChartData: BtcChart;
-  setMarketChartData: (interval: MarketChartIntervalType, data: ChartData) => void;
   // endregion
 
   // region [대시보드 해시레이트 차트]
@@ -111,22 +109,8 @@ export interface BlockTypes {
   poolName: string;
 }
 
-// 비트코인 차트 데이터
-export interface ChartData {
-  date: number[];
-  price: number[];
-  timeStamp: number;
-}
-
-export interface BtcChart {
-  '1': ChartData;
-  '7': ChartData;
-  '30': ChartData;
-  '365': ChartData;
-}
-
 export type OverviewChartType = 'hashrate' | 'difficulty' | 'price';
-export type MarketChartIntervalType = 1 | 7 | 30 | 365;
+export type MarketChartIntervalType = '1d' | '7d' | '1m' | 'all';
 export type MiningMetricChartIntervalType = '3m' | '6m' | '1y' | '2y' | '3y' | 'all';
 
 export type CurrencyTypes = 'KRW' | 'USD' | 'KRW/USD';

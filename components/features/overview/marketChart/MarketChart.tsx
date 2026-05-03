@@ -9,10 +9,10 @@ import type { MarketChartIntervalType } from '@/shared/stores/store.interface'
 
 
 const marketChartIntervalOptions: ChartIntervalOption<MarketChartIntervalType>[] = [
-  { text: '1D', value: 1 },
-  { text: '1W', value: 7 },
-  { text: '1M', value: 30 },
-  { text: '1Y', value: 365 },
+  { text: '1D', value: '1d' },
+  { text: '7D', value: '7d' },
+  { text: '1M', value: '1m' },
+  { text: 'ALL', value: 'all' },
 ]
 
 
