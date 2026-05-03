@@ -45,6 +45,8 @@ html.slide-first::view-transition-new(root) {
 @layer base {
     :root {
         --bitcoin-color: #f7931a;
+        --up-color: #22c55e;
+        --down-color: #ef4444;
         --background: 0 0% 100%;
         --header-height: 52px;
         --navigation-height: 82px;

@@ -18,6 +18,8 @@ export default {
             },
             colors: {
                 bitcoin: 'var(--bitcoin-color)',
+                up: 'var(--up-color)',
+                down: 'var(--down-color)',
                 background: "hsl(var(--background))",
             },
             height: {

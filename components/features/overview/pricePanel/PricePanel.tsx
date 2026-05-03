@@ -3,6 +3,8 @@
 import { useMemo } from 'react'
 import useStore from '@/shared/stores/store'
 import { CountText, UpdownIcon } from '@/components'
+import PriceMiniChart from './PriceMiniChart'
+
 
 export default function PricePanel() {
 
@@ -16,45 +18,57 @@ export default function PricePanel() {
       sign: '₩',
       price: Number(bitcoinPrice.krw),
       percent: Number(bitcoinPrice.krwChange24h),
-      signSize: 'text-[26px]',
+      signSize: 'text-[20px]',
     },
     {
       code: 'USD',
       sign: '$',
       price: Number(bitcoinPrice.usd),
       percent: Number(bitcoinPrice.usdChange24h),
-      signSize: 'text-[28px]',
+      signSize: 'text-[22px]',
     },
   ], [bitcoinPrice])
+
+  const visibleCurrencies = useMemo(
+    () => Currencies.filter(({ code }) => currency.includes(code)),
+    [Currencies, currency],
+  )
   // endregion
 
+
+  if (!visibleCurrencies.length) return null
+
   return (
-    <div className="flex flex-col gap-2 px-2">
-      <div className="flex flex-col gap-0.5 items-start">
-        {
-          Currencies
-            .filter(({ code }) => currency.includes(code))
-            .map(({ code, sign, price, percent, signSize }) => (
-              <div key={code}
-                   className="flex justify-between items-center gap-3 w-full font-bold whitespace-nowrap overflow-hidden text-xl font-number">
+    <div className="flex justify-between items-center gap-1.5 px-0">
 
-                <div className="flex items-center gap-1 flex-1">
-                  <span className={`flex justify-center content-center w-6 ${signSize}`}>{sign}</span>
-                  <CountText value={price} className="text-3xl"/>
-                </div>
+      <div className="flex flex-col flex-1 min-w-0">
+        {visibleCurrencies.map(({ code, sign, price, percent, signSize }) => {
+          const isUp = percent >= 0
 
-                <div className="flex justify-end items-center w-[72px] flex-shrink-0 gap-1 text-sm">
-                  <UpdownIcon isUp={percent > 0}/>
-                  <span className="text-right">
-                    <CountText value={percent} decimals={2}/>
-                    %
-                </span>
-                </div>
-
-              </div>
-            ))
-        }
+          return (
+            <div key={code}
+                 className="flex items-center justify-between gap-2 font-bold whitespace-nowrap overflow-hidden font-number">
+              <span className="flex items-center">
+                <span className={`flex justify-center items-center w-6 ${signSize}`}>{sign}</span>
+                <CountText value={price} className="text-2xl lg:text-3xl"/>
+              </span>
+              <span className={`flex items-center gap-0.5 text-[12px] ${isUp ? 'text-up' : 'text-down'}`}>
+                <UpdownIcon isUp={isUp}/>
+                <CountText value={percent} decimals={2}/>%
+              </span>
+            </div>
+          )
+        })}
       </div>
+
+      <div className="flex-shrink-0">
+        <PriceMiniChart
+          barCount={10}
+          width={140}
+          height={60}
+        />
+      </div>
+
     </div>
   )
 };
