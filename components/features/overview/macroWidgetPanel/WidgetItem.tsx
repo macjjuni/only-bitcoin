@@ -44,7 +44,7 @@ export default function WidgetItem({
   // region [Styles]
   const widgetClass = useMemo(() => (
     [
-      'relative flex flex-col gap-0.5 p-1 select-none tap-highlight-transparent',
+      'relative flex flex-col gap-1 p-1 select-none tap-highlight-transparent',
       isEditMode ? 'animate-wiggle' : '',
       onClick ? 'cursor-pointer' : '',
     ].filter(Boolean).join(' ')
@@ -64,7 +64,7 @@ export default function WidgetItem({
   // endregion
 
   return (
-    <div ref={setNodeRef} style={style} {...(isEditMode ? { ...attributes, ...listeners } : {})}>
+    <div ref={setNodeRef} style={style} {...attributes} {...listeners}>
       <div className={widgetClass} onClick={onClickWidget}>
 
         {/* Label Area */}

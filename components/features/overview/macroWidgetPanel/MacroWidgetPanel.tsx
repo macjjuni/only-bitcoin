@@ -4,8 +4,15 @@ import { useEffect, useState } from 'react'
 import { useTransitionRouter } from 'next-view-transitions'
 import { KButton, kToast } from 'kku-ui'
 import { arrayMove, horizontalListSortingStrategy, SortableContext } from '@dnd-kit/sortable'
-import { closestCenter, DndContext, DragEndEvent } from '@dnd-kit/core'
-import { EditIcon, SaveIcon } from '@/components/ui/icon'
+import {
+  closestCenter,
+  DndContext,
+  DragEndEvent,
+  PointerSensor,
+  TouchSensor,
+  useSensor,
+  useSensors,
+} from '@dnd-kit/core'
 import { useBitcoinDominanceQuery, useFearGreedIndex } from '@/shared/query'
 import { calcPremiumPercent, minedPercent, usdToSats } from '@/shared/utils/calculate'
 import { FearAndGreedDialog } from '@/components/feedbacks'
@@ -34,6 +41,21 @@ export default function MacroWidgetPanel() {
   const usdExRate = useStore((state) => state.exRate.value)
   const blockData = useStore((state) => state.blockData)
   const fees = useStore((state) => state.fees)
+
+  /**
+   * dnd-kit 센서 설정
+   * - 편집 모드 진입 전: 500ms 길게 누르면 드래그 활성화 (iOS 위젯 편집 패턴)
+   * - 편집 모드 진입 후: 5px 이동 시 즉시 드래그 활성화 (지연 없이 바로 이동 가능)
+   * 짧은 탭은 onClick으로 정상 동작합니다.
+   */
+  const sensors = useSensors(
+    useSensor(PointerSensor, {
+      activationConstraint: isEditMode ? { distance: 5 } : { delay: 500, tolerance: 8 },
+    }),
+    useSensor(TouchSensor, {
+      activationConstraint: isEditMode ? { distance: 5 } : { delay: 500, tolerance: 8 },
+    }),
+  )
   // endregion
 
 
@@ -80,14 +102,22 @@ export default function MacroWidgetPanel() {
 
 
   // region [Events]
-  const onClickEditToggle = () => setIsEditMode((p) => !p)
+  const onClickFinishEdit = () => setIsEditMode(false)
+
+  const onClickEmptySlot = () => setIsEditMode(true)
+
+  /**
+   * 길게 눌러 드래그가 시작되면 편집 모드로 진입합니다. (iOS 위젯 편집 패턴)
+   */
+  const onDragStart = () => {
+    if (!isEditMode) setIsEditMode(true)
+  }
 
   /**
    * 위젯 드래그 종료 이벤트 핸들러
    * 위젯 순서를 변경합니다.
    */
   const onDragEnd = (event: DragEndEvent) => {
-    if (!isEditMode) return
     const { active, over } = event
     if (!over || active.id === over.id) return
 
@@ -128,16 +158,27 @@ export default function MacroWidgetPanel() {
 
   return (
     <>
-      <div className="flex flex-col mb-2 -mt-1">
-        <div className="flex justify-end items-center pb-1">
-          <button type="button" onClick={onClickEditToggle} className="text-current mr-1">
-            {isEditMode ? <SaveIcon size={22}/> : <EditIcon size={22}/>}
-          </button>
-        </div>
+      <div className="flex flex-col my-2">
+        {isEditMode && (
+          <div className="flex justify-end items-center pb-1">
+            <button
+              type="button"
+              onClick={onClickFinishEdit}
+              className="text-primary text-sm font-bold mr-1 px-1"
+            >
+              저장
+            </button>
+          </div>
+        )}
 
-        <DndContext onDragEnd={onDragEnd} collisionDetection={closestCenter}>
+        <DndContext
+          sensors={sensors}
+          onDragStart={onDragStart}
+          onDragEnd={onDragEnd}
+          collisionDetection={closestCenter}
+        >
           <SortableContext items={macroSequence} strategy={horizontalListSortingStrategy}>
-            <div className={`grid grid-cols-4 gap-3 ${isEditMode ? 'cursor-pointer mt-2' : ''}`}>
+            <div className={`grid grid-cols-4 gap-3 ${isEditMode ? 'cursor-pointer mt-3' : ''}`}>
               {visibleItems.map(({ id, label, value, sign, decimals, onClick }) => (
                 <div key={id} className="tap-highlight-transparent">
                   <WidgetItem
@@ -150,7 +191,7 @@ export default function MacroWidgetPanel() {
               {Array.from({ length: 4 - visibleItems.length }).map((_, i) => (
                 <div
                   key={`empty-${i}`}
-                  onClick={() => setIsEditMode(true)}
+                  onClick={onClickEmptySlot}
                   className="flex justify-center items-center h-[52px] text-[32px] text-border border border-dashed border-muted-foreground rounded-lg cursor-pointer tap-highlight-transparent"
                 >
                   +
