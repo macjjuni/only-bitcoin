@@ -50,6 +50,16 @@ export default function OverviewChartShell<T extends string | number>({
     fillOpacityTo,
     fillStops,
   }), [isDark, formatter, maxPoint, strokeWidth, fillOpacityTo, fillStops])
+
+  const activeIndex = useMemo(
+    () => intervalOptions.findIndex(opt => opt.value === currentInterval),
+    [intervalOptions, currentInterval]
+  )
+
+  const indicatorStyle = useMemo(() => ({
+    width: `calc((100% - 8px) / ${intervalOptions.length})`,
+    transform: `translateX(${Math.max(activeIndex, 0) * 100}%)`,
+  }), [intervalOptions.length, activeIndex])
   // endregion
 
 
@@ -59,10 +69,10 @@ export default function OverviewChartShell<T extends string | number>({
    */
   const getButtonClass = useCallback((value: T) => {
     const isActive = currentInterval === value
-    const baseClass = 'h-[30px] px-3 border-none text-sm rounded-md transition-all'
+    const baseClass = 'relative z-10 flex-1 h-[28px] text-sm font-medium transition-colors duration-200'
     const stateClass = isActive
-      ? 'font-bold text-white bg-black/40 dark:bg-white/80 dark:text-black'
-      : 'text-current hover:bg-gray-100 dark:hover:bg-gray-800'
+      ? 'text-white dark:text-black'
+      : 'text-gray-500 dark:text-gray-400 hover:text-gray-700 dark:hover:text-gray-200'
 
     return `${baseClass} ${stateClass}`
   }, [currentInterval])
@@ -91,8 +101,12 @@ export default function OverviewChartShell<T extends string | number>({
         )}
       </div>
 
-      <div className="relative flex justify-between items-center px-2">
-        <div className="flex justify-center items-center gap-8 w-full pl-3 py-1">
+      <div className="relative flex justify-between items-center gap-3 px-2">
+        <div className="relative flex items-center flex-1 rounded-lg p-1">
+          <div
+            className="absolute top-1 bottom-1 left-1 bg-gray-900 dark:bg-white rounded-md shadow-sm transition-transform duration-300 ease-out"
+            style={indicatorStyle}
+          />
           {intervalOptions.map(({ value, text }) => (
             <button type="button" key={String(value)} className={getButtonClass(value)}
                     onClick={() => onChangeInterval(value)}>
