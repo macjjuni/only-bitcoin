@@ -12,6 +12,8 @@ const marketChartIntervalOptions: ChartIntervalOption<MarketChartIntervalType>[]
   { text: '1D', value: '1d' },
   { text: '7D', value: '7d' },
   { text: '1M', value: '1m' },
+  { text: '1Y', value: '1y' },
+  { text: '5Y', value: '5y' },
   { text: 'ALL', value: 'all' },
 ]
 

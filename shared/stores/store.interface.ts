@@ -110,7 +110,7 @@ export interface BlockTypes {
 }
 
 export type OverviewChartType = 'hashrate' | 'difficulty' | 'price';
-export type MarketChartIntervalType = '1d' | '7d' | '1m' | 'all';
+export type MarketChartIntervalType = '1d' | '7d' | '1m' | '1y' | '5y' | 'all';
 export type MiningMetricChartIntervalType = '3m' | '6m' | '1y' | '2y' | '3y' | 'all';
 
 export type CurrencyTypes = 'KRW' | 'USD' | 'KRW/USD';

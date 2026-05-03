@@ -4,7 +4,7 @@ import type { BinanceKline, MarketChartFormattedData } from '@/shared/types/api/
 
 const BINANCE_KLINES_URL = 'https://api.binance.com/api/v3/klines';
 
-export type BinanceInterval = '5m' | '15m' | '1h' | '4h' | '1d';
+export type BinanceInterval = '5m' | '15m' | '1h' | '4h' | '1d' | '1w';
 
 
 /**

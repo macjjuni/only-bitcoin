@@ -13,11 +13,15 @@ import { isDev } from '@/shared/utils/common';
  * - 1D: 5분봉 × 288 (24h)
  * - 7D: 1시간봉 × 168 (7일)
  * - 1M: 4시간봉 × 180 (30일)
+ * - 1Y: 1일봉 × 365
+ * - 5Y: 1주봉 × 260 (≈ 52주 × 5)
  */
 const BINANCE_INTERVAL_MAP: Record<Exclude<MarketChartIntervalType, 'all'>, { interval: BinanceInterval; limit: number }> = {
   '1d': { interval: '5m', limit: 288 },
   '7d': { interval: '1h', limit: 168 },
   '1m': { interval: '4h', limit: 180 },
+  '1y': { interval: '1d', limit: 365 },
+  '5y': { interval: '1w', limit: 260 },
 };
 
 
