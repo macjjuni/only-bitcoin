@@ -81,8 +81,13 @@ export const createChartOptions = ({
     padding: { left: 0, right: 0, top: -10, bottom: 0 },
   },
   dataLabels: { enabled: false },
-  annotations: maxPoint ? {
-    points: [{
+  annotations: {
+    yaxis: [],
+    xaxis: [],
+    texts: [],
+    images: [],
+    shapes: [],
+    points: maxPoint ? [{
       x: maxPoint.x,
       y: maxPoint.y,
       marker: {
@@ -110,6 +115,6 @@ export const createChartOptions = ({
           },
         },
       },
-    }],
-  } as unknown as ApexOptions['annotations'] : undefined,
+    }] : [],
+  } as unknown as ApexOptions['annotations'],
 })
