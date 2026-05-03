@@ -104,7 +104,7 @@ export default function OverviewChartShell<T extends string | number>({
       <div className="relative flex justify-between items-center gap-3 px-2">
         <div className="relative flex items-center flex-1 rounded-lg p-1">
           <div
-            className="absolute top-1 bottom-1 left-1 bg-gray-900 dark:bg-white rounded-md shadow-sm transition-transform duration-300 ease-out"
+            className="absolute top-1 bottom-1 left-1 bg-black dark:opacity-100 dark:bg-white rounded-md shadow-sm transition-transform duration-300 ease-out"
             style={indicatorStyle}
           />
           {intervalOptions.map(({ value, text }) => (

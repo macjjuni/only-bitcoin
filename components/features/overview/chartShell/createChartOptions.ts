@@ -31,7 +31,7 @@ export const createChartOptions = ({
     animations: { enabled: false },
   },
   theme: { mode: isDark ? 'dark' : 'light' },
-  colors: [isDark ? '#ffffff' : '#000000'],
+  colors: [isDark ? '#f7931a' : '#f7931a'],
   stroke: { curve: 'smooth', width: strokeWidth },
   fill: {
     type: 'gradient',
