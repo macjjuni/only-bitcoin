@@ -44,10 +44,11 @@ export default function PricePanel() {
       <div className="flex flex-col flex-1 min-w-0">
         {visibleCurrencies.map(({ code, sign, price, percent, signSize }) => {
           const isUp = percent >= 0
+          const isSingle = visibleCurrencies.length === 1
 
           return (
             <div key={code}
-                 className="flex items-center justify-between gap-2 font-bold whitespace-nowrap overflow-hidden font-number">
+                 className={`flex items-center justify-between gap-2 font-bold whitespace-nowrap overflow-hidden font-number${isSingle ? ' mb-8' : ''}`}>
               <span className="flex items-center">
                 <span className={`flex justify-center items-center w-6 ${signSize}`}>{sign}</span>
                 <CountText value={price} className="text-2xl lg:text-3xl"/>
@@ -62,11 +63,7 @@ export default function PricePanel() {
       </div>
 
       <div className="flex-shrink-0">
-        <PriceMiniChart
-          barCount={10}
-          width={140}
-          height={60}
-        />
+        <PriceMiniChart barCount={10} width={140} height={60} />
       </div>
 
     </div>
