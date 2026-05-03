@@ -172,6 +172,7 @@ export default function MacroWidgetPanel() {
         )}
 
         <DndContext
+          id="macro-widget-dnd"
           sensors={sensors}
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}
