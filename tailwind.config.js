@@ -35,6 +35,10 @@ export default {
                     '0%, 100%': {opacity: '0'},
                     '50%': {opacity: '1'},
                 },
+                blinkFade: {
+                    '0%, 100%': {opacity: '0.2'},
+                    '50%': {opacity: '1'},
+                },
                 fadeOut: {
                     'from': {opacity: '1'},
                     'to': {opacity: '0'},
@@ -69,6 +73,7 @@ export default {
             animation: {
                 wiggle: 'wiggle 0.36s ease-in-out infinite',
                 'blink-gold': 'blink 1.2s infinite ease-in-out',
+                'blink-fade': 'blinkFade 1.33s infinite ease-in-out',
                 swing: 'swing 3.4s linear infinite',
                 'view-exit': 'fadeOut 0.2s ease-in-out forwards',
                 'view-enter-right': 'slideInFromRight 0.2s ease-in-out forwards',

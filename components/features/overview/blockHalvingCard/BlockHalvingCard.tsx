@@ -8,7 +8,7 @@ import { calcPercentage, getNextHalvingData } from '@/shared/utils/calculate'
 import blockLottieJson from '@/shared/assets/lottie/blocks.json'
 import { calcDate } from '@/shared/lib/date'
 
-const totalSegments = 25 as const
+const totalSegments = 24 as const
 
 
 export default function BlockHalvingCard() {
@@ -27,7 +27,7 @@ export default function BlockHalvingCard() {
 
 
   // region [Privates]
-  const currentBlockIndex = Math.floor(halvingPercent / 4)
+  const currentBlockIndex = Math.floor((halvingPercent / 100) * totalSegments)
 
   /**
    * 반감기 진행도 세그먼트 렌더링
@@ -38,10 +38,16 @@ export default function BlockHalvingCard() {
       const isFilled = index < currentBlockIndex
       const isActive = index === currentBlockIndex
 
+      const isFirst = index === 0
+      const isLast = index === totalSegments - 1
+
       const className = [
-        'inline-flex h-full w-[calc((100%-50px)/25)] mr-0.5 -translate-x-1 -skew-x-[24deg] transition-all duration-300',
-        isFilled ? 'bg-current z-[1]' : 'bg-transparent',
-        isActive ? '!bg-current animate-blink-gold z-[2]' : '',
+        'flex-1 h-full transition-all duration-300',
+        isFirst ? 'rounded-l-sm' : '',
+        isLast ? 'rounded-r-sm' : '',
+        isFilled && !isActive ? 'bg-current' : '',
+        isActive ? 'bg-current animate-blink-fade' : '',
+        !isFilled && !isActive ? 'bg-current opacity-20' : '',
       ].filter(Boolean).join(' ')
 
       return <div key={index} className={className}/>
@@ -66,22 +72,13 @@ export default function BlockHalvingCard() {
     <div className="flex flex-col justify-between gap-2 p-0 mt-2 border-none">
 
       {/* .block-halving-card__header */}
-      <h2 className="text-lg font-bold">Bitcoin Halving</h2>
+      <h2 className="text-lg font-bold mb-1">Bitcoin Halving</h2>
 
       {/* .block-halving-card__content */}
       <div className="flex justify-between items-center gap-4">
         {/* .block-halving-card__gauge */}
-        <div
-          className="relative w-[70%] h-8 p-0.5 border-2 border-current rounded-sm whitespace-nowrap overflow-hidden">
-          {/* Edge Spans */}
-          <span className="absolute top-0 left-0 w-[2px] h-full bg-background z-10"/>
-
-          <div
-            className="inline-flex h-full w-[calc((100%-50px)/25)] mr-0.5 -translate-x-1 -skew-x-[24deg] bg-current z-0"/>
-
+        <div className="flex w-[70%] h-9 gap-0.5">
           {renderSegments}
-
-          <span className="absolute top-0 right-0 w-[2px] h-full bg-background z-10"/>
         </div>
 
         <span className="text-xl font-bold pr-1 text-current drop-shadow-[0_0_10px_rgba(var(--font-rgb),0.5)]">

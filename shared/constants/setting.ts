@@ -29,7 +29,7 @@ export const NOTICE_COOKIE_KEY = 'notice' as const;
 
 export const sourceOptions = [
   { label: "BTC", value: "Upbit, Bithumb, Binance, Coinbase" },
-  { label: "Dominance & Chart", value: "Coin Gecko" },
+  { label: "Dominance", value: "Coin Gecko" },
   { label: "Fear & Greed Index", value: "alternative.me" },
   { label: "USD/KRW Exchange Rate", value: "Naver(KEB)" }
 ] as const;
