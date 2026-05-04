@@ -55,7 +55,7 @@ export default function PricePanel() {
               </span>
               <span className={`flex items-center gap-0.5 text-[12px] ${isUp ? 'text-up' : 'text-down'}`}>
                 <UpdownIcon isUp={isUp}/>
-                <CountText value={percent} decimals={2}/>%
+                <CountText value={Math.abs(percent)} decimals={2}/>%
               </span>
             </div>
           )
