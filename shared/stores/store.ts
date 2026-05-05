@@ -115,7 +115,7 @@ const useStore = create<StoreType>()(
         currency: "KRW/USD",
         isUsdtStandard: false,
         isCountUp: true,
-        isBackgroundImg: false,
+        isBackgroundImg: true,
         deferredPrompt: null
       },
       setInitialPath: (path) => set((state) => ({
