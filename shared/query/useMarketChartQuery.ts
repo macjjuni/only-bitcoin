@@ -43,24 +43,40 @@ async function fetchMarketChart(interval: MarketChartIntervalType): Promise<Mark
 }
 
 
-const REFRESH_TIME = 1000 * 60 * 5; // 5분
+const MINUTE = 1000 * 60;
+
+/**
+ * 인터벌별 캐시 갱신 주기
+ * - 1D / 7D / 1M: 분·시간봉 기반이라 5분 주기 갱신 의미가 있음
+ * - 1Y: 1일봉 기반, 30분 주기로 충분
+ * - 5Y / All: 주봉/전체 히스토리, 1시간 주기로 충분
+ */
+const REFRESH_TIME_MAP: Record<MarketChartIntervalType, number> = {
+  '1d': MINUTE * 5,
+  '7d': MINUTE * 5,
+  '1m': MINUTE * 5,
+  '1y': MINUTE * 30,
+  '5y': MINUTE * 60,
+  'all': MINUTE * 60,
+};
 
 const useMarketChart = (interval: MarketChartIntervalType) => {
 
   // region [Hooks]
+  const refreshTime = REFRESH_TIME_MAP[interval];
 
-  const { data: marketChartData, isPending, isSuccess, isError, error } = useQuery<MarketChartFormattedData>({
+  const { data: marketChartData, isPending, isPlaceholderData, isSuccess, isError, error } = useQuery<MarketChartFormattedData>({
     queryKey: ['marketChart', interval],
     queryFn: () => fetchMarketChart(interval),
 
-    staleTime: REFRESH_TIME,
-    gcTime: REFRESH_TIME,
+    staleTime: refreshTime,
+    gcTime: refreshTime,
 
     refetchOnMount: true,
     refetchOnWindowFocus: false,
     refetchOnReconnect: false,
 
-    refetchInterval: REFRESH_TIME,
+    refetchInterval: refreshTime,
     placeholderData: keepPreviousData,
     retry: 1,
   });
@@ -80,7 +96,7 @@ const useMarketChart = (interval: MarketChartIntervalType) => {
 
   // endregion
 
-  return { marketChartData, isLoading: isPending, isSuccess, isError, error };
+  return { marketChartData, isLoading: isPending || isPlaceholderData, isSuccess, isError, error };
 };
 
 export default useMarketChart;
