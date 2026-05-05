@@ -64,7 +64,7 @@ const useStore = create<StoreType>()(
       // region [대시보드 차트]
       overviewChart: "price",
       setOverviewChart: ((overviewChart) => set((store) => ({ ...store, overviewChart }))),
-      marketChartInterval: 'all',
+      marketChartInterval: '5y',
       setMarketChartInterval: ((interval) => set(() => (
         { ...{ marketChartInterval: interval } }
       ))),
