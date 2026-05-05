@@ -53,8 +53,8 @@ export default function PricePanel() {
                 <span className={`flex justify-center items-center w-6 ${signSize}`}>{sign}</span>
                 <CountText value={price} className="text-2xl lg:text-3xl"/>
               </span>
-              <span className={`flex items-center gap-0.5 text-[12px] ${isUp ? 'text-up' : 'text-down'}`}>
-                <UpdownIcon isUp={isUp}/>
+              <span className={`flex items-center text-[12px] ${isUp ? 'text-up' : 'text-down'}`}>
+                <UpdownIcon isUp={isUp} className="mr-1"/>
                 <CountText value={Math.abs(percent)} decimals={2}/>%
               </span>
             </div>
