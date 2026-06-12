@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback } from "react";
+import { useCallback } from "react";
 import { KIcon, KListGroup, KListRow } from "kku-ui";
 import { DiscordIcon, LazyImage, NaverIcon, PageIcon } from "@/components";
 import { ChevronRight, ExternalLink, Images, TableProperties } from "lucide-react";
@@ -14,9 +14,11 @@ const EXTERNAL_LINKS = {
   CITADEL_DISCORD: "https://discord.gg/citadel21",
   ATOMIC_BTC_NOTION: "http://atomicbtc.kr",
   CITADEL_CAFE: "https://cafe.naver.com/btcforever",
-  BTC_MAP: "http://btcmap.kr/",
+  BTC_MAP: "http://btcmap.kr",
   FIAT_GOV_BITCOIN_DOC: "https://finished-snake-h7zp8jm.gamma.site",
-  SATOSHOP: "https://satoshop.org"
+  SATOSHOP: "https://satoshop.org",
+  LN_FORTUNE: "https://ln-fortune.vercel.app"
+
 } as const;
 // endregion
 
@@ -79,6 +81,11 @@ const OrangePillContent = () => {
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.BTC_MAP)}
         />
+        <KListRow
+          icon={<LazyImage src="https://ln-fortune.vercel.app/favicon.ico" />} label="Lightning Fortune"
+          rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
+          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.LN_FORTUNE)}
+        />
       </KListGroup>
 
       {/* 아카데미 */}
@@ -110,7 +117,4 @@ const OrangePillContent = () => {
   );
 };
 
-const MemoizedOrangePillContent = memo(OrangePillContent);
-MemoizedOrangePillContent.displayName = "OrangePillContent";
-
-export default MemoizedOrangePillContent;
+export default OrangePillContent;
