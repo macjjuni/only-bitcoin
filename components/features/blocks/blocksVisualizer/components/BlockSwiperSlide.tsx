@@ -70,11 +70,11 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
 
 
   // region [Life Cycles]
-  // 시간 표시가 필요한 일반 블록만 30초마다 경과 시간을 갱신한다.
+  // 시간 표시가 필요한 일반 블록만 15초마다 경과 시간을 갱신한다.
   useEffect(() => {
     if (isGenesis || isUnmined) return;
 
-    const timerId = setInterval(() => setNow(Date.now()), 30_000);
+    const timerId = setInterval(() => setNow(Date.now()), 15_000);
     return () => clearInterval(timerId);
   }, [isGenesis, isUnmined]);
   // endregion
