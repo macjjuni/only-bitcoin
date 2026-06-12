@@ -13,6 +13,7 @@ const nextConfig: NextConfig = {
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
+  allowedDevOrigins: ['192.168.68.104'],
   // endregion
 };
 

@@ -2,6 +2,7 @@ import { useEffect, useRef, useCallback } from "react";
 import {kToast} from "kku-ui";
 import ReconnectingWebSocket from "reconnecting-websocket";
 import useStore from "@/shared/stores/store";
+import useConfettiStore from "@/shared/stores/confettiStore";
 import { deepEqual } from "@/shared/utils/common";
 import { comma } from "@/shared/utils/string";
 import { MemPoolBlockTypes } from "@/shared/types/block.interface";
@@ -39,6 +40,7 @@ export default function useMempoolSocket() {
     const sanitizedBlock: BlockTypes = { id, height, size, timestamp, poolName: extras.pool.name };
 
     kToast.info(`${comma(height)}번째 블록 채굴!️`);
+    useConfettiStore.getState().show();
 
     setBlockData([sanitizedBlock, ...blockData]);
   }, []);
