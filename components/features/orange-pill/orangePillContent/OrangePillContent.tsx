@@ -14,10 +14,9 @@ const EXTERNAL_LINKS = {
   CITADEL_DISCORD: "https://discord.gg/citadel21",
   ATOMIC_BTC_NOTION: "http://atomicbtc.kr",
   CITADEL_CAFE: "https://cafe.naver.com/btcforever",
-  POW: "https://powbitcoiner.com",
   BTC_MAP: "http://btcmap.kr/",
   FIAT_GOV_BITCOIN_DOC: "https://finished-snake-h7zp8jm.gamma.site",
-  SATOSHOP: "https://store.btcmap.kr"
+  SATOSHOP: "https://satoshop.org"
 } as const;
 // endregion
 
@@ -62,11 +61,6 @@ const OrangePillContent = () => {
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_DISCORD)}
         />
         <KListRow
-          icon={<LazyImage src="https://powbitcoiner.com/favicon.ico" />}
-          label="포우 POW" rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.POW)}
-        />
-        <KListRow
           icon={<NaverIcon size={28} />} label="비트코인⚡️지분전쟁: 시타델"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_CAFE)}
@@ -76,8 +70,8 @@ const OrangePillContent = () => {
       {/* 서비스 */}
       <KListGroup header="서비스">
         <KListRow
-          icon={<LazyImage src="https://store.btcmap.kr/static/images/icons/icon-100x100.png" />}
-          label="BTCmap" rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
+          icon={<LazyImage src="https://satoshop.org/icon.svg?icon.12fecbu508vdu.svg" />}
+          label="사토샵" rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.SATOSHOP)}
         />
         <KListRow

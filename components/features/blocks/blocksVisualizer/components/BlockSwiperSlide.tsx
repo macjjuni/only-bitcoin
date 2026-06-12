@@ -1,4 +1,4 @@
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { dateUtil } from "kku-util";
 import { SwiperSlide } from "swiper/react";
 import { bytesToMB } from "@/shared/utils/number";
@@ -20,7 +20,9 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
   // region [Hooks]
   const { isUnmined, isGenesis, id, height, size, poolName, timestamp, onClick, onClickGenesis } = props;
 
-  const diffNowMin = useMemo(() => calcCurrentDateDifference(timestamp || 0, "minute"), [timestamp]);
+  const [now, setNow] = useState(() => Date.now());
+
+  const diffNowMin = useMemo(() => calcCurrentDateDifference(timestamp || 0, "minute"), [timestamp, now]);
   const isDefaultRender = useMemo(() => !isUnmined, [isUnmined]);
 
   // 상태별 동적 스타일 생성
@@ -64,6 +66,17 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
       onClickGenesis?.(id);
     }
   }, [id, isGenesis, onClick, onClickGenesis]);
+  // endregion
+
+
+  // region [Life Cycles]
+  // 시간 표시가 필요한 일반 블록만 30초마다 경과 시간을 갱신한다.
+  useEffect(() => {
+    if (isGenesis || isUnmined) return;
+
+    const timerId = setInterval(() => setNow(Date.now()), 30_000);
+    return () => clearInterval(timerId);
+  }, [isGenesis, isUnmined]);
   // endregion
 
   // region [Templates]
