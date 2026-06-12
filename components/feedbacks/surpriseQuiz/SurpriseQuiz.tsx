@@ -16,6 +16,7 @@ import {
 } from "kku-ui";
 import { QRCode } from "react-qrcode-logo";
 import useCopyOnClick from "@/shared/hooks/useCopyOnClick";
+import useConfettiStore from "@/shared/stores/confettiStore";
 import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/shared/constants/setting";
 
 
@@ -60,6 +61,7 @@ export default function SurpriseQuiz() {
   const [isStepReward, setIsStepReward] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const handleCopyLnurl = useCopyOnClick(qrDivRef);
+  const showConfetti = useConfettiStore((state) => state.show);
   // endregion
 
   // region [Events]
@@ -142,6 +144,7 @@ export default function SurpriseQuiz() {
       if (result.success) {
         setRewardLnurl(result.lnurl);
         setIsStepReward(true);
+        showConfetti();
       } else {
         handleClose();
         throw Error('알 수 없는 오류가 발생했습니다. 불편을 드려 죄송합니다. 🙇‍♂️')

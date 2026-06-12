@@ -5,7 +5,7 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import { BottomNavigation, Content, DefaultLayout, Header } from "@/layouts";
 import { THEME_INITIALIZATION_SCRIPT } from "@/shared/config/theme";
 import QueryProvider from "@/components/provider/QueryProvider";
-import { Initializer } from "@/components";
+import { ConfettiEffect, Initializer } from "@/components";
 import { env } from "@/shared/config/env";
 import "./globals.css";
 
@@ -90,9 +90,12 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
         <Initializer />
         <DefaultLayout>
           <Header />
-          <Content>{children}</Content>
+          <Content>
+            {children}
+          </Content>
           <BottomNavigation />
         </DefaultLayout>
+        <ConfettiEffect />
       </QueryProvider>
       </body>
       </html>
