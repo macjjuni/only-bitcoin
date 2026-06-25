@@ -3,9 +3,20 @@
 import { TransitionLink } from "@/components";
 import { usePathname } from "next/navigation";
 import { navigationRouteList } from "@/shared/config/route";
+import { vibrate } from "@/shared/utils/device";
 
 export default function BottomNavigation() {
+
+  // region [Hooks]
   const pathname = usePathname();
+  // endregion
+
+
+  // region [Events]
+  const onClickNavItem = () => {
+    vibrate();
+  };
+  // endregion
 
   return (
     <nav className={[
@@ -21,6 +32,7 @@ export default function BottomNavigation() {
             <li key={path} className="relative z-0">
               <TransitionLink
                 href={path}
+                onClick={onClickNavItem}
                 className={`flex items-center justify-center rounded-lg p-3 transition-colors tap-highlight-transparent z-10 ${
                   isActive
                     ? "text-[#F7931A]"
