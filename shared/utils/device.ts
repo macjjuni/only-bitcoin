@@ -41,15 +41,14 @@ function getIOSHapticLabel(): HTMLLabelElement {
 
   const label = document.createElement("label");
   label.ariaHidden = "true";
-  label.style.cssText = "position:absolute;width:0;height:0;overflow:hidden;pointer-events:none;opacity:0;";
+  label.style.display = "none";
 
   const input = document.createElement("input");
   input.type = "checkbox";
   input.setAttribute("switch", ""); // iOS 17.4+ 스위치 input
-  input.tabIndex = -1;
 
   label.appendChild(input);
-  document.body.appendChild(label);
+  document.head.appendChild(label);
 
   iosHapticLabel = label;
   return label;
