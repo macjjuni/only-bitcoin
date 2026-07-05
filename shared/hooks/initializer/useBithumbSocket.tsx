@@ -32,7 +32,6 @@ const getRequestPayload = () => [
 export default function useBithumbWebSocket() {
   // region [Hooks]
   const krwMarket = useStore(store => store.krwMarket);
-  const setReconnectBithumb = useStore(state => state.setReconnectBithumb);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
   // endregion
 
@@ -122,16 +121,7 @@ export default function useBithumbWebSocket() {
     socketRef.current = null;
   }, []);
 
-  const reconnect = useCallback(() => {
-    disconnect();
-    connect();
-  }, [disconnect, connect]);
-
   // region [Life Cycles]
-  useEffect(() => {
-    setReconnectBithumb(reconnect);
-  }, [reconnect]);
-
   useEffect(() => {
     if (krwMarket === BITHUMB_MARKET_FLAG) {
       connect();

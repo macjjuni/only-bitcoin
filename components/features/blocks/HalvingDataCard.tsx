@@ -8,7 +8,7 @@ import useStore from "@/shared/stores/store";
 
 const HalvingDataCard = () => {
   // region [Templates]
-  const currentBlockHeight = useStore((state) => state.blockData[0].height || 0);
+  const currentBlockHeight = useStore((state) => state.blockData[0]?.height ?? 0);
 
   const nextHalvingIndex = useMemo(
     () => blockHalvingData.findIndex(({ blockHeight }) => blockHeight > currentBlockHeight),

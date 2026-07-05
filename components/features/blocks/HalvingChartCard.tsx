@@ -14,12 +14,11 @@ const HalvingChartCard = () => {
 
   // region [Hooks]
   const isMount = useMounted();
-  const currentBlockData = useStore(state => state.blockData[0]);
-  const currentBlockHeight = useMemo(() => (currentBlockData.height), [currentBlockData]);
+  const currentBlockHeight = useStore(state => state.blockData[0]?.height ?? 0);
 
-  const nextHalvingData = useMemo(() => getNextHalvingData(currentBlockData.height), [currentBlockData]);
-  const restBlockCount = useMemo(() => (nextHalvingData.blockHeight - currentBlockData.height), [nextHalvingData, currentBlockData]);
-  const halvingPercent = useMemo(() => calcPercentage(nextHalvingData.blockHeight, currentBlockData.height), [nextHalvingData, currentBlockData]);
+  const nextHalvingData = useMemo(() => getNextHalvingData(currentBlockHeight), [currentBlockHeight]);
+  const restBlockCount = useMemo(() => (nextHalvingData.blockHeight - currentBlockHeight), [nextHalvingData, currentBlockHeight]);
+  const halvingPercent = useMemo(() => calcPercentage(nextHalvingData.blockHeight, currentBlockHeight), [nextHalvingData, currentBlockHeight]);
   const expectNextHalvingDate = useMemo(() => {
     if (!isMount) return "YYYY.MM.DD";
     // eslint-disable-next-line react-hooks/purity

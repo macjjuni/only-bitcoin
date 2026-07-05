@@ -34,7 +34,6 @@ export default function useUpbitWebSocket() {
 
   // region [Hooks]
   const krwMarket = useStore(store => store.krwMarket);
-  const setReconnectUpbit = useStore(state => state.setReconnectUpbit);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
   // endregion
 
@@ -118,17 +117,7 @@ export default function useUpbitWebSocket() {
     socketRef.current = null;
   }, []);
 
-  const reconnect = useCallback(() => {
-    disconnect();
-    connect();
-  }, [disconnect, connect]);
-
-
   // region [Life Cycles]
-  useEffect(() => {
-    setReconnectUpbit(reconnect);
-  }, [reconnect]);
-
   useEffect(() => {
     if (krwMarket === UPBIT_MARKET_FLAG) {
       connect();

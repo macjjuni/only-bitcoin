@@ -14,7 +14,6 @@ export default function useBinanceWebSocket() {
   // region [Hooks]
   const usdMarket = useStore(store => store.usdMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
-  const setReconnectBinance = useStore(state => state.setReconnectBinance);
   // endregion
 
   const resetUsdDisconnected = useCallback(() => {
@@ -88,17 +87,7 @@ export default function useBinanceWebSocket() {
     socketRef.current = null;
   }, []);
 
-  const reconnect = useCallback(() => {
-    disconnect();
-    connect();
-  }, [disconnect, connect]);
-
-
   // region [Life Cycles]
-  useEffect(() => {
-    setReconnectBinance(reconnect);
-  }, [reconnect]);
-
   useEffect(() => {
     if (usdMarket === BINANCE_MARKET_FLAG) {
       connect();

@@ -17,10 +17,10 @@ export default function BlockHalvingCard() {
   const { View, animationItem } = useLottie({ animationData: blockLottieJson, loop: true })
 
   const blockData = useStore((state) => state.blockData)
-  const recentBlockData = useMemo(() => blockData[0], [blockData])
-  const nextHalvingData = useMemo(() => getNextHalvingData(recentBlockData.height), [recentBlockData])
-  const halvingPercent = useMemo(() => calcPercentage(nextHalvingData?.blockHeight, recentBlockData.height), [nextHalvingData, recentBlockData])
-  const restBlockCount = useMemo(() => (nextHalvingData.blockHeight - blockData[0].height), [nextHalvingData, blockData])
+  const recentBlockHeight = useMemo(() => blockData[0]?.height ?? 0, [blockData])
+  const nextHalvingData = useMemo(() => getNextHalvingData(recentBlockHeight), [recentBlockHeight])
+  const halvingPercent = useMemo(() => calcPercentage(nextHalvingData?.blockHeight, recentBlockHeight), [nextHalvingData, recentBlockHeight])
+  const restBlockCount = useMemo(() => (nextHalvingData.blockHeight - recentBlockHeight), [nextHalvingData, recentBlockHeight])
   // eslint-disable-next-line react-hooks/purity
   const expectNextHalvingDate = useMemo(() => calcDate(Date.now(), restBlockCount * 10, 'minute', 'YYYY.MM.DD'), [restBlockCount])
   // endregion
@@ -97,7 +97,7 @@ export default function BlockHalvingCard() {
         {/* Info Items */}
         <div className="flex flex-col gap-1">
           <span className="text-[12px] opacity-70">Current</span>
-          <span className="font-number font-bold text-base">{comma(recentBlockData.height)}</span>
+          <span className="font-number font-bold text-base">{comma(recentBlockHeight)}</span>
         </div>
 
         <div className="w-px h-9 bg-current"/>
@@ -105,7 +105,7 @@ export default function BlockHalvingCard() {
         <div className="flex flex-col gap-1">
           <span className="text-[12px] opacity-70">Remaining</span>
           <span className="font-number font-bold text-base">
-            {comma(nextHalvingData.blockHeight - recentBlockData.height)}
+            {comma(nextHalvingData.blockHeight - recentBlockHeight)}
           </span>
         </div>
 

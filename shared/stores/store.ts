@@ -40,38 +40,25 @@ const useStore = create<StoreType>()(
       })),
 
       krwMarket: "BITHUMB",
-      setKrwMarket: (krwMarket) => set((store) => ({ ...store, krwMarket })),
+      setKrwMarket: (krwMarket) => set(() => ({ krwMarket })),
       usdMarket: "BINANCE",
-      setUsdMarket: (usdMarket) => set((store) => ({ ...store, usdMarket })),
-
-      reconnectUpbit: () => {},
-      reconnectBithumb: () => {},
-      reconnectBinance: () => {},
-      reconnectCoinbase: () => {},
-      setReconnectUpbit: (reconnectUpbit) => set((store) => ({ ...store, reconnectUpbit })),
-      setReconnectBithumb: (reconnectBithumb) => set((store) => ({ ...store, reconnectBithumb })),
-      setReconnectBinance: (reconnectBinance) => set((store) => ({ ...store, reconnectBinance })),
-      setReconnectCoinbase: (reconnectCoinbase) => set((store) => ({ ...store, reconnectCoinbase })),
+      setUsdMarket: (usdMarket) => set(() => ({ usdMarket })),
       // endregion
 
 
       // region [대시보드 메크로 순서]
       macroSequence: [1, 2, 3, 4],
-      setMacroSequence: (macroSequence) => set((store) => ({ ...store, macroSequence })),
+      setMacroSequence: (macroSequence) => set(() => ({ macroSequence })),
       // endregion
 
 
       // region [대시보드 차트]
       overviewChart: "price",
-      setOverviewChart: ((overviewChart) => set((store) => ({ ...store, overviewChart }))),
+      setOverviewChart: (overviewChart) => set(() => ({ overviewChart })),
       marketChartInterval: '5y',
-      setMarketChartInterval: ((interval) => set(() => (
-        { ...{ marketChartInterval: interval } }
-      ))),
+      setMarketChartInterval: (marketChartInterval) => set(() => ({ marketChartInterval })),
       miningMetricChartInterval: "all",
-      setMiningMetricChartInterval: ((miningMetricChartInterval) => set((store) =>
-        ({ ...store, miningMetricChartInterval })
-      )),
+      setMiningMetricChartInterval: (miningMetricChartInterval) => set(() => ({ miningMetricChartInterval })),
       // endregion
 
 

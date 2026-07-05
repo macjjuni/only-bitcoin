@@ -15,7 +15,6 @@ export default function useCoinbaseWebSocket() {
   // region [Hooks]
   const usdMarket = useStore(store => store.usdMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
-  const setReconnectCoinbase = useStore(state => state.setReconnectCoinbase);
   // endregion
 
   const resetUsdDisconnected = useCallback(() => {
@@ -106,16 +105,7 @@ export default function useCoinbaseWebSocket() {
     socketRef.current = null;
   }, []);
 
-  const reconnect = useCallback(() => {
-    disconnect();
-    connect();
-  }, [disconnect, connect]);
-
   // region [Life Cycles]
-  useEffect(() => {
-    setReconnectCoinbase(reconnect);
-  }, [reconnect]);
-
   useEffect(() => {
     if (usdMarket === COINBASE_MARKET_FLAG) {
       connect();

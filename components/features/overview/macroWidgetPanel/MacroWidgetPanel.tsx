@@ -87,7 +87,7 @@ export default function MacroWidgetPanel() {
       sign: null,
       onClick: onClickOpenFearAndGreedDialog,
     },
-    { id: 5, label: 'Mined %', value: minedPercent(blockData[0].height), decimals: 2, sign: '%' },
+    { id: 5, label: 'Mined %', value: minedPercent(blockData[0]?.height ?? 0), decimals: 2, sign: '%' },
     { id: 6, label: 'Sats/USD', value: usdToSats(1, usd), decimals: 0, sign: null },
     { id: 7, label: 'Fast Fee', value: fees.fastestFee, decimals: 1, sign: 'sat/vB' },
     { id: 8, label: 'Eco Fee', value: fees.economyFee, decimals: 1, sign: 'sat/vB' },
