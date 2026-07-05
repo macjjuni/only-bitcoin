@@ -1,15 +1,15 @@
 "use client";
 
+import { useMemo, memo } from "react";
 import { KAspectRatio, KDialog, KDialogContent, KDialogHeader, KDialogOverlay, KDialogTitle } from "kku-ui";
 import LazyImage from "@/components/ui/LazyImage";
-import { useMemo } from "react";
 
 interface ModalTypes {
   open: boolean;
   setOpen: (val: boolean) => void;
 }
 
-export default function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
+function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
 
   // region [Hooks]
   // eslint-disable-next-line react-hooks/purity
@@ -32,3 +32,8 @@ export default function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
     </KDialog>
   );
 }
+
+const MemoizedFearAndGreedDialog = memo(FearAndGreedDialog)
+MemoizedFearAndGreedDialog.displayName = 'MemoizedFearAndGreedDialog'
+
+export default MemoizedFearAndGreedDialog
