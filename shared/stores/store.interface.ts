@@ -1,131 +1,24 @@
-import { KrwMarketType, UsdMarketType } from "@/shared/constants/market";
-
-export interface StoreType {
-
-  // region [Theme]
-  theme: 'light' | 'dark';
-  setTheme: (theme: 'light' | 'dark') => void;
-  // endregion
-
-  // region [비트코인 실시간 가격]
-  bitcoinPrice: BitcoinPriceTypes; // BTC 시세 정보
-  setBitcoinKrwPrice: (bitcoinPriceKRW: BitcoinPriceKRWTypes) => void;
-  setBitcoinUsdPrice: (bitcoinPriceUSD: BitcoinPriceUSDTypes) => void;
-  krwMarket: KrwMarketType;
-  setKrwMarket: (market: KrwMarketType) => void;
-  usdMarket: UsdMarketType;
-  setUsdMarket: (Market: UsdMarketType) => void;
-  // endregion
-
-  // region [대시보드 메크로 순서]
-  macroSequence: number[],
-  setMacroSequence: (macroSequence: number[]) => void,
-  // endregion
-
-  // region [대시보드 가격 차트]
-  overviewChart: OverviewChartType;
-  setOverviewChart: (chart: OverviewChartType) => void
-  marketChartInterval: MarketChartIntervalType;
-  setMarketChartInterval: (interval: MarketChartIntervalType) => void;
-  // endregion
-
-  // region [대시보드 해시레이트 차트]
-  miningMetricChartInterval: MiningMetricChartIntervalType;
-  setMiningMetricChartInterval: (interval: MiningMetricChartIntervalType) => void;
-  // endregion
-
-  // region [환율 데이터]
-  exRate: ExRateTypes; // USD/KRW 환율 데이터
-  setExRate: (exRate: ExRateTypes) => void;
-  // endregion
-
-  // region [블록정보]
-  blockData: BlockTypes[];
-  setBlockData: (blocks: BlockTypes[]) => void;
-  fees: FeesTypes;
-  setFees: (fees: FeesTypes) => void;
-  // endregion
-
-  // region [BTC2Fiat]
-  btc2Fiat: { btcCount: string; krw: string; usd: string; sats: string; };
-  setBtcCount: (btcCount: string) => void;
-  setKrw: (krw: string) => void;
-  setUsd: (usd: string) => void;
-  setSats: (sats: string) => void;
-  focusCurrency: UnitType;
-  setFocusCurrency: (currency: UnitType) => void
-  premium: number;
-  setPremium: (premium: number) => void;
-  // endregion
-
-  // region [즐겨찾기]
-  setting: SettingTypes;
-  setInitialPath: (path: string) => void;
-  setCurrency: (currency: CurrencyTypes) => void;
-  setUsdtStandard: (isUsdtStandard: boolean) => void;
-  setIsCountUp: (isCountUp: boolean) => void;
-  setIsBackgroundImg: (isBackgroundImg: boolean) => void;
-  setDeferredPrompt: (deferredPrompt: BeforeInstallPromptEvent | null) => void;
-  // endregion
-}
-
-export interface BitcoinPriceTypes extends BitcoinPriceKRWTypes, BitcoinPriceUSDTypes {}
-
-export interface BitcoinPriceKRWTypes {
-  krw: number;
-  krwChange24h: string;
-  krwUpdateTimestamp: number;
-  isKrwConnected?: boolean; // 웹 소켓 접속 여부(업비트)
-}
-
-
-export interface BitcoinPriceUSDTypes {
-  usd: number;
-  usdChange24h: string;
-  usdUpdateTimestamp: number;
-  isUsdConnected?: boolean; // 웹 소켓 접속 여부(바이낸스)
-}
-
-// 환율 정보
-export interface ExRateTypes {
-  value: number;
-  date: string;
-}
-
-export interface BlockTypes {
-  id: string;
-  height: number; // 블록 높이
-  timestamp: number; // 블록 생성 타임스탬프
-  size: number;
-  poolName: string;
-}
-
-export type OverviewChartType = 'hashrate' | 'difficulty' | 'price';
-export type MarketChartIntervalType = '1d' | '7d' | '1m' | '1y' | '5y' | 'all';
-export type MiningMetricChartIntervalType = '3m' | '6m' | '1y' | '2y' | '3y' | 'all';
-
-export type CurrencyTypes = 'KRW' | 'USD' | 'KRW/USD';
-
-export interface SettingTypes {
-  initialPath: string;
-  currency: CurrencyTypes;
-  isUsdtStandard: boolean;
-  isCountUp: boolean;
-  isBackgroundImg: boolean;
-  deferredPrompt: BeforeInstallPromptEvent | null;
-}
-
-export interface FeesTypes {
-  economyFee: number;
-  fastestFee: number;
-  halfHourFee: number;
-  hourFee: number;
-  minimumFee: number;
-}
-
-export interface BeforeInstallPromptEvent extends Event {
-  prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
-}
-
-export type UnitType = 'BTC' | 'USD' | 'KRW' | 'SATS';
+/**
+ * 스토어 타입 배럴(barrel).
+ * 실제 타입 정의는 각 도메인 슬라이스(`slices/*Slice.ts`)에 위치하며,
+ * 이 파일은 기존 `@/shared/stores/store.interface` import 경로 호환을 위해 재export한다.
+ */
+export type { StoreType } from "@/shared/stores/store";
+export type {
+  BitcoinPriceTypes,
+  BitcoinPriceKRWTypes,
+  BitcoinPriceUSDTypes,
+} from "@/shared/stores/slices/priceSlice";
+export type {
+  OverviewChartType,
+  MarketChartIntervalType,
+  MiningMetricChartIntervalType,
+} from "@/shared/stores/slices/chartSlice";
+export type { ExRateTypes } from "@/shared/stores/slices/exRateSlice";
+export type { BlockTypes, FeesTypes } from "@/shared/stores/slices/blockSlice";
+export type { UnitType } from "@/shared/stores/slices/btc2FiatSlice";
+export type {
+  CurrencyTypes,
+  SettingTypes,
+  BeforeInstallPromptEvent,
+} from "@/shared/stores/slices/settingSlice";
