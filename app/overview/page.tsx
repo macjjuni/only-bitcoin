@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { PageLayout } from "@/layouts";
 import { env } from "@/shared/config/env";
+import { PageLayout } from "@/shared/ui/layout";
 import { BlockHalvingCard, ClientChart, MacroWidgetPanel, PricePanel } from "@/views/overview";
 
 export const metadata: Metadata = {

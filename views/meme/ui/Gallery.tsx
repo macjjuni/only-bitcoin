@@ -1,9 +1,9 @@
 "use client";
 
 import { memo, useCallback, useMemo, useState } from "react";
-import { LazyImage } from "@/components";
 import type { MemeImageResponseData } from "@/entities/meme";
 import { env } from "@/shared/config/env";
+import { LazyImage } from "@/shared/ui";
 import ImageModal from "./ImageModal";
 
 interface GalleryProps {

@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { getBip39Data } from "@/entities/bip39";
-import { PageLayout } from "@/layouts";
 import { env } from "@/shared/config/env";
+import { PageLayout } from "@/shared/ui/layout";
 import { Bip39Page } from "@/views/bip39";
 
 export const metadata: Metadata = {

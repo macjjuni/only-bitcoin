@@ -1,8 +1,8 @@
 import { KIcon, KListGroup, KListRow, KSwitch } from "kku-ui";
 import { Moon } from "lucide-react";
 import { memo } from "react";
-import { AnimationIcon } from "@/components";
 import useStore from "@/shared/stores/store";
+import { AnimationIcon } from "@/shared/ui";
 
 const StyleListRowGroup = () => {
   // region [Hooks]

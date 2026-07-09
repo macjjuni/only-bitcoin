@@ -12,9 +12,9 @@ import {
   KIcon,
 } from "kku-ui";
 import { useState } from "react";
-import { IosShareIcon } from "@/components/ui/icon";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import { useInitializePWA } from "@/shared/hooks/initializer";
+import { IosShareIcon } from "@/shared/ui";
 import { setCookie } from "@/shared/utils/cookie";
 
 export default function PWAInstallAlertIOSBottomSheet() {

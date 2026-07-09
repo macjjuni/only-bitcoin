@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useMemo } from "react";
 import { useLottie } from "lottie-react";
+import { useCallback, useEffect, useMemo } from "react";
 import blockLottieJson from "@/shared/assets/lottie/blocks.json";
 import { calcDate } from "@/shared/lib/date";
 import useStore from "@/shared/stores/store";

@@ -1,8 +1,8 @@
 "use client";
 
 import { useLottie } from "lottie-react";
-import { CountText, UpdownIcon } from "@/components";
 import LightningLottieData from "@/shared/assets/lottie/lightning.json";
+import { CountText, UpdownIcon } from "@/shared/ui";
 
 interface MiningMetricHeaderProps {
   hasData: boolean;

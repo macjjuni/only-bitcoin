@@ -4,8 +4,8 @@ import { KIcon, KListGroup, KListRow } from "kku-ui";
 import { ChevronRight, ExternalLink, Images, TableProperties } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { useCallback } from "react";
-import { DiscordIcon, LazyImage, NaverIcon, PageIcon } from "@/components";
 import { allRouteList } from "@/shared/config/route";
+import { DiscordIcon, LazyImage, NaverIcon, PageIcon } from "@/shared/ui";
 import { onRouteToExternalLink } from "@/shared/utils/common";
 
 // region [Constants]

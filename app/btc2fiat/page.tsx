@@ -1,6 +1,6 @@
 import type { Metadata } from "next";
-import { PageLayout } from "@/layouts";
 import { env } from "@/shared/config/env";
+import { PageLayout } from "@/shared/ui/layout";
 import { ConvertPanel, PremiumBadge } from "@/views/btc2fiat";
 
 export const metadata: Metadata = {

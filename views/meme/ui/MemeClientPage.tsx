@@ -2,7 +2,7 @@
 
 import { useCallback, useMemo, useState } from "react";
 import type { MemeImageResponseData } from "@/entities/meme";
-import { PageLayout } from "@/layouts";
+import { PageLayout } from "@/shared/ui/layout";
 import Gallery from "./Gallery";
 import TagList from "./TagList";
 

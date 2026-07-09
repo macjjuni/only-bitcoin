@@ -1,8 +1,8 @@
 "use client";
 
 import { useMemo } from "react";
-import { CountText, UpdownIcon } from "@/components";
 import useStore from "@/shared/stores/store";
+import { CountText, UpdownIcon } from "@/shared/ui";
 import PriceMiniChart from "./PriceMiniChart";
 
 export default function PricePanel() {

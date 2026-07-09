@@ -1,10 +1,4 @@
-import {
-  BlockIcon,
-  DashboardIcon,
-  ExchangeIcon,
-  PillIcon,
-  PremiumIcon,
-} from "@/components/ui/icon";
+import { BlockIcon, DashboardIcon, ExchangeIcon, PillIcon, PremiumIcon } from "@/shared/ui";
 
 const clientRoutes = [
   {

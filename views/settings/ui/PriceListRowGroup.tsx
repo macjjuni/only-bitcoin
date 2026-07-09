@@ -3,11 +3,11 @@
 import { KIcon, KListGroup, KListRow, KSelect, KSwitch } from "kku-ui";
 import { Star } from "lucide-react";
 import { memo, useMemo } from "react";
-import { CurrencyIcon } from "@/components";
 import { favoriteRouteList } from "@/shared/config/route";
 import { currencyOptions, krwMarketOptions, usdMarketOptions } from "@/shared/constants/setting";
 import useStore from "@/shared/stores/store";
 import type { CurrencyTypes } from "@/shared/stores/store.interface";
+import { CurrencyIcon } from "@/shared/ui";
 
 const PriceListRowGroup = () => {
   // region [Hooks]

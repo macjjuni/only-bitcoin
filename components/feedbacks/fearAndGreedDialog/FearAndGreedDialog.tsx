@@ -9,7 +9,7 @@ import {
   KDialogTitle,
 } from "kku-ui";
 import { memo, useMemo } from "react";
-import LazyImage from "@/components/ui/LazyImage";
+import { LazyImage } from "@/shared/ui";
 
 interface ModalTypes {
   open: boolean;

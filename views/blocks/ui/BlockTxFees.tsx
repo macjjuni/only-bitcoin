@@ -1,8 +1,8 @@
 "use client";
 
 import { Fragment, memo, useMemo } from "react";
-import { CountText } from "@/components";
 import useStore from "@/shared/stores/store";
+import { CountText } from "@/shared/ui";
 
 const BlockTxFees = () => {
   // region [Hooks]

@@ -2,11 +2,13 @@ import { GoogleAnalytics } from "@next/third-parties/google";
 import type { Metadata, Viewport } from "next";
 import { ViewTransitions } from "next-view-transitions";
 import type { ReactNode } from "react";
-import { ConfettiEffect, Initializer } from "@/components";
+import { Initializer } from "@/components";
 import QueryProvider from "@/components/provider/QueryProvider";
-import { BottomNavigation, Content, DefaultLayout, Header } from "@/layouts";
 import { env } from "@/shared/config/env";
 import { THEME_INITIALIZATION_SCRIPT } from "@/shared/config/theme";
+import { ConfettiEffect } from "@/shared/ui";
+import { Content, DefaultLayout } from "@/shared/ui/layout";
+import { BottomNavigation, Header } from "@/widgets";
 import "./globals.css";
 
 // 1. Viewport

@@ -2,9 +2,9 @@
 
 import { KCard, KCardContent, KCardHeader, KCardTitle, KSkeleton } from "kku-ui";
 import { memo, useMemo } from "react";
-import { CountText } from "@/components";
 import { formatDate } from "@/shared/lib/date";
 import useStore from "@/shared/stores/store";
+import { CountText } from "@/shared/ui";
 import { calcPremiumPercent } from "@/shared/utils/calculate";
 
 const PremiumPanel = () => {
