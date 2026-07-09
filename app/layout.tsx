@@ -8,7 +8,8 @@ import { env } from "@/shared/config/env";
 import { THEME_INITIALIZATION_SCRIPT } from "@/shared/config/theme";
 import { ConfettiEffect } from "@/shared/ui";
 import { Content, DefaultLayout } from "@/shared/ui/layout";
-import { BottomNavigation, Header } from "@/widgets";
+import { BottomNavigation } from "@/widgets/bottom-navigation";
+import { Header } from "@/widgets/header";
 import "./globals.css";
 
 // 1. Viewport
