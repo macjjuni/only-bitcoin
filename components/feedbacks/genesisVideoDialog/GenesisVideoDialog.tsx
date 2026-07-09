@@ -1,13 +1,21 @@
 "use client";
 
+import { MediaPlayer, MediaProvider, Poster, Track } from "@vidstack/react";
+import { DefaultVideoLayout, defaultLayoutIcons } from "@vidstack/react/player/layouts/default";
+import {
+  KAspectRatio,
+  KDialog,
+  KDialogContent,
+  KDialogHeader,
+  KDialogOverlay,
+  KDialogTitle,
+} from "kku-ui";
 // region Imports
 import { useEffect, useState } from "react";
-import { KAspectRatio, KDialog, KDialogContent, KDialogHeader, KDialogOverlay, KDialogTitle } from "kku-ui";
-import { MediaPlayer, MediaProvider, Poster, Track } from "@vidstack/react";
-import { defaultLayoutIcons, DefaultVideoLayout } from "@vidstack/react/player/layouts/default";
 
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
+
 // endregion
 
 // region Types & Constants

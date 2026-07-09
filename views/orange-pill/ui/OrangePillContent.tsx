@@ -1,13 +1,12 @@
 "use client";
 
-import { useCallback } from "react";
 import { KIcon, KListGroup, KListRow } from "kku-ui";
-import { DiscordIcon, LazyImage, NaverIcon, PageIcon } from "@/components";
 import { ChevronRight, ExternalLink, Images, TableProperties } from "lucide-react";
-import { onRouteToExternalLink } from "@/shared/utils/common";
 import { useTransitionRouter } from "next-view-transitions";
+import { useCallback } from "react";
+import { DiscordIcon, LazyImage, NaverIcon, PageIcon } from "@/components";
 import { allRouteList } from "@/shared/config/route";
-
+import { onRouteToExternalLink } from "@/shared/utils/common";
 
 // region [Constants]
 const EXTERNAL_LINKS = {
@@ -17,21 +16,18 @@ const EXTERNAL_LINKS = {
   BTC_MAP: "http://btcmap.kr",
   FIAT_GOV_BITCOIN_DOC: "https://finished-snake-h7zp8jm.gamma.site",
   SATOSHOP: "https://satoshop.org",
-  LN_FORTUNE: "https://ln-fortune.vercel.app"
-
+  LN_FORTUNE: "https://ln-fortune.vercel.app",
 } as const;
 // endregion
 
-
 const OrangePillContent = () => {
-
   // region [Hooks]
   const router = useTransitionRouter();
   // endregion
 
-// region [Privates]
+  // region [Privates]
   const handleMemeRoute = useCallback(() => {
-    const routePath = allRouteList.find(item => item.path.includes("meme"))?.path;
+    const routePath = allRouteList.find((item) => item.path.includes("meme"))?.path;
 
     if (!routePath) {
       console.warn("Meme 경로를 찾을 수 없습니다.");
@@ -63,7 +59,8 @@ const OrangePillContent = () => {
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_DISCORD)}
         />
         <KListRow
-          icon={<NaverIcon size={28} />} label="비트코인⚡️지분전쟁: 시타델"
+          icon={<NaverIcon size={28} />}
+          label="비트코인⚡️지분전쟁: 시타델"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_CAFE)}
         />
@@ -73,16 +70,19 @@ const OrangePillContent = () => {
       <KListGroup header="서비스">
         <KListRow
           icon={<LazyImage src="https://satoshop.org/icon.svg?icon.12fecbu508vdu.svg" />}
-          label="사토샵" rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
+          label="사토샵"
+          rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.SATOSHOP)}
         />
         <KListRow
-          icon={<NaverIcon size={28} />} label="비트코인 결제 매장"
+          icon={<NaverIcon size={28} />}
+          label="비트코인 결제 매장"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.BTC_MAP)}
         />
         <KListRow
-          icon={<LazyImage src="https://ln-fortune.vercel.app/favicon.ico" />} label="Lightning Fortune"
+          icon={<LazyImage src="https://ln-fortune.vercel.app/favicon.ico" />}
+          label="Lightning Fortune"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.LN_FORTUNE)}
         />
@@ -91,24 +91,30 @@ const OrangePillContent = () => {
       {/* 아카데미 */}
       <KListGroup header="아카데미">
         <KListRow
-          icon={<KIcon icon="notion" size={28} />} label="ATOMIC⚡️₿ITCOIN 노션"
+          icon={<KIcon icon="notion" size={28} />}
+          label="ATOMIC⚡️₿ITCOIN 노션"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.ATOMIC_BTC_NOTION)} />
+          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.ATOMIC_BTC_NOTION)}
+        />
         <KListRow
-          icon={<PageIcon size={28} />} label="화폐와 정부 그리고 비트코인"
+          icon={<PageIcon size={28} />}
+          label="화폐와 정부 그리고 비트코인"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.FIAT_GOV_BITCOIN_DOC)} />
+          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.FIAT_GOV_BITCOIN_DOC)}
+        />
       </KListGroup>
 
       {/* 유틸리티 */}
       <KListGroup header="유틸리티">
         <KListRow
-          icon={<Images size={28} />} label="비트맥시 전용 밈 저장소"
+          icon={<Images size={28} />}
+          label="비트맥시 전용 밈 저장소"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleMemeRoute}
         />
         <KListRow
-          icon={<TableProperties size={28} />} label="BIP39"
+          icon={<TableProperties size={28} />}
+          label="BIP39"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleBIP39Route}
         />

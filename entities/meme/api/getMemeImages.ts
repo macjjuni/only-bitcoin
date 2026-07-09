@@ -1,7 +1,6 @@
-import { MemeImageResponseData } from "../model/types";
-import { shuffleArray } from "@/shared/utils/common";
 import { env } from "@/shared/config/env";
-
+import { shuffleArray } from "@/shared/utils/common";
+import type { MemeImageResponseData } from "../model/types";
 
 export const getMemeImages = async (): Promise<MemeImageResponseData[]> => {
   try {

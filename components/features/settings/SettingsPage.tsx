@@ -1,25 +1,23 @@
-'use client';
+"use client";
 
-import { memo, useMemo } from "react";
 import dynamic from "next/dynamic";
+import { memo, useMemo } from "react";
 import {
   InfoListRowGroup,
   PriceListRowGroup,
-  StyleListRowGroup
+  StyleListRowGroup,
 } from "@/components/features/settings";
 import useStore from "@/shared/stores/store";
 import { isSafari } from "@/shared/utils/device";
 
-
 const DynamicInstallListRowGroup = dynamic(
   () => import("@/components/features/settings").then((mod) => mod.InstallListRowGroup),
-  { ssr: false }
+  { ssr: false },
 );
-
 
 const SettingsPage = () => {
   // region [Hooks]
-  const deferredPrompt = useStore(state => state.setting.deferredPrompt);
+  const deferredPrompt = useStore((state) => state.setting.deferredPrompt);
 
   const showInstallGroup = useMemo(() => {
     if (typeof window === "undefined") return false;

@@ -1,7 +1,14 @@
 "use client";
 
-import { useMemo, memo } from "react";
-import { KAspectRatio, KDialog, KDialogContent, KDialogHeader, KDialogOverlay, KDialogTitle } from "kku-ui";
+import {
+  KAspectRatio,
+  KDialog,
+  KDialogContent,
+  KDialogHeader,
+  KDialogOverlay,
+  KDialogTitle,
+} from "kku-ui";
+import { memo, useMemo } from "react";
 import LazyImage from "@/components/ui/LazyImage";
 
 interface ModalTypes {
@@ -10,10 +17,12 @@ interface ModalTypes {
 }
 
 function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
-
   // region [Hooks]
   // eslint-disable-next-line react-hooks/purity
-  const imageUrl = useMemo(() => (`https://alternative.me/crypto/fear-and-greed-index.png?${Date.now()}`), [open]);
+  const imageUrl = useMemo(
+    () => `https://alternative.me/crypto/fear-and-greed-index.png?${Date.now()}`,
+    [open],
+  );
   // endregion
 
   return (
@@ -33,7 +42,7 @@ function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
   );
 }
 
-const MemoizedFearAndGreedDialog = memo(FearAndGreedDialog)
-MemoizedFearAndGreedDialog.displayName = 'MemoizedFearAndGreedDialog'
+const MemoizedFearAndGreedDialog = memo(FearAndGreedDialog);
+MemoizedFearAndGreedDialog.displayName = "MemoizedFearAndGreedDialog";
 
-export default MemoizedFearAndGreedDialog
+export default MemoizedFearAndGreedDialog;

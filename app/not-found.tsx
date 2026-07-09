@@ -1,10 +1,10 @@
-'use client'
+"use client";
 
-import { useTransitionRouter } from 'next-view-transitions'
-import { KButton } from 'kku-ui'
+import { KButton } from "kku-ui";
+import { useTransitionRouter } from "next-view-transitions";
 
 export default function NotFound() {
-  const router = useTransitionRouter()
+  const router = useTransitionRouter();
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4">
@@ -14,5 +14,5 @@ export default function NotFound() {
         뒤로가기
       </KButton>
     </div>
-  )
+  );
 }

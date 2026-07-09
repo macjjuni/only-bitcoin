@@ -1,10 +1,14 @@
-'use client';
+"use client";
 
 import { memo, useCallback, useEffect, useState } from "react";
-import { DomainNoticeDialog, PWAInstallAlertBottomSheet, PWAInstallAlertIOSBottomSheet } from "@/components/feedbacks";
-import { getCookie } from "@/shared/utils/cookie";
+import {
+  DomainNoticeDialog,
+  PWAInstallAlertBottomSheet,
+  PWAInstallAlertIOSBottomSheet,
+} from "@/components/feedbacks";
 import { NOTICE_COOKIE_KEY, PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import { useInitializePWA } from "@/shared/hooks/initializer";
+import { getCookie } from "@/shared/utils/cookie";
 import { isIOSPWA, isIOSSafari, isPWAInstalled, isSafari } from "@/shared/utils/device";
 
 const AlarmManager = () => {
@@ -19,19 +23,21 @@ const AlarmManager = () => {
   const determineDisplayState = useCallback((): DisplayState => {
     // 1. 도메인 이전 공지
     const isHideDomain = !!getCookie(NOTICE_COOKIE_KEY);
-    const searchParams = new URLSearchParams(typeof window !== 'undefined' ? window.location.search : "");
+    const searchParams = new URLSearchParams(
+      typeof window !== "undefined" ? window.location.search : "",
+    );
     const isRedirected = searchParams.get("redirected") === "true";
 
     if (!isHideDomain && isRedirected) return "DOMAIN";
 
     // 2. 공통 쿠키 확인
-    if (!!getCookie(PWA_COOKIE_KEY)) return "NONE";
+    if (getCookie(PWA_COOKIE_KEY)) return "NONE";
 
     // 3. IOS PWA (Safari)
     if (isIOSSafari() && !isIOSPWA()) return "IOS_PWA";
 
     // 4. Android/Desktop PWA (deferredPrompt 존재 + standalone 모드가 아닌 경우만 체크)
-    if (!isSafari() && !!deferredPrompt && !isPWAInstalled()) {
+    if (!isSafari() && deferredPrompt && !isPWAInstalled()) {
       return "OTHER_PWA";
     }
 
@@ -54,10 +60,14 @@ const AlarmManager = () => {
   // region [Events]
   const renderAlarm = () => {
     switch (displayState) {
-      case "DOMAIN": return <DomainNoticeDialog />;
-      case "IOS_PWA": return <PWAInstallAlertIOSBottomSheet />;
-      case "OTHER_PWA": return <PWAInstallAlertBottomSheet />;
-      default: return null;
+      case "DOMAIN":
+        return <DomainNoticeDialog />;
+      case "IOS_PWA":
+        return <PWAInstallAlertIOSBottomSheet />;
+      case "OTHER_PWA":
+        return <PWAInstallAlertBottomSheet />;
+      default:
+        return null;
     }
   };
   // endregion

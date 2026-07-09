@@ -1,10 +1,17 @@
 import { dateUtil } from "kku-util";
 
-const { formatConfig, getFormatDate, convertToTimestamp, getCurrentDate, calcCurrentDateDifference, calcDate } = dateUtil;
+const {
+  formatConfig,
+  getFormatDate,
+  convertToTimestamp,
+  getCurrentDate,
+  calcCurrentDateDifference,
+  calcDate,
+} = dateUtil;
 
 function formatDate(
   date: Date | string | number | undefined | null,
-  format: string = formatConfig.detail
+  format: string = formatConfig.detail,
 ) {
   if (!date) {
     return "-";
@@ -25,4 +32,11 @@ function formatDate(
   }
 }
 
-export { formatConfig, formatDate, convertToTimestamp, getCurrentDate, calcCurrentDateDifference, calcDate };
+export {
+  calcCurrentDateDifference,
+  calcDate,
+  convertToTimestamp,
+  formatConfig,
+  formatDate,
+  getCurrentDate,
+};

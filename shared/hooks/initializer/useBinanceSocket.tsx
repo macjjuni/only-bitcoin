@@ -1,18 +1,17 @@
-import { useCallback, useEffect, useRef } from "react";
 import { kToast } from "kku-ui";
+import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
+import { BINANCE_MARKET_FLAG } from "@/shared/constants/market";
 import useStore from "@/shared/stores/store";
+import { isDev } from "@/shared/utils/common";
 import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
-import { isDev } from "@/shared/utils/common";
-import { BINANCE_MARKET_FLAG } from "@/shared/constants/market";
 
 const BINANCE_URL = `wss://stream.binance.com:9443/ws/btcusdt@ticker`;
 
 export default function useBinanceWebSocket() {
-
   // region [Hooks]
-  const usdMarket = useStore(store => store.usdMarket);
+  const usdMarket = useStore((store) => store.usdMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
   // endregion
 
@@ -21,24 +20,32 @@ export default function useBinanceWebSocket() {
     setBitcoinUsdPrice({ ...bitcoinPrice, isUsdConnected: false });
   }, []);
 
-  const handleBTCUpdate = useCallback((price: number, usdUpdateTimestamp: number, usdChange24h: string) => {
-    const { setBitcoinUsdPrice } = useStore.getState();
-    const usdChange24hStr = floorToDecimal(Number(usdChange24h), 2).toString();
+  const handleBTCUpdate = useCallback(
+    (price: number, usdUpdateTimestamp: number, usdChange24h: string) => {
+      const { setBitcoinUsdPrice } = useStore.getState();
+      const usdChange24hStr = floorToDecimal(Number(usdChange24h), 2).toString();
 
-    setBitcoinUsdPrice({ usd: price, usdChange24h: usdChange24hStr, usdUpdateTimestamp, isUsdConnected: true });
-  }, []);
+      setBitcoinUsdPrice({
+        usd: price,
+        usdChange24h: usdChange24hStr,
+        usdUpdateTimestamp,
+        isUsdConnected: true,
+      });
+    },
+    [],
+  );
 
   const connect = useCallback(() => {
     const socket = new ReconnectingWebSocket(BINANCE_URL, [], {
-      maxReconnectionDelay: 8000,           // 재연결 최대 지연: 10초
-      minReconnectionDelay: 1000,           // 재연결 최소 지연: 1초
-      reconnectionDelayGrowFactor: 1.5,     // 재시도 간 딜레이 증가 비율
-      minUptime: 5000,                      // 연결이 최소 유지되어야 하는 시간 (5초)
-      connectionTimeout: 3000,              // 연결 시도 타임아웃: 4초
-      maxRetries: 10,                       // 10회 재시도 (실서비스 기준)
-      maxEnqueuedMessages: 100,             // 연결 안 된 동안 큐에 쌓을 메시지 수 제한
-      startClosed: false,                   // 생성 직후 자동 연결
-      debug: false                          // 디버깅 로그 출력 여부
+      maxReconnectionDelay: 8000, // 재연결 최대 지연: 10초
+      minReconnectionDelay: 1000, // 재연결 최소 지연: 1초
+      reconnectionDelayGrowFactor: 1.5, // 재시도 간 딜레이 증가 비율
+      minUptime: 5000, // 연결이 최소 유지되어야 하는 시간 (5초)
+      connectionTimeout: 3000, // 연결 시도 타임아웃: 4초
+      maxRetries: 10, // 10회 재시도 (실서비스 기준)
+      maxEnqueuedMessages: 100, // 연결 안 된 동안 큐에 쌓을 메시지 수 제한
+      startClosed: false, // 생성 직후 자동 연결
+      debug: false, // 디버깅 로그 출력 여부
     });
 
     socket.binaryType = "arraybuffer";
@@ -100,4 +107,4 @@ export default function useBinanceWebSocket() {
     };
   }, [usdMarket, connect, disconnect]);
   // endregion
-};
+}

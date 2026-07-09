@@ -8,7 +8,6 @@ interface BlinkPaymentResult {
 }
 // endregion
 
-
 // region [Privates]
 const blinkFetch = async (query: string, variables?: Record<string, unknown>) => {
   const response = await fetch(BLINK_API_URL, {
@@ -24,7 +23,6 @@ const blinkFetch = async (query: string, variables?: Record<string, unknown>) =>
 };
 // endregion
 
-
 // region [Transactions]
 /**
  * Blink 기본 지갑 ID 조회
@@ -39,7 +37,10 @@ export const getBlinkWalletId = async (): Promise<string | null> => {
 /**
  * Lightning Invoice 결제 실행
  */
-export const sendLnPayment = async (paymentRequest: string, memo?: string): Promise<BlinkPaymentResult> => {
+export const sendLnPayment = async (
+  paymentRequest: string,
+  memo?: string,
+): Promise<BlinkPaymentResult> => {
   const walletId = await getBlinkWalletId();
 
   if (!walletId) {

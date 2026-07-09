@@ -1,11 +1,10 @@
-'use client';
+"use client";
 
 import { memo, useMemo } from "react";
 import useStore from "@/shared/stores/store";
 
 const PremiumBadge = () => {
-
-  const premium = useStore(state => state.premium);
+  const premium = useStore((state) => state.premium);
   const numberSign = useMemo(() => (premium > 0 ? "+" : ""), [premium]);
 
   if (premium === 0) {
@@ -14,12 +13,13 @@ const PremiumBadge = () => {
 
   return (
     <div className="absolute top-2.5 left-4 layout-max:left-6 flex items-center justify-start gap-1 text-md font-bold text-bitcoin">
-      Premium: {numberSign}{premium}%
+      Premium: {numberSign}
+      {premium}%
     </div>
   );
 };
 
-const MemoizedPremiumBadge= memo(PremiumBadge);
+const MemoizedPremiumBadge = memo(PremiumBadge);
 MemoizedPremiumBadge.displayName = "PremiumBadge";
 
 export default MemoizedPremiumBadge;

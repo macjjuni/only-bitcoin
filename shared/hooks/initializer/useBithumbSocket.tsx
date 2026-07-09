@@ -1,14 +1,14 @@
-import {useCallback, useEffect, useRef} from 'react'
-import {kToast} from "kku-ui";
-import ReconnectingWebSocket from 'reconnecting-websocket'
-import useStore from '@/shared/stores/store'
-import {isNetwork} from '@/shared/utils/network'
-import LocalStorage from '@/shared/utils/storage'
-import {generateUUID} from '@/shared/lib/uuid'
-import {formatDate} from '@/shared/lib/date'
-import {floorToDecimal} from '@/shared/utils/number'
-import {isDev} from '@/shared/utils/common'
-import {BITHUMB_MARKET_FLAG} from '@/shared/constants/market'
+import { kToast } from "kku-ui";
+import { useCallback, useEffect, useRef } from "react";
+import ReconnectingWebSocket from "reconnecting-websocket";
+import { BITHUMB_MARKET_FLAG } from "@/shared/constants/market";
+import { formatDate } from "@/shared/lib/date";
+import { generateUUID } from "@/shared/lib/uuid";
+import useStore from "@/shared/stores/store";
+import { isDev } from "@/shared/utils/common";
+import { isNetwork } from "@/shared/utils/network";
+import { floorToDecimal } from "@/shared/utils/number";
+import LocalStorage from "@/shared/utils/storage";
 
 const BITHUMB_URL = "wss://ws-api.bithumb.com/websocket/v1";
 const UUID_STORAGE_KEY = "uuid";
@@ -26,12 +26,12 @@ const getUUID = () => {
 const getRequestPayload = () => [
   { ticket: getUUID() },
   { type: "ticker", codes: [BITHUMB_BTC_TICKER, BITHUMB_USDT_TICKER] },
-  { format: "SIMPLE" }
+  { format: "SIMPLE" },
 ];
 
 export default function useBithumbWebSocket() {
   // region [Hooks]
-  const krwMarket = useStore(store => store.krwMarket);
+  const krwMarket = useStore((store) => store.krwMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
   // endregion
 
@@ -40,14 +40,22 @@ export default function useBithumbWebSocket() {
     setBitcoinKrwPrice({ ...bitcoinPrice, isKrwConnected: false });
   };
 
-  const handleBTCUpdate = useCallback((price: number, krwUpdateTimestamp: number, krwChange24h: number) => {
-    const { setBitcoinKrwPrice, setting } = useStore.getState();
+  const handleBTCUpdate = useCallback(
+    (price: number, krwUpdateTimestamp: number, krwChange24h: number) => {
+      const { setBitcoinKrwPrice, setting } = useStore.getState();
 
-    if (setting.currency.includes("KRW")) {
-      const krwChange24hStr = floorToDecimal(krwChange24h * 100, 2).toString();
-      setBitcoinKrwPrice({ krw: price, krwChange24h: krwChange24hStr, krwUpdateTimestamp, isKrwConnected: true });
-    }
-  }, []);
+      if (setting.currency.includes("KRW")) {
+        const krwChange24hStr = floorToDecimal(krwChange24h * 100, 2).toString();
+        setBitcoinKrwPrice({
+          krw: price,
+          krwChange24h: krwChange24hStr,
+          krwUpdateTimestamp,
+          isKrwConnected: true,
+        });
+      }
+    },
+    [],
+  );
 
   const handleUSDTUpdate = useCallback((price: number, timestamp: number) => {
     const { setExRate, setting } = useStore.getState();
@@ -66,7 +74,7 @@ export default function useBithumbWebSocket() {
       maxRetries: 10,
       maxEnqueuedMessages: 100,
       startClosed: false,
-      debug: false
+      debug: false,
     });
     socket.binaryType = "arraybuffer";
 
@@ -84,7 +92,7 @@ export default function useBithumbWebSocket() {
         const data = JSON.parse(dataString);
 
         if (data?.ty === "ticker" && data.cd === BITHUMB_BTC_TICKER) {
-          handleBTCUpdate(data.tp , data.tms, data.scr);
+          handleBTCUpdate(data.tp, data.tms, data.scr);
         }
         if (data?.ty === "ticker" && data.cd === BITHUMB_USDT_TICKER) {
           handleUSDTUpdate(data.tp, data.tms);
@@ -129,7 +137,9 @@ export default function useBithumbWebSocket() {
       disconnect();
     }
 
-    return () => { disconnect(); };
+    return () => {
+      disconnect();
+    };
   }, [krwMarket, connect, disconnect]); // krwMarket 값에 따라 연결/해제
   // endregion
 }

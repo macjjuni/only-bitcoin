@@ -1,7 +1,7 @@
 "use client";
 
-import { useEffect } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { useEffect } from "react";
 import useStore from "@/shared/stores/store";
 
 export default function useInitializePage() {
@@ -12,14 +12,11 @@ export default function useInitializePage() {
   const initialPath = useStore((state) => state.setting.initialPath);
   // endregion
 
-
   // region [Privates]
   const handleInitialRedirect = () => {
     if (pathname === "/") {
       const queryString = searchParams.toString();
-      const redirectUrl = queryString
-        ? `${initialPath}?${queryString}`
-        : initialPath;
+      const redirectUrl = queryString ? `${initialPath}?${queryString}` : initialPath;
 
       router.replace(redirectUrl);
     }

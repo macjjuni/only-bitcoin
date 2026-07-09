@@ -1,7 +1,4 @@
-
-
 const fetcher = async <T>(url: string, options?: RequestInit): Promise<T> => {
-
   const response = await fetch(url, options);
 
   if (!response.ok) {
@@ -10,6 +7,5 @@ const fetcher = async <T>(url: string, options?: RequestInit): Promise<T> => {
 
   return response.json();
 };
-
 
 export default fetcher;

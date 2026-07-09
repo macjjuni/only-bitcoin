@@ -1,4 +1,3 @@
-
 export interface MarketChartFormattedData {
   price: number[];
   date: number[];
@@ -9,7 +8,18 @@ export interface MarketChartFormattedData {
  * [openTime, open, high, low, close, volume, closeTime, ...]
  */
 export type BinanceKline = [
-  number, string, string, string, string, string, number, string, number, string, string, string,
+  number,
+  string,
+  string,
+  string,
+  string,
+  string,
+  number,
+  string,
+  number,
+  string,
+  string,
+  string,
 ];
 
 export interface BlockchainChartResponseData {

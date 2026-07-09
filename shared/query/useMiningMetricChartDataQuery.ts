@@ -1,16 +1,17 @@
-import { useEffect } from "react";
+import { useQuery } from "@tanstack/react-query";
 import { kToast } from "kku-ui";
-import { useQuery } from '@tanstack/react-query';
-import {HashrateChartFormattedData, HashrateChartResponseData} from '@/shared/types/api/hashrateChart'
-import type { MiningMetricChartIntervalType } from '@/shared/stores/store.interface';
-import fetcher from "@/shared/utils/fetcher";
+import { useEffect } from "react";
+import type { MiningMetricChartIntervalType } from "@/shared/stores/store.interface";
+import type {
+  HashrateChartFormattedData,
+  HashrateChartResponseData,
+} from "@/shared/types/api/hashrateChart";
 import { isDev } from "@/shared/utils/common";
-
+import fetcher from "@/shared/utils/fetcher";
 
 function processDataInWorker(data: HashrateChartResponseData): Promise<HashrateChartFormattedData> {
-
   return new Promise((resolve, reject) => {
-    const worker = new Worker('/worker/hashrate-chart.js');
+    const worker = new Worker("/worker/hashrate-chart.js");
 
     worker.postMessage(data);
 
@@ -27,10 +28,9 @@ function processDataInWorker(data: HashrateChartResponseData): Promise<HashrateC
   });
 }
 
-
-
-async function fetchMiningMetricChart(interval: MiningMetricChartIntervalType): Promise<HashrateChartFormattedData> {
-
+async function fetchMiningMetricChart(
+  interval: MiningMetricChartIntervalType,
+): Promise<HashrateChartFormattedData> {
   try {
     const data: HashrateChartResponseData = await fetcher(MARKET_CHART_API_URL + interval);
 
@@ -49,17 +49,15 @@ async function fetchMiningMetricChart(interval: MiningMetricChartIntervalType): 
   }
 }
 
-
-const MARKET_CHART_API_URL = 'https://mempool.space/api/v1/mining/hashrate/';
+const MARKET_CHART_API_URL = "https://mempool.space/api/v1/mining/hashrate/";
 const STALE_TIME_MIN = 30;
 const INTERVAL_TIME_MIN = 30;
 
 const useMiningMetricChartData = (days: MiningMetricChartIntervalType) => {
-
   // region [Hooks]
 
-  const { data, isSuccess, isLoading, isError, error} = useQuery<HashrateChartFormattedData>({
-    queryKey: ['hashrateChart', days],
+  const { data, isSuccess, isLoading, isError, error } = useQuery<HashrateChartFormattedData>({
+    queryKey: ["hashrateChart", days],
     queryFn: () => fetchMiningMetricChart(days),
 
     staleTime: 60 * 1000 * STALE_TIME_MIN,
@@ -71,20 +69,18 @@ const useMiningMetricChartData = (days: MiningMetricChartIntervalType) => {
 
   // endregion
 
-
   // region [Life Cycles]
 
   useEffect(() => {
-
     if (isError) {
-      console.error('❌ 채굴 지표 차트 데이터 초기화 오류', error);
-      kToast.error('채굴 지표 차트 데이터 초기화 오류');
+      console.error("❌ 채굴 지표 차트 데이터 초기화 오류", error);
+      kToast.error("채굴 지표 차트 데이터 초기화 오류");
     }
   }, [isError]);
 
   // endregion
 
   return { data, isLoading, isSuccess, isError, error };
-}
+};
 
 export default useMiningMetricChartData;

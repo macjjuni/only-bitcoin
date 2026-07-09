@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect } from "react";
 import { usePathname } from "next/navigation";
+import { useCallback, useEffect } from "react";
 
 export default function useInitializeDisabledZoom() {
   const pathname = usePathname();

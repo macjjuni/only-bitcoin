@@ -1,16 +1,14 @@
 "use client";
 
-import { TransitionLink } from "@/components";
 import { usePathname } from "next/navigation";
+import { TransitionLink } from "@/components";
 import { navigationRouteList } from "@/shared/config/route";
 import { vibrate } from "@/shared/utils/device";
 
 export default function BottomNavigation() {
-
   // region [Hooks]
   const pathname = usePathname();
   // endregion
-
 
   // region [Events]
   const onClickNavItem = () => {
@@ -19,11 +17,15 @@ export default function BottomNavigation() {
   // endregion
 
   return (
-    <nav className={[
-      'only-btc__bottom-nav',
-      'fixed bottom-0 left-0 z-[10] h-bottom-nav overflow-hidden border-t border-border bg-transparent pb-2 backdrop-blur-[8px]',
-      'w-full layout-max:left-1/2 layout-max:max-w-[calc(theme(maxWidth.layout)-2px)] layout-max:-translate-x-1/2'
-    ].filter(Boolean).join(' ')}>
+    <nav
+      className={[
+        "only-btc__bottom-nav",
+        "fixed bottom-0 left-0 z-[10] h-bottom-nav overflow-hidden border-t border-border bg-transparent pb-2 backdrop-blur-[8px]",
+        "w-full layout-max:left-1/2 layout-max:max-w-[calc(theme(maxWidth.layout)-2px)] layout-max:-translate-x-1/2",
+      ]
+        .filter(Boolean)
+        .join(" ")}
+    >
       <ul className="flex h-full w-full items-center justify-around">
         {navigationRouteList.map(({ path, icon }) => {
           const isActive = pathname.includes(path);
@@ -34,14 +36,10 @@ export default function BottomNavigation() {
                 href={path}
                 onClick={onClickNavItem}
                 className={`flex items-center justify-center rounded-lg p-3 transition-colors tap-highlight-transparent z-10 ${
-                  isActive
-                    ? "text-[#F7931A]"
-                    : "text-black dark:text-white"
+                  isActive ? "text-[#F7931A]" : "text-black dark:text-white"
                 }`}
               >
-                <span className="inline-block text-[0px]">
-                  {icon}
-                </span>
+                <span className="inline-block text-[0px]">{icon}</span>
               </TransitionLink>
             </li>
           );

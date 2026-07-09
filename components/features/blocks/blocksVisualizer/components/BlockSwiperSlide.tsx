@@ -1,8 +1,8 @@
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { dateUtil } from "kku-util";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { SwiperSlide } from "swiper/react";
-import { bytesToMB } from "@/shared/utils/number";
 import { calcCurrentDateDifference } from "@/shared/lib/date";
+import { bytesToMB } from "@/shared/utils/number";
 
 interface BlockSwiperSlideProps {
   id?: string;
@@ -18,11 +18,15 @@ interface BlockSwiperSlideProps {
 
 const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
   // region [Hooks]
-  const { isUnmined, isGenesis, id, height, size, poolName, timestamp, onClick, onClickGenesis } = props;
+  const { isUnmined, isGenesis, id, height, size, poolName, timestamp, onClick, onClickGenesis } =
+    props;
 
   const [now, setNow] = useState(() => Date.now());
 
-  const diffNowMin = useMemo(() => calcCurrentDateDifference(timestamp || 0, "minute"), [timestamp, now]);
+  const diffNowMin = useMemo(
+    () => calcCurrentDateDifference(timestamp || 0, "minute"),
+    [timestamp, now],
+  );
   const isDefaultRender = useMemo(() => !isUnmined, [isUnmined]);
 
   // 상태별 동적 스타일 생성
@@ -54,7 +58,7 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
       const remainingMinutes = minutes % 60;
       return `${hours}시간 ${remainingMinutes}분`;
     },
-    [isGenesis]
+    [isGenesis],
   );
   // endregion
 
@@ -67,7 +71,6 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
     }
   }, [id, isGenesis, onClick, onClickGenesis]);
   // endregion
-
 
   // region [Life Cycles]
   // 시간 표시가 필요한 일반 블록만 15초마다 경과 시간을 갱신한다.
@@ -98,7 +101,7 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
         className={[
           "relative flex flex-col justify-between items-center gap-1.5 p-1.5 text-white font-bold transition-all duration-300",
           "h-[calc((100dvw-88px)/3)] layout-max:h-[calc((524px-88px)/3)] layout-max:p-2",
-          isUnmined && ' animate-blink-gold',
+          isUnmined && " animate-blink-gold",
           // 3D Side (Before - Top)
           "before:content-[''] before:absolute before:-top-[20px] before:left-0 before:w-full before:h-[20px] before:origin-bottom before:skew-x-[45deg]",
           // 3D Side (After - Left)
@@ -108,9 +111,7 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
       >
         {isDefaultRender && (
           <>
-            <p className="font-number text-[14px] font-bold layout-max:text-xl  ">
-              {height}
-            </p>
+            <p className="font-number text-[14px] font-bold layout-max:text-xl  ">{height}</p>
             <div className="flex flex-col items-center justify-center gap-1 font-number text-[12px] leading-[1.2] layout-max:gap-2 layout-max:text-[14px]">
               <p>{isGenesis ? "285B" : `${bytesToMB(size || 0)}MB`}</p>
               <p className="w-full text-center truncate px-1">{poolName}</p>
@@ -141,8 +142,8 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
           className="absolute -top-[12px] right-2 w-[2px] h-[144px] layout-max:h-[244px]"
           style={{
             backgroundImage: `linear-gradient(to bottom, #8a8a8a 50%, transparent 50%)`,
-            backgroundSize: '1px 18px',
-            backgroundRepeat: 'repeat-y'
+            backgroundSize: "1px 18px",
+            backgroundRepeat: "repeat-y",
           }}
         />
       )}

@@ -1,8 +1,6 @@
 import { useState } from "react";
 
-
 const useQuizState = () => {
-
   // region [Hooks]
   const [isVisible, setIsVisible] = useState(false);
   const [quizData, setQuizData] = useState<{

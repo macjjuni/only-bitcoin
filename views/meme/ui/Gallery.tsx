@@ -1,8 +1,8 @@
-'use client';
+"use client";
 
 import { memo, useCallback, useMemo, useState } from "react";
 import { LazyImage } from "@/components";
-import { MemeImageResponseData } from "@/entities/meme";
+import type { MemeImageResponseData } from "@/entities/meme";
 import { env } from "@/shared/config/env";
 import ImageModal from "./ImageModal";
 
@@ -13,18 +13,15 @@ interface GalleryProps {
 
 const IMAGE_BASE_URL = env.NEXT_PUBLIC_MEME_IMAGE_URL;
 
-
 const Gallery = ({ images, selected }: GalleryProps) => {
-
   // region [Hooks]
   const [selectedImage, setSelectedImage] = useState<string | null>(null);
 
   const filteredImages = useMemo(() => {
     if (selected === "전체") return images;
-    return images.filter(item => item.tags.includes(selected));
+    return images.filter((item) => item.tags.includes(selected));
   }, [images, selected]);
   // endregion
-
 
   // region [Privates]
   const getImageUrl = useCallback((src: string) => `${IMAGE_BASE_URL}/image/${src}.webp`, []);
@@ -33,7 +30,6 @@ const Gallery = ({ images, selected }: GalleryProps) => {
     setSelectedImage(null);
   }, []);
   // endregion
-
 
   // region [Events]
   const onClickImage = useCallback((src: string) => {
@@ -65,12 +61,7 @@ const Gallery = ({ images, selected }: GalleryProps) => {
         })}
       </div>
 
-      {selectedImage && (
-        <ImageModal
-          src={selectedImage}
-          onClose={closeModal}
-        />
-      )}
+      {selectedImage && <ImageModal src={selectedImage} onClose={closeModal} />}
     </>
   );
 };

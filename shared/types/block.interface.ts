@@ -1,4 +1,3 @@
-
 interface BlockExtras {
   reward: number;
   coinbaseRaw: string;

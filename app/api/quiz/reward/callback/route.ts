@@ -1,29 +1,32 @@
-import { NextResponse } from 'next/server';
-import * as bolt11 from 'bolt11';
-import { env } from "@/shared/config/env";
-import { validateRewardToken, claimRewardToken, releaseRewardToken } from "@/shared/api/quiz-rewards";
+import * as bolt11 from "bolt11";
+import { NextResponse } from "next/server";
 import { sendLnPayment } from "@/shared/api/blink";
+import {
+  claimRewardToken,
+  releaseRewardToken,
+  validateRewardToken,
+} from "@/shared/api/quiz-rewards";
+import { env } from "@/shared/config/env";
 
 // region [Privates]
-const isDev = process.env.NODE_ENV === 'development';
+const isDev = process.env.NODE_ENV === "development";
 const DOMAIN = isDev
-  ? 'https://unresonant-elfreda-unreasonably.ngrok-free.dev'
+  ? "https://unresonant-elfreda-unreasonably.ngrok-free.dev"
   : env.NEXT_PUBLIC_URL;
 
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
-  'Access-Control-Allow-Methods': 'GET, OPTIONS',
-  'Access-Control-Allow-Headers': 'Content-Type',
-  'ngrok-skip-browser-warning': 'true',
+  "Access-Control-Allow-Origin": "*",
+  "Access-Control-Allow-Methods": "GET, OPTIONS",
+  "Access-Control-Allow-Headers": "Content-Type",
+  "ngrok-skip-browser-warning": "true",
 };
 // endregion
-
 
 // region [Transactions]
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
-  const k1 = searchParams.get('k1');
-  const pr = searchParams.get('pr');
+  const k1 = searchParams.get("k1");
+  const pr = searchParams.get("pr");
 
   // k1(reward_token) 필수 검증
   if (!k1) {
@@ -34,18 +37,24 @@ export async function GET(request: Request) {
   if (!pr) {
     const result = await validateRewardToken(k1);
     if (!result.valid) {
-      return NextResponse.json({ status: "ERROR", reason: result.reason }, { headers: corsHeaders });
+      return NextResponse.json(
+        { status: "ERROR", reason: result.reason },
+        { headers: corsHeaders },
+      );
     }
 
     const milliSats = result.amount * 1000;
-    return NextResponse.json({
-      tag: "withdrawRequest",
-      callback: `${DOMAIN}/api/quiz/reward/callback?k1=${k1}`,
-      k1,
-      defaultDescription: "🎁 Quiz Reward(only-btc.app)",
-      minWithdrawable: milliSats,
-      maxWithdrawable: milliSats,
-    }, { headers: corsHeaders });
+    return NextResponse.json(
+      {
+        tag: "withdrawRequest",
+        callback: `${DOMAIN}/api/quiz/reward/callback?k1=${k1}`,
+        k1,
+        defaultDescription: "🎁 Quiz Reward(only-btc.app)",
+        minWithdrawable: milliSats,
+        maxWithdrawable: milliSats,
+      },
+      { headers: corsHeaders },
+    );
   }
 
   // [STEP 2] 송금 실행 및 검증
@@ -53,7 +62,10 @@ export async function GET(request: Request) {
     // 토큰 선점 (atomic) - Race Condition 방지
     const claimResult = await claimRewardToken(k1);
     if (!claimResult.valid) {
-      return NextResponse.json({ status: "ERROR", reason: claimResult.reason }, { headers: corsHeaders });
+      return NextResponse.json(
+        { status: "ERROR", reason: claimResult.reason },
+        { headers: corsHeaders },
+      );
     }
 
     const decoded = bolt11.decode(pr);
@@ -61,7 +73,10 @@ export async function GET(request: Request) {
     // 금액 조작 검증
     if (decoded.satoshis !== claimResult.amount) {
       await releaseRewardToken(k1); // 롤백
-      return NextResponse.json({ status: "ERROR", reason: "Amount mismatch" }, { headers: corsHeaders });
+      return NextResponse.json(
+        { status: "ERROR", reason: "Amount mismatch" },
+        { headers: corsHeaders },
+      );
     }
 
     // Blink 송금
@@ -72,10 +87,16 @@ export async function GET(request: Request) {
 
     // 송금 실패 시 롤백
     await releaseRewardToken(k1);
-    return NextResponse.json({ status: "ERROR", reason: paymentResult.error || "Payout failed" }, { headers: corsHeaders });
+    return NextResponse.json(
+      { status: "ERROR", reason: paymentResult.error || "Payout failed" },
+      { headers: corsHeaders },
+    );
   } catch {
     await releaseRewardToken(k1); // 예외 발생 시 롤백
-    return NextResponse.json({ status: "ERROR", reason: "Invalid request" }, { headers: corsHeaders });
+    return NextResponse.json(
+      { status: "ERROR", reason: "Invalid request" },
+      { headers: corsHeaders },
+    );
   }
 }
 

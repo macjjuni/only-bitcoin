@@ -1,13 +1,13 @@
-'use client';
+"use client";
 
-import { useEffect, useState, memo } from 'react';
+import { memo, useEffect, useState } from "react";
 
 const bitcoinWiseSayingList = [
-  'Not your keys, not your ₿itcoin.',
-  'Stay humble and stack sats.',
-  'HODL.',
-  'Be your own bank.',
-  '1BTC = 1BTC',
+  "Not your keys, not your ₿itcoin.",
+  "Stay humble and stack sats.",
+  "HODL.",
+  "Be your own bank.",
+  "1BTC = 1BTC",
   "Don't Trust, Verify",
   "You need ₿itcoin.",
 ] as const;
@@ -54,12 +54,14 @@ const NotKeyNotYourBitcoin = () => {
         fade ? "opacity-100" : "opacity-0",
       ].join(" ")}
     >
-      <p suppressHydrationWarning className="flex items-center justify-center w-full h-5 mt-2">{shuffledList[currentIndex]}</p>
+      <p suppressHydrationWarning className="flex items-center justify-center w-full h-5 mt-2">
+        {shuffledList[currentIndex]}
+      </p>
     </div>
   );
 };
 
-const MemoizedNotKeyNotYourBitcoin = memo(NotKeyNotYourBitcoin)
-MemoizedNotKeyNotYourBitcoin.displayName = 'NotKeyNotYourBitcoin';
+const MemoizedNotKeyNotYourBitcoin = memo(NotKeyNotYourBitcoin);
+MemoizedNotKeyNotYourBitcoin.displayName = "NotKeyNotYourBitcoin";
 
 export default MemoizedNotKeyNotYourBitcoin;

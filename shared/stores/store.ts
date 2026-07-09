@@ -1,18 +1,17 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { createThemeSlice, ThemeSlice } from "@/shared/stores/slices/themeSlice";
-import { createPriceSlice, PriceSlice } from "@/shared/stores/slices/priceSlice";
-import { createMacroSlice, MacroSlice } from "@/shared/stores/slices/macroSlice";
-import { createChartSlice, ChartSlice } from "@/shared/stores/slices/chartSlice";
-import { createExRateSlice, ExRateSlice } from "@/shared/stores/slices/exRateSlice";
-import { createBlockSlice, BlockSlice } from "@/shared/stores/slices/blockSlice";
-import { createBtc2FiatSlice, Btc2FiatSlice } from "@/shared/stores/slices/btc2FiatSlice";
-import { createSettingSlice, SettingSlice } from "@/shared/stores/slices/settingSlice";
+import { type BlockSlice, createBlockSlice } from "@/shared/stores/slices/blockSlice";
+import { type Btc2FiatSlice, createBtc2FiatSlice } from "@/shared/stores/slices/btc2FiatSlice";
+import { type ChartSlice, createChartSlice } from "@/shared/stores/slices/chartSlice";
+import { createExRateSlice, type ExRateSlice } from "@/shared/stores/slices/exRateSlice";
+import { createMacroSlice, type MacroSlice } from "@/shared/stores/slices/macroSlice";
+import { createPriceSlice, type PriceSlice } from "@/shared/stores/slices/priceSlice";
+import { createSettingSlice, type SettingSlice } from "@/shared/stores/slices/settingSlice";
+import { createThemeSlice, type ThemeSlice } from "@/shared/stores/slices/themeSlice";
 
 export const persistKey = "only-bitcoin";
 
-export type StoreType =
-  ThemeSlice &
+export type StoreType = ThemeSlice &
   PriceSlice &
   MacroSlice &
   ChartSlice &
@@ -33,9 +32,8 @@ const useStore = create<StoreType>()(
       ...createBtc2FiatSlice(...a),
       ...createSettingSlice(...a),
     }),
-    { name: persistKey }
-  )
+    { name: persistKey },
+  ),
 );
-
 
 export default useStore;

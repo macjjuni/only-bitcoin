@@ -1,5 +1,3 @@
-
-
 export interface ICurrency {
   ath: number | null;
   ath_change_percentage: number | null;

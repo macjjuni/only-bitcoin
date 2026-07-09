@@ -1,41 +1,43 @@
-'use client'
+"use client";
 
-import { TransitionLink } from "@/components";
-import { KIcon } from 'kku-ui'
-import { ConnectionDot } from '@/components'
-import SettingButton from '@/layouts/header/components/settingButton/SettingButton'
-import useStore from '@/shared/stores/store'
-
+import { KIcon } from "kku-ui";
+import { ConnectionDot, TransitionLink } from "@/components";
+import SettingButton from "@/layouts/header/components/settingButton/SettingButton";
+import useStore from "@/shared/stores/store";
 
 export default function Header() {
-
-  const initialPath = useStore(state => state.setting.initialPath)
+  const initialPath = useStore((state) => state.setting.initialPath);
 
   return (
     <header
       className={[
-        'only-btc__header',
-        'fixed top-0 left-0 layout-max:left-1/2 layout-max:-translate-x-1/2 bg-background',
-        'flex justify-between items-center gap-1 w-full layout-max:max-w-[calc(theme(maxWidth.layout)_-_2px)] h-header p-2',
-        'z-[10] select-none tap-highlight-transparent',
+        "only-btc__header",
+        "fixed top-0 left-0 layout-max:left-1/2 layout-max:-translate-x-1/2 bg-background",
+        "flex justify-between items-center gap-1 w-full layout-max:max-w-[calc(theme(maxWidth.layout)_-_2px)] h-header p-2",
+        "z-[10] select-none tap-highlight-transparent",
         // 하단 그라데이션
-        'after:content-[\'\'] after:fixed after:top-header after:left-0 after:w-full after:h-4',
-        'after:bg-gradient-to-b after:from-background after:to-transparent',
-        'dark:after:from-background dark:after:to-transparent',
-      ].filter(Boolean).join(' ')}
+        "after:content-[''] after:fixed after:top-header after:left-0 after:w-full after:h-4",
+        "after:bg-gradient-to-b after:from-background after:to-transparent",
+        "dark:after:from-background dark:after:to-transparent",
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       <h2 className="font-bold tracking-[-1px] text-current">
-        <TransitionLink href={initialPath} className="flex justify-start items-center gap-2 text-current dark:text-current !no-underline
-              text-3xl font-bold">
-          <KIcon id="bitcoin" icon="bitcoin" size={36}/>
+        <TransitionLink
+          href={initialPath}
+          className="flex justify-start items-center gap-2 text-current dark:text-current !no-underline
+              text-3xl font-bold"
+        >
+          <KIcon id="bitcoin" icon="bitcoin" size={36} />
           ₿itcoin
         </TransitionLink>
       </h2>
 
       <div className="flex justify-center items-center gap-2">
-        <ConnectionDot/>
-        <SettingButton/>
+        <ConnectionDot />
+        <SettingButton />
       </div>
     </header>
-  )
-};
+  );
+}

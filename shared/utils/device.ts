@@ -1,10 +1,8 @@
-
-
 export function isSafari() {
   return (
-    navigator.userAgent.includes('Safari') &&
-    !navigator.userAgent.includes('Chrome') &&
-    navigator.vendor === 'Apple Computer, Inc.'
+    navigator.userAgent.includes("Safari") &&
+    !navigator.userAgent.includes("Chrome") &&
+    navigator.vendor === "Apple Computer, Inc."
   );
 }
 

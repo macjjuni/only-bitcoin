@@ -1,6 +1,5 @@
-import { StateCreator } from "zustand";
+import type { StateCreator } from "zustand";
 import type { StoreType } from "@/shared/stores/store";
-
 
 export interface BlockTypes {
   id: string;
@@ -18,14 +17,12 @@ export interface FeesTypes {
   minimumFee: number;
 }
 
-
 export interface BlockSlice {
   blockData: BlockTypes[];
   setBlockData: (blocks: BlockTypes[]) => void;
   fees: FeesTypes;
   setFees: (fees: FeesTypes) => void;
 }
-
 
 export const createBlockSlice: StateCreator<StoreType, [], [], BlockSlice> = (set) => ({
   blockData: [{ id: "", height: 0, timestamp: 0, size: 0, poolName: "-" }],

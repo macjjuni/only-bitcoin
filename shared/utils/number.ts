@@ -17,7 +17,6 @@ export function btcToSatoshi(btcCount: string | number): string {
   return BigInt(Math.floor(parseFloat(btcCount.toString()) * 100_000_000)).toLocaleString();
 }
 
-
 export function formatHashrate(hashrate: number) {
   // eslint-disable-next-line no-restricted-globals
   if (hashrate === 0 || !isFinite(hashrate)) {
@@ -27,7 +26,7 @@ export function formatHashrate(hashrate: number) {
   let hashrateValue = hashrate;
 
   // SI 접두어 기호 (1000의 거듭제곱)
-  const units = ['H/s', 'kH/s', 'MH/s', 'GH/s', 'TH/s', 'PH/s', 'EH/s', 'ZH/s', 'YH/s'];
+  const units = ["H/s", "kH/s", "MH/s", "GH/s", "TH/s", "PH/s", "EH/s", "ZH/s", "YH/s"];
   const base = 1000;
   let i = 0;
 
@@ -40,7 +39,6 @@ export function formatHashrate(hashrate: number) {
   // 소수점 둘째 자리까지 표시
   return `${hashrateValue.toFixed(2)}${units[i]}`;
 }
-
 
 /**
  * 비트코인 난이도 단위 변환 (K, M, G, T, P, E)

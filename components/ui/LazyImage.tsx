@@ -1,7 +1,7 @@
-'use client';
+"use client";
 
-import { memo, useCallback, useEffect, useRef, useState } from "react";
 import { KSkeleton } from "kku-ui";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 
 interface LazyImageProps {
   src: string;
@@ -21,7 +21,6 @@ const LazyImage = ({ src, alt = "", className = "" }: LazyImageProps) => {
   const [retryKey, setRetryKey] = useState(0);
   // endregion
 
-
   // region [Events]
   const onLoadedImage = useCallback(() => {
     setIsLoaded(true);
@@ -38,7 +37,6 @@ const LazyImage = ({ src, alt = "", className = "" }: LazyImageProps) => {
   }, []);
   // endregion
 
-
   // region [Life Cycles]
   useEffect(() => {
     const observer = new IntersectionObserver(
@@ -48,7 +46,7 @@ const LazyImage = ({ src, alt = "", className = "" }: LazyImageProps) => {
           observer.disconnect();
         }
       },
-      { threshold: 0.1, rootMargin: "50px" }
+      { threshold: 0.1, rootMargin: "50px" },
     );
 
     if (containerRef.current) {
@@ -62,15 +60,15 @@ const LazyImage = ({ src, alt = "", className = "" }: LazyImageProps) => {
   const classNames = (...classes: (string | boolean | undefined)[]) =>
     classes.filter(Boolean).join(" ");
 
-
   return (
-    <div ref={containerRef}
-         className={classNames(
-           "relative overflow-hidden bg-neutral-200 dark:bg-neutral-900 border-border border-[0.5px] rounded-md isolate w-full",
-           !isLoaded && "min-h-[150px]",
-           className
-         )}>
-
+    <div
+      ref={containerRef}
+      className={classNames(
+        "relative overflow-hidden bg-neutral-200 dark:bg-neutral-900 border-border border-[0.5px] rounded-md isolate w-full",
+        !isLoaded && "min-h-[150px]",
+        className,
+      )}
+    >
       {/* 1. Loading State (Skeleton) */}
       {!isLoaded && !isError && (
         <KSkeleton className="absolute inset-0 z-0 h-full w-full opacity-50" />
@@ -78,11 +76,17 @@ const LazyImage = ({ src, alt = "", className = "" }: LazyImageProps) => {
 
       {/* 2. Image Render */}
       {isVisible && !isError && (
-        <img key={`${src}-${retryKey}`} src={src} alt={alt} onLoad={onLoadedImage}
-             onError={onErrorImage} className={classNames(
-          "w-full h-auto block transition-opacity duration-500",
-          isLoaded ? "opacity-100" : "opacity-0"
-        )} />
+        <img
+          key={`${src}-${retryKey}`}
+          src={src}
+          alt={alt}
+          onLoad={onLoadedImage}
+          onError={onErrorImage}
+          className={classNames(
+            "w-full h-auto block transition-opacity duration-500",
+            isLoaded ? "opacity-100" : "opacity-0",
+          )}
+        />
       )}
 
       {/* 3. Error State (Developer Look) */}
@@ -97,7 +101,6 @@ const LazyImage = ({ src, alt = "", className = "" }: LazyImageProps) => {
     </div>
   );
 };
-
 
 const MemoizedLazyImage = memo(LazyImage);
 MemoizedLazyImage.displayName = "LazyImage";

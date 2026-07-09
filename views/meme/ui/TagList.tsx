@@ -1,4 +1,4 @@
-import { memo, MouseEvent, useCallback, useMemo } from 'react';
+import { type MouseEvent, memo, useCallback, useMemo } from "react";
 
 interface TagListProps {
   tags: string[];
@@ -7,7 +7,6 @@ interface TagListProps {
 }
 
 const TagList = ({ tags, selected, onChangeTag }: TagListProps) => {
-
   // region [Hooks]
   const tagRows = useMemo(() => {
     const firstRow: string[] = [];
@@ -24,13 +23,14 @@ const TagList = ({ tags, selected, onChangeTag }: TagListProps) => {
   }, [tags]);
   // endregion
 
-
   // region [Events]
-  const onClickTag = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    onChangeTag(e.currentTarget.dataset.tag || '전체');
-  }, [onChangeTag]);
+  const onClickTag = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      onChangeTag(e.currentTarget.dataset.tag || "전체");
+    },
+    [onChangeTag],
+  );
   // endregion
-
 
   // region [Privates]
   const classNames = (...classes: (string | boolean | undefined)[]) =>
@@ -52,7 +52,7 @@ const TagList = ({ tags, selected, onChangeTag }: TagListProps) => {
                   "px-3.5 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-sm whitespace-nowrap",
                   tag === selected
                     ? "bg-gradient-to-r from-[#f7931a] to-[#ff8c00] text-white shadow-md"
-                    : "bg-white border border-neutral-300 text-neutral-700 hover:border-[#f7931a] hover:text-[#f7931a] dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-200 dark:hover:border-[#f7931a]"
+                    : "bg-white border border-neutral-300 text-neutral-700 hover:border-[#f7931a] hover:text-[#f7931a] dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-200 dark:hover:border-[#f7931a]",
                 )}
               >
                 {tag}
@@ -65,7 +65,7 @@ const TagList = ({ tags, selected, onChangeTag }: TagListProps) => {
   );
 };
 
-const MemoizedTagList = memo(TagList)
+const MemoizedTagList = memo(TagList);
 MemoizedTagList.displayName = "TagList";
 
 export default MemoizedTagList;

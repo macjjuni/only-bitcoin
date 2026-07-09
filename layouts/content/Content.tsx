@@ -1,10 +1,15 @@
 "use client";
 
-import React, { ReactNode } from "react";
+import React, { type ReactNode } from "react";
 import { useFadeInByPath } from "@/shared/hooks";
 
-export default function Content({ children, className }: { children: ReactNode; className?: string }) {
-
+export default function Content({
+  children,
+  className,
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
   // region [States]
   const fadeInClasses = useFadeInByPath();
   // endregion
@@ -17,8 +22,10 @@ export default function Content({ children, className }: { children: ReactNode; 
         "pt-[theme(height.header)] pb-[theme(height.bottom-nav)]",
         "transition-opacity duration-500 ease-in-out",
         fadeInClasses,
-        className
-      ].filter(Boolean).join(" ")}
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
     >
       {children}
     </main>

@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { memo, useCallback, useEffect, MouseEvent } from "react";
+import { type MouseEvent, memo, useCallback, useEffect } from "react";
 import { downloadMemeImage } from "@/features/download-meme";
 
 interface ImageModalProps {
@@ -9,40 +9,47 @@ interface ImageModalProps {
 }
 
 const ImageModal = ({ src, onClose }: ImageModalProps) => {
-
   // region [Events]
-  const onClickBackdrop = useCallback((e: MouseEvent<HTMLDivElement>) => {
-    if (e.target === e.currentTarget) {
+  const onClickBackdrop = useCallback(
+    (e: MouseEvent<HTMLDivElement>) => {
+      if (e.target === e.currentTarget) {
+        onClose();
+      }
+    },
+    [onClose],
+  );
+
+  const onClickDownload = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
+      downloadMemeImage(src);
+    },
+    [src],
+  );
+
+  const onClickClose = useCallback(
+    (e: MouseEvent<HTMLButtonElement>) => {
+      e.stopPropagation();
       onClose();
-    }
-  }, [onClose]);
-
-  const onClickDownload = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    downloadMemeImage(src);
-  }, [src]);
-
-  const onClickClose = useCallback((e: MouseEvent<HTMLButtonElement>) => {
-    e.stopPropagation();
-    onClose();
-  }, [onClose]);
+    },
+    [onClose],
+  );
   // endregion
-
 
   // region [Life Cycles]
   useEffect(() => {
     const handleEscape = (e: KeyboardEvent) => {
-      if (e.key === 'Escape') {
+      if (e.key === "Escape") {
         onClose();
       }
     };
 
-    document.addEventListener('keydown', handleEscape);
-    document.body.style.overflow = 'hidden';
+    document.addEventListener("keydown", handleEscape);
+    document.body.style.overflow = "hidden";
 
     return () => {
-      document.removeEventListener('keydown', handleEscape);
-      document.body.style.overflow = 'unset';
+      document.removeEventListener("keydown", handleEscape);
+      document.body.style.overflow = "unset";
     };
   }, [onClose]);
   // endregion

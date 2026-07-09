@@ -1,5 +1,3 @@
-
-
 export interface DifficultyVO {
   adjustment: number;
   difficulty: number;
@@ -25,9 +23,9 @@ export interface HashrateChartFormattedData {
   hashrates: {
     value: number[];
     date: number[];
-  }
+  };
   difficulty: {
     value: number[];
     date: number[];
-  }
+  };
 }

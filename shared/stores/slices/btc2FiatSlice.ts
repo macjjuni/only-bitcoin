@@ -1,12 +1,10 @@
-import { StateCreator } from "zustand";
+import type { StateCreator } from "zustand";
 import type { StoreType } from "@/shared/stores/store";
 
-
-export type UnitType = 'BTC' | 'USD' | 'KRW' | 'SATS';
-
+export type UnitType = "BTC" | "USD" | "KRW" | "SATS";
 
 export interface Btc2FiatSlice {
-  btc2Fiat: { btcCount: string; krw: string; usd: string; sats: string; };
+  btc2Fiat: { btcCount: string; krw: string; usd: string; sats: string };
   setBtcCount: (btcCount: string) => void;
   setKrw: (krw: string) => void;
   setUsd: (usd: string) => void;
@@ -16,7 +14,6 @@ export interface Btc2FiatSlice {
   premium: number;
   setPremium: (premium: number) => void;
 }
-
 
 export const createBtc2FiatSlice: StateCreator<StoreType, [], [], Btc2FiatSlice> = (set) => ({
   btc2Fiat: { btcCount: "1", krw: "0", usd: "0", sats: "0" },

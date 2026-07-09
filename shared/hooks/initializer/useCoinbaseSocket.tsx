@@ -1,19 +1,18 @@
-import { useEffect, useRef, useCallback } from "react";
 import { kToast } from "kku-ui";
+import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
+import { COINBASE_MARKET_FLAG } from "@/shared/constants/market";
 import useStore from "@/shared/stores/store";
+import { isDev, setTitle } from "@/shared/utils/common";
 import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
-import { isDev, setTitle } from "@/shared/utils/common";
-import { COINBASE_MARKET_FLAG } from "@/shared/constants/market";
 
 const COINBASE_URL = `wss://ws-feed.exchange.coinbase.com`;
 
 export default function useCoinbaseWebSocket() {
-
   // region [Hooks]
-  const usdMarket = useStore(store => store.usdMarket);
+  const usdMarket = useStore((store) => store.usdMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
   // endregion
 
@@ -22,14 +21,22 @@ export default function useCoinbaseWebSocket() {
     setBitcoinUsdPrice({ ...bitcoinPrice, isUsdConnected: false });
   }, []);
 
-  const handleBTCUpdate = useCallback((price: number, usdUpdateTimestamp: number, usdChange24h: string) => {
-    const { setBitcoinUsdPrice } = useStore.getState();
-    // 코인베이스는 퍼센트가 아니라 24시간 시가(open_24h)를 줌 -> 변동률 직접 계산 필요
-    const usdChange24hStr = floorToDecimal(Number(usdChange24h), 2).toString();
+  const handleBTCUpdate = useCallback(
+    (price: number, usdUpdateTimestamp: number, usdChange24h: string) => {
+      const { setBitcoinUsdPrice } = useStore.getState();
+      // 코인베이스는 퍼센트가 아니라 24시간 시가(open_24h)를 줌 -> 변동률 직접 계산 필요
+      const usdChange24hStr = floorToDecimal(Number(usdChange24h), 2).toString();
 
-    setTitle(comma(price.toFixed(0)));
-    setBitcoinUsdPrice({ usd: price, usdChange24h: usdChange24hStr, usdUpdateTimestamp, isUsdConnected: true });
-  }, []);
+      setTitle(comma(price.toFixed(0)));
+      setBitcoinUsdPrice({
+        usd: price,
+        usdChange24h: usdChange24hStr,
+        usdUpdateTimestamp,
+        isUsdConnected: true,
+      });
+    },
+    [],
+  );
 
   const connect = useCallback(() => {
     const socket = new ReconnectingWebSocket(COINBASE_URL, [], {
@@ -41,7 +48,7 @@ export default function useCoinbaseWebSocket() {
       maxRetries: 10,
       maxEnqueuedMessages: 100,
       startClosed: false,
-      debug: false
+      debug: false,
     });
 
     socket.onopen = () => {
@@ -52,7 +59,7 @@ export default function useCoinbaseWebSocket() {
       const subscribeMsg = {
         type: "subscribe",
         product_ids: ["BTC-USD"],
-        channels: ["ticker"]
+        channels: ["ticker"],
       };
       socket.send(JSON.stringify(subscribeMsg));
     };
@@ -118,4 +125,4 @@ export default function useCoinbaseWebSocket() {
     };
   }, [usdMarket, connect, disconnect]);
   // endregion
-};
+}

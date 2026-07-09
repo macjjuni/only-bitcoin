@@ -1,29 +1,25 @@
-'use client';
+"use client";
 
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { kToast } from "kku-ui";
+import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { Lottie } from "@/components";
-import useStore from "@/shared/stores/store";
 import greenDotLottie from "@/shared/assets/lottie/green-dot.json";
 import redDotLottie from "@/shared/assets/lottie/red-dot.json";
-
+import useStore from "@/shared/stores/store";
 
 const ConnectionDot = () => {
-
   // region [Hooks]
   const [isEnabledNetwork, setIsEnabledNetwork] = useState<boolean>(true);
-  const isKrwConnected = useStore(state => state.bitcoinPrice.isKrwConnected);
-  const isUsdConnected = useStore(state => state.bitcoinPrice.isUsdConnected);
+  const isKrwConnected = useStore((state) => state.bitcoinPrice.isKrwConnected);
+  const isUsdConnected = useStore((state) => state.bitcoinPrice.isUsdConnected);
   // endregion
 
   // region [Privates]
   const setInitState = useCallback(({ type }: Event) => {
-
     setIsEnabledNetwork(type === "online");
   }, []);
 
   const initializeEvent = useCallback(() => {
-
     window.addEventListener("online", setInitState);
     window.addEventListener("offline", setInitState);
   }, []);
@@ -53,23 +49,21 @@ const ConnectionDot = () => {
   }, []);
   // endregion
 
-
-  const isStable = useMemo(() => (
-    !(!isEnabledNetwork || !isKrwConnected || !isUsdConnected)
-  ), [isEnabledNetwork, isKrwConnected, isUsdConnected]);
-
+  const isStable = useMemo(
+    () => !(!isEnabledNetwork || !isKrwConnected || !isUsdConnected),
+    [isEnabledNetwork, isKrwConnected, isUsdConnected],
+  );
 
   return (
     <div className="inline-flex justify-center items-center">
-      {isStable ?
+      {isStable ? (
         <Lottie animationData={greenDotLottie} width="26px" height="26px" />
-        :
+      ) : (
         <Lottie animationData={redDotLottie} width="26px" height="26px" />
-      }
+      )}
     </div>
   );
 };
-
 
 const MemoizedConnectionDot = memo(ConnectionDot);
 MemoizedConnectionDot.displayName = "ConnectionDot";

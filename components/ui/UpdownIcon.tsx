@@ -8,10 +8,14 @@ interface UpdownIconTypes {
   className?: string;
 }
 
-
 export default function UpdownIcon({ isUp, size = 8, className }: UpdownIconTypes) {
-
-  return (<KIcon className={`updown-icon${className ? ` ${className}` : ''}`} icon={isUp ? 'triangleUp' : 'triangleDown'}
-                 color={isUp ? '#22d48e' : '#F6465D'} size={size} suppressHydrationWarning />)
+  return (
+    <KIcon
+      className={`updown-icon${className ? ` ${className}` : ""}`}
+      icon={isUp ? "triangleUp" : "triangleDown"}
+      color={isUp ? "#22d48e" : "#F6465D"}
+      size={size}
+      suppressHydrationWarning
+    />
+  );
 }
-

@@ -1,39 +1,36 @@
-'use client'
+"use client";
 
-import { useState } from 'react'
 import {
   KBottomSheet,
   KBottomSheetClose,
   KBottomSheetContent,
   KBottomSheetFooter,
   KBottomSheetHeader,
-  KBottomSheetTitle,
   KBottomSheetOverlay,
+  KBottomSheetTitle,
   KButton,
   KIcon,
-} from 'kku-ui'
-import { setCookie } from '@/shared/utils/cookie'
-import { PWA_COOKIE_KEY } from '@/shared/constants/setting'
-import { IosShareIcon } from '@/components/ui/icon'
-import { useInitializePWA } from '@/shared/hooks/initializer'
+} from "kku-ui";
+import { useState } from "react";
+import { IosShareIcon } from "@/components/ui/icon";
+import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
+import { useInitializePWA } from "@/shared/hooks/initializer";
+import { setCookie } from "@/shared/utils/cookie";
 
 export default function PWAInstallAlertIOSBottomSheet() {
-
   // region [Hooks]
   // 렌더링 시 자동으로 열림
-  const [open, setOpen] = useState(true)
-  const { onClickDisabled } = useInitializePWA()
+  const [open, setOpen] = useState(true);
+  const { onClickDisabled } = useInitializePWA();
   // endregion
-
 
   // region [Events]
   const onClickClose = () => {
-    setCookie(PWA_COOKIE_KEY, 'true', 1)
-    setOpen(false)
-    onClickDisabled()
-  }
+    setCookie(PWA_COOKIE_KEY, "true", 1);
+    setOpen(false);
+    onClickDisabled();
+  };
   // endregion
-
 
   return (
     <KBottomSheet open={open} onOpenChange={setOpen}>
@@ -45,7 +42,7 @@ export default function PWAInstallAlertIOSBottomSheet() {
 
         <div className="flex flex-col gap-4">
           <div className="flex flex-row items-center gap-5">
-            <KIcon icon="app" size={48} color="#1796EE"/>
+            <KIcon icon="app" size={48} color="#1796EE" />
             <p className="flex-1 text-md leading-tight font-medium break-keep">
               앱으로 설치하여 홈 화면에서 더 빠르고 편리하게 이용해 보세요.
             </p>
@@ -64,7 +61,9 @@ export default function PWAInstallAlertIOSBottomSheet() {
             </div>
             <div className="flex items-start gap-2">
               <span className="font-bold text-blue-600">2.</span>
-              <p>메뉴에서 <strong>'홈 화면에 추가'</strong>를 선택해 주세요.</p>
+              <p>
+                메뉴에서 <strong>'홈 화면에 추가'</strong>를 선택해 주세요.
+              </p>
             </div>
           </div>
 
@@ -82,5 +81,5 @@ export default function PWAInstallAlertIOSBottomSheet() {
         </KBottomSheetFooter>
       </KBottomSheetContent>
     </KBottomSheet>
-  )
+  );
 }

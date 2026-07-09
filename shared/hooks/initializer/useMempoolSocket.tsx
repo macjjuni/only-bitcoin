@@ -1,18 +1,16 @@
-import { useEffect, useRef, useCallback } from "react";
-import {kToast} from "kku-ui";
+import { kToast } from "kku-ui";
+import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import useStore from "@/shared/stores/store";
 import useConfettiStore from "@/shared/stores/confettiStore";
+import useStore from "@/shared/stores/store";
+import type { BlockTypes, FeesTypes } from "@/shared/stores/store.interface";
+import type { MemPoolBlockTypes } from "@/shared/types/block.interface";
 import { deepEqual } from "@/shared/utils/common";
 import { comma } from "@/shared/utils/string";
-import { MemPoolBlockTypes } from "@/shared/types/block.interface";
-import { BlockTypes, FeesTypes } from "@/shared/stores/store.interface";
 
 const MEMPOOL_WS_URL = "wss://mempool.space/api/v1/ws";
 
-
 export default function useMempoolSocket() {
-
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
 
   const handleMempoolBlocks = useCallback((blocks: MemPoolBlockTypes[]) => {
@@ -54,15 +52,15 @@ export default function useMempoolSocket() {
 
   const connect = useCallback(() => {
     const socket = new ReconnectingWebSocket(MEMPOOL_WS_URL, [], {
-      maxReconnectionDelay: 8000,           // 재연결 최대 지연: 10초
-      minReconnectionDelay: 1000,           // 재연결 최소 지연: 1초
-      reconnectionDelayGrowFactor: 1.5,     // 재시도 간 딜레이 증가 비율
-      minUptime: 5000,                      // 연결이 최소 유지되어야 하는 시간 (5초)
-      connectionTimeout: 3000,              // 연결 시도 타임아웃: 4초
-      maxRetries: 10,                       // 무한 재시도 (실서비스 기준)
-      maxEnqueuedMessages: 100,             // 연결 안 된 동안 큐에 쌓을 메시지 수 제한
-      startClosed: false,                   // 생성 직후 자동 연결
-      debug: false                          // 디버깅 로그 출력 여부
+      maxReconnectionDelay: 8000, // 재연결 최대 지연: 10초
+      minReconnectionDelay: 1000, // 재연결 최소 지연: 1초
+      reconnectionDelayGrowFactor: 1.5, // 재시도 간 딜레이 증가 비율
+      minUptime: 5000, // 연결이 최소 유지되어야 하는 시간 (5초)
+      connectionTimeout: 3000, // 연결 시도 타임아웃: 4초
+      maxRetries: 10, // 무한 재시도 (실서비스 기준)
+      maxEnqueuedMessages: 100, // 연결 안 된 동안 큐에 쌓을 메시지 수 제한
+      startClosed: false, // 생성 직후 자동 연결
+      debug: false, // 디버깅 로그 출력 여부
     });
 
     socket.binaryType = "arraybuffer";
@@ -121,4 +119,4 @@ export default function useMempoolSocket() {
   }, [connect, disconnect]);
 
   return { reconnect };
-};
+}

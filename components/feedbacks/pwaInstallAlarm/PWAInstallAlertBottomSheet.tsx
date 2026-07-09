@@ -1,7 +1,6 @@
 // @/components/PWAInstallAlertBottomSheet.tsx
 "use client";
 
-import { useState } from "react";
 import {
   KBottomSheet,
   KBottomSheetClose,
@@ -11,11 +10,12 @@ import {
   KBottomSheetOverlay,
   KBottomSheetTitle,
   KButton,
-  KIcon
+  KIcon,
 } from "kku-ui";
+import { useState } from "react";
+import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import { useInitializePWA } from "@/shared/hooks/initializer";
 import { setCookie } from "@/shared/utils/cookie";
-import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 
 export default function PWAInstallAlertBottomSheet() {
   // region [Hooks]
@@ -24,10 +24,9 @@ export default function PWAInstallAlertBottomSheet() {
   const { onClickInstall, onClickDisabled } = useInitializePWA();
   // endregion
 
-
   // region [Events]
   const onClickClose = () => {
-    setCookie(PWA_COOKIE_KEY, 'true', 1); // 하루 안보기 쿠키 저장
+    setCookie(PWA_COOKIE_KEY, "true", 1); // 하루 안보기 쿠키 저장
     setOpen(false);
     onClickDisabled();
   };
@@ -57,19 +56,28 @@ export default function PWAInstallAlertBottomSheet() {
           <div className="bg-gray-50 dark:bg-neutral-800 rounded-xl px-3 py-4 flex flex-col gap-2 text-[14px] text-gray-700">
             <div className="flex items-start gap-2">
               <span className="font-bold text-blue-600 mt-0.5">1.</span>
-              <p className="flex-1 leading-6 dark:text-gray-100">아래 <strong>'설치'</strong> 버튼을 클릭해 주세요.</p>
+              <p className="flex-1 leading-6 dark:text-gray-100">
+                아래 <strong>'설치'</strong> 버튼을 클릭해 주세요.
+              </p>
             </div>
             <div className="flex items-start gap-2">
               <span className="font-bold text-blue-600 mt-0.5">2.</span>
-              <p className="flex-1 leading-6 dark:text-gray-100">브라우저 팝업창에서 <strong>'설치'</strong> 또는 <strong>'추가'</strong>를 선택하면 완료됩니다.</p>
+              <p className="flex-1 leading-6 dark:text-gray-100">
+                브라우저 팝업창에서 <strong>'설치'</strong> 또는 <strong>'추가'</strong>를 선택하면
+                완료됩니다.
+              </p>
             </div>
           </div>
         </div>
 
         <KBottomSheetFooter>
-          <KButton variant="primary" width="full" onClick={handleInstall}>설치</KButton>
+          <KButton variant="primary" width="full" onClick={handleInstall}>
+            설치
+          </KButton>
           <KBottomSheetClose asChild>
-            <KButton variant="ghost" width="full" onClick={onClickClose}>오늘 하루 안보기</KButton>
+            <KButton variant="ghost" width="full" onClick={onClickClose}>
+              오늘 하루 안보기
+            </KButton>
           </KBottomSheetClose>
         </KBottomSheetFooter>
       </KBottomSheetContent>

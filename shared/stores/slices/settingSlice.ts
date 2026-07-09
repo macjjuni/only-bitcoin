@@ -1,12 +1,11 @@
-import { StateCreator } from "zustand";
+import type { StateCreator } from "zustand";
 import type { StoreType } from "@/shared/stores/store";
 
-
-export type CurrencyTypes = 'KRW' | 'USD' | 'KRW/USD';
+export type CurrencyTypes = "KRW" | "USD" | "KRW/USD";
 
 export interface BeforeInstallPromptEvent extends Event {
   prompt: () => Promise<void>;
-  userChoice: Promise<{ outcome: 'accepted' | 'dismissed' }>;
+  userChoice: Promise<{ outcome: "accepted" | "dismissed" }>;
 }
 
 export interface SettingTypes {
@@ -18,7 +17,6 @@ export interface SettingTypes {
   deferredPrompt: BeforeInstallPromptEvent | null;
 }
 
-
 export interface SettingSlice {
   setting: SettingTypes;
   setInitialPath: (path: string) => void;
@@ -29,7 +27,6 @@ export interface SettingSlice {
   setDeferredPrompt: (deferredPrompt: BeforeInstallPromptEvent | null) => void;
 }
 
-
 export const createSettingSlice: StateCreator<StoreType, [], [], SettingSlice> = (set) => ({
   setting: {
     initialPath: "/overview",
@@ -37,28 +34,34 @@ export const createSettingSlice: StateCreator<StoreType, [], [], SettingSlice> =
     isUsdtStandard: false,
     isCountUp: true,
     isBackgroundImg: true,
-    deferredPrompt: null
+    deferredPrompt: null,
   },
-  setInitialPath: (path) => set((state) => ({
-    setting: { ...state.setting, initialPath: path }
-  })),
-  setCurrency: (currency) => set((state) => {
-    // BTC2Fiat 페이지 설정 충돌 방지
-    const isNotIncludeCurrency = currency.includes(state.focusCurrency);
-    const focusCurrency = !isNotIncludeCurrency ? "BTC" : state.focusCurrency;
+  setInitialPath: (path) =>
+    set((state) => ({
+      setting: { ...state.setting, initialPath: path },
+    })),
+  setCurrency: (currency) =>
+    set((state) => {
+      // BTC2Fiat 페이지 설정 충돌 방지
+      const isNotIncludeCurrency = currency.includes(state.focusCurrency);
+      const focusCurrency = !isNotIncludeCurrency ? "BTC" : state.focusCurrency;
 
-    return { setting: { ...state.setting, currency }, focusCurrency };
-  }),
-  setUsdtStandard: (isUsdtStandard) => set((state) => ({
-    setting: { ...state.setting, isUsdtStandard }
-  })),
-  setIsCountUp: (isCountUp) => set((state) => ({
-    setting: { ...state.setting, isCountUp }
-  })),
-  setIsBackgroundImg: (isBackgroundImg) => set((state) => ({
-    setting: { ...state.setting, isBackgroundImg }
-  })),
-  setDeferredPrompt: (deferredPrompt) => set((state) => ({
-    setting: { ...state.setting, deferredPrompt }
-  })),
+      return { setting: { ...state.setting, currency }, focusCurrency };
+    }),
+  setUsdtStandard: (isUsdtStandard) =>
+    set((state) => ({
+      setting: { ...state.setting, isUsdtStandard },
+    })),
+  setIsCountUp: (isCountUp) =>
+    set((state) => ({
+      setting: { ...state.setting, isCountUp },
+    })),
+  setIsBackgroundImg: (isBackgroundImg) =>
+    set((state) => ({
+      setting: { ...state.setting, isBackgroundImg },
+    })),
+  setDeferredPrompt: (deferredPrompt) =>
+    set((state) => ({
+      setting: { ...state.setting, deferredPrompt },
+    })),
 });

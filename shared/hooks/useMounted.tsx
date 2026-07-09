@@ -1,17 +1,16 @@
-'use client';
+"use client";
 
-import { useState, useEffect } from 'react';
+import { useEffect, useState } from "react";
 
 export default function useMounted() {
-
   // region [Hooks]
   const [isMount, setIsMount] = useState(false);
   // endregion
 
   // region [Privates]
   const setOnMount = () => {
-    setIsMount(true)
-  }
+    setIsMount(true);
+  };
   // endregion
 
   // region [Life Cycles]

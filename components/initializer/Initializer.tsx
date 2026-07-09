@@ -1,10 +1,10 @@
 "use client";
 
-import { memo, Suspense } from "react";
-import dynamic from "next/dynamic";
 import { KToast } from "kku-ui";
-import { getToastProps } from "@/shared/config/toast";
+import dynamic from "next/dynamic";
+import { memo, Suspense } from "react";
 import PwaRegister from "@/components/initializer/PwaRegister";
+import { getToastProps } from "@/shared/config/toast";
 import {
   useBinanceSocket,
   useBithumbSocket,
@@ -16,11 +16,11 @@ import {
   useMempoolSocket,
   useTheme,
   useUpbitSocket,
-  useUsdExchangeRate
+  useUsdExchangeRate,
 } from "@/shared/hooks/initializer";
 
 const AlarmManager = dynamic(() => import("@/components/feedbacks/AlarmManager"), {
-  ssr: false
+  ssr: false,
 });
 
 /**
@@ -46,7 +46,6 @@ function BaseInitializer() {
 
   return <KToast {...getToastProps()} offset={120} />;
 }
-
 
 const Initializer = () => {
   return (

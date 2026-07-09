@@ -1,44 +1,39 @@
-'use client'
+"use client";
 
-import { useCallback, useMemo } from 'react'
-import useStore from '@/shared/stores/store'
-import { useMarketChartData } from '@/shared/query'
-import OverviewChartShell from '@/components/features/overview/chartShell/OverviewChartShell'
-import type { ChartIntervalOption } from '@/components/features/overview/chartShell/OverviewChartShell.interface'
-import type { MarketChartIntervalType } from '@/shared/stores/store.interface'
-
+import { useCallback, useMemo } from "react";
+import OverviewChartShell from "@/components/features/overview/chartShell/OverviewChartShell";
+import type { ChartIntervalOption } from "@/components/features/overview/chartShell/OverviewChartShell.interface";
+import { useMarketChartData } from "@/shared/query";
+import useStore from "@/shared/stores/store";
+import type { MarketChartIntervalType } from "@/shared/stores/store.interface";
 
 const marketChartIntervalOptions: ChartIntervalOption<MarketChartIntervalType>[] = [
-  { text: '1D', value: '1d' },
-  { text: '7D', value: '7d' },
-  { text: '1M', value: '1m' },
-  { text: '1Y', value: '1y' },
-  { text: '5Y', value: '5y' },
-  { text: 'All', value: 'all' },
-]
-
+  { text: "1D", value: "1d" },
+  { text: "7D", value: "7d" },
+  { text: "1M", value: "1m" },
+  { text: "1Y", value: "1y" },
+  { text: "5Y", value: "5y" },
+  { text: "All", value: "all" },
+];
 
 export default function MarketChart() {
-
   // region [Hooks]
-  const marketChartInterval = useStore(state => state.marketChartInterval)
-  const setMarketChartInterval = useStore(state => state.setMarketChartInterval)
-  const { marketChartData, isLoading } = useMarketChartData(marketChartInterval)
+  const marketChartInterval = useStore((state) => state.marketChartInterval);
+  const setMarketChartInterval = useStore((state) => state.setMarketChartInterval);
+  const { marketChartData, isLoading } = useMarketChartData(marketChartInterval);
 
   const seriesData = useMemo(() => {
-    if (!marketChartData?.date?.length) return []
+    if (!marketChartData?.date?.length) return [];
     return marketChartData.date.map((timestamp, idx) => ({
       x: timestamp,
       y: marketChartData.price[idx],
-    }))
-  }, [marketChartData])
+    }));
+  }, [marketChartData]);
   // endregion
-
 
   // region [Privates]
-  const formatter = useCallback((val: number) => `$${Math.floor(val).toLocaleString()}`, [])
+  const formatter = useCallback((val: number) => `$${Math.floor(val).toLocaleString()}`, []);
   // endregion
-
 
   return (
     <OverviewChartShell
@@ -54,5 +49,5 @@ export default function MarketChart() {
       fillStops={[0, 90]}
       chartHeight={200}
     />
-  )
+  );
 }

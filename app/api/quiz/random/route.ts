@@ -1,7 +1,7 @@
-import { NextResponse } from "next/server";
 import { cookies } from "next/headers";
-import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/shared/constants/setting";
+import { NextResponse } from "next/server";
 import { quizData } from "@/shared/constants/quiz";
+import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/shared/constants/setting";
 
 // region [Privates]
 const LIMIT_KEY = `${QUIZ_COOKIE_KEY}_done`;
@@ -29,7 +29,6 @@ const checkServerEligibility = async () => {
 
   return { eligible: true };
 };
-
 
 const getRandomQuiz = () => {
   const randomIndex = Math.floor(Math.random() * quizData.length);
@@ -59,7 +58,7 @@ const fetchWalletBalance = async (): Promise<number> => {
       method: "POST",
       headers: {
         "Content-Type": "application/json",
-        "X-API-KEY": process.env?.BLINK_ACCESS_TOKEN || '',
+        "X-API-KEY": process.env?.BLINK_ACCESS_TOKEN || "",
       },
       body: JSON.stringify({ query }),
     });
@@ -96,7 +95,7 @@ export async function GET() {
 
     // 2. 지갑 잔액 확인 (주머니 사정 체크)
     const currentBalance = await fetchWalletBalance();
-    console.log('currentBalance', currentBalance);
+    console.log("currentBalance", currentBalance);
     if (currentBalance < MIN_BALANCE_SATS) {
       return NextResponse.json({ success: false, error: "PROBABILITY_FAIL" });
     }
@@ -109,18 +108,14 @@ export async function GET() {
       const { answer: _, ...quizWithoutAnswer } = quiz;
       return NextResponse.json({
         success: true,
-        data: quizWithoutAnswer
+        data: quizWithoutAnswer,
       });
     }
 
     return NextResponse.json({ success: false, error: "PROBABILITY_FAIL" });
-
   } catch (error) {
     console.error("Quiz API Error:", error);
-    return NextResponse.json(
-      { success: false, error: "INTERNAL_SERVER_ERROR" },
-      { status: 500 }
-    );
+    return NextResponse.json({ success: false, error: "INTERNAL_SERVER_ERROR" }, { status: 500 });
   }
 }
 // endregion

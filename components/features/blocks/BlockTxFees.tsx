@@ -1,20 +1,21 @@
-'use client'
+"use client";
 
 import { Fragment, memo, useMemo } from "react";
-import useStore from "@/shared/stores/store";
 import { CountText } from "@/components";
-
+import useStore from "@/shared/stores/store";
 
 const BlockTxFees = () => {
-
   // region [Hooks]
-  const fees = useStore(state => state.fees);
-  const feeDataList = useMemo(() => [
-    { label: "최하위 순위", value: fees.economyFee },
-    { label: "낮은 우선 순위", value: fees.hourFee },
-    { label: "중간 우선 순위", value: fees.halfHourFee },
-    { label: "높은 우선 순위", value: fees.fastestFee }
-  ], [fees]);
+  const fees = useStore((state) => state.fees);
+  const feeDataList = useMemo(
+    () => [
+      { label: "최하위 순위", value: fees.economyFee },
+      { label: "낮은 우선 순위", value: fees.hourFee },
+      { label: "중간 우선 순위", value: fees.halfHourFee },
+      { label: "높은 우선 순위", value: fees.fastestFee },
+    ],
+    [fees],
+  );
   // endregion
 
   return (
@@ -37,9 +38,7 @@ const BlockTxFees = () => {
             </div>
 
             {/* Divider */}
-            {idx !== feeDataList.length - 1 && (
-              <div className="w-px h-9 bg-current opacity-70" />
-            )}
+            {idx !== feeDataList.length - 1 && <div className="w-px h-9 bg-current opacity-70" />}
           </Fragment>
         ))}
       </div>

@@ -8,6 +8,6 @@ export function toBip39Binary(index: number) {
     throw new Error("index must be a number between 0 and 2047");
   }
   const originStr = index.toString(2).padStart(12, "0");
-  const replacedPoint = originStr.replaceAll('1', '*');
-  return replacedPoint.replaceAll('0', 'O');
+  const replacedPoint = originStr.replaceAll("1", "*");
+  return replacedPoint.replaceAll("0", "O");
 }

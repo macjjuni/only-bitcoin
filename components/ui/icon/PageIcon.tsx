@@ -1,8 +1,7 @@
 import { memo } from "react";
-import { IconTypes } from "@/components/ui/icon/icon";
+import type { IconTypes } from "@/components/ui/icon/icon";
 
 const PageIcon = ({ size = "100%", color = "currentColor", style }: IconTypes) => {
-
   return (
     <svg
       version="1.1"
@@ -14,8 +13,8 @@ const PageIcon = ({ size = "100%", color = "currentColor", style }: IconTypes) =
       fill={color}
       style={style}
     >
-      <g strokeWidth="0"/>
-      <g strokeLinecap="round" strokeLinejoin="round"/>
+      <g strokeWidth="0" />
+      <g strokeLinecap="round" strokeLinejoin="round" />
       <g>
         <g>
           <path
@@ -43,10 +42,10 @@ const PageIcon = ({ size = "100%", color = "currentColor", style }: IconTypes) =
               style={{ fill: "#F9F8C9" }}
               points="462.397,174.365 462.397,182.337 422.755,182.337 379.423,222.075 311.326,159.631 274.966,192.965 237.87,192.965 237.87,184.994 271.36,184.994 311.326,148.364 379.423,210.808 419.149,174.365"
             />
-            <ellipse style={{ fill: "#FEFDF0" }} cx="312.427" cy="156.878" rx="7.995" ry="7.807"/>
-            <ellipse style={{ fill: "#FEFDF0" }} cx="420.747" cy="178.019" rx="7.995" ry="7.807"/>
-            <ellipse style={{ fill: "#FEFDF0" }} cx="379.251" cy="215.814" rx="7.995" ry="7.807"/>
-            <ellipse style={{ fill: "#FEFDF0" }} cx="274.243" cy="186.484" rx="7.995" ry="7.807"/>
+            <ellipse style={{ fill: "#FEFDF0" }} cx="312.427" cy="156.878" rx="7.995" ry="7.807" />
+            <ellipse style={{ fill: "#FEFDF0" }} cx="420.747" cy="178.019" rx="7.995" ry="7.807" />
+            <ellipse style={{ fill: "#FEFDF0" }} cx="379.251" cy="215.814" rx="7.995" ry="7.807" />
+            <ellipse style={{ fill: "#FEFDF0" }} cx="274.243" cy="186.484" rx="7.995" ry="7.807" />
           </g>
           <g>
             <ellipse style={{ fill: "#8BC66F" }} cx="125.815" cy="32.559" rx="12.141" ry="12.923" />
@@ -55,21 +54,67 @@ const PageIcon = ({ size = "100%", color = "currentColor", style }: IconTypes) =
           </g>
           <g>
             <g>
-              <rect x="53.699" y="305.567" style={{ opacity: 0.5, fill: "#899C99" }} width="76.66"
-                    height="64.006"/>
+              <rect
+                x="53.699"
+                y="305.567"
+                style={{ opacity: 0.5, fill: "#899C99" }}
+                width="76.66"
+                height="64.006"
+              />
               <g style={{ opacity: 0.5 }}>
-                <rect x="142.537" y="356.288" style={{ fill: "#899C99" }} width="51.228" height="8.816"/>
-                <rect x="142.537" y="308.167" style={{ fill: "#899C99" }} width="105.815" height="9.216"/>
-                <rect x="142.537" y="332.127" style={{ fill: "#899C99" }} width="105.815" height="9.216"/>
+                <rect
+                  x="142.537"
+                  y="356.288"
+                  style={{ fill: "#899C99" }}
+                  width="51.228"
+                  height="8.816"
+                />
+                <rect
+                  x="142.537"
+                  y="308.167"
+                  style={{ fill: "#899C99" }}
+                  width="105.815"
+                  height="9.216"
+                />
+                <rect
+                  x="142.537"
+                  y="332.127"
+                  style={{ fill: "#899C99" }}
+                  width="105.815"
+                  height="9.216"
+                />
               </g>
             </g>
             <g>
-              <rect x="271.77" y="305.567" style={{ opacity: 0.5, fill: "#899C99" }} width="76.66"
-                    height="64.006"/>
+              <rect
+                x="271.77"
+                y="305.567"
+                style={{ opacity: 0.5, fill: "#899C99" }}
+                width="76.66"
+                height="64.006"
+              />
               <g style={{ opacity: 0.5 }}>
-                <rect x="360.607" y="356.288" style={{ fill: "#899C99" }} width="51.228" height="8.816" />
-                <rect x="360.607" y="308.167" style={{ fill: "#899C99" }} width="105.815" height="9.216" />
-                <rect x="360.607" y="332.127" style={{ fill: "#899C99" }} width="105.815" height="9.216" />
+                <rect
+                  x="360.607"
+                  y="356.288"
+                  style={{ fill: "#899C99" }}
+                  width="51.228"
+                  height="8.816"
+                />
+                <rect
+                  x="360.607"
+                  y="308.167"
+                  style={{ fill: "#899C99" }}
+                  width="105.815"
+                  height="9.216"
+                />
+                <rect
+                  x="360.607"
+                  y="332.127"
+                  style={{ fill: "#899C99" }}
+                  width="105.815"
+                  height="9.216"
+                />
               </g>
             </g>
           </g>
@@ -92,10 +137,34 @@ const PageIcon = ({ size = "100%", color = "currentColor", style }: IconTypes) =
             />
           </g>
           <g>
-            <rect x="429.489" y="256.97" style={{ fill: "#82CCD3" }} width="32.908" height="20.313" />
-            <rect x="387.246" y="256.97" style={{ fill: "#E4E78E" }} width="32.908" height="20.313" />
-            <rect x="345.004" y="256.97" style={{ fill: "#E5A871" }} width="32.908" height="20.313" />
-            <rect x="302.761" y="256.97" style={{ fill: "#6992A1" }} width="32.908" height="20.313" />
+            <rect
+              x="429.489"
+              y="256.97"
+              style={{ fill: "#82CCD3" }}
+              width="32.908"
+              height="20.313"
+            />
+            <rect
+              x="387.246"
+              y="256.97"
+              style={{ fill: "#E4E78E" }}
+              width="32.908"
+              height="20.313"
+            />
+            <rect
+              x="345.004"
+              y="256.97"
+              style={{ fill: "#E5A871" }}
+              width="32.908"
+              height="20.313"
+            />
+            <rect
+              x="302.761"
+              y="256.97"
+              style={{ fill: "#6992A1" }}
+              width="32.908"
+              height="20.313"
+            />
           </g>
         </g>
       </g>

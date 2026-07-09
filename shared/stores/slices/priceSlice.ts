@@ -1,7 +1,6 @@
-import { StateCreator } from "zustand";
-import { KrwMarketType, UsdMarketType } from "@/shared/constants/market";
+import type { StateCreator } from "zustand";
+import type { KrwMarketType, UsdMarketType } from "@/shared/constants/market";
 import type { StoreType } from "@/shared/stores/store";
-
 
 export interface BitcoinPriceKRWTypes {
   krw: number;
@@ -19,7 +18,6 @@ export interface BitcoinPriceUSDTypes {
 
 export interface BitcoinPriceTypes extends BitcoinPriceKRWTypes, BitcoinPriceUSDTypes {}
 
-
 export interface PriceSlice {
   bitcoinPrice: BitcoinPriceTypes; // BTC 시세 정보
   setBitcoinKrwPrice: (bitcoinPriceKRW: BitcoinPriceKRWTypes) => void;
@@ -30,7 +28,6 @@ export interface PriceSlice {
   setUsdMarket: (market: UsdMarketType) => void;
 }
 
-
 export const createPriceSlice: StateCreator<StoreType, [], [], PriceSlice> = (set) => ({
   bitcoinPrice: {
     krw: 0,
@@ -40,14 +37,16 @@ export const createPriceSlice: StateCreator<StoreType, [], [], PriceSlice> = (se
     usd: 0,
     usdChange24h: "0",
     usdUpdateTimestamp: 0,
-    isUsdConnected: false
+    isUsdConnected: false,
   },
-  setBitcoinKrwPrice: (krw) => set(({ bitcoinPrice }) => ({
-    bitcoinPrice: { ...bitcoinPrice, ...krw }
-  })),
-  setBitcoinUsdPrice: (usd) => set(({ bitcoinPrice }) => ({
-    bitcoinPrice: { ...bitcoinPrice, ...usd }
-  })),
+  setBitcoinKrwPrice: (krw) =>
+    set(({ bitcoinPrice }) => ({
+      bitcoinPrice: { ...bitcoinPrice, ...krw },
+    })),
+  setBitcoinUsdPrice: (usd) =>
+    set(({ bitcoinPrice }) => ({
+      bitcoinPrice: { ...bitcoinPrice, ...usd },
+    })),
 
   krwMarket: "BITHUMB",
   setKrwMarket: (krwMarket) => set(() => ({ krwMarket })),

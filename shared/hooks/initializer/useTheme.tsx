@@ -2,14 +2,12 @@ import { useCallback, useLayoutEffect } from "react";
 import useStore from "@/shared/stores/store";
 
 export default function useTheme() {
-
   // region [Hooks]
-  const theme = useStore(state => state.theme);
+  const theme = useStore((state) => state.theme);
   // endregion
 
   // region [Privates]
   const initializeTheme = useCallback(() => {
-
     const bodyElement = window.document.body;
     const meta = document.querySelector('meta[name="theme-color"]');
     const color = theme === "light" ? "#ffffff" : "#000000"; // 원하면 색상 변경 가능

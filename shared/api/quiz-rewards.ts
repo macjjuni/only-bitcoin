@@ -8,20 +8,21 @@ export type TokenValidationResult =
   | { valid: true; amount: number };
 // endregion
 
-
 // region [Transactions]
 /**
  * [answer] 정답 검증 후 레코드 생성 (PENDING 상태)
  */
-export const createAnswerToken = async (answerToken: string, quizId: string, amount: number = 100) => {
-  const { error } = await supabase
-    .from("quiz_rewards")
-    .insert({
-      answer_token: answerToken,
-      quiz_id: quizId,
-      amount,
-      status: "PENDING" as QuizRewardStatus
-    });
+export const createAnswerToken = async (
+  answerToken: string,
+  quizId: string,
+  amount: number = 100,
+) => {
+  const { error } = await supabase.from("quiz_rewards").insert({
+    answer_token: answerToken,
+    quiz_id: quizId,
+    amount,
+    status: "PENDING" as QuizRewardStatus,
+  });
 
   return { success: !error, error };
 };
@@ -30,14 +31,17 @@ export const createAnswerToken = async (answerToken: string, quizId: string, amo
  * [generate] PENDING → READY 상태 변경 + reward_token 추가 (atomic)
  * 5분 이내 생성된 PENDING 상태만 유효
  */
-export const activateRewardToken = async (answerToken: string, rewardToken: string): Promise<TokenValidationResult> => {
+export const activateRewardToken = async (
+  answerToken: string,
+  rewardToken: string,
+): Promise<TokenValidationResult> => {
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
 
   const { data, error } = await supabase
     .from("quiz_rewards")
     .update({
       reward_token: rewardToken,
-      status: "READY" as QuizRewardStatus
+      status: "READY" as QuizRewardStatus,
     })
     .eq("answer_token", answerToken)
     .eq("status", "PENDING")
@@ -98,7 +102,7 @@ export const claimRewardToken = async (rewardToken: string): Promise<TokenValida
     .from("quiz_rewards")
     .update({
       status: "USED" as QuizRewardStatus,
-      used_at: new Date().toISOString()
+      used_at: new Date().toISOString(),
     })
     .eq("reward_token", rewardToken)
     .eq("status", "READY")
@@ -124,7 +128,7 @@ export const releaseRewardToken = async (rewardToken: string) => {
     .from("quiz_rewards")
     .update({
       status: "READY" as QuizRewardStatus,
-      used_at: null
+      used_at: null,
     })
     .eq("reward_token", rewardToken);
 

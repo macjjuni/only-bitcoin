@@ -1,14 +1,14 @@
-import { useCallback, useEffect, useRef } from "react";
 import { kToast } from "kku-ui";
+import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import useStore from "@/shared/stores/store";
-import { isNetwork } from "@/shared/utils/network";
-import LocalStorage from "@/shared/utils/storage";
-import { generateUUID } from "@/shared/lib/uuid";
+import { UPBIT_MARKET_FLAG } from "@/shared/constants/market";
 import { formatDate } from "@/shared/lib/date";
-import { floorToDecimal } from "@/shared/utils/number";
+import { generateUUID } from "@/shared/lib/uuid";
+import useStore from "@/shared/stores/store";
 import { isDev } from "@/shared/utils/common";
-import {UPBIT_MARKET_FLAG} from '@/shared/constants/market'
+import { isNetwork } from "@/shared/utils/network";
+import { floorToDecimal } from "@/shared/utils/number";
+import LocalStorage from "@/shared/utils/storage";
 
 const UPBIT_URL = "wss://api.upbit.com/websocket/v1";
 const UUID_STORAGE_KEY = "uuid";
@@ -26,14 +26,12 @@ const getUUID = () => {
 const getRequestPayload = () => [
   { ticket: getUUID() },
   { type: "ticker", codes: [UPBIT_BTC_TICKER, UPBIT_USDT_TICKER] },
-  { format: "SIMPLE" }
+  { format: "SIMPLE" },
 ];
 
-
 export default function useUpbitWebSocket() {
-
   // region [Hooks]
-  const krwMarket = useStore(store => store.krwMarket);
+  const krwMarket = useStore((store) => store.krwMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
   // endregion
 
@@ -42,13 +40,21 @@ export default function useUpbitWebSocket() {
     setBitcoinKrwPrice({ ...bitcoinPrice, isKrwConnected: false });
   };
 
-  const handleBTCUpdate = useCallback((price: number, krwUpdateTimestamp: number, krwChange24h: number) => {
-    const { setBitcoinKrwPrice, setting } = useStore.getState();
-    if (setting.currency.includes("KRW")) {
-      const krwChange24hStr = floorToDecimal(krwChange24h * 100, 2).toString();
-      setBitcoinKrwPrice({ krw: price, krwChange24h: krwChange24hStr, krwUpdateTimestamp, isKrwConnected: true });
-    }
-  }, []);
+  const handleBTCUpdate = useCallback(
+    (price: number, krwUpdateTimestamp: number, krwChange24h: number) => {
+      const { setBitcoinKrwPrice, setting } = useStore.getState();
+      if (setting.currency.includes("KRW")) {
+        const krwChange24hStr = floorToDecimal(krwChange24h * 100, 2).toString();
+        setBitcoinKrwPrice({
+          krw: price,
+          krwChange24h: krwChange24hStr,
+          krwUpdateTimestamp,
+          isKrwConnected: true,
+        });
+      }
+    },
+    [],
+  );
 
   const handleUSDTUpdate = useCallback((price: number, timestamp: number) => {
     const { setExRate, setting } = useStore.getState();
@@ -59,15 +65,15 @@ export default function useUpbitWebSocket() {
 
   const connect = useCallback(() => {
     const socket = new ReconnectingWebSocket(UPBIT_URL, [], {
-      maxReconnectionDelay: 8000,           // 재연결 최대 지연: 10초
+      maxReconnectionDelay: 8000, // 재연결 최대 지연: 10초
       minReconnectionDelay: 1000,
-      reconnectionDelayGrowFactor: 1,       // 재시도 간 딜레이 증가 비율
-      minUptime: 5000,                      // 연결이 최소 유지되어야 하는 시간 (5초)
-      connectionTimeout: 3000,              // 연결 시도 타임아웃: 4초
-      maxRetries: 999,                       // 무한 재시도 (실서비스 기준)
-      maxEnqueuedMessages: 100,             // 연결 안 된 동안 큐에 쌓을 메시지 수 제한
-      startClosed: false,                   // 생성 직후 자동 연결
-      debug: false                          // 디버깅 로그 출력 여부
+      reconnectionDelayGrowFactor: 1, // 재시도 간 딜레이 증가 비율
+      minUptime: 5000, // 연결이 최소 유지되어야 하는 시간 (5초)
+      connectionTimeout: 3000, // 연결 시도 타임아웃: 4초
+      maxRetries: 999, // 무한 재시도 (실서비스 기준)
+      maxEnqueuedMessages: 100, // 연결 안 된 동안 큐에 쌓을 메시지 수 제한
+      startClosed: false, // 생성 직후 자동 연결
+      debug: false, // 디버깅 로그 출력 여부
     });
 
     socket.binaryType = "arraybuffer";
@@ -130,4 +136,4 @@ export default function useUpbitWebSocket() {
     };
   }, [krwMarket, connect, disconnect]);
   // endregion
-};
+}

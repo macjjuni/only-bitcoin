@@ -1,93 +1,92 @@
-'use client'
+"use client";
 
-import { useCallback, useMemo } from 'react'
-import { useMiningMetricChartData } from '@/shared/query'
-import { formatDifficulty, formatHashrate } from '@/shared/utils/number'
-import useStore from '@/shared/stores/store'
-import OverviewChartShell from '@/components/features/overview/chartShell/OverviewChartShell'
-import MiningMetricHeader from '@/components/features/overview/miningMetricChart/MiningMetricHeader'
-import type { ChartIntervalOption } from '@/components/features/overview/chartShell/OverviewChartShell.interface'
-import type { MiningMetricChartIntervalType } from '@/shared/stores/store.interface'
-
+import { useCallback, useMemo } from "react";
+import OverviewChartShell from "@/components/features/overview/chartShell/OverviewChartShell";
+import type { ChartIntervalOption } from "@/components/features/overview/chartShell/OverviewChartShell.interface";
+import MiningMetricHeader from "@/components/features/overview/miningMetricChart/MiningMetricHeader";
+import { useMiningMetricChartData } from "@/shared/query";
+import useStore from "@/shared/stores/store";
+import type { MiningMetricChartIntervalType } from "@/shared/stores/store.interface";
+import { formatDifficulty, formatHashrate } from "@/shared/utils/number";
 
 /*
-* 해시레이트 모든 차트는 데이터 크기가 많아 시간기반 균일 샘플링으로 최적화(64%) 했으나,
-* 시간이 지날수록 데이터가 계속 늘어나므로 최적화 양을 늘리거나 알고리즘 변화가 필요함.
-*  */
+ * 해시레이트 모든 차트는 데이터 크기가 많아 시간기반 균일 샘플링으로 최적화(64%) 했으나,
+ * 시간이 지날수록 데이터가 계속 늘어나므로 최적화 양을 늘리거나 알고리즘 변화가 필요함.
+ *  */
 
 const miningMetricChartIntervalOptions: ChartIntervalOption<MiningMetricChartIntervalType>[] = [
-  { text: '3M', value: '3m' },
-  { text: '1Y', value: '1y' },
-  { text: '3Y', value: '3y' },
-  { text: 'All', value: 'all' },
-]
-
+  { text: "3M", value: "3m" },
+  { text: "1Y", value: "1y" },
+  { text: "3Y", value: "3y" },
+  { text: "All", value: "all" },
+];
 
 export default function MiningMetricChart() {
-
   // region [Hooks]
-  const overviewChart = useStore(store => store.overviewChart)
-  const miningMetricChartInterval = useStore(state => state.miningMetricChartInterval)
-  const setHashrateChartInterval = useStore(state => state.setMiningMetricChartInterval)
-  const { data, isLoading } = useMiningMetricChartData(miningMetricChartInterval)
+  const overviewChart = useStore((store) => store.overviewChart);
+  const miningMetricChartInterval = useStore((state) => state.miningMetricChartInterval);
+  const setHashrateChartInterval = useStore((state) => state.setMiningMetricChartInterval);
+  const { data, isLoading } = useMiningMetricChartData(miningMetricChartInterval);
 
   /**
    * 차트 타입에 따른 데이터 반환
    */
   const chartRowData = useMemo(() => {
-    if (!data) return { value: [] as number[], date: [] as number[] }
-    if (overviewChart === 'hashrate') return data.hashrates
-    if (overviewChart === 'difficulty') return data.difficulty
+    if (!data) return { value: [] as number[], date: [] as number[] };
+    if (overviewChart === "hashrate") return data.hashrates;
+    if (overviewChart === "difficulty") return data.difficulty;
 
-    console.error('Invalid overview chart type:', overviewChart)
-    return { value: [] as number[], date: [] as number[] }
-  }, [overviewChart, data])
+    console.error("Invalid overview chart type:", overviewChart);
+    return { value: [] as number[], date: [] as number[] };
+  }, [overviewChart, data]);
 
   const seriesData = useMemo(() => {
-    if (!chartRowData.date?.length) return []
+    if (!chartRowData.date?.length) return [];
     // mempool.space 타임스탬프는 초 단위 → ApexCharts datetime은 ms 단위
     return chartRowData.date.map((timestamp, idx) => ({
       x: timestamp * 1000,
       y: chartRowData.value[idx],
-    }))
-  }, [chartRowData])
+    }));
+  }, [chartRowData]);
 
   const maxValue = useMemo(() => {
-    const values = chartRowData.value
-    if (!values.length) return 0
-    return values.reduce((max, val) => (val > max ? val : max), values[0])
-  }, [chartRowData])
+    const values = chartRowData.value;
+    if (!values.length) return 0;
+    return values.reduce((max, val) => (val > max ? val : max), values[0]);
+  }, [chartRowData]);
 
   /**
    * 현재값 대비 최대값의 변화율 계산
    */
   const percentage = useMemo(() => {
-    if (!data) return 0
-    const factor = 10 ** 2
-    const targetCurrentValue = overviewChart === 'hashrate' ? data.currentHashrate : data.currentDifficulty
-    const percentValue = (targetCurrentValue - maxValue) / Math.abs(targetCurrentValue) * 100
-    return Math.floor(percentValue * factor) / factor
-  }, [data, maxValue, overviewChart])
+    if (!data) return 0;
+    const factor = 10 ** 2;
+    const targetCurrentValue =
+      overviewChart === "hashrate" ? data.currentHashrate : data.currentDifficulty;
+    const percentValue = ((targetCurrentValue - maxValue) / Math.abs(targetCurrentValue)) * 100;
+    return Math.floor(percentValue * factor) / factor;
+  }, [data, maxValue, overviewChart]);
 
   const allTimeHighValue = useMemo(() => {
-    if (!data) return ''
-    if (overviewChart === 'hashrate') return `Hashrate: ${formatHashrate(data.currentHashrate || 0)}`
-    if (overviewChart === 'difficulty') return `Difficulty: ${formatDifficulty(data.currentDifficulty || 0)}`
-    return ''
-  }, [data, overviewChart])
+    if (!data) return "";
+    if (overviewChart === "hashrate")
+      return `Hashrate: ${formatHashrate(data.currentHashrate || 0)}`;
+    if (overviewChart === "difficulty")
+      return `Difficulty: ${formatDifficulty(data.currentDifficulty || 0)}`;
+    return "";
+  }, [data, overviewChart]);
   // endregion
-
 
   // region [Privates]
-  const formatter = useCallback((val: number) => (
-    overviewChart === 'hashrate' ? formatHashrate(val) : formatDifficulty(val)
-  ), [overviewChart])
+  const formatter = useCallback(
+    (val: number) => (overviewChart === "hashrate" ? formatHashrate(val) : formatDifficulty(val)),
+    [overviewChart],
+  );
   // endregion
-
 
   return (
     <OverviewChartShell
-      seriesName={overviewChart === 'hashrate' ? 'Hashrate' : 'Difficulty'}
+      seriesName={overviewChart === "hashrate" ? "Hashrate" : "Difficulty"}
       seriesData={seriesData}
       isLoading={isLoading}
       formatter={formatter}
@@ -107,5 +106,5 @@ export default function MiningMetricChart() {
         />
       }
     />
-  )
+  );
 }

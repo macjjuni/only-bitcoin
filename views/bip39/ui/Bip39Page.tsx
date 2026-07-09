@@ -1,9 +1,9 @@
 "use client";
 
-import { ChangeEvent, memo, useCallback, useDeferredValue, useMemo, useState } from "react";
 import { KTextField } from "kku-ui";
-import { toBip39Binary } from "@/entities/bip39";
+import { type ChangeEvent, memo, useCallback, useDeferredValue, useMemo, useState } from "react";
 import type { BIP39Item } from "@/entities/bip39";
+import { toBip39Binary } from "@/entities/bip39";
 
 interface BIP39PageProps {
   initialData: BIP39Item[];
@@ -11,17 +11,16 @@ interface BIP39PageProps {
 
 const ENGLISH_REG = /^[A-Za-z]+$/;
 
-
 const Bip39Page = ({ initialData }: BIP39PageProps) => {
-
   // region [Hooks]
 
   const [search, setSearch] = useState("");
   const deferredSearch = useDeferredValue(search);
 
-  const bip39List = useMemo(() => (
-    initialData.filter(item => item.word.startsWith(deferredSearch.toLowerCase()))
-  ), [initialData, deferredSearch]);
+  const bip39List = useMemo(
+    () => initialData.filter((item) => item.word.startsWith(deferredSearch.toLowerCase())),
+    [initialData, deferredSearch],
+  );
   // endregion
 
   // region [Events]
@@ -52,8 +51,7 @@ const Bip39Page = ({ initialData }: BIP39PageProps) => {
         <ul className="flex-1 flex flex-col m-0 p-0 list-none">
           {/* List Header */}
           <li className="flex justify-between items-center w-full p-0.5 tracking-[-1px] text-[18px] mb-2">
-            <div
-              className="flex justify-start items-center gap-[3px] font-bold whitespace-nowrap text-[20px] w-[116px]">
+            <div className="flex justify-start items-center gap-[3px] font-bold whitespace-nowrap text-[20px] w-[116px]">
               Word List
             </div>
             <div className="flex justify-end items-center gap-[2px] font-bold whitespace-nowrap text-[20px] mr-[160px]">
@@ -63,23 +61,27 @@ const Bip39Page = ({ initialData }: BIP39PageProps) => {
 
           {/* List Content */}
           {bip39List?.map(({ word, index }) => (
-            <li key={word}
-                className="flex justify-between items-center w-full p-0.5 tracking-[-1px] text-[18px] dark:border-gray-500">
+            <li
+              key={word}
+              className="flex justify-between items-center w-full p-0.5 tracking-[-1px] text-[18px] dark:border-gray-500"
+            >
               <div className="flex justify-start items-center gap-[3px]">
                 <span className="mr-[3px]">{index}.</span>
                 <span>{word}</span>
               </div>
               <div className="flex justify-end items-center gap-[2px]">
-                {toBip39Binary(index).split("").map((item, idx) => (
-                  <span
-                    key={idx}
-                    className={[
-                      "w-[17px] h-[17px] border border-current rounded-full transition-colors",
-                      item === "*" ? "bg-current" : "bg-transparent",
-                      idx === 5 ? "mr-2" : "" // 6번째 요소(index 5) 뒤에 spacing-8(8px) 여백
-                    ].join(" ")}
-                  />
-                ))}
+                {toBip39Binary(index)
+                  .split("")
+                  .map((item, idx) => (
+                    <span
+                      key={idx}
+                      className={[
+                        "w-[17px] h-[17px] border border-current rounded-full transition-colors",
+                        item === "*" ? "bg-current" : "bg-transparent",
+                        idx === 5 ? "mr-2" : "", // 6번째 요소(index 5) 뒤에 spacing-8(8px) 여백
+                      ].join(" ")}
+                    />
+                  ))}
               </div>
             </li>
           ))}

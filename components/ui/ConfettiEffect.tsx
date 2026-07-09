@@ -18,12 +18,20 @@ interface Particle {
   tiltAngleIncrement: number;
 }
 
-const COLORS = ["#ff4757", "#2ed573", "#1e90ff", "#ffa502", "#9b59b6", "#f1c40f", "#e056fd", "#686de0"];
+const COLORS = [
+  "#ff4757",
+  "#2ed573",
+  "#1e90ff",
+  "#ffa502",
+  "#9b59b6",
+  "#f1c40f",
+  "#e056fd",
+  "#686de0",
+];
 const SHAPES: ShapeType[] = ["square", "circle", "strip", "square"];
 const COUNT_PER_SIDE = 120;
 
 const ConfettiEffect = () => {
-
   // region [Hooks]
   const isActive = useConfettiStore((state) => state.isActive);
   const hide = useConfettiStore((state) => state.hide);
@@ -31,7 +39,6 @@ const ConfettiEffect = () => {
   const particles = useRef<Particle[]>([]);
   const animationId = useRef<number>(0);
   // endregion
-
 
   // region [Privates]
   /**
@@ -75,7 +82,7 @@ const ConfettiEffect = () => {
         ctx.fill();
         break;
       case "strip":
-        ctx.fillRect(-p.size / 4, (-p.size * 0.75) * flipScale, p.size / 2, (p.size * 1.5) * flipScale);
+        ctx.fillRect(-p.size / 4, -p.size * 0.75 * flipScale, p.size / 2, p.size * 1.5 * flipScale);
         break;
       case "square":
       default:
@@ -86,35 +93,37 @@ const ConfettiEffect = () => {
     ctx.restore();
   };
 
-  const updateAndDraw = useCallback((ctx: CanvasRenderingContext2D, width: number, height: number) => {
-    ctx.clearRect(0, 0, width, height);
+  const updateAndDraw = useCallback(
+    (ctx: CanvasRenderingContext2D, width: number, height: number) => {
+      ctx.clearRect(0, 0, width, height);
 
-    // 역순 순회: splice 시 인덱스 밀림 현상 방지 및 안정적인 제거
-    for (let i = particles.current.length - 1; i >= 0; i--) {
-      const p = particles.current[i];
+      // 역순 순회: splice 시 인덱스 밀림 현상 방지 및 안정적인 제거
+      for (let i = particles.current.length - 1; i >= 0; i--) {
+        const p = particles.current[i];
 
-      p.tiltAngle += p.tiltAngleIncrement;
-      p.velocity.y += 0.3;
-      p.velocity.x *= 0.99;
-      p.x += p.velocity.x + Math.sin(p.tiltAngle) * 0.5;
-      p.y += p.velocity.y;
-      p.rotation += p.rotationSpeed;
+        p.tiltAngle += p.tiltAngleIncrement;
+        p.velocity.y += 0.3;
+        p.velocity.x *= 0.99;
+        p.x += p.velocity.x + Math.sin(p.tiltAngle) * 0.5;
+        p.y += p.velocity.y;
+        p.rotation += p.rotationSpeed;
 
-      drawParticle(ctx, p);
+        drawParticle(ctx, p);
 
-      if (p.y > height + 50) {
-        particles.current.splice(i, 1);
+        if (p.y > height + 50) {
+          particles.current.splice(i, 1);
+        }
       }
-    }
 
-    if (particles.current.length > 0) {
-      animationId.current = requestAnimationFrame(() => updateAndDraw(ctx, width, height));
-    } else {
-      hide(); // 모든 입자가 제거되면 Store 상태 변경
-    }
-  }, [hide]);
+      if (particles.current.length > 0) {
+        animationId.current = requestAnimationFrame(() => updateAndDraw(ctx, width, height));
+      } else {
+        hide(); // 모든 입자가 제거되면 Store 상태 변경
+      }
+    },
+    [hide],
+  );
   // endregion
-
 
   // region [Life Cycles]
   useEffect(() => {

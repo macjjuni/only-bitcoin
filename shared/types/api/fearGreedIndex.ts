@@ -1,5 +1,3 @@
-
-
 export interface FearGreedIndexResponseTypes {
   name: string;
   data: [
@@ -8,7 +6,7 @@ export interface FearGreedIndexResponseTypes {
       value_classification: string;
       timestamp: string;
       time_until_update: string;
-    }
+    },
   ];
   metadata: {
     error: null | string;

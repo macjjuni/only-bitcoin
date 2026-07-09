@@ -1,4 +1,4 @@
-import { MetadataRoute } from "next";
+import type { MetadataRoute } from "next";
 
 const BASE_URL = "https://only-btc.app";
 
@@ -13,7 +13,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/orange-pill",
     "/orange-pill/meme",
     "/orange-pill/bip39",
-    "/settings"
+    "/settings",
   ].map((route) => ({
     url: `${BASE_URL}${route}`,
     lastModified: new Date(),

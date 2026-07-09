@@ -1,16 +1,12 @@
 import { useCallback, useEffect } from "react";
 import useStore from "@/shared/stores/store";
 
-
 export default function useInitializeBackground() {
-
-
   // region [Hooks]
 
-  const isBackgroundImg = useStore(state => state.setting.isBackgroundImg);
+  const isBackgroundImg = useStore((state) => state.setting.isBackgroundImg);
 
   // endregion
-
 
   // region [Privates]
 
@@ -24,7 +20,6 @@ export default function useInitializeBackground() {
 
   // endregion
 
-
   // region [Life Cycles]
 
   useEffect(() => {
@@ -32,5 +27,4 @@ export default function useInitializeBackground() {
   }, [isBackgroundImg]);
 
   // endregion
-
-};
+}

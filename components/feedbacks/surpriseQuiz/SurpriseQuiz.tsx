@@ -1,8 +1,5 @@
 "use client";
 
-import { useEffect, useRef, useState } from "react";
-import useQuizState from "@/components/feedbacks/surpriseQuiz/useQuizState";
-import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
 import {
   KButton,
   KDialog,
@@ -12,13 +9,15 @@ import {
   KDialogHeader,
   KDialogOverlay,
   KDialogTitle,
-  KSpinner
+  KSpinner,
 } from "kku-ui";
+import { useEffect, useRef, useState } from "react";
 import { QRCode } from "react-qrcode-logo";
+import useQuizState from "@/components/feedbacks/surpriseQuiz/useQuizState";
+import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/shared/constants/setting";
 import useCopyOnClick from "@/shared/hooks/useCopyOnClick";
 import useConfettiStore from "@/shared/stores/confettiStore";
-import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/shared/constants/setting";
-
+import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
 
 // region [Privates]
 const LIMIT_KEY = `${QUIZ_COOKIE_KEY}_done`;
@@ -29,14 +28,15 @@ const checkPwaEnv = (): boolean => {
   if (typeof window === "undefined") return false;
 
   // 모바일 여부 확인
-  const isMobile = /Mobi|Android|iPhone/i.test(window.navigator.userAgent) || window.innerWidth <= 768;
+  const isMobile =
+    /Mobi|Android|iPhone/i.test(window.navigator.userAgent) || window.innerWidth <= 768;
 
   // PWA 여부 확인 (iOS standalone 속성 대응을 위한 타입 단언)
   const isStandaloneMode = window.matchMedia("(display-mode: standalone)").matches;
   const isIOSStandalone = (window.navigator as Navigator & { standalone?: boolean }).standalone;
   const isPWA = isStandaloneMode || !!isIOSStandalone;
 
-  return isDev ? true : (isMobile && isPWA);
+  return isDev ? true : isMobile && isPWA;
 };
 
 const getVisitCount = () => parseInt(getCookie(QUIZ_COOKIE_KEY) || "0");
@@ -80,7 +80,6 @@ export default function SurpriseQuiz() {
   };
   // endregion
 
-
   // region [Transactions]
   const fetchServerQuiz = async () => {
     // 서버 호출 전 클라이언트에서 선제적 체크 (불필요한 Edge Request 방지)
@@ -116,7 +115,7 @@ export default function SurpriseQuiz() {
       const response = await fetch("/api/quiz/answer", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ quizId: quizData.id, answer })
+        body: JSON.stringify({ quizId: quizData.id, answer }),
       });
       const result = await response.json();
 
@@ -138,7 +137,7 @@ export default function SurpriseQuiz() {
       const response = await fetch("/api/quiz/reward/generate", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ answerToken })
+        body: JSON.stringify({ answerToken }),
       });
       const result = await response.json();
       if (result.success) {
@@ -147,7 +146,7 @@ export default function SurpriseQuiz() {
         showConfetti();
       } else {
         handleClose();
-        throw Error('알 수 없는 오류가 발생했습니다. 불편을 드려 죄송합니다. 🙇‍♂️')
+        throw Error("알 수 없는 오류가 발생했습니다. 불편을 드려 죄송합니다. 🙇‍♂️");
       }
     } catch (error) {
       console.error("보상 생성 실패:", error);
@@ -184,7 +183,6 @@ export default function SurpriseQuiz() {
     }, 1000);
   };
   // endregion
-
 
   // region [Life Cycles]
   useEffect(() => {
@@ -228,56 +226,88 @@ export default function SurpriseQuiz() {
   return (
     <>
       {isIconVisible && (
-        <button onClick={() => setIsVisible(true)}
-                className="fixed top-[10px] right-[80px] z-[40] flex w-[40px] h-[40px] text-2xl animate-bounce items-center justify-center">
+        <button
+          onClick={() => setIsVisible(true)}
+          className="fixed top-[10px] right-[80px] z-[40] flex w-[40px] h-[40px] text-2xl animate-bounce items-center justify-center"
+        >
           🎁
         </button>
       )}
 
       <KDialog open={isVisible} onOpenChange={handleClose} size="sm" blur={4}>
         <KDialogOverlay />
-        <KDialogContent className="p-4" onPointerDownOutside={(e) => { e.preventDefault(); }}>
+        <KDialogContent
+          className="p-4"
+          onPointerDownOutside={(e) => {
+            e.preventDefault();
+          }}
+        >
           {!isStepReward ? (
             <>
               <KDialogHeader className="items-center text-center">
                 <div className="text-4xl">🎁</div>
                 <KDialogTitle className="text-2xl font-black">깜짝 비트코인 퀴즈!</KDialogTitle>
-                <KDialogDescription className="pt-2 text-md">{quizData?.question}</KDialogDescription>
+                <KDialogDescription className="pt-2 text-md">
+                  {quizData?.question}
+                </KDialogDescription>
               </KDialogHeader>
               <div className="relative grid gap-3 py-4">
                 {quizData?.options.map((option) => (
-                  <KButton key={option} variant="outline" width="full"
-                           className={`font-bold h-10 ${isLoading && "opacity-0"}`}
-                           disabled={isLoading}
-                           onClick={() => handleAnswerSelect(option)}>
+                  <KButton
+                    key={option}
+                    variant="outline"
+                    width="full"
+                    className={`font-bold h-10 ${isLoading && "opacity-0"}`}
+                    disabled={isLoading}
+                    onClick={() => handleAnswerSelect(option)}
+                  >
                     {option}
                   </KButton>
                 ))}
-                {isLoading &&
-                  <KSpinner size="xl" className="absolute top-1/2 left-1/2 -mt-[26px] -ml-[26px]" />}
+                {isLoading && (
+                  <KSpinner size="xl" className="absolute top-1/2 left-1/2 -mt-[26px] -ml-[26px]" />
+                )}
               </div>
             </>
           ) : (
             <div className="flex flex-col items-center text-center">
               <KDialogHeader className="items-center">
-                <KDialogTitle className="text-2xl font-black mb-3 text-orange-500">⚡️ 정답입니다! ⚡️</KDialogTitle>
+                <KDialogTitle className="text-2xl font-black mb-3 text-orange-500">
+                  ⚡️ 정답입니다! ⚡️
+                </KDialogTitle>
                 <KDialogDescription>100 Sats를 받으세요!</KDialogDescription>
-                <KDialogDescription className="text-red-500">창을 닫으면 보상을 받을 수 없습니다.</KDialogDescription>
+                <KDialogDescription className="text-red-500">
+                  창을 닫으면 보상을 받을 수 없습니다.
+                </KDialogDescription>
               </KDialogHeader>
-              <div ref={qrDivRef} data-copy={rewardLnurl}
-                   className="my-4 rounded-2xl bg-white p-1 border-4 border-orange-400">
-                {rewardLnurl &&
-                  <QRCode value={rewardLnurl} size={250} logoImage="https://bitcoin.org/img/icons/logo_ios.png"
-                          logoWidth={55} qrStyle="squares" />}
+              <div
+                ref={qrDivRef}
+                data-copy={rewardLnurl}
+                className="my-4 rounded-2xl bg-white p-1 border-4 border-orange-400"
+              >
+                {rewardLnurl && (
+                  <QRCode
+                    value={rewardLnurl}
+                    size={250}
+                    logoImage="https://bitcoin.org/img/icons/logo_ios.png"
+                    logoWidth={55}
+                    qrStyle="squares"
+                  />
+                )}
               </div>
-              <KButton variant="primary" onClick={handleCopyLnurl} className="mb-4 gap-2">🔗 인보이스 복사</KButton>
+              <KButton variant="primary" onClick={handleCopyLnurl} className="mb-4 gap-2">
+                🔗 인보이스 복사
+              </KButton>
               <p className="text-[11px] text-muted-foreground break-keep px-6 leading-relaxed">
-                60분 이내에 라이트닝 월렛으로 스캔하거나 <br />인보이스 주소를 복사하여 보상을 받으세요
+                60분 이내에 라이트닝 월렛으로 스캔하거나 <br />
+                인보이스 주소를 복사하여 보상을 받으세요
               </p>
             </div>
           )}
           <KDialogFooter className="mt-2 border-t pt-2">
-            <KButton variant="ghost" width="full" onClick={handleClose}>닫기</KButton>
+            <KButton variant="ghost" width="full" onClick={handleClose}>
+              닫기
+            </KButton>
           </KDialogFooter>
         </KDialogContent>
       </KDialog>
