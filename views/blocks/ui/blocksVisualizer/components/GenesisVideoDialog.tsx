@@ -10,15 +10,11 @@ import {
   KDialogOverlay,
   KDialogTitle,
 } from "kku-ui";
-// region Imports
 import { useEffect, useState } from "react";
 
 import "@vidstack/react/player/styles/default/theme.css";
 import "@vidstack/react/player/styles/default/layouts/video.css";
 
-// endregion
-
-// region Types & Constants
 interface ModalTypes {
   open: boolean;
   setOpen: (val: boolean) => void;
@@ -28,7 +24,6 @@ const VIDEO_POSTER_URL = "https://image-store-one.vercel.app/image/l12hjd.webp";
 const VIDEO_URL = "https://image-store-one.vercel.app/video/bitcoin_genesis.mp4";
 const VIDEO_SUBTITLE_URL = "https://image-store-one.vercel.app/video/bitcoin_genesis.srt";
 const BREAKPOINT_WIDTH = 524;
-// endregion
 
 export default function GenesisVideoDialog({ open, setOpen }: ModalTypes) {
   // region Hooks

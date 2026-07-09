@@ -1,13 +1,13 @@
 import type { Metadata } from "next";
+import { PageLayout } from "@/layouts";
+import { env } from "@/shared/config/env";
 import {
   BlocksExplorer,
   BlocksVisualizer,
   BlockTxFees,
   HalvingChartCard,
   HalvingDataCard,
-} from "@/components/features/blocks";
-import { PageLayout } from "@/layouts";
-import { env } from "@/shared/config/env";
+} from "@/views/blocks";
 
 export const metadata: Metadata = {
   title: `${env.NEXT_PUBLIC_TITLE} - Blocks`,

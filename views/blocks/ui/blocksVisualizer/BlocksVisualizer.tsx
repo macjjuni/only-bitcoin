@@ -4,12 +4,11 @@ import { memo, useCallback, useState } from "react";
 import { FreeMode } from "swiper/modules";
 import { Swiper } from "swiper/react";
 import { GENESIS_BLOCK } from "@/shared/constants/block";
-// import { GenesisDataDialog } from "@/components";
 import useStore from "@/shared/stores/store";
 import BlockSwiperSlide from "./components/BlockSwiperSlide";
+import GenesisVideoDialog from "./components/GenesisVideoDialog";
 import "swiper/css";
 import "swiper/css/free-mode";
-import { GenesisVideoDialog } from "@/components";
 
 const MEMPOOL_BLOCK_SEARCH_URL = "https://mempool.space/ko/block/" as const;
 
@@ -37,7 +36,6 @@ const BlocksVisualizer = () => {
 
   return (
     <>
-      {/* <GenesisDataDialog /> */}
       <GenesisVideoDialog open={isGenesisBlockModal} setOpen={setIsGenesisBlockModal} />
       <div className="relative">
         <Swiper
