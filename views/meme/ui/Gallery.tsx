@@ -2,9 +2,9 @@
 
 import { memo, useCallback, useMemo, useState } from "react";
 import { LazyImage } from "@/components";
-import { MemeImageResponseData } from "@/shared/types/api/memeImage";
+import { MemeImageResponseData } from "@/entities/meme";
 import { env } from "@/shared/config/env";
-import ImageModal from "../imageModal/ImageModal";
+import ImageModal from "./ImageModal";
 
 interface GalleryProps {
   images: MemeImageResponseData[];

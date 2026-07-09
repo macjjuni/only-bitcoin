@@ -1,9 +1,10 @@
 'use client'
 
 import { useCallback, useMemo, useState } from 'react'
-import { Gallery, TagList } from '@/components/features/orange-pill/meme'
+import Gallery from './Gallery'
+import TagList from './TagList'
 import { PageLayout } from '@/layouts'
-import { MemeImageResponseData } from '@/shared/types/api/memeImage'
+import { MemeImageResponseData } from '@/entities/meme'
 
 interface MemeClientPageProps {
   initialImages: MemeImageResponseData[];
@@ -38,4 +39,4 @@ const MemeClientPage = ({ initialImages }: MemeClientPageProps) => {
   )
 }
 
-export default MemeClientPage
+export default MemeClientPage;

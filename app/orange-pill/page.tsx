@@ -1,7 +1,7 @@
 import { PageLayout } from "@/layouts";
 import { Metadata } from "next";
 import { env } from "@/shared/config/env";
-import OrangePillContent from "@/components/features/orange-pill/orangePillContent/OrangePillContent";
+import { OrangePillContent } from "@/views/orange-pill";
 
 
 export const metadata: Metadata = {

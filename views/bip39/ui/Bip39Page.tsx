@@ -2,8 +2,8 @@
 
 import { ChangeEvent, memo, useCallback, useDeferredValue, useMemo, useState } from "react";
 import { KTextField } from "kku-ui";
-import { toBip39Binary } from "@/shared/utils/calculate";
-import type { BIP39Item } from "@/shared/query/useBip39Query";
+import { toBip39Binary } from "@/entities/bip39";
+import type { BIP39Item } from "@/entities/bip39";
 
 interface BIP39PageProps {
   initialData: BIP39Item[];
@@ -71,8 +71,8 @@ const Bip39Page = ({ initialData }: BIP39PageProps) => {
               </div>
               <div className="flex justify-end items-center gap-[2px]">
                 {toBip39Binary(index).split("").map((item, idx) => (
-                  // eslint-disable-next-line react/jsx-key
                   <span
+                    key={idx}
                     className={[
                       "w-[17px] h-[17px] border border-current rounded-full transition-colors",
                       item === "*" ? "bg-current" : "bg-transparent",

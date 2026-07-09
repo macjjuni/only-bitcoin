@@ -6,6 +6,9 @@ export default {
         "./components/**/*.{js,ts,jsx,tsx,mdx}",
         "./layouts/**/*.{js,ts,jsx,tsx,mdx}",
         "./shared/**/*.{js,ts,jsx,tsx,mdx}",
+        "./views/**/*.{js,ts,jsx,tsx,mdx}",
+        "./features/**/*.{js,ts,jsx,tsx,mdx}",
+        "./entities/**/*.{js,ts,jsx,tsx,mdx}",
     ],
     theme: {
         extend: {

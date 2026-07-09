@@ -1,8 +1,8 @@
 import { PageLayout } from "@/layouts";
 import { Metadata } from "next";
 import { env } from "@/shared/config/env";
-import BIP39Page from "@/components/features/orange-pill/bip39Page/BIP39Page";
-import useBIP39Query from "@/shared/query/useBip39Query";
+import { Bip39Page } from "@/views/bip39";
+import { getBip39Data } from "@/entities/bip39";
 
 
 export const metadata: Metadata = {
@@ -15,12 +15,11 @@ export const revalidate = 31536000; // 365일
 
 export default async function Page() {
 
-  // eslint-disable-next-line react-hooks/rules-of-hooks
-  const bip39Data = await useBIP39Query();
+  const bip39Data = await getBip39Data();
 
   return (
     <PageLayout className="pt-2 flex flex-col gap-6">
-      <BIP39Page initialData={bip39Data} />
+      <Bip39Page initialData={bip39Data} />
     </PageLayout>
   );
 }

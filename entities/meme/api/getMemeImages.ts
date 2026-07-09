@@ -1,14 +1,19 @@
-import { MemeImageResponseData } from "@/shared/types/api/memeImage";
+import { MemeImageResponseData } from "../model/types";
 import { shuffleArray } from "@/shared/utils/common";
 import { env } from "@/shared/config/env";
-
-const MEME_IMAGE_API_URL = `${env.NEXT_PUBLIC_MEME_IMAGE_URL}/meme.json`;
 
 
 export const getMemeImages = async (): Promise<MemeImageResponseData[]> => {
   try {
-    console.log(MEME_IMAGE_API_URL);
-    const response = await fetch(MEME_IMAGE_API_URL, {
+    const baseUrl = env.NEXT_PUBLIC_MEME_IMAGE_URL;
+    if (!baseUrl) {
+      console.warn("NEXT_PUBLIC_MEME_IMAGE_URL is empty or undefined.");
+      return [];
+    }
+
+    const url = `${baseUrl}/meme.json`;
+    console.log(url);
+    const response = await fetch(url, {
       next: { revalidate: 3600 * 3 }, // 3시간 동안 캐시
     });
 

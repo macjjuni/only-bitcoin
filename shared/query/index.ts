@@ -3,4 +3,3 @@ export { default as useFearGreedIndex } from "@/shared/query/useFearGreedIndexQu
 export { default as useMarketChartData } from "@/shared/query/useMarketChartQuery";
 export { default as usePriceMiniChartData } from "@/shared/query/usePriceMiniChartQuery";
 export { default as useMiningMetricChartData } from "@/shared/query/useMiningMetricChartDataQuery";
-export { default as useBIP39Query } from "@/shared/query/useBip39Query";

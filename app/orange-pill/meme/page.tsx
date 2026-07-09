@@ -1,5 +1,5 @@
-import { getMemeImages } from "@/shared/api/meme";
-import MemeClientPage from "@/components/features/meme/MemeClientPage";
+import { getMemeImages } from "@/entities/meme";
+import { MemeClientPage } from "@/views/meme";
 import { Metadata } from "next";
 import { env } from "@/shared/config/env";
 

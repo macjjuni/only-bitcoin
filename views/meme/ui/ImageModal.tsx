@@ -1,6 +1,7 @@
 'use client';
 
 import { memo, useCallback, useEffect, MouseEvent } from "react";
+import { downloadMemeImage } from "@/features/download-meme";
 
 interface ImageModalProps {
   src: string;
@@ -8,26 +9,6 @@ interface ImageModalProps {
 }
 
 const ImageModal = ({ src, onClose }: ImageModalProps) => {
-
-  // region [Privates]
-  const downloadImage = useCallback(async () => {
-    try {
-      const response = await fetch(src);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = src.split('/').pop() || 'image.webp';
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      window.URL.revokeObjectURL(url);
-    } catch (error) {
-      console.error('Download failed:', error);
-    }
-  }, [src]);
-  // endregion
-
 
   // region [Events]
   const onClickBackdrop = useCallback((e: MouseEvent<HTMLDivElement>) => {
@@ -38,8 +19,8 @@ const ImageModal = ({ src, onClose }: ImageModalProps) => {
 
   const onClickDownload = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();
-    downloadImage();
-  }, [downloadImage]);
+    downloadMemeImage(src);
+  }, [src]);
 
   const onClickClose = useCallback((e: MouseEvent<HTMLButtonElement>) => {
     e.stopPropagation();

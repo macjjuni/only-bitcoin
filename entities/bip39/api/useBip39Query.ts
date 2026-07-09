@@ -1,4 +1,4 @@
-export type BIP39Item = { index: number, word: string };
+import type { BIP39Item } from "../model/types";
 
 const BIP39_URL = "https://raw.githubusercontent.com/bitcoin/bips/refs/heads/master/bip-0039/english.txt" as const;
 
