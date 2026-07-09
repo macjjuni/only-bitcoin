@@ -3,10 +3,10 @@
 import { KSpinner } from "kku-ui";
 import dynamic from "next/dynamic";
 import { useCallback, useMemo } from "react";
-import { ChartChanger } from "@/components/features/overview";
-import { createChartOptions } from "@/components/features/overview/chartShell/createChartOptions";
-import type { OverviewChartShellProps } from "@/components/features/overview/chartShell/OverviewChartShell.interface";
 import useStore from "@/shared/stores/store";
+import ChartChanger from "../chartChanger/ChartChanger";
+import { createChartOptions } from "./createChartOptions";
+import type { OverviewChartShellProps } from "./OverviewChartShell.interface";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 

@@ -13,11 +13,11 @@ import { arrayMove, horizontalListSortingStrategy, SortableContext } from "@dnd-
 import { KButton, kToast } from "kku-ui";
 import { useTransitionRouter } from "next-view-transitions";
 import { useEffect, useState } from "react";
-import { WidgetItem } from "@/components/features/overview";
 import { FearAndGreedDialog } from "@/components/feedbacks";
 import { useBitcoinDominanceQuery, useFearGreedIndex } from "@/shared/query";
 import useStore from "@/shared/stores/store";
 import { calcPremiumPercent, minedPercent, usdToSats } from "@/shared/utils/calculate";
+import WidgetItem from "./WidgetItem";
 
 interface MacroVO {
   id: number;

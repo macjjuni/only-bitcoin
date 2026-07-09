@@ -1,13 +1,13 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import OverviewChartShell from "@/components/features/overview/chartShell/OverviewChartShell";
-import type { ChartIntervalOption } from "@/components/features/overview/chartShell/OverviewChartShell.interface";
-import MiningMetricHeader from "@/components/features/overview/miningMetricChart/MiningMetricHeader";
 import { useMiningMetricChartData } from "@/shared/query";
 import useStore from "@/shared/stores/store";
 import type { MiningMetricChartIntervalType } from "@/shared/stores/store.interface";
 import { formatDifficulty, formatHashrate } from "@/shared/utils/number";
+import OverviewChartShell from "../chartShell/OverviewChartShell";
+import type { ChartIntervalOption } from "../chartShell/OverviewChartShell.interface";
+import MiningMetricHeader from "./MiningMetricHeader";
 
 /*
  * 해시레이트 모든 차트는 데이터 크기가 많아 시간기반 균일 샘플링으로 최적화(64%) 했으나,

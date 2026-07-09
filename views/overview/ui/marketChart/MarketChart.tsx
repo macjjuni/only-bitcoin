@@ -1,11 +1,11 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import OverviewChartShell from "@/components/features/overview/chartShell/OverviewChartShell";
-import type { ChartIntervalOption } from "@/components/features/overview/chartShell/OverviewChartShell.interface";
 import { useMarketChartData } from "@/shared/query";
 import useStore from "@/shared/stores/store";
 import type { MarketChartIntervalType } from "@/shared/stores/store.interface";
+import OverviewChartShell from "../chartShell/OverviewChartShell";
+import type { ChartIntervalOption } from "../chartShell/OverviewChartShell.interface";
 
 const marketChartIntervalOptions: ChartIntervalOption<MarketChartIntervalType>[] = [
   { text: "1D", value: "1d" },

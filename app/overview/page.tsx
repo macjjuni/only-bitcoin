@@ -1,13 +1,7 @@
 import type { Metadata } from "next";
-import {
-  BlockHalvingCard,
-  ClientChart,
-  MacroWidgetPanel,
-  PricePanel,
-} from "@/components/features/overview";
-
 import { PageLayout } from "@/layouts";
 import { env } from "@/shared/config/env";
+import { BlockHalvingCard, ClientChart, MacroWidgetPanel, PricePanel } from "@/views/overview";
 
 export const metadata: Metadata = {
   title: `${env.NEXT_PUBLIC_TITLE} - Overview`,

@@ -1,8 +1,9 @@
 "use client";
 
 import { memo } from "react";
-import { MarketChart, MiningMetricChart } from "@/components/features/overview";
 import useStore from "@/shared/stores/store";
+import MarketChart from "../marketChart/MarketChart";
+import MiningMetricChart from "../miningMetricChart/MiningMetricChart";
 
 const ClientChart = () => {
   // region [Hooks]

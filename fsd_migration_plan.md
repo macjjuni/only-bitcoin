@@ -162,7 +162,7 @@ FSD 아키텍처에서 UI 컴포넌트는 **비즈니스 결합도**와 **재사
 
 | 페이지명 | 기존 경로 | FSD 목표 페이지 경로 | 핵심 이관 위젯 / 피처 | 마이그레이션 상태 |
 | :--- | :--- | :--- | :--- | :--- |
-| **대시보드 (Overview)** | `app/overview/` | `src/pages/overview/` | `widgets/price-dashboard-panel`<br>`widgets/mining-metric-chart` | ⬜ 대기 |
+| **대시보드 (Overview)** | `app/overview/` | `views/overview/` | `widgets/price-dashboard-panel`<br>`widgets/mining-metric-chart` | ✅ 완료 |
 | **블록 현황 (Blocks)** | `app/blocks/` | `views/blocks/` | `widgets/mempool-visualizer`<br>`widgets/block-tx-fees` | ✅ 완료 |
 | **계산기 (Btc2Fiat)** | `app/btc2fiat/` | `views/btc2fiat/` | `widgets/btc-calculator`<br>`features/convert-btc-fiat` | ✅ 완료 |
 | **프리미엄 (Premium)** | `app/premium/` | `views/premium/` | `widgets/premium-dashboard`<br>`entities/exchange-rate` | ✅ 완료 |
