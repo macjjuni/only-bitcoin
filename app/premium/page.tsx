@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { PremiumLottie, PremiumPanel } from "@/components/features/premium";
 import { PageLayout } from "@/layouts";
 import { env } from "@/shared/config/env";
+import { PremiumLottie, PremiumPanel } from "@/views/premium";
 
 export const metadata: Metadata = {
   title: `${env.NEXT_PUBLIC_TITLE} - Premium`,
