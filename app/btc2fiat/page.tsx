@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import { ConvertPanel, PremiumBadge } from "@/components/features/btc2fiat";
 import { PageLayout } from "@/layouts";
 import { env } from "@/shared/config/env";
+import { ConvertPanel, PremiumBadge } from "@/views/btc2fiat";
 
 export const metadata: Metadata = {
   title: `${env.NEXT_PUBLIC_TITLE} - BTC to KRW`,

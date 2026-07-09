@@ -20,11 +20,12 @@ import {
   useCallback,
   useRef,
 } from "react";
-import { PremiumField, UnitDropdownMenu } from "@/components/features/btc2fiat";
 import { useCopyOnClick } from "@/shared/hooks";
 import type { UnitType } from "@/shared/stores/store.interface";
 import { isNumber } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
+import PremiumField from "./PremiumField";
+import UnitDropdownMenu from "./UnitDropdownMenu";
 
 export interface ConvertCardProps {
   inputActive: boolean;

@@ -164,7 +164,7 @@ FSD 아키텍처에서 UI 컴포넌트는 **비즈니스 결합도**와 **재사
 | :--- | :--- | :--- | :--- | :--- |
 | **대시보드 (Overview)** | `app/overview/` | `src/pages/overview/` | `widgets/price-dashboard-panel`<br>`widgets/mining-metric-chart` | ⬜ 대기 |
 | **블록 현황 (Blocks)** | `app/blocks/` | `src/pages/blocks/` | `widgets/mempool-visualizer`<br>`widgets/block-tx-fees` | ⬜ 대기 |
-| **계산기 (Btc2Fiat)** | `app/btc2fiat/` | `src/pages/btc2fiat/` | `widgets/btc-calculator`<br>`features/convert-btc-fiat` | ⬜ 대기 |
+| **계산기 (Btc2Fiat)** | `app/btc2fiat/` | `views/btc2fiat/` | `widgets/btc-calculator`<br>`features/convert-btc-fiat` | ✅ 완료 |
 | **프리미엄 (Premium)** | `app/premium/` | `src/pages/premium/` | `widgets/premium-dashboard`<br>`entities/exchange-rate` | ⬜ 대기 |
 | **설정 (Settings)** | `app/settings/` | `views/settings/` | `widgets/settings-form`<br>`features/toggle-theme` | ✅ 완료 |
 | **오렌지필 메인 (Orange Pill)** | `app/orange-pill/` | `views/orange-pill/` | `widgets/orange-pill-content` | ✅ 완료 |

@@ -1,11 +1,11 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo } from "react";
-import { ConvertCard } from "@/components/features/btc2fiat";
 import useStore from "@/shared/stores/store";
 import type { UnitType } from "@/shared/stores/store.interface";
 import { btcToSatoshi, floorToDecimal } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
+import ConvertCard from "./ConvertCard";
 
 const ConvertPanel = () => {
   // region [Hooks]
@@ -58,56 +58,119 @@ const ConvertPanel = () => {
       setSats(btcToSatoshi(btcCountNum));
     }
 
+    if (focusCurrency === "SATS") {
+      const satsNum = parseFloat(sats.replace(/,/g, ""));
+      const btcCountNum = satsNum / 100_000_000;
+      const usdFromBtcCount = floorToDecimal(premiumUsdPrice * btcCountNum, 2);
+
+      setUsd(comma(usdFromBtcCount, false));
+      setKrw(comma(premiumKrwPrice * btcCountNum));
+      setBtcCount(satoshiFormatter(satsNum));
+    }
+
     if (focusCurrency === "KRW") {
       const krwNum = parseFloat(krw.replace(/,/g, ""));
-      const btcCountFromKrw = floorToDecimal(krwNum / premiumKrwPrice, 8);
-      const usdFromKrw = (krwNum / exRate).toFixed(2);
+      const btcFromKrw = krwNum / premiumKrwPrice;
 
-      setBtcCount(comma(btcFormatter(btcCountFromKrw)));
-      setUsd(Number(usdFromKrw) === 0 ? "0" : comma(usdFromKrw));
-      setSats(btcToSatoshi(krwNum / premiumKrwPrice));
+      setUsd(comma(floorToDecimal((krwNum / premiumKrwPrice) * premiumUsdPrice, 2), false));
+      setBtcCount(btcFormatter(btcFromKrw));
+      setSats(btcToSatoshi(btcFromKrw));
     }
 
     if (focusCurrency === "USD") {
       const usdNum = parseFloat(usd.replace(/,/g, ""));
-      const btcCountFromUsd = floorToDecimal(usdNum / premiumUsdPrice, 8);
+      const btcFromUsd = usdNum / premiumUsdPrice;
 
-      setBtcCount(btcFormatter(btcCountFromUsd));
-      setKrw(comma(Math.floor(usdNum * exRate)));
-      setSats(btcToSatoshi(btcCountFromUsd));
+      setKrw(comma(btcFromUsd * premiumKrwPrice));
+      setBtcCount(btcFormatter(btcFromUsd));
+      setSats(btcToSatoshi(btcFromUsd));
     }
-
-    if (focusCurrency === "SATS") {
-      const satsNum = parseFloat(sats.replace(/,/g, ""));
-      const btcCountNum = satoshiFormatter(satsNum);
-      const usdFromBtcCount = floorToDecimal(premiumUsdPrice * Number(btcCountNum), 2);
-
-      setKrw(comma(premiumKrwPrice * Number(btcCountNum)));
-      setUsd(comma(usdFromBtcCount, false));
-      setBtcCount(Number(btcCountNum) === 0 ? "0" : comma(btcCountNum));
-    }
-  }, [focusCurrency, btcCount, krw, usd, sats, krwPrice, usdPrice, exRate, premium]);
-
-  const resetPremium = useCallback(() => {
-    setPremium(0);
-  }, [setPremium]);
+  }, [
+    focusCurrency,
+    btcCount,
+    sats,
+    krw,
+    usd,
+    premium,
+    krwPrice,
+    usdPrice,
+    setUsd,
+    setKrw,
+    setSats,
+    setBtcCount,
+    btcFormatter,
+    satoshiFormatter,
+  ]);
   // endregion
 
   // region [Events]
-  const onChangeUsd = useCallback(setUsd, []);
-  const onChangeKrw = useCallback(setKrw, []);
-  const onChangeBtcCount = useCallback(setBtcCount, []);
-  const onChangeSats = useCallback(setSats, []);
-  const onChangeUnit = useCallback((unit: UnitType) => {
-    setFocusCurrency(unit);
-    resetPremium();
-  }, []);
+  const onChangeBtcCount = useCallback(
+    (val: string) => {
+      setBtcCount(val);
+      setFocusCurrency("BTC");
+    },
+    [setBtcCount, setFocusCurrency],
+  );
+
+  const onChangeSats = useCallback(
+    (val: string) => {
+      setSats(val);
+      setFocusCurrency("SATS");
+    },
+    [setSats, setFocusCurrency],
+  );
+
+  const onChangeKrw = useCallback(
+    (val: string) => {
+      setKrw(val);
+      setFocusCurrency("KRW");
+    },
+    [setKrw, setFocusCurrency],
+  );
+
+  const onChangeUsd = useCallback(
+    (val: string) => {
+      setUsd(val);
+      setFocusCurrency("USD");
+    },
+    [setUsd, setFocusCurrency],
+  );
+
+  const onChangeUnit = useCallback(
+    (unit: UnitType) => {
+      if (unit === "BTC") {
+        setFocusCurrency("BTC");
+      }
+      if (unit === "SATS") {
+        setFocusCurrency("SATS");
+      }
+      if (unit === "KRW") {
+        setFocusCurrency("KRW");
+      }
+      if (unit === "USD") {
+        setFocusCurrency("USD");
+      }
+    },
+    [setFocusCurrency],
+  );
   // endregion
 
   // region [Life Cycles]
-  useEffect(synchronizeValue, [synchronizeValue]);
+  // 1. 값 변경 대응을 위한 동기화 감시
+  useEffect(() => {
+    synchronizeValue();
+  }, [synchronizeValue]);
+
+  // 2. 외부 데이터 변동 및 프리미엄 소수점 대응
+  useEffect(() => {
+    // 0 이하 프리미엄 방지
+    if (premium < 0) {
+      setPremium(0);
+    }
+  }, [premium, setPremium]);
   // endregion
 
+  // region [memos]
   const KrwNumberField = useMemo(() => {
     const isCurrentCurrency = focusCurrency === "KRW";
     const premiumAmount = Math.floor(krwPrice * (premium / 100));
@@ -135,7 +198,7 @@ const ConvertPanel = () => {
         onChangeUnit={onChangeUnit}
         isPremium={focusCurrency !== "USD" && premium !== 0}
         topDescription={topDescription}
-        bottomDescription={`1BTC = ${comma(krwPrice)} ${focusCurrency === "USD" && `| 1$ = ₩${comma(exRate)}`}`}
+        bottomDescription={`1BTC = ${comma(krwPrice)} ${focusCurrency === "USD" ? `| 1$ = ₩${comma(exRate)}` : ""}`}
       />
     );
   }, [krw, krwPrice, focusCurrency, premium, onChangeKrw, onChangeUnit, exRate]);
