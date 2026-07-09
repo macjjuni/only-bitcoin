@@ -27,10 +27,6 @@ const PriceListRowGroup = () => {
   const setUsdtStandard = useStore((state) => state.setUsdtStandard);
   // endregion
 
-  // region [Privates]
-
-  // endregion
-
   // region [memo]
   const favoriteRouteOptions = useMemo(
     () => favoriteRouteList.map((route) => ({ label: route.title, value: route.path })),

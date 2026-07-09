@@ -3,7 +3,7 @@
 import { KButton, KIcon, KListGroup, KListRow, KListRowAccordion, kToast } from "kku-ui";
 import { clipboardUtil } from "kku-util";
 import { CodeXml, QrCode as QrCodeIcon } from "lucide-react";
-import { memo, useCallback } from "react";
+import { memo, useCallback, useRef } from "react";
 import { QRCode } from "react-qrcode-logo";
 import { sourceOptions } from "@/shared/constants/setting";
 
@@ -12,14 +12,19 @@ const FEEDBACK_URL = process.env.NEXT_PUBLIC_FEEDBACK_URL || "https://x.com/a7w2
 const DONATE_VALUE = "donation" as const;
 
 const InfoListRowGroup = () => {
+  const donationRef = useRef<HTMLDivElement>(null);
+
   // region [Privates]
   const onScrollDown = useCallback(() => {
-    const container: HTMLElement | null = document.querySelector(".only-btc__content");
-    if (container) {
-      setTimeout(() => {
-        container.scrollTo({ top: container.scrollHeight, behavior: "smooth" });
-      }, 300);
-    }
+    console.log("onScrollDown triggered using scrollIntoView");
+    setTimeout(() => {
+      if (donationRef.current) {
+        donationRef.current.scrollIntoView({
+          behavior: "smooth",
+          block: "center",
+        });
+      }
+    }, 300);
   }, []);
 
   const onRouteToFeedback = useCallback(() => {
@@ -29,6 +34,7 @@ const InfoListRowGroup = () => {
 
   // region [Events]
   const onChangeDonationRow = useCallback((val: string) => {
+    console.log("onChangeDonationRow called with value:", val);
     if (val === DONATE_VALUE) {
       onScrollDown();
     }
@@ -44,24 +50,26 @@ const InfoListRowGroup = () => {
 
   return (
     <KListGroup header="정보">
-      <KListRowAccordion
-        value={DONATE_VALUE}
-        label="개발자 후원"
-        icon={<QrCodeIcon />}
-        onValueChange={onChangeDonationRow}
-      >
-        <div className="flex flex-col justify-center items-center gap-4 pb-4">
-          <QRCode
-            value={LIGHTNING_ADDRESS}
-            size={264}
-            logoImage="https://www.walletofsatoshi.com/assets/images/icon.png"
-            logoPadding={2}
-          />
-          <KButton variant="primary" onClick={onClickCopyAddress}>
-            라이트닝 주소 복사
-          </KButton>
-        </div>
-      </KListRowAccordion>
+      <div ref={donationRef}>
+        <KListRowAccordion
+          value={DONATE_VALUE}
+          label="개발자 후원"
+          icon={<QrCodeIcon />}
+          onValueChange={onChangeDonationRow}
+        >
+          <div className="flex flex-col justify-center items-center gap-4 pb-4">
+            <QRCode
+              value={LIGHTNING_ADDRESS}
+              size={264}
+              logoImage="https://www.walletofsatoshi.com/assets/images/icon.png"
+              logoPadding={2}
+            />
+            <KButton variant="primary" onClick={onClickCopyAddress}>
+              라이트닝 주소 복사
+            </KButton>
+          </div>
+        </KListRowAccordion>
+      </div>
 
       <KListRowAccordion value="resource" label="리소스 출처" icon={<CodeXml />}>
         <ul>

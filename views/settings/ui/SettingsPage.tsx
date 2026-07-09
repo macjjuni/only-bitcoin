@@ -2,18 +2,13 @@
 
 import dynamic from "next/dynamic";
 import { memo, useMemo } from "react";
-import {
-  InfoListRowGroup,
-  PriceListRowGroup,
-  StyleListRowGroup,
-} from "@/components/features/settings";
 import useStore from "@/shared/stores/store";
 import { isSafari } from "@/shared/utils/device";
+import InfoListRowGroup from "./InfoListRowGroup";
+import PriceListRowGroup from "./PriceListRowGroup";
+import StyleListRowGroup from "./StyleListRowGroup";
 
-const DynamicInstallListRowGroup = dynamic(
-  () => import("@/components/features/settings").then((mod) => mod.InstallListRowGroup),
-  { ssr: false },
-);
+const DynamicInstallListRowGroup = dynamic(() => import("./InstallListRowGroup"), { ssr: false });
 
 const SettingsPage = () => {
   // region [Hooks]

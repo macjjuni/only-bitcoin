@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
-import SettingsPage from "@/components/features/settings/SettingsPage";
 import { PageLayout } from "@/layouts";
 import { env } from "@/shared/config/env";
+import { SettingsPage } from "@/views/settings";
 
 export const metadata: Metadata = {
   title: `${env.NEXT_PUBLIC_TITLE} - Settings`,

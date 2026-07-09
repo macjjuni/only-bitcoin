@@ -32,7 +32,18 @@ const useStore = create<StoreType>()(
       ...createBtc2FiatSlice(...a),
       ...createSettingSlice(...a),
     }),
-    { name: persistKey },
+    {
+      name: persistKey,
+      partialize: (state) => {
+        // deferredPrompt는 브라우저 네이티브 이벤트 객체이므로 로컬 스토리지에 직렬화하여 저장하지 않습니다.
+        const { setting, ...rest } = state;
+        const { deferredPrompt, ...settingWithoutPrompt } = setting;
+        return {
+          ...rest,
+          setting: settingWithoutPrompt,
+        } as StoreType;
+      },
+    },
   ),
 );
 

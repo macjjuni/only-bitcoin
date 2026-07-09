@@ -11,10 +11,6 @@ const nextConfig: NextConfig = {
   env: { NEXT_PUBLIC_APP_VERSION: APP_VERSION },
   // endregion
 
-  eslint: {
-    ignoreDuringBuilds: true,
-  },
-
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
