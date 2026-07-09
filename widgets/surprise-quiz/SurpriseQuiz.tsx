@@ -13,11 +13,11 @@ import {
 } from "kku-ui";
 import { useEffect, useRef, useState } from "react";
 import { QRCode } from "react-qrcode-logo";
-import useQuizState from "@/components/feedbacks/surpriseQuiz/useQuizState";
 import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/shared/constants/setting";
 import useCopyOnClick from "@/shared/hooks/useCopyOnClick";
 import useConfettiStore from "@/shared/stores/confettiStore";
 import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
+import useQuizState from "./useQuizState";
 
 // region [Privates]
 const LIMIT_KEY = `${QUIZ_COOKIE_KEY}_done`;

@@ -3,7 +3,6 @@
 import { KToast } from "kku-ui";
 import dynamic from "next/dynamic";
 import { memo, Suspense } from "react";
-import PwaRegister from "@/components/initializer/PwaRegister";
 import { getToastProps } from "@/shared/config/toast";
 import {
   useBinanceSocket,
@@ -18,8 +17,9 @@ import {
   useUpbitSocket,
   useUsdExchangeRate,
 } from "@/shared/hooks/initializer";
+import PwaRegister from "./PwaRegister";
 
-const AlarmManager = dynamic(() => import("@/components/feedbacks/AlarmManager"), {
+const AlarmManager = dynamic(() => import("@/widgets/alarm-manager").then((m) => m.AlarmManager), {
   ssr: false,
 });
 

@@ -1,15 +1,13 @@
 "use client";
 
 import { memo, useCallback, useEffect, useState } from "react";
-import {
-  DomainNoticeDialog,
-  PWAInstallAlertBottomSheet,
-  PWAInstallAlertIOSBottomSheet,
-} from "@/components/feedbacks";
 import { NOTICE_COOKIE_KEY, PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import { useInitializePWA } from "@/shared/hooks/initializer";
 import { getCookie } from "@/shared/utils/cookie";
 import { isIOSPWA, isIOSSafari, isPWAInstalled, isSafari } from "@/shared/utils/device";
+import DomainNoticeDialog from "./components/DomainNoticeDialog";
+import PWAInstallAlertBottomSheet from "./components/PWAInstallAlertBottomSheet";
+import PWAInstallAlertIOSBottomSheet from "./components/PWAInstallAlertIOSBottomSheet";
 
 const AlarmManager = () => {
   type DisplayState = "NONE" | "DOMAIN" | "IOS_PWA" | "OTHER_PWA";
