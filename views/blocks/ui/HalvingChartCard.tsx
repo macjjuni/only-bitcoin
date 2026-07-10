@@ -1,10 +1,9 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
-import { calcPercentage, getNextHalvingData } from "@/entities/block";
+import { calcPercentage, getNextHalvingData, useBlockStore } from "@/entities/block";
 import { useMounted } from "@/shared/hooks";
 import { calcDate } from "@/shared/lib/date";
-import useStore from "@/shared/stores/store";
 import { CountText } from "@/shared/ui";
 
 const circumference = 2 * Math.PI * 50; // 원의 둘레
@@ -12,7 +11,7 @@ const circumference = 2 * Math.PI * 50; // 원의 둘레
 const HalvingChartCard = () => {
   // region [Hooks]
   const isMount = useMounted();
-  const currentBlockHeight = useStore((state) => state.blockData[0]?.height ?? 0);
+  const currentBlockHeight = useBlockStore((state) => state.blockData[0]?.height ?? 0);
 
   const nextHalvingData = useMemo(
     () => getNextHalvingData(currentBlockHeight),

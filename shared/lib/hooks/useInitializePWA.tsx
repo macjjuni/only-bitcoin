@@ -2,8 +2,8 @@
 
 import { useEffect } from "react";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
+import type { BeforeInstallPromptEvent } from "@/shared/stores/slices/settingSlice";
 import useStore from "@/shared/stores/store";
-import type { BeforeInstallPromptEvent } from "@/shared/stores/store.interface";
 import { setCookie } from "@/shared/utils/cookie";
 
 export default function useInitializePWA() {

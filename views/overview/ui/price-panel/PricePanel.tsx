@@ -1,13 +1,14 @@
 "use client";
 
 import { useMemo } from "react";
+import { useBitcoinStore } from "@/entities/bitcoin";
 import useStore from "@/shared/stores/store";
 import { CountText, UpdownIcon } from "@/shared/ui";
 import PriceMiniChart from "./PriceMiniChart";
 
 export default function PricePanel() {
   // region [Hooks]
-  const bitcoinPrice = useStore((state) => state.bitcoinPrice);
+  const bitcoinPrice = useBitcoinStore((state) => state.bitcoinPrice);
   const currency = useStore((state) => state.setting.currency);
 
   const Currencies = useMemo(

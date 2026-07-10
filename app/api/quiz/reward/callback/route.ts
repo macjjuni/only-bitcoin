@@ -1,11 +1,11 @@
 import * as bolt11 from "bolt11";
 import { NextResponse } from "next/server";
-import { sendLnPayment } from "@/entities/wallet/api/blink";
 import {
   claimRewardToken,
   releaseRewardToken,
   validateRewardToken,
 } from "@/entities/quiz/api/quiz-rewards";
+import { sendLnPayment } from "@/entities/wallet/api/blink";
 import { env } from "@/shared/config/env";
 
 // region [Privates]

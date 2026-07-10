@@ -4,8 +4,8 @@ import { useEffect } from "react";
 import { type BinanceInterval, fetchBinanceKlines } from "@/entities/bitcoin/api/binance";
 import { fetchBlockchainMarketPriceAll } from "@/entities/bitcoin/api/blockchain";
 import type { MarketChartFormattedData } from "@/entities/market";
-import type { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import { isDev } from "@/shared/utils/common";
+import type { MarketChartIntervalType } from "../model/chartSlice";
 
 /**
  * 인터벌별 Binance Klines 파라미터 매핑

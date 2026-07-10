@@ -1,8 +1,8 @@
 import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
+import { useBitcoinStore } from "@/entities/bitcoin";
 import { BINANCE_MARKET_FLAG } from "@/entities/market";
-import useStore from "@/shared/stores/store";
 import { isDev } from "@/shared/utils/common";
 import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
@@ -11,18 +11,18 @@ const BINANCE_URL = `wss://stream.binance.com:9443/ws/btcusdt@ticker`;
 
 export default function useBinanceSocket() {
   // region [Hooks]
-  const usdMarket = useStore((store) => store.usdMarket);
+  const usdMarket = useBitcoinStore((store) => store.usdMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
   // endregion
 
   const resetUsdDisconnected = useCallback(() => {
-    const { bitcoinPrice, setBitcoinUsdPrice } = useStore.getState();
+    const { bitcoinPrice, setBitcoinUsdPrice } = useBitcoinStore.getState();
     setBitcoinUsdPrice({ ...bitcoinPrice, isUsdConnected: false });
   }, []);
 
   const handleBTCUpdate = useCallback(
     (price: number, usdUpdateTimestamp: number, usdChange24h: string) => {
-      const { setBitcoinUsdPrice } = useStore.getState();
+      const { setBitcoinUsdPrice } = useBitcoinStore.getState();
       const usdChange24hStr = floorToDecimal(Number(usdChange24h), 2).toString();
 
       setBitcoinUsdPrice({

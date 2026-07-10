@@ -1,12 +1,12 @@
 "use client";
 
 import { Fragment, memo, useMemo } from "react";
-import useStore from "@/shared/stores/store";
+import { useBlockStore } from "@/entities/block";
 import { CountText } from "@/shared/ui";
 
 const BlockTxFees = () => {
   // region [Hooks]
-  const fees = useStore((state) => state.fees);
+  const fees = useBlockStore((state) => state.fees);
   const feeDataList = useMemo(
     () => [
       { label: "최하위 순위", value: fees.economyFee },

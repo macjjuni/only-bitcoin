@@ -13,9 +13,9 @@ import { arrayMove, horizontalListSortingStrategy, SortableContext } from "@dnd-
 import { KButton, kToast } from "kku-ui";
 import { useTransitionRouter } from "next-view-transitions";
 import { useEffect, useState } from "react";
+import { useBitcoinStore } from "@/entities/bitcoin";
 import { useBitcoinDominanceQuery, useFearGreedIndex } from "@/entities/bitcoin/client";
-import { minedPercent } from "@/entities/block";
-import useStore from "@/shared/stores/store";
+import { minedPercent, useBlockStore } from "@/entities/block";
 import { calcPremiumPercent, usdToSats } from "@/shared/utils/calculate";
 import FearAndGreedDialog from "./components/FearAndGreedDialog";
 import WidgetItem from "./WidgetItem";
@@ -35,12 +35,12 @@ export default function MacroWidgetPanel() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [IsFearAndGreedDialog, setIsFearAndGreedDialog] = useState(false);
 
-  const macroSequence = useStore((state) => state.macroSequence);
-  const setMacroSequence = useStore((state) => state.setMacroSequence);
-  const { krw, usd } = useStore((state) => state.bitcoinPrice);
-  const usdExRate = useStore((state) => state.exRate.value);
-  const blockData = useStore((state) => state.blockData);
-  const fees = useStore((state) => state.fees);
+  const macroSequence = useBitcoinStore((state) => state.macroSequence);
+  const setMacroSequence = useBitcoinStore((state) => state.setMacroSequence);
+  const { krw, usd } = useBitcoinStore((state) => state.bitcoinPrice);
+  const usdExRate = useBitcoinStore((state) => state.exRate.value);
+  const blockData = useBlockStore((state) => state.blockData);
+  const fees = useBlockStore((state) => state.fees);
 
   /**
    * dnd-kit 센서 설정

@@ -4,8 +4,8 @@ import { KSkeleton } from "kku-ui";
 import { memo, useMemo } from "react";
 import CountUp from "react-countup";
 import { useMounted } from "@/shared/hooks";
-import useStore from "@/shared/stores/store";
 import type { ComponentBaseTypes } from "@/shared/lib/types";
+import useStore from "@/shared/stores/store";
 
 interface CountTextTypes extends ComponentBaseTypes {
   value: number;

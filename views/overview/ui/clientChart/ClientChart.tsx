@@ -1,13 +1,13 @@
 "use client";
 
 import { memo } from "react";
-import useStore from "@/shared/stores/store";
+import { useBitcoinStore } from "@/entities/bitcoin";
 import MarketChart from "../marketChart/MarketChart";
 import MiningMetricChart from "../mining-metric-chart/MiningMetricChart";
 
 const ClientChart = () => {
   // region [Hooks]
-  const overviewChart = useStore((store) => store.overviewChart);
+  const overviewChart = useBitcoinStore((store) => store.overviewChart);
   // endregion
 
   return (

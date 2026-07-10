@@ -1,9 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { kToast } from "kku-ui";
 import { useCallback, useEffect } from "react";
+import type { ExRateTypes } from "@/entities/bitcoin";
+import { useBitcoinStore } from "@/entities/bitcoin";
 import { getCurrentDate } from "@/shared/lib/date";
 import useStore from "@/shared/stores/store";
-import type { ExRateTypes } from "@/shared/stores/store.interface";
 import { isDev } from "@/shared/utils/common";
 
 interface ICurrency {
@@ -23,7 +24,7 @@ const apiUrl = `https://m.search.naver.com/p/csearch/content/qapirender.nhn?key=
 
 export default function useUsdExchangeRate() {
   const isUsdtStandard = useStore((state) => state.setting.isUsdtStandard);
-  const setExRate = useStore((state) => state.setExRate);
+  const setExRate = useBitcoinStore((state) => state.setExRate);
 
   const query = useQuery<INaverExchangeRateResponse, Error>({
     queryKey: ["usd-exchange-rate"],

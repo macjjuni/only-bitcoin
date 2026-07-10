@@ -3,10 +3,10 @@ import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
 import type { MemPoolBlockTypes } from "@/entities/block";
 import useConfettiStore from "@/shared/stores/confettiStore";
-import useStore from "@/shared/stores/store";
-import type { BlockTypes, FeesTypes } from "@/shared/stores/store.interface";
 import { deepEqual } from "@/shared/utils/common";
 import { comma } from "@/shared/utils/string";
+import type { BlockTypes, FeesTypes } from "../../model/blockSlice";
+import useBlockStore from "../../model/blockStore";
 
 const MEMPOOL_WS_URL = "wss://mempool.space/api/v1/ws";
 
@@ -14,7 +14,7 @@ export default function useMempoolSocket() {
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
 
   const handleMempoolBlocks = useCallback((blocks: MemPoolBlockTypes[]) => {
-    const { setBlockData } = useStore.getState();
+    const { setBlockData } = useBlockStore.getState();
     const sanitizedBlocks: BlockTypes[] = blocks
       .map(({ id, height, timestamp, size, extras }) => ({
         id,
@@ -29,7 +29,7 @@ export default function useMempoolSocket() {
   }, []);
 
   const handleMempoolBlock = useCallback((block: MemPoolBlockTypes) => {
-    const { blockData, setBlockData } = useStore.getState();
+    const { blockData, setBlockData } = useBlockStore.getState();
 
     const isContained = blockData.some((blockItem) => blockItem.height === block.height);
     if (isContained) return;
@@ -44,7 +44,7 @@ export default function useMempoolSocket() {
   }, []);
 
   const handleMempoolFees = useCallback((resFees: FeesTypes) => {
-    const { fees, setFees } = useStore.getState();
+    const { fees, setFees } = useBlockStore.getState();
     if (!deepEqual(fees, resFees)) {
       setFees(resFees);
     }

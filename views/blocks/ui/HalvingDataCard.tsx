@@ -2,12 +2,11 @@
 
 import { KAccordion, KAccordionContent, KAccordionItem, KAccordionTrigger } from "kku-ui";
 import { memo, useMemo } from "react";
-import { blockHalvingData } from "@/entities/block";
-import useStore from "@/shared/stores/store";
+import { blockHalvingData, useBlockStore } from "@/entities/block";
 
 const HalvingDataCard = () => {
   // region [Templates]
-  const currentBlockHeight = useStore((state) => state.blockData[0]?.height ?? 0);
+  const currentBlockHeight = useBlockStore((state) => state.blockData[0]?.height ?? 0);
 
   const nextHalvingIndex = useMemo(
     () => blockHalvingData.findIndex(({ blockHeight }) => blockHeight > currentBlockHeight),

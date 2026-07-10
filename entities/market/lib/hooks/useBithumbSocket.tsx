@@ -1,6 +1,7 @@
 import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
+import { useBitcoinStore } from "@/entities/bitcoin";
 import { BITHUMB_MARKET_FLAG } from "@/entities/market";
 import { formatDate } from "@/shared/lib/date";
 import { generateUUID } from "@/shared/lib/uuid";
@@ -31,18 +32,19 @@ const getRequestPayload = () => [
 
 export default function useBithumbSocket() {
   // region [Hooks]
-  const krwMarket = useStore((store) => store.krwMarket);
+  const krwMarket = useBitcoinStore((store) => store.krwMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
   // endregion
 
   const resetKrwDisconnected = () => {
-    const { bitcoinPrice, setBitcoinKrwPrice } = useStore.getState();
+    const { bitcoinPrice, setBitcoinKrwPrice } = useBitcoinStore.getState();
     setBitcoinKrwPrice({ ...bitcoinPrice, isKrwConnected: false });
   };
 
   const handleBTCUpdate = useCallback(
     (price: number, krwUpdateTimestamp: number, krwChange24h: number) => {
-      const { setBitcoinKrwPrice, setting } = useStore.getState();
+      const { setBitcoinKrwPrice } = useBitcoinStore.getState();
+      const { setting } = useStore.getState();
 
       if (setting.currency.includes("KRW")) {
         const krwChange24hStr = floorToDecimal(krwChange24h * 100, 2).toString();
@@ -58,7 +60,8 @@ export default function useBithumbSocket() {
   );
 
   const handleUSDTUpdate = useCallback((price: number, timestamp: number) => {
-    const { setExRate, setting } = useStore.getState();
+    const { setExRate } = useBitcoinStore.getState();
+    const { setting } = useStore.getState();
     if (setting.isUsdtStandard) {
       setExRate({ value: price, date: formatDate(timestamp) });
     }

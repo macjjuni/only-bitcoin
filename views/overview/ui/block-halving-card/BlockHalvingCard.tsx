@@ -2,10 +2,9 @@
 
 import { useLottie } from "lottie-react";
 import { useCallback, useEffect, useMemo } from "react";
-import { calcPercentage, getNextHalvingData } from "@/entities/block";
+import { calcPercentage, getNextHalvingData, useBlockStore } from "@/entities/block";
 import blockLottieJson from "@/shared/assets/lottie/blocks.json";
 import { calcDate } from "@/shared/lib/date";
-import useStore from "@/shared/stores/store";
 import { comma } from "@/shared/utils/string";
 
 const totalSegments = 24 as const;
@@ -14,7 +13,7 @@ export default function BlockHalvingCard() {
   // region [Hooks]
   const { View, animationItem } = useLottie({ animationData: blockLottieJson, loop: true });
 
-  const blockData = useStore((state) => state.blockData);
+  const blockData = useBlockStore((state) => state.blockData);
   const recentBlockHeight = useMemo(() => blockData[0]?.height ?? 0, [blockData]);
   const nextHalvingData = useMemo(() => getNextHalvingData(recentBlockHeight), [recentBlockHeight]);
   const halvingPercent = useMemo(

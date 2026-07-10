@@ -1,9 +1,9 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
+import type { MiningMetricChartIntervalType } from "@/entities/bitcoin";
+import { useBitcoinStore } from "@/entities/bitcoin";
 import { useMiningMetricChartData } from "@/entities/block/client";
-import useStore from "@/shared/stores/store";
-import type { MiningMetricChartIntervalType } from "@/shared/stores/store.interface";
 import { formatDifficulty, formatHashrate } from "@/shared/utils/number";
 import OverviewChartShell from "../chartShell/OverviewChartShell";
 import type { ChartIntervalOption } from "../chartShell/OverviewChartShell.interface";
@@ -23,9 +23,9 @@ const miningMetricChartIntervalOptions: ChartIntervalOption<MiningMetricChartInt
 
 export default function MiningMetricChart() {
   // region [Hooks]
-  const overviewChart = useStore((store) => store.overviewChart);
-  const miningMetricChartInterval = useStore((state) => state.miningMetricChartInterval);
-  const setHashrateChartInterval = useStore((state) => state.setMiningMetricChartInterval);
+  const overviewChart = useBitcoinStore((store) => store.overviewChart);
+  const miningMetricChartInterval = useBitcoinStore((state) => state.miningMetricChartInterval);
+  const setHashrateChartInterval = useBitcoinStore((state) => state.setMiningMetricChartInterval);
   const { data, isLoading } = useMiningMetricChartData(miningMetricChartInterval);
 
   /**

@@ -1,6 +1,6 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
-import { quizData, QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/entities/quiz";
+import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT, quizData } from "@/entities/quiz";
 
 // region [Privates]
 const LIMIT_KEY = `${QUIZ_COOKIE_KEY}_done`;

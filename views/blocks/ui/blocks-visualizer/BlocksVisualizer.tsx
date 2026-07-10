@@ -3,8 +3,7 @@
 import { memo, useCallback, useState } from "react";
 import { FreeMode } from "swiper/modules";
 import { Swiper } from "swiper/react";
-import { GENESIS_BLOCK } from "@/entities/block";
-import useStore from "@/shared/stores/store";
+import { GENESIS_BLOCK, useBlockStore } from "@/entities/block";
 import BlockSwiperSlide from "./components/BlockSwiperSlide";
 import GenesisVideoDialog from "./components/GenesisVideoDialog";
 import "swiper/css";
@@ -14,7 +13,7 @@ const MEMPOOL_BLOCK_SEARCH_URL = "https://mempool.space/ko/block/" as const;
 
 const BlocksVisualizer = () => {
   // region [Hooks]
-  const blockData = useStore((state) => state.blockData);
+  const blockData = useBlockStore((state) => state.blockData);
   const [isGenesisBlockModal, setIsGenesisBlockModal] = useState(false);
   // endregion
 

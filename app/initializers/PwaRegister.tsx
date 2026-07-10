@@ -1,8 +1,8 @@
 "use client";
 
 import { useEffect } from "react";
+import type { BeforeInstallPromptEvent } from "@/shared/stores/slices/settingSlice";
 import useStore from "@/shared/stores/store";
-import type { BeforeInstallPromptEvent } from "@/shared/stores/store.interface";
 
 export default function PwaRegister() {
   // region [Hooks]

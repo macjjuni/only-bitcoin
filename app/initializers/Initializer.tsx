@@ -3,7 +3,7 @@
 import { KToast } from "kku-ui";
 import dynamic from "next/dynamic";
 import { memo, Suspense } from "react";
-import { getToastProps } from "@/shared/config/toast";
+import { useMempoolSocket } from "@/entities/block";
 import {
   useBinanceSocket,
   useBithumbSocket,
@@ -11,7 +11,7 @@ import {
   useUpbitSocket,
   useUsdExchangeRate,
 } from "@/entities/market/lib/hooks";
-import { useMempoolSocket } from "@/entities/block";
+import { getToastProps } from "@/shared/config/toast";
 import {
   useInitializeBackground,
   useInitializeDisabledZoom,

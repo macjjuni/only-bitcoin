@@ -1,4 +1,4 @@
-import type { CurrencyTypes } from "@/shared/stores/store.interface";
+import type { CurrencyTypes } from "@/shared/stores/slices/settingSlice";
 
 interface CurrencyOptionTypes {
   label: string;

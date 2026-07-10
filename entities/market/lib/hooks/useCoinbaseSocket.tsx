@@ -1,8 +1,8 @@
 import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
+import { useBitcoinStore } from "@/entities/bitcoin";
 import { COINBASE_MARKET_FLAG } from "@/entities/market";
-import useStore from "@/shared/stores/store";
 import { isDev, setTitle } from "@/shared/utils/common";
 import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
@@ -12,18 +12,18 @@ const COINBASE_URL = `wss://ws-feed.exchange.coinbase.com`;
 
 export default function useCoinbaseSocket() {
   // region [Hooks]
-  const usdMarket = useStore((store) => store.usdMarket);
+  const usdMarket = useBitcoinStore((store) => store.usdMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
   // endregion
 
   const resetUsdDisconnected = useCallback(() => {
-    const { bitcoinPrice, setBitcoinUsdPrice } = useStore.getState();
+    const { bitcoinPrice, setBitcoinUsdPrice } = useBitcoinStore.getState();
     setBitcoinUsdPrice({ ...bitcoinPrice, isUsdConnected: false });
   }, []);
 
   const handleBTCUpdate = useCallback(
     (price: number, usdUpdateTimestamp: number, usdChange24h: string) => {
-      const { setBitcoinUsdPrice } = useStore.getState();
+      const { setBitcoinUsdPrice } = useBitcoinStore.getState();
       // 코인베이스는 퍼센트가 아니라 24시간 시가(open_24h)를 줌 -> 변동률 직접 계산 필요
       const usdChange24hStr = floorToDecimal(Number(usdChange24h), 2).toString();
 

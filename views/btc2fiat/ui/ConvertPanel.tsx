@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo } from "react";
+import { useBitcoinStore } from "@/entities/bitcoin";
 import { useMounted } from "@/shared/hooks";
 import useStore from "@/shared/stores/store";
 import { btcToSatoshi, floorToDecimal } from "@/shared/utils/number";
@@ -10,9 +11,9 @@ import ConvertCard from "./ConvertCard";
 
 const ConvertPanel = () => {
   // region [Hooks]
-  const krwPrice = useStore((state) => state.bitcoinPrice.krw);
-  const usdPrice = useStore((state) => state.bitcoinPrice.usd);
-  const exRate = useStore((state) => state.exRate.value);
+  const krwPrice = useBitcoinStore((state) => state.bitcoinPrice.krw);
+  const usdPrice = useBitcoinStore((state) => state.bitcoinPrice.usd);
+  const exRate = useBitcoinStore((state) => state.exRate.value);
   const isUsdtStandard = useStore((state) => state.setting.isUsdtStandard);
 
   const btcCount = useBtc2FiatStore((state) => state.btc2Fiat.btcCount);

@@ -3,11 +3,12 @@
 import { KIcon, KListGroup, KListRow, KSelect, KSwitch } from "kku-ui";
 import { Star } from "lucide-react";
 import { memo, useMemo } from "react";
+import { useBitcoinStore } from "@/entities/bitcoin";
 import { krwMarketOptions, usdMarketOptions } from "@/entities/market";
 import { favoriteRouteList } from "@/shared/config/route";
 import { currencyOptions } from "@/shared/constants/setting";
+import type { CurrencyTypes } from "@/shared/stores/slices/settingSlice";
 import useStore from "@/shared/stores/store";
-import type { CurrencyTypes } from "@/shared/stores/store.interface";
 import { CurrencyIcon } from "@/shared/ui";
 
 const PriceListRowGroup = () => {
@@ -18,11 +19,11 @@ const PriceListRowGroup = () => {
   const currency = useStore((state) => state.setting.currency);
   const setCurrency = useStore((state) => state.setCurrency);
 
-  const krwMarket = useStore((state) => state.krwMarket);
-  const setKrwMarket = useStore((state) => state.setKrwMarket);
+  const krwMarket = useBitcoinStore((state) => state.krwMarket);
+  const setKrwMarket = useBitcoinStore((state) => state.setKrwMarket);
 
-  const usdMarket = useStore((state) => state.usdMarket);
-  const setUsdMarket = useStore((state) => state.setUsdMarket);
+  const usdMarket = useBitcoinStore((state) => state.usdMarket);
+  const setUsdMarket = useBitcoinStore((state) => state.setUsdMarket);
 
   const isUsdtStandard = useStore((state) => state.setting.isUsdtStandard);
   const setUsdtStandard = useStore((state) => state.setUsdtStandard);

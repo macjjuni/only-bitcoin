@@ -2,16 +2,16 @@
 
 import { kToast } from "kku-ui";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { useBitcoinStore } from "@/entities/bitcoin";
 import greenDotLottie from "@/shared/assets/lottie/green-dot.json";
 import redDotLottie from "@/shared/assets/lottie/red-dot.json";
-import useStore from "@/shared/stores/store";
 import { Lottie } from "@/shared/ui";
 
 const ConnectionDot = () => {
   // region [Hooks]
   const [isEnabledNetwork, setIsEnabledNetwork] = useState<boolean>(true);
-  const isKrwConnected = useStore((state) => state.bitcoinPrice.isKrwConnected);
-  const isUsdConnected = useStore((state) => state.bitcoinPrice.isUsdConnected);
+  const isKrwConnected = useBitcoinStore((state) => state.bitcoinPrice.isKrwConnected);
+  const isUsdConnected = useBitcoinStore((state) => state.bitcoinPrice.isUsdConnected);
   // endregion
 
   // region [Privates]
