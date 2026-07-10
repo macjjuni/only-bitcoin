@@ -80,7 +80,7 @@ export default function MacroWidgetPanel() {
       id: 2,
       label: "KRW/USD",
       value: usdExRate,
-      decimals: 0,
+      decimals: 1,
       sign: null,
       onClick: onRoutePremiumPage,
     },
