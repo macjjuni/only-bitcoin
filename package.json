@@ -8,7 +8,8 @@
     "start": "next start -p 4004",
     "lint": "biome lint .",
     "format": "biome format --write .",
-    "check": "biome check --write ."
+    "check": "biome check --write .",
+    "check:cycles": "node scripts/check-cycles.mjs"
   },
   "dependencies": {
     "@dnd-kit/core": "^6.3.1",
