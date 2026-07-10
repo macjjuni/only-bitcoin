@@ -1,9 +1,9 @@
 import { useQuery } from "@tanstack/react-query";
 import { kToast } from "kku-ui";
 import { useEffect } from "react";
-import type { FearGreedIndexResponseTypes } from "@/entities/bitcoin";
 import { isDev } from "@/shared/utils/common";
 import fetcher from "@/shared/utils/fetcher";
+import type { FearGreedIndexResponseTypes } from "../model/types";
 
 const FEAR_GREED_INDEX_API_URL = "https://api.alternative.me/fng/";
 

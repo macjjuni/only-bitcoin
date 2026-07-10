@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { kToast } from "kku-ui";
 import { useEffect } from "react";
-import type { ICurrency } from "@/entities/bitcoin";
 import { isDev } from "@/shared/utils/common";
 import fetcher from "@/shared/utils/fetcher";
 import { floorToDecimal } from "@/shared/utils/number";
+import type { ICurrency } from "../model/types";
 
 const calculateBitcoinDominance = (list: ICurrency[]) => {
   let BTCCap = 0;

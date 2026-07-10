@@ -1,4 +1,4 @@
-import { blockHalvingData } from "@/entities/block/model/constants";
+import { blockHalvingData } from "../model/constants";
 
 /** 현재 블록 높이 기준 다음 반감기 정보 */
 export const getNextHalvingData = (currentHeight: number) => {

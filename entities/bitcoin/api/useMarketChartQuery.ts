@@ -1,11 +1,11 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { kToast } from "kku-ui";
 import { useEffect } from "react";
-import { type BinanceInterval, fetchBinanceKlines } from "@/entities/bitcoin/api/binance";
-import { fetchBlockchainMarketPriceAll } from "@/entities/bitcoin/api/blockchain";
 import { isDev } from "@/shared/utils/common";
 import type { MarketChartFormattedData } from "../model/market";
 import type { MarketChartIntervalType } from "../model/types";
+import { type BinanceInterval, fetchBinanceKlines } from "./binance";
+import { fetchBlockchainMarketPriceAll } from "./blockchain";
 
 /**
  * 인터벌별 Binance Klines 파라미터 매핑

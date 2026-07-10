@@ -1,12 +1,12 @@
 import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import type { MemPoolBlockTypes } from "@/entities/block";
 import useConfettiStore from "@/shared/stores/confettiStore";
 import { deepEqual } from "@/shared/utils/common";
 import { comma } from "@/shared/utils/string";
 import type { BlockTypes, FeesTypes } from "../../model/blockSlice";
 import useBlockStore from "../../model/blockStore";
+import type { MemPoolBlockTypes } from "../../model/types";
 
 const MEMPOOL_WS_URL = "wss://mempool.space/api/v1/ws";
 
