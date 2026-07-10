@@ -15,6 +15,32 @@
   }
 }
 
+/* region [반투명 유리 표면]
+   뒤에 깔린 커버 이미지와 하단 앰비언트 글로우가 비쳐 보이게 한다.
+   kku-ui 가 KCard/KListRow 에 칠하는 불투명 배경(bg-card, bg-background)을 덮는다.
+
+   @layer components 에 두면 안 된다. Header 가 bg-background 를 쓰는 탓에
+   우리 빌드도 .bg-background 를 utilities 레이어에 생성하는데, components 는
+   utilities 보다 먼저 출력되므로 같은 특정도(0,1,0)에서 밀린다.
+   (dark: 변형은 .dark .glass-surface 라 0,2,0 이 되어 혼자만 이겼다.)
+   @tailwind utilities 뒤에 두어 순서로 이긴다. */
+.glass-surface {
+  @apply bg-neutral-100/30 backdrop-blur-sm;
+}
+
+/* :where() 로 특정도를 0 으로 묶어 라이트 규칙과 같은 0,1,0 을 유지한다.
+   0,2,0 이 되면 KListRow 의 active:bg-secondary 누름 효과까지 덮어버린다. */
+:where(.dark) .glass-surface {
+  @apply bg-neutral-900/30;
+}
+
+/* KListRowAccordion 은 펼침 본문 div 에 bg-background 를 따로 칠해서,
+   루트만 유리로 만들면 펼쳤을 때 그 부분만 불투명하게 남는다. */
+.glass-surface [class~="bg-background"] {
+  background-color: transparent;
+}
+/* endregion */
+
 .only-btc__header {
   view-transition-name: main-header;
 }

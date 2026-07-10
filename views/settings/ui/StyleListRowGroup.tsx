@@ -21,6 +21,7 @@ const StyleListRowGroup = () => {
   return (
     <KListGroup header="스타일 및 화면 설정">
       <KListRow
+        className="glass-surface"
         icon={<Moon />}
         label="다크모드"
         rightElement={
@@ -28,12 +29,13 @@ const StyleListRowGroup = () => {
         }
       />
       <KListRow
+        className="glass-surface dark:text-gray-700"
         icon={<KIcon icon="bitcoin_square" size={24} color="currentColor" />}
-        className="dark:text-gray-700"
         label="배경 이미지"
         rightElement={<KSwitch checked={isBackgroundImg} onCheckedChange={setIsBackgroundImg} />}
       />
       <KListRow
+        className="glass-surface"
         icon={<AnimationIcon size={24} />}
         label="카운트 업 애니메이션"
         rightElement={<KSwitch checked={isCountUp} onCheckedChange={setIsCountUp} />}

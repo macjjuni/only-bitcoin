@@ -38,6 +38,7 @@ const PriceListRowGroup = () => {
   return (
     <KListGroup header="가격 설정">
       <KListRow
+        className="glass-surface"
         icon={<Star className="text-bitcoin" />}
         label="시작 페이지"
         rightElement={
@@ -50,6 +51,7 @@ const PriceListRowGroup = () => {
         }
       />
       <KListRow
+        className="glass-surface"
         icon={<CurrencyIcon size={24} />}
         label="통화 단위"
         rightElement={
@@ -62,6 +64,7 @@ const PriceListRowGroup = () => {
         }
       />
       <KListRow
+        className="glass-surface"
         icon={<KIcon icon="won" size={28} color="#F2C84B" />}
         label="국내거래소"
         rightElement={
@@ -74,6 +77,7 @@ const PriceListRowGroup = () => {
         }
       />
       <KListRow
+        className="glass-surface"
         icon={<KIcon icon="dollar" size={28} color="#85BB65" />}
         label="해외거래소"
         rightElement={
@@ -86,6 +90,7 @@ const PriceListRowGroup = () => {
         }
       />
       <KListRow
+        className="glass-surface"
         icon={<KIcon icon="tether" size={24} />}
         label="USDT 기준 환율"
         rightElement={<KSwitch checked={isUsdtStandard} onCheckedChange={setUsdtStandard} />}

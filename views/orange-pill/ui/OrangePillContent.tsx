@@ -53,12 +53,14 @@ const OrangePillContent = () => {
       {/* 커뮤니티 그룹 */}
       <KListGroup header="커뮤니티" className="mt-1">
         <KListRow
+          className="glass-surface"
           icon={<DiscordIcon size={28} />}
           label="BITCOIN⚡️CITADEL"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_DISCORD)}
         />
         <KListRow
+          className="glass-surface"
           icon={<NaverIcon size={28} />}
           label="비트코인⚡️지분전쟁: 시타델"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
@@ -69,18 +71,21 @@ const OrangePillContent = () => {
       {/* 서비스 */}
       <KListGroup header="서비스">
         <KListRow
+          className="glass-surface"
           icon={<LazyImage src="https://satoshop.org/icon.svg?icon.12fecbu508vdu.svg" />}
           label="사토샵"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.SATOSHOP)}
         />
         <KListRow
+          className="glass-surface"
           icon={<NaverIcon size={28} />}
           label="비트코인 결제 매장"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.BTC_MAP)}
         />
         <KListRow
+          className="glass-surface"
           icon={<LazyImage src="https://ln-fortune.vercel.app/favicon.ico" />}
           label="Lightning Fortune"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
@@ -91,12 +96,14 @@ const OrangePillContent = () => {
       {/* 아카데미 */}
       <KListGroup header="아카데미">
         <KListRow
+          className="glass-surface"
           icon={<KIcon icon="notion" size={28} />}
           label="ATOMIC⚡️₿ITCOIN 노션"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.ATOMIC_BTC_NOTION)}
         />
         <KListRow
+          className="glass-surface"
           icon={<PageIcon size={28} />}
           label="화폐와 정부 그리고 비트코인"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
@@ -107,12 +114,14 @@ const OrangePillContent = () => {
       {/* 유틸리티 */}
       <KListGroup header="유틸리티">
         <KListRow
+          className="glass-surface"
           icon={<Images size={28} />}
           label="비트맥시 전용 밈 저장소"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleMemeRoute}
         />
         <KListRow
+          className="glass-surface"
           icon={<TableProperties size={28} />}
           label="BIP39"
           rightElement={<ChevronRight className="text-muted-foreground" />}

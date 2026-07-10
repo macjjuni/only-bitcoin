@@ -37,11 +37,13 @@ export default function InstallListRowGroup() {
   return (
     <KListGroup header="앱 설치">
       <KListRow
+        className="glass-surface"
         icon={<MessageSquareWarning color="#1796EE" />}
         label="앱 설치 메시지 숨기기"
         rightElement={<KSwitch checked={isInstallMsg} onCheckedChange={onChangeInstallMsg} />}
       />
       <KListRow
+        className="glass-surface"
         icon={<KIcon icon="app" size={24} color="#1796EE" />}
         label="앱 설치"
         onClick={onClickInstall}
