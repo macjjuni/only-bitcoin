@@ -13,7 +13,7 @@ import {
 } from "kku-ui";
 import { useEffect, useRef, useState } from "react";
 import { QRCode } from "react-qrcode-logo";
-import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/shared/constants/setting";
+import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/entities/quiz";
 import useCopyOnClick from "@/shared/hooks/useCopyOnClick";
 import useConfettiStore from "@/shared/stores/confettiStore";
 import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";

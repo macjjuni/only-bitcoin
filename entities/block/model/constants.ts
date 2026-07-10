@@ -1,8 +1,3 @@
-// TODO. 반감기 날짜를 멤풀에 조회해서 뿌려주기.
-// - 현재 블록 높이 가져와서 지난 지난 반감기 블록 높이 조회 후 날짜를 보여주기
-// - 단점: 멤풀에 의존적이므로 네트워크 오류 시 데이터 표시 못 함.
-// - 장점: 계속 업데이트 안해줘도 됨.
-
 export interface BlockHalvingDataTypes {
   date: string;
   blockHeight: number;

@@ -1,11 +1,3 @@
-import {
-  BINANCE_MARKET_FLAG,
-  BITHUMB_MARKET_FLAG,
-  COINBASE_MARKET_FLAG,
-  type KrwMarketType,
-  UPBIT_MARKET_FLAG,
-  type UsdMarketType,
-} from "@/shared/constants/market";
 import type { CurrencyTypes } from "@/shared/stores/store.interface";
 
 interface CurrencyOptionTypes {
@@ -18,18 +10,8 @@ export const currencyOptions: CurrencyOptionTypes[] = [
   { label: "USD", value: "USD" },
   { label: "KRW", value: "KRW" },
 ];
-export const krwMarketOptions: { label: string; value: KrwMarketType }[] = [
-  { label: "업비트", value: UPBIT_MARKET_FLAG },
-  { label: "빗썸", value: BITHUMB_MARKET_FLAG },
-];
-export const usdMarketOptions: { label: string; value: UsdMarketType }[] = [
-  { label: "바이낸스", value: BINANCE_MARKET_FLAG },
-  { label: "코인베이스", value: COINBASE_MARKET_FLAG },
-];
 
 export const PWA_COOKIE_KEY = "install" as const;
-export const QUIZ_COOKIE_KEY = "_ga_ss_v2" as const;
-export const QUIZ_MIN_COUNT = 5 as const;
 export const NOTICE_COOKIE_KEY = "notice" as const;
 
 export const sourceOptions = [

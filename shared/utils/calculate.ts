@@ -1,4 +1,4 @@
-import { blockHalvingData } from "@/shared/constants/block";
+import { blockHalvingData } from "@/entities/block";
 import { floorToDecimal } from "@/shared/utils/number";
 
 // 김치 프리미엄 퍼센트 계산

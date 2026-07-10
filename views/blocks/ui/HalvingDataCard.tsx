@@ -2,7 +2,7 @@
 
 import { KAccordion, KAccordionContent, KAccordionItem, KAccordionTrigger } from "kku-ui";
 import { memo, useMemo } from "react";
-import { blockHalvingData } from "@/shared/constants/block";
+import { blockHalvingData } from "@/entities/block";
 import useStore from "@/shared/stores/store";
 
 const HalvingDataCard = () => {

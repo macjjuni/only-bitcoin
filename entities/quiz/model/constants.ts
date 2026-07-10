@@ -1,3 +1,6 @@
+export const QUIZ_COOKIE_KEY = "_ga_ss_v2" as const;
+export const QUIZ_MIN_COUNT = 5 as const;
+
 export const quizData = [
   {
     id: "btc_001",

@@ -1,5 +1,5 @@
 import type { StateCreator } from "zustand";
-import type { KrwMarketType, UsdMarketType } from "@/shared/constants/market";
+import type { KrwMarketType, UsdMarketType } from "@/entities/market";
 import type { StoreType } from "@/shared/stores/store";
 
 export interface BitcoinPriceKRWTypes {
