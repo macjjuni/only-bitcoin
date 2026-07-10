@@ -1,7 +1,8 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { BTC2FIAT_PERSIST_KEY, migrateLegacyStore } from "@/shared/stores/legacyMigration";
-import useStore from "@/shared/stores/store";
+import { migrateLegacyStore } from "@/shared/stores/legacyMigration";
+import { BTC2FIAT_PERSIST_KEY } from "@/shared/stores/persistKeys";
+import useSettingStore from "@/shared/stores/settingStore";
 
 export type UnitType = "BTC" | "USD" | "KRW" | "SATS";
 
@@ -49,7 +50,7 @@ const useBtc2FiatStore = create<Btc2FiatState>()(
  * 마운트/초기화 시점에는 보정하지 않는다. 그래야 `focusCurrency`가 `"SATS"`인 사용자가
  * 새로고침할 때마다 `"BTC"`로 되돌아가지 않는다.
  */
-useStore.subscribe((state, previousState) => {
+useSettingStore.subscribe((state, previousState) => {
   const { currency } = state.setting;
 
   if (currency === previousState.setting.currency) {

@@ -7,17 +7,17 @@ import { useBitcoinStore } from "@/entities/bitcoin";
 import { krwMarketOptions, usdMarketOptions } from "@/entities/market";
 import { favoriteRouteList } from "@/shared/config/route";
 import { currencyOptions } from "@/shared/constants/setting";
+import useSettingStore from "@/shared/stores/settingStore";
 import type { CurrencyTypes } from "@/shared/stores/slices/settingSlice";
-import useStore from "@/shared/stores/store";
 import { CurrencyIcon } from "@/shared/ui";
 
 const PriceListRowGroup = () => {
   // region [Hooks]
-  const initialPath = useStore((state) => state.setting.initialPath);
-  const setInitialPath = useStore((state) => state.setInitialPath);
+  const initialPath = useSettingStore((state) => state.setting.initialPath);
+  const setInitialPath = useSettingStore((state) => state.setInitialPath);
 
-  const currency = useStore((state) => state.setting.currency);
-  const setCurrency = useStore((state) => state.setCurrency);
+  const currency = useSettingStore((state) => state.setting.currency);
+  const setCurrency = useSettingStore((state) => state.setCurrency);
 
   const krwMarket = useBitcoinStore((state) => state.krwMarket);
   const setKrwMarket = useBitcoinStore((state) => state.setKrwMarket);
@@ -25,8 +25,8 @@ const PriceListRowGroup = () => {
   const usdMarket = useBitcoinStore((state) => state.usdMarket);
   const setUsdMarket = useBitcoinStore((state) => state.setUsdMarket);
 
-  const isUsdtStandard = useStore((state) => state.setting.isUsdtStandard);
-  const setUsdtStandard = useStore((state) => state.setUsdtStandard);
+  const isUsdtStandard = useSettingStore((state) => state.setting.isUsdtStandard);
+  const setUsdtStandard = useSettingStore((state) => state.setUsdtStandard);
   // endregion
 
   // region [memo]

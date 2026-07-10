@@ -1,9 +1,9 @@
 import { useCallback, useLayoutEffect } from "react";
-import useStore from "@/shared/stores/store";
+import useSettingStore from "@/shared/stores/settingStore";
 
 export default function useTheme() {
   // region [Hooks]
-  const theme = useStore((state) => state.theme);
+  const theme = useSettingStore((state) => state.theme);
   // endregion
 
   // region [Privates]

@@ -1,10 +1,10 @@
 import { useCallback, useEffect } from "react";
-import useStore from "@/shared/stores/store";
+import useSettingStore from "@/shared/stores/settingStore";
 
 export default function useInitializeBackground() {
   // region [Hooks]
 
-  const isBackgroundImg = useStore((state) => state.setting.isBackgroundImg);
+  const isBackgroundImg = useSettingStore((state) => state.setting.isBackgroundImg);
 
   // endregion
 

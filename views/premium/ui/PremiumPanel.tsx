@@ -4,16 +4,16 @@ import { KCard, KCardContent, KCardHeader, KCardTitle, KSkeleton } from "kku-ui"
 import { memo, useMemo } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { formatDate } from "@/shared/lib/date";
-import useStore from "@/shared/stores/store";
+import useSettingStore from "@/shared/stores/settingStore";
 import { CountText } from "@/shared/ui";
 import { calcPremiumPercent } from "@/shared/utils/calculate";
 
 const PremiumPanel = () => {
   // region [Hooks]
-  const currency = useStore((state) => state.setting.currency);
+  const currency = useSettingStore((state) => state.setting.currency);
   const { krw, usd } = useBitcoinStore((state) => state.bitcoinPrice);
   const { value: usdExRate, date } = useBitcoinStore((state) => state.exRate);
-  const isUsdtStandard = useStore((state) => state.setting.isUsdtStandard);
+  const isUsdtStandard = useSettingStore((state) => state.setting.isUsdtStandard);
   // endregion
 
   // region [Templates]

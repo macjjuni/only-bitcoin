@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { memo, useMemo } from "react";
-import useStore from "@/shared/stores/store";
+import useSettingStore from "@/shared/stores/settingStore";
 import { isSafari } from "@/shared/utils/device";
 import InfoListRowGroup from "./InfoListRowGroup";
 import PriceListRowGroup from "./PriceListRowGroup";
@@ -12,7 +12,7 @@ const DynamicInstallListRowGroup = dynamic(() => import("./InstallListRowGroup")
 
 const SettingsPage = () => {
   // region [Hooks]
-  const deferredPrompt = useStore((state) => state.setting.deferredPrompt);
+  const deferredPrompt = useSettingStore((state) => state.setting.deferredPrompt);
 
   const showInstallGroup = useMemo(() => {
     if (typeof window === "undefined") return false;

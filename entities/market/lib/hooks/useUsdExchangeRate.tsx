@@ -4,7 +4,7 @@ import { useCallback, useEffect } from "react";
 import type { ExRateTypes } from "@/entities/bitcoin";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { getCurrentDate } from "@/shared/lib/date";
-import useStore from "@/shared/stores/store";
+import useSettingStore from "@/shared/stores/settingStore";
 import { isDev } from "@/shared/utils/common";
 
 interface ICurrency {
@@ -23,7 +23,7 @@ interface INaverExchangeRateResponse {
 const apiUrl = `https://m.search.naver.com/p/csearch/content/qapirender.nhn?key=calculator&pkid=141&q=%ED%99%98%EC%9C%A8&where=m&u1=keb&u6=standardUnit&u7=0&u3=USD&u4=KRW&u8=down&u2=1`;
 
 export default function useUsdExchangeRate() {
-  const isUsdtStandard = useStore((state) => state.setting.isUsdtStandard);
+  const isUsdtStandard = useSettingStore((state) => state.setting.isUsdtStandard);
   const setExRate = useBitcoinStore((state) => state.setExRate);
 
   const query = useQuery<INaverExchangeRateResponse, Error>({

@@ -1,13 +1,13 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import useStore from "@/shared/stores/store";
+import useSettingStore from "@/shared/stores/settingStore";
 import { TransitionLink } from "@/shared/ui";
 import ConnectionDot from "./components/connection-dot/ConnectionDot";
 import SettingButton from "./components/setting-button/SettingButton";
 
 export default function Header() {
-  const initialPath = useStore((state) => state.setting.initialPath);
+  const initialPath = useSettingStore((state) => state.setting.initialPath);
 
   return (
     <header

@@ -3,7 +3,7 @@
 import { memo, useCallback, useEffect, useMemo } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { useMounted } from "@/shared/hooks";
-import useStore from "@/shared/stores/store";
+import useSettingStore from "@/shared/stores/settingStore";
 import { btcToSatoshi, floorToDecimal } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 import useBtc2FiatStore, { type UnitType } from "../model/btc2FiatStore";
@@ -14,7 +14,7 @@ const ConvertPanel = () => {
   const krwPrice = useBitcoinStore((state) => state.bitcoinPrice.krw);
   const usdPrice = useBitcoinStore((state) => state.bitcoinPrice.usd);
   const exRate = useBitcoinStore((state) => state.exRate.value);
-  const isUsdtStandard = useStore((state) => state.setting.isUsdtStandard);
+  const isUsdtStandard = useSettingStore((state) => state.setting.isUsdtStandard);
 
   const btcCount = useBtc2FiatStore((state) => state.btc2Fiat.btcCount);
   const krw = useBtc2FiatStore((state) => state.btc2Fiat.krw);

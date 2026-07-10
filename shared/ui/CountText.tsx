@@ -5,7 +5,7 @@ import { memo, useMemo } from "react";
 import CountUp from "react-countup";
 import { useMounted } from "@/shared/hooks";
 import type { ComponentBaseTypes } from "@/shared/lib/types";
-import useStore from "@/shared/stores/store";
+import useSettingStore from "@/shared/stores/settingStore";
 
 interface CountTextTypes extends ComponentBaseTypes {
   value: number;
@@ -17,7 +17,7 @@ interface CountTextTypes extends ComponentBaseTypes {
 const CountText = (props: CountTextTypes) => {
   // region [Hooks]
   const isMount = useMounted();
-  const isCountUp = useStore((state) => state.setting.isCountUp);
+  const isCountUp = useSettingStore((state) => state.setting.isCountUp);
   const { className, value, duration = 0.3, decimals = 0, separator = "," } = props;
 
   const rootClass = useMemo(() => (className ? ` ${className}` : ""), [className]);

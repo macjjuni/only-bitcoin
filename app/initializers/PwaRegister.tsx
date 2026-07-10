@@ -1,12 +1,12 @@
 "use client";
 
 import { useEffect } from "react";
+import useSettingStore from "@/shared/stores/settingStore";
 import type { BeforeInstallPromptEvent } from "@/shared/stores/slices/settingSlice";
-import useStore from "@/shared/stores/store";
 
 export default function PwaRegister() {
   // region [Hooks]
-  const setDeferredPrompt = useStore((state) => state.setDeferredPrompt);
+  const setDeferredPrompt = useSettingStore((state) => state.setDeferredPrompt);
   // endregion
 
   // region [Life Cycles]

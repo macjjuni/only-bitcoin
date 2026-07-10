@@ -9,7 +9,7 @@ import {
   KIcon,
 } from "kku-ui";
 import { memo, type ReactNode, useMemo } from "react";
-import useStore from "@/shared/stores/store";
+import useSettingStore from "@/shared/stores/settingStore";
 import type { UnitType } from "../model/btc2FiatStore";
 
 export interface UnitDropdownMenuProps {
@@ -27,7 +27,7 @@ const UNIT_DISPLAY: Record<UnitType, ReactNode> = {
 const UnitDropdownMenu = (props: UnitDropdownMenuProps) => {
   // region [Hooks]
   const { currentUnit, onChangeUnit } = props;
-  const currency = useStore((state) => state.setting.currency);
+  const currency = useSettingStore((state) => state.setting.currency);
   const unitList = useMemo(
     () => ["BTC"].concat(currency.split("/")).concat("SATS"),
     [currency],

@@ -24,10 +24,12 @@
  *   스크립트가 첫 페인트 전에 `parsed.state.theme` 를 읽기 때문이다.
  */
 
-export const STORE_PERSIST_KEY = "only-bitcoin";
-export const BTC2FIAT_PERSIST_KEY = "only-bitcoin-btc2fiat";
-export const BITCOIN_PERSIST_KEY = "only-bitcoin-bitcoin";
-export const BLOCK_PERSIST_KEY = "only-bitcoin-block";
+import {
+  BITCOIN_PERSIST_KEY,
+  BLOCK_PERSIST_KEY,
+  BTC2FIAT_PERSIST_KEY,
+  STORE_PERSIST_KEY,
+} from "@/shared/stores/persistKeys";
 
 /** 현재 `only-bitcoin` 키의 스키마 버전 */
 const CURRENT_VERSION = 2;

@@ -5,7 +5,7 @@ import { useBitcoinStore } from "@/entities/bitcoin";
 import { UPBIT_MARKET_FLAG } from "@/entities/market";
 import { formatDate } from "@/shared/lib/date";
 import { generateUUID } from "@/shared/lib/uuid";
-import useStore from "@/shared/stores/store";
+import useSettingStore from "@/shared/stores/settingStore";
 import { isDev } from "@/shared/utils/common";
 import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
@@ -44,7 +44,7 @@ export default function useUpbitSocket() {
   const handleBTCUpdate = useCallback(
     (price: number, krwUpdateTimestamp: number, krwChange24h: number) => {
       const { setBitcoinKrwPrice } = useBitcoinStore.getState();
-      const { setting } = useStore.getState();
+      const { setting } = useSettingStore.getState();
       if (setting.currency.includes("KRW")) {
         const krwChange24hStr = floorToDecimal(krwChange24h * 100, 2).toString();
         setBitcoinKrwPrice({
@@ -60,7 +60,7 @@ export default function useUpbitSocket() {
 
   const handleUSDTUpdate = useCallback((price: number, timestamp: number) => {
     const { setExRate } = useBitcoinStore.getState();
-    const { setting } = useStore.getState();
+    const { setting } = useSettingStore.getState();
     if (setting.isUsdtStandard) {
       setExRate({ value: price, date: formatDate(timestamp) });
     }

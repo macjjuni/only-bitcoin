@@ -2,14 +2,14 @@
 
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { useEffect } from "react";
-import useStore from "@/shared/stores/store";
+import useSettingStore from "@/shared/stores/settingStore";
 
 export default function useInitializePage() {
   // region [Hooks]
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
-  const initialPath = useStore((state) => state.setting.initialPath);
+  const initialPath = useSettingStore((state) => state.setting.initialPath);
   // endregion
 
   // region [Privates]

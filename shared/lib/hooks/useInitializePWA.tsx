@@ -2,14 +2,14 @@
 
 import { useEffect } from "react";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
+import useSettingStore from "@/shared/stores/settingStore";
 import type { BeforeInstallPromptEvent } from "@/shared/stores/slices/settingSlice";
-import useStore from "@/shared/stores/store";
 import { setCookie } from "@/shared/utils/cookie";
 
 export default function useInitializePWA() {
   // region [Hooks]
-  const deferredPrompt = useStore((state) => state.setting.deferredPrompt);
-  const setDeferredPrompt = useStore((state) => state.setDeferredPrompt);
+  const deferredPrompt = useSettingStore((state) => state.setting.deferredPrompt);
+  const setDeferredPrompt = useSettingStore((state) => state.setDeferredPrompt);
   // endregion
 
   // region [Privates]

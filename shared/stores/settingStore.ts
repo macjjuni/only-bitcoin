@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { migrateLegacyStore, STORE_PERSIST_KEY } from "@/shared/stores/legacyMigration";
+import { migrateLegacyStore } from "@/shared/stores/legacyMigration";
+import { STORE_PERSIST_KEY } from "@/shared/stores/persistKeys";
 import { createSettingSlice, type SettingSlice } from "@/shared/stores/slices/settingSlice";
 import { createThemeSlice, type ThemeSlice } from "@/shared/stores/slices/themeSlice";
 
@@ -12,21 +13,19 @@ import { createThemeSlice, type ThemeSlice } from "@/shared/stores/slices/themeS
  * - BTC 변환 계산기: `@/views/btc2fiat` 의 `useBtc2FiatStore`
  */
 
-export const persistKey = STORE_PERSIST_KEY;
-
-export type StoreType = ThemeSlice & SettingSlice;
+export type SettingStoreType = ThemeSlice & SettingSlice;
 
 // 스토어가 하이드레이트되기 전에 구버전 값을 이관한다. (제거 예정)
 migrateLegacyStore();
 
-const useStore = create<StoreType>()(
+const useSettingStore = create<SettingStoreType>()(
   persist(
     (...a) => ({
       ...createThemeSlice(...a),
       ...createSettingSlice(...a),
     }),
     {
-      name: persistKey,
+      name: STORE_PERSIST_KEY,
       // v1: btc2Fiat 분리, v2: bitcoin / block 도메인 상태 분리
       version: 2,
       partialize: (state) => {
@@ -36,10 +35,10 @@ const useStore = create<StoreType>()(
         return {
           ...rest,
           setting: settingWithoutPrompt,
-        } as StoreType;
+        } as SettingStoreType;
       },
     },
   ),
 );
 
-export default useStore;
+export default useSettingStore;

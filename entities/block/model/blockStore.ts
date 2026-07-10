@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { BLOCK_PERSIST_KEY, migrateLegacyStore } from "@/shared/stores/legacyMigration";
+import { migrateLegacyStore } from "@/shared/stores/legacyMigration";
+import { BLOCK_PERSIST_KEY } from "@/shared/stores/persistKeys";
 import { type BlockSlice, createBlockSlice } from "./blockSlice";
 
 export type BlockStoreType = BlockSlice;

@@ -3,19 +3,19 @@
 import { KIcon, KListGroup, KListRow, KSwitch } from "kku-ui";
 import { Moon } from "lucide-react";
 import { memo } from "react";
-import useStore from "@/shared/stores/store";
+import useSettingStore from "@/shared/stores/settingStore";
 import { AnimationIcon } from "@/shared/ui";
 
 const StyleListRowGroup = () => {
   // region [Hooks]
-  const isCountUp = useStore((state) => state.setting.isCountUp);
-  const setIsCountUp = useStore((state) => state.setIsCountUp);
+  const isCountUp = useSettingStore((state) => state.setting.isCountUp);
+  const setIsCountUp = useSettingStore((state) => state.setIsCountUp);
 
-  const isBackgroundImg = useStore((state) => state.setting.isBackgroundImg);
-  const setIsBackgroundImg = useStore((state) => state.setIsBackgroundImg);
+  const isBackgroundImg = useSettingStore((state) => state.setting.isBackgroundImg);
+  const setIsBackgroundImg = useSettingStore((state) => state.setIsBackgroundImg);
 
-  const isDark = useStore((state) => state.theme) === "dark";
-  const setTheme = useStore((state) => state.setTheme);
+  const isDark = useSettingStore((state) => state.theme) === "dark";
+  const setTheme = useSettingStore((state) => state.setTheme);
   // endregion
 
   return (

@@ -1,6 +1,7 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
-import { BITCOIN_PERSIST_KEY, migrateLegacyStore } from "@/shared/stores/legacyMigration";
+import { migrateLegacyStore } from "@/shared/stores/legacyMigration";
+import { BITCOIN_PERSIST_KEY } from "@/shared/stores/persistKeys";
 import { type ChartSlice, createChartSlice } from "./chartSlice";
 import { createExRateSlice, type ExRateSlice } from "./exRateSlice";
 import { createMacroSlice, type MacroSlice } from "./macroSlice";

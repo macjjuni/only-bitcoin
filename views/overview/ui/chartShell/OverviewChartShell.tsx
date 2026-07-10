@@ -3,7 +3,7 @@
 import { KSpinner } from "kku-ui";
 import dynamic from "next/dynamic";
 import { useCallback, useMemo } from "react";
-import useStore from "@/shared/stores/store";
+import useSettingStore from "@/shared/stores/settingStore";
 import ChartChanger from "../chartChanger/ChartChanger";
 import { createChartOptions } from "./createChartOptions";
 import type { OverviewChartShellProps } from "./OverviewChartShell.interface";
@@ -26,7 +26,7 @@ export default function OverviewChartShell<T extends string | number>({
   loadingClassName,
 }: OverviewChartShellProps<T>) {
   // region [Hooks]
-  const isDark = useStore((store) => store.theme) === "dark";
+  const isDark = useSettingStore((store) => store.theme) === "dark";
 
   const maxPointIndex = useMemo(() => {
     if (!seriesData.length) return -1;
