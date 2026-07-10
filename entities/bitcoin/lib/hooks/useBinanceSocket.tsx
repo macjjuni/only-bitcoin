@@ -1,11 +1,11 @@
 import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { useBitcoinStore } from "@/entities/bitcoin";
 import { BINANCE_MARKET_FLAG } from "@/entities/market";
 import { isDev } from "@/shared/utils/common";
 import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
+import useBitcoinStore from "../../model/bitcoinStore";
 
 const BINANCE_URL = `wss://stream.binance.com:9443/ws/btcusdt@ticker`;
 

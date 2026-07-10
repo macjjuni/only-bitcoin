@@ -1,11 +1,11 @@
 import { useQuery } from "@tanstack/react-query";
 import { kToast } from "kku-ui";
 import { useCallback, useEffect } from "react";
-import type { ExRateTypes } from "@/entities/bitcoin";
-import { useBitcoinStore } from "@/entities/bitcoin";
 import { getCurrentDate } from "@/shared/lib/date";
 import useSettingStore from "@/shared/stores/settingStore";
 import { isDev } from "@/shared/utils/common";
+import useBitcoinStore from "../../model/bitcoinStore";
+import type { ExRateTypes } from "../../model/exRateSlice";
 
 interface ICurrency {
   currencyUnit: string; // 통화 단위, 예: "달러", "원"

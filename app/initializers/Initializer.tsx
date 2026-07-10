@@ -3,14 +3,14 @@
 import { KToast } from "kku-ui";
 import dynamic from "next/dynamic";
 import { memo, Suspense } from "react";
-import { useMempoolSocket } from "@/entities/block";
 import {
   useBinanceSocket,
   useBithumbSocket,
   useCoinbaseSocket,
   useUpbitSocket,
   useUsdExchangeRate,
-} from "@/entities/market/lib/hooks";
+} from "@/entities/bitcoin/client";
+import { useMempoolSocket } from "@/entities/block";
 import { getToastProps } from "@/shared/config/toast";
 import {
   useInitializeBackground,
