@@ -39,7 +39,7 @@ const Gallery = ({ images, selected }: GalleryProps) => {
 
   return (
     <>
-      <div className="columns-2 sm:columns-3 gap-3 pb-2">
+      <div className="columns-2 sm:columns-3 gap-3 pb-2 px-0.5">
         {filteredImages.map(({ src }) => {
           const imageUrl = getImageUrl(src);
           return (

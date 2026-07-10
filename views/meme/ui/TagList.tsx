@@ -38,7 +38,7 @@ const TagList = ({ tags, selected, onChangeTag }: TagListProps) => {
   // endregion
 
   return (
-    <div className="-mx-2 py-2 px-2 pb-4 overflow-x-auto no-scrollbar">
+    <div className="-mx-2 py-2 px-2.5 pb-4 overflow-x-auto scrollbar-hide">
       <div className="flex flex-col gap-2 w-max">
         {tagRows.map((row, rowIndex) => (
           <div key={`tag-row-${rowIndex}`} className="flex gap-2">
