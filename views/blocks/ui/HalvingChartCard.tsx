@@ -2,8 +2,8 @@
 
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { calcPercentage, getNextHalvingData, useBlockStore } from "@/entities/block";
-import { useMounted } from "@/shared/hooks";
 import { calcDate } from "@/shared/lib/date";
+import { useMounted } from "@/shared/lib/hooks";
 import { CountText } from "@/shared/ui";
 
 const circumference = 2 * Math.PI * 50; // 원의 둘레

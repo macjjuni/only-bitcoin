@@ -4,7 +4,7 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { KIcon } from "kku-ui";
 import { type MouseEvent, useMemo } from "react";
-import { useMounted } from "@/shared/hooks";
+import { useMounted } from "@/shared/lib/hooks";
 import { CountText } from "@/shared/ui";
 
 export interface WidgetItemProps {

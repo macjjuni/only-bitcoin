@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useMemo } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
-import { useMounted } from "@/shared/hooks";
+import { useMounted } from "@/shared/lib/hooks";
 import useSettingStore from "@/shared/stores/settingStore";
 import { btcToSatoshi, floorToDecimal } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";

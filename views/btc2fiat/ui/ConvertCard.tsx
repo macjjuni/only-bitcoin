@@ -20,7 +20,7 @@ import {
   useCallback,
   useRef,
 } from "react";
-import { useCopyOnClick } from "@/shared/hooks";
+import { useCopyOnClick } from "@/shared/lib/hooks";
 import { isNumber } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 import type { UnitType } from "../model/btc2FiatStore";

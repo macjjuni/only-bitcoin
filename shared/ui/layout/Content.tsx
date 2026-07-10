@@ -1,7 +1,7 @@
 "use client";
 
 import React, { type ReactNode } from "react";
-import { useFadeInByPath } from "@/shared/hooks";
+import { useFadeInByPath } from "@/shared/lib/hooks";
 
 export default function Content({
   children,
