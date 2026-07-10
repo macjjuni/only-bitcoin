@@ -2,10 +2,10 @@
 
 import { useLottie } from "lottie-react";
 import { useCallback, useEffect, useMemo } from "react";
+import { calcPercentage, getNextHalvingData } from "@/entities/block";
 import blockLottieJson from "@/shared/assets/lottie/blocks.json";
 import { calcDate } from "@/shared/lib/date";
 import useStore from "@/shared/stores/store";
-import { calcPercentage, getNextHalvingData } from "@/shared/utils/calculate";
 import { comma } from "@/shared/utils/string";
 
 const totalSegments = 24 as const;

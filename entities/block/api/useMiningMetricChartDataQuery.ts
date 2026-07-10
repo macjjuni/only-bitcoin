@@ -1,11 +1,8 @@
 import { useQuery } from "@tanstack/react-query";
 import { kToast } from "kku-ui";
 import { useEffect } from "react";
+import type { HashrateChartFormattedData, HashrateChartResponseData } from "@/entities/block";
 import type { MiningMetricChartIntervalType } from "@/shared/stores/store.interface";
-import type {
-  HashrateChartFormattedData,
-  HashrateChartResponseData,
-} from "@/entities/block";
 import { isDev } from "@/shared/utils/common";
 import fetcher from "@/shared/utils/fetcher";
 

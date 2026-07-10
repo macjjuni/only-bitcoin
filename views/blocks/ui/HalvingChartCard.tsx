@@ -1,11 +1,11 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { calcPercentage, getNextHalvingData } from "@/entities/block";
 import { useMounted } from "@/shared/hooks";
 import { calcDate } from "@/shared/lib/date";
 import useStore from "@/shared/stores/store";
 import { CountText } from "@/shared/ui";
-import { calcPercentage, getNextHalvingData } from "@/shared/utils/calculate";
 
 const circumference = 2 * Math.PI * 50; // 원의 둘레
 

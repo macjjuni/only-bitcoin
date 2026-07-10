@@ -1,10 +1,10 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { kToast } from "kku-ui";
 import { useEffect } from "react";
-import type { MarketChartIntervalType } from "@/shared/stores/store.interface";
+import { type BinanceInterval, fetchBinanceKlines } from "@/entities/bitcoin/api/binance";
+import { fetchBlockchainMarketPriceAll } from "@/entities/bitcoin/api/blockchain";
 import type { MarketChartFormattedData } from "@/entities/market";
-import { type BinanceInterval, fetchBinanceKlines } from "@/shared/utils/api/binance";
-import { fetchBlockchainMarketPriceAll } from "@/shared/utils/api/blockchain";
+import type { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import { isDev } from "@/shared/utils/common";
 
 /**
