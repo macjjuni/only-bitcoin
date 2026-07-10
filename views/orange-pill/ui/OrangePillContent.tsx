@@ -50,26 +50,26 @@ const OrangePillContent = () => {
 
   return (
     <>
-      {/* 커뮤니티 그룹 */}
-      <KListGroup header="커뮤니티" className="mt-1">
+      {/* 유틸리티 */}
+      <KListGroup header="유틸리티">
         <KListRow
           className="glass-surface"
-          icon={<DiscordIcon size={28} />}
-          label="BITCOIN⚡️CITADEL"
-          rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_DISCORD)}
+          icon={<Images size={28} />}
+          label="비트맥시 전용 밈 저장소"
+          rightElement={<ChevronRight className="text-muted-foreground" />}
+          onClick={handleMemeRoute}
         />
         <KListRow
           className="glass-surface"
-          icon={<NaverIcon size={28} />}
-          label="비트코인⚡️지분전쟁: 시타델"
-          rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_CAFE)}
+          icon={<TableProperties size={28} />}
+          label="BIP39"
+          rightElement={<ChevronRight className="text-muted-foreground" />}
+          onClick={handleBIP39Route}
         />
       </KListGroup>
 
       {/* 서비스 */}
-      <KListGroup header="서비스">
+      <KListGroup header="서비스" className="!mt-4">
         <KListRow
           className="glass-surface"
           icon={<LazyImage src="https://satoshop.org/icon.svg?icon.12fecbu508vdu.svg" />}
@@ -94,7 +94,7 @@ const OrangePillContent = () => {
       </KListGroup>
 
       {/* 아카데미 */}
-      <KListGroup header="아카데미">
+      <KListGroup header="아카데미" className="!mt-4">
         <KListRow
           className="glass-surface"
           icon={<KIcon icon="notion" size={28} />}
@@ -111,21 +111,21 @@ const OrangePillContent = () => {
         />
       </KListGroup>
 
-      {/* 유틸리티 */}
-      <KListGroup header="유틸리티">
+      {/* 커뮤니티 그룹 */}
+      <KListGroup header="커뮤니티" className="!mt-4">
         <KListRow
           className="glass-surface"
-          icon={<Images size={28} />}
-          label="비트맥시 전용 밈 저장소"
-          rightElement={<ChevronRight className="text-muted-foreground" />}
-          onClick={handleMemeRoute}
+          icon={<DiscordIcon size={28} />}
+          label="BITCOIN⚡️CITADEL"
+          rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
+          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_DISCORD)}
         />
         <KListRow
           className="glass-surface"
-          icon={<TableProperties size={28} />}
-          label="BIP39"
-          rightElement={<ChevronRight className="text-muted-foreground" />}
-          onClick={handleBIP39Route}
+          icon={<NaverIcon size={28} />}
+          label="비트코인⚡️지분전쟁: 시타델"
+          rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
+          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_CAFE)}
         />
       </KListGroup>
     </>
