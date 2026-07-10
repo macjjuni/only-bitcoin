@@ -78,6 +78,60 @@ html.slide-first::view-transition-new(root) {
     -moz-osx-font-smoothing: grayscale;
   }
 
+  /* region [배경 하단 오렌지 앰비언트 글로우] */
+  @keyframes emberGlow {
+    0% {
+      opacity: 0.5;
+      transform: translateX(-50%) translateY(3%) scaleX(1) scaleY(1);
+    }
+    22% {
+      opacity: 0.82;
+      transform: translateX(-51%) translateY(1%) scaleX(1.04) scaleY(1.05);
+    }
+    45% {
+      opacity: 0.62;
+      transform: translateX(-49%) translateY(2%) scaleX(0.98) scaleY(1.02);
+    }
+    68% {
+      opacity: 0.9;
+      transform: translateX(-50.5%) translateY(0) scaleX(1.05) scaleY(1.08);
+    }
+    100% {
+      opacity: 0.5;
+      transform: translateX(-50%) translateY(3%) scaleX(1) scaleY(1);
+    }
+  }
+
+  /* 다크모드 전용: 화이트모드에서는 글로우를 렌더링하지 않는다 */
+  .dark body::before {
+    content: "";
+    position: fixed;
+    left: 50%;
+    bottom: 0;
+    width: min(150%, 620px);
+    height: 38vh;
+    transform: translateX(-50%);
+    transform-origin: 50% 100%;
+    z-index: -1;
+    pointer-events: none;
+    filter: blur(8px);
+    animation: emberGlow 7s ease-in-out infinite;
+    will-change: opacity, transform;
+    background: radial-gradient(
+      ellipse 58% 100% at 50% 100%,
+      rgba(247, 147, 26, 0.42) 0%,
+      rgba(247, 147, 26, 0.18) 38%,
+      rgba(247, 147, 26, 0) 72%
+    );
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .dark body::before {
+      animation: none;
+    }
+  }
+  /* endregion */
+
   body.show-bg {
     @apply bg-no-repeat bg-fixed bg-center;
     overflow-x: hidden;
