@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { useMiningMetricChartData } from "@/shared/query";
+import { useMiningMetricChartData } from "@/entities/block/client";
 import useStore from "@/shared/stores/store";
 import type { MiningMetricChartIntervalType } from "@/shared/stores/store.interface";
 import { formatDifficulty, formatHashrate } from "@/shared/utils/number";

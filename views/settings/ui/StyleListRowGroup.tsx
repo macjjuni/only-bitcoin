@@ -1,3 +1,5 @@
+"use client";
+
 import { KIcon, KListGroup, KListRow, KSwitch } from "kku-ui";
 import { Moon } from "lucide-react";
 import { memo } from "react";

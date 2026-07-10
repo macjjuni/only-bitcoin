@@ -13,7 +13,7 @@ import { arrayMove, horizontalListSortingStrategy, SortableContext } from "@dnd-
 import { KButton, kToast } from "kku-ui";
 import { useTransitionRouter } from "next-view-transitions";
 import { useEffect, useState } from "react";
-import { useBitcoinDominanceQuery, useFearGreedIndex } from "@/shared/query";
+import { useBitcoinDominanceQuery, useFearGreedIndex } from "@/entities/bitcoin/client";
 import useStore from "@/shared/stores/store";
 import { calcPremiumPercent, minedPercent, usdToSats } from "@/shared/utils/calculate";
 import FearAndGreedDialog from "./components/FearAndGreedDialog";

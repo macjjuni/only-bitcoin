@@ -1,7 +1,7 @@
 "use client";
 
 import { useId, useMemo } from "react";
-import { usePriceMiniChartData } from "@/shared/query";
+import { usePriceMiniChartData } from "@/entities/bitcoin/client";
 
 interface PriceMiniChartProps {
   barCount?: number;

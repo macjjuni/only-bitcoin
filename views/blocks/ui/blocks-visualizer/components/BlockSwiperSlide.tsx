@@ -1,3 +1,5 @@
+"use client";
+
 import { dateUtil } from "kku-util";
 import { memo, useCallback, useEffect, useMemo, useState } from "react";
 import { SwiperSlide } from "swiper/react";

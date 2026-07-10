@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useMemo } from "react";
-import { useMarketChartData } from "@/shared/query";
+import { useMarketChartData } from "@/entities/bitcoin/client";
 import useStore from "@/shared/stores/store";
 import type { MarketChartIntervalType } from "@/shared/stores/store.interface";
 import OverviewChartShell from "../chartShell/OverviewChartShell";
