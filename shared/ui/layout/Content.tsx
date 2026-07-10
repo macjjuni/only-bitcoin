@@ -19,8 +19,7 @@ export default function Content({
       className={[
         "only-btc__content",
         "flex flex-col flex-1 min-h-0 w-full mx-auto max-w-layout",
-        "overflow-y-auto overflow-x-hidden",
-        "pt-[theme(height.header)]",
+        "overflow-y-auto overflow-x-hidden overscroll-contain",
         "transition-opacity duration-500 ease-in-out",
         fadeInClasses,
         className,

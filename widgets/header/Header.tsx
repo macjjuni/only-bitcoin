@@ -13,11 +13,11 @@ export default function Header() {
     <header
       className={[
         "only-btc__header",
-        "fixed top-0 left-0 layout-max:left-1/2 layout-max:-translate-x-1/2 bg-background",
-        "flex justify-between items-center gap-1 w-full layout-max:max-w-[calc(theme(maxWidth.layout)_-_2px)] h-header p-2",
+        "relative shrink-0 bg-background",
+        "flex justify-between items-center gap-1 w-full h-header p-2",
         "z-[10] select-none tap-highlight-transparent",
         // 하단 그라데이션
-        "after:content-[''] after:fixed after:top-header after:left-0 after:w-full after:h-4",
+        "after:content-[''] after:absolute after:top-full after:left-0 after:w-full after:h-4 after:pointer-events-none",
         "after:bg-gradient-to-b after:from-background after:to-transparent",
         "dark:after:from-background dark:after:to-transparent",
       ]
