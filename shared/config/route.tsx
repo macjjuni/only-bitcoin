@@ -1,4 +1,8 @@
-import { BlockIcon, DashboardIcon, ExchangeIcon, PillIcon, PremiumIcon } from "@/shared/ui";
+// 배럴(@/shared/ui)이 아니라 아이콘 하위 배럴을 직접 가리킨다.
+// @/shared/ui 는 TransitionLink 를 export 하고 TransitionLink 는 이 파일을 import 하므로,
+// 배럴을 경유하면 모듈 순환이 생긴다. 이 파일은 최상위에서 JSX 를 만들기 때문에
+// 평가 순서에 따라 아이콘이 undefined 인 채로 렌더될 수 있다.
+import { BlockIcon, DashboardIcon, ExchangeIcon, PillIcon, PremiumIcon } from "@/shared/ui/icon";
 
 const clientRoutes = [
   {
