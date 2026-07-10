@@ -41,15 +41,14 @@ const buildGraph = (includeTypeOnly) => {
     const deps = new Set();
 
     const importRe = /^\s*(?:import|export)\s+([\s\S]*?)from\s+["']([^"']+)["']/gm;
-    let m;
-    while ((m = importRe.exec(src))) {
+    for (const m of src.matchAll(importRe)) {
       if (/^\s*type\s/.test(m[1]) && !includeTypeOnly) continue;
       const resolved = resolveSpec(m[2], file);
       if (resolved) deps.add(resolved);
     }
 
     const starRe = /^\s*export\s+\*\s+from\s+["']([^"']+)["']/gm;
-    while ((m = starRe.exec(src))) {
+    for (const m of src.matchAll(starRe)) {
       const resolved = resolveSpec(m[1], file);
       if (resolved) deps.add(resolved);
     }

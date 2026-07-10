@@ -47,6 +47,7 @@ export default function DomainNoticeDialog() {
     setOpen(false);
   };
 
+  // biome-ignore lint/correctness/noUnusedVariables: "일주일 동안 보지 않기" 버튼이 임시 비활성(하단 주석) 상태라 핸들러를 유지한다
   const handleNeverShowAgain = () => {
     // 일주일 동안 쿠키 유지
     setCookie(NOTICE_COOKIE_KEY, "true", 7);

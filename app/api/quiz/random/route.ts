@@ -20,7 +20,7 @@ const checkServerEligibility = async () => {
 
   // 2. 카운트 체크
   const countRaw = cookieStore.get(QUIZ_COOKIE_KEY)?.value;
-  const count = parseInt(countRaw || "0");
+  const count = parseInt(countRaw || "0", 10);
 
   if (count < QUIZ_MIN_COUNT) {
     return { eligible: false, reason: "INSUFFICIENT_COUNT" };
@@ -63,10 +63,11 @@ const fetchWalletBalance = async (): Promise<number> => {
     });
 
     const result = await response.json();
-    const wallets = result.data?.me?.defaultAccount?.wallets || [];
+    const wallets: Array<{ walletCurrency: string; balance: number }> =
+      result.data?.me?.defaultAccount?.wallets || [];
 
     // BTC 지갑 찾기 (일반적으로 BTC 단위의 잔액 반환)
-    const btcWallet = wallets.find((w: any) => w.walletCurrency === "BTC");
+    const btcWallet = wallets.find((w) => w.walletCurrency === "BTC");
     return btcWallet ? btcWallet.balance : 0;
   } catch (error) {
     console.error("Blink Balance Fetch Error:", error);

@@ -76,6 +76,7 @@ const LazyImage = ({ src, alt = "", className = "" }: LazyImageProps) => {
 
       {/* 2. Image Render */}
       {isVisible && !isError && (
+        // biome-ignore lint/performance/noImgElement: IntersectionObserver 기반 자체 지연 로딩·재시도 컴포넌트. 외부 원본 이미지를 그대로 쓰므로 next/image 최적화 대상이 아니다
         <img
           key={`${src}-${retryKey}`}
           src={src}

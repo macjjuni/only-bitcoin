@@ -3,6 +3,7 @@ export function setCookie(name: string, value: string, days: number) {
   // (일 * 24시간 * 60분 * 60초 * 1000밀리초)로 계산하여 현재 시간에 더함
   expires.setTime(expires.getTime() + days * 24 * 60 * 60 * 1000);
 
+  // biome-ignore lint/suspicious/noDocumentCookie: 대안인 Cookie Store API 는 Safari/Firefox 미지원
   document.cookie = `${name}=${value}; path=/; expires=${expires.toUTCString()}; SameSite=Lax`;
 }
 
@@ -17,5 +18,6 @@ export function getCookie(name: string): string | null {
 }
 
 export function deleteCookie(name: string) {
+  // biome-ignore lint/suspicious/noDocumentCookie: 대안인 Cookie Store API 는 Safari/Firefox 미지원
   document.cookie = `${name}=; path=/; expires=Thu, 01 Jan 1970 00:00:00 UTC;`;
 }

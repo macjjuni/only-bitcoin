@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 import useConfettiStore from "@/shared/stores/confettiStore";
 
 type ShapeType = "square" | "circle" | "strip";
@@ -84,7 +84,6 @@ const ConfettiEffect = () => {
       case "strip":
         ctx.fillRect(-p.size / 4, -p.size * 0.75 * flipScale, p.size / 2, p.size * 1.5 * flipScale);
         break;
-      case "square":
       default:
         ctx.fillRect(-p.size / 2, (-p.size / 2) * flipScale, p.size, p.size * flipScale);
         break;

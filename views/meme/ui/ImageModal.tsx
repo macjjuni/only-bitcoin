@@ -107,6 +107,7 @@ const ImageModal = ({ src, onClose }: ImageModalProps) => {
 
       {/* Image */}
       <div className="relative max-w-[90vw] max-h-[90vh] animate-in zoom-in duration-300">
+        {/* biome-ignore lint/performance/noImgElement: 외부 밈 이미지 원본 확대 뷰. 크기를 알 수 없고 object-contain 으로 원본을 그대로 보여준다 */}
         <img
           src={src}
           alt="확대 이미지"

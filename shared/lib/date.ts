@@ -20,7 +20,7 @@ function formatDate(
   try {
     const d = new Date(date);
 
-    if (isNaN(d.getTime())) {
+    if (Number.isNaN(d.getTime())) {
       console.warn(`Invalid date value passed to formatDate: ${date}`);
       return "-";
     }

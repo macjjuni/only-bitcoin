@@ -42,7 +42,7 @@ export default function GenesisVideoDialog({ open, setOpen }: ModalTypes) {
       const srtText = await response.text();
 
       // SRT 포맷의 쉼표(,)를 VTT용 마침표(.)로 변환
-      const vttText = "WEBVTT\n\n" + srtText.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, "$1.$2");
+      const vttText = `WEBVTT\n\n${srtText.replace(/(\d{2}:\d{2}:\d{2}),(\d{3})/g, "$1.$2")}`;
       return new Blob([vttText], { type: "text/vtt" });
     } catch (error) {
       console.error("Subtitle conversion failed:", error);

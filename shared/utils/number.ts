@@ -19,7 +19,7 @@ export function btcToSatoshi(btcCount: string | number): string {
 
 export function formatHashrate(hashrate: number) {
   // eslint-disable-next-line no-restricted-globals
-  if (hashrate === 0 || !isFinite(hashrate)) {
+  if (hashrate === 0 || !Number.isFinite(hashrate)) {
     return "0.00H/s";
   }
 

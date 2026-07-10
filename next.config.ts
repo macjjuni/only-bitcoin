@@ -1,6 +1,6 @@
 // next.config.ts
 
-import { readFileSync } from "fs";
+import { readFileSync } from "node:fs";
 import type { NextConfig } from "next";
 
 const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));

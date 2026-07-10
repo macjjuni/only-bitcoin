@@ -1,7 +1,7 @@
 interface BlockExtras {
   reward: number;
   coinbaseRaw: string;
-  orphans: any[];
+  orphans: unknown[];
   medianFee: number;
   feeRange: number[];
   totalFees: number;
@@ -15,7 +15,7 @@ interface BlockExtras {
   segwitTotalTxs: number;
   segwitTotalSize: number;
   segwitTotalWeight: number;
-  feePercentiles: any;
+  feePercentiles: number[] | null;
   virtualSize: number;
   coinbaseAddress: string;
   coinbaseAddresses: string[];

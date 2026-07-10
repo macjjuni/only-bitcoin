@@ -39,7 +39,7 @@ const checkPwaEnv = (): boolean => {
   return isDev ? true : isMobile && isPWA;
 };
 
-const getVisitCount = () => parseInt(getCookie(QUIZ_COOKIE_KEY) || "0");
+const getVisitCount = () => parseInt(getCookie(QUIZ_COOKIE_KEY) || "0", 10);
 const setVisitCount = (count: number) => setCookie(QUIZ_COOKIE_KEY, count.toString(), 1);
 
 const canIncrementCount = () => !getCookie(COUNT_COOLDOWN_KEY);
