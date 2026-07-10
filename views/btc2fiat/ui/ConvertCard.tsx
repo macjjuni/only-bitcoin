@@ -92,10 +92,10 @@ const ConvertCard = (props: ConvertCardProps) => {
   return (
     <KCard
       className={[
-        "border-border font-number",
+        "border-border font-number border-[0.5px]",
         inputActive && "glass-surface",
         !inputActive &&
-          " !border-0 !bg-transparent !shadow-none [&>div]:px-2 layout-max:[&>div]:px-4",
+          "!border-0 !bg-transparent !shadow-none [&>div]:px-2 layout-max:[&>div]:px-4",
       ]
         .filter(Boolean)
         .join(" ")}
