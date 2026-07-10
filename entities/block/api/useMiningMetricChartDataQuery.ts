@@ -1,10 +1,10 @@
 import { useQuery } from "@tanstack/react-query";
 import { kToast } from "kku-ui";
 import { useEffect } from "react";
-import type { MiningMetricChartIntervalType } from "@/entities/bitcoin";
 import type { HashrateChartFormattedData, HashrateChartResponseData } from "@/entities/block";
 import { isDev } from "@/shared/utils/common";
 import fetcher from "@/shared/utils/fetcher";
+import type { MiningMetricChartIntervalType } from "../model/types";
 
 function processDataInWorker(data: HashrateChartResponseData): Promise<HashrateChartFormattedData> {
   return new Promise((resolve, reject) => {

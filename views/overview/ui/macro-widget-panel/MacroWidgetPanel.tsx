@@ -17,6 +17,7 @@ import { useBitcoinStore } from "@/entities/bitcoin";
 import { useBitcoinDominanceQuery, useFearGreedIndex } from "@/entities/bitcoin/client";
 import { minedPercent, useBlockStore } from "@/entities/block";
 import { calcPremiumPercent, usdToSats } from "@/shared/utils/calculate";
+import useOverviewStore from "../../model/overviewStore";
 import FearAndGreedDialog from "./components/FearAndGreedDialog";
 import WidgetItem from "./WidgetItem";
 
@@ -35,8 +36,8 @@ export default function MacroWidgetPanel() {
   const [isEditMode, setIsEditMode] = useState(false);
   const [IsFearAndGreedDialog, setIsFearAndGreedDialog] = useState(false);
 
-  const macroSequence = useBitcoinStore((state) => state.macroSequence);
-  const setMacroSequence = useBitcoinStore((state) => state.setMacroSequence);
+  const macroSequence = useOverviewStore((state) => state.macroSequence);
+  const setMacroSequence = useOverviewStore((state) => state.setMacroSequence);
   const { krw, usd } = useBitcoinStore((state) => state.bitcoinPrice);
   const usdExRate = useBitcoinStore((state) => state.exRate.value);
   const blockData = useBlockStore((state) => state.blockData);

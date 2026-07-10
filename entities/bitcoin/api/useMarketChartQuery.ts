@@ -5,7 +5,7 @@ import { type BinanceInterval, fetchBinanceKlines } from "@/entities/bitcoin/api
 import { fetchBlockchainMarketPriceAll } from "@/entities/bitcoin/api/blockchain";
 import type { MarketChartFormattedData } from "@/entities/market";
 import { isDev } from "@/shared/utils/common";
-import type { MarketChartIntervalType } from "../model/chartSlice";
+import type { MarketChartIntervalType } from "../model/types";
 
 /**
  * 인터벌별 Binance Klines 파라미터 매핑

@@ -9,3 +9,4 @@ export const STORE_PERSIST_KEY = "only-bitcoin";
 export const BITCOIN_PERSIST_KEY = "only-bitcoin-bitcoin";
 export const BLOCK_PERSIST_KEY = "only-bitcoin-block";
 export const BTC2FIAT_PERSIST_KEY = "only-bitcoin-btc2fiat";
+export const OVERVIEW_PERSIST_KEY = "only-bitcoin-overview";

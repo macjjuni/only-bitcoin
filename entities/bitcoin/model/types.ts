@@ -41,3 +41,6 @@ export interface FearGreedIndexResponseTypes {
     error: null | string;
   };
 }
+
+/** 가격 차트 조회 기간 (useMarketChartQuery 파라미터) */
+export type MarketChartIntervalType = "1d" | "7d" | "1m" | "1y" | "5y" | "all";

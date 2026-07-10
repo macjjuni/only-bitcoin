@@ -2,8 +2,8 @@
 
 import { useCallback, useMemo } from "react";
 import type { MarketChartIntervalType } from "@/entities/bitcoin";
-import { useBitcoinStore } from "@/entities/bitcoin";
 import { useMarketChartData } from "@/entities/bitcoin/client";
+import useOverviewStore from "../../model/overviewStore";
 import OverviewChartShell from "../chartShell/OverviewChartShell";
 import type { ChartIntervalOption } from "../chartShell/OverviewChartShell.interface";
 
@@ -18,8 +18,8 @@ const marketChartIntervalOptions: ChartIntervalOption<MarketChartIntervalType>[]
 
 export default function MarketChart() {
   // region [Hooks]
-  const marketChartInterval = useBitcoinStore((state) => state.marketChartInterval);
-  const setMarketChartInterval = useBitcoinStore((state) => state.setMarketChartInterval);
+  const marketChartInterval = useOverviewStore((state) => state.marketChartInterval);
+  const setMarketChartInterval = useOverviewStore((state) => state.setMarketChartInterval);
   const { marketChartData, isLoading } = useMarketChartData(marketChartInterval);
 
   const seriesData = useMemo(() => {

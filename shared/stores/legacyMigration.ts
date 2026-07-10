@@ -28,6 +28,7 @@ import {
   BITCOIN_PERSIST_KEY,
   BLOCK_PERSIST_KEY,
   BTC2FIAT_PERSIST_KEY,
+  OVERVIEW_PERSIST_KEY,
   STORE_PERSIST_KEY,
 } from "@/shared/stores/persistKeys";
 
@@ -42,20 +43,21 @@ const MIGRATION_TARGETS: ReadonlyArray<{ key: string; stateKeys: readonly string
   },
   {
     key: BITCOIN_PERSIST_KEY,
-    stateKeys: [
-      "bitcoinPrice",
-      "krwMarket",
-      "usdMarket",
-      "macroSequence",
-      "overviewChart",
-      "marketChartInterval",
-      "miningMetricChartInterval",
-      "exRate",
-    ],
+    stateKeys: ["bitcoinPrice", "krwMarket", "usdMarket", "exRate"],
   },
   {
     key: BLOCK_PERSIST_KEY,
     stateKeys: ["blockData", "fees"],
+  },
+  {
+    // 차트 선택 / 기간 / 위젯 순서는 overview 페이지의 화면 상태다.
+    key: OVERVIEW_PERSIST_KEY,
+    stateKeys: [
+      "overviewChart",
+      "marketChartInterval",
+      "miningMetricChartInterval",
+      "macroSequence",
+    ],
   },
 ];
 

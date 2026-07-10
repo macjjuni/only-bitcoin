@@ -85,3 +85,6 @@ export interface HashrateChartFormattedData {
     date: number[];
   };
 }
+
+/** 해시레이트/난이도 차트 조회 기간 (useMiningMetricChartDataQuery 파라미터) */
+export type MiningMetricChartIntervalType = "3m" | "6m" | "1y" | "2y" | "3y" | "all";

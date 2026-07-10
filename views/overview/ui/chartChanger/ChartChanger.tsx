@@ -10,8 +10,7 @@ import {
 } from "kku-ui";
 import { ChartNoAxesCombined } from "lucide-react";
 import { useCallback } from "react";
-import type { OverviewChartType } from "@/entities/bitcoin";
-import { useBitcoinStore } from "@/entities/bitcoin";
+import useOverviewStore, { type OverviewChartType } from "../../model/overviewStore";
 
 const overviewChartOptions = [
   { label: "가격", value: "price" },
@@ -21,8 +20,8 @@ const overviewChartOptions = [
 
 export default function ChartChanger() {
   // region [Hooks]
-  const overviewChart = useBitcoinStore((store) => store.overviewChart);
-  const setOverviewChart = useBitcoinStore((store) => store.setOverviewChart);
+  const overviewChart = useOverviewStore((store) => store.overviewChart);
+  const setOverviewChart = useOverviewStore((store) => store.setOverviewChart);
   // endregion
 
   // region [Events]
