@@ -1,7 +1,7 @@
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
 import { quizData } from "@/entities/quiz";
-import { createAnswerToken } from "@/entities/quiz/api/quiz-rewards";
+import { createAnswerToken } from "@/entities/quiz/server";
 
 // region [Types]
 interface AnswerRequest {

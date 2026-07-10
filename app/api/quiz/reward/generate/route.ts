@@ -1,7 +1,7 @@
 import { bech32 } from "bech32";
 import { NextResponse } from "next/server";
 import { v4 as uuidv4 } from "uuid";
-import { activateRewardToken } from "@/entities/quiz/api/quiz-rewards";
+import { activateRewardToken } from "@/entities/quiz/server";
 import { env } from "@/shared/config/env";
 
 // region [Types]
