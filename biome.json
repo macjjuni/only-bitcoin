@@ -57,5 +57,94 @@
       "!**/tsconfig.tsbuildinfo",
       "!**/*.css"
     ]
-  }
+  },
+  "overrides": [
+    {
+      "includes": ["shared/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  {
+                    "group": [
+                      "@/entities/**",
+                      "@/features/**",
+                      "@/widgets/**",
+                      "@/views/**",
+                      "@/app/**"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["entities/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [
+                  { "group": ["@/features/**", "@/widgets/**", "@/views/**", "@/app/**"] }
+                ]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["features/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [{ "group": ["@/widgets/**", "@/views/**", "@/app/**"] }]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["widgets/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [{ "group": ["@/views/**", "@/app/**"] }]
+              }
+            }
+          }
+        }
+      }
+    },
+    {
+      "includes": ["views/**"],
+      "linter": {
+        "rules": {
+          "style": {
+            "noRestrictedImports": {
+              "level": "error",
+              "options": {
+                "patterns": [{ "group": ["@/app/**"] }]
+              }
+            }
+          }
+        }
+      }
+    }
+  ]
 }
