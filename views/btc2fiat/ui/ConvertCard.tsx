@@ -21,9 +21,9 @@ import {
   useRef,
 } from "react";
 import { useCopyOnClick } from "@/shared/hooks";
-import type { UnitType } from "@/shared/stores/store.interface";
 import { isNumber } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
+import type { UnitType } from "../model/btc2FiatStore";
 import PremiumField from "./PremiumField";
 import UnitDropdownMenu from "./UnitDropdownMenu";
 

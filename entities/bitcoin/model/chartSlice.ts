@@ -1,5 +1,4 @@
 import type { StateCreator } from "zustand";
-import type { StoreType } from "@/shared/stores/store";
 
 export type OverviewChartType = "hashrate" | "difficulty" | "price";
 export type MarketChartIntervalType = "1d" | "7d" | "1m" | "1y" | "5y" | "all";
@@ -16,7 +15,7 @@ export interface ChartSlice {
   setMiningMetricChartInterval: (interval: MiningMetricChartIntervalType) => void;
 }
 
-export const createChartSlice: StateCreator<StoreType, [], [], ChartSlice> = (set) => ({
+export const createChartSlice: StateCreator<ChartSlice> = (set) => ({
   overviewChart: "price",
   setOverviewChart: (overviewChart) => set(() => ({ overviewChart })),
   marketChartInterval: "5y",

@@ -1,10 +1,10 @@
 "use client";
 
 import { memo, useMemo } from "react";
-import useStore from "@/shared/stores/store";
+import useBtc2FiatStore from "../model/btc2FiatStore";
 
 const PremiumBadge = () => {
-  const premium = useStore((state) => state.premium);
+  const premium = useBtc2FiatStore((state) => state.premium);
   const numberSign = useMemo(() => (premium > 0 ? "+" : ""), [premium]);
 
   if (premium === 0) {

@@ -1,12 +1,11 @@
 import type { StateCreator } from "zustand";
-import type { StoreType } from "@/shared/stores/store";
 
 export interface ThemeSlice {
   theme: "light" | "dark";
   setTheme: (theme: "light" | "dark") => void;
 }
 
-export const createThemeSlice: StateCreator<StoreType, [], [], ThemeSlice> = (set) => ({
+export const createThemeSlice: StateCreator<ThemeSlice> = (set) => ({
   theme: "light",
   setTheme: (theme) =>
     set((store) => {

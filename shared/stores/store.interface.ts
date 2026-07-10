@@ -20,4 +20,3 @@ export type {
   SettingTypes,
 } from "@/shared/stores/slices/settingSlice";
 export type { StoreType } from "@/shared/stores/store";
-export type { UnitType } from "@/views/btc2fiat";

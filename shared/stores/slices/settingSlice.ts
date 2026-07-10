@@ -1,5 +1,4 @@
 import type { StateCreator } from "zustand";
-import type { StoreType } from "@/shared/stores/store";
 
 export type CurrencyTypes = "KRW" | "USD" | "KRW/USD";
 
@@ -27,7 +26,7 @@ export interface SettingSlice {
   setDeferredPrompt: (deferredPrompt: BeforeInstallPromptEvent | null) => void;
 }
 
-export const createSettingSlice: StateCreator<StoreType, [], [], SettingSlice> = (set) => ({
+export const createSettingSlice: StateCreator<SettingSlice> = (set) => ({
   setting: {
     initialPath: "/overview",
     currency: "KRW/USD",
@@ -40,14 +39,11 @@ export const createSettingSlice: StateCreator<StoreType, [], [], SettingSlice> =
     set((state) => ({
       setting: { ...state.setting, initialPath: path },
     })),
+  // BTC2Fiat 페이지의 기준 단위(focusCurrency) 보정은 views/btc2fiat 에서 이 값을 구독해 처리한다.
   setCurrency: (currency) =>
-    set((state) => {
-      // BTC2Fiat 페이지 설정 충돌 방지
-      const isNotIncludeCurrency = currency.includes(state.focusCurrency);
-      const focusCurrency = !isNotIncludeCurrency ? "BTC" : state.focusCurrency;
-
-      return { setting: { ...state.setting, currency }, focusCurrency };
-    }),
+    set((state) => ({
+      setting: { ...state.setting, currency },
+    })),
   setUsdtStandard: (isUsdtStandard) =>
     set((state) => ({
       setting: { ...state.setting, isUsdtStandard },

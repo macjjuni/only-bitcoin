@@ -10,7 +10,7 @@ import {
 } from "kku-ui";
 import { memo, type ReactNode, useMemo } from "react";
 import useStore from "@/shared/stores/store";
-import type { UnitType } from "@/shared/stores/store.interface";
+import type { UnitType } from "../model/btc2FiatStore";
 
 export interface UnitDropdownMenuProps {
   currentUnit: UnitType;

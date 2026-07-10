@@ -2,9 +2,9 @@
 
 import { memo, useCallback, useEffect, useMemo } from "react";
 import useStore from "@/shared/stores/store";
-import type { UnitType } from "@/shared/stores/store.interface";
 import { btcToSatoshi, floorToDecimal } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
+import useBtc2FiatStore, { type UnitType } from "../model/btc2FiatStore";
 import ConvertCard from "./ConvertCard";
 
 const ConvertPanel = () => {
@@ -14,19 +14,19 @@ const ConvertPanel = () => {
   const exRate = useStore((state) => state.exRate.value);
   const isUsdtStandard = useStore((state) => state.setting.isUsdtStandard);
 
-  const btcCount = useStore((state) => state.btc2Fiat.btcCount);
-  const krw = useStore((state) => state.btc2Fiat.krw);
-  const usd = useStore((state) => state.btc2Fiat.usd);
-  const sats = useStore((state) => state.btc2Fiat.sats);
-  const setBtcCount = useStore((state) => state.setBtcCount);
-  const setKrw = useStore((state) => state.setKrw);
-  const setUsd = useStore((state) => state.setUsd);
-  const setSats = useStore((state) => state.setSats);
-  const premium = useStore((state) => state.premium);
-  const setPremium = useStore((state) => state.setPremium);
+  const btcCount = useBtc2FiatStore((state) => state.btc2Fiat.btcCount);
+  const krw = useBtc2FiatStore((state) => state.btc2Fiat.krw);
+  const usd = useBtc2FiatStore((state) => state.btc2Fiat.usd);
+  const sats = useBtc2FiatStore((state) => state.btc2Fiat.sats);
+  const setBtcCount = useBtc2FiatStore((state) => state.setBtcCount);
+  const setKrw = useBtc2FiatStore((state) => state.setKrw);
+  const setUsd = useBtc2FiatStore((state) => state.setUsd);
+  const setSats = useBtc2FiatStore((state) => state.setSats);
+  const premium = useBtc2FiatStore((state) => state.premium);
+  const setPremium = useBtc2FiatStore((state) => state.setPremium);
 
-  const focusCurrency = useStore((state) => state.focusCurrency);
-  const setFocusCurrency = useStore((state) => state.setFocusCurrency);
+  const focusCurrency = useBtc2FiatStore((state) => state.focusCurrency);
+  const setFocusCurrency = useBtc2FiatStore((state) => state.setFocusCurrency);
   // endregion
 
   // region [Privates]

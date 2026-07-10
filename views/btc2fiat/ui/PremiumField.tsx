@@ -3,12 +3,12 @@
 import { KButton, KNumberStepper, KPopover, KPopoverContent, KPopoverTrigger } from "kku-ui";
 import { Info, RotateCcw } from "lucide-react";
 import { memo, useCallback, useMemo } from "react";
-import useStore from "@/shared/stores/store";
+import useBtc2FiatStore from "../model/btc2FiatStore";
 
 const PremiumField = () => {
   // region [Hooks]
-  const premium = useStore((state) => state.premium);
-  const setPremium = useStore((state) => state.setPremium);
+  const premium = useBtc2FiatStore((state) => state.premium);
+  const setPremium = useBtc2FiatStore((state) => state.setPremium);
   const isPremium = useMemo(() => premium !== 0, [premium]);
   // endregion
 

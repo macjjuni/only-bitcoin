@@ -1,6 +1,5 @@
 import type { StateCreator } from "zustand";
 import type { KrwMarketType, UsdMarketType } from "@/entities/market";
-import type { StoreType } from "@/shared/stores/store";
 
 export interface BitcoinPriceKRWTypes {
   krw: number;
@@ -28,7 +27,7 @@ export interface PriceSlice {
   setUsdMarket: (market: UsdMarketType) => void;
 }
 
-export const createPriceSlice: StateCreator<StoreType, [], [], PriceSlice> = (set) => ({
+export const createPriceSlice: StateCreator<PriceSlice> = (set) => ({
   bitcoinPrice: {
     krw: 0,
     krwChange24h: "0",
