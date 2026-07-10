@@ -51,7 +51,7 @@ app > views > widgets > features > entities > shared
 | --- | --- | --- |
 | `index.ts` | 서버·클라이언트 공용 (타입, 상수, 스토어) | 전부 |
 | `client.ts` | `"use client"` 전용 (훅) | `entities/bitcoin` |
-| `server.ts` | 서버 전용 (비밀키를 읽는 API) | `entities/quiz`, `entities/wallet` |
+| `server.ts` | 서버 전용 (비밀키를 읽는 API) | `entities/quiz`, `entities/lightning-wallet` |
 
 `server.ts` 는 사고를 겪고 만든 규칙이다. `entities/quiz/index.ts` 가 supabase
 클라이언트를 만드는 `api/quiz-rewards` 를 재export 하고 있었는데,
