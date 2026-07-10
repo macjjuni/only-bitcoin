@@ -15,6 +15,18 @@
   }
 }
 
+/* 다크모드 본문 스크롤바 썸만 흰색으로. main(.only-btc__content)이 스크롤 컨테이너다.
+   iOS Safari 는 ::-webkit-scrollbar 를 무시하므로, 터치 스크롤 인디케이터를
+   밝게 만들려면 스크롤 컨테이너에 color-scheme: dark 를 직접 줘야 한다. */
+.dark .only-btc__content {
+  color-scheme: dark;
+  scrollbar-color: rgb(255 255 255 / 0.4) transparent;
+}
+.dark .only-btc__content::-webkit-scrollbar-thumb {
+  background-color: rgb(255 255 255 / 0.4);
+  border-radius: 9999px;
+}
+
 /* region [반투명 유리 표면]
    뒤에 깔린 커버 이미지와 하단 앰비언트 글로우가 비쳐 보이게 한다.
    kku-ui 가 KCard/KListRow 에 칠하는 불투명 배경(bg-card, bg-background)을 덮는다.
@@ -75,6 +87,7 @@ html.slide-first::view-transition-new(root) {
 
 @layer base {
   :root {
+    color-scheme: light;
     --bitcoin-color: #f7931a;
     --up-color: #22c55e;
     --down-color: #ef4444;
@@ -89,6 +102,7 @@ html.slide-first::view-transition-new(root) {
       "Helvetica Neue", Arial, "Noto Sans", sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol", "Noto Color Emoji";
   }
   .dark {
+    color-scheme: dark;
     --background: 0 0% 7.1%;
   }
   html,
