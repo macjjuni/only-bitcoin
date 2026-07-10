@@ -4,22 +4,20 @@
  * 이 파일은 기존 `@/shared/stores/store.interface` import 경로 호환을 위해 재export한다.
  */
 
-export type { BlockTypes, FeesTypes } from "@/shared/stores/slices/blockSlice";
-export type { UnitType } from "@/shared/stores/slices/btc2FiatSlice";
-export type {
-  MarketChartIntervalType,
-  MiningMetricChartIntervalType,
-  OverviewChartType,
-} from "@/shared/stores/slices/chartSlice";
-export type { ExRateTypes } from "@/shared/stores/slices/exRateSlice";
 export type {
   BitcoinPriceKRWTypes,
   BitcoinPriceTypes,
   BitcoinPriceUSDTypes,
-} from "@/shared/stores/slices/priceSlice";
+  ExRateTypes,
+  MarketChartIntervalType,
+  MiningMetricChartIntervalType,
+  OverviewChartType,
+} from "@/entities/bitcoin";
+export type { BlockTypes, FeesTypes } from "@/entities/block";
 export type {
   BeforeInstallPromptEvent,
   CurrencyTypes,
   SettingTypes,
 } from "@/shared/stores/slices/settingSlice";
 export type { StoreType } from "@/shared/stores/store";
+export type { UnitType } from "@/views/btc2fiat";
