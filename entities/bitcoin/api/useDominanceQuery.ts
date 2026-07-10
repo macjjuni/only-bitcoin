@@ -1,7 +1,7 @@
 import { useQuery } from "@tanstack/react-query";
 import { kToast } from "kku-ui";
 import { useEffect } from "react";
-import type { ICurrency } from "@/shared/types/api/dominance";
+import type { ICurrency } from "@/entities/bitcoin";
 import { isDev } from "@/shared/utils/common";
 import fetcher from "@/shared/utils/fetcher";
 import { floorToDecimal } from "@/shared/utils/number";

@@ -16,3 +16,4 @@ export type {
   PriceSlice,
 } from "./model/priceSlice";
 export { createPriceSlice } from "./model/priceSlice";
+export * from "./model/types";

@@ -1,7 +1,7 @@
 import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { kToast } from "kku-ui";
 import { useEffect } from "react";
-import type { MarketChartFormattedData } from "@/shared/types/api/marketChart";
+import type { MarketChartFormattedData } from "@/entities/market";
 import { fetchBinanceKlines } from "@/shared/utils/api/binance";
 import { isDev } from "@/shared/utils/common";
 

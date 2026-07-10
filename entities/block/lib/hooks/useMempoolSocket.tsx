@@ -4,7 +4,7 @@ import ReconnectingWebSocket from "reconnecting-websocket";
 import useConfettiStore from "@/shared/stores/confettiStore";
 import useStore from "@/shared/stores/store";
 import type { BlockTypes, FeesTypes } from "@/shared/stores/store.interface";
-import type { MemPoolBlockTypes } from "@/shared/types/block.interface";
+import type { MemPoolBlockTypes } from "@/entities/block";
 import { deepEqual } from "@/shared/utils/common";
 import { comma } from "@/shared/utils/string";
 

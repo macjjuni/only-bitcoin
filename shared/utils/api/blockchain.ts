@@ -1,7 +1,7 @@
 import type {
   BlockchainChartResponseData,
   MarketChartFormattedData,
-} from "@/shared/types/api/marketChart";
+} from "@/entities/market";
 import fetcher from "@/shared/utils/fetcher";
 
 const BLOCKCHAIN_MARKET_PRICE_URL = "https://api.blockchain.info/charts/market-price";

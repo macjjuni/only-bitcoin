@@ -5,7 +5,7 @@ import type { MiningMetricChartIntervalType } from "@/shared/stores/store.interf
 import type {
   HashrateChartFormattedData,
   HashrateChartResponseData,
-} from "@/shared/types/api/hashrateChart";
+} from "@/entities/block";
 import { isDev } from "@/shared/utils/common";
 import fetcher from "@/shared/utils/fetcher";
 
