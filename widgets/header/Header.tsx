@@ -3,8 +3,8 @@
 import { KIcon } from "kku-ui";
 import useStore from "@/shared/stores/store";
 import { TransitionLink } from "@/shared/ui";
-import ConnectionDot from "./components/connectionDot/ConnectionDot";
-import SettingButton from "./components/settingButton/SettingButton";
+import ConnectionDot from "./components/connection-dot/ConnectionDot";
+import SettingButton from "./components/setting-button/SettingButton";
 
 export default function Header() {
   const initialPath = useStore((state) => state.setting.initialPath);

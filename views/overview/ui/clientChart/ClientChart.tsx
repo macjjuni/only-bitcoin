@@ -3,7 +3,7 @@
 import { memo } from "react";
 import useStore from "@/shared/stores/store";
 import MarketChart from "../marketChart/MarketChart";
-import MiningMetricChart from "../miningMetricChart/MiningMetricChart";
+import MiningMetricChart from "../mining-metric-chart/MiningMetricChart";
 
 const ClientChart = () => {
   // region [Hooks]
