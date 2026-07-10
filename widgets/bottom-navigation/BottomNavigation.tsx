@@ -19,15 +19,22 @@ export default function BottomNavigation() {
   return (
     <nav
       className={[
-        "only-btc__bottom-nav",
-        "fixed bottom-0 left-0 z-[10] h-bottom-nav overflow-hidden border-t border-border bg-transparent pb-2 backdrop-blur-[8px]",
-        "w-full layout-max:left-1/2 layout-max:max-w-[calc(theme(maxWidth.layout)-2px)] layout-max:-translate-x-1/2",
+        "fixed bottom-0 left-0 z-[10] h-bottom-nav w-full px-6 pb-5 overflow-hidden",
+        "layout-max:left-1/2 layout-max:max-w-[calc(theme(maxWidth.layout)-2px)] layout-max:-translate-x-1/2",
       ]
         .filter(Boolean)
         .join(" ")}
     >
-      <ul className="flex h-full w-full items-center justify-around">
-        {navigationRouteList.map(({ path, icon }) => {
+      <ul
+        className={[
+          "only-btc__bottom-nav",
+          "flex h-full w-full px-3.5 items-center justify-around rounded-full",
+          "bg-neutral-200/50 dark:bg-neutral-900/30 backdrop-blur-[4px]",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {navigationRouteList.map(({ path, icon, subtitle }) => {
           const isActive = pathname.includes(path);
 
           return (
@@ -35,11 +42,24 @@ export default function BottomNavigation() {
               <TransitionLink
                 href={path}
                 onClick={onClickNavItem}
-                className={`flex items-center justify-center rounded-lg p-3 transition-colors tap-highlight-transparent z-10 ${
+                className={`relative flex flex-col gap-1 items-center justify-center rounded-lg p-3 transition-colors tap-highlight-transparent z-10 ${
                   isActive ? "text-[#F7931A]" : "text-black dark:text-white"
-                }`}
+                } w-[64px]`}
               >
-                <span className="inline-block text-[0px]">{icon}</span>
+                {isActive && (
+                  <span className="absolute top-[12px] right-[12px] w-[4px] h-[4px] bg-bitcoin rounded-full" />
+                )}
+                <span className="inline-flex justify-center items-center h-[26px]">{icon}</span>
+                <span
+                  className={[
+                    "text-[10px] tracking-tighter whitespace-nowrap",
+                    isActive ? "font-bold" : null,
+                  ]
+                    .filter(Boolean)
+                    .join(" ")}
+                >
+                  {subtitle}
+                </span>
               </TransitionLink>
             </li>
           );

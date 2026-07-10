@@ -56,6 +56,9 @@
 .only-btc__header {
   view-transition-name: main-header;
 }
+/* view-transition-name 은 backdrop root 를 만든다. 이 이름을 바깥 nav 에 두면
+   안쪽 ul 의 backdrop-filter 가 nav 내부만 샘플링해 블러가 보이지 않는다.
+   이름과 블러는 같은 요소에 둔다. */
 .only-btc__bottom-nav {
   view-transition-name: bottom-nav;
 }
