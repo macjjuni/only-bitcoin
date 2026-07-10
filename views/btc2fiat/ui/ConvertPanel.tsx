@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useCallback, useEffect, useMemo } from "react";
+import { useMounted } from "@/shared/hooks";
 import useStore from "@/shared/stores/store";
 import { btcToSatoshi, floorToDecimal } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
@@ -27,6 +28,8 @@ const ConvertPanel = () => {
 
   const focusCurrency = useBtc2FiatStore((state) => state.focusCurrency);
   const setFocusCurrency = useBtc2FiatStore((state) => state.setFocusCurrency);
+
+  const isMounted = useMounted();
   // endregion
 
   // region [Privates]
@@ -158,8 +161,18 @@ const ConvertPanel = () => {
   // region [Life Cycles]
   // 1. 값 변경 대응을 위한 동기화 감시
   useEffect(() => {
+    /**
+     * zustand는 `useSyncExternalStore`의 서버 스냅샷으로 스토어의 초기값을 넘긴다.
+     * 그래서 React 하이드레이션 렌더에서는 persist로 복원된 값이 아니라 기본값
+     * (btcCount "1", focusCurrency "BTC")이 보인다. 이 시점에 동기화를 돌리면
+     * 기본값 기준으로 계산된 값이 복원된 사용자 입력을 덮어쓴다.
+     * 마운트가 끝나 실제 스토어 값을 읽을 수 있을 때부터 동기화한다.
+     */
+    if (!isMounted) {
+      return;
+    }
     synchronizeValue();
-  }, [synchronizeValue]);
+  }, [isMounted, synchronizeValue]);
 
   // 2. 외부 데이터 변동 및 프리미엄 소수점 대응
   useEffect(() => {
