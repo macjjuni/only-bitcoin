@@ -1,7 +1,7 @@
 import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { UPBIT_MARKET_FLAG } from "@/shared/constants/market";
+import { BITHUMB_MARKET_FLAG } from "@/entities/market";
 import { formatDate } from "@/shared/lib/date";
 import { generateUUID } from "@/shared/lib/uuid";
 import useStore from "@/shared/stores/store";
@@ -10,10 +10,10 @@ import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
 import LocalStorage from "@/shared/utils/storage";
 
-const UPBIT_URL = "wss://api.upbit.com/websocket/v1";
+const BITHUMB_URL = "wss://ws-api.bithumb.com/websocket/v1";
 const UUID_STORAGE_KEY = "uuid";
-const UPBIT_BTC_TICKER = "KRW-BTC";
-const UPBIT_USDT_TICKER = "KRW-USDT";
+const BITHUMB_BTC_TICKER = "KRW-BTC";
+const BITHUMB_USDT_TICKER = "KRW-USDT";
 
 const getUUID = () => {
   const stored = LocalStorage.getItem(UUID_STORAGE_KEY);
@@ -25,11 +25,11 @@ const getUUID = () => {
 
 const getRequestPayload = () => [
   { ticket: getUUID() },
-  { type: "ticker", codes: [UPBIT_BTC_TICKER, UPBIT_USDT_TICKER] },
+  { type: "ticker", codes: [BITHUMB_BTC_TICKER, BITHUMB_USDT_TICKER] },
   { format: "SIMPLE" },
 ];
 
-export default function useUpbitWebSocket() {
+export default function useBithumbSocket() {
   // region [Hooks]
   const krwMarket = useStore((store) => store.krwMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
@@ -43,6 +43,7 @@ export default function useUpbitWebSocket() {
   const handleBTCUpdate = useCallback(
     (price: number, krwUpdateTimestamp: number, krwChange24h: number) => {
       const { setBitcoinKrwPrice, setting } = useStore.getState();
+
       if (setting.currency.includes("KRW")) {
         const krwChange24hStr = floorToDecimal(krwChange24h * 100, 2).toString();
         setBitcoinKrwPrice({
@@ -64,41 +65,46 @@ export default function useUpbitWebSocket() {
   }, []);
 
   const connect = useCallback(() => {
-    const socket = new ReconnectingWebSocket(UPBIT_URL, [], {
-      maxReconnectionDelay: 8000, // 재연결 최대 지연: 10초
+    const socket = new ReconnectingWebSocket(BITHUMB_URL, [], {
+      maxReconnectionDelay: 8000,
       minReconnectionDelay: 1000,
-      reconnectionDelayGrowFactor: 1, // 재시도 간 딜레이 증가 비율
-      minUptime: 5000, // 연결이 최소 유지되어야 하는 시간 (5초)
-      connectionTimeout: 3000, // 연결 시도 타임아웃: 4초
-      maxRetries: 999, // 무한 재시도 (실서비스 기준)
-      maxEnqueuedMessages: 100, // 연결 안 된 동안 큐에 쌓을 메시지 수 제한
-      startClosed: false, // 생성 직후 자동 연결
-      debug: false, // 디버깅 로그 출력 여부
+      reconnectionDelayGrowFactor: 1.5,
+      minUptime: 5000,
+      connectionTimeout: 3000,
+      maxRetries: 10,
+      maxEnqueuedMessages: 100,
+      startClosed: false,
+      debug: false,
     });
-
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      kToast.success("업비트 연결!");
-      if (isDev) console.log("✅ 업비트 소켓 연결");
+      kToast.success("빗썸 연결!");
+      if (isDev) console.log("✅ 빗썸 소켓 연결");
       socket.send(JSON.stringify(getRequestPayload()));
     };
 
     socket.onmessage = (evt) => {
-      const enc = new TextDecoder("utf-8");
-      const data = JSON.parse(enc.decode(new Uint8Array(evt.data)));
+      const decoder = new TextDecoder("utf-8");
+      const dataString = decoder.decode(evt.data);
 
-      if (data.cd === UPBIT_BTC_TICKER) {
-        handleBTCUpdate(data.tp, data.ttms, data.scr);
-      }
-      if (data.cd === UPBIT_USDT_TICKER) {
-        handleUSDTUpdate(data.tp, data.ttms);
+      try {
+        const data = JSON.parse(dataString);
+
+        if (data?.ty === "ticker" && data.cd === BITHUMB_BTC_TICKER) {
+          handleBTCUpdate(data.tp, data.tms, data.scr);
+        }
+        if (data?.ty === "ticker" && data.cd === BITHUMB_USDT_TICKER) {
+          handleUSDTUpdate(data.tp, data.tms);
+        }
+      } catch (error) {
+        console.error("JSON 파싱 오류:", error);
       }
     };
 
     socket.onerror = (e) => {
-      console.warn("Upbit WebSocket Error:", e);
-      kToast.error("Upbit 연결 오류");
+      console.error("Bithumb WebSocket Error:", e);
+      kToast.error("빗썸 연결 오류");
 
       if (!isNetwork()) {
         socket.close();
@@ -106,10 +112,10 @@ export default function useUpbitWebSocket() {
     };
 
     socket.onclose = (e) => {
-      console.warn(`⛔ 업비트 소켓 종료: ${e.code}`);
+      console.warn(`⛔ 빗썸 소켓 종료: ${e.code}`);
       resetKrwDisconnected();
       if (e.wasClean || e.code === 1000) {
-        console.log("🔌 서버 정상 종료(Upbit)");
+        console.log("🔌 서버 정상 종료(Bithumb)");
       } else {
         console.log("🔁 재연결 시도중...");
       }
@@ -125,7 +131,7 @@ export default function useUpbitWebSocket() {
 
   // region [Life Cycles]
   useEffect(() => {
-    if (krwMarket === UPBIT_MARKET_FLAG) {
+    if (krwMarket === BITHUMB_MARKET_FLAG) {
       connect();
     } else {
       disconnect();
@@ -134,6 +140,6 @@ export default function useUpbitWebSocket() {
     return () => {
       disconnect();
     };
-  }, [krwMarket, connect, disconnect]);
+  }, [krwMarket, connect, disconnect]); // krwMarket 값에 따라 연결/해제
   // endregion
 }

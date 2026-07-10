@@ -1,7 +1,7 @@
 import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { BINANCE_MARKET_FLAG } from "@/shared/constants/market";
+import { BINANCE_MARKET_FLAG } from "@/entities/market";
 import useStore from "@/shared/stores/store";
 import { isDev } from "@/shared/utils/common";
 import { isNetwork } from "@/shared/utils/network";
@@ -9,7 +9,7 @@ import { floorToDecimal } from "@/shared/utils/number";
 
 const BINANCE_URL = `wss://stream.binance.com:9443/ws/btcusdt@ticker`;
 
-export default function useBinanceWebSocket() {
+export default function useBinanceSocket() {
   // region [Hooks]
   const usdMarket = useStore((store) => store.usdMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);

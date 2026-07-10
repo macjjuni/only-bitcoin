@@ -2,7 +2,7 @@
 
 import { memo, useCallback, useEffect, useState } from "react";
 import { NOTICE_COOKIE_KEY, PWA_COOKIE_KEY } from "@/shared/constants/setting";
-import { useInitializePWA } from "@/shared/hooks/initializer";
+import { useInitializePWA } from "@/shared/lib/hooks";
 import { getCookie } from "@/shared/utils/cookie";
 import { isIOSPWA, isIOSSafari, isPWAInstalled, isSafari } from "@/shared/utils/device";
 import DomainNoticeDialog from "./components/DomainNoticeDialog";

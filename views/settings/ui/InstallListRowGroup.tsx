@@ -4,7 +4,7 @@ import { KIcon, KListGroup, KListRow, KSwitch } from "kku-ui";
 import { MessageSquareWarning } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
-import { useInitializePWA } from "@/shared/hooks/initializer";
+import { useInitializePWA } from "@/shared/lib/hooks";
 import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
 
 export default function InstallListRowGroup() {

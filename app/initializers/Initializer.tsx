@@ -8,15 +8,17 @@ import {
   useBinanceSocket,
   useBithumbSocket,
   useCoinbaseSocket,
+  useUpbitSocket,
+  useUsdExchangeRate,
+} from "@/entities/market/lib/hooks";
+import { useMempoolSocket } from "@/entities/block";
+import {
   useInitializeBackground,
   useInitializeDisabledZoom,
   useInitializePage,
   useInitializePWA,
-  useMempoolSocket,
   useTheme,
-  useUpbitSocket,
-  useUsdExchangeRate,
-} from "@/shared/hooks/initializer";
+} from "@/shared/lib/hooks";
 import PwaRegister from "./PwaRegister";
 
 const AlarmManager = dynamic(() => import("@/widgets/alarm-manager").then((m) => m.AlarmManager), {

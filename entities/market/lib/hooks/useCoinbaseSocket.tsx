@@ -1,7 +1,7 @@
 import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { COINBASE_MARKET_FLAG } from "@/shared/constants/market";
+import { COINBASE_MARKET_FLAG } from "@/entities/market";
 import useStore from "@/shared/stores/store";
 import { isDev, setTitle } from "@/shared/utils/common";
 import { isNetwork } from "@/shared/utils/network";
@@ -10,7 +10,7 @@ import { comma } from "@/shared/utils/string";
 
 const COINBASE_URL = `wss://ws-feed.exchange.coinbase.com`;
 
-export default function useCoinbaseWebSocket() {
+export default function useCoinbaseSocket() {
   // region [Hooks]
   const usdMarket = useStore((store) => store.usdMarket);
   const socketRef = useRef<ReconnectingWebSocket | null>(null);

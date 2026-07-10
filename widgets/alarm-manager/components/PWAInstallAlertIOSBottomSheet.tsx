@@ -13,7 +13,7 @@ import {
 } from "kku-ui";
 import { useState } from "react";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
-import { useInitializePWA } from "@/shared/hooks/initializer";
+import { useInitializePWA } from "@/shared/lib/hooks";
 import { IosShareIcon } from "@/shared/ui";
 import { setCookie } from "@/shared/utils/cookie";
 
