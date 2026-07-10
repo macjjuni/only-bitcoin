@@ -2,8 +2,8 @@ import { keepPreviousData, useQuery } from "@tanstack/react-query";
 import { kToast } from "kku-ui";
 import { useEffect } from "react";
 import { fetchBinanceKlines } from "@/entities/bitcoin/api/binance";
-import type { MarketChartFormattedData } from "@/entities/market";
 import { isDev } from "@/shared/utils/common";
+import type { MarketChartFormattedData } from "../model/market";
 
 /**
  * PriceMiniChart 전용 1D 가격 시계열 패치.

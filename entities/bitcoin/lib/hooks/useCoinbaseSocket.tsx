@@ -1,12 +1,12 @@
 import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { COINBASE_MARKET_FLAG } from "@/entities/market";
 import { isDev, setTitle } from "@/shared/utils/common";
 import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 import useBitcoinStore from "../../model/bitcoinStore";
+import { COINBASE_MARKET_FLAG } from "../../model/market";
 
 const COINBASE_URL = `wss://ws-feed.exchange.coinbase.com`;
 

@@ -3,8 +3,8 @@ import { kToast } from "kku-ui";
 import { useEffect } from "react";
 import { type BinanceInterval, fetchBinanceKlines } from "@/entities/bitcoin/api/binance";
 import { fetchBlockchainMarketPriceAll } from "@/entities/bitcoin/api/blockchain";
-import type { MarketChartFormattedData } from "@/entities/market";
 import { isDev } from "@/shared/utils/common";
+import type { MarketChartFormattedData } from "../model/market";
 import type { MarketChartIntervalType } from "../model/types";
 
 /**

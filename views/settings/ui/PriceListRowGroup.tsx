@@ -3,8 +3,7 @@
 import { KIcon, KListGroup, KListRow, KSelect, KSwitch } from "kku-ui";
 import { Star } from "lucide-react";
 import { memo, useMemo } from "react";
-import { useBitcoinStore } from "@/entities/bitcoin";
-import { krwMarketOptions, usdMarketOptions } from "@/entities/market";
+import { krwMarketOptions, usdMarketOptions, useBitcoinStore } from "@/entities/bitcoin";
 import { favoriteRouteList } from "@/shared/config/route";
 import { currencyOptions } from "@/shared/constants/setting";
 import useSettingStore from "@/shared/stores/settingStore";

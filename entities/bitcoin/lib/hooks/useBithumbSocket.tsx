@@ -1,7 +1,6 @@
 import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { BITHUMB_MARKET_FLAG } from "@/entities/market";
 import { formatDate } from "@/shared/lib/date";
 import { generateUUID } from "@/shared/lib/uuid";
 import useSettingStore from "@/shared/stores/settingStore";
@@ -10,6 +9,7 @@ import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
 import LocalStorage from "@/shared/utils/storage";
 import useBitcoinStore from "../../model/bitcoinStore";
+import { BITHUMB_MARKET_FLAG } from "../../model/market";
 
 const BITHUMB_URL = "wss://ws-api.bithumb.com/websocket/v1";
 const UUID_STORAGE_KEY = "uuid";

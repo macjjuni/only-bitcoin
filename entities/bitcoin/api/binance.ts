@@ -1,5 +1,5 @@
-import type { BinanceKline, MarketChartFormattedData } from "@/entities/market";
 import fetcher from "@/shared/utils/fetcher";
+import type { BinanceKline, MarketChartFormattedData } from "../model/market";
 
 const BINANCE_KLINES_URL = "https://api.binance.com/api/v3/klines";
 
