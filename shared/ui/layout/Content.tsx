@@ -18,8 +18,9 @@ export default function Content({
     <main
       className={[
         "only-btc__content",
-        "flex flex-col flex-auto w-full mx-auto max-w-layout",
-        "pt-[theme(height.header)] pb-[theme(height.bottom-nav)]",
+        "flex flex-col flex-1 min-h-0 w-full mx-auto max-w-layout",
+        "overflow-y-auto overflow-x-hidden",
+        "pt-[theme(height.header)]",
         "transition-opacity duration-500 ease-in-out",
         fadeInClasses,
         className,
