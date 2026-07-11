@@ -24,6 +24,7 @@ const BINANCE_INTERVAL_MAP: Record<
   "1m": { interval: "4h", limit: 180 },
   "1y": { interval: "1d", limit: 365 },
   "5y": { interval: "1w", limit: 260 },
+  "10y": { interval: "1w", limit: 520 },
 };
 
 async function fetchMarketChart(
@@ -62,6 +63,7 @@ const REFRESH_TIME_MAP: Record<MarketChartIntervalType, number> = {
   "1m": MINUTE * 5,
   "1y": MINUTE * 30,
   "5y": MINUTE * 60,
+  "10y": MINUTE * 60,
   all: MINUTE * 60,
 };
 
