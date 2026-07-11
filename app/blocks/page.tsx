@@ -3,6 +3,7 @@ import { env } from "@/shared/config/env";
 import { PageLayout } from "@/shared/ui/layout";
 import {
   BlocksExplorer,
+  BlocksGuideArticle,
   BlocksVisualizer,
   BlockTxFees,
   HalvingChartCard,
@@ -21,6 +22,7 @@ export default function BlocksPage() {
       <BlockTxFees />
       <BlocksExplorer />
       <HalvingChartCard />
+      <BlocksGuideArticle />
       <HalvingDataCard />
     </PageLayout>
   );
