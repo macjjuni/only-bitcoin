@@ -1,5 +1,6 @@
 export { default as ConfettiEffect } from "./ConfettiEffect";
 export { default as CountText } from "./CountText";
+export { default as HighlightText } from "./HighlightText";
 export * from "./icon";
 export { default as LazyImage } from "./LazyImage";
 export { default as Lottie } from "./lottie/Lottie";
