@@ -70,7 +70,7 @@ const TxSearcher = () => {
   // endregion
 
   return (
-    <KInputGroup className="mt-0.5 mb-2" size="lg">
+    <KInputGroup className="glass-surface dark:bg-neutral-900/30 mt-0.5 mb-2" size="lg">
       <KInputGroupAddon align="inline-start" className="pr-0">
         <Search size={20} />
       </KInputGroupAddon>
