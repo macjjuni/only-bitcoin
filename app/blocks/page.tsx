@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 
 export default function BlocksPage() {
   return (
-    <PageLayout className="block-page__area">
+    <PageLayout className="block-page__area gap-2.5">
       <BlocksVisualizer />
       <BlockTxFees />
       <BlocksExplorer />
