@@ -2,7 +2,7 @@
 
 import { KCard } from "kku-ui";
 import { memo, type ReactNode } from "react";
-import { HighlightText } from "@/shared/ui";
+import { CollapseSection, HighlightText } from "@/shared/ui";
 
 interface GuideSectionTypes {
   title: string;
@@ -11,25 +11,15 @@ interface GuideSectionTypes {
 }
 
 const GuideSection = ({ title, defaultOpen = false, children }: GuideSectionTypes) => (
-  <details open={defaultOpen} className="group border-b border-border last:border-none">
-    <summary className="flex cursor-pointer items-center justify-between gap-2 py-4 text-base font-bold list-none [&::-webkit-details-marker]:hidden">
-      <h3 className="m-0 text-base font-bold">{title}</h3>
-      <svg
-        className="size-4 shrink-0 opacity-70 transition-transform duration-200 group-open:rotate-180"
-        viewBox="0 0 24 24"
-        fill="none"
-        stroke="currentColor"
-        strokeWidth="2"
-        strokeLinecap="round"
-        strokeLinejoin="round"
-        aria-hidden="true"
-      >
-        <path d="m6 9 6 6 6-6" />
-      </svg>
-    </summary>
-
-    <div className="flex flex-col gap-3 pb-5">{children}</div>
-  </details>
+  <CollapseSection
+    title={<h3 className="m-0 text-base font-bold">{title}</h3>}
+    defaultOpen={defaultOpen}
+    className="border-b border-border last:border-none"
+    summaryClassName="py-4 text-base"
+    contentClassName="flex flex-col gap-3 pb-5"
+  >
+    {children}
+  </CollapseSection>
 );
 
 const GuideParagraph = ({ children }: { children: ReactNode }) => (
@@ -100,9 +90,9 @@ const BlocksGuideArticle = () => {
             </GuideParagraph>
             <GuideParagraph>
               공급이 줄어드는 일정이 코드에 고정되어 있다는 점이 비트코인을{" "}
-              <HighlightText type="marker">디지털 금</HighlightText>에 비유하는 이유입니다. 마지막
-              비트코인은 대략 2140년경에 채굴될 것으로 예상되며, 그 이후 채굴자는 거래 수수료만으로
-              보상을 받게 됩니다.
+              <HighlightText>디지털 금</HighlightText>에 비유하는 이유입니다. 마지막 비트코인은 대략
+              2140년경에 채굴될 것으로 예상되며, 그 이후 채굴자는 거래 수수료만으로 보상을 받게
+              됩니다.
             </GuideParagraph>
           </GuideSection>
 

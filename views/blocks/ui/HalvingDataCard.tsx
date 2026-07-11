@@ -1,13 +1,16 @@
 "use client";
 
-import { KAccordion, KAccordionContent, KAccordionItem, KAccordionTrigger, KCard } from "kku-ui";
+import { KCard } from "kku-ui";
 import { memo, useMemo } from "react";
 import { blockHalvingData, useBlockStore } from "@/entities/block";
+import { CollapseSection } from "@/shared/ui";
 
 const HalvingDataCard = () => {
-  // region [Templates]
+  // region [Hooks]
   const currentBlockHeight = useBlockStore((state) => state.blockData[0]?.height ?? 0);
+  // endregion
 
+  // region [Templates]
   const nextHalvingIndex = useMemo(
     () => blockHalvingData.findIndex(({ blockHeight }) => blockHeight > currentBlockHeight),
     [currentBlockHeight],
@@ -35,41 +38,40 @@ const HalvingDataCard = () => {
 
   return (
     <KCard className="glass-surface w-full">
-      <KAccordion className="w-full" type="single" collapsible>
-        <KAccordionItem value="Halving-Data" className="border-none">
-          <KAccordionTrigger className="text-[18px] font-bold p-4">반감기 정보</KAccordionTrigger>
-          <KAccordionContent className="overflow-x-auto px-6 pb-6">
-            <ul className="flex flex-row">
-              {HalvingDataList.map(({ label, items }) => (
-                <div key={label} className="flex flex-col w-auto">
-                  {/* 헤더 레이블 */}
-                  <div className="whitespace-nowrap px-1.5 py-0.5 font-bold border-b border-border font-number">
-                    {label}
-                  </div>
-                  {/* 데이터 리스트 */}
-                  {items.map(({ value, key }, idx) => {
-                    const isActive = nextHalvingIndex === idx;
-                    const isLast = idx === items.length - 1;
+      <CollapseSection
+        title={<h2 className="m-0 text-[18px] font-bold">반감기 정보</h2>}
+        summaryClassName="p-4 text-[18px]"
+        contentClassName="overflow-x-auto px-6 pb-6"
+      >
+        <ul className="flex flex-row">
+          {HalvingDataList.map(({ label, items }) => (
+            <div key={label} className="flex flex-col w-auto">
+              {/* 헤더 레이블 */}
+              <div className="whitespace-nowrap px-2 py-0.5 font-bold border-b border-border font-number">
+                {label}
+              </div>
+              {/* 데이터 리스트 */}
+              {items.map(({ value, key }, idx) => {
+                const isActive = nextHalvingIndex === idx;
+                const isLast = idx === items.length - 1;
 
-                    return (
-                      <div
-                        key={key}
-                        className={[
-                          "whitespace-nowrap px-1.5 py-0.5 font-number text-base transition-colors",
-                          isLast ? "border-none" : "border-b border-border",
-                          isActive ? "font-bold text-[#F7931A]" : "text-current",
-                        ].join(" ")}
-                      >
-                        {value}
-                      </div>
-                    );
-                  })}
-                </div>
-              ))}
-            </ul>
-          </KAccordionContent>
-        </KAccordionItem>
-      </KAccordion>
+                return (
+                  <div
+                    key={key}
+                    className={[
+                      "whitespace-nowrap px-1.5 py-0.5 font-number text-base transition-colors",
+                      isLast ? "border-none" : "border-b border-border",
+                      isActive ? "font-bold text-[#F7931A]" : "text-current",
+                    ].join(" ")}
+                  >
+                    {value}
+                  </div>
+                );
+              })}
+            </div>
+          ))}
+        </ul>
+      </CollapseSection>
     </KCard>
   );
 };
