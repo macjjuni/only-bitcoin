@@ -100,7 +100,7 @@ const ConvertCard = (props: ConvertCardProps) => {
         .filter(Boolean)
         .join(" ")}
     >
-      <KCardHeader>
+      <KCardHeader className="!p-2">
         <KCardTitle>
           <div className="flex justify-between items-center gap-4 min-w-0">
             {!inputActive && (

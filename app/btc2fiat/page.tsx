@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
 import { env } from "@/shared/config/env";
 import { PageLayout } from "@/shared/ui/layout";
-import { ConvertPanel, PremiumBadge } from "@/views/btc2fiat";
+import { ConvertPanel, PriceTicker } from "@/views/btc2fiat";
 
 export const metadata: Metadata = {
   title: `${env.NEXT_PUBLIC_TITLE} - BTC to KRW`,
@@ -11,7 +11,7 @@ export const metadata: Metadata = {
 export default function Btc2FiatPage() {
   return (
     <PageLayout className="!pt-4">
-      <PremiumBadge />
+      <PriceTicker />
       <ConvertPanel />
     </PageLayout>
   );
