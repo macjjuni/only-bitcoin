@@ -40,9 +40,7 @@ const HighlightText = (props: HighlightTextTypes) => {
   const variantClass =
     type === "marker" ? MARKER_VARIANT_CLASS[variant] : TEXT_VARIANT_CLASS[variant];
   const markerClass =
-    type === "marker"
-      ? "rounded px-1 py-0.5"
-      : "underline decoration-2 underline-offset-2";
+    type === "marker" ? "rounded px-1 py-0.5" : "underline decoration-2 underline-offset-2";
   const weightClass = bold ? "font-bold" : "";
 
   const rootClass = ["bg-transparent", variantClass, markerClass, weightClass, className]
@@ -50,13 +48,11 @@ const HighlightText = (props: HighlightTextTypes) => {
     .join(" ");
   // endregion
 
-  // region [Render]
   return (
     <mark id={id} className={rootClass}>
       {children}
     </mark>
   );
-  // endregion
 };
 
 export default HighlightText;
