@@ -1,6 +1,6 @@
 "use client";
 
-import { KAccordion, KAccordionContent, KAccordionItem, KAccordionTrigger } from "kku-ui";
+import { KAccordion, KAccordionContent, KAccordionItem, KAccordionTrigger, KCard } from "kku-ui";
 import { memo, useMemo } from "react";
 import { blockHalvingData, useBlockStore } from "@/entities/block";
 
@@ -34,41 +34,43 @@ const HalvingDataCard = () => {
   // endregion
 
   return (
-    <KAccordion className="w-full" type="single" collapsible>
-      <KAccordionItem value="Halving-Data" className="border-none">
-        <KAccordionTrigger className="text-[18px] font-bold py-4">반감기 정보</KAccordionTrigger>
-        <KAccordionContent className="overflow-x-auto pb-4">
-          <ul className="flex flex-row">
-            {HalvingDataList.map(({ label, items }) => (
-              <div key={label} className="flex flex-col w-auto">
-                {/* 헤더 레이블 */}
-                <div className="whitespace-nowrap px-1.5 py-0.5 font-bold border-b border-border font-number">
-                  {label}
-                </div>
-                {/* 데이터 리스트 */}
-                {items.map(({ value, key }, idx) => {
-                  const isActive = nextHalvingIndex === idx;
-                  const isLast = idx === items.length - 1;
+    <KCard className="glass-surface w-full">
+      <KAccordion className="w-full" type="single" collapsible>
+        <KAccordionItem value="Halving-Data" className="border-none">
+          <KAccordionTrigger className="text-[18px] font-bold p-4">반감기 정보</KAccordionTrigger>
+          <KAccordionContent className="overflow-x-auto px-6 pb-6">
+            <ul className="flex flex-row">
+              {HalvingDataList.map(({ label, items }) => (
+                <div key={label} className="flex flex-col w-auto">
+                  {/* 헤더 레이블 */}
+                  <div className="whitespace-nowrap px-1.5 py-0.5 font-bold border-b border-border font-number">
+                    {label}
+                  </div>
+                  {/* 데이터 리스트 */}
+                  {items.map(({ value, key }, idx) => {
+                    const isActive = nextHalvingIndex === idx;
+                    const isLast = idx === items.length - 1;
 
-                  return (
-                    <div
-                      key={key}
-                      className={[
-                        "whitespace-nowrap px-1.5 py-0.5 font-number text-base transition-colors",
-                        isLast ? "border-none" : "border-b border-border",
-                        isActive ? "font-bold text-[#F7931A]" : "text-current",
-                      ].join(" ")}
-                    >
-                      {value}
-                    </div>
-                  );
-                })}
-              </div>
-            ))}
-          </ul>
-        </KAccordionContent>
-      </KAccordionItem>
-    </KAccordion>
+                    return (
+                      <div
+                        key={key}
+                        className={[
+                          "whitespace-nowrap px-1.5 py-0.5 font-number text-base transition-colors",
+                          isLast ? "border-none" : "border-b border-border",
+                          isActive ? "font-bold text-[#F7931A]" : "text-current",
+                        ].join(" ")}
+                      >
+                        {value}
+                      </div>
+                    );
+                  })}
+                </div>
+              ))}
+            </ul>
+          </KAccordionContent>
+        </KAccordionItem>
+      </KAccordion>
+    </KCard>
   );
 };
 
