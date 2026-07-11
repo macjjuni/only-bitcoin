@@ -21,7 +21,7 @@ const BlockTxFees = () => {
   return (
     <div className="flex flex-col justify-between gap-3 border-none">
       <div className="flex justify-between items-end">
-        <h2 className="text-[18px] font-bold">트랜잭션 수수료</h2>
+        <h2 className="text-[18px] font-bold">실시간 트랜잭션 수수료</h2>
       </div>
 
       <div className="flex justify-between items-center gap-2 pr-1">
