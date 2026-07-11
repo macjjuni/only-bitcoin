@@ -212,7 +212,7 @@ const ConvertPanel = () => {
         onChangeUnit={onChangeUnit}
         isPremium={focusCurrency !== "USD" && premium !== 0}
         topDescription={topDescription}
-        bottomDescription={`1BTC = ${comma(krwPrice)} ${focusCurrency === "USD" ? `| 1$ = ₩${comma(exRate)}` : ""}`}
+        bottomDescription={`1$ = ₩${comma(exRate)}`}
       />
     );
   }, [krw, krwPrice, focusCurrency, premium, onChangeKrw, onChangeUnit, exRate]);
@@ -244,7 +244,7 @@ const ConvertPanel = () => {
         onChangeUnit={onChangeUnit}
         isPremium={focusCurrency !== "KRW" && premium !== 0}
         topDescription={topDescription}
-        bottomDescription={`1BTC = ${comma(usdPrice)} | 1${isUsdtStandard ? "USDT" : "USD"} : ${comma(exRate)}`}
+        bottomDescription={`1${isUsdtStandard ? "USDT" : "USD"} = ₩${comma(exRate)}`}
       />
     );
   }, [usd, usdPrice, focusCurrency, exRate, premium, isUsdtStandard, onChangeUsd, onChangeUnit]);
