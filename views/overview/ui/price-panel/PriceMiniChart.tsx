@@ -16,6 +16,7 @@ interface BarShape {
   y: number;
   height: number;
   isUp: boolean;
+  opacity: number;
 }
 
 export default function PriceMiniChart({
@@ -73,11 +74,22 @@ export default function PriceMiniChart({
       const yBottom = ((globalMax - s.low) / priceRange) * usableHeight + minBarHeight;
       const barHeight = Math.max(minBarHeight, yBottom - yTop);
 
+      // 차트 길이에 맞춰 opacity를 3단계로 다르게 설정 (3~5개 등 원하는 단계로 변경 가능)
+      // 예시: 3단계: [0.5, 0.75, 1.0] / 4단계: [0.4, 0.6, 0.8, 1.0] / 5단계: [0.4, 0.55, 0.7, 0.85, 1.0]
+      const opacities = [0.5, 0.75, 1.0];
+      const normalizedHeight = usableHeight > 0 ? (barHeight - minBarHeight) / usableHeight : 0;
+      const stepIndex = Math.min(
+        opacities.length - 1,
+        Math.floor(normalizedHeight * opacities.length),
+      );
+      const opacity = opacities[stepIndex];
+
       return {
         x: startX + i * (barWidth + gap),
         y: yTop,
         height: barHeight,
         isUp: s.close >= s.open,
+        opacity,
       };
     });
   }, [data, barCount, width, height]);
@@ -113,6 +125,7 @@ export default function PriceMiniChart({
           ry={3}
           fill={bar.isUp ? upColor : downColor}
           filter={`url(#${glowId})`}
+          opacity={bar.opacity}
         />
       ))}
     </svg>
