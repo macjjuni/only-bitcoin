@@ -15,9 +15,7 @@
   }
 }
 
-/* 다크모드 본문 스크롤바 썸만 흰색으로. main(.only-btc__content)이 스크롤 컨테이너다.
-   iOS Safari 는 ::-webkit-scrollbar 를 무시하므로, 터치 스크롤 인디케이터를
-   밝게 만들려면 스크롤 컨테이너에 color-scheme: dark 를 직접 줘야 한다. */
+
 .dark .only-btc__content {
   color-scheme: dark;
   scrollbar-color: rgb(255 255 255 / 0.4) transparent;
@@ -27,41 +25,12 @@
   border-radius: 9999px;
 }
 
-/* region [반투명 유리 표면]
-   뒤에 깔린 커버 이미지와 하단 앰비언트 글로우가 비쳐 보이게 한다.
-   kku-ui 가 KCard/KListRow 에 칠하는 불투명 배경(bg-card, bg-background)을 덮는다.
+.glass-surface { @apply bg-neutral-100/30 backdrop-blur-sm; }
+.glass-surface [class~="bg-background"] { background-color: transparent; }
+:where(.dark) .glass-surface { @apply bg-neutral-900/30; }
 
-   @layer components 에 두면 안 된다. Header 가 bg-background 를 쓰는 탓에
-   우리 빌드도 .bg-background 를 utilities 레이어에 생성하는데, components 는
-   utilities 보다 먼저 출력되므로 같은 특정도(0,1,0)에서 밀린다.
-   (dark: 변형은 .dark .glass-surface 라 0,2,0 이 되어 혼자만 이겼다.)
-   @tailwind utilities 뒤에 두어 순서로 이긴다. */
-.glass-surface {
-  @apply bg-neutral-100/30 backdrop-blur-sm;
-}
-
-/* :where() 로 특정도를 0 으로 묶어 라이트 규칙과 같은 0,1,0 을 유지한다.
-   0,2,0 이 되면 KListRow 의 active:bg-secondary 누름 효과까지 덮어버린다. */
-:where(.dark) .glass-surface {
-  @apply bg-neutral-900/30;
-}
-
-/* KListRowAccordion 은 펼침 본문 div 에 bg-background 를 따로 칠해서,
-   루트만 유리로 만들면 펼쳤을 때 그 부분만 불투명하게 남는다. */
-.glass-surface [class~="bg-background"] {
-  background-color: transparent;
-}
-/* endregion */
-
-.only-btc__header {
-  view-transition-name: main-header;
-}
-/* view-transition-name 은 backdrop root 를 만든다. 이 이름을 바깥 nav 에 두면
-   안쪽 ul 의 backdrop-filter 가 nav 내부만 샘플링해 블러가 보이지 않는다.
-   이름과 블러는 같은 요소에 둔다. */
-.only-btc__bottom-nav {
-  view-transition-name: bottom-nav;
-}
+.only-btc__header { view-transition-name: main-header; }
+.only-btc__bottom-nav { view-transition-name: bottom-nav; }
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
@@ -121,31 +90,6 @@ html.slide-first::view-transition-new(root) {
     -moz-osx-font-smoothing: grayscale;
   }
 
-  /* region [배경 하단 오렌지 앰비언트 글로우] */
-  @keyframes emberGlow {
-    0% {
-      opacity: 0.5;
-      transform: translateX(-50%) translateY(3%) scaleX(1) scaleY(1);
-    }
-    22% {
-      opacity: 0.82;
-      transform: translateX(-51%) translateY(1%) scaleX(1.04) scaleY(1.05);
-    }
-    45% {
-      opacity: 0.62;
-      transform: translateX(-49%) translateY(2%) scaleX(0.98) scaleY(1.02);
-    }
-    68% {
-      opacity: 0.9;
-      transform: translateX(-50.5%) translateY(0) scaleX(1.05) scaleY(1.08);
-    }
-    100% {
-      opacity: 0.5;
-      transform: translateX(-50%) translateY(3%) scaleX(1) scaleY(1);
-    }
-  }
-
-  /* 다크모드 전용: 화이트모드에서는 글로우를 렌더링하지 않는다 */
   .dark body::before {
     content: "";
     position: fixed;
@@ -158,7 +102,7 @@ html.slide-first::view-transition-new(root) {
     z-index: -1;
     pointer-events: none;
     filter: blur(8px);
-    animation: emberGlow 7s ease-in-out infinite;
+    @apply animate-ember-glow;
     will-change: opacity, transform;
     background: radial-gradient(
       ellipse 58% 100% at 50% 100%,
@@ -173,7 +117,6 @@ html.slide-first::view-transition-new(root) {
       animation: none;
     }
   }
-  /* endregion */
 
   body.show-bg {
     @apply bg-no-repeat bg-fixed bg-center;

@@ -57,6 +57,24 @@ export default {
           from: { opacity: "0" },
           to: { opacity: "1" },
         },
+        emberGlow: {
+          "0%, 100%": {
+            opacity: "0.5",
+            transform: "translateX(-50%) translateY(3%) scaleX(1) scaleY(1)",
+          },
+          "22%": {
+            opacity: "0.82",
+            transform: "translateX(-51%) translateY(1%) scaleX(1.04) scaleY(1.05)",
+          },
+          "45%": {
+            opacity: "0.62",
+            transform: "translateX(-49%) translateY(2%) scaleX(0.98) scaleY(1.02)",
+          },
+          "68%": {
+            opacity: "0.9",
+            transform: "translateX(-50.5%) translateY(0) scaleX(1.05) scaleY(1.08)",
+          },
+        },
         swing: {
           "0%, 50%, 100%": {
             transform: "perspective(1000px) rotateY(0deg)",
@@ -81,6 +99,7 @@ export default {
         "view-enter-right": "slideInFromRight 0.2s ease-in-out forwards",
         "view-enter-left": "slideInFromLeft 0.2s ease-in-out forwards",
         "view-enter-first": "firstLoad 0.2s ease-in-out forwards",
+        "ember-glow": "emberGlow 7s ease-in-out infinite",
       },
     },
   },
