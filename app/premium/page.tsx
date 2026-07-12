@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function PremiumPage() {
   return (
-    <PageLayout className="relative overflow-x-hidden isolation-auto gap-2.5">
+    <PageLayout className="relative overflow-x-hidden isolation-auto gap-2.5 !pt-4">
       <PremiumLottie />
       <PremiumPanel />
     </PageLayout>

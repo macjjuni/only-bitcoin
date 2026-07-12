@@ -43,7 +43,7 @@ const clientRoutes = [
   },
   {
     title: "Orange Pill",
-    subtitle: "Orange Pill",
+    subtitle: "Orange",
     path: "/orange-pill",
     isNav: true,
     isFavorite: true,
