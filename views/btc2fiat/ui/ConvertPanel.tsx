@@ -212,7 +212,7 @@ const ConvertPanel = () => {
         onChangeUnit={onChangeUnit}
         isPremium={focusCurrency !== "USD" && premium !== 0}
         topDescription={topDescription}
-        bottomDescription={`1$ = ₩${comma(exRate)}`}
+        bottomDescription={`₩${comma(exRate)} = 1$`}
       />
     );
   }, [krw, krwPrice, focusCurrency, premium, onChangeKrw, onChangeUnit, exRate]);
