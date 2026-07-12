@@ -27,8 +27,8 @@ export default function BottomNavigation() {
     >
       <ul
         className={[
-          "only-btc__bottom-nav",
-          "flex h-full w-full px-3.5 items-center justify-around rounded-full",
+          "only-btc__bottom-nav border-[0.75px] border-neutral-300 dark:border-neutral-600",
+          "flex h-full w-full px-3.5 items-center justify-around rounded-full select-none",
           "bg-neutral-200/50 dark:bg-neutral-900/30 backdrop-blur-[4px]",
         ]
           .filter(Boolean)
@@ -42,12 +42,12 @@ export default function BottomNavigation() {
               <TransitionLink
                 href={path}
                 onClick={onClickNavItem}
-                className={`relative flex flex-col gap-1 items-center justify-center rounded-lg p-3 transition-colors tap-highlight-transparent z-10 ${
+                className={`relative flex flex-col gap-1 items-center justify-center rounded-lg transition-colors tap-highlight-transparent z-10 ${
                   isActive ? "text-[#F7931A]" : "text-black dark:text-white"
-                } w-[64px]`}
+                } w-[60px] h-[60px]`}
               >
                 {isActive && (
-                  <span className="absolute top-[12px] right-[12px] w-[4px] h-[4px] bg-bitcoin rounded-full" />
+                  <span className="absolute top-[9px] right-[12px] w-[5px] h-[5px] bg-bitcoin rounded-full" />
                 )}
                 <span className="inline-flex justify-center items-center h-[26px]">{icon}</span>
                 <span
