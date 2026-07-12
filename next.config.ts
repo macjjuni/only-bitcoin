@@ -12,6 +12,7 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   allowedDevOrigins: ["192.168.68.*"],
+  devIndicators: false,
 };
 
 export default nextConfig;

@@ -5,10 +5,11 @@
  * 붙어 광고 자리가 생기므로(app/layout.tsx 의 isProduction 분기) 재현이 안 된다.
  *
  * 사용: pnpm dev 를 띄워둔 상태에서
- *   node scripts/screenshot.mjs            # 전체
- *   node scripts/screenshot.mjs overview   # 일부만
+ *   node scripts/screenshot.mjs               # 전체
+ *   node scripts/screenshot.mjs overview      # 일부만
+ *   THEME=light node scripts/screenshot.mjs   # 라이트로 찍기
  *
- * 환경변수: BASE_URL(다른 주소에 붙기), SETTLE_MS, QUALITY, HEADED=1
+ * 환경변수: THEME=light, BASE_URL(다른 주소에 붙기), SETTLE_MS, QUALITY, HEADED=1
  */
 import fs from "node:fs";
 import path from "node:path";
@@ -19,6 +20,9 @@ const ROOT = process.cwd();
 const OUT_DIR = path.join(ROOT, "screenshot");
 /** next dev 가 자기 pid/port 를 적어두는 곳. */
 const DEV_LOCK = path.join(ROOT, ".next", "dev", "lock");
+
+/** README 스샷은 다크가 기본. 라이트가 필요하면 THEME=light. */
+const IS_DARK = process.env.THEME !== "light";
 
 /** 지정하면 lock 파일 대신 이 주소를 쓴다. */
 const EXTERNAL_URL = process.env.BASE_URL;
@@ -109,6 +113,19 @@ const settle = async (page) => {
   await sleep(SETTLE_MS);
 };
 
+/**
+ * 다크 테마를 첫 페인트 전에 켠다.
+ *
+ * 앱은 설정 스토어(zustand persist)가 localStorage 에 남긴 값을 테마의 원본으로
+ * 삼는다. `app/layout.tsx` 의 블로킹 스크립트가 이 값을 읽어 <html> 에 dark 를
+ * 붙이므로, 페이지 스크립트보다 먼저 도는 init script 로 같은 모양의 값을 심어준다.
+ * 키와 형태는 shared/stores/persistKeys.ts + settingStore.ts 와 맞춰야 한다.
+ */
+const seedDarkTheme = (context) =>
+  context.addInitScript(() => {
+    localStorage.setItem("only-bitcoin", JSON.stringify({ state: { theme: "dark" }, version: 2 }));
+  });
+
 const capture = async (context, baseUrl, name, route) => {
   const page = await context.newPage();
   const file = path.join(OUT_DIR, `${name}.jpg`);
@@ -127,7 +144,7 @@ const capture = async (context, baseUrl, name, route) => {
     });
 
     const kb = Math.round(fs.statSync(file).size / 1024);
-    log(`  ✓ ${name}.jpg (${kb} KB)`);
+    log(`  ✓ ${path.basename(file)} (${kb} KB)`);
   } finally {
     await page.close();
   }
@@ -155,11 +172,12 @@ const main = async () => {
     deviceScaleFactor: DEVICE_SCALE_FACTOR,
     isMobile: true,
     hasTouch: true,
-    // localStorage 가 빈 새 컨텍스트 → 앱 기본값(라이트 테마)으로 그려진다.
-    colorScheme: "light",
+    colorScheme: IS_DARK ? "dark" : "light",
     locale: "ko-KR",
     timezoneId: "Asia/Seoul",
   });
+
+  if (IS_DARK) await seedDarkTheme(context);
 
   try {
     for (const name of targets) {
