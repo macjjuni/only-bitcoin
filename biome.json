@@ -60,7 +60,7 @@
   },
   "overrides": [
     {
-      "includes": ["shared/**"],
+      "includes": ["src/shared/**"],
       "linter": {
         "rules": {
           "style": {
@@ -85,7 +85,7 @@
       }
     },
     {
-      "includes": ["entities/**"],
+      "includes": ["src/entities/**"],
       "linter": {
         "rules": {
           "style": {
@@ -102,7 +102,7 @@
       }
     },
     {
-      "includes": ["features/**"],
+      "includes": ["src/features/**"],
       "linter": {
         "rules": {
           "style": {
@@ -117,7 +117,7 @@
       }
     },
     {
-      "includes": ["widgets/**"],
+      "includes": ["src/widgets/**"],
       "linter": {
         "rules": {
           "style": {
@@ -132,7 +132,7 @@
       }
     },
     {
-      "includes": ["views/**"],
+      "includes": ["src/views/**"],
       "linter": {
         "rules": {
           "style": {

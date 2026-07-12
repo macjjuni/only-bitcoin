@@ -28,7 +28,7 @@ const resolveModule = (p) => {
 };
 
 const resolveSpec = (spec, fromFile) => {
-  if (spec.startsWith("@/")) return resolveModule(spec.slice(2));
+  if (spec.startsWith("@/")) return resolveModule(path.posix.join("src", spec.slice(2)));
   if (spec.startsWith("."))
     return resolveModule(path.posix.join(path.posix.dirname(fromFile), spec));
   return null;
