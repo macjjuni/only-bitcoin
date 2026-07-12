@@ -17,6 +17,34 @@
 - [x] 비트코인 도미넌스(자체 계산: 시총 200위 기준), 한국 프리미엄, 환율(USD/KRW or USDT/KRW), Fear & Greed 지수 제공
 - [x] 실시간 BTC to Fiat 계산기(KRW/USD)
 
+## 🏗️ 프로젝트 구조
+
+**FSD(Feature-Sliced Design)** 를 따릅니다. 상위 레이어는 하위 레이어만 import 할 수 있고, 같은 레이어의 슬라이스끼리는 서로 참조하지 않습니다.
+
+```
+app > views > widgets > features > entities > shared
+```
+
+```
+src/
+├── app/        # Next.js App Router - 라우트 진입점, API 라우트, 프로바이더
+├── views/      # FSD 의 pages 레이어 - 라우트별 화면 조립
+├── widgets/    # 독립적으로 동작하는 UI 블록 (header, bottom-navigation ...)
+├── features/   # 사용자 액션 단위 기능 (download-meme ...)
+├── entities/   # 도메인 데이터와 상태 (bitcoin, block, quiz ...)
+└── shared/     # 도메인 비의존 공통 코드 (ui, lib, stores, config ...)
+```
+
+- **`pages` 대신 `views`**: Next.js App Router 의 `app/` 과 개념이 겹치고, `pages/` 는 Pages Router 를 연상시키기 때문입니다.
+- **의존 규칙은 린트로 강제**: `biome.json` 의 `noRestrictedImports` 가 레이어 역참조를 error 로 막습니다.
+- **슬라이스 공개 API**: 각 슬라이스는 배럴(`index.ts`)로만 외부에 노출합니다. 클라이언트 전용 훅은 `client.ts`, 서버 전용 코드(비밀키를 읽는 API)는 `server.ts` 로 분리해 RSC 경계를 넘지 않게 합니다.
+- **상태 관리**: Zustand 스토어를 소유 레이어별로 나눠 둡니다. (`shared` 의 설정/테마, `entities` 의 시세·블록, `views` 의 화면 상태)
+
+```bash
+pnpm lint          # 레이어 경계 위반 검사
+pnpm check:cycles  # 모듈 순환 참조 검사
+```
+
 ## 📸 릴리즈 노트
 
 <details>
@@ -96,18 +124,9 @@
 
 <br>
 
-<details open>
+<details>
     <summary><b>v4.0.1 (2026.03.01)</b></summary>
     <div markdown="1">
-        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/overview.jpg" width="220" alt="v4.0.1 overview">
-        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/blocks.jpg" width="220" alt="v4.0.1 blocks">
-        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/btc2fiat.jpg" width="220" alt="v4.0.1 btc2fiat">
-        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/premium.jpg" width="220" alt="v4.0.1 premium">
-        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/orange-pill.jpg" width="220" alt="v4.0.1 orange-pill">
-        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/meme.jpg" width="220" alt="v4.0.1 meme">
-        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/bip39.jpg" width="220" alt="v4.0.1 bip39">
-        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/settings.jpg" width="220" alt="v4.0.1 settings">
-    </div>
 
 - UI 전면 개편 및 Next.js App Router 기반으로 마이그레이션
 - BIP39 니모닉 단어 검색 페이지 추가
@@ -116,6 +135,27 @@
 - 차트 라이브러리 마이그레이션 및 해시레이트/난이도 차트 개선
 - 페이지별 SEO 메타데이터 및 동적 사이트맵 적용
   </div>
+</details>
+
+<br>
+
+<details open>
+    <summary><b>v4.0.3 (2026.07.12)</b></summary>
+    <div markdown="1">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/overview.jpg" width="220" alt="v4.0.3 overview">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/blocks.jpg" width="220" alt="v4.0.3 blocks">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/btc2fiat.jpg" width="220" alt="v4.0.3 btc2fiat">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/premium.jpg" width="220" alt="v4.0.3 premium">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/orange-pill.jpg" width="220" alt="v4.0.3 orange-pill">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/meme.jpg" width="220" alt="v4.0.3 meme">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/bip39.jpg" width="220" alt="v4.0.3 bip39">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/settings.jpg" width="220" alt="v4.0.3 settings">
+    </div>
+
+- 마켓 차트 10년(10Y) 기간 추가
+- Blocks 페이지에 비트코인 블록/채굴/반감기/수수료 설명 추가
+- FSD(Feature-Sliced Design) 아키텍처 적용
+- 전반적인 UI 개선
 </details>
 
 

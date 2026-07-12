@@ -1,20 +1,18 @@
 // next.config.ts
+
+import { readFileSync } from "node:fs";
 import type { NextConfig } from "next";
-import { readFileSync } from "fs";
 
 const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));
 const APP_VERSION = `${packageJson.version}`;
 
 const nextConfig: NextConfig = {
-  // region [Env Configuration]
   env: { NEXT_PUBLIC_APP_VERSION: APP_VERSION },
-  // endregion
-
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },
-  allowedDevOrigins: ['192.168.68.104'],
-  // endregion
+  allowedDevOrigins: ["192.168.68.*"],
+  devIndicators: false,
 };
 
 export default nextConfig;
