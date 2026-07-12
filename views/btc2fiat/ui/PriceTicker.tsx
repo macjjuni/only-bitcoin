@@ -1,11 +1,10 @@
 "use client";
 
-import { KCard, KCardContent } from "kku-ui";
 import { memo, useMemo } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { useMounted } from "@/shared/lib/hooks";
 import useSettingStore from "@/shared/stores/settingStore";
-import { CountText, UpdownIcon } from "@/shared/ui";
+import { Card, CardContent, CountText, UpdownIcon } from "@/shared/ui";
 
 interface TickerItem {
   code: "KRW" | "USD";
@@ -47,8 +46,8 @@ const PriceTicker = () => {
   }
 
   return (
-    <KCard className="glass-surface">
-      <KCardContent className="flex justify-evenly gap-4 items-center p-3 font-number text-md font-bold">
+    <Card>
+      <CardContent className="flex justify-evenly gap-4 items-center p-3 font-number text-md font-bold">
         {tickers.map(({ code, sign, price, change }) => {
           const isUp = change >= 0;
 
@@ -71,8 +70,8 @@ const PriceTicker = () => {
             </div>
           );
         })}
-      </KCardContent>
-    </KCard>
+      </CardContent>
+    </Card>
   );
 };
 

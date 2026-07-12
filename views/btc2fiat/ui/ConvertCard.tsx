@@ -1,19 +1,10 @@
 "use client";
 
-import {
-  KButton,
-  KCard,
-  KCardContent,
-  KCardDescription,
-  KCardHeader,
-  KCardTitle,
-  KInputGroup,
-  KInputGroupAddon,
-  KInputGroupInput,
-} from "kku-ui";
+import { KButton } from "kku-ui";
 import { Copy, X } from "lucide-react";
 import {
   type ChangeEvent,
+  type ElementType,
   type FocusEvent,
   memo,
   type ReactNode,
@@ -21,6 +12,16 @@ import {
   useRef,
 } from "react";
 import { useCopyOnClick } from "@/shared/lib/hooks";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+} from "@/shared/ui";
 import { isNumber } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 import type { UnitType } from "../model/btc2FiatStore";
@@ -89,19 +90,18 @@ const ConvertCard = (props: ConvertCardProps) => {
   }, [onChange]);
   // endregion
 
+  // region [Privates]
+  const Shell: ElementType = inputActive ? Card : "div";
+  const shellClassName = [
+    "font-number",
+    !inputActive && "rounded-md text-card-foreground [&>div]:px-2 layout-max:[&>div]:px-4",
+  ].join(" ");
+  // endregion
+
   return (
-    <KCard
-      className={[
-        "border-border font-number border-[0.5px]",
-        inputActive && "glass-surface",
-        !inputActive &&
-          "!border-0 !bg-transparent !shadow-none [&>div]:px-2 layout-max:[&>div]:px-4",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      <KCardHeader className="!p-2">
-        <KCardTitle>
+    <Shell className={shellClassName}>
+      <CardHeader className="!p-2">
+        <CardTitle>
           <div className="flex justify-between items-center gap-4 min-w-0">
             {!inputActive && (
               <span className="text-lg font-default font-bold flex-none">{title}</span>
@@ -121,13 +121,13 @@ const ConvertCard = (props: ConvertCardProps) => {
                 </KButton>
               </div>
             ) : (
-              <KInputGroup size="lg" className="h-11 my-1 bg-white flex-1">
+              <InputGroup size="lg" className="h-11 my-1 flex-1">
                 {value !== "0" && (
-                  <KInputGroupAddon align="inline-start" className="pr-1">
+                  <InputGroupAddon align="inline-start" className="pr-1">
                     <X className="cursor-pointer" onClick={onClickClear} />
-                  </KInputGroupAddon>
+                  </InputGroupAddon>
                 )}
-                <KInputGroupInput
+                <InputGroupInput
                   type="text"
                   inputMode="decimal"
                   maxLength={maxLength}
@@ -136,26 +136,26 @@ const ConvertCard = (props: ConvertCardProps) => {
                   onFocus={onFocusInput}
                   className="font-number text-xl font-bold text-right h-full"
                 />
-                <KInputGroupAddon align="inline-end" className="!text-current">
+                <InputGroupAddon align="inline-end" className="!text-current">
                   <UnitDropdownMenu currentUnit={unit} onChangeUnit={onChangeUnit} />
-                </KInputGroupAddon>
-              </KInputGroup>
+                </InputGroupAddon>
+              </InputGroup>
             )}
           </div>
-        </KCardTitle>
+        </CardTitle>
         {!inputActive && (topDescription || bottomDescription) && (
-          <KCardDescription className="flex flex-col gap-1.5 text-right text-md text-current">
+          <CardDescription className="flex flex-col gap-1.5 text-right text-md text-current">
             {isPremium && topDescription && <span className="font-bold">= {topDescription}</span>}
             {bottomDescription && <span className="font-bold">* {bottomDescription}</span>}
-          </KCardDescription>
+          </CardDescription>
         )}
-      </KCardHeader>
+      </CardHeader>
       {inputActive && (
-        <KCardContent>
+        <CardContent className="px-2 pb-2.5">
           <PremiumField />
-        </KCardContent>
+        </CardContent>
       )}
-    </KCard>
+    </Shell>
   );
 };
 

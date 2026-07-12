@@ -1,7 +1,22 @@
+export {
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  type CardProps,
+  CardTitle,
+  default as Card,
+} from "./Card";
 export { default as CollapseSection } from "./CollapseSection";
 export { default as ConfettiEffect } from "./ConfettiEffect";
 export { default as CountText } from "./CountText";
 export { default as HighlightText } from "./HighlightText";
+export {
+  default as InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  type InputGroupProps,
+} from "./InputGroup";
 export * from "./icon";
 export { default as LazyImage } from "./LazyImage";
 export { default as Lottie } from "./lottie/Lottie";

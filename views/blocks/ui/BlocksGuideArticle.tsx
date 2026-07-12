@@ -1,8 +1,7 @@
 "use client";
 
-import { KCard } from "kku-ui";
 import { memo, type ReactNode } from "react";
-import { CollapseSection, HighlightText } from "@/shared/ui";
+import { Card, CollapseSection, HighlightText } from "@/shared/ui";
 
 interface GuideSectionTypes {
   title: string;
@@ -14,7 +13,7 @@ const GuideSection = ({ title, defaultOpen = false, children }: GuideSectionType
   <CollapseSection
     title={<h3 className="m-0 text-base font-bold">{title}</h3>}
     defaultOpen={defaultOpen}
-    className="border-b border-border last:border-none"
+    className="border-b-[0.75px] border-neutral-300 dark:border-neutral-600 last:border-none"
     summaryClassName="py-4 text-base"
     contentClassName="flex flex-col gap-3 pb-5"
   >
@@ -28,7 +27,7 @@ const GuideParagraph = ({ children }: { children: ReactNode }) => (
 
 const BlocksGuideArticle = () => {
   return (
-    <KCard className="glass-surface w-full">
+    <Card className="w-full">
       <article className="flex flex-col gap-2 p-4">
         <header className="flex flex-col gap-1">
           <h2 className="text-[18px] font-bold">비트코인 블록 이해하기</h2>
@@ -115,7 +114,7 @@ const BlocksGuideArticle = () => {
           </GuideSection>
         </div>
       </article>
-    </KCard>
+    </Card>
   );
 };
 

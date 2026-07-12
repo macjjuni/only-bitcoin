@@ -1,9 +1,8 @@
 "use client";
 
-import { KCard } from "kku-ui";
 import { memo, useMemo } from "react";
 import { blockHalvingData, useBlockStore } from "@/entities/block";
-import { CollapseSection } from "@/shared/ui";
+import { Card, CollapseSection } from "@/shared/ui";
 
 const HalvingDataCard = () => {
   // region [Hooks]
@@ -37,7 +36,7 @@ const HalvingDataCard = () => {
   // endregion
 
   return (
-    <KCard className="glass-surface w-full">
+    <Card className="w-full">
       <CollapseSection
         title={<h2 className="m-0 text-[18px] font-bold">반감기 정보</h2>}
         summaryClassName="p-4 text-[18px]"
@@ -72,7 +71,7 @@ const HalvingDataCard = () => {
           ))}
         </ul>
       </CollapseSection>
-    </KCard>
+    </Card>
   );
 };
 

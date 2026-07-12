@@ -1,20 +1,20 @@
 "use client";
 
-import { KCard, KCardContent, KCardHeader, KCardTitle } from "kku-ui";
 import { memo } from "react";
+import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import HalvingProgressBar from "@/views/blocks/ui/HalvingProgressBar";
 
 const HalvingChartCard = () => {
   return (
-    <KCard className="glass-surface">
-      <KCardHeader>
-        <KCardTitle className="text-[18px] font-bold">반감기 현황</KCardTitle>
-      </KCardHeader>
+    <Card>
+      <CardHeader>
+        <CardTitle className="text-[18px] font-bold">반감기 현황</CardTitle>
+      </CardHeader>
 
-      <KCardContent>
+      <CardContent>
         <HalvingProgressBar />
-      </KCardContent>
-    </KCard>
+      </CardContent>
+    </Card>
   );
 };
 

@@ -1,9 +1,10 @@
 "use client";
 
-import { KButton, KInputGroup, KInputGroupAddon, KInputGroupInput } from "kku-ui";
+import { KButton } from "kku-ui";
 import { clipboardUtil } from "kku-util";
 import { ClipboardPaste, Search, X } from "lucide-react";
 import { type ChangeEvent, memo, useCallback, useMemo, useRef, useState } from "react";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/shared/ui";
 
 const MEMPOOL_TX_SEARCH_URL = "https://mempool.space/ko/tx/";
 
@@ -70,11 +71,11 @@ const TxSearcher = () => {
   // endregion
 
   return (
-    <KInputGroup className="glass-surface !m-0 dark:bg-neutral-900/30" size="lg">
-      <KInputGroupAddon align="inline-start" className="pr-0">
+    <InputGroup size="lg">
+      <InputGroupAddon align="inline-start" className="pr-0">
         <Search size={20} />
-      </KInputGroupAddon>
-      <KInputGroupInput
+      </InputGroupAddon>
+      <InputGroupInput
         ref={searchRef}
         value={txValue}
         onChange={onChangeTxInput}
@@ -84,8 +85,8 @@ const TxSearcher = () => {
         autoCorrect="off"
         autoComplete="off"
       />
-      <KInputGroupAddon align="inline-end">{SearchRightAction}</KInputGroupAddon>
-    </KInputGroup>
+      <InputGroupAddon align="inline-end">{SearchRightAction}</InputGroupAddon>
+    </InputGroup>
   );
 };
 
