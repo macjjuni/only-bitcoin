@@ -1,10 +1,11 @@
 "use client";
 
-import { KIcon, KListGroup, KListRow, KSwitch } from "kku-ui";
+import { KIcon, KSwitch } from "kku-ui";
 import { MessageSquareWarning } from "lucide-react";
 import { useEffect, useState } from "react";
 import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import { useInitializePWA } from "@/shared/lib/hooks";
+import { ListGroup, ListRow } from "@/shared/ui";
 import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
 
 export default function InstallListRowGroup() {
@@ -35,19 +36,17 @@ export default function InstallListRowGroup() {
   // endregion
 
   return (
-    <KListGroup header="앱 설치">
-      <KListRow
-        className="glass-surface"
+    <ListGroup header="앱 설치">
+      <ListRow
         icon={<MessageSquareWarning color="#1796EE" />}
         label="앱 설치 메시지 숨기기"
         rightElement={<KSwitch checked={isInstallMsg} onCheckedChange={onChangeInstallMsg} />}
       />
-      <KListRow
-        className="glass-surface"
+      <ListRow
         icon={<KIcon icon="app" size={24} color="#1796EE" />}
         label="앱 설치"
         onClick={onClickInstall}
       />
-    </KListGroup>
+    </ListGroup>
   );
 }

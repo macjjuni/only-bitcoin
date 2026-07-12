@@ -1,10 +1,10 @@
 "use client";
 
-import { KIcon, KListGroup, KListRow, KSwitch } from "kku-ui";
+import { KIcon, KSwitch } from "kku-ui";
 import { Moon } from "lucide-react";
 import { memo } from "react";
 import useSettingStore from "@/shared/stores/settingStore";
-import { AnimationIcon } from "@/shared/ui";
+import { AnimationIcon, ListGroup, ListRow } from "@/shared/ui";
 
 const StyleListRowGroup = () => {
   // region [Hooks]
@@ -19,28 +19,26 @@ const StyleListRowGroup = () => {
   // endregion
 
   return (
-    <KListGroup header="스타일 및 화면 설정">
-      <KListRow
-        className="glass-surface"
+    <ListGroup header="스타일 및 화면 설정">
+      <ListRow
         icon={<Moon />}
         label="다크모드"
         rightElement={
           <KSwitch checked={isDark} onCheckedChange={(val) => setTheme(val ? "dark" : "light")} />
         }
       />
-      <KListRow
-        className="glass-surface dark:text-gray-700"
+      <ListRow
+        className="dark:text-gray-700"
         icon={<KIcon icon="bitcoin_square" size={24} color="currentColor" />}
         label="배경 이미지"
         rightElement={<KSwitch checked={isBackgroundImg} onCheckedChange={setIsBackgroundImg} />}
       />
-      <KListRow
-        className="glass-surface"
+      <ListRow
         icon={<AnimationIcon size={24} />}
         label="카운트 업 애니메이션"
         rightElement={<KSwitch checked={isCountUp} onCheckedChange={setIsCountUp} />}
       />
-    </KListGroup>
+    </ListGroup>
   );
 };
 

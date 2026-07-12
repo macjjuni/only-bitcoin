@@ -1,6 +1,6 @@
 "use client";
 
-import { KIcon, KListGroup, KListRow, KSelect, KSwitch } from "kku-ui";
+import { KIcon, KSelect, KSwitch } from "kku-ui";
 import { Star } from "lucide-react";
 import { memo, useMemo } from "react";
 import { krwMarketOptions, usdMarketOptions, useBitcoinStore } from "@/entities/bitcoin";
@@ -8,7 +8,7 @@ import { favoriteRouteList } from "@/shared/config/route";
 import { currencyOptions } from "@/shared/constants/setting";
 import useSettingStore from "@/shared/stores/settingStore";
 import type { CurrencyTypes } from "@/shared/stores/slices/settingSlice";
-import { CurrencyIcon } from "@/shared/ui";
+import { CurrencyIcon, ListGroup, ListRow } from "@/shared/ui";
 
 const PriceListRowGroup = () => {
   // region [Hooks]
@@ -36,9 +36,8 @@ const PriceListRowGroup = () => {
   // endregion
 
   return (
-    <KListGroup header="가격 설정">
-      <KListRow
-        className="glass-surface"
+    <ListGroup header="가격 설정">
+      <ListRow
         icon={<Star className="text-bitcoin" />}
         label="시작 페이지"
         rightElement={
@@ -50,8 +49,7 @@ const PriceListRowGroup = () => {
           />
         }
       />
-      <KListRow
-        className="glass-surface"
+      <ListRow
         icon={<CurrencyIcon size={24} />}
         label="통화 단위"
         rightElement={
@@ -63,8 +61,7 @@ const PriceListRowGroup = () => {
           />
         }
       />
-      <KListRow
-        className="glass-surface"
+      <ListRow
         icon={<KIcon icon="won" size={28} color="#F2C84B" />}
         label="국내거래소"
         rightElement={
@@ -76,8 +73,7 @@ const PriceListRowGroup = () => {
           />
         }
       />
-      <KListRow
-        className="glass-surface"
+      <ListRow
         icon={<KIcon icon="dollar" size={28} color="#85BB65" />}
         label="해외거래소"
         rightElement={
@@ -89,13 +85,12 @@ const PriceListRowGroup = () => {
           />
         }
       />
-      <KListRow
-        className="glass-surface"
+      <ListRow
         icon={<KIcon icon="tether" size={24} />}
         label="USDT 기준 환율"
         rightElement={<KSwitch checked={isUsdtStandard} onCheckedChange={setUsdtStandard} />}
       />
-    </KListGroup>
+    </ListGroup>
   );
 };
 
