@@ -12,6 +12,16 @@
 * **Styling:** TailwindCSS
 * **State Management:** Zustand, TanStack-Query
 * **Ecosystem:** Active use of `kku-ui` and `kku-util` libraries.
+* **Package Manager:** **pnpm** — always use `pnpm`, never `npm` or `yarn`.
+
+### 2.1 Common Commands
+```bash
+pnpm install          # Install dependencies
+pnpm dev              # Start dev server
+pnpm build            # Production build
+pnpm check            # Biome lint + format (write)
+pnpm check:cycles     # Circular dependency check
+```
 
 ## 3. Coding Standards
 
