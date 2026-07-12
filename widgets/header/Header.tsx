@@ -35,7 +35,7 @@ export default function Header() {
         </TransitionLink>
       </h2>
 
-      <div className="flex justify-center items-center gap-2">
+      <div className="flex justify-center items-center gap-1">
         <ConnectionDot />
         <SettingButton />
       </div>
