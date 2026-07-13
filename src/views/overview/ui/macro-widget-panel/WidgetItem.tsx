@@ -4,7 +4,6 @@ import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { KIcon } from "kku-ui";
 import { type MouseEvent, useMemo } from "react";
-import { useMounted } from "@/shared/lib/hooks";
 import { CountText } from "@/shared/ui";
 
 export interface WidgetItemProps {
@@ -29,7 +28,6 @@ export default function WidgetItem({
   onRemove,
 }: WidgetItemProps) {
   // region [Hooks]
-  const isMount = useMounted();
   const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
 
   const style = useMemo(
@@ -77,7 +75,7 @@ export default function WidgetItem({
         {/* Value Area */}
         <div className="font-number text-xl font-bold">
           <CountText value={value} decimals={decimals} />
-          {isMount && <span className="text-base font-bold ml-0.5">{sign}</span>}
+          <span className="text-base font-bold ml-0.5">{sign}</span>
         </div>
 
         {/* Remove Button */}

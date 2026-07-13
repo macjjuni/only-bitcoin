@@ -5,4 +5,5 @@ export { default as MacroWidgetPanel } from "./macro-widget-panel/MacroWidgetPan
 export { default as WidgetItem } from "./macro-widget-panel/WidgetItem";
 export { default as MarketChart } from "./marketChart/MarketChart";
 export { default as MiningMetricChart } from "./mining-metric-chart/MiningMetricChart";
+export { default as OverviewScreen } from "./overview-screen/OverviewScreen";
 export { default as PricePanel } from "./price-panel/PricePanel";

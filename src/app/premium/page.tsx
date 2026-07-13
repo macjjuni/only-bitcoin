@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { fetchInitialBitcoinPrice, fetchMacroIndicators } from "@/entities/bitcoin";
 import { env } from "@/shared/config/env";
 import { PageLayout } from "@/shared/ui/layout";
 import { PremiumLottie, PremiumPanel } from "@/views/premium";
@@ -8,11 +9,16 @@ export const metadata: Metadata = {
   description: "실시간 비트코인 김치 프리미엄 현황을 실시간으로 확인하세요.",
 };
 
-export default function PremiumPage() {
+export default async function PremiumPage() {
+  const [initialPrice, initialMacro] = await Promise.all([
+    fetchInitialBitcoinPrice(),
+    fetchMacroIndicators(),
+  ]);
+
   return (
     <PageLayout className="relative overflow-x-hidden isolation-auto gap-2.5 !pt-4">
       <PremiumLottie />
-      <PremiumPanel />
+      <PremiumPanel initialPrice={initialPrice} initialMacro={initialMacro} />
     </PageLayout>
   );
 }

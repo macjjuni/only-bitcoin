@@ -13,6 +13,7 @@ import { arrayMove, horizontalListSortingStrategy, SortableContext } from "@dnd-
 import { KButton, kToast } from "kku-ui";
 import { useTransitionRouter } from "next-view-transitions";
 import { useEffect, useState } from "react";
+import type { InitialBitcoinPrice, MacroIndicators } from "@/entities/bitcoin";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { useBitcoinDominanceQuery, useFearGreedIndex } from "@/entities/bitcoin/client";
 import { minedPercent, useBlockStore } from "@/entities/block";
@@ -30,7 +31,14 @@ interface MacroVO {
   onClick?: () => void;
 }
 
-export default function MacroWidgetPanel() {
+interface MacroWidgetPanelTypes {
+  /** SSR 로 미리 조회한 매크로 지표. 클라이언트 쿼리가 갱신하기 전까지의 표시값이다. */
+  initialMacro: MacroIndicators;
+  /** SSR 로 미리 조회한 시세. Premium / Sats-USD 계산에 필요하다. */
+  initialPrice: InitialBitcoinPrice;
+}
+
+export default function MacroWidgetPanel({ initialMacro, initialPrice }: MacroWidgetPanelTypes) {
   // region [Hooks]
   const router = useTransitionRouter();
   const [isEditMode, setIsEditMode] = useState(false);
@@ -38,9 +46,17 @@ export default function MacroWidgetPanel() {
 
   const macroSequence = useOverviewStore((state) => state.macroSequence);
   const setMacroSequence = useOverviewStore((state) => state.setMacroSequence);
-  const { krw, usd } = useBitcoinStore((state) => state.bitcoinPrice);
-  const usdExRate = useBitcoinStore((state) => state.exRate.value);
+  const { krw: socketKrw, usd: socketUsd } = useBitcoinStore((state) => state.bitcoinPrice);
+  const storeExRate = useBitcoinStore((state) => state.exRate.value);
   const blockData = useBlockStore((state) => state.blockData);
+
+  /**
+   * 소켓/쿼리가 값을 채우기 전(= 서버 렌더링 및 첫 페인트)에는 SSR 값으로 대체한다.
+   * 채워지는 즉시 실시간 값이 우선한다.
+   */
+  const krw = socketKrw || initialPrice.krw;
+  const usd = socketUsd || initialPrice.usd;
+  const usdExRate = storeExRate || initialMacro.usdExRate;
   const fees = useBlockStore((state) => state.fees);
 
   /**
@@ -60,8 +76,8 @@ export default function MacroWidgetPanel() {
   // endregion
 
   // region [Transactions]
-  const dominanceData = useBitcoinDominanceQuery();
-  const fearGreedData = useFearGreedIndex();
+  const dominanceData = useBitcoinDominanceQuery(initialMacro.dominance);
+  const fearGreedData = useFearGreedIndex(initialMacro.fearGreedIndex);
   // endregion
 
   // region [Privates]
