@@ -101,7 +101,6 @@ export default function useUpbitSocket() {
 
     socket.onerror = (e) => {
       console.warn("Upbit WebSocket Error:", e);
-      kToast.error("Upbit 연결 오류");
 
       if (!isNetwork()) {
         socket.close();
