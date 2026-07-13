@@ -1,4 +1,4 @@
-import { supabase } from "@/shared/lib/supabase";
+import { getSupabase } from "@/shared/lib/supabase";
 
 // region [Types]
 type QuizRewardStatus = "PENDING" | "READY" | "USED";
@@ -17,12 +17,14 @@ export const createAnswerToken = async (
   quizId: string,
   amount: number = 100,
 ) => {
-  const { error } = await supabase.from("quiz_rewards").insert({
-    answer_token: answerToken,
-    quiz_id: quizId,
-    amount,
-    status: "PENDING" as QuizRewardStatus,
-  });
+  const { error } = await getSupabase()
+    .from("quiz_rewards")
+    .insert({
+      answer_token: answerToken,
+      quiz_id: quizId,
+      amount,
+      status: "PENDING" as QuizRewardStatus,
+    });
 
   return { success: !error, error };
 };
@@ -35,6 +37,7 @@ export const activateRewardToken = async (
   answerToken: string,
   rewardToken: string,
 ): Promise<TokenValidationResult> => {
+  const supabase = getSupabase();
   const fiveMinutesAgo = new Date(Date.now() - 5 * 60 * 1000).toISOString();
 
   const { data, error } = await supabase
@@ -73,7 +76,7 @@ export const activateRewardToken = async (
  * [callback] reward_token 검증 (READY 상태 확인)
  */
 export const validateRewardToken = async (rewardToken: string): Promise<TokenValidationResult> => {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("quiz_rewards")
     .select("amount, status")
     .eq("reward_token", rewardToken)
@@ -98,7 +101,7 @@ export const validateRewardToken = async (rewardToken: string): Promise<TokenVal
  * [callback] READY → USED 상태 변경 (atomic, 송금 전 선점)
  */
 export const claimRewardToken = async (rewardToken: string): Promise<TokenValidationResult> => {
-  const { data, error } = await supabase
+  const { data, error } = await getSupabase()
     .from("quiz_rewards")
     .update({
       status: "USED" as QuizRewardStatus,
@@ -124,7 +127,7 @@ export const claimRewardToken = async (rewardToken: string): Promise<TokenValida
  * [callback] 송금 실패 시 USED → READY 롤백
  */
 export const releaseRewardToken = async (rewardToken: string) => {
-  const { error } = await supabase
+  const { error } = await getSupabase()
     .from("quiz_rewards")
     .update({
       status: "READY" as QuizRewardStatus,
