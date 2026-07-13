@@ -61,6 +61,13 @@ const clientRoutes = [
   },
   { title: "404 - Not Found", path: "/*", isNav: false, isFavorite: false, icon: null },
   { title: "Settings", path: "/settings", isNav: false, isFavorite: false, icon: null },
+  {
+    title: "Privacy Policy",
+    path: "/settings/privacy",
+    isNav: false,
+    isFavorite: false,
+    icon: null,
+  },
 ];
 
 export const allRouteList = clientRoutes.filter(({ title, ...restProps }) => restProps);
