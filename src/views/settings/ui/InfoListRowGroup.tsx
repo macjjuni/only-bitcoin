@@ -2,7 +2,8 @@
 
 import { KButton, KIcon, kToast } from "kku-ui";
 import { clipboardUtil } from "kku-util";
-import { CodeXml, QrCode as QrCodeIcon } from "lucide-react";
+import { CodeXml, QrCode as QrCodeIcon, ShieldCheck } from "lucide-react";
+import { useTransitionRouter } from "next-view-transitions";
 import { memo, useCallback } from "react";
 import { QRCode } from "react-qrcode-logo";
 import { sourceOptions } from "@/shared/constants/setting";
@@ -22,7 +23,13 @@ const DONATE_VALUE = "donation" as const;
  */
 const DONATION_ROW_CLASS = "donation-row";
 
+const PRIVACY_PATH = "/settings/privacy";
+
 const InfoListRowGroup = () => {
+  // region [Hooks]
+  const router = useTransitionRouter();
+  // endregion
+
   // region [Privates]
   const onScrollDown = useCallback(() => {
     setTimeout(() => {
@@ -35,6 +42,10 @@ const InfoListRowGroup = () => {
   const onRouteToFeedback = useCallback(() => {
     window.open(FEEDBACK_URL, "_blank", "noopener,noreferrer");
   }, []);
+
+  const onRouteToPrivacy = useCallback(() => {
+    router.push(PRIVACY_PATH);
+  }, [router]);
   // endregion
 
   // region [Events]
@@ -90,6 +101,11 @@ const InfoListRowGroup = () => {
         icon={<KIcon icon="x_logo" size={24} />}
         label="피드백"
         onClick={onRouteToFeedback}
+      />
+      <ListRow
+        icon={<ShieldCheck size={24} />}
+        label="개인정보처리방침"
+        onClick={onRouteToPrivacy}
       />
       <ListRow
         icon={<KIcon icon="dev" color="#333" size={24} />}

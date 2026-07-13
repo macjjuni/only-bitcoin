@@ -1,0 +1,18 @@
+# 저장소에 저장되는 줄바꿈을 LF 로 고정한다.
+# 맥/윈도우를 오가며 작업할 때 내용은 그대로인데 CRLF/LF 차이로 파일 전체가
+# 수정된 것처럼 잡히는 문제를 막는다. 각자의 core.autocrlf 설정보다 우선한다.
+* text=auto eol=lf
+
+# 바이너리로 명시. Git 이 텍스트로 오판해 줄바꿈을 건드리지 않도록 한다.
+*.png binary
+*.jpg binary
+*.jpeg binary
+*.webp binary
+*.gif binary
+*.ico binary
+*.mp4 binary
+*.webm binary
+*.woff binary
+*.woff2 binary
+*.ttf binary
+*.otf binary
