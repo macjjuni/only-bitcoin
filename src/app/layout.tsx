@@ -30,7 +30,7 @@ export const metadata: Metadata = {
   keywords: ["비트코인", "온리 비트코인", "비트코인 계산기", "사토시 계산기", "비트코인 밈"],
   authors: [{ name: "a7w2en7z_" }],
   verification: {
-    google: "NcpMqZPUpri0JyCFt3SV-633FoaSsDKG4PRg2HlgqW8", // 서치 콘솔
+    google: "nEjgqK7F-A9Ldgevt4Jjz1ekaTutFoUx8FEkUcaTfPE", // 서치 콘솔
   },
   manifest: "/manifest.json",
   appleWebApp: {
