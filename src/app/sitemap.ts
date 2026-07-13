@@ -4,8 +4,8 @@ const BASE_URL = "https://only-btc.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // #region 1. Static Routes
+  // `/`는 `/overview`를 canonical로 가리키므로 사이트맵에는 정규 URL만 제출한다.
   const staticRoutes = [
-    "",
     "/overview",
     "/blocks",
     "/btc2fiat",
@@ -18,7 +18,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     url: `${BASE_URL}${route}`,
     lastModified: new Date(),
     changeFrequency: "daily" as const,
-    priority: route === "" ? 1.0 : 0.8,
+    priority: route === "/overview" ? 1.0 : 0.8,
   }));
   // #endregion
 

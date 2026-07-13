@@ -107,7 +107,6 @@ export default function useBithumbSocket() {
 
     socket.onerror = (e) => {
       console.error("Bithumb WebSocket Error:", e);
-      kToast.error("빗썸 연결 오류");
 
       if (!isNetwork()) {
         socket.close();

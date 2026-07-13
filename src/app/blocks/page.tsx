@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { fetchInitialBlocks } from "@/entities/block/server";
 import { env } from "@/shared/config/env";
 import { PageLayout } from "@/shared/ui/layout";
 import {
@@ -15,15 +16,18 @@ export const metadata: Metadata = {
   description: "비트코인 네트워크의 최신 블록 생성 현황과 트랜잭션 수수료를 실시간으로 확인하세요.",
 };
 
-export default function BlocksPage() {
+export default async function BlocksPage() {
+  const { blocks, fees } = await fetchInitialBlocks();
+  const currentBlockHeight = blocks[0]?.height ?? 0;
+
   return (
     <PageLayout className="block-page__area gap-2.5">
-      <BlocksVisualizer />
-      <BlockTxFees />
+      <BlocksVisualizer initialBlocks={blocks} />
+      <BlockTxFees initialFees={fees} />
       <BlocksExplorer />
-      <HalvingChartCard />
+      <HalvingChartCard initialBlockHeight={currentBlockHeight} />
       <BlocksGuideArticle />
-      <HalvingDataCard />
+      <HalvingDataCard initialBlockHeight={currentBlockHeight} />
     </PageLayout>
   );
 }

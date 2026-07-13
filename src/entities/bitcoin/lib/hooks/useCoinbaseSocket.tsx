@@ -87,7 +87,6 @@ export default function useCoinbaseSocket() {
 
     socket.onerror = (e) => {
       console.error("Coinbase WebSocket Error:", e);
-      kToast.error("코인베이스 연결 오류");
 
       if (!isNetwork()) {
         socket.close();

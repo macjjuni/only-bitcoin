@@ -20,7 +20,10 @@ const fetchFearGreedIndex = async (): Promise<number> => {
   }
 };
 
-const useFearGreedIndex = () => {
+/**
+ * @param initialFearGreedIndex SSR 로 미리 조회한 공포탐욕지수. 크롤러가 읽는 값이다.
+ */
+const useFearGreedIndex = (initialFearGreedIndex = 0) => {
   // region [Hooks]
   const STALE_TIME_MIN = 10;
   const REFETCH_TIME_MIN = 10;
@@ -36,6 +39,9 @@ const useFearGreedIndex = () => {
     refetchInterval: 1000 * 60 * REFETCH_TIME_MIN, // 10분마다 자동 갱신
     refetchOnMount: true,
     retry: 3,
+    initialData: initialFearGreedIndex || undefined,
+    // 서버 값은 최대 12시간 캐시된 값이므로 즉시 stale 로 두어 마운트 직후 재조회시킨다.
+    initialDataUpdatedAt: 0,
   });
   // endregion
 

@@ -1,12 +1,18 @@
 "use client";
 
 import { useMemo } from "react";
+import type { InitialPrice } from "@/entities/bitcoin";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import useSettingStore from "@/shared/stores/settingStore";
 import { CountText, UpdownIcon } from "@/shared/ui";
 import PriceMiniChart from "./PriceMiniChart";
 
-export default function PricePanel() {
+interface PricePanelTypes {
+  /** SSR 로 미리 조회한 시세. 소켓이 붙기 전까지의 표시값이자 크롤러가 읽는 값이다. */
+  initialPrice: InitialPrice;
+}
+
+export default function PricePanel({ initialPrice }: PricePanelTypes) {
   // region [Hooks]
   const bitcoinPrice = useBitcoinStore((state) => state.bitcoinPrice);
   const currency = useSettingStore((state) => state.setting.currency);
@@ -16,19 +22,23 @@ export default function PricePanel() {
       {
         code: "KRW",
         sign: "₩",
-        price: Number(bitcoinPrice.krw),
-        percent: Number(bitcoinPrice.krwChange24h),
+        price: Number(bitcoinPrice.krw) || Number(initialPrice.krw),
+        percent: Number(bitcoinPrice.krw)
+          ? Number(bitcoinPrice.krwChange24h)
+          : Number(initialPrice.krwChange24h),
         signSize: "text-[20px]",
       },
       {
         code: "USD",
         sign: "$",
-        price: Number(bitcoinPrice.usd),
-        percent: Number(bitcoinPrice.usdChange24h),
+        price: Number(bitcoinPrice.usd) || Number(initialPrice.usd),
+        percent: Number(bitcoinPrice.usd)
+          ? Number(bitcoinPrice.usdChange24h)
+          : Number(initialPrice.usdChange24h),
         signSize: "text-[22px]",
       },
     ],
-    [bitcoinPrice],
+    [bitcoinPrice, initialPrice],
   );
 
   const visibleCurrencies = useMemo(

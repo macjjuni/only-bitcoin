@@ -2,6 +2,7 @@
 
 import { KSkeleton } from "kku-ui";
 import { memo, useMemo } from "react";
+import type { InitialMacro, InitialPrice } from "@/entities/bitcoin";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { formatDate } from "@/shared/lib/date";
 import useSettingStore from "@/shared/stores/settingStore";
@@ -13,12 +14,28 @@ const HEADER_CLASS = "flex flex-col space-y-1.5 p-4";
 const TITLE_CLASS = "leading-none tracking-tight flex justify-start items-center";
 const CONTENT_CLASS = "p-4 pt-0";
 
-const PremiumPanel = () => {
+interface PremiumPanelTypes {
+  /** SSR 로 미리 조회한 시세 */
+  initialPrice: InitialPrice;
+  /** SSR 로 미리 조회한 매크로 지표(환율 사용) */
+  initialMacro: InitialMacro;
+}
+
+const PremiumPanel = ({ initialPrice, initialMacro }: PremiumPanelTypes) => {
   // region [Hooks]
   const currency = useSettingStore((state) => state.setting.currency);
-  const { krw, usd } = useBitcoinStore((state) => state.bitcoinPrice);
-  const { value: usdExRate, date } = useBitcoinStore((state) => state.exRate);
+  const { krw: socketKrw, usd: socketUsd } = useBitcoinStore((state) => state.bitcoinPrice);
+  const { value: storeExRate, date: storeExRateDate } = useBitcoinStore((state) => state.exRate);
   const isUsdtStandard = useSettingStore((state) => state.setting.isUsdtStandard);
+
+  /**
+   * 소켓/환율 쿼리가 값을 채우기 전(= 서버 렌더링 및 첫 페인트)에는 SSR 값으로 대체한다.
+   * 채워지는 즉시 실시간 값이 우선한다.
+   */
+  const krw = socketKrw || initialPrice.krw;
+  const usd = socketUsd || initialPrice.usd;
+  const usdExRate = storeExRate || initialMacro.usdExRate;
+  const date = storeExRateDate || initialMacro.usdExRateDate;
   // endregion
 
   // region [Templates]
