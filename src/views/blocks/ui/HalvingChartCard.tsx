@@ -4,7 +4,12 @@ import { memo } from "react";
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui";
 import HalvingProgressBar from "@/views/blocks/ui/HalvingProgressBar";
 
-const HalvingChartCard = () => {
+interface HalvingChartCardProps {
+  /** SSR 로 미리 조회한 블록 높이 */
+  initialBlockHeight: number;
+}
+
+const HalvingChartCard = ({ initialBlockHeight }: HalvingChartCardProps) => {
   return (
     <Card>
       <CardHeader>
@@ -12,7 +17,7 @@ const HalvingChartCard = () => {
       </CardHeader>
 
       <CardContent>
-        <HalvingProgressBar />
+        <HalvingProgressBar initialBlockHeight={initialBlockHeight} />
       </CardContent>
     </Card>
   );

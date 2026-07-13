@@ -7,12 +7,15 @@ import { useMounted } from "@/shared/lib/hooks";
 
 interface HalvingProgressBarProps {
   className?: string;
+  /** SSR 로 미리 조회한 블록 높이. 소켓이 붙기 전까지의 표시값이다. */
+  initialBlockHeight: number;
 }
 
-const HalvingProgressBar = ({ className = "" }: HalvingProgressBarProps) => {
+const HalvingProgressBar = ({ className = "", initialBlockHeight }: HalvingProgressBarProps) => {
   // region [Hooks]
   const isMount = useMounted();
-  const currentBlockHeight = useBlockStore((state) => state.blockData[0]?.height ?? 0);
+  const storeBlockHeight = useBlockStore((state) => state.blockData[0]?.height ?? 0);
+  const currentBlockHeight = storeBlockHeight || initialBlockHeight;
 
   const nextHalvingData = useMemo(
     () => getNextHalvingData(currentBlockHeight),

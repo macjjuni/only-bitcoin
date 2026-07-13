@@ -1,12 +1,22 @@
 "use client";
 
 import { Fragment, memo, useMemo } from "react";
+import type { FeesTypes } from "@/entities/block";
 import { useBlockStore } from "@/entities/block";
 import { CountText } from "@/shared/ui";
 
-const BlockTxFees = () => {
+interface BlockTxFeesProps {
+  /** SSR 로 미리 조회한 수수료. 소켓이 붙기 전까지의 표시값이다. */
+  initialFees: FeesTypes;
+}
+
+const BlockTxFees = ({ initialFees }: BlockTxFeesProps) => {
   // region [Hooks]
-  const fees = useBlockStore((state) => state.fees);
+  const storeFees = useBlockStore((state) => state.fees);
+
+  // 소켓이 값을 채우기 전(= 서버 렌더링 및 첫 페인트)에는 SSR 값으로 대체한다.
+  const fees = storeFees.fastestFee ? storeFees : initialFees;
+
   const feeDataList = useMemo(
     () => [
       { label: "최하위 순위", value: fees.economyFee },

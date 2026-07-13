@@ -4,9 +4,15 @@ import { memo, useMemo } from "react";
 import { blockHalvingData, useBlockStore } from "@/entities/block";
 import { Card, CollapseSection } from "@/shared/ui";
 
-const HalvingDataCard = () => {
+interface HalvingDataCardProps {
+  /** SSR 로 미리 조회한 블록 높이. 다음 반감기 행 하이라이트에 쓰인다. */
+  initialBlockHeight: number;
+}
+
+const HalvingDataCard = ({ initialBlockHeight }: HalvingDataCardProps) => {
   // region [Hooks]
-  const currentBlockHeight = useBlockStore((state) => state.blockData[0]?.height ?? 0);
+  const storeBlockHeight = useBlockStore((state) => state.blockData[0]?.height ?? 0);
+  const currentBlockHeight = storeBlockHeight || initialBlockHeight;
   // endregion
 
   // region [Templates]
