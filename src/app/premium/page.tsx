@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { fetchInitialBitcoinPrice, fetchMacroIndicators } from "@/entities/bitcoin";
+import { fetchInitialMacro, fetchInitialPrice } from "@/entities/bitcoin/server";
 import { env } from "@/shared/config/env";
 import { PageLayout } from "@/shared/ui/layout";
 import { PremiumLottie, PremiumPanel } from "@/views/premium";
@@ -11,8 +11,8 @@ export const metadata: Metadata = {
 
 export default async function PremiumPage() {
   const [initialPrice, initialMacro] = await Promise.all([
-    fetchInitialBitcoinPrice(),
-    fetchMacroIndicators(),
+    fetchInitialPrice(),
+    fetchInitialMacro(),
   ]);
 
   return (

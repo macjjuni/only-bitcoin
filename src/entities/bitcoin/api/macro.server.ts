@@ -5,20 +5,7 @@ import {
   type NaverExchangeRateResponse,
   parseUsdExchangeRate,
 } from "../lib/exchange-rate";
-import type { FearGreedIndexResponseTypes, ICurrency } from "../model/types";
-
-// region [Types]
-export interface MacroIndicators {
-  /** 비트코인 도미넌스(%) */
-  dominance: number;
-  /** 공포탐욕지수(0~100) */
-  fearGreedIndex: number;
-  /** USD → KRW 환율 */
-  usdExRate: number;
-  /** 환율 조회 일자(YYYY-MM-DD). 조회 실패 시 빈 문자열 */
-  usdExRateDate: string;
-}
-// endregion
+import type { FearGreedIndexResponseTypes, ICurrency, InitialMacro } from "../model/types";
 
 // region [Privates]
 const BTC_DOMINANCE_API_URL =
@@ -34,7 +21,7 @@ const FEAR_GREED_INDEX_API_URL = "https://api.alternative.me/fng/";
 const SLOW_REVALIDATE_SECONDS = 60 * 60 * 12;
 const EX_RATE_REVALIDATE_SECONDS = 60 * 60;
 
-const EMPTY_MACRO: MacroIndicators = {
+const EMPTY_MACRO: InitialMacro = {
   dominance: 0,
   fearGreedIndex: 0,
   usdExRate: 0,
@@ -64,7 +51,7 @@ const fetchMacro = async <T>(url: string, revalidate: number): Promise<T | null>
  * 클라이언트 쿼리로만 채우면 크롤러가 보는 HTML 에는 0 만 남으므로 서버에서 미리 읽는다.
  * 일부가 실패해도 나머지 값은 그대로 사용한다.
  */
-export const fetchMacroIndicators = async (): Promise<MacroIndicators> => {
+export const fetchInitialMacro = async (): Promise<InitialMacro> => {
   const [markets, fearGreed, exRate] = await Promise.all([
     fetchMacro<ICurrency[]>(BTC_DOMINANCE_API_URL, SLOW_REVALIDATE_SECONDS),
     fetchMacro<FearGreedIndexResponseTypes>(FEAR_GREED_INDEX_API_URL, SLOW_REVALIDATE_SECONDS),

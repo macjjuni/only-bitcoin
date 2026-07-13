@@ -9,12 +9,20 @@ import { comma } from "@/shared/utils/string";
 
 const totalSegments = 24 as const;
 
-export default function BlockHalvingCard() {
+interface BlockHalvingCardProps {
+  /** SSR 로 미리 조회한 블록 높이. 소켓이 붙기 전까지의 표시값이자 크롤러가 읽는 값이다. */
+  initialBlockHeight: number;
+}
+
+export default function BlockHalvingCard({ initialBlockHeight }: BlockHalvingCardProps) {
   // region [Hooks]
   const { View, animationItem } = useLottie({ animationData: blockLottieJson, loop: true });
 
   const blockData = useBlockStore((state) => state.blockData);
-  const recentBlockHeight = useMemo(() => blockData[0]?.height ?? 0, [blockData]);
+  const recentBlockHeight = useMemo(
+    () => blockData[0]?.height || initialBlockHeight,
+    [blockData, initialBlockHeight],
+  );
   const nextHalvingData = useMemo(() => getNextHalvingData(recentBlockHeight), [recentBlockHeight]);
   const halvingPercent = useMemo(
     () => calcPercentage(nextHalvingData?.blockHeight, recentBlockHeight),

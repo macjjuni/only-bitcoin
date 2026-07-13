@@ -1,5 +1,5 @@
 import type { Metadata } from "next";
-import { fetchInitialBlockData } from "@/entities/block";
+import { fetchInitialBlocks } from "@/entities/block/server";
 import { env } from "@/shared/config/env";
 import { PageLayout } from "@/shared/ui/layout";
 import {
@@ -17,7 +17,7 @@ export const metadata: Metadata = {
 };
 
 export default async function BlocksPage() {
-  const { blocks, fees } = await fetchInitialBlockData();
+  const { blocks, fees } = await fetchInitialBlocks();
   const currentBlockHeight = blocks[0]?.height ?? 0;
 
   return (

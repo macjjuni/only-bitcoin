@@ -13,9 +13,10 @@ import { arrayMove, horizontalListSortingStrategy, SortableContext } from "@dnd-
 import { KButton, kToast } from "kku-ui";
 import { useTransitionRouter } from "next-view-transitions";
 import { useEffect, useState } from "react";
-import type { InitialBitcoinPrice, MacroIndicators } from "@/entities/bitcoin";
+import type { InitialMacro, InitialPrice } from "@/entities/bitcoin";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { useBitcoinDominanceQuery, useFearGreedIndex } from "@/entities/bitcoin/client";
+import type { InitialBlocks } from "@/entities/block";
 import { minedPercent, useBlockStore } from "@/entities/block";
 import { calcPremiumPercent, usdToSats } from "@/shared/utils/calculate";
 import useOverviewStore from "../../model/overviewStore";
@@ -33,12 +34,18 @@ interface MacroVO {
 
 interface MacroWidgetPanelTypes {
   /** SSR 로 미리 조회한 매크로 지표. 클라이언트 쿼리가 갱신하기 전까지의 표시값이다. */
-  initialMacro: MacroIndicators;
+  initialMacro: InitialMacro;
   /** SSR 로 미리 조회한 시세. Premium / Sats-USD 계산에 필요하다. */
-  initialPrice: InitialBitcoinPrice;
+  initialPrice: InitialPrice;
+  /** SSR 로 미리 조회한 블록 데이터. Mined % / Fee 위젯에 필요하다. */
+  initialBlockData: InitialBlocks;
 }
 
-export default function MacroWidgetPanel({ initialMacro, initialPrice }: MacroWidgetPanelTypes) {
+export default function MacroWidgetPanel({
+  initialMacro,
+  initialPrice,
+  initialBlockData,
+}: MacroWidgetPanelTypes) {
   // region [Hooks]
   const router = useTransitionRouter();
   const [isEditMode, setIsEditMode] = useState(false);
@@ -48,7 +55,8 @@ export default function MacroWidgetPanel({ initialMacro, initialPrice }: MacroWi
   const setMacroSequence = useOverviewStore((state) => state.setMacroSequence);
   const { krw: socketKrw, usd: socketUsd } = useBitcoinStore((state) => state.bitcoinPrice);
   const storeExRate = useBitcoinStore((state) => state.exRate.value);
-  const blockData = useBlockStore((state) => state.blockData);
+  const storeBlockData = useBlockStore((state) => state.blockData);
+  const storeFees = useBlockStore((state) => state.fees);
 
   /**
    * 소켓/쿼리가 값을 채우기 전(= 서버 렌더링 및 첫 페인트)에는 SSR 값으로 대체한다.
@@ -57,7 +65,8 @@ export default function MacroWidgetPanel({ initialMacro, initialPrice }: MacroWi
   const krw = socketKrw || initialPrice.krw;
   const usd = socketUsd || initialPrice.usd;
   const usdExRate = storeExRate || initialMacro.usdExRate;
-  const fees = useBlockStore((state) => state.fees);
+  const blockHeight = storeBlockData[0]?.height || initialBlockData.blocks[0]?.height || 0;
+  const fees = storeFees.fastestFee ? storeFees : initialBlockData.fees;
 
   /**
    * dnd-kit 센서 설정
@@ -119,7 +128,7 @@ export default function MacroWidgetPanel({ initialMacro, initialPrice }: MacroWi
     {
       id: 5,
       label: "Mined %",
-      value: minedPercent(blockData[0]?.height ?? 0),
+      value: minedPercent(blockHeight),
       decimals: 2,
       sign: "%",
     },

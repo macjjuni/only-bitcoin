@@ -2,7 +2,7 @@
 
 import { KSkeleton } from "kku-ui";
 import { memo, useMemo } from "react";
-import type { InitialBitcoinPrice, MacroIndicators } from "@/entities/bitcoin";
+import type { InitialMacro, InitialPrice } from "@/entities/bitcoin";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { formatDate } from "@/shared/lib/date";
 import useSettingStore from "@/shared/stores/settingStore";
@@ -16,9 +16,9 @@ const CONTENT_CLASS = "p-4 pt-0";
 
 interface PremiumPanelTypes {
   /** SSR 로 미리 조회한 시세 */
-  initialPrice: InitialBitcoinPrice;
+  initialPrice: InitialPrice;
   /** SSR 로 미리 조회한 매크로 지표(환율 사용) */
-  initialMacro: MacroIndicators;
+  initialMacro: InitialMacro;
 }
 
 const PremiumPanel = ({ initialPrice, initialMacro }: PremiumPanelTypes) => {

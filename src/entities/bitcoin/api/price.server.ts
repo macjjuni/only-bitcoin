@@ -1,11 +1,6 @@
-import type { BitcoinPriceTypes } from "../model/priceSlice";
+import type { InitialPrice } from "../model/types";
 
 // region [Types]
-export type InitialBitcoinPrice = Pick<
-  BitcoinPriceTypes,
-  "krw" | "krwChange24h" | "usd" | "usdChange24h"
->;
-
 interface BithumbTickerResponse {
   status: string;
   data?: {
@@ -27,7 +22,7 @@ const BINANCE_TICKER_URL = "https://api.binance.com/api/v3/ticker/24hr?symbol=BT
 /** 서버 렌더링용 캐시 주기(초). 봇에게 보여줄 값이므로 실시간성보다 캐시 적중이 중요하다. */
 const REVALIDATE_SECONDS = 300;
 
-const EMPTY_PRICE: InitialBitcoinPrice = {
+const EMPTY_PRICE: InitialPrice = {
   krw: 0,
   krwChange24h: "0",
   usd: 0,
@@ -60,7 +55,7 @@ const fetchTicker = async <T>(url: string): Promise<T | null> => {
  *
  * 두 거래소 중 하나가 실패해도 나머지 값은 그대로 사용한다.
  */
-export const fetchInitialBitcoinPrice = async (): Promise<InitialBitcoinPrice> => {
+export const fetchInitialPrice = async (): Promise<InitialPrice> => {
   const [bithumb, binance] = await Promise.all([
     fetchTicker<BithumbTickerResponse>(BITHUMB_TICKER_URL),
     fetchTicker<BinanceTickerResponse>(BINANCE_TICKER_URL),

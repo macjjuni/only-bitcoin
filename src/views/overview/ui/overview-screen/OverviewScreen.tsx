@@ -1,4 +1,5 @@
-import { fetchInitialBitcoinPrice, fetchMacroIndicators } from "@/entities/bitcoin";
+import { fetchInitialMacro, fetchInitialPrice } from "@/entities/bitcoin/server";
+import { fetchInitialBlocks } from "@/entities/block/server";
 import { PageLayout } from "@/shared/ui/layout";
 import BlockHalvingCard from "../block-halving-card/BlockHalvingCard";
 import ClientChart from "../clientChart/ClientChart";
@@ -10,17 +11,24 @@ import PricePanel from "../price-panel/PricePanel";
  * `/`와 `/overview` 두 라우트에서 동일하게 렌더링
  */
 export default async function OverviewScreen() {
-  const [initialPrice, initialMacro] = await Promise.all([
-    fetchInitialBitcoinPrice(),
-    fetchMacroIndicators(),
+  const [initialPrice, initialMacro, initialBlockData] = await Promise.all([
+    fetchInitialPrice(),
+    fetchInitialMacro(),
+    fetchInitialBlocks(),
   ]);
+
+  const initialBlockHeight = initialBlockData.blocks[0]?.height ?? 0;
 
   return (
     <PageLayout>
       <PricePanel initialPrice={initialPrice} />
-      <MacroWidgetPanel initialMacro={initialMacro} initialPrice={initialPrice} />
+      <MacroWidgetPanel
+        initialMacro={initialMacro}
+        initialPrice={initialPrice}
+        initialBlockData={initialBlockData}
+      />
       <ClientChart />
-      <BlockHalvingCard />
+      <BlockHalvingCard initialBlockHeight={initialBlockHeight} />
     </PageLayout>
   );
 }

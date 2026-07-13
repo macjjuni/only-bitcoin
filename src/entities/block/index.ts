@@ -1,5 +1,4 @@
-export type { InitialBlockData } from "./api/initial-blocks";
-export { fetchInitialBlockData } from "./api/initial-blocks";
+// SSR 초기값 조회는 `@/entities/block/server` 에서 가져온다.
 export { calcPercentage, getNextHalvingData, minedPercent } from "./lib/calculate";
 export { useMempoolSocket } from "./lib/hooks";
 export type { BlockSlice, BlockTypes, FeesTypes } from "./model/blockSlice";

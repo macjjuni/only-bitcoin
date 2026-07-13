@@ -1,12 +1,5 @@
 import type { BlockTypes, FeesTypes } from "../model/blockSlice";
-import type { MemPoolBlockTypes } from "../model/types";
-
-// region [Types]
-export interface InitialBlockData {
-  blocks: BlockTypes[];
-  fees: FeesTypes;
-}
-// endregion
+import type { InitialBlocks, MemPoolBlockTypes } from "../model/types";
 
 // region [Privates]
 const MEMPOOL_BLOCKS_URL = "https://mempool.space/api/v1/blocks";
@@ -18,7 +11,7 @@ const MEMPOOL_FEES_URL = "https://mempool.space/api/v1/fees/recommended";
  */
 const REVALIDATE_SECONDS = 60 * 10;
 
-const EMPTY_BLOCK_DATA: InitialBlockData = {
+const EMPTY_BLOCK_DATA: InitialBlocks = {
   blocks: [{ id: "", height: 0, timestamp: 0, size: 0, poolName: "-" }],
   fees: { economyFee: 0, fastestFee: 0, halfHourFee: 0, hourFee: 0, minimumFee: 0 },
 };
@@ -47,7 +40,7 @@ const fetchMempool = async <T>(url: string): Promise<T | null> => {
  * REST 응답(`/api/v1/blocks`)이 소켓의 blocks 메시지와 같은 구조라 동일하게 변환한다.
  * 클라이언트에서 소켓이 붙으면 이 값은 곧바로 실시간 값으로 대체된다.
  */
-export const fetchInitialBlockData = async (): Promise<InitialBlockData> => {
+export const fetchInitialBlocks = async (): Promise<InitialBlocks> => {
   const [blocks, fees] = await Promise.all([
     fetchMempool<MemPoolBlockTypes[]>(MEMPOOL_BLOCKS_URL),
     fetchMempool<FeesTypes>(MEMPOOL_FEES_URL),

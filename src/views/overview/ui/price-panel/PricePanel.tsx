@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import type { InitialBitcoinPrice } from "@/entities/bitcoin";
+import type { InitialPrice } from "@/entities/bitcoin";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import useSettingStore from "@/shared/stores/settingStore";
 import { CountText, UpdownIcon } from "@/shared/ui";
@@ -9,7 +9,7 @@ import PriceMiniChart from "./PriceMiniChart";
 
 interface PricePanelTypes {
   /** SSR 로 미리 조회한 시세. 소켓이 붙기 전까지의 표시값이자 크롤러가 읽는 값이다. */
-  initialPrice: InitialBitcoinPrice;
+  initialPrice: InitialPrice;
 }
 
 export default function PricePanel({ initialPrice }: PricePanelTypes) {
