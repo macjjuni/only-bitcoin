@@ -1,8 +1,8 @@
 "use client";
 
 import { memo, useMemo } from "react";
+import { type PurchaseRecord, useDcaStore } from "@/entities/dca";
 import { Card } from "@/shared/ui";
-import useDcaStore, { type PurchaseRecord } from "../model/dcaStore";
 import PurchaseListItem from "./PurchaseListItem";
 
 interface PurchaseListProps {

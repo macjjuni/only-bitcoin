@@ -1,11 +1,11 @@
 "use client";
 
-import { KButton, kToast } from "kku-ui";
+import { KButton, KPopover, KPopoverContent, KPopoverTrigger, kToast } from "kku-ui";
 import { Pencil, Trash2 } from "lucide-react";
 import { memo } from "react";
+import { type PurchaseRecord, useDcaStore } from "@/entities/dca";
 import { comma } from "@/shared/utils/string";
 import { formatBtc } from "../lib/format";
-import useDcaStore, { type PurchaseRecord } from "../model/dcaStore";
 
 interface PurchaseListItemProps {
   record: PurchaseRecord;
@@ -48,11 +48,20 @@ const PurchaseListItem = ({ record, onClickEdit }: PurchaseListItemProps) => {
 
       <div className="flex flex-none items-center">
         <KButton variant="ghost" size="icon" onClick={onClickEditItem}>
-          <Pencil size={15} />
+          <Pencil size={16} />
         </KButton>
-        <KButton variant="ghost" size="icon" onClick={onClickRemoveItem}>
-          <Trash2 size={15} />
-        </KButton>
+        <KPopover>
+          <KPopoverTrigger asChild>
+            <KButton variant="ghost" size="icon">
+              <Trash2 size={16} />
+            </KButton>
+          </KPopoverTrigger>
+          <KPopoverContent side="top" align="end" sideOffset={4} className="w-auto p-1.5">
+            <KButton variant="ghost" size="sm" className="text-down" onClick={onClickRemoveItem}>
+              삭제하기
+            </KButton>
+          </KPopoverContent>
+        </KPopover>
       </div>
     </li>
   );

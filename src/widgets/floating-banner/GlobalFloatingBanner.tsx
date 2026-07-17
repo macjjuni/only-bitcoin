@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import Btc2FiatFloatingBanner from "./ui/Btc2FiatFloatingBanner";
+import DcaAddRecordFloatingBanner from "./ui/DcaAddRecordFloatingBanner";
 import ScrollUpFloatingBanner from "./ui/ScrollUpFloatingBanner";
 
 interface BannerConfig {
@@ -42,6 +43,14 @@ const BANNER_CONFIGS: BannerConfig[] = [
     },
   },
   {
+    id: "dca-add-record",
+    Component: DcaAddRecordFloatingBanner,
+    useIsVisible: () => {
+      const pathname = usePathname();
+      return pathname.startsWith("/dca");
+    },
+  },
+  {
     id: "scroll-up",
     Component: ScrollUpFloatingBanner,
     useIsVisible: () => useScrollVisibility(100),
@@ -66,7 +75,7 @@ export default function GlobalFloatingBanner() {
   return (
     <div
       className={[
-        "fixed bottom-bottom-nav right-0 z-[10] pr-6 pb-3 pointer-events-none",
+        "fixed bottom-bottom-nav right-0 z-[10] pr-4 pb-3.5 pointer-events-none",
         "flex flex-col gap-2 items-end",
         "layout-max:left-1/2 layout-max:max-w-[calc(theme(maxWidth.layout)-2px)] layout-max:-translate-x-1/2",
       ]

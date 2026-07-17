@@ -4,12 +4,12 @@ import { KButton } from "kku-ui";
 import { Check, Pencil } from "lucide-react";
 import { type ChangeEvent, memo, useMemo, useState } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
+import { useDcaStore } from "@/entities/dca";
 import { Card, CardContent, InputGroup, InputGroupInput, UpdownIcon } from "@/shared/ui";
 import { isNumber } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 import { calculateDcaSummary } from "../lib/calculateDca";
 import { formatBtc } from "../lib/format";
-import useDcaStore from "../model/dcaStore";
 
 const DcaSummary = () => {
   // region [Hooks]
@@ -30,9 +30,6 @@ const DcaSummary = () => {
   const isProfitUp = summary.profit >= 0;
   const hasRecord = records.length > 0;
 
-  /**
-   * 입력값을 검증하고 목표 개수를 저장한 뒤 편집 모드를 닫는다.
-   */
   const saveTargetBtcCount = () => {
     const parsed = parseFloat(targetInput);
 
@@ -67,23 +64,26 @@ const DcaSummary = () => {
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="grid grid-cols-2 gap-3">
           <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted-foreground font-default">총 보유</span>
+            <span className="text-sm text-muted-foreground font-bold">총 보유</span>
             <span className="text-xl font-bold">
               <span className="text-bitcoin">₿</span> {formatBtc(summary.totalBtcCount)}
             </span>
           </div>
           <div className="flex flex-col gap-1 text-right">
-            <span className="text-xs text-muted-foreground font-default">평단가</span>
+            <span className="text-sm text-muted-foreground font-bold">평단가</span>
             <span className="text-xl font-bold">₩{comma(summary.avgPrice)}</span>
           </div>
-          <div className="flex flex-col gap-1">
-            <span className="text-xs text-muted-foreground font-default">평가금액</span>
+        </div>
+
+        <div className="flex flex-col gap-2">
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm text-muted-foreground font-bold">평가금액</span>
             <span className="text-lg font-bold">₩{comma(summary.valuation)}</span>
           </div>
-          <div className="flex flex-col gap-1 text-right">
-            <span className="text-xs text-muted-foreground font-default">평가손익</span>
+          <div className="flex items-center justify-between gap-2">
+            <span className="text-sm text-muted-foreground font-bold">평가손익</span>
             <span
-              className={`flex items-center justify-end gap-1.5 text-lg font-bold ${
+              className={`flex items-center justify-end gap-1.5 text-md font-bold ${
                 hasRecord ? (isProfitUp ? "text-up" : "text-down") : ""
               }`}
             >
@@ -95,19 +95,19 @@ const DcaSummary = () => {
         </div>
 
         <div className="flex flex-col gap-1.5 border-t-[0.75px] border-neutral-300 dark:border-neutral-600 pt-3">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-xs text-muted-foreground font-default">목표</span>
+          <div className="flex items-center justify-between gap-2 mb-2">
+            <span className="text-sm text-muted-foreground font-bold">목표</span>
 
             {isTargetEditing ? (
-              <div className="flex items-center gap-1">
-                <InputGroup size="sm" className="h-8 w-32">
+              <div className="flex items-center gap-2">
+                <InputGroup size="md" className="h-9 w-32">
                   <InputGroupInput
                     type="text"
                     inputMode="decimal"
                     maxLength={12}
                     value={targetInput}
                     onChange={onChangeTargetInput}
-                    className="font-number text-sm font-bold text-right h-full"
+                    className="font-number text-md font-bold text-right h-full"
                   />
                 </InputGroup>
                 <KButton variant="ghost" size="icon" onClick={onClickSaveTarget}>
@@ -115,23 +115,24 @@ const DcaSummary = () => {
                 </KButton>
               </div>
             ) : (
-              <span className="flex items-center gap-1 text-sm font-bold">
-                <span className="text-bitcoin">₿</span> {formatBtc(targetBtcCount)}
-                <KButton variant="ghost" size="icon" onClick={onClickEditTarget}>
-                  <Pencil size={13} />
+              <span className="flex items-center gap-1 text-md font-bold">
+                <span className="text-xl text-bitcoin">₿</span>
+                <strong className="text-xl">{formatBtc(targetBtcCount)}</strong>
+                <KButton className="ml-3.5" variant="ghost" size="icon" onClick={onClickEditTarget}>
+                  <Pencil size={16} />
                 </KButton>
               </span>
             )}
           </div>
 
-          <div className="h-2 w-full overflow-hidden rounded-full bg-neutral-300/60 dark:bg-neutral-700">
+          <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-300/60 dark:bg-neutral-700">
             <div
               className="h-full rounded-full bg-bitcoin transition-[width] duration-300"
               style={{ width: `${summary.achievementRate}%` }}
             />
           </div>
 
-          <div className="flex justify-between text-xs">
+          <div className="flex justify-between text-sm">
             <span className="font-bold">{summary.achievementRate.toFixed(1)}%</span>
             <span>
               남은 개수 <span className="font-bold">{formatBtc(summary.remainingBtcCount)}</span>{" "}

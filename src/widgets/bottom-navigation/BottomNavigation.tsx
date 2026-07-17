@@ -19,7 +19,7 @@ export default function BottomNavigation() {
   return (
     <nav
       className={[
-        "fixed bottom-0 left-0 z-[10] h-bottom-nav w-full px-6 pb-5 overflow-hidden",
+        "fixed bottom-0 left-0 z-[10] h-bottom-nav w-full px-4 pb-5 overflow-hidden",
         "layout-max:left-1/2 layout-max:max-w-[calc(theme(maxWidth.layout)-2px)] layout-max:-translate-x-1/2",
       ]
         .filter(Boolean)

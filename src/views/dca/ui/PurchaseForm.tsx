@@ -2,13 +2,15 @@
 
 import { KButton, kToast } from "kku-ui";
 import { type ChangeEvent, memo, useMemo, useState } from "react";
-import { Card, CardContent, InputGroup, InputGroupAddon, InputGroupInput } from "@/shared/ui";
+import { useBitcoinStore } from "@/entities/bitcoin";
+import { type PurchaseRecord, useDcaStore } from "@/entities/dca";
+import { InputGroup, InputGroupAddon, InputGroupInput } from "@/shared/ui";
 import { isNumber } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 import { getTodayString } from "../lib/format";
-import useDcaStore, { type PurchaseRecord } from "../model/dcaStore";
 
 const BTC_MAX_DECIMALS = 8;
+const PRICE_FLOOR_UNIT = 1_000_000; // 매수 단가 초기값 버림 단위 (백만원)
 
 interface PurchaseFormProps {
   editRecord: PurchaseRecord | null; // null 이면 신규 추가 모드
@@ -19,9 +21,17 @@ const PurchaseForm = ({ editRecord, onClose }: PurchaseFormProps) => {
   // region [Hooks]
   const addRecord = useDcaStore((state) => state.addRecord);
   const updateRecord = useDcaStore((state) => state.updateRecord);
+  const currentPrice = useBitcoinStore((state) => state.bitcoinPrice.krw);
   const [date, setDate] = useState(editRecord?.date ?? getTodayString());
   const [btcCountInput, setBtcCountInput] = useState(editRecord ? String(editRecord.btcCount) : "");
-  const [priceInput, setPriceInput] = useState(editRecord ? comma(editRecord.price) : "");
+  const [priceInput, setPriceInput] = useState(() => {
+    if (editRecord) {
+      return comma(editRecord.price);
+    }
+    // 신규 추가 모드: 다이얼로그 오픈 시점의 현재가를 백만원 단위 아래로 버림 처리해 초기값으로 사용
+    const flooredPrice = Math.floor(currentPrice / PRICE_FLOOR_UNIT) * PRICE_FLOOR_UNIT;
+    return flooredPrice > 0 ? comma(flooredPrice) : "";
+  });
   // endregion
 
   // region [Privates]
@@ -91,73 +101,71 @@ const PurchaseForm = ({ editRecord, onClose }: PurchaseFormProps) => {
   // endregion
 
   return (
-    <Card className="font-number">
-      <CardContent className="flex flex-col gap-3 p-4">
-        <div className="flex flex-col gap-1">
-          <span className="text-xs text-muted-foreground font-default">매수 날짜</span>
-          <InputGroup size="sm" className="h-10">
-            <InputGroupInput
-              type="date"
-              max={getTodayString()}
-              value={date}
-              onChange={onChangeDate}
-              className="font-number text-md font-bold h-full"
-            />
-          </InputGroup>
-        </div>
+    <div className="flex flex-col gap-3 pt-2 font-number">
+      <div className="flex flex-col gap-1">
+        <span className="text-sm text-muted-foreground font-default">매수 날짜</span>
+        <InputGroup size="sm" className="h-10">
+          <InputGroupInput
+            type="date"
+            max={getTodayString()}
+            value={date}
+            onChange={onChangeDate}
+            className="font-number text-md font-bold h-full"
+          />
+        </InputGroup>
+      </div>
 
-        <div className="flex flex-col gap-1">
-          <span className="text-xs text-muted-foreground font-default">매수 개수 (BTC)</span>
-          <InputGroup size="sm" className="h-10">
-            <InputGroupAddon align="inline-start" className="!text-bitcoin font-bold">
-              ₿
-            </InputGroupAddon>
-            <InputGroupInput
-              type="text"
-              inputMode="decimal"
-              maxLength={12}
-              placeholder="0.001"
-              value={btcCountInput}
-              onChange={onChangeBtcCount}
-              className="font-number text-md font-bold text-right h-full"
-            />
-          </InputGroup>
-        </div>
+      <div className="flex flex-col gap-1">
+        <span className="text-sm text-muted-foreground font-default">매수 개수 (BTC)</span>
+        <InputGroup size="sm" className="h-10">
+          <InputGroupAddon align="inline-start" className="!text-bitcoin text-lg font-bold">
+            ₿
+          </InputGroupAddon>
+          <InputGroupInput
+            type="text"
+            inputMode="decimal"
+            maxLength={12}
+            placeholder="0.001"
+            value={btcCountInput}
+            onChange={onChangeBtcCount}
+            className="font-number text-md font-bold text-right h-full"
+          />
+        </InputGroup>
+      </div>
 
-        <div className="flex flex-col gap-1">
-          <span className="text-xs text-muted-foreground font-default">매수 단가 (KRW/BTC)</span>
-          <InputGroup size="sm" className="h-10">
-            <InputGroupAddon align="inline-start" className="font-bold">
-              ₩
-            </InputGroupAddon>
-            <InputGroupInput
-              type="text"
-              inputMode="numeric"
-              maxLength={15}
-              placeholder="150,000,000"
-              value={priceInput}
-              onChange={onChangePrice}
-              className="font-number text-md font-bold text-right h-full"
-            />
-          </InputGroup>
-        </div>
+      <div className="flex flex-col gap-1">
+        <span className="text-sm text-muted-foreground font-default">매수 단가 (KRW/BTC)</span>
+        <InputGroup size="sm" className="h-10">
+          <InputGroupAddon align="inline-start" className="text-[15px] font-bold">
+            ₩
+          </InputGroupAddon>
+          <InputGroupInput
+            type="text"
+            inputMode="numeric"
+            maxLength={15}
+            placeholder="150,000,000"
+            value={priceInput}
+            onChange={onChangePrice}
+            className="font-number text-md font-bold text-right h-full"
+          />
+        </InputGroup>
+      </div>
 
-        {totalCost > 0 && (
-          <p className="text-right text-sm text-muted-foreground">
-            총 매수금액 <span className="font-bold text-foreground">₩{comma(totalCost)}</span>
-          </p>
-        )}
+      {totalCost > 0 && (
+        <p className="text-right text-sm text-muted-foreground">
+          총 매수금액 <span className="font-bold text-foreground">₩{comma(totalCost)}</span>
+        </p>
+      )}
 
-        <div className="flex gap-2">
-          <KButton variant="outline" className="flex-1" onClick={onClickCancel}>
-            취소
-          </KButton>
-          <KButton className="flex-1" disabled={!isValid} onClick={onClickSave}>
-            {editRecord ? "수정" : "추가"}
-          </KButton>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="flex gap-2">
+        <KButton variant="outline" className="flex-1" size="lg" onClick={onClickCancel}>
+          취소
+        </KButton>
+        <KButton className="flex-1 bg-bitcoin" size="lg" disabled={!isValid} onClick={onClickSave}>
+          {editRecord ? "수정" : "추가"}
+        </KButton>
+      </div>
+    </div>
   );
 };
 

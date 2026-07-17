@@ -1,3 +1,4 @@
+import { v4 as uuidv4 } from "uuid";
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { DCA_PERSIST_KEY } from "@/shared/stores/persistKeys";
@@ -25,7 +26,7 @@ const useDcaStore = create<DcaState>()(
       targetBtcCount: 1,
       addRecord: (record) =>
         set((state) => ({
-          records: [...state.records, { ...record, id: crypto.randomUUID() }],
+          records: [...state.records, { ...record, id: uuidv4() }],
         })),
       updateRecord: (record) =>
         set((state) => ({

@@ -28,7 +28,7 @@ function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
   return (
     <KDialog open={open} onOpenChange={setOpen} blur={2} size="sm">
       <KDialogOverlay />
-      <KDialogContent>
+      <KDialogContent className="!top-[45%]">
         <KDialogHeader>
           <KDialogTitle>
             <strong>공포 & 탐욕 지수</strong>

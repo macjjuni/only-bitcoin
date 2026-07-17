@@ -1,4 +1,4 @@
-import type { PurchaseRecord } from "../model/dcaStore";
+import type { PurchaseRecord } from "@/entities/dca";
 
 const SATOSHI_PER_BTC = 100_000_000;
 
@@ -14,15 +14,15 @@ export interface DcaSummaryData {
 }
 
 /**
- * BTC 개수를 사토시(정수) 단위로 변환한다.
- * 부동소수점 합산 오차를 막기 위해 내부 계산은 사토시 기준으로 수행한다.
+ * BTC 개수를 사토시(정수) 단위로 변환.
+ * 부동소수점 합산 오차를 막기 위해 내부 계산은 사토시 기준.
  */
 const btcToSats = (btcCount: number): number => {
   return Math.round(btcCount * SATOSHI_PER_BTC);
 };
 
 /**
- * 매수 기록과 현재 시세를 기반으로 평단가·목표·수익 요약 지표를 계산한다.
+ * 매수 기록과 현재 시세를 기반으로 평단가·목표·수익 요약 지표를 계산.
  *
  * @param records - 매수 기록 목록
  * @param targetBtcCount - 목표 보유 개수 (BTC)
