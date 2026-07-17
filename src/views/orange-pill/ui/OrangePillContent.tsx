@@ -1,11 +1,20 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { ChevronRight, ExternalLink, Images, TableProperties } from "lucide-react";
+import { ChevronRight, ExternalLink, TableProperties } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { useCallback } from "react";
 import { allRouteList } from "@/shared/config/route";
-import { DiscordIcon, LazyImage, ListGroup, ListRow, NaverIcon, PageIcon } from "@/shared/ui";
+import {
+  DiscordIcon,
+  LazyImage,
+  ListGroup,
+  ListRow,
+  MinerIcon,
+  NaverIcon,
+  PageIcon,
+  ShootingStarIcon,
+} from "@/shared/ui";
 import { onRouteToExternalLink } from "@/shared/utils/common";
 
 // region [Constants]
@@ -37,6 +46,17 @@ const OrangePillContent = () => {
     router.push(routePath);
   }, [router]);
 
+  const handleDcaRoute = useCallback(() => {
+    const routePath = allRouteList.find((item) => item.path.includes("/dca"))?.path;
+
+    if (!routePath) {
+      console.warn("DCA 경로를 찾을 수 없습니다.");
+      return;
+    }
+
+    router.push(routePath);
+  }, [router]);
+
   const handleBIP39Route = useCallback(() => {
     const routePath = allRouteList.find((item) => item.path.includes("/bip39"))?.path;
 
@@ -53,13 +73,19 @@ const OrangePillContent = () => {
       {/* 유틸리티 */}
       <ListGroup header="유틸리티">
         <ListRow
-          icon={<Images size={28} />}
+          icon={<ShootingStarIcon size={28} />}
           label="비트맥시 전용 밈 저장소"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleMemeRoute}
         />
         <ListRow
-          icon={<TableProperties size={28} />}
+          icon={<MinerIcon size={28} />}
+          label="비트코인 평단가 계산 (DCA)"
+          rightElement={<ChevronRight className="text-muted-foreground" />}
+          onClick={handleDcaRoute}
+        />
+        <ListRow
+          icon={<TableProperties size={24} />}
           label="BIP39"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleBIP39Route}
