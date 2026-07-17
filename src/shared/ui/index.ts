@@ -10,6 +10,7 @@ export {
 export { default as CollapseSection } from "./CollapseSection";
 export { default as ConfettiEffect } from "./ConfettiEffect";
 export { default as CountText } from "./CountText";
+export { default as FloatingBannerButton } from "./FloatingBannerButton";
 export { default as HighlightText } from "./HighlightText";
 export {
   default as InputGroup,

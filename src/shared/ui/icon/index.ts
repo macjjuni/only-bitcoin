@@ -13,3 +13,5 @@ export { default as PillIcon } from "./PillIcon";
 export { default as PremiumIcon } from "./PremiumIcon";
 export { default as SaveIcon } from "./SaveIcon";
 export { default as SettingIcon } from "./SettingIcon";
+export { default as MinerIcon } from "./MinerIcon";
+
