@@ -80,7 +80,7 @@ const OrangePillContent = () => {
         />
         <ListRow
           icon={<MinerIcon size={28} />}
-          label="비트코인 평단가 계산 (DCA)"
+          label="DCA 계산기"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleDcaRoute}
         />

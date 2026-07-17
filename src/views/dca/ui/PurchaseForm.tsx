@@ -1,6 +1,6 @@
 "use client";
 
-import { KButton, kToast } from "kku-ui";
+import { KButton } from "kku-ui";
 import { type ChangeEvent, memo, useMemo, useState } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { type PurchaseRecord, useDcaStore } from "@/entities/dca";
@@ -87,10 +87,8 @@ const PurchaseForm = ({ editRecord, onClose }: PurchaseFormProps) => {
 
     if (editRecord) {
       updateRecord({ ...editRecord, date, btcCount, price });
-      kToast.success("매수 기록을 수정했어요.");
     } else {
       addRecord({ date, btcCount, price });
-      kToast.success("매수 기록을 추가했어요.");
     }
     onClose();
   };
