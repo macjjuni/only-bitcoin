@@ -1,12 +1,35 @@
 "use client";
 
 import { usePathname } from "next/navigation";
+import { useEffect, useState } from "react";
 import Btc2FiatFloatingBanner from "./ui/Btc2FiatFloatingBanner";
+import ScrollUpFloatingBanner from "./ui/ScrollUpFloatingBanner";
 
 interface BannerConfig {
   id: string;
   Component: React.ComponentType;
   useIsVisible: () => boolean;
+}
+
+function useScrollVisibility(threshold = 100) {
+  const pathname = usePathname();
+  const [isVisible, setIsVisible] = useState(false);
+
+  useEffect(() => {
+    const scrollContainer = document.querySelector(".only-btc__content");
+    if (!scrollContainer) return;
+
+    const handleScroll = () => {
+      setIsVisible(scrollContainer.scrollTop > threshold);
+    };
+
+    handleScroll();
+
+    scrollContainer.addEventListener("scroll", handleScroll, { passive: true });
+    return () => scrollContainer.removeEventListener("scroll", handleScroll);
+  }, [threshold, pathname]);
+
+  return isVisible;
 }
 
 const BANNER_CONFIGS: BannerConfig[] = [
@@ -18,16 +41,11 @@ const BANNER_CONFIGS: BannerConfig[] = [
       return pathname.startsWith("/btc2fiat");
     },
   },
-  // Example of adding a common banner with multiple conditions (pathname + settings store, etc.)
-  // {
-  //   id: "common-banner",
-  //   Component: CommonFloatingBanner,
-  //   useIsVisible: () => {
-  //     const pathname = usePathname();
-  //     const isUsdtStandard = useSettingStore((state) => state.setting.isUsdtStandard);
-  //     return ["/btc2fiat", "/dca"].includes(pathname) && isUsdtStandard;
-  //   }
-  // }
+  {
+    id: "scroll-up",
+    Component: ScrollUpFloatingBanner,
+    useIsVisible: () => useScrollVisibility(100),
+  },
 ];
 
 function BannerItem({ config }: { config: BannerConfig }) {
