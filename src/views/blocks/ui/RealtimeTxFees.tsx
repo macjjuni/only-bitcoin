@@ -1,21 +1,46 @@
 "use client";
 
 import { Fragment, memo, useMemo } from "react";
-import type { FeesTypes } from "@/entities/block";
+import type { FeesTypes, MempoolInfoTypes } from "@/entities/block";
 import { useBlockStore } from "@/entities/block";
 import { CountText } from "@/shared/ui";
 
+/** 블록 하나가 담을 수 있는 vsize(vB). 대기 물량을 블록 수로 환산하는 기준 */
+const BLOCK_VSIZE = 1_000_000;
+
+/**
+ * 혼잡도 단계. 대기 물량(블록 수) 상한 기준으로 앞에서부터 매칭.
+ * Tailwind 는 소스에서 완성된 클래스 문자열만 감지하므로 `bg-${...}` 처럼 조합하면 안 된다.
+ */
+const CONGESTION_LEVELS = [
+  {
+    maxBlocks: 2,
+    label: "원활",
+    dotClassName: "bg-emerald-500",
+    textClassName: "text-emerald-500",
+  },
+  { maxBlocks: 10, label: "보통", dotClassName: "bg-amber-500", textClassName: "text-amber-500" },
+  {
+    maxBlocks: Number.POSITIVE_INFINITY,
+    label: "혼잡",
+    dotClassName: "bg-red-500",
+    textClassName: "text-red-500",
+  },
+] as const;
+
 interface RealtimeTxFeesProps {
-  /** SSR 로 미리 조회한 수수료. 소켓이 붙기 전까지의 표시값이다. */
+  /** SSR 로 미리 조회한 수수료. 소켓이 붙기 전까지의 표시값 */
   initialFees: FeesTypes;
+  /** SSR 로 미리 조회한 멤풀 현황. 소켓이 붙기 전까지의 표시 */
+  initialMempoolInfo: MempoolInfoTypes;
 }
 
-const RealtimeTxFees = ({ initialFees }: RealtimeTxFeesProps) => {
+const RealtimeTxFees = ({ initialFees, initialMempoolInfo }: RealtimeTxFeesProps) => {
   // region [Hooks]
   const storeFees = useBlockStore((state) => state.fees);
-
-  // 소켓이 값을 채우기 전(= 서버 렌더링 및 첫 페인트)에는 SSR 값으로 대체한다.
+  const storeMempoolInfo = useBlockStore((state) => state.mempoolInfo);
   const fees = storeFees.fastestFee ? storeFees : initialFees;
+  const mempoolInfo = storeMempoolInfo.vsize ? storeMempoolInfo : initialMempoolInfo;
 
   const feeDataList = useMemo(
     () => [
@@ -26,12 +51,49 @@ const RealtimeTxFees = ({ initialFees }: RealtimeTxFeesProps) => {
     ],
     [fees],
   );
+
+  const congestion = useMemo(() => {
+    if (!mempoolInfo.vsize) return null;
+
+    const backlogBlocks = mempoolInfo.vsize / BLOCK_VSIZE;
+    const level =
+      CONGESTION_LEVELS.find(({ maxBlocks }) => backlogBlocks < maxBlocks) ??
+      CONGESTION_LEVELS[CONGESTION_LEVELS.length - 1];
+
+    return { ...level, backlogBlocks };
+  }, [mempoolInfo]);
   // endregion
 
   return (
     <div className="flex flex-col justify-between gap-3 border-none">
-      <div className="flex justify-between items-end">
+      <div className="flex justify-between items-center">
         <h2 className="text-[18px] font-bold">실시간 트랜잭션 수수료</h2>
+
+        {congestion && (
+          <div className="flex items-center gap-1.5 text-[13px]">
+            <span
+              aria-hidden="true"
+              className="relative inline-block w-3 h-3 animate-[spin_1.6s_linear_infinite] motion-reduce:animate-none"
+            >
+              <span
+                className={`absolute top-0 left-1/2 -translate-x-1/2 w-1 h-1 rounded-full ${congestion.dotClassName}`}
+              />
+              <span
+                className={`absolute bottom-0 left-0 w-1 h-1 rounded-full opacity-70 ${congestion.dotClassName}`}
+              />
+              <span
+                className={`absolute bottom-0 right-0 w-1 h-1 rounded-full opacity-40 ${congestion.dotClassName}`}
+              />
+            </span>
+            <span className="text-sm tracking-[-0.5px] whitespace-nowrap opacity-80">
+              {congestion.label} · 약{" "}
+              <strong className={`${congestion.textClassName} mr-1`}>
+                {Math.max(1, Math.round(congestion.backlogBlocks))}
+              </strong>
+              블록 대기
+            </span>
+          </div>
+        )}
       </div>
 
       <div className="flex justify-between items-center gap-2 pr-1">

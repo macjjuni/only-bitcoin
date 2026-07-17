@@ -1,4 +1,4 @@
-import type { BlockTypes, FeesTypes } from "./blockSlice";
+import type { BlockTypes, FeesTypes, MempoolInfoTypes } from "./blockSlice";
 
 interface BlockExtras {
   reward: number;
@@ -91,8 +91,21 @@ export interface HashrateChartFormattedData {
 /** 해시레이트/난이도 차트 조회 기간 (useMiningMetricChartDataQuery 파라미터) */
 export type MiningMetricChartIntervalType = "3m" | "6m" | "1y" | "2y" | "3y" | "all";
 
+/** 멤풀 소켓 `mempoolInfo` 메시지 중 사용하는 필드 */
+export interface MempoolInfoMessage {
+  size: number; // 미확인 트랜잭션 수
+  bytes: number; // 대기 중인 트랜잭션 총 vsize(vB)
+}
+
+/** REST `/api/mempool` 응답 중 사용하는 필드 */
+export interface MempoolRestResponse {
+  count: number; // 미확인 트랜잭션 수
+  vsize: number; // 대기 중인 트랜잭션 총 vsize(vB)
+}
+
 /** SSR 초기 블록 데이터 (blocks.server) */
 export interface InitialBlocks {
   blocks: BlockTypes[];
   fees: FeesTypes;
+  mempoolInfo: MempoolInfoTypes;
 }

@@ -1,9 +1,10 @@
 import type { BlockTypes, FeesTypes } from "../model/blockSlice";
-import type { InitialBlocks, MemPoolBlockTypes } from "../model/types";
+import type { InitialBlocks, MemPoolBlockTypes, MempoolRestResponse } from "../model/types";
 
 // region [Privates]
 const MEMPOOL_BLOCKS_URL = "https://mempool.space/api/v1/blocks";
 const MEMPOOL_FEES_URL = "https://mempool.space/api/v1/fees/precise";
+const MEMPOOL_INFO_URL = "https://mempool.space/api/mempool";
 
 /**
  * 서버 캐시 주기(초). 블록 평균 생성 간격과 같은 10분.
@@ -14,6 +15,7 @@ const REVALIDATE_SECONDS = 60 * 10;
 const EMPTY_BLOCK_DATA: InitialBlocks = {
   blocks: [{ id: "", height: 0, timestamp: 0, size: 0, poolName: "-" }],
   fees: { economyFee: 0, fastestFee: 0, halfHourFee: 0, hourFee: 0, minimumFee: 0 },
+  mempoolInfo: { txCount: 0, vsize: 0 },
 };
 
 /**
@@ -41,9 +43,10 @@ const fetchMempool = async <T>(url: string): Promise<T | null> => {
  * 클라이언트에서 소켓이 붙으면 이 값은 곧바로 실시간 값으로 대체된다.
  */
 export const fetchInitialBlocks = async (): Promise<InitialBlocks> => {
-  const [blocks, fees] = await Promise.all([
+  const [blocks, fees, mempoolInfo] = await Promise.all([
     fetchMempool<MemPoolBlockTypes[]>(MEMPOOL_BLOCKS_URL),
     fetchMempool<FeesTypes>(MEMPOOL_FEES_URL),
+    fetchMempool<MempoolRestResponse>(MEMPOOL_INFO_URL),
   ]);
 
   const sanitizedBlocks: BlockTypes[] = (blocks ?? [])
@@ -59,6 +62,9 @@ export const fetchInitialBlocks = async (): Promise<InitialBlocks> => {
   return {
     blocks: sanitizedBlocks.length ? sanitizedBlocks : EMPTY_BLOCK_DATA.blocks,
     fees: fees ?? EMPTY_BLOCK_DATA.fees,
+    mempoolInfo: mempoolInfo
+      ? { txCount: mempoolInfo.count, vsize: mempoolInfo.vsize }
+      : EMPTY_BLOCK_DATA.mempoolInfo,
   };
 };
 // endregion

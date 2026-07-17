@@ -16,11 +16,18 @@ export interface FeesTypes {
   minimumFee: number;
 }
 
+export interface MempoolInfoTypes {
+  txCount: number; // 미확인 트랜잭션 수
+  vsize: number; // 대기 중인 트랜잭션 총 vsize(vB)
+}
+
 export interface BlockSlice {
   blockData: BlockTypes[];
   setBlockData: (blocks: BlockTypes[]) => void;
   fees: FeesTypes;
   setFees: (fees: FeesTypes) => void;
+  mempoolInfo: MempoolInfoTypes;
+  setMempoolInfo: (mempoolInfo: MempoolInfoTypes) => void;
 }
 
 export const createBlockSlice: StateCreator<BlockSlice> = (set) => ({
@@ -28,4 +35,6 @@ export const createBlockSlice: StateCreator<BlockSlice> = (set) => ({
   setBlockData: (blockData) => set(() => ({ blockData: [...blockData] })),
   fees: { economyFee: 0, fastestFee: 0, halfHourFee: 0, hourFee: 0, minimumFee: 0 },
   setFees: (fees) => set(() => ({ fees })),
+  mempoolInfo: { txCount: 0, vsize: 0 },
+  setMempoolInfo: (mempoolInfo) => set(() => ({ mempoolInfo })),
 });

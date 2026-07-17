@@ -6,7 +6,7 @@ import { deepEqual } from "@/shared/utils/common";
 import { comma } from "@/shared/utils/string";
 import type { BlockTypes, FeesTypes } from "../../model/blockSlice";
 import useBlockStore from "../../model/blockStore";
-import type { MemPoolBlockTypes } from "../../model/types";
+import type { MemPoolBlockTypes, MempoolInfoMessage } from "../../model/types";
 
 const MEMPOOL_WS_URL = "wss://mempool.space/api/v1/ws";
 
@@ -50,6 +50,14 @@ export default function useMempoolSocket() {
     }
   }, []);
 
+  const handleMempoolInfo = useCallback((info: MempoolInfoMessage) => {
+    const { mempoolInfo, setMempoolInfo } = useBlockStore.getState();
+    const nextMempoolInfo = { txCount: info.size, vsize: info.bytes };
+    if (!deepEqual(mempoolInfo, nextMempoolInfo)) {
+      setMempoolInfo(nextMempoolInfo);
+    }
+  }, []);
+
   const connect = useCallback(() => {
     const socket = new ReconnectingWebSocket(MEMPOOL_WS_URL, [], {
       maxReconnectionDelay: 8000, // 재연결 최대 지연: 10초
@@ -85,6 +93,9 @@ export default function useMempoolSocket() {
       if (mempoolData?.fees) {
         handleMempoolFees(mempoolData.fees);
       }
+      if (mempoolData?.mempoolInfo) {
+        handleMempoolInfo(mempoolData.mempoolInfo);
+      }
     };
 
     socket.onerror = (e) => {
@@ -101,7 +112,7 @@ export default function useMempoolSocket() {
     };
 
     socketRef.current = socket;
-  }, [handleMempoolBlocks, handleMempoolBlock, handleMempoolFees]);
+  }, [handleMempoolBlocks, handleMempoolBlock, handleMempoolFees, handleMempoolInfo]);
 
   const disconnect = useCallback(() => {
     socketRef.current?.close(1000);

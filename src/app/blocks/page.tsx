@@ -6,9 +6,9 @@ import {
   BlocksExplorer,
   BlocksGuideArticle,
   BlocksVisualizer,
-  RealtimeTxFees,
   HalvingChartCard,
   HalvingDataCard,
+  RealtimeTxFees,
 } from "@/views/blocks";
 
 export const metadata: Metadata = {
@@ -17,13 +17,13 @@ export const metadata: Metadata = {
 };
 
 export default async function BlocksPage() {
-  const { blocks, fees } = await fetchInitialBlocks();
+  const { blocks, fees, mempoolInfo } = await fetchInitialBlocks();
   const currentBlockHeight = blocks[0]?.height ?? 0;
 
   return (
     <PageLayout className="block-page__area gap-2.5">
       <BlocksVisualizer initialBlocks={blocks} />
-      <RealtimeTxFees initialFees={fees} />
+      <RealtimeTxFees initialFees={fees} initialMempoolInfo={mempoolInfo} />
       <BlocksExplorer />
       <HalvingChartCard initialBlockHeight={currentBlockHeight} />
       <BlocksGuideArticle />

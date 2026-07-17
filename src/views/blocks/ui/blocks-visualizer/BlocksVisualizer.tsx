@@ -13,7 +13,6 @@ import "swiper/css/free-mode";
 const MEMPOOL_BLOCK_SEARCH_URL = "https://mempool.space/ko/block/" as const;
 
 interface BlocksVisualizerProps {
-  /** SSR 로 미리 조회한 블록 목록. 소켓이 붙기 전까지의 표시값이자 크롤러가 읽는 값이다. */
   initialBlocks: BlockTypes[];
 }
 
