@@ -6,7 +6,7 @@ import {
   BlocksExplorer,
   BlocksGuideArticle,
   BlocksVisualizer,
-  BlockTxFees,
+  RealtimeTxFees,
   HalvingChartCard,
   HalvingDataCard,
 } from "@/views/blocks";
@@ -23,7 +23,7 @@ export default async function BlocksPage() {
   return (
     <PageLayout className="block-page__area gap-2.5">
       <BlocksVisualizer initialBlocks={blocks} />
-      <BlockTxFees initialFees={fees} />
+      <RealtimeTxFees initialFees={fees} />
       <BlocksExplorer />
       <HalvingChartCard initialBlockHeight={currentBlockHeight} />
       <BlocksGuideArticle />

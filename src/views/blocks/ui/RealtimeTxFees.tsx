@@ -5,12 +5,12 @@ import type { FeesTypes } from "@/entities/block";
 import { useBlockStore } from "@/entities/block";
 import { CountText } from "@/shared/ui";
 
-interface BlockTxFeesProps {
+interface RealtimeTxFeesProps {
   /** SSR 로 미리 조회한 수수료. 소켓이 붙기 전까지의 표시값이다. */
   initialFees: FeesTypes;
 }
 
-const BlockTxFees = ({ initialFees }: BlockTxFeesProps) => {
+const RealtimeTxFees = ({ initialFees }: RealtimeTxFeesProps) => {
   // region [Hooks]
   const storeFees = useBlockStore((state) => state.fees);
 
@@ -56,8 +56,7 @@ const BlockTxFees = ({ initialFees }: BlockTxFeesProps) => {
   );
 };
 
-const MemoizedBlockTxFees = memo(BlockTxFees);
-MemoizedBlockTxFees.displayName = "BlockTxFees";
-BlockTxFees.display = "BlockTxFees";
+const MemoizedRealtimeTxFees = memo(RealtimeTxFees);
+MemoizedRealtimeTxFees.displayName = "RealtimeTxFees";
 
-export default MemoizedBlockTxFees;
+export default MemoizedRealtimeTxFees;

@@ -3,7 +3,7 @@ import type { InitialBlocks, MemPoolBlockTypes } from "../model/types";
 
 // region [Privates]
 const MEMPOOL_BLOCKS_URL = "https://mempool.space/api/v1/blocks";
-const MEMPOOL_FEES_URL = "https://mempool.space/api/v1/fees/recommended";
+const MEMPOOL_FEES_URL = "https://mempool.space/api/v1/fees/precise";
 
 /**
  * 서버 캐시 주기(초). 블록 평균 생성 간격과 같은 10분.
