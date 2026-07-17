@@ -108,7 +108,7 @@ const BlocksGuideArticle = () => {
             </GuideParagraph>
             <GuideParagraph>
               급하지 않은 거래라면 네트워크가 한산한 시간대에 낮은 수수료로 보내고, 빠른 확정이
-              필요하면 높은 수수료를 지불하는 식으로 조절할 수 있습니다. 위의 실시간 트랜젝션 수수료
+              필요하면 높은 수수료를 지불하는 식으로 조절할 수 있습니다. 위의 실시간 트랜잭션 수수료
               정보를 참고하면 적절한 수준을 가늠하는 데 도움이 됩니다.
             </GuideParagraph>
           </GuideSection>
