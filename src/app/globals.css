@@ -64,7 +64,7 @@ html.slide-first::view-transition-new(root) {
     --up-color: #22c55e;
     --down-color: #ef4444;
     --background: 0 0% 100%;
-    --header-height: 52px;
+    --header-height: 50px;
     --navigation-height: 82px;
     --default-font:
       JetBrains Mono, ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, "Helvetica Neue",

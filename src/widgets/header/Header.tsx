@@ -14,12 +14,11 @@ export default function Header() {
       className={[
         "only-btc__header",
         "relative shrink-0 bg-background",
-        "flex justify-between items-center gap-1 w-full h-header p-2",
+        "flex justify-between items-center gap-1 w-full h-header p-2 pb-1.5",
         "z-[10] select-none tap-highlight-transparent",
-        // 하단 그라데이션
-        "after:content-[''] after:absolute after:top-full after:left-0 after:w-full after:h-4 after:pointer-events-none",
-        "after:bg-gradient-to-b after:from-background after:to-transparent",
-        "dark:after:from-background dark:after:to-transparent",
+        // 하단 그라데이션 (ease-out 곡선 근사 스탑으로 자연스럽게 페이드)
+        "after:content-[''] after:absolute after:top-full after:left-0 after:w-full after:h-[20px] after:pointer-events-none",
+        "after:bg-[linear-gradient(to_bottom,hsl(var(--background))_0%,hsl(var(--background)/0.87)_14%,hsl(var(--background)/0.7)_28%,hsl(var(--background)/0.5)_42%,hsl(var(--background)/0.32)_56%,hsl(var(--background)/0.17)_70%,hsl(var(--background)/0.07)_84%,hsl(var(--background)/0)_100%)]",
       ]
         .filter(Boolean)
         .join(" ")}

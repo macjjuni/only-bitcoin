@@ -6,7 +6,7 @@ export default {
     extend: {
       maxWidth: { layout: "524px" },
       screens: { "layout-max": "524px" },
-      spacing: { header: "52px", "bottom-nav": "84px" },
+      spacing: { header: "50px", "bottom-nav": "84px" },
       fontFamily: {
         default: ["var(--default-font)"],
         number: ["var(--number-font)"],
