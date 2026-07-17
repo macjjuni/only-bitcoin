@@ -23,9 +23,8 @@ const PurchaseList = ({ onClickEdit }: PurchaseListProps) => {
   if (sortedRecords.length === 0) {
     return (
       <Card>
-        <p className="p-6 text-center text-sm text-muted-foreground">
-          아직 매수 기록이 없어요.
-          <br />첫 매수 기록을 추가해 보세요! 🥕
+        <p className="py-8 text-center text-sm text-muted-foreground">
+          + 버튼을 눌러 첫 기록을 추가해 보세요.
         </p>
       </Card>
     );
