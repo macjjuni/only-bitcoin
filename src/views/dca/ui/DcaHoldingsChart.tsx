@@ -32,7 +32,13 @@ const DcaHoldingsChart = () => {
   // endregion
 
   if (seriesData.length === 0) {
-    return null;
+    return (
+      <Card>
+        <p className="py-8 text-center text-sm text-muted-foreground">
+          기록을 추가하면 보유량 추이를 볼 수 있어요.
+        </p>
+      </Card>
+    );
   }
 
   return (
