@@ -28,7 +28,7 @@ const PurchaseFormDialog = () => {
   return (
     <KDialog open={isFormOpen} onOpenChange={onOpenChangeDialog} blur={2} size="sm">
       <KDialogOverlay />
-      <KDialogContent className="!top-[45%]" onOpenAutoFocus={onOpenAutoFocusDialog}>
+      <KDialogContent className="!top-[44%]" onOpenAutoFocus={onOpenAutoFocusDialog}>
         <KDialogHeader>
           <KDialogTitle>
             <strong>{editRecord ? "기록 수정" : "기록 추가"}</strong>
