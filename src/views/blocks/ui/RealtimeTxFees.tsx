@@ -8,10 +8,7 @@ import { CountText } from "@/shared/ui";
 /** 블록 하나가 담을 수 있는 vsize(vB). 대기 물량을 블록 수로 환산하는 기준 */
 const BLOCK_VSIZE = 1_000_000;
 
-/**
- * 혼잡도 단계. 대기 물량(블록 수) 상한 기준으로 앞에서부터 매칭.
- * Tailwind 는 소스에서 완성된 클래스 문자열만 감지하므로 `bg-${...}` 처럼 조합하면 안 된다.
- */
+/** 혼잡도 단계. 대기 물량(블록 수) 상한 기준으로 앞에서부터 매칭. */
 const CONGESTION_LEVELS = [
   {
     maxBlocks: 2,
@@ -39,8 +36,14 @@ const RealtimeTxFees = ({ initialFees, initialMempoolInfo }: RealtimeTxFeesProps
   // region [Hooks]
   const storeFees = useBlockStore((state) => state.fees);
   const storeMempoolInfo = useBlockStore((state) => state.mempoolInfo);
-  const fees = storeFees.fastestFee ? storeFees : initialFees;
-  const mempoolInfo = storeMempoolInfo.vsize ? storeMempoolInfo : initialMempoolInfo;
+  const fees = useMemo(
+    () => (storeFees.fastestFee ? storeFees : initialFees),
+    [storeFees, initialFees],
+  );
+  const mempoolInfo = useMemo(
+    () => (storeMempoolInfo.vsize ? storeMempoolInfo : initialMempoolInfo),
+    [storeMempoolInfo, initialMempoolInfo],
+  );
 
   const feeDataList = useMemo(
     () => [
