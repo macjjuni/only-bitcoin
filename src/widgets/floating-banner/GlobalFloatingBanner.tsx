@@ -77,7 +77,7 @@ export default function GlobalFloatingBanner() {
       className={[
         "fixed bottom-bottom-nav right-0 z-[10] pr-4 pb-3.5 pointer-events-none",
         "flex flex-col gap-2 items-end",
-        "layout-max:left-1/2 layout-max:max-w-[calc(theme(maxWidth.layout)-2px)] layout-max:-translate-x-1/2",
+        "layout-max:left-1/2 layout-max:w-full layout-max:max-w-[calc(theme(maxWidth.layout)-2px)] layout-max:-translate-x-1/2",
       ]
         .filter(Boolean)
         .join(" ")}
