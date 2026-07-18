@@ -3,6 +3,7 @@
 import { memo } from "react";
 import { type TradeRecord, useDcaFormStore } from "@/entities/dca";
 import { useMounted } from "@/shared/lib/hooks";
+import DcaHoldingsChart from "./DcaHoldingsChart";
 import DcaSummary from "./DcaSummary";
 import TradeFormDialog from "./TradeFormDialog";
 import TradeList from "./TradeList";
@@ -26,6 +27,7 @@ const DcaPanel = () => {
   return (
     <div className="flex flex-col gap-3">
       <DcaSummary />
+      <DcaHoldingsChart />
       <TradeList onClickEdit={onClickEditRecord} />
       <TradeFormDialog />
     </div>
