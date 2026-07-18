@@ -6,7 +6,6 @@ export interface DcaSummaryData {
   totalBtcCount: number; // 총 보유 개수 (BTC)
   totalCost: number; // 보유분 매수원가 (KRW)
   avgPrice: number; // 평단가 (KRW/BTC)
-  realizedProfit: number; // 실현손익 (KRW, 이동평균법)
   remainingBtcCount: number; // 목표까지 남은 개수 (BTC)
   achievementRate: number; // 목표 달성률 (%)
   valuation: number; // 평가금액 (KRW)
@@ -23,12 +22,11 @@ const btcToSats = (btcCount: number): number => {
 };
 
 /**
- * 매매 기록과 현재 시세를 기반으로 평단가·실현손익·목표·수익 요약 지표를 계산.
+ * 매매 기록과 현재 시세를 기반으로 평단가·목표·수익 요약 지표를 계산.
  *
  * 이동평균법 기준:
  * - 매수 시 보유원가에 매수금액을 누적하고, 매도 시 평단가는 유지한 채
  *   매도 수량만큼 원가를 비례 차감한다.
- * - 매도 금액과 차감 원가의 차이를 실현손익으로 누적한다.
  * - 보유량을 초과하는 매도는 보유분까지만 반영한다.
  *
  * @param records - 매매 기록 목록 (날짜순 정렬 전제 없음)
@@ -45,7 +43,6 @@ export function calculateDcaSummary(
 
   let holdingSats = 0;
   let holdingCost = 0;
-  let realizedProfit = 0;
 
   for (const record of sortedRecords) {
     const sats = btcToSats(record.btcCount);
@@ -62,9 +59,7 @@ export function calculateDcaSummary(
     }
 
     const costOfSold = Math.round((holdingCost * sellSats) / holdingSats);
-    const proceeds = Math.round((sellSats * record.price) / SATOSHI_PER_BTC);
 
-    realizedProfit += proceeds - costOfSold;
     holdingCost -= costOfSold;
     holdingSats -= sellSats;
   }
@@ -85,7 +80,6 @@ export function calculateDcaSummary(
     totalBtcCount,
     totalCost,
     avgPrice,
-    realizedProfit,
     remainingBtcCount,
     achievementRate,
     valuation,

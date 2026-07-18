@@ -17,10 +17,12 @@ export interface TradeRecord {
 export interface DcaState {
   records: TradeRecord[];
   targetBtcCount: number;
+  isSummaryDetailOpen: boolean; // 요약 카드 "자세히" 펼침 여부
   addRecord: (record: Omit<TradeRecord, "id">) => void;
   updateRecord: (record: TradeRecord) => void;
   removeRecord: (id: string) => void;
   setTargetBtcCount: (targetBtcCount: number) => void;
+  setSummaryDetailOpen: (isSummaryDetailOpen: boolean) => void;
 }
 
 /** persist 대상 상태 (액션 제외). 구버전(v0) 기록에는 type 필드가 없다. */
@@ -34,6 +36,7 @@ const useDcaStore = create<DcaState>()(
     (set) => ({
       records: [],
       targetBtcCount: 1,
+      isSummaryDetailOpen: false,
       addRecord: (record) =>
         set((state) => ({
           records: [...state.records, { ...record, id: uuidv4() }],
@@ -47,6 +50,7 @@ const useDcaStore = create<DcaState>()(
           records: state.records.filter((item) => item.id !== id),
         })),
       setTargetBtcCount: (targetBtcCount) => set(() => ({ targetBtcCount })),
+      setSummaryDetailOpen: (isSummaryDetailOpen) => set(() => ({ isSummaryDetailOpen })),
     }),
     {
       name: DCA_PERSIST_KEY,

@@ -1,7 +1,7 @@
 "use client";
 
 import { KButton } from "kku-ui";
-import { Check, Pencil } from "lucide-react";
+import { Check, ChevronDown, Pencil } from "lucide-react";
 import { type ChangeEvent, memo, useMemo, useState } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { useDcaStore } from "@/entities/dca";
@@ -17,6 +17,8 @@ const DcaSummary = () => {
   const targetBtcCount = useDcaStore((state) => state.targetBtcCount);
   const setTargetBtcCount = useDcaStore((state) => state.setTargetBtcCount);
   const currentPrice = useBitcoinStore((state) => state.bitcoinPrice.krw);
+  const isDetailOpen = useDcaStore((state) => state.isSummaryDetailOpen);
+  const setSummaryDetailOpen = useDcaStore((state) => state.setSummaryDetailOpen);
   const [isTargetEditing, setIsTargetEditing] = useState(false);
   const [targetInput, setTargetInput] = useState("");
   // endregion
@@ -28,9 +30,7 @@ const DcaSummary = () => {
   );
 
   const isProfitUp = summary.profit >= 0;
-  const isRealizedProfitUp = summary.realizedProfit >= 0;
   const hasRecord = records.length > 0;
-  const hasSellRecord = records.some((record) => record.type === "sell");
 
   const saveTargetBtcCount = () => {
     const parsed = parseFloat(targetInput);
@@ -59,6 +59,10 @@ const DcaSummary = () => {
       setTargetInput(text);
     }
   };
+
+  const onClickToggleDetail = () => {
+    setSummaryDetailOpen(!isDetailOpen);
+  };
   // endregion
 
   return (
@@ -68,53 +72,61 @@ const DcaSummary = () => {
           <div className="flex flex-col gap-1">
             <span className="text-sm text-muted-foreground font-bold">총 보유</span>
             <span className="text-xl font-bold">
-              <span className="text-bitcoin">₿</span> {formatBtc(summary.totalBtcCount)}
+              <span className="text-bitcoin -mr-2">₿</span> {formatBtc(summary.totalBtcCount)}
             </span>
           </div>
           <div className="flex flex-col gap-1 text-right">
-            <span className="text-sm text-muted-foreground font-bold">평단가</span>
-            <span className="text-xl font-bold">₩{comma(summary.avgPrice)}</span>
+            <span className="text-sm text-muted-foreground font-bold">평가금액</span>
+            <span className="text-xl font-bold">₩{comma(summary.valuation)}</span>
           </div>
         </div>
 
-        <div className="flex flex-col gap-2">
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-sm text-muted-foreground font-bold">평가금액</span>
-            <span className="text-lg font-bold">₩{comma(summary.valuation)}</span>
-          </div>
-          <div className="flex items-center justify-between gap-2">
-            <span className="text-sm text-muted-foreground font-bold">평가손익</span>
-            <span
-              className={`flex items-center justify-end gap-1.5 text-md font-bold ${
-                hasRecord ? (isProfitUp ? "text-up" : "text-down") : ""
-              }`}
-            >
-              {hasRecord && <UpdownIcon size={9} isUp={isProfitUp} />}₩
-              {comma(Math.abs(summary.profit))}
-              <span className="text-xs">({summary.profitRate.toFixed(2)}%)</span>
-            </span>
-          </div>
-          {hasSellRecord && (
+        <div className="flex items-center justify-between gap-2 -mb-2">
+          <span className="text-sm text-muted-foreground font-bold">남은 개수</span>
+          <span className="text-lg font-bold">
+            <span className="text-bitcoin">₿</span> {formatBtc(summary.remainingBtcCount)}
+          </span>
+        </div>
+
+        {isDetailOpen && (
+          <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm text-muted-foreground font-bold">실현손익</span>
+              <span className="text-sm text-muted-foreground font-bold">평단가</span>
+              <span className="text-lg font-bold">₩{comma(summary.avgPrice)}</span>
+            </div>
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm text-muted-foreground font-bold">평가손익</span>
               <span
-                className={`flex items-center justify-end gap-1.5 text-md font-bold ${
-                  isRealizedProfitUp ? "text-up" : "text-down"
+                className={`flex items-center justify-end gap-1.5 text-lg font-bold ${
+                  hasRecord ? (isProfitUp ? "text-up" : "text-down") : ""
                 }`}
               >
-                <UpdownIcon size={9} isUp={isRealizedProfitUp} />₩
-                {comma(Math.abs(summary.realizedProfit))}
+                {hasRecord && <UpdownIcon size={9} isUp={isProfitUp} />}₩
+                {comma(Math.abs(summary.profit))}
+                <span className="text-xs">({summary.profitRate.toFixed(2)}%)</span>
               </span>
             </div>
-          )}
-        </div>
+          </div>
+        )}
+
+        <button
+          type="button"
+          className="flex items-center justify-center gap-1 text-xs text-muted-foreground font-default"
+          onClick={onClickToggleDetail}
+        >
+          {isDetailOpen ? "접기" : "자세히"}
+          <ChevronDown
+            size={14}
+            className={`transition-transform duration-200 ${isDetailOpen ? "rotate-180" : ""}`}
+          />
+        </button>
 
         <div className="flex flex-col gap-1.5 border-t-[0.75px] border-neutral-300 dark:border-neutral-600 pt-3">
-          <div className="flex items-center justify-between gap-2 mb-2">
+          <div className="flex items-center justify-between gap-2 ">
             <span className="text-sm text-muted-foreground font-bold">목표</span>
 
             {isTargetEditing ? (
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-3">
                 <InputGroup size="md" className="h-9 w-32">
                   <InputGroupInput
                     type="text"
@@ -140,19 +152,14 @@ const DcaSummary = () => {
             )}
           </div>
 
-          <div className="h-3 w-full overflow-hidden rounded-full bg-neutral-300/60 dark:bg-neutral-700">
-            <div
-              className="h-full rounded-full bg-bitcoin transition-[width] duration-300"
-              style={{ width: `${summary.achievementRate}%` }}
-            />
-          </div>
-
-          <div className="flex justify-between text-sm">
-            <span className="font-bold">{summary.achievementRate.toFixed(1)}%</span>
-            <span>
-              남은 개수 <span className="font-bold">{formatBtc(summary.remainingBtcCount)}</span>{" "}
-              BTC
-            </span>
+          <div className="flex justify-start items-center gap-3">
+            <div className="h-4 w-full overflow-hidden rounded-full bg-neutral-300/60 dark:bg-neutral-700">
+              <div
+                className="h-full rounded-full bg-bitcoin transition-[width] duration-300"
+                style={{ width: `${summary.achievementRate}%` }}
+              />
+            </div>
+            <span className="text-sm font-bold">{summary.achievementRate.toFixed(1)}%</span>
           </div>
         </div>
       </CardContent>
