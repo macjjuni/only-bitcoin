@@ -3,9 +3,9 @@
 import { KDialog, KDialogContent, KDialogHeader, KDialogOverlay, KDialogTitle } from "kku-ui";
 import { memo } from "react";
 import { useDcaFormStore } from "@/entities/dca";
-import PurchaseForm from "./PurchaseForm";
+import TradeForm from "./TradeForm";
 
-const PurchaseFormDialog = () => {
+const TradeFormDialog = () => {
   // region [Hooks]
   const isFormOpen = useDcaFormStore((state) => state.isFormOpen);
   const editRecord = useDcaFormStore((state) => state.editRecord);
@@ -35,14 +35,14 @@ const PurchaseFormDialog = () => {
           </KDialogTitle>
         </KDialogHeader>
         {isFormOpen && (
-          <PurchaseForm key={editRecord?.id ?? "new"} editRecord={editRecord} onClose={closeForm} />
+          <TradeForm key={editRecord?.id ?? "new"} editRecord={editRecord} onClose={closeForm} />
         )}
       </KDialogContent>
     </KDialog>
   );
 };
 
-const MemoizedPurchaseFormDialog = memo(PurchaseFormDialog);
-MemoizedPurchaseFormDialog.displayName = "PurchaseFormDialog";
+const MemoizedTradeFormDialog = memo(TradeFormDialog);
+MemoizedTradeFormDialog.displayName = "TradeFormDialog";
 
-export default MemoizedPurchaseFormDialog;
+export default MemoizedTradeFormDialog;

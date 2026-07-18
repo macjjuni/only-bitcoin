@@ -28,7 +28,9 @@ const DcaSummary = () => {
   );
 
   const isProfitUp = summary.profit >= 0;
+  const isRealizedProfitUp = summary.realizedProfit >= 0;
   const hasRecord = records.length > 0;
+  const hasSellRecord = records.some((record) => record.type === "sell");
 
   const saveTargetBtcCount = () => {
     const parsed = parseFloat(targetInput);
@@ -92,6 +94,19 @@ const DcaSummary = () => {
               <span className="text-xs">({summary.profitRate.toFixed(2)}%)</span>
             </span>
           </div>
+          {hasSellRecord && (
+            <div className="flex items-center justify-between gap-2">
+              <span className="text-sm text-muted-foreground font-bold">실현손익</span>
+              <span
+                className={`flex items-center justify-end gap-1.5 text-md font-bold ${
+                  isRealizedProfitUp ? "text-up" : "text-down"
+                }`}
+              >
+                <UpdownIcon size={9} isUp={isRealizedProfitUp} />₩
+                {comma(Math.abs(summary.realizedProfit))}
+              </span>
+            </div>
+          )}
         </div>
 
         <div className="flex flex-col gap-1.5 border-t-[0.75px] border-neutral-300 dark:border-neutral-600 pt-3">

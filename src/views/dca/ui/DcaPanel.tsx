@@ -1,11 +1,11 @@
 "use client";
 
 import { memo } from "react";
-import { type PurchaseRecord, useDcaFormStore } from "@/entities/dca";
+import { type TradeRecord, useDcaFormStore } from "@/entities/dca";
 import { useMounted } from "@/shared/lib/hooks";
 import DcaSummary from "./DcaSummary";
-import PurchaseFormDialog from "./PurchaseFormDialog";
-import PurchaseList from "./PurchaseList";
+import TradeFormDialog from "./TradeFormDialog";
+import TradeList from "./TradeList";
 
 const DcaPanel = () => {
   // region [Hooks]
@@ -14,7 +14,7 @@ const DcaPanel = () => {
   // endregion
 
   // region [Events]
-  const onClickEditRecord = (record: PurchaseRecord) => {
+  const onClickEditRecord = (record: TradeRecord) => {
     openForm(record);
   };
   // endregion
@@ -26,8 +26,8 @@ const DcaPanel = () => {
   return (
     <div className="flex flex-col gap-3">
       <DcaSummary />
-      <PurchaseList onClickEdit={onClickEditRecord} />
-      <PurchaseFormDialog />
+      <TradeList onClickEdit={onClickEditRecord} />
+      <TradeFormDialog />
     </div>
   );
 };

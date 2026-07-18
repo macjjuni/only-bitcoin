@@ -16,7 +16,7 @@ export default function DcaAddRecordFloatingBanner() {
   // endregion
 
   return (
-    <FloatingBannerButton onClick={onClickAddRecord} aria-label="매수 기록 추가">
+    <FloatingBannerButton onClick={onClickAddRecord} aria-label="매매 기록 추가">
       <Plus size={28} className="text-black dark:text-white" />
     </FloatingBannerButton>
   );

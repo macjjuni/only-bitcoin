@@ -105,7 +105,7 @@ const PrivacyPolicy = () => {
             <PolicyList
               items={[
                 "로컬 저장소(localStorage): 테마(라이트/다크), 표시 통화 단위 등 사용자 설정과 시세·블록 데이터 캐시",
-                "DCA 매수 기록: 이용자가 DCA 페이지에 직접 입력한 매수 수량·단가·날짜 및 목표 수량 (로컬 저장소에만 저장)",
+                "DCA 매매 기록: 이용자가 DCA 페이지에 직접 입력한 매수·매도 수량·단가·날짜·메모 및 목표 수량 (로컬 저장소에만 저장)",
                 "쿠키(Cookie): 앱 설치(PWA) 안내 노출 여부, 공지 확인 여부",
               ]}
             />
@@ -174,7 +174,7 @@ const PrivacyPolicy = () => {
               방식으로 제공됩니다.
             </PolicyParagraph>
             <PolicyParagraph>
-              이용자가 DCA(적립식 매수) 기능에 직접 입력하는 매수 기록 역시 이용자 기기의
+              이용자가 DCA(적립식 매수) 기능에 직접 입력하는 매수·매도 기록 역시 이용자 기기의
               브라우저에만 저장되며, 서버로 전송하거나 보관하지 않습니다.
             </PolicyParagraph>
           </PolicySection>
