@@ -8,7 +8,6 @@ import { CountText, UpdownIcon } from "@/shared/ui";
 import PriceMiniChart from "./PriceMiniChart";
 
 interface PricePanelTypes {
-  /** SSR 로 미리 조회한 시세. 소켓이 붙기 전까지의 표시값이자 크롤러가 읽는 값이다. */
   initialPrice: InitialPrice;
 }
 
