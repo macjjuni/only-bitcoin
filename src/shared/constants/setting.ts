@@ -20,10 +20,3 @@ export const INITIAL_PATH_COOKIE_KEY = "initial_path" as const;
 // 재방문 시 훅(`useInitializePage`)이 쿠키를 갱신하므로 실질적으로 만료되지 않는다.
 export const INITIAL_PATH_COOKIE_MAX_AGE_DAYS = 400;
 export const DEFAULT_INITIAL_PATH = "/overview" as const;
-
-export const sourceOptions = [
-  { label: "BTC", value: "Upbit, Bithumb, Binance, Coinbase" },
-  { label: "Dominance", value: "Coin Gecko" },
-  { label: "Fear & Greed Index", value: "alternative.me" },
-  { label: "USD/KRW Exchange Rate", value: "Naver(KEB)" },
-] as const;

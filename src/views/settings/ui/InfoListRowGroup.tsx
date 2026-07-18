@@ -2,11 +2,10 @@
 
 import { KButton, KIcon, kToast } from "kku-ui";
 import { clipboardUtil } from "kku-util";
-import { CodeXml, QrCode as QrCodeIcon, ShieldCheck } from "lucide-react";
+import { QrCode as QrCodeIcon, ShieldCheck } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, useCallback } from "react";
 import { QRCode } from "react-qrcode-logo";
-import { sourceOptions } from "@/shared/constants/setting";
 import { ListGroup, ListRow, ListRowAccordion } from "@/shared/ui";
 
 const LIGHTNING_ADDRESS = process.env.NEXT_PUBLIC_DONATION_ADDRESS || "";
@@ -88,15 +87,6 @@ const InfoListRowGroup = () => {
         </div>
       </ListRowAccordion>
 
-      <ListRowAccordion value="resource" label="리소스 출처" icon={<CodeXml />}>
-        <ul>
-          {sourceOptions.map(({ label, value }) => (
-            <li key={label} className="text-sm text-current tracking-tighter">
-              - {label}: {value}
-            </li>
-          ))}
-        </ul>
-      </ListRowAccordion>
       <ListRow
         icon={<KIcon icon="x_logo" size={24} />}
         label="피드백"
