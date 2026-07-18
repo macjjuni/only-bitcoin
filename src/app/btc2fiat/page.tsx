@@ -10,7 +10,7 @@ export const metadata: Metadata = {
 
 export default function Btc2FiatPage() {
   return (
-    <PageLayout className="!pt-4 gap-3">
+    <PageLayout className="gap-3">
       <PriceTicker />
       <ConvertPanel />
     </PageLayout>

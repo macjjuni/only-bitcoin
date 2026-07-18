@@ -47,7 +47,7 @@ const PriceTicker = () => {
 
   return (
     <Card>
-      <CardContent className="flex justify-evenly gap-4 items-center p-3 font-number text-md font-bold">
+      <CardContent className="flex justify-evenly gap-4 items-center h-[44px] p-3 font-number text-md font-bold">
         {tickers.map(({ code, sign, price, change }) => {
           const isUp = change >= 0;
 
