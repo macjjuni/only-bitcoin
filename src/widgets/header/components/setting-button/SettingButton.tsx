@@ -13,7 +13,7 @@ export default function SettingButton() {
   if (pathname === "/settings") {
     return (
       <button type="button" onClick={() => router.back()} className="text-current cursor-pointer">
-        <Undo2Icon size={30} className="text-gray-500 dark:text-gray-200" />
+        <Undo2Icon size={30} className="text-gray-800 dark:text-gray-200" />
       </button>
     );
   }
@@ -21,7 +21,7 @@ export default function SettingButton() {
   // 설정 버튼 스타일
   return (
     <TransitionLink href="/settings" className="inline-flex justify-center items-center">
-      <SettingIcon size={30} className="text-gray-500 dark:text-gray-200" />
+      <SettingIcon size={30} className="text-gray-800 dark:text-gray-200" />
     </TransitionLink>
   );
 }
