@@ -3,6 +3,7 @@
 import { memo, useState } from "react";
 import { type TradeRecord, useDcaFormStore } from "@/entities/dca";
 import { useMounted } from "@/shared/lib/hooks";
+import { SegmentedControl } from "@/shared/ui";
 import DcaHoldingsChart from "./DcaHoldingsChart";
 import DcaSummary from "./DcaSummary";
 import TradeFormDialog from "./TradeFormDialog";
@@ -38,22 +39,7 @@ const DcaPanel = () => {
 
   return (
     <div className="flex flex-col gap-3">
-      <div className="grid grid-cols-2 gap-1 rounded-lg bg-neutral-200/70 p-1 dark:bg-neutral-800">
-        {tabOptions.map((option) => (
-          <button
-            key={option.value}
-            type="button"
-            className={`h-9 rounded-md text-sm font-default font-bold transition-colors active:scale-[0.97] ${
-              activeTab === option.value
-                ? "bg-white shadow-sm dark:bg-neutral-600 text-foreground"
-                : "text-muted-foreground"
-            }`}
-            onClick={() => onClickTab(option.value)}
-          >
-            {option.label}
-          </button>
-        ))}
-      </div>
+      <SegmentedControl options={tabOptions} value={activeTab} onChange={onClickTab} />
 
       {activeTab === "summary" ? <DcaSummary /> : <DcaHoldingsChart />}
 

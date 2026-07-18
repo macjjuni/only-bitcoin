@@ -30,5 +30,10 @@ export {
 } from "./ListGroup";
 export { default as Lottie } from "./lottie/Lottie";
 export { default as NotKeyNotYourBitcoin } from "./NotKeyNotYourBitcoin";
+export {
+  default as SegmentedControl,
+  type SegmentedControlOption,
+  type SegmentedControlProps,
+} from "./SegmentedControl";
 export { default as TransitionLink } from "./TransitionLink";
 export { default as UpdownIcon } from "./UpdownIcon";

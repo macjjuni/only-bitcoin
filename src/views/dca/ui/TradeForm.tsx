@@ -4,7 +4,13 @@ import { KButton, KTextarea } from "kku-ui";
 import { type ChangeEvent, memo, useMemo, useState } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { type TradeRecord, type TradeType, useDcaStore } from "@/entities/dca";
-import { InputGroup, InputGroupAddon, InputGroupInput } from "@/shared/ui";
+import {
+  InputGroup,
+  InputGroupAddon,
+  InputGroupInput,
+  SegmentedControl,
+  type SegmentedControlOption,
+} from "@/shared/ui";
 import { isNumber } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 import { calculateHoldingBtcCount } from "../lib/calculateDca";
@@ -13,6 +19,11 @@ import { formatBtc, getTodayString } from "../lib/format";
 const BTC_MAX_DECIMALS = 8;
 const PRICE_FLOOR_UNIT = 1_000_000; // 매매 단가 초기값 버림 단위 (백만원)
 const MEMO_MAX_LENGTH = 200;
+
+const tradeTypeOptions: Array<SegmentedControlOption<TradeType>> = [
+  { label: "매수", value: "buy", activeClassName: "bg-up/15 text-up" },
+  { label: "매도", value: "sell", activeClassName: "bg-down/15 text-down" },
+];
 
 interface TradeFormProps {
   editRecord: TradeRecord | null; // null 이면 신규 추가 모드
@@ -59,12 +70,8 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
   // endregion
 
   // region [Events]
-  const onClickBuyType = () => {
-    setTradeType("buy");
-  };
-
-  const onClickSellType = () => {
-    setTradeType("sell");
+  const onChangeTradeType = (type: TradeType) => {
+    setTradeType(type);
   };
 
   const onChangeDate = (e: ChangeEvent<HTMLInputElement>) => {
@@ -130,26 +137,7 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
 
   return (
     <div className="flex flex-col gap-3 pt-2 font-number">
-      <div className="grid grid-cols-2 gap-1 rounded-lg bg-neutral-200/70 p-1 dark:bg-neutral-800">
-        <KButton
-          variant="ghost"
-          size="sm"
-          width="100%"
-          className={`font-default font-bold ${isBuy ? "bg-up/15 !text-up" : "text-muted-foreground"}`}
-          onClick={onClickBuyType}
-        >
-          매수
-        </KButton>
-        <KButton
-          variant="ghost"
-          size="sm"
-          width="100%"
-          className={`font-default font-bold ${!isBuy ? "bg-down/15 !text-down" : "text-muted-foreground"}`}
-          onClick={onClickSellType}
-        >
-          매도
-        </KButton>
-      </div>
+      <SegmentedControl options={tradeTypeOptions} value={tradeType} onChange={onChangeTradeType} />
 
       <div className="flex flex-col gap-1">
         <span className="text-sm text-muted-foreground font-default">{typeLabel} 날짜</span>

@@ -7,6 +7,7 @@ import useSettingStore from "@/shared/stores/settingStore";
 import { Card, CardContent } from "@/shared/ui";
 import { calculateHoldingsSeries } from "../lib/calculateHoldingsSeries";
 import { createHoldingsChartOptions } from "./createHoldingsChartOptions";
+import EmptyMessageCard from "./EmptyMessageCard";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
@@ -32,13 +33,7 @@ const DcaHoldingsChart = () => {
   // endregion
 
   if (seriesData.length === 0) {
-    return (
-      <Card>
-        <p className="py-8 text-center text-sm text-muted-foreground">
-          기록을 추가하면 보유량 추이를 볼 수 있어요.
-        </p>
-      </Card>
-    );
+    return <EmptyMessageCard>기록을 추가하면 보유량 추이를 볼 수 있어요.</EmptyMessageCard>;
   }
 
   return (
