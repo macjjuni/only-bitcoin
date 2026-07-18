@@ -42,11 +42,9 @@ export const createHoldingsChartOptions = ({
     },
   },
   markers: {
-    size: 3,
+    size: 0,
     colors: [BITCOIN_COLOR],
-    strokeColors: isDark ? "#121212" : "#fff",
-    strokeWidth: 1.5,
-    hover: { size: 5, sizeOffset: 0 },
+    hover: { size: 4, sizeOffset: 0 },
   },
   tooltip: {
     theme: isDark ? "dark" : "light",
@@ -60,6 +58,7 @@ export const createHoldingsChartOptions = ({
   },
   xaxis: {
     type: "datetime",
+    tickAmount: 6,
     labels: {
       show: true,
       // 로컬 자정 기준 timestamp라 UTC로 표시하면 KST에서 하루 밀린다.
