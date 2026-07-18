@@ -1,7 +1,8 @@
 import type { TradeRecord } from "@/entities/dca";
 import { getTodayString } from "./format";
+import { applyTradeSats, satsToBtc } from "./satoshi";
+import { sortTradeRecords } from "./sortTradeRecords";
 
-const SATOSHI_PER_BTC = 100_000_000;
 const DAY_MS = 86_400_000;
 
 export interface HoldingsSeriesPoint {
@@ -32,25 +33,19 @@ export function calculateHoldingsSeries(records: TradeRecord[]): HoldingsSeriesP
     return [];
   }
 
-  const sortedRecords = [...records].sort((a, b) => a.date.localeCompare(b.date));
+  const sortedRecords = sortTradeRecords(records, "dateAsc");
 
   let holdingSats = 0;
   const satsByDate = new Map<string, number>();
 
   for (const record of sortedRecords) {
-    const sats = Math.round(record.btcCount * SATOSHI_PER_BTC);
-
-    if (record.type === "buy") {
-      holdingSats += sats;
-    } else {
-      holdingSats -= Math.min(sats, holdingSats);
-    }
+    holdingSats = applyTradeSats(holdingSats, record);
     satsByDate.set(record.date, holdingSats);
   }
 
   const points: HoldingsSeriesPoint[] = [...satsByDate.entries()].map(([date, sats]) => ({
     x: dateToTimestamp(date),
-    y: sats / SATOSHI_PER_BTC,
+    y: satsToBtc(sats),
   }));
 
   const firstDate = sortedRecords[0].date;
@@ -60,7 +55,7 @@ export function calculateHoldingsSeries(records: TradeRecord[]): HoldingsSeriesP
   const lastDate = sortedRecords[sortedRecords.length - 1].date;
 
   if (lastDate < today) {
-    points.push({ x: dateToTimestamp(today), y: holdingSats / SATOSHI_PER_BTC });
+    points.push({ x: dateToTimestamp(today), y: satsToBtc(holdingSats) });
   }
 
   return points;

@@ -1,6 +1,6 @@
 import type { TradeRecord } from "@/entities/dca";
-
-const SATOSHI_PER_BTC = 100_000_000;
+import { applyTradeSats, btcToSats, SATOSHI_PER_BTC, satsToBtc } from "./satoshi";
+import { sortTradeRecords } from "./sortTradeRecords";
 
 export interface DcaSummaryData {
   totalBtcCount: number; // 총 보유 개수 (BTC)
@@ -12,14 +12,6 @@ export interface DcaSummaryData {
   profit: number; // 평가손익 (KRW)
   profitRate: number; // 수익률 (%)
 }
-
-/**
- * BTC 개수를 사토시(정수) 단위로 변환.
- * 부동소수점 합산 오차를 막기 위해 내부 계산은 사토시 기준.
- */
-const btcToSats = (btcCount: number): number => {
-  return Math.round(btcCount * SATOSHI_PER_BTC);
-};
 
 /**
  * 매매 기록과 현재 시세를 기반으로 평단가·목표·수익 요약 지표를 계산.
@@ -39,7 +31,7 @@ export function calculateDcaSummary(
   currentPrice: number,
 ): DcaSummaryData {
   // 이동평균법은 체결 순서에 의존하므로 날짜 오름차순(동일 날짜는 입력 순서 유지)으로 계산한다.
-  const sortedRecords = [...records].sort((a, b) => a.date.localeCompare(b.date));
+  const sortedRecords = sortTradeRecords(records, "dateAsc");
 
   let holdingSats = 0;
   let holdingCost = 0;
@@ -64,12 +56,12 @@ export function calculateDcaSummary(
     holdingSats -= sellSats;
   }
 
-  const totalBtcCount = holdingSats / SATOSHI_PER_BTC;
+  const totalBtcCount = satsToBtc(holdingSats);
   const totalCost = holdingCost;
   const avgPrice = totalBtcCount > 0 ? Math.round(totalCost / totalBtcCount) : 0;
 
   const targetSats = btcToSats(targetBtcCount);
-  const remainingBtcCount = Math.max(targetSats - holdingSats, 0) / SATOSHI_PER_BTC;
+  const remainingBtcCount = satsToBtc(Math.max(targetSats - holdingSats, 0));
   const achievementRate = targetSats > 0 ? Math.min((holdingSats / targetSats) * 100, 100) : 0;
 
   const valuation = currentPrice > 0 ? Math.round(totalBtcCount * currentPrice) : 0;
@@ -96,13 +88,10 @@ export function calculateDcaSummary(
  * @param excludeId - 계산에서 제외할 기록 id (수정 모드에서 자기 자신 제외용)
  */
 export function calculateHoldingBtcCount(records: TradeRecord[], excludeId?: string): number {
-  const holdingSats = records.reduce((acc, record) => {
-    if (record.id === excludeId) {
-      return acc;
-    }
-    const sats = btcToSats(record.btcCount);
-    return record.type === "buy" ? acc + sats : acc - sats;
-  }, 0);
+  // 요약·차트와 동일하게 날짜순으로 기록별 클램프를 적용해 보유량 계산 기준을 일치시킨다.
+  const holdingSats = sortTradeRecords(records, "dateAsc")
+    .filter((record) => record.id !== excludeId)
+    .reduce((acc, record) => applyTradeSats(acc, record), 0);
 
-  return Math.max(holdingSats, 0) / SATOSHI_PER_BTC;
+  return satsToBtc(holdingSats);
 }
