@@ -12,9 +12,9 @@ export default {
         number: ["var(--number-font)"],
       },
       colors: {
-        bitcoin: "var(--bitcoin-color)",
-        up: "var(--up-color)",
-        down: "var(--down-color)",
+        bitcoin: "rgb(var(--bitcoin-rgb) / <alpha-value>)",
+        up: "rgb(var(--up-rgb) / <alpha-value>)",
+        down: "rgb(var(--down-rgb) / <alpha-value>)",
         background: "hsl(var(--background))",
       },
       height: {
