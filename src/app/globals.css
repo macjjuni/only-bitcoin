@@ -13,6 +13,19 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  /* iOS에서 링크 길게 누를 때 뜨는 콜아웃 메뉴(열기·링크 복사·공유 등) 차단 */
+  .touch-callout-none {
+    -webkit-touch-callout: none;
+  }
+  /* iOS 스타일 눌림 피드백: pointer-down 즉시 살짝 축소 (색상 전환 포함) */
+  .press-feedback {
+    transition:
+      color 100ms ease-out,
+      transform 100ms ease-out;
+  }
+  .press-feedback:active {
+    transform: scale(0.93);
+  }
 }
 
 

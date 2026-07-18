@@ -9,6 +9,7 @@ export default function TransitionLink({
   href,
   children,
   onClick,
+  className = "",
   ...restProps
 }: ComponentPropsWithoutRef<"a">) {
   // region [Hooks]
@@ -51,7 +52,12 @@ export default function TransitionLink({
   // endregion
 
   return (
-    <a {...restProps} href={href} onClick={handleClick}>
+    <a
+      {...restProps}
+      href={href}
+      onClick={handleClick}
+      className={`touch-callout-none select-none tap-highlight-transparent ${className}`.trim()}
+    >
       {children}
     </a>
   );

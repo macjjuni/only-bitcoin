@@ -42,7 +42,7 @@ export default function BottomNavigation() {
               <TransitionLink
                 href={path}
                 onClick={onClickNavItem}
-                className={`relative flex flex-col gap-1 items-center justify-center rounded-lg transition-colors tap-highlight-transparent z-10 ${
+                className={`relative flex flex-col gap-1 items-center justify-center rounded-lg press-feedback z-10 ${
                   isActive ? "text-[#F7931A]" : "text-black dark:text-white"
                 } w-[60px] h-[60px]`}
               >
@@ -52,7 +52,7 @@ export default function BottomNavigation() {
                 <span className="inline-flex justify-center items-center h-[26px]">{icon}</span>
                 <span
                   className={[
-                    "text-[10px] tracking-tighter whitespace-nowrap",
+                    "text-[10px] tracking-wide whitespace-nowrap",
                     isActive ? "font-bold" : null,
                   ]
                     .filter(Boolean)
