@@ -10,6 +10,7 @@
     "format": "biome format --write .",
     "check": "biome check --write .",
     "check:cycles": "node scripts/check-cycles.mjs",
+    "test": "vitest run",
     "screenshot": "playwright install chromium && node scripts/screenshot.mjs"
   },
   "dependencies": {
@@ -54,7 +55,8 @@
     "postcss": "^8.5.6",
     "sass": "^1.97.1",
     "tailwindcss": "3",
-    "typescript": "^5.9.3"
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.10"
   },
   "pnpm": {
     "onlyBuiltDependencies": [
