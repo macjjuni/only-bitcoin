@@ -1,7 +1,8 @@
 "use client";
 
-import { useId, useMemo } from "react";
+import { memo, useId, useMemo } from "react";
 import { usePriceMiniChartData } from "@/entities/bitcoin/client";
+import useSettingStore from "@/shared/stores/settingStore";
 
 interface PriceMiniChartProps {
   barCount?: number;
@@ -19,7 +20,7 @@ interface BarShape {
   opacity: number;
 }
 
-export default function PriceMiniChart({
+function PriceMiniChart({
   barCount = 10,
   width = 140,
   height = 60,
@@ -27,6 +28,7 @@ export default function PriceMiniChart({
   downColor = "var(--down-color)",
 }: PriceMiniChartProps) {
   // region [Hooks]
+  const theme = useSettingStore((state) => state.theme);
   const { priceMiniChartData } = usePriceMiniChartData();
   const rawId = useId();
   const glowId = `priceMiniChartGlow-${rawId.replace(/:/g, "")}`;
@@ -34,7 +36,7 @@ export default function PriceMiniChart({
   const data = useMemo<number[]>(() => priceMiniChartData?.price ?? [], [priceMiniChartData]);
 
   /**
-   * 가격 시계열을 N개 버킷으로 나눠 캔들형 막대 데이터로 변환한다.
+   * 가격 시계열을 N개 버킷으로 나눠 캔들형 막대 데이터로 변환.
    * - 막대의 세로 위치/높이: 버킷 high/low 가격 범위 기준
    * - 색상(상승/하락): 버킷 open(첫 값) vs close(마지막 값) 비교
    */
@@ -75,8 +77,8 @@ export default function PriceMiniChart({
       const barHeight = Math.max(minBarHeight, yBottom - yTop);
 
       // 차트 길이에 맞춰 opacity를 3단계로 다르게 설정 (3~5개 등 원하는 단계로 변경 가능)
-      // 예시: 3단계: [0.5, 0.75, 1.0] / 4단계: [0.4, 0.6, 0.8, 1.0] / 5단계: [0.4, 0.55, 0.7, 0.85, 1.0]
-      const opacities = [0.5, 0.75, 1.0];
+      // 라이트 모드는 배경이 밝아 흐리게 보이므로 다크 모드보다 진하게 설정
+      const opacities = theme === "light" ? [0.7, 0.85, 1.0] : [0.5, 0.75, 1.0];
       const normalizedHeight = usableHeight > 0 ? (barHeight - minBarHeight) / usableHeight : 0;
       const stepIndex = Math.min(
         opacities.length - 1,
@@ -92,7 +94,7 @@ export default function PriceMiniChart({
         opacity,
       };
     });
-  }, [data, barCount, width, height]);
+  }, [data, barCount, width, height, theme]);
   // endregion
 
   if (!barShapes.length) return null;
@@ -131,3 +133,8 @@ export default function PriceMiniChart({
     </svg>
   );
 }
+
+const MemoizedPriceMiniChart = memo(PriceMiniChart);
+MemoizedPriceMiniChart.displayName = "PriceMiniChart";
+
+export default MemoizedPriceMiniChart;
