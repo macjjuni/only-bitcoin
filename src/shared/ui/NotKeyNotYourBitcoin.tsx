@@ -33,23 +33,33 @@ const NotKeyNotYourBitcoin = () => {
 
   // region [Life Cycles]
   useEffect(() => {
+    let fadeTimer: ReturnType<typeof setTimeout>;
+    let rafId: number;
+
     const interval = setInterval(() => {
       setFade(false); // 페이드 아웃 시작
 
-      setTimeout(() => {
+      fadeTimer = setTimeout(() => {
         setCurrentIndex((prevIndex) => (prevIndex + 1) % shuffledList.length);
-        setFade(true); // 페이드 인
+        // iOS Safari WebKit: 텍스트 노드 변경과 opacity transition의 동일 프레임 레이어 파괴 방지
+        rafId = requestAnimationFrame(() => {
+          setFade(true); // 페이드 인
+        });
       }, FADE_OUT_TIME);
     }, ANIMATION_CHANGE_TIME);
 
-    return () => clearInterval(interval);
+    return () => {
+      clearInterval(interval);
+      if (fadeTimer) clearTimeout(fadeTimer);
+      if (rafId) cancelAnimationFrame(rafId);
+    };
   }, [shuffledList]);
   // endregion
 
   return (
     <div
       className={[
-        "flex flex-col justify-end items-center flex-[1_1_auto] font-bold select-none transition-opacity duration-[480ms] ease-in-out",
+        "flex flex-col justify-end items-center flex-[1_1_auto] font-bold select-none transition-opacity duration-[480ms] ease-in-out will-change-[opacity] transform-gpu",
         "text-[13px] text-current",
         fade ? "opacity-100" : "opacity-0",
       ].join(" ")}
