@@ -19,7 +19,7 @@ export default async function Page() {
 
   return (
     // 배경이 테마와 무관하게 딥 스페이스 톤이므로 본문 색도 밝은 쪽으로 고정한다.
-    <PageLayout className="text-white/70 p-4">
+    <PageLayout className="text-white/70 p-4" hasBottomNav={false}>
       <HalvingCountdown initialBlockHeight={currentBlockHeight} />
     </PageLayout>
   );

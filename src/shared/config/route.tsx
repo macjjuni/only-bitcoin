@@ -10,6 +10,7 @@ interface ClientRoute {
   icon: ReactNode;
   replace?: string;
   hideHeader?: boolean;
+  hideBottomNav?: boolean;
 }
 
 /** 전환 방향은 이 배열의 인덱스 순서로 결정되므로, 하위 페이지는 상위 경로 뒤에 둔다. */
@@ -45,6 +46,7 @@ const clientRoutes: ClientRoute[] = [
     isFavorite: false,
     icon: null,
     hideHeader: true,
+    hideBottomNav: true,
   },
   {
     title: "BTC To Fiat",
@@ -103,6 +105,11 @@ export const navigationRouteList = clientRoutes.filter(
 /** 헤더를 렌더링하지 않을 경로 목록 */
 export const hideHeaderPathList = clientRoutes
   .filter(({ hideHeader }) => hideHeader)
+  .map(({ path }) => path);
+
+/** 하단 네비게이션을 렌더링하지 않을 경로 목록 */
+export const hideBottomNavPathList = clientRoutes
+  .filter(({ hideBottomNav }) => hideBottomNav)
   .map(({ path }) => path);
 
 export default { allRouteList, favoriteRouteList, navigationRouteList };
