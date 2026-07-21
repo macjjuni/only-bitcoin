@@ -55,6 +55,7 @@
 
 .only-btc__header { view-transition-name: main-header; }
 .only-btc__bottom-nav { view-transition-name: bottom-nav; }
+.only-btc__floating-banner { view-transition-name: floating-banner; }
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
