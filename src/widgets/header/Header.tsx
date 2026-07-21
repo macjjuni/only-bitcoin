@@ -1,13 +1,23 @@
 "use client";
 
 import { KIcon } from "kku-ui";
+import { usePathname } from "next/navigation";
+import { hideHeaderPathList } from "@/shared/config/route";
 import useSettingStore from "@/shared/stores/settingStore";
 import { TransitionLink } from "@/shared/ui";
 import ConnectionDot from "./components/connection-dot/ConnectionDot";
 import SettingButton from "./components/setting-button/SettingButton";
 
 export default function Header() {
+  // region [Hooks]
+  const pathname = usePathname();
   const initialPath = useSettingStore((state) => state.setting.initialPath);
+  // endregion
+
+  // 몰입형 페이지는 헤더를 렌더링하지 않는다.
+  if (hideHeaderPathList.includes(pathname)) {
+    return null;
+  }
 
   return (
     <header
