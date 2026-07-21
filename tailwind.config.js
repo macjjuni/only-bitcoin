@@ -68,6 +68,22 @@ export default {
             transform: "translateX(-50.5%) translateY(0) scaleX(1.05) scaleY(1.08)",
           },
         },
+        shimmer: {
+          "0%": { transform: "translateX(-120%)" },
+          "100%": { transform: "translateX(320%)" },
+        },
+        gaugePulse: {
+          "0%, 100%": { opacity: "0.45", transform: "scaleX(1)" },
+          "50%": { opacity: "1", transform: "scaleX(1.35)" },
+        },
+        blobDriftA: {
+          "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1)" },
+          "50%": { transform: "translate3d(6%, 8%, 0) scale(1.15)" },
+        },
+        blobDriftB: {
+          "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1.1)" },
+          "50%": { transform: "translate3d(-7%, -6%, 0) scale(0.9)" },
+        },
         swing: {
           "0%, 50%, 100%": {
             transform: "perspective(1000px) rotateY(0deg)",
@@ -93,6 +109,10 @@ export default {
         "view-enter-left": "slideInFromLeft 0.2s ease-in-out forwards",
         "view-enter-first": "firstLoad 0.2s ease-in-out forwards",
         "ember-glow": "emberGlow 7s ease-in-out infinite",
+        shimmer: "shimmer 2.6s ease-in-out infinite",
+        "gauge-pulse": "gaugePulse 1.8s ease-in-out infinite",
+        "blob-drift-a": "blobDriftA 20s ease-in-out infinite",
+        "blob-drift-b": "blobDriftB 24s ease-in-out infinite",
       },
     },
   },
