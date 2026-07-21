@@ -2,6 +2,7 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import BlocksCountdownFloatingBanner from "./ui/BlocksCountdownFloatingBanner";
 import Btc2FiatFloatingBanner from "./ui/Btc2FiatFloatingBanner";
 import DcaAddRecordFloatingBanner from "./ui/DcaAddRecordFloatingBanner";
 import ScrollUpFloatingBanner from "./ui/ScrollUpFloatingBanner";
@@ -34,6 +35,14 @@ function useScrollVisibility(threshold = 100) {
 }
 
 const BANNER_CONFIGS: BannerConfig[] = [
+  {
+    id: "blocks-countdown",
+    Component: BlocksCountdownFloatingBanner,
+    useIsVisible: () => {
+      const pathname = usePathname();
+      return pathname === "/blocks";
+    },
+  },
   {
     id: "btc2fiat",
     Component: Btc2FiatFloatingBanner,
