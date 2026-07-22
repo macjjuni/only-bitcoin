@@ -1,0 +1,73 @@
+"use client";
+
+import { memo } from "react";
+
+/** 진행 위치를 가늠할 기준 눈금 (%) */
+const TICKS = [25, 50, 75] as const;
+
+/** 반감기 도달 연출용 프리즘 그라디언트. 양 끝을 같은 색으로 맞춰 흐름이 끊기지 않게 한다. */
+const REACHED_GRADIENT =
+  "bg-[linear-gradient(90deg,#F7931A,#FFD54F,#FFF3C4,#FF7AC8,#A66BFF,#FFD54F,#F7931A)]";
+
+interface HalvingGaugeProps {
+  /** 진행률 (0~100) */
+  percent: number;
+  /** 반감기 도달 여부. `true` 면 게이지를 도달 전용 연출로 바꾼다. */
+  isReached?: boolean;
+}
+
+const HalvingGauge = ({ percent, isReached = false }: HalvingGaugeProps) => {
+  // region [Hooks]
+  const clampedPercent = Math.min(Math.max(percent, 0), 100);
+
+  /** 도달 시에는 흐르는 프리즘 그라디언트 + 다중 글로우로 전환한다. */
+  const fillClassName = isReached
+    ? `${REACHED_GRADIENT} bg-[length:300%_100%] animate-aurora-flow shadow-[0_0_22px_rgba(247,147,26,0.9),0_0_40px_rgba(166,107,255,0.5)] motion-reduce:animate-none`
+    : "bg-gradient-to-r from-bitcoin/50 via-bitcoin to-[#FFB74D] shadow-[0_0_16px_rgba(247,147,26,0.85)]";
+  // endregion
+
+  return (
+    <div
+      className="relative mt-2.5 h-3.5 w-full overflow-hidden rounded-full bg-black/25 shadow-[inset_0_1px_3px_rgba(0,0,0,0.5)]"
+      role="progressbar"
+      aria-valuenow={clampedPercent}
+      aria-valuemin={0}
+      aria-valuemax={100}
+      aria-label="현재 반감기 진행률"
+    >
+      <div
+        className={`absolute inset-y-0 left-0 overflow-hidden rounded-full transition-[width] duration-700 ease-out ${fillClassName}`}
+        style={{ width: `${clampedPercent}%` }}
+      >
+        {/* 채워진 구간을 훑고 지나가는 하이라이트 */}
+        <span
+          className={`absolute inset-y-0 left-0 w-1/2 bg-gradient-to-r from-transparent to-transparent animate-shimmer motion-reduce:hidden ${
+            isReached ? "via-white/75" : "via-white/50"
+          }`}
+          aria-hidden="true"
+        />
+
+        {/* 진행 선두의 발광 */}
+        <span
+          className="absolute inset-y-0 right-0 w-1.5 rounded-full bg-white/90 blur-[2px] animate-gauge-pulse motion-reduce:animate-none"
+          aria-hidden="true"
+        />
+      </div>
+
+      {/* 눈금은 채워진 구간 위에도 보이도록 마지막에 겹친다. */}
+      {TICKS.map((tick) => (
+        <span
+          key={tick}
+          className="absolute inset-y-0 w-px bg-white/20"
+          style={{ left: `${tick}%` }}
+          aria-hidden="true"
+        />
+      ))}
+    </div>
+  );
+};
+
+const MemoizedHalvingGauge = memo(HalvingGauge);
+MemoizedHalvingGauge.displayName = "HalvingGauge";
+
+export default MemoizedHalvingGauge;

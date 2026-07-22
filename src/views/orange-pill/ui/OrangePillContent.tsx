@@ -7,6 +7,7 @@ import { useCallback } from "react";
 import { allRouteList } from "@/shared/config/route";
 import {
   DiscordIcon,
+  HalfCircleIcon,
   LazyImage,
   ListGroup,
   ListRow,
@@ -57,6 +58,17 @@ const OrangePillContent = () => {
     router.push(routePath);
   }, [router]);
 
+  const handleHalvingCountdownRoute = useCallback(() => {
+    const routePath = allRouteList.find((item) => item.path.includes("/countdown"))?.path;
+
+    if (!routePath) {
+      console.warn("반감기 카운트다운 경로를 찾을 수 없습니다.");
+      return;
+    }
+
+    router.push(routePath);
+  }, [router]);
+
   const handleBIP39Route = useCallback(() => {
     const routePath = allRouteList.find((item) => item.path.includes("/bip39"))?.path;
 
@@ -83,6 +95,12 @@ const OrangePillContent = () => {
           label="DCA 계산기"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleDcaRoute}
+        />
+        <ListRow
+          icon={<HalfCircleIcon size={28} />}
+          label="반감기 카운트다운"
+          rightElement={<ChevronRight className="text-muted-foreground" />}
+          onClick={handleHalvingCountdownRoute}
         />
         <ListRow
           icon={<TableProperties size={24} />}

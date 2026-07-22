@@ -55,7 +55,8 @@
       "!**/pnpm-lock.yaml",
       "!**/package-lock.json",
       "!**/tsconfig.tsbuildinfo",
-      "!**/*.css"
+      "!**/*.css",
+      "!src/shared/assets/lottie"
     ]
   },
   "overrides": [

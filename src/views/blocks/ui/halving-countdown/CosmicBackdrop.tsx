@@ -1,0 +1,328 @@
+"use client";
+
+import { memo, useEffect, useRef } from "react";
+
+const STAR_COUNT = 90;
+const PARTICLE_COUNT = 46;
+
+/** 입자 색상 색조 범위. oklch(0.78 0.16 H) 의 H = 265 ± 30 (보라~파랑) */
+const PARTICLE_HUE_BASE = 265;
+const PARTICLE_HUE_RANGE = 30;
+
+/** 별똥별 재등장 간격(프레임, 60fps 기준 약 4 ~ 11초) */
+const METEOR_DELAY_MIN = 240;
+const METEOR_DELAY_RANGE = 420;
+/** 별똥별 진행 각도(라디안). 수평 기준 약 20° ~ 38° 아래로 떨어진다. */
+const METEOR_ANGLE_MIN = Math.PI / 9;
+const METEOR_ANGLE_RANGE = Math.PI / 10;
+
+interface Star {
+  x: number;
+  y: number;
+  radius: number;
+  phase: number;
+  phaseSpeed: number;
+}
+
+interface Particle {
+  x: number;
+  y: number;
+  radius: number;
+  vy: number;
+  alpha: number;
+  color: string;
+}
+
+interface Meteor {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  /** 꼬리 길이(px) */
+  length: number;
+  /** 경과 프레임 */
+  life: number;
+  /** 소멸까지의 총 프레임 */
+  maxLife: number;
+}
+
+/**
+ * oklch 를 sRGB 로 변환한다.
+ *
+ * 캔버스 `fillStyle` 의 oklch 파싱은 구형 iOS Safari 에서 무시되어 색이 검게 칠해지므로,
+ * 색상 계산은 JS 에서 마치고 rgb 문자열만 넘긴다.
+ */
+const oklchToRgb = (lightness: number, chroma: number, hue: number) => {
+  const radian = (hue * Math.PI) / 180;
+  const a = chroma * Math.cos(radian);
+  const b = chroma * Math.sin(radian);
+
+  const l = (lightness + 0.3963377774 * a + 0.2158037573 * b) ** 3;
+  const m = (lightness - 0.1055613458 * a - 0.0638541728 * b) ** 3;
+  const s = (lightness - 0.0894841775 * a - 1.291485548 * b) ** 3;
+
+  const linearRgb = [
+    4.0767416621 * l - 3.3077115913 * m + 0.2309699292 * s,
+    -1.2684380046 * l + 2.6097574011 * m - 0.3413193965 * s,
+    -0.0041960863 * l - 0.7034186147 * m + 1.707614701 * s,
+  ];
+
+  const [r, g, blue] = linearRgb.map((channel) => {
+    const encoded = channel <= 0.0031308 ? 12.92 * channel : 1.055 * channel ** (1 / 2.4) - 0.055;
+    return Math.round(Math.min(Math.max(encoded, 0), 1) * 255);
+  });
+
+  return `${r}, ${g}, ${blue}`;
+};
+
+interface CosmicBackdropProps {
+  className?: string;
+}
+
+/**
+ * 딥 스페이스 배경 레이어.
+ *
+ * 베이스 색 → 보라·시안 글로우 블롭 → 별/상승 입자 캔버스 순으로 쌓는다.
+ * 레이아웃 프레임(max-w-layout) 안에 고정되어 콘텐츠가 스크롤해도 함께 움직이지 않는다.
+ */
+const CosmicBackdrop = ({ className = "" }: CosmicBackdropProps) => {
+  // region [Hooks]
+  const canvasRef = useRef<HTMLCanvasElement>(null);
+  const frameRef = useRef(0);
+  // endregion
+
+  // region [Life Cycles]
+  useEffect(() => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext("2d");
+    if (!canvas || !ctx) return;
+
+    const prefersReducedMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+
+    let width = 0;
+    let height = 0;
+    let stars: Star[] = [];
+    let particles: Particle[] = [];
+    let meteor: Meteor | null = null;
+    let meteorDelay = Math.floor(Math.random() * METEOR_DELAY_RANGE);
+
+    const createParticle = (initialY?: number): Particle => ({
+      x: Math.random() * width,
+      y: initialY ?? height + Math.random() * height,
+      radius: Math.random() * 2.2 + 0.8,
+      vy: -(Math.random() * 0.35 + 0.12),
+      alpha: Math.random() * 0.5 + 0.2,
+      color: oklchToRgb(
+        0.78,
+        0.16,
+        PARTICLE_HUE_BASE + (Math.random() * 2 - 1) * PARTICLE_HUE_RANGE,
+      ),
+    });
+
+    /**
+     * 화면 상단에서 대각선으로 떨어지는 별똥별 하나를 만든다.
+     *
+     * 좌·우 방향을 랜덤하게 골라 진행 방향 반대편 바깥에서 출발시키고,
+     * 화면 너비의 절반 이상을 가로지를 만큼만 살아 있도록 수명을 잡는다.
+     */
+    const createMeteor = (): Meteor => {
+      const direction = Math.random() < 0.5 ? 1 : -1;
+      const angle = METEOR_ANGLE_MIN + Math.random() * METEOR_ANGLE_RANGE;
+      const speed = Math.random() * 4 + 7;
+      const travelDistance = width * (0.5 + Math.random() * 0.4);
+      const startRatio = direction === 1 ? Math.random() * 0.5 - 0.1 : Math.random() * 0.5 + 0.6;
+
+      return {
+        x: width * startRatio,
+        y: height * (Math.random() * 0.4 - 0.05),
+        vx: Math.cos(angle) * speed * direction,
+        vy: Math.sin(angle) * speed,
+        length: Math.random() * 90 + 110,
+        life: 0,
+        maxLife: travelDistance / speed,
+      };
+    };
+
+    /** 캔버스를 컨테이너 크기에 맞추고 별·입자를 다시 배치한다. */
+    const resize = () => {
+      const rect = canvas.getBoundingClientRect();
+      const dpr = Math.min(window.devicePixelRatio || 1, 2);
+
+      width = rect.width;
+      height = rect.height;
+      canvas.width = Math.floor(width * dpr);
+      canvas.height = Math.floor(height * dpr);
+      ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
+
+      stars = Array.from({ length: STAR_COUNT }, () => ({
+        x: Math.random() * width,
+        y: Math.random() * height,
+        radius: Math.random() * 1.3 + 0.2,
+        phase: Math.random() * Math.PI * 2,
+        phaseSpeed: Math.random() * 0.03 + 0.008,
+      }));
+
+      particles = Array.from({ length: PARTICLE_COUNT }, () =>
+        createParticle(Math.random() * height),
+      );
+
+      meteor = null;
+      meteorDelay = Math.floor(Math.random() * METEOR_DELAY_RANGE);
+    };
+
+    /**
+     * 별똥별을 진행시키고 꼬리를 그린다.
+     *
+     * 살아 있는 별똥별이 없으면 대기 프레임을 소진시켜 다음 별똥별을 예약한다.
+     * 밝기는 수명에 대해 sin 곡선을 그려 자연스럽게 나타났다 사라진다.
+     */
+    const drawMeteor = () => {
+      if (!meteor) {
+        meteorDelay -= 1;
+        if (meteorDelay <= 0) {
+          meteor = createMeteor();
+          meteorDelay = METEOR_DELAY_MIN + Math.floor(Math.random() * METEOR_DELAY_RANGE);
+        }
+        return;
+      }
+
+      meteor.x += meteor.vx;
+      meteor.y += meteor.vy;
+      meteor.life += 1;
+
+      if (meteor.life >= meteor.maxLife) {
+        meteor = null;
+        return;
+      }
+
+      const speed = Math.hypot(meteor.vx, meteor.vy);
+      const tailX = meteor.x - (meteor.vx / speed) * meteor.length;
+      const tailY = meteor.y - (meteor.vy / speed) * meteor.length;
+      const opacity = Math.sin((meteor.life / meteor.maxLife) * Math.PI) ** 0.7;
+
+      const gradient = ctx.createLinearGradient(meteor.x, meteor.y, tailX, tailY);
+      gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
+      gradient.addColorStop(0.35, `rgba(186, 205, 255, ${opacity * 0.45})`);
+      gradient.addColorStop(1, "rgba(186, 205, 255, 0)");
+
+      ctx.beginPath();
+      ctx.moveTo(meteor.x, meteor.y);
+      ctx.lineTo(tailX, tailY);
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 1.8;
+      ctx.lineCap = "round";
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(meteor.x, meteor.y, 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = `rgba(214, 226, 255, ${opacity})`;
+      ctx.fill();
+      ctx.shadowBlur = 0;
+    };
+
+    const draw = () => {
+      ctx.clearRect(0, 0, width, height);
+
+      ctx.shadowBlur = 0;
+      for (const star of stars) {
+        if (!prefersReducedMotion) {
+          star.phase += star.phaseSpeed;
+        }
+
+        const opacity = 0.35 + Math.sin(star.phase) * 0.35;
+
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(230, 235, 255, ${opacity})`;
+        ctx.fill();
+      }
+
+      for (const particle of particles) {
+        if (!prefersReducedMotion) {
+          particle.y += particle.vy;
+          particle.x += Math.sin(particle.y * 0.01) * 0.15;
+
+          if (particle.y < -particle.radius) {
+            Object.assign(particle, createParticle(height + particle.radius));
+          }
+        }
+
+        ctx.beginPath();
+        ctx.arc(particle.x, particle.y, particle.radius, 0, Math.PI * 2);
+        ctx.fillStyle = `rgba(${particle.color}, ${particle.alpha})`;
+        ctx.shadowBlur = 10;
+        ctx.shadowColor = `rgba(${particle.color}, ${particle.alpha})`;
+        ctx.fill();
+      }
+
+      ctx.shadowBlur = 0;
+
+      if (!prefersReducedMotion) {
+        drawMeteor();
+      }
+    };
+
+    const loop = () => {
+      draw();
+      frameRef.current = requestAnimationFrame(loop);
+    };
+
+    resize();
+
+    if (prefersReducedMotion) {
+      draw();
+    } else {
+      frameRef.current = requestAnimationFrame(loop);
+    }
+
+    const resizeObserver = new ResizeObserver(() => {
+      resize();
+      if (prefersReducedMotion) draw();
+    });
+    resizeObserver.observe(canvas);
+
+    return () => {
+      cancelAnimationFrame(frameRef.current);
+      resizeObserver.disconnect();
+    };
+  }, []);
+  // endregion
+
+  return (
+    <div
+      className={[
+        "pointer-events-none fixed inset-y-0 left-0 z-0 w-full overflow-hidden bg-[#05060f]",
+        // 데스크톱에서는 뷰포트 전체가 아니라 앱 프레임 안에만 깔림.
+        "layout-max:left-1/2 layout-max:w-full layout-max:max-w-layout layout-max:-translate-x-1/2",
+        className,
+      ]
+        .filter(Boolean)
+        .join(" ")}
+      aria-hidden="true"
+    >
+      <span
+        className="absolute -top-[10%] -left-[20%] h-[min(80vw,520px)] w-[min(80vw,520px)] rounded-full blur-[60px] animate-blob-drift-a"
+        style={{
+          // oklch(0.55 0.2 290 / 0.55)
+          background: "radial-gradient(circle, rgba(117, 82, 219, 0.55), transparent 70%)",
+        }}
+      />
+      <span
+        className="absolute -right-[22%] -bottom-[8%] h-[min(78vw,500px)] w-[min(78vw,500px)] rounded-full blur-[64px] animate-blob-drift-b"
+        style={{
+          // oklch(0.62 0.16 210 / 0.5)
+          background: "radial-gradient(circle, rgba(0, 157, 187, 0.5), transparent 70%)",
+        }}
+      />
+
+      <canvas ref={canvasRef} className="absolute inset-0 h-full w-full" />
+    </div>
+  );
+};
+
+const MemoizedCosmicBackdrop = memo(CosmicBackdrop);
+MemoizedCosmicBackdrop.displayName = "CosmicBackdrop";
+
+export default MemoizedCosmicBackdrop;

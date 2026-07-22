@@ -1,7 +1,7 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { navigationRouteList } from "@/shared/config/route";
+import { hideBottomNavPathList, navigationRouteList } from "@/shared/config/route";
 import { TransitionLink } from "@/shared/ui";
 import { vibrate } from "@/shared/utils/device";
 
@@ -15,6 +15,11 @@ export default function BottomNavigation() {
     vibrate();
   };
   // endregion
+
+  // 몰입형 페이지는 하단 네비게이션을 렌더링하지 않는다.
+  if (hideBottomNavPathList.includes(pathname)) {
+    return null;
+  }
 
   return (
     <nav

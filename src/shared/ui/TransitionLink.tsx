@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
 import { type ComponentPropsWithoutRef, type MouseEvent, useCallback } from "react";
 import { allRouteList } from "@/shared/config/route";
+import { setTransitionDirection } from "@/shared/lib/transition";
 
 export default function TransitionLink({
   href,
@@ -24,11 +25,7 @@ export default function TransitionLink({
       const toIdx = allRouteList.findIndex((nav) => nav.path === to);
 
       // 방향 결정: 인덱스가 작아지면 오른쪽(Back), 커지면 왼쪽(Forward)
-      const direction = toIdx < fromIdx ? "right" : "left";
-
-      const html = document.documentElement;
-      html.classList.remove("slide-left", "slide-right");
-      html.classList.add(`slide-${direction}`);
+      setTransitionDirection(toIdx < fromIdx ? "right" : "left");
     },
     [pathname],
   );
