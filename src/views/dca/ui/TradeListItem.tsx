@@ -74,8 +74,9 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
 
   return (
     <li className="flex items-center justify-between gap-2 px-4 py-3 font-number">
-      <div className="flex min-w-0 flex-col gap-1">
-        <span className="flex items-center gap-1.5 text-xs text-muted-foreground">
+      {/* 날짜·개수는 길이가 고정적이라 압축되면 안 된다. 폭이 모자라면 우측 금액 컬럼이 줄어든다. */}
+      <div className="flex flex-none flex-col gap-1.5">
+        <span className="flex items-center gap-1.5 whitespace-nowrap text-xs text-muted-foreground">
           <span
             className={`rounded px-1 py-px font-default font-bold ${
               isBuy ? "bg-up/15 text-up" : "bg-down/15 text-down"
@@ -85,18 +86,18 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
           </span>
           {record.date}
         </span>
-        <span className="text-md font-bold">
+        <span className="whitespace-nowrap text-md font-bold">
           <span className="text-bitcoin">₿</span> {isBuy ? "" : "-"}
           {formatBtc(record.btcCount)}
         </span>
       </div>
 
-      <div className="flex min-w-0 flex-col gap-1 text-right">
-        <span className="text-xs text-muted-foreground">₩{comma(record.price)}</span>
-        <span className="text-md font-bold">₩{comma(totalAmount)}</span>
+      <div className="flex min-w-0 flex-1 flex-col gap-1 text-right">
+        <span className="truncate text-xs text-muted-foreground">₩{comma(record.price)}</span>
+        <span className="truncate text-md font-bold">₩{comma(totalAmount)}</span>
         {recordProfit && (
           <span
-            className={`flex items-center justify-end gap-1 text-xs font-bold ${
+            className={`flex items-center justify-end gap-1 whitespace-nowrap text-xs font-bold ${
               isProfitUp ? "text-up" : "text-down"
             }`}
           >
@@ -107,7 +108,8 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
       </div>
 
       <div className="flex flex-none items-center">
-        {record.memo && (
+        {/* 메모 유무와 무관하게 아이콘 버튼(h-9 w-9)만큼 자리를 고정해 행 간 금액 정렬을 맞춘다. */}
+        {record.memo ? (
           <KPopover>
             <KPopoverTrigger asChild>
               <KButton variant="ghost" size="icon" aria-label="메모 보기">
@@ -118,6 +120,8 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
               <p className="whitespace-pre-wrap break-words text-sm font-default">{record.memo}</p>
             </KPopoverContent>
           </KPopover>
+        ) : (
+          <span className="h-9 w-9 flex-none" aria-hidden="true" />
         )}
 
         <KDropdownMenu size="md">
