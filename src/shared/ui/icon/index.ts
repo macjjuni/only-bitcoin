@@ -6,6 +6,7 @@ export { default as DashboardIcon } from "./DashboardIcon";
 export { default as DiscordIcon } from "./DiscordIcon";
 export { default as EditIcon } from "./EditIcon";
 export { default as ExchangeIcon } from "./ExchangeIcon";
+export { default as HalfCircleIcon } from "./HalfCircleIcon";
 export { default as IosShareIcon } from "./IosShareIcon";
 export { default as MinerIcon } from "./MinerIcon";
 export { default as NaverIcon } from "./NaverIcon";

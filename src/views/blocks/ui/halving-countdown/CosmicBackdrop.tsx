@@ -130,8 +130,7 @@ const CosmicBackdrop = ({ className = "" }: CosmicBackdropProps) => {
       const angle = METEOR_ANGLE_MIN + Math.random() * METEOR_ANGLE_RANGE;
       const speed = Math.random() * 4 + 7;
       const travelDistance = width * (0.5 + Math.random() * 0.4);
-      const startRatio =
-        direction === 1 ? Math.random() * 0.5 - 0.1 : Math.random() * 0.5 + 0.6;
+      const startRatio = direction === 1 ? Math.random() * 0.5 - 0.1 : Math.random() * 0.5 + 0.6;
 
       return {
         x: width * startRatio,
