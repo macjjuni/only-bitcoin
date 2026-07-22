@@ -189,7 +189,7 @@ const CosmicBackdrop = ({ className = "" }: CosmicBackdropProps) => {
     <div
       className={[
         "pointer-events-none fixed inset-y-0 left-0 z-0 w-full overflow-hidden bg-[#05060f]",
-        // 데스크톱에서는 뷰포트 전체가 아니라 앱 프레임 안에만 깔린다.
+        // 데스크톱에서는 뷰포트 전체가 아니라 앱 프레임 안에만 깔림.
         "layout-max:left-1/2 layout-max:w-full layout-max:max-w-layout layout-max:-translate-x-1/2",
         className,
       ]

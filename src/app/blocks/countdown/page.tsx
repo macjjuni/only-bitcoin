@@ -3,6 +3,7 @@ import { fetchInitialBlocks } from "@/entities/block/server";
 import { env } from "@/shared/config/env";
 import { PageLayout } from "@/shared/ui/layout";
 import { HalvingCountdown } from "@/views/blocks";
+import CosmicBackdrop from "@/views/blocks/ui/halving-countdown/CosmicBackdrop";
 
 export const metadata: Metadata = {
   title: `${env.NEXT_PUBLIC_TITLE} - Halving Countdown`,
@@ -20,6 +21,7 @@ export default async function Page() {
   return (
     // 배경이 테마와 무관하게 딥 스페이스 톤이므로 본문 색도 밝은 쪽으로 고정한다.
     <PageLayout className="text-white/70 p-4" hasBottomNav={false}>
+      <CosmicBackdrop />
       <HalvingCountdown initialBlockHeight={currentBlockHeight} />
     </PageLayout>
   );
