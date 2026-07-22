@@ -9,6 +9,13 @@ const PARTICLE_COUNT = 46;
 const PARTICLE_HUE_BASE = 265;
 const PARTICLE_HUE_RANGE = 30;
 
+/** 별똥별 재등장 간격(프레임, 60fps 기준 약 4 ~ 11초) */
+const METEOR_DELAY_MIN = 240;
+const METEOR_DELAY_RANGE = 420;
+/** 별똥별 진행 각도(라디안). 수평 기준 약 20° ~ 38° 아래로 떨어진다. */
+const METEOR_ANGLE_MIN = Math.PI / 9;
+const METEOR_ANGLE_RANGE = Math.PI / 10;
+
 interface Star {
   x: number;
   y: number;
@@ -24,6 +31,19 @@ interface Particle {
   vy: number;
   alpha: number;
   color: string;
+}
+
+interface Meteor {
+  x: number;
+  y: number;
+  vx: number;
+  vy: number;
+  /** 꼬리 길이(px) */
+  length: number;
+  /** 경과 프레임 */
+  life: number;
+  /** 소멸까지의 총 프레임 */
+  maxLife: number;
 }
 
 /**
@@ -83,6 +103,8 @@ const CosmicBackdrop = ({ className = "" }: CosmicBackdropProps) => {
     let height = 0;
     let stars: Star[] = [];
     let particles: Particle[] = [];
+    let meteor: Meteor | null = null;
+    let meteorDelay = Math.floor(Math.random() * METEOR_DELAY_RANGE);
 
     const createParticle = (initialY?: number): Particle => ({
       x: Math.random() * width,
@@ -96,6 +118,31 @@ const CosmicBackdrop = ({ className = "" }: CosmicBackdropProps) => {
         PARTICLE_HUE_BASE + (Math.random() * 2 - 1) * PARTICLE_HUE_RANGE,
       ),
     });
+
+    /**
+     * 화면 상단에서 대각선으로 떨어지는 별똥별 하나를 만든다.
+     *
+     * 좌·우 방향을 랜덤하게 골라 진행 방향 반대편 바깥에서 출발시키고,
+     * 화면 너비의 절반 이상을 가로지를 만큼만 살아 있도록 수명을 잡는다.
+     */
+    const createMeteor = (): Meteor => {
+      const direction = Math.random() < 0.5 ? 1 : -1;
+      const angle = METEOR_ANGLE_MIN + Math.random() * METEOR_ANGLE_RANGE;
+      const speed = Math.random() * 4 + 7;
+      const travelDistance = width * (0.5 + Math.random() * 0.4);
+      const startRatio =
+        direction === 1 ? Math.random() * 0.5 - 0.1 : Math.random() * 0.5 + 0.6;
+
+      return {
+        x: width * startRatio,
+        y: height * (Math.random() * 0.4 - 0.05),
+        vx: Math.cos(angle) * speed * direction,
+        vy: Math.sin(angle) * speed,
+        length: Math.random() * 90 + 110,
+        life: 0,
+        maxLife: travelDistance / speed,
+      };
+    };
 
     /** 캔버스를 컨테이너 크기에 맞추고 별·입자를 다시 배치한다. */
     const resize = () => {
@@ -119,6 +166,61 @@ const CosmicBackdrop = ({ className = "" }: CosmicBackdropProps) => {
       particles = Array.from({ length: PARTICLE_COUNT }, () =>
         createParticle(Math.random() * height),
       );
+
+      meteor = null;
+      meteorDelay = Math.floor(Math.random() * METEOR_DELAY_RANGE);
+    };
+
+    /**
+     * 별똥별을 진행시키고 꼬리를 그린다.
+     *
+     * 살아 있는 별똥별이 없으면 대기 프레임을 소진시켜 다음 별똥별을 예약한다.
+     * 밝기는 수명에 대해 sin 곡선을 그려 자연스럽게 나타났다 사라진다.
+     */
+    const drawMeteor = () => {
+      if (!meteor) {
+        meteorDelay -= 1;
+        if (meteorDelay <= 0) {
+          meteor = createMeteor();
+          meteorDelay = METEOR_DELAY_MIN + Math.floor(Math.random() * METEOR_DELAY_RANGE);
+        }
+        return;
+      }
+
+      meteor.x += meteor.vx;
+      meteor.y += meteor.vy;
+      meteor.life += 1;
+
+      if (meteor.life >= meteor.maxLife) {
+        meteor = null;
+        return;
+      }
+
+      const speed = Math.hypot(meteor.vx, meteor.vy);
+      const tailX = meteor.x - (meteor.vx / speed) * meteor.length;
+      const tailY = meteor.y - (meteor.vy / speed) * meteor.length;
+      const opacity = Math.sin((meteor.life / meteor.maxLife) * Math.PI) ** 0.7;
+
+      const gradient = ctx.createLinearGradient(meteor.x, meteor.y, tailX, tailY);
+      gradient.addColorStop(0, `rgba(255, 255, 255, ${opacity})`);
+      gradient.addColorStop(0.35, `rgba(186, 205, 255, ${opacity * 0.45})`);
+      gradient.addColorStop(1, "rgba(186, 205, 255, 0)");
+
+      ctx.beginPath();
+      ctx.moveTo(meteor.x, meteor.y);
+      ctx.lineTo(tailX, tailY);
+      ctx.strokeStyle = gradient;
+      ctx.lineWidth = 1.8;
+      ctx.lineCap = "round";
+      ctx.stroke();
+
+      ctx.beginPath();
+      ctx.arc(meteor.x, meteor.y, 1.8, 0, Math.PI * 2);
+      ctx.fillStyle = `rgba(255, 255, 255, ${opacity})`;
+      ctx.shadowBlur = 12;
+      ctx.shadowColor = `rgba(214, 226, 255, ${opacity})`;
+      ctx.fill();
+      ctx.shadowBlur = 0;
     };
 
     const draw = () => {
@@ -157,6 +259,10 @@ const CosmicBackdrop = ({ className = "" }: CosmicBackdropProps) => {
       }
 
       ctx.shadowBlur = 0;
+
+      if (!prefersReducedMotion) {
+        drawMeteor();
+      }
     };
 
     const loop = () => {
