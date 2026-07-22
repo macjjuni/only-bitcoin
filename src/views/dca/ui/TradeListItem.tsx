@@ -4,6 +4,7 @@ import {
   KButton,
   KDialog,
   KDialogContent,
+  KDialogDescription,
   KDialogFooter,
   KDialogHeader,
   KDialogOverlay,
@@ -146,9 +147,9 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
               <strong>기록 삭제</strong>
             </KDialogTitle>
           </KDialogHeader>
-          <p className="text-sm font-default text-muted-foreground">
+          <KDialogDescription className="text-sm font-default text-muted-foreground">
             {record.date} {tradeTypeText} 기록을 삭제할까요? 되돌릴 수 없어요.
-          </p>
+          </KDialogDescription>
           <KDialogFooter>
             <KButton variant="ghost" onClick={onClickCancelDelete}>
               취소

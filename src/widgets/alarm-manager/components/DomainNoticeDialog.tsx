@@ -4,6 +4,7 @@ import {
   KButton,
   KDialog,
   KDialogContent,
+  KDialogDescription,
   KDialogFooter,
   KDialogHeader,
   KDialogOverlay,
@@ -74,9 +75,9 @@ export default function DomainNoticeDialog() {
         </KDialogHeader>
 
         <div className="py-2 flex flex-col gap-4">
-          <p className="text-[13px] text-blue-600 dark:text-blue-400 font-medium">
+          <KDialogDescription className="text-[13px] text-blue-600 dark:text-blue-400 font-medium">
             ⚡️ 기존 주소를 통해 접속하신 분들께 드리는 안내입니다.
-          </p>
+          </KDialogDescription>
 
           {/* 도메인 비교 섹션 */}
           <div className="flex flex-col gap-2 p-4 bg-gray-50 dark:bg-neutral-800 border-border rounded-lg border">

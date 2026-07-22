@@ -4,6 +4,7 @@ import {
   KAspectRatio,
   KDialog,
   KDialogContent,
+  KDialogDescription,
   KDialogHeader,
   KDialogOverlay,
   KDialogTitle,
@@ -33,6 +34,9 @@ function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
           <KDialogTitle>
             <strong>공포 & 탐욕 지수</strong>
           </KDialogTitle>
+          <KDialogDescription className="sr-only">
+            시장의 투자 심리를 0(극단적 공포)부터 100(극단적 탐욕)까지 나타낸 지표 이미지입니다.
+          </KDialogDescription>
         </KDialogHeader>
         <KAspectRatio ratio={1.1146}>
           <LazyImage src={imageUrl} alt="공포 & 탐욕 지수" className="h-full" />
