@@ -11,6 +11,24 @@ export const getNextHalvingData = (currentHeight: number) => {
   );
 };
 
+/** 표시용 보상 포맷. `"1.56250000"` 처럼 남은 0 을 떼고 `"1.5625"` 로 만든다. */
+const formatBlockReward = (blockReward: number | string) => Number(blockReward).toString();
+
+/**
+ * 반감기 도달 시 블록 보상 변화(이전 → 이후).
+ * @param halvingHeight 도달한 반감기 블록 높이
+ * @returns 제네시스(첫 항목)이거나 목록에 없는 높이면 `null`
+ */
+export const getHalvingRewardTransition = (halvingHeight: number) => {
+  const index = blockHalvingData.findIndex(({ blockHeight }) => blockHeight === halvingHeight);
+  if (index <= 0) return null;
+
+  return {
+    before: formatBlockReward(blockHalvingData[index - 1].blockReward),
+    after: formatBlockReward(blockHalvingData[index].blockReward),
+  };
+};
+
 /** 반감기 진행률 계산 */
 export const calcPercentage = (nextHalvingHeight: number | undefined, current: number) => {
   if (!nextHalvingHeight) {

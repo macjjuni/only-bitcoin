@@ -72,6 +72,10 @@ export default {
           "0%": { transform: "translateX(-120%)" },
           "100%": { transform: "translateX(320%)" },
         },
+        auroraFlow: {
+          "0%": { backgroundPosition: "0% 50%" },
+          "100%": { backgroundPosition: "100% 50%" },
+        },
         gaugePulse: {
           "0%, 100%": { opacity: "0.45", transform: "scaleX(1)" },
           "50%": { opacity: "1", transform: "scaleX(1.35)" },
@@ -111,6 +115,7 @@ export default {
         "ember-glow": "emberGlow 7s ease-in-out infinite",
         shimmer: "shimmer 2.6s ease-in-out infinite",
         "gauge-pulse": "gaugePulse 1.8s ease-in-out infinite",
+        "aurora-flow": "auroraFlow 4s linear infinite",
         "blob-drift-a": "blobDriftA 20s ease-in-out infinite",
         "blob-drift-b": "blobDriftB 24s ease-in-out infinite",
       },
