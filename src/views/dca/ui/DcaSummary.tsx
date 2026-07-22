@@ -68,7 +68,6 @@ const DcaSummary = () => {
   return (
     <Card className="font-number">
       <CardContent className="flex flex-col gap-3 p-4">
-        {/* 그리드 셀은 기본 min-width:auto 라 긴 값이 셀을 밀고 나간다. min-w-0 로 축소를 허용한다. */}
         <div className="grid grid-cols-2 gap-3">
           <div className="flex min-w-0 flex-col gap-1">
             <span className="whitespace-nowrap text-sm text-muted-foreground font-bold">

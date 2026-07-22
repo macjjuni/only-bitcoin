@@ -43,7 +43,7 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
   const tradeTypeText = isBuy ? "매수" : "매도";
   const totalAmount = calculateTradeAmount(record.btcCount, record.price);
 
-  // 매수 기록만 현재가 기준 평가손익을 표시한다. (매도·시세 미수신 시 null)
+  // 매수 기록만 현재가 기준 평가손익을 표시. (매도·시세 미수신 시 null)
   const recordProfit = calculateRecordProfit(record, currentPrice);
   const isProfitUp = (recordProfit?.profit ?? 0) >= 0;
   // endregion
@@ -73,8 +73,7 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
   // endregion
 
   return (
-    <li className="flex items-center justify-between gap-2 px-4 py-3 font-number">
-      {/* 날짜·개수는 길이가 고정적이라 압축되면 안 된다. 폭이 모자라면 우측 금액 컬럼이 줄어든다. */}
+    <li className="flex items-center justify-between gap-2 h-[58px] px-4 font-number">
       <div className="flex flex-none flex-col gap-1.5">
         <span className="flex items-center gap-1.5 whitespace-nowrap text-xs text-muted-foreground">
           <span
@@ -92,7 +91,7 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
         </span>
       </div>
 
-      <div className="flex min-w-0 flex-1 flex-col gap-1 text-right">
+      <div className="flex min-w-0 flex-1 flex-col gap-0 text-right">
         <span className="truncate text-xs text-muted-foreground">₩{comma(record.price)}</span>
         <span className="truncate text-md font-bold">₩{comma(totalAmount)}</span>
         {recordProfit && (
@@ -108,7 +107,6 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
       </div>
 
       <div className="flex flex-none items-center">
-        {/* 메모 유무와 무관하게 아이콘 버튼(h-9 w-9)만큼 자리를 고정해 행 간 금액 정렬을 맞춘다. */}
         {record.memo ? (
           <KPopover>
             <KPopoverTrigger asChild>
