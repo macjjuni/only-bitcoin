@@ -17,6 +17,7 @@ import { calculateHoldingBtcCount } from "../lib/calculateDca";
 import { formatBtc, getTodayString } from "../lib/format";
 
 const BTC_MAX_DECIMALS = 8;
+const BTC_MAX_COUNT = 21_000_000; // 비트코인 총 발행량. 이보다 큰 입력은 오타로 간주한다.
 const PRICE_FLOOR_UNIT = 1_000_000; // 매매 단가 초기값 버림 단위 (백만원)
 const MEMO_MAX_LENGTH = 200;
 
@@ -61,8 +62,10 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
     return calculateHoldingBtcCount(records, editRecord?.id);
   }, [records, editRecord]);
 
+  const isMemoFull = memoInput.length >= MEMO_MAX_LENGTH;
+  const isOverMaxBtc = btcCount > BTC_MAX_COUNT;
   const isOverSell = !isBuy && btcCount > sellableBtcCount;
-  const isValid = date !== "" && btcCount > 0 && price > 0 && !isOverSell;
+  const isValid = date !== "" && btcCount > 0 && price > 0 && !isOverMaxBtc && !isOverSell;
 
   const totalAmount = useMemo(() => {
     return Math.round(btcCount * price);
@@ -97,7 +100,8 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
   };
 
   const onChangeMemo = (e: ChangeEvent<HTMLTextAreaElement>) => {
-    setMemoInput(e.target.value);
+    // maxLength 로 1차 차단되지만, IME 조합 입력은 우회될 수 있어 여기서 한 번 더 자른다.
+    setMemoInput(e.target.value.slice(0, MEMO_MAX_LENGTH));
   };
 
   const onChangePrice = (e: ChangeEvent<HTMLInputElement>) => {
@@ -168,10 +172,16 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
             className="font-number text-md font-bold text-right h-full"
           />
         </InputGroup>
-        {isOverSell && (
+        {isOverMaxBtc ? (
           <p className="text-right text-xs text-down font-default">
-            보유 개수(₿ {formatBtc(sellableBtcCount)})까지만 매도할 수 있어요.
+            총 발행량(₿ {comma(BTC_MAX_COUNT)})보다 많이 입력할 수 없어요.
           </p>
+        ) : (
+          isOverSell && (
+            <p className="text-right text-xs text-down font-default">
+              보유 개수(₿ {formatBtc(sellableBtcCount)})까지만 매도할 수 있어요.
+            </p>
+          )
         )}
       </div>
 
@@ -196,7 +206,12 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="text-sm text-muted-foreground font-default">메모 (선택)</span>
+        <span className="flex items-center justify-between text-sm text-muted-foreground font-default">
+          메모 (선택)
+          <span className={`font-number text-xs ${isMemoFull ? "text-down" : ""}`}>
+            {memoInput.length}/{MEMO_MAX_LENGTH}
+          </span>
+        </span>
         <KTextarea
           rows={2}
           maxLength={MEMO_MAX_LENGTH}

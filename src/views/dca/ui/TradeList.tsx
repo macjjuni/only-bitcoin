@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useMemo, useState } from "react";
+import { useBitcoinStore } from "@/entities/bitcoin";
 import { type TradeRecord, useDcaStore } from "@/entities/dca";
 import { Card } from "@/shared/ui";
 import { sortTradeRecords, type TradeSortType } from "../lib/sortTradeRecords";
@@ -15,6 +16,8 @@ interface TradeListProps {
 const TradeList = ({ onClickEdit }: TradeListProps) => {
   // region [Hooks]
   const records = useDcaStore((state) => state.records);
+  // 시세는 목록에서 한 번만 구독하고 각 아이템에 내려줌. (아이템별 중복 구독 방지)
+  const currentPrice = useBitcoinStore((state) => state.bitcoinPrice.krw);
   const [typeFilter, setTypeFilter] = useState<TradeTypeFilter>("all");
   const [sortType, setSortType] = useState<TradeSortType>("dateDesc");
   // endregion
@@ -57,7 +60,12 @@ const TradeList = ({ onClickEdit }: TradeListProps) => {
         <Card>
           <ul className="divide-y-[0.75px] divide-neutral-300 dark:divide-neutral-600">
             {filteredRecords.map((record) => (
-              <TradeListItem key={record.id} record={record} onClickEdit={onClickEdit} />
+              <TradeListItem
+                key={record.id}
+                record={record}
+                currentPrice={currentPrice}
+                onClickEdit={onClickEdit}
+              />
             ))}
           </ul>
         </Card>

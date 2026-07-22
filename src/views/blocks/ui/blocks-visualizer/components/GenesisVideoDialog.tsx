@@ -6,6 +6,7 @@ import {
   KAspectRatio,
   KDialog,
   KDialogContent,
+  KDialogDescription,
   KDialogHeader,
   KDialogOverlay,
   KDialogTitle,
@@ -82,8 +83,11 @@ export default function GenesisVideoDialog({ open, setOpen }: ModalTypes) {
     <KDialog open={open} onOpenChange={setOpen} blur={2} size={dialogSize}>
       <KDialogOverlay />
       <KDialogContent className="p-0 overflow-hidden text-[0]">
-        <KDialogHeader className="hidden">
+        <KDialogHeader className="sr-only">
           <KDialogTitle>Genesis Block</KDialogTitle>
+          <KDialogDescription>
+            비트코인 제네시스 블록의 탄생을 다룬 영상을 재생합니다.
+          </KDialogDescription>
         </KDialogHeader>
 
         {/* region Video Player */}

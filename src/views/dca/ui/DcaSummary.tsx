@@ -69,21 +69,27 @@ const DcaSummary = () => {
     <Card className="font-number">
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="grid grid-cols-2 gap-3">
-          <div className="flex flex-col gap-1">
-            <span className="text-sm text-muted-foreground font-bold">총 보유</span>
-            <span className="text-xl font-bold">
+          <div className="flex min-w-0 flex-col gap-1">
+            <span className="whitespace-nowrap text-sm text-muted-foreground font-bold">
+              총 보유
+            </span>
+            <span className="truncate text-xl font-bold">
               <span className="text-bitcoin -mr-2">₿</span> {formatBtc(summary.totalBtcCount)}
             </span>
           </div>
-          <div className="flex flex-col gap-1 text-right">
-            <span className="text-sm text-muted-foreground font-bold">평가금액</span>
-            <span className="text-xl font-bold">₩{comma(summary.valuation)}</span>
+          <div className="flex min-w-0 flex-col gap-1 text-right">
+            <span className="whitespace-nowrap text-sm text-muted-foreground font-bold">
+              평가금액
+            </span>
+            <span className="truncate text-xl font-bold">₩{comma(summary.valuation)}</span>
           </div>
         </div>
 
         <div className="flex items-center justify-between gap-2 -mb-2">
-          <span className="text-sm text-muted-foreground font-bold">남은 개수</span>
-          <span className="text-lg font-bold">
+          <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold">
+            남은 개수
+          </span>
+          <span className="truncate text-lg font-bold">
             <span className="text-bitcoin">₿</span> {formatBtc(summary.remainingBtcCount)}
           </span>
         </div>
@@ -91,19 +97,23 @@ const DcaSummary = () => {
         {isDetailOpen && (
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm text-muted-foreground font-bold">평단가</span>
-              <span className="text-lg font-bold">₩{comma(summary.avgPrice)}</span>
+              <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold">
+                평단가
+              </span>
+              <span className="truncate text-lg font-bold">₩{comma(summary.avgPrice)}</span>
             </div>
             <div className="flex items-center justify-between gap-2">
-              <span className="text-sm text-muted-foreground font-bold">평가손익</span>
+              <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold">
+                평가손익
+              </span>
               <span
-                className={`flex items-center justify-end gap-1.5 text-lg font-bold ${
+                className={`flex min-w-0 items-center justify-end gap-1.5 text-lg font-bold ${
                   hasRecord ? (isProfitUp ? "text-up" : "text-down") : ""
                 }`}
               >
-                {hasRecord && <UpdownIcon size={9} isUp={isProfitUp} />}₩
-                {comma(Math.abs(summary.profit))}
-                <span className="text-xs">({summary.profitRate.toFixed(2)}%)</span>
+                {hasRecord && <UpdownIcon className="flex-none" size={9} isUp={isProfitUp} />}
+                <span className="truncate">₩{comma(Math.abs(summary.profit))}</span>
+                <span className="flex-none text-xs">({summary.profitRate.toFixed(2)}%)</span>
               </span>
             </div>
           </div>
@@ -123,7 +133,9 @@ const DcaSummary = () => {
 
         <div className="flex flex-col gap-1.5 border-t-[0.75px] border-neutral-300 dark:border-neutral-600 pt-3">
           <div className="flex items-center justify-between gap-2 ">
-            <span className="text-sm text-muted-foreground font-bold">목표</span>
+            <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold">
+              목표
+            </span>
 
             {isTargetEditing ? (
               <div className="flex items-center gap-3">
@@ -142,10 +154,15 @@ const DcaSummary = () => {
                 </KButton>
               </div>
             ) : (
-              <span className="flex items-center gap-1 text-md font-bold">
-                <span className="text-xl text-bitcoin">₿</span>
-                <strong className="text-xl">{formatBtc(targetBtcCount)}</strong>
-                <KButton className="ml-3.5" variant="ghost" size="icon" onClick={onClickEditTarget}>
+              <span className="flex min-w-0 items-center gap-1 text-md font-bold">
+                <span className="flex-none text-xl text-bitcoin">₿</span>
+                <strong className="truncate text-xl">{formatBtc(targetBtcCount)}</strong>
+                <KButton
+                  className="ml-3.5 flex-none"
+                  variant="ghost"
+                  size="icon"
+                  onClick={onClickEditTarget}
+                >
                   <Pencil size={16} />
                 </KButton>
               </span>
