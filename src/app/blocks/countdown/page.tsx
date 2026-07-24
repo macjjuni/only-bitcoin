@@ -5,7 +5,7 @@ import { PageLayout } from "@/shared/ui/layout";
 import { HalvingCountdown } from "@/views/blocks";
 import CosmicBackdrop from "@/views/blocks/ui/halving-countdown/CosmicBackdrop";
 
-const SERVICE_DOMAIN = env.NEXT_PUBLIC_URL.replace(/^https?:\/\//, "");
+const SERVICE_DOMAIN = env.NEXT_PUBLIC_URL.replace(/^https?:\/\/(www\.)?/, "");
 
 export const metadata: Metadata = {
   title: `${env.NEXT_PUBLIC_TITLE} - Halving Countdown`,
