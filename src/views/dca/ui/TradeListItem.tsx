@@ -114,7 +114,7 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
                 <NotepadText size={16} />
               </KButton>
             </KPopoverTrigger>
-            <KPopoverContent side="top" align="end" sideOffset={4} className="max-w-60 p-3">
+            <KPopoverContent side="top" align="end" sideOffset={6} className="max-w-60 p-3">
               <p className="whitespace-pre-wrap break-words text-sm font-default">{record.memo}</p>
             </KPopoverContent>
           </KPopover>
@@ -128,7 +128,7 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
               <Ellipsis size={16} />
             </KButton>
           </KDropdownMenuTrigger>
-          <KDropdownMenuContent side="top" align="end" sideOffset={4}>
+          <KDropdownMenuContent side="top" align="end" sideOffset={6}>
             <KDropdownMenuItem onSelect={onSelectEditItem}>
               <Pencil size={14} />
               수정

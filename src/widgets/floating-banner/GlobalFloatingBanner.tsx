@@ -72,7 +72,7 @@ const BANNER_CONFIGS: BannerConfig[] = [
   {
     id: "scroll-up",
     Component: ScrollUpFloatingBanner,
-    useIsVisible: () => useScrollVisibility(100),
+    useIsVisible: () => useScrollVisibility(160),
   },
 ];
 
