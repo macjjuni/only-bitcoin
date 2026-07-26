@@ -21,6 +21,7 @@ export interface DcaState {
   addRecord: (record: Omit<TradeRecord, "id">) => void;
   updateRecord: (record: TradeRecord) => void;
   removeRecord: (id: string) => void;
+  clearRecords: () => void;
   setTargetBtcCount: (targetBtcCount: number) => void;
   setSummaryDetailOpen: (isSummaryDetailOpen: boolean) => void;
 }
@@ -49,6 +50,7 @@ const useDcaStore = create<DcaState>()(
         set((state) => ({
           records: state.records.filter((item) => item.id !== id),
         })),
+      clearRecords: () => set(() => ({ records: [] })),
       setTargetBtcCount: (targetBtcCount) => set(() => ({ targetBtcCount })),
       setSummaryDetailOpen: (isSummaryDetailOpen) => set(() => ({ isSummaryDetailOpen })),
     }),

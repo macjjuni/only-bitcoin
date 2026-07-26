@@ -31,6 +31,7 @@ const DcaPanel = () => {
   const onClickTab = (tab: DcaTabType) => {
     setActiveTab(tab);
   };
+
   // endregion
 
   if (!isMounted) {
