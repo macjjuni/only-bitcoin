@@ -29,6 +29,7 @@ export {
   type ListRowProps,
 } from "./ListGroup";
 export { default as Lottie } from "./lottie/Lottie";
+export { default as NoticeCard } from "./NoticeCard";
 export { default as NotKeyNotYourBitcoin } from "./NotKeyNotYourBitcoin";
 export {
   default as SegmentedControl,

@@ -1,0 +1,14 @@
+{
+  "notices": [
+    {
+      "id": "2026-summer-event1",
+      "title": "여름 이벤트 안내",
+      "message": "온리 비트코인 여름 이벤트가 진행 중입니다.",
+      "link": "https://example.com/event",
+      "linkLabel": "이벤트 참여하기",
+      "startDate": "2026-07-01 00:00",
+      "endDate": "2026-08-31 23:59",
+      "enabled": true
+    }
+  ]
+}

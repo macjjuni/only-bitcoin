@@ -11,6 +11,7 @@ import { Content, DefaultLayout } from "@/shared/ui/layout";
 import { BottomNavigation } from "@/widgets/bottom-navigation";
 import { GlobalFloatingBanner } from "@/widgets/floating-banner";
 import { Header } from "@/widgets/header";
+import { NoticeBox } from "@/widgets/notice-box";
 import "./globals.css";
 
 // 1. Viewport
@@ -95,6 +96,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
               <Content>{children}</Content>
               <BottomNavigation />
               <GlobalFloatingBanner />
+              <NoticeBox />
             </DefaultLayout>
             <ConfettiEffect />
           </QueryProvider>

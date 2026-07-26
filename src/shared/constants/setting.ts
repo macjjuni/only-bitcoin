@@ -20,3 +20,5 @@ export const INITIAL_PATH_COOKIE_KEY = "initial_path" as const;
 // 재방문 시 훅(`useInitializePage`)이 쿠키를 갱신하므로 실질적으로 만료되지 않는다.
 export const INITIAL_PATH_COOKIE_MAX_AGE_DAYS = 400;
 export const DEFAULT_INITIAL_PATH = "/overview" as const;
+
+export const NOTICE_BOX_COOKIE_PREFIX = "notice_dismiss_" as const;

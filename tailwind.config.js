@@ -102,6 +102,14 @@ export default {
             animationTimingFunction: "ease-in",
           },
         },
+        slideUpFadeIn: {
+          "0%": { transform: "translateY(12px)", opacity: "0" },
+          "100%": { transform: "translateY(0)", opacity: "1" },
+        },
+        slideDownFadeOut: {
+          "0%": { transform: "translateY(0)", opacity: "1" },
+          "100%": { transform: "translateY(12px)", opacity: "0" },
+        },
       },
       animation: {
         wiggle: "wiggle 0.36s ease-in-out infinite",
@@ -118,6 +126,8 @@ export default {
         "aurora-flow": "auroraFlow 4s linear infinite",
         "blob-drift-a": "blobDriftA 20s ease-in-out infinite",
         "blob-drift-b": "blobDriftB 24s ease-in-out infinite",
+        "slide-up-fade-in": "slideUpFadeIn 0.3s ease-out forwards",
+        "slide-down-fade-out": "slideDownFadeOut 0.25s ease-in forwards",
       },
     },
   },
