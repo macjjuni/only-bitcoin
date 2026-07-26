@@ -17,6 +17,7 @@ const DcaHoldingsChart = () => {
   // region [Hooks]
   const records = useDcaStore((state) => state.records);
   const targetBtcCount = useDcaStore((state) => state.targetBtcCount);
+  const isPrivateMode = useDcaStore((state) => state.isPrivateMode);
   const isDark = useSettingStore((store) => store.theme) === "dark";
 
   const seriesData = useMemo(() => calculateHoldingsSeries(records), [records]);
@@ -27,8 +28,8 @@ const DcaHoldingsChart = () => {
   );
 
   const chartOptions = useMemo(
-    () => createHoldingsChartOptions({ isDark, targetBtcCount, maxHoldingBtcCount }),
-    [isDark, targetBtcCount, maxHoldingBtcCount],
+    () => createHoldingsChartOptions({ isDark, targetBtcCount, maxHoldingBtcCount, isPrivateMode }),
+    [isDark, targetBtcCount, maxHoldingBtcCount, isPrivateMode],
   );
   // endregion
 

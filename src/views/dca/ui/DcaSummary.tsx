@@ -1,7 +1,7 @@
 "use client";
 
 import { KButton } from "kku-ui";
-import { Check, ChevronDown, Pencil } from "lucide-react";
+import { Check, ChevronDown, Eye, EyeOff, Pencil } from "lucide-react";
 import { type ChangeEvent, memo, useMemo, useState } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { useDcaStore } from "@/entities/dca";
@@ -16,6 +16,8 @@ const DcaSummary = () => {
   const records = useDcaStore((state) => state.records);
   const targetBtcCount = useDcaStore((state) => state.targetBtcCount);
   const setTargetBtcCount = useDcaStore((state) => state.setTargetBtcCount);
+  const isPrivateMode = useDcaStore((state) => state.isPrivateMode);
+  const togglePrivateMode = useDcaStore((state) => state.togglePrivateMode);
   const currentPrice = useBitcoinStore((state) => state.bitcoinPrice.krw);
   const isDetailOpen = useDcaStore((state) => state.isSummaryDetailOpen);
   const setSummaryDetailOpen = useDcaStore((state) => state.setSummaryDetailOpen);
@@ -70,18 +72,32 @@ const DcaSummary = () => {
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="grid grid-cols-2 gap-3">
           <div className="flex min-w-0 flex-col gap-1">
-            <span className="whitespace-nowrap text-sm text-muted-foreground font-bold">
-              총 보유
-            </span>
+            <div className="flex items-center gap-1.5">
+              <span className="whitespace-nowrap text-sm text-muted-foreground font-bold">
+                총 보유
+              </span>
+              <KButton
+                variant="ghost"
+                size="icon"
+                className="h-5 w-5 text-muted-foreground hover:text-foreground"
+                onClick={togglePrivateMode}
+                aria-label="지표 숨기기 토글"
+              >
+                {isPrivateMode ? <EyeOff size={14} /> : <Eye size={14} />}
+              </KButton>
+            </div>
             <span className="truncate text-xl font-bold">
-              <span className="text-bitcoin -mr-2">₿</span> {formatBtc(summary.totalBtcCount)}
+              <span className="text-bitcoin -mr-2">₿</span>{" "}
+              {isPrivateMode ? "****" : formatBtc(summary.totalBtcCount)}
             </span>
           </div>
           <div className="flex min-w-0 flex-col gap-1 text-right">
             <span className="whitespace-nowrap text-sm text-muted-foreground font-bold">
               평가금액
             </span>
-            <span className="truncate text-xl font-bold">₩{comma(summary.valuation)}</span>
+            <span className="truncate text-xl font-bold">
+              ₩{isPrivateMode ? "****" : comma(summary.valuation)}
+            </span>
           </div>
         </div>
 
@@ -90,7 +106,8 @@ const DcaSummary = () => {
             남은 개수
           </span>
           <span className="truncate text-lg font-bold">
-            <span className="text-bitcoin">₿</span> {formatBtc(summary.remainingBtcCount)}
+            <span className="text-bitcoin">₿</span>{" "}
+            {isPrivateMode ? "****" : formatBtc(summary.remainingBtcCount)}
           </span>
         </div>
 
@@ -100,7 +117,9 @@ const DcaSummary = () => {
               <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold">
                 평단가
               </span>
-              <span className="truncate text-lg font-bold">₩{comma(summary.avgPrice)}</span>
+              <span className="truncate text-lg font-bold">
+                ₩{isPrivateMode ? "****" : comma(summary.avgPrice)}
+              </span>
             </div>
             <div className="flex items-center justify-between gap-2">
               <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold">
@@ -112,8 +131,12 @@ const DcaSummary = () => {
                 }`}
               >
                 {hasRecord && <UpdownIcon className="flex-none" size={9} isUp={isProfitUp} />}
-                <span className="truncate">₩{comma(Math.abs(summary.profit))}</span>
-                <span className="flex-none text-xs">({summary.profitRate.toFixed(2)}%)</span>
+                <span className="truncate">
+                  ₩{isPrivateMode ? "****" : comma(Math.abs(summary.profit))}
+                </span>
+                <span className="flex-none text-xs">
+                  ({isPrivateMode ? "*.*" : summary.profitRate.toFixed(2)}%)
+                </span>
               </span>
             </div>
           </div>
@@ -156,7 +179,9 @@ const DcaSummary = () => {
             ) : (
               <span className="flex min-w-0 items-center gap-1 text-md font-bold">
                 <span className="flex-none text-xl text-bitcoin">₿</span>
-                <strong className="truncate text-xl">{formatBtc(targetBtcCount)}</strong>
+                <strong className="truncate text-xl">
+                  {isPrivateMode ? "****" : formatBtc(targetBtcCount)}
+                </strong>
                 <KButton
                   className="ml-3.5 flex-none"
                   variant="ghost"
@@ -173,10 +198,12 @@ const DcaSummary = () => {
             <div className="h-4 w-full overflow-hidden rounded-full bg-neutral-300/60 dark:bg-neutral-700">
               <div
                 className="h-full rounded-full bg-bitcoin transition-[width] duration-300"
-                style={{ width: `${summary.achievementRate}%` }}
+                style={{ width: isPrivateMode ? "0%" : `${summary.achievementRate}%` }}
               />
             </div>
-            <span className="text-sm font-bold">{summary.achievementRate.toFixed(1)}%</span>
+            <span className="text-sm font-bold">
+              {isPrivateMode ? "*.*" : summary.achievementRate.toFixed(1)}%
+            </span>
           </div>
         </div>
       </CardContent>

@@ -35,6 +35,7 @@ interface TradeListItemProps {
 const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps) => {
   // region [Hooks]
   const removeRecord = useDcaStore((state) => state.removeRecord);
+  const isPrivateMode = useDcaStore((state) => state.isPrivateMode);
   const [isDeleteOpen, setIsDeleteOpen] = useState(false);
   // endregion
 
@@ -87,21 +88,28 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
         </span>
         <span className="whitespace-nowrap text-md font-bold">
           <span className="text-bitcoin">₿</span> {isBuy ? "" : "-"}
-          {formatBtc(record.btcCount)}
+          {isPrivateMode ? "****" : formatBtc(record.btcCount)}
         </span>
       </div>
 
       <div className="flex min-w-0 flex-1 flex-col gap-0 text-right">
-        <span className="truncate text-xs text-muted-foreground">₩{comma(record.price)}</span>
-        <span className="truncate text-md font-bold">₩{comma(totalAmount)}</span>
+        <span className="truncate text-xs text-muted-foreground">
+          ₩{isPrivateMode ? "****" : comma(record.price)}
+        </span>
+        <span className="truncate text-md font-bold">
+          ₩{isPrivateMode ? "****" : comma(totalAmount)}
+        </span>
         {recordProfit && (
           <span
             className={`flex items-center justify-end gap-1 whitespace-nowrap text-xs font-bold ${
               isProfitUp ? "text-up" : "text-down"
             }`}
           >
-            <UpdownIcon size={7} isUp={isProfitUp} />₩{comma(Math.abs(recordProfit.profit))}
-            <span className="font-normal">({recordProfit.profitRate.toFixed(2)}%)</span>
+            <UpdownIcon size={7} isUp={isProfitUp} />
+            ₩{isPrivateMode ? "****" : comma(Math.abs(recordProfit.profit))}
+            <span className="font-normal">
+              ({isPrivateMode ? "*.*" : recordProfit.profitRate.toFixed(2)}%)
+            </span>
           </span>
         )}
       </div>

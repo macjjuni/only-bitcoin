@@ -7,6 +7,7 @@ export interface CreateHoldingsChartOptionsParams {
   isDark: boolean;
   targetBtcCount: number;
   maxHoldingBtcCount: number;
+  isPrivateMode?: boolean;
 }
 
 /**
@@ -20,6 +21,7 @@ export const createHoldingsChartOptions = ({
   isDark,
   targetBtcCount,
   maxHoldingBtcCount,
+  isPrivateMode = false,
 }: CreateHoldingsChartOptionsParams): ApexOptions => ({
   chart: {
     type: "area",
@@ -52,7 +54,9 @@ export const createHoldingsChartOptions = ({
       show: true,
       format: "yyyy.MM.dd",
     },
-    y: { formatter: (val: number) => `₿ ${formatBtc(val)}` },
+    y: {
+      formatter: (val: number) => `₿ ${isPrivateMode ? "****" : formatBtc(val)}`,
+    },
     marker: { show: false },
     style: { fontSize: "12px", fontFamily: "Roboto Mono" },
   },
@@ -101,7 +105,7 @@ export const createHoldingsChartOptions = ({
         borderColor: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.45)",
         strokeDashArray: 4,
         label: {
-          text: `목표 ₿ ${formatBtc(targetBtcCount)}`,
+          text: `목표 ₿ ${isPrivateMode ? "****" : formatBtc(targetBtcCount)}`,
           position: "left",
           textAnchor: "start",
           offsetY: -6,

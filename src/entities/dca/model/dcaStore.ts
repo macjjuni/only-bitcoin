@@ -18,18 +18,21 @@ export interface DcaState {
   records: TradeRecord[];
   targetBtcCount: number;
   isSummaryDetailOpen: boolean; // 요약 카드 "자세히" 펼침 여부
+  isPrivateMode: boolean; // 숫자 지표 아스타리크(*) 숨김 여부
   addRecord: (record: Omit<TradeRecord, "id">) => void;
   updateRecord: (record: TradeRecord) => void;
   removeRecord: (id: string) => void;
   clearRecords: () => void;
   setTargetBtcCount: (targetBtcCount: number) => void;
   setSummaryDetailOpen: (isSummaryDetailOpen: boolean) => void;
+  togglePrivateMode: () => void;
 }
 
 /** persist 대상 상태 (액션 제외). 구버전(v0) 기록에는 type 필드가 없다. */
 type DcaPersistedState = {
   records: Array<Omit<TradeRecord, "type"> & { type?: TradeType }>;
   targetBtcCount: number;
+  isPrivateMode?: boolean;
 };
 
 const useDcaStore = create<DcaState>()(
@@ -38,6 +41,7 @@ const useDcaStore = create<DcaState>()(
       records: [],
       targetBtcCount: 1,
       isSummaryDetailOpen: false,
+      isPrivateMode: false,
       addRecord: (record) =>
         set((state) => ({
           records: [...state.records, { ...record, id: uuidv4() }],
@@ -53,6 +57,7 @@ const useDcaStore = create<DcaState>()(
       clearRecords: () => set(() => ({ records: [] })),
       setTargetBtcCount: (targetBtcCount) => set(() => ({ targetBtcCount })),
       setSummaryDetailOpen: (isSummaryDetailOpen) => set(() => ({ isSummaryDetailOpen })),
+      togglePrivateMode: () => set((state) => ({ isPrivateMode: !state.isPrivateMode })),
     }),
     {
       name: DCA_PERSIST_KEY,
