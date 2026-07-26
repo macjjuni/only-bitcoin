@@ -1,10 +1,10 @@
 "use client";
 
 import { Database, Plus, Trash2 } from "lucide-react";
+import { useMemo } from "react";
 import { useDcaFormStore, useDcaStore } from "@/entities/dca";
 import { FloatingBannerButton } from "@/shared/ui";
 import { isDev } from "@/shared/utils/common";
-import { useMemo } from 'react'
 import { generateDummyTradeRecords } from "@/views/dca/lib/generateDummyRecords";
 
 export default function DcaAddRecordFloatingBanner() {
@@ -13,7 +13,6 @@ export default function DcaAddRecordFloatingBanner() {
   const addRecord = useDcaStore((state) => state.addRecord);
   const clearRecords = useDcaStore((state) => state.clearRecords);
   // endregion
-
 
   // region [Events]
   const onClickAddRecord = () => {
@@ -32,20 +31,29 @@ export default function DcaAddRecordFloatingBanner() {
   };
   // endregion
 
-
-
   // region [Templates]
-  const DevTemplates = useMemo(() => (
-    isDev &&
-    <>
-      <FloatingBannerButton className="mb-2" onClick={onClickClearRecords} aria-label="기록 초기화">
-        <Trash2 size={22} className="text-red-500" />
-      </FloatingBannerButton>
-      <FloatingBannerButton className="mb-2" onClick={onClickGenerateDummy} aria-label="더미 데이터 생성">
-        <Database size={22} className="text-amber-500" />
-      </FloatingBannerButton>
-    </>
-  ), [isDev])
+  const DevTemplates = useMemo(
+    () =>
+      isDev && (
+        <>
+          <FloatingBannerButton
+            className="mb-2"
+            onClick={onClickClearRecords}
+            aria-label="기록 초기화"
+          >
+            <Trash2 size={22} className="text-red-500" />
+          </FloatingBannerButton>
+          <FloatingBannerButton
+            className="mb-2"
+            onClick={onClickGenerateDummy}
+            aria-label="더미 데이터 생성"
+          >
+            <Database size={22} className="text-amber-500" />
+          </FloatingBannerButton>
+        </>
+      ),
+    [isDev],
+  );
   // endregion
 
   return (

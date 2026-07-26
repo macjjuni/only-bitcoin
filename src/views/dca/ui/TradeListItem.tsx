@@ -105,8 +105,8 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
               isProfitUp ? "text-up" : "text-down"
             }`}
           >
-            <UpdownIcon size={7} isUp={isProfitUp} />
-            ₩{isPrivateMode ? "****" : comma(Math.abs(recordProfit.profit))}
+            <UpdownIcon size={7} isUp={isProfitUp} />₩
+            {isPrivateMode ? "****" : comma(Math.abs(recordProfit.profit))}
             <span className="font-normal">
               ({isPrivateMode ? "*.*" : recordProfit.profitRate.toFixed(2)}%)
             </span>
