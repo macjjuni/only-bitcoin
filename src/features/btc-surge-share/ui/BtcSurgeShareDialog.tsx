@@ -16,39 +16,55 @@ import { useBtcSurgeShareStore } from "../model/useBtcSurgeShareStore";
 import { BtcSurgeShareCard } from "./BtcSurgeShareCard";
 
 function BtcSurgeShareDialog() {
+  // region [Hooks]
   const isOpen = useBtcSurgeShareStore((state) => state.isOpen);
   const closeModal = useBtcSurgeShareStore((state) => state.closeModal);
   const cardRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
+  // endregion
 
-  const handleOpenChange = useCallback(
+
+  // region [Privates]
+  const captureCardToPng = async () => {
+    if (!cardRef.current) return null;
+    return toPng(cardRef.current, {
+      cacheBust: true,
+      pixelRatio: 3,
+      style: { transform: "scale(1)", transformOrigin: "top left" },
+    });
+  };
+
+  const captureCardToBlob = async () => {
+    if (!cardRef.current) return null;
+    return toBlob(cardRef.current, { cacheBust: true, pixelRatio: 3 });
+  };
+
+  const downloadDataUrl = (dataUrl: string) => {
+    const link = document.createElement("a");
+    link.download = `ONLY-BTC-APP-${Date.now()}.png`;
+    link.href = dataUrl;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+  };
+  // endregion
+
+
+  // region [Events]
+  const onOpenChange = useCallback(
     (open: boolean) => {
-      if (!open) {
-        closeModal();
-      }
+      if (!open) closeModal();
     },
     [closeModal],
   );
 
-  /** 이미지 저장 */
-  const handleDownloadImage = async () => {
+  const onClickDownloadImage = async () => {
     if (!cardRef.current || isExporting) return;
     try {
       setIsExporting(true);
-      const dataUrl = await toPng(cardRef.current, {
-        cacheBust: true,
-        pixelRatio: 3,
-        style: {
-          transform: "scale(1)",
-          transformOrigin: "top left",
-        },
-      });
-
-      const link = document.createElement("a");
-      link.download = `ONLY-BTC-APP-${Date.now()}.png`;
-      link.href = dataUrl;
-      link.click();
-
+      const dataUrl = await captureCardToPng();
+      if (!dataUrl) throw new Error("PNG 변환 실패");
+      downloadDataUrl(dataUrl);
       kToast.success("이미지가 저장되었습니다!");
     } catch (err) {
       console.error("이미지 저장 실패:", err);
@@ -58,31 +74,19 @@ function BtcSurgeShareDialog() {
     }
   };
 
-  /** 클립보드 복사 / 공유 */
-  const handleShareImage = async () => {
+  const onClickShareImage = async () => {
     if (!cardRef.current || isExporting) return;
     try {
       setIsExporting(true);
-      const blob = await toBlob(cardRef.current, {
-        cacheBust: true,
-        pixelRatio: 3,
-      });
-
+      const blob = await captureCardToBlob();
       if (!blob) throw new Error("Blob 생성 실패");
 
       if (navigator.clipboard && window.ClipboardItem) {
-        await navigator.clipboard.write([
-          new ClipboardItem({
-            [blob.type]: blob,
-          }),
-        ]);
+        await navigator.clipboard.write([new ClipboardItem({ [blob.type]: blob })]);
         kToast.success("클립보드에 카드가 복사되었습니다! SNS에 붙여넣어 공유해보세요.");
       } else if (navigator.share) {
         const file = new File([blob], "only-btc-app.png", { type: "image/png" });
-        await navigator.share({
-          files: [file],
-          title: "ONLY-BTC.APP 비트코인 시세 알림",
-        });
+        await navigator.share({ files: [file], title: "ONLY-BTC.APP 비트코인 시세 알림" });
       } else {
         kToast.info("이미지 저장을 이용해 주세요.");
       }
@@ -93,9 +97,11 @@ function BtcSurgeShareDialog() {
       setIsExporting(false);
     }
   };
+  // endregion
+
 
   return (
-    <KDialog open={isOpen} onOpenChange={handleOpenChange} blur={3} size="md">
+    <KDialog open={isOpen} onOpenChange={onOpenChange} blur={3} size="md">
       <KDialogOverlay className="bg-black/70 backdrop-blur-md" />
       <KDialogContent className="p-0 border-none bg-transparent shadow-none max-w-[460px] w-[92vw] [&>button]:hidden">
         <KDialogHeader className="sr-only">
@@ -127,7 +133,7 @@ function BtcSurgeShareDialog() {
           <div className="flex items-center gap-3 mt-4 w-full max-w-[440px]">
             <button
               type="button"
-              onClick={handleDownloadImage}
+              onClick={onClickDownloadImage}
               disabled={isExporting}
               className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-black font-extrabold text-sm transition-all shadow-[0_0_20px_rgba(0,230,118,0.4)] cursor-pointer disabled:opacity-50"
             >
@@ -137,7 +143,7 @@ function BtcSurgeShareDialog() {
 
             <button
               type="button"
-              onClick={handleShareImage}
+              onClick={onClickShareImage}
               disabled={isExporting}
               className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-neutral-800/90 hover:bg-neutral-700 border border-neutral-700/80 active:scale-[0.98] text-white font-extrabold text-sm transition-all cursor-pointer disabled:opacity-50"
             >

@@ -25,7 +25,7 @@ const fetchBtcTicker = async (): Promise<UpbitTickerResponse | null> => {
 
 /** 24H 거래대금(원화)을 "3.5조", "8,500억" 형태의 한국어 가독 단위로 변환 */
 export function formatKoreanVolume(volumeInKrw: number): string {
-  if (!volumeInKrw || volumeInKrw <= 0) return "3.5조";
+  if (!volumeInKrw || volumeInKrw <= 0) return "-";
   if (volumeInKrw >= 1_000_000_000_000) {
     const cho = volumeInKrw / 1_000_000_000_000;
     return `${cho.toFixed(1)}조`;
