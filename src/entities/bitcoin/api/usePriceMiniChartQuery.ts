@@ -4,20 +4,23 @@ import { useEffect } from "react";
 import { isDev } from "@/shared/utils/common";
 import type { MarketChartFormattedData } from "../model/market";
 import { fetchBinanceKlines } from "./binance";
+import { fetchUpbitCandles } from "./upbit";
 
 /**
- * PriceMiniChart 전용 1D 가격 시계열 패치.
+ * PriceMiniChart 전용 1D 가격 시계열 패치 (업비트 KRW 차트 우선, 바이낸스 폴백)
  * - MarketChart와 캐시를 공유하지 않도록 별도 queryKey 사용
  * - 15분 캐싱 정책
  */
 async function fetchPriceMiniChart(): Promise<MarketChartFormattedData> {
   try {
-    const data = await fetchBinanceKlines("5m", 288);
-
-    if (isDev) {
-      console.log("✅ 가격 미니차트 데이터 초기화!");
+    const upbitData = await fetchUpbitCandles("minutes/5", 200);
+    if (upbitData.price && upbitData.price.length >= 10) {
+      if (isDev) console.log("✅ 업비트 미니차트 데이터 초기화!");
+      return upbitData;
     }
 
+    const data = await fetchBinanceKlines("5m", 288);
+    if (isDev) console.log("✅ 바이낸스 미니차트 데이터 초기화!");
     return data;
   } catch {
     return { date: [], price: [] };

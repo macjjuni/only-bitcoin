@@ -2,9 +2,11 @@
 
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
+import { BtcSurgeShareDialog } from "@/features/btc-surge-share";
 import { hideBottomNavPathList } from "@/shared/config/route";
 import BlocksCountdownFloatingBanner from "./ui/BlocksCountdownFloatingBanner";
 import Btc2FiatFloatingBanner from "./ui/Btc2FiatFloatingBanner";
+import BtcSurgeShareFloatingBanner from "./ui/BtcSurgeShareFloatingBanner";
 import CountdownBackFloatingBanner from "./ui/CountdownBackFloatingBanner";
 import DcaAddRecordFloatingBanner from "./ui/DcaAddRecordFloatingBanner";
 import ScrollUpFloatingBanner from "./ui/ScrollUpFloatingBanner";
@@ -37,6 +39,14 @@ function useScrollVisibility(threshold = 100) {
 }
 
 const BANNER_CONFIGS: BannerConfig[] = [
+  {
+    id: "btc-surge-share",
+    Component: BtcSurgeShareFloatingBanner,
+    useIsVisible: () => {
+      const pathname = usePathname();
+      return pathname === "/" || pathname === "/overview";
+    },
+  },
   {
     id: "blocks-countdown",
     Component: BlocksCountdownFloatingBanner,
@@ -97,21 +107,24 @@ export default function GlobalFloatingBanner() {
   const hasBottomNav = !hideBottomNavPathList.includes(pathname);
 
   return (
-    <div
-      className={[
-        // 헤더·바텀 네비와 동일하게 페이지 전환 시 함께 밀리지 않는 고정 UI 로 취급한다.
-        "only-btc__floating-banner",
-        "fixed right-0 z-[10] pr-4 pb-3.5 pointer-events-none",
-        hasBottomNav ? "bottom-bottom-nav" : "bottom-0",
-        "flex flex-col gap-2 items-end",
-        "layout-max:left-1/2 layout-max:w-full layout-max:max-w-[calc(theme(maxWidth.layout)-2px)] layout-max:-translate-x-1/2",
-      ]
-        .filter(Boolean)
-        .join(" ")}
-    >
-      {BANNER_CONFIGS.map((config) => (
-        <BannerItem key={config.id} config={config} />
-      ))}
-    </div>
+    <>
+      <div
+        className={[
+          // 헤더·바텀 네비와 동일하게 페이지 전환 시 함께 밀리지 않는 고정 UI 로 취급한다.
+          "only-btc__floating-banner",
+          "fixed right-0 z-[10] pr-4 pb-3.5 pointer-events-none",
+          hasBottomNav ? "bottom-bottom-nav" : "bottom-0",
+          "flex flex-col gap-2 items-end",
+          "layout-max:left-1/2 layout-max:w-full layout-max:max-w-[calc(theme(maxWidth.layout)-2px)] layout-max:-translate-x-1/2",
+        ]
+          .filter(Boolean)
+          .join(" ")}
+      >
+        {BANNER_CONFIGS.map((config) => (
+          <BannerItem key={config.id} config={config} />
+        ))}
+      </div>
+      <BtcSurgeShareDialog />
+    </>
   );
 }
