@@ -78,7 +78,10 @@ useEffect(() => {
 // endregion
 ```
 
-## 4. Communication Protocol
+## 4. Git Commit Rules
+- **Co-Authored-By 금지:** 커밋 메시지에 `Co-Authored-By` 라인을 절대 포함하지 않는다.
+
+## 5. Communication Protocol
 
 - Result-Oriented: Provide the full code solution first, followed by concise explanations.
 - Full Context: Always provide the entire code snippet rather than partial edits to maintain context.
