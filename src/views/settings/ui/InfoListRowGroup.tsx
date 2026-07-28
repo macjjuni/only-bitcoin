@@ -1,11 +1,12 @@
 "use client";
 
-import { KButton, KIcon, kToast } from "kku-ui";
+import { KButton, KIcon, KSwitch, kToast } from "kku-ui";
 import { clipboardUtil } from "kku-util";
-import { QrCode as QrCodeIcon, ShieldCheck } from "lucide-react";
+import { FlaskConical, QrCode as QrCodeIcon, ShieldCheck } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, useCallback } from "react";
 import { QRCode } from "react-qrcode-logo";
+import useSettingStore from "@/shared/stores/settingStore";
 import { ListGroup, ListRow, ListRowAccordion } from "@/shared/ui";
 
 const LIGHTNING_ADDRESS = process.env.NEXT_PUBLIC_DONATION_ADDRESS || "";
@@ -27,6 +28,8 @@ const PRIVACY_PATH = "/settings/privacy";
 const InfoListRowGroup = () => {
   // region [Hooks]
   const router = useTransitionRouter();
+  const isLab = useSettingStore((state) => state.setting.isLab);
+  const setIsLab = useSettingStore((state) => state.setIsLab);
   // endregion
 
   // region [Privates]
@@ -96,6 +99,11 @@ const InfoListRowGroup = () => {
         icon={<ShieldCheck size={24} />}
         label="개인정보처리방침"
         onClick={onRouteToPrivacy}
+      />
+      <ListRow
+        icon={<FlaskConical size={24} />}
+        label="실험실"
+        rightElement={<KSwitch checked={isLab} onCheckedChange={setIsLab} />}
       />
       <ListRow
         icon={<KIcon icon="dev" color="#333" size={24} />}
