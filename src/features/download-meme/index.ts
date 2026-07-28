@@ -1,1 +1,1 @@
-export { downloadMemeImage } from "./lib/downloadImage";
+export { copyMemeImageToClipboard, downloadMemeImage } from "./lib/downloadImage";

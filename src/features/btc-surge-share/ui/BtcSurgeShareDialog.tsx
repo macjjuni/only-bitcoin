@@ -9,14 +9,12 @@ import {
   KDialogTitle,
   kToast,
 } from "kku-ui";
-import { Download, Share2, X } from "lucide-react";
+import { Copy, X } from "lucide-react";
 import { memo, useCallback, useRef, useState } from "react";
 import {
   captureElementToPngBlob,
-  captureElementToPngDataUrl,
   copyPngToClipboard,
   createPngFile,
-  downloadImageFromDataUrl,
   isImageClipboardSupported,
   isImageFileShareSupported,
   isShareAbortedByUser,
@@ -102,7 +100,7 @@ function BtcSurgeShareDialog() {
     const shareImageFile = createPngFile(capturedImageBlob, SHARE_IMAGE_FILE_NAME);
 
     if (!isImageFileShareSupported(shareImageFile)) {
-      kToast.info("이미지 저장을 이용해 주세요.");
+      kToast.info("이미지 복사를 이용해 주세요.");
       return;
     }
 
@@ -120,27 +118,6 @@ function BtcSurgeShareDialog() {
     [closeModal],
   );
 
-  const onClickDownloadImage = async () => {
-    const cardElement = cardRef.current;
-
-    if (!cardElement || isExporting) {
-      return;
-    }
-
-    setIsExporting(true);
-
-    try {
-      const capturedDataUrl = await captureElementToPngDataUrl(cardElement);
-      downloadImageFromDataUrl(capturedDataUrl, `ONLY-BTC-APP-${Date.now()}.png`);
-      kToast.success("이미지가 저장되었습니다!");
-    } catch (error) {
-      console.error("이미지 저장 실패:", error);
-      kToast.error("이미지 저장에 실패했습니다.");
-    } finally {
-      setIsExporting(false);
-    }
-  };
-
   const onClickCopyImage = async () => {
     const cardElement = cardRef.current;
 
@@ -154,7 +131,7 @@ function BtcSurgeShareDialog() {
       if (isImageClipboardSupported()) {
         // Safari 는 user gesture 동기 구간에서만 클립보드 쓰기를 허용하므로 Blob 을 await 하지 않는다.
         await copyPngToClipboard(() => captureElementToPngBlob(cardElement));
-        kToast.success("클립보드에 카드가 복사되었습니다! SNS에 붙여넣어 공유해보세요.");
+        kToast.success("클립보드에 복사되었습니다.");
         return;
       }
 
@@ -219,24 +196,14 @@ function BtcSurgeShareDialog() {
           </div>
 
           {/* 캡처 & 공유 액션 버튼 그룹 */}
-          <div className="flex items-center gap-3 mt-4 w-full max-w-[440px]">
-            <button
-              type="button"
-              onClick={onClickDownloadImage}
-              disabled={isExporting}
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-black font-extrabold text-sm transition-all shadow-[0_0_20px_rgba(0,230,118,0.4)] cursor-pointer disabled:opacity-50"
-            >
-              <Download size={18} />
-              {isExporting ? "처리 중..." : "이미지 저장"}
-            </button>
-
+          <div className="flex items-center mt-4 w-full max-w-[440px]">
             <button
               type="button"
               onClick={onClickCopyImage}
               disabled={isExporting}
-              className="flex-1 flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-neutral-800/90 hover:bg-neutral-700 border border-neutral-700/80 active:scale-[0.98] text-white font-extrabold text-sm transition-all cursor-pointer disabled:opacity-50"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-black font-extrabold text-sm transition-all shadow-[0_0_20px_rgba(0,230,118,0.4)] cursor-pointer"
             >
-              <Share2 size={18} />
+              <Copy size={18} />
               {isExporting ? "처리 중..." : "이미지 복사"}
             </button>
           </div>

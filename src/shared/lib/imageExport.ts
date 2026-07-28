@@ -29,6 +29,19 @@ const CAPTURE_OPTIONS = {
 } as const;
 
 /**
+ * iOS 기기(iPhone, iPad, iPod) 환경인지 여부를 반환한다.
+ */
+export function isIos(): boolean {
+  if (typeof window === "undefined" || typeof navigator === "undefined") {
+    return false;
+  }
+  return (
+    /iPad|iPhone|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+/**
  * 클립보드 이미지 쓰기(ClipboardItem) 지원 여부를 반환한다.
  */
 export function isImageClipboardSupported(): boolean {
