@@ -17,17 +17,16 @@ const BtcTextLogo = ({
     <svg
       width={width}
       height={height}
-      viewBox="0 0 110 24"
-      className={className}
+      viewBox="0 0 120 24"
+      className={`block overflow-visible ${className}`}
       style={style}
       xmlns="http://www.w3.org/2000/svg"
     >
       <text
         x="0"
-        y="50%"
-        dominantBaseline="central"
+        y="20"
         fill={color}
-        fontSize="24"
+        fontSize="26"
         fontWeight="900"
         letterSpacing="0.05em"
         fontFamily="var(--font-sans, system-ui, -apple-system, sans-serif)"
