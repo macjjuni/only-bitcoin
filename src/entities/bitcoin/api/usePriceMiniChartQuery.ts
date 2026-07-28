@@ -6,7 +6,7 @@ import type { MarketChartFormattedData } from "../model/market";
 import { fetchBinanceKlines } from "./binance";
 
 /**
- * PriceMiniChart 전용 1D 가격 시계열 패치.
+ * PriceMiniChart 전용 1D 가격 시계열 패치 ( 바이낸스 BTCUSDT 5분봉 × 288 = 24h )
  * - MarketChart와 캐시를 공유하지 않도록 별도 queryKey 사용
  * - 15분 캐싱 정책
  */
@@ -15,7 +15,7 @@ async function fetchPriceMiniChart(): Promise<MarketChartFormattedData> {
     const data = await fetchBinanceKlines("5m", 288);
 
     if (isDev) {
-      console.log("✅ 가격 미니차트 데이터 초기화!");
+      console.log("✅ 바이낸스 미니차트 데이터 초기화!");
     }
 
     return data;

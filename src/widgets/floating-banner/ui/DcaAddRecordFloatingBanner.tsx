@@ -2,10 +2,9 @@
 
 import { Database, Plus, Trash2 } from "lucide-react";
 import { useMemo } from "react";
-import { useDcaFormStore, useDcaStore } from "@/entities/dca";
+import { generateDummyTradeRecords, useDcaFormStore, useDcaStore } from "@/entities/dca";
 import { FloatingBannerButton } from "@/shared/ui";
 import { isDev } from "@/shared/utils/common";
-import { generateDummyTradeRecords } from "@/views/dca/lib/generateDummyRecords";
 
 export default function DcaAddRecordFloatingBanner() {
   // region [Hooks]
@@ -32,7 +31,8 @@ export default function DcaAddRecordFloatingBanner() {
   // endregion
 
   // region [Templates]
-  const DevTemplates = useMemo(
+  // 개발용 더미 데이터 생성·초기화 버튼. 필요할 때 아래 return 문에서 주석을 해제해 사용한다.
+  const _DevTemplates = useMemo(
     () =>
       isDev && (
         <>
@@ -58,7 +58,7 @@ export default function DcaAddRecordFloatingBanner() {
 
   return (
     <>
-      {/* {DevTemplates} */}
+      {/* {_DevTemplates} */}
       <FloatingBannerButton onClick={onClickAddRecord} aria-label="매매 기록 추가">
         <Plus size={28} className="text-black dark:text-white" />
       </FloatingBannerButton>

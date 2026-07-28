@@ -8,7 +8,7 @@ import { type BinanceInterval, fetchBinanceKlines } from "./binance";
 import { fetchBlockchainMarketPriceAll } from "./blockchain";
 
 /**
- * 인터벌별 Binance Klines 파라미터 매핑
+ * 인터벌별 Binance Klines 파라미터 매핑 ( BTCUSDT 종가 기준 )
  * - 1D: 5분봉 × 288 (24h)
  * - 7D: 1시간봉 × 168 (7일)
  * - 1M: 4시간봉 × 180 (30일)
