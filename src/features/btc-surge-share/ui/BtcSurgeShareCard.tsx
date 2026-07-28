@@ -215,8 +215,8 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       {/* 상단 헤더: 브랜드 로고 + 상태 뱃지 */}
       <div className="relative z-10 flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <KIcon icon="bitcoin" color="white" size={28} />
-          <BtcTextLogo color="white" height={28} width={130} />
+          <KIcon icon="bitcoin" color="#F7931A" size={28} />
+          <BtcTextLogo color="#fff" height={28} width={130} />
         </div>
 
         <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/10">
@@ -352,18 +352,18 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       </div>
 
       {/* 하단 메타 정보 ( 좌측 서비스 도메인은 SNS 확산용 워터마크 ) */}
-      <div className="relative z-10 flex justify-between items-center gap-2 text-[11px] font-medium text-neutral-400 pt-4 border-t border-white/10">
+      <div className="relative z-10 flex justify-between items-center gap-2 text-sm font-medium text-neutral-400 pt-4 border-t border-white/10">
         <span
-          className="flex items-center gap-1.5 font-black tracking-wider text-white text-xs uppercase whitespace-nowrap flex-shrink-0"
+          className="flex items-center gap-1.5 font-black tracking-wider text-white text-sm uppercase whitespace-nowrap flex-shrink-0"
           style={{ textShadow: `0 0 14px ${themeColor}80` }}
         >
           <span
-            className="text-sm w-1.5 h-1.5 rounded-full flex-shrink-0"
+            className="w-1.5 h-1.5 rounded-full flex-shrink-0"
             style={{ backgroundColor: themeColor }}
           />
           {SERVICE_DOMAIN}
         </span>
-        <span className="text-xs font-number min-w-0 truncate">{capturedAtKst}</span>
+        <span className="text-sm font-number min-w-0 truncate">{capturedAtKst}</span>
       </div>
     </div>
   );
