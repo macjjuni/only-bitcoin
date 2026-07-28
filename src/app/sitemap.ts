@@ -6,15 +6,17 @@ const BASE_URL = "https://only-btc.app";
 export default function sitemap(): MetadataRoute.Sitemap {
   // #region 1. Static Routes
   // `/`는 `/overview`를 canonical로 가리키므로 사이트맵에는 정규 URL만 제출.
+  // `/settings`는 robots.txt 에서 차단하므로 제출하지 않는다. (하위 `/settings/privacy` 는 예외)
   const staticRoutes = [
     "/overview",
     "/blocks",
+    "/blocks/countdown",
     "/btc2fiat",
+    "/dca",
     "/premium",
     "/orange-pill",
     "/orange-pill/meme",
     "/orange-pill/bip39",
-    "/settings",
   ].map((route) => ({
     url: `${BASE_URL}${route}`,
     lastModified: new Date(),
