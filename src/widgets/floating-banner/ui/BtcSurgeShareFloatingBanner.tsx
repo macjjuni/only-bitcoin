@@ -2,10 +2,16 @@
 
 import { TrendingUp } from "lucide-react";
 import { useBtcSurgeShareStore } from "@/features/btc-surge-share";
+import useSettingStore from "@/shared/stores/settingStore";
 import { FloatingBannerButton } from "@/shared/ui";
 
 export default function BtcSurgeShareFloatingBanner() {
   const openModal = useBtcSurgeShareStore((state) => state.openModal);
+  const isLab = useSettingStore((state) => state.setting.isLab);
+
+  if (!isLab) {
+    return null;
+  }
 
   return (
     <FloatingBannerButton
