@@ -201,7 +201,7 @@ function BtcSurgeShareDialog() {
               type="button"
               onClick={onClickCopyImage}
               disabled={isExporting}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-black font-extrabold text-sm transition-all shadow-[0_0_20px_rgba(0,230,118,0.4)] cursor-pointer"
+              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-bitcoin hover:bg-amber-600 active:scale-[0.98] text-white font-extrabold text-sm transition-all shadow-[0_0_20px_rgb(247,147,26)] cursor-pointer"
             >
               <Copy size={18} />
               {isExporting ? "처리 중..." : "이미지 복사"}
