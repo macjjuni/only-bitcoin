@@ -43,6 +43,16 @@ export function isIos(): boolean {
 }
 
 /**
+ * Android 기기 환경인지 여부를 반환한다.
+ */
+export function isAndroid(): boolean {
+  if (typeof navigator === "undefined") {
+    return false;
+  }
+  return /Android/i.test(navigator.userAgent);
+}
+
+/**
  * 클립보드 이미지 쓰기(ClipboardItem) 지원 여부를 반환한다.
  */
 export function isImageClipboardSupported(): boolean {

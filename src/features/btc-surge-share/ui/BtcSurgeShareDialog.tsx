@@ -10,14 +10,18 @@ import {
   KDialogTitle,
   kToast,
 } from "kku-ui";
-import { Copy, X } from "lucide-react";
+import { Copy, Download, X } from "lucide-react";
 import { memo, useCallback, useRef, useState } from "react";
 import {
   captureElementToPngBlob,
+  captureElementToPngDataUrl,
   copyPngToClipboard,
   createPngFile,
+  downloadImageFromDataUrl,
+  isAndroid,
   isImageClipboardSupported,
   isImageFileShareSupported,
+  isIos,
   isShareAbortedByUser,
 } from "@/shared/lib/imageExport";
 import { useBtcSurgeShareStore } from "../model/useBtcSurgeShareStore";
@@ -101,7 +105,7 @@ function BtcSurgeShareDialog() {
     const shareImageFile = createPngFile(capturedImageBlob, SHARE_IMAGE_FILE_NAME);
 
     if (!isImageFileShareSupported(shareImageFile)) {
-      kToast.info("이미지 복사를 이용해 주세요.");
+      kToast.info("이미지 저장을 이용해 주세요.");
       return;
     }
 
@@ -129,7 +133,8 @@ function BtcSurgeShareDialog() {
     setIsExporting(true);
 
     try {
-      if (isImageClipboardSupported()) {
+      // Android 는 clipboard.write 가 성공으로 응답해도 실제로 이미지가 저장되지 않는 경우가 있어 공유 시트를 우선한다.
+      if (!isAndroid() && isImageClipboardSupported()) {
         // Safari 는 user gesture 동기 구간에서만 클립보드 쓰기를 허용하므로 Blob 을 await 하지 않는다.
         await copyPngToClipboard(() => captureElementToPngBlob(cardElement));
         kToast.success("클립보드에 복사되었습니다.");
@@ -142,8 +147,34 @@ function BtcSurgeShareDialog() {
         return;
       }
 
-      console.error("이미지 공유 실패:", error);
-      kToast.error("공유에 실패했습니다.");
+      console.error("이미지 복사 실패:", error);
+      kToast.error("이미지 복사에 실패했습니다.");
+    } finally {
+      setIsExporting(false);
+    }
+  };
+
+  const onClickSaveImage = async () => {
+    if (isIos()) {
+      kToast.error("iOS에서는 이미지 저장을 지원하지 않습니다.");
+      return;
+    }
+
+    const cardElement = cardRef.current;
+
+    if (!cardElement || isExporting) {
+      return;
+    }
+
+    setIsExporting(true);
+
+    try {
+      const dataUrl = await captureElementToPngDataUrl(cardElement);
+
+      downloadImageFromDataUrl(dataUrl, SHARE_IMAGE_FILE_NAME);
+    } catch (error) {
+      console.error("이미지 저장 실패:", error);
+      kToast.error("이미지 저장에 실패했습니다.");
     } finally {
       setIsExporting(false);
     }
@@ -194,7 +225,7 @@ function BtcSurgeShareDialog() {
           </div>
 
           {/* 캡처 & 공유 액션 버튼 그룹 */}
-          <div className="flex items-center mt-4 w-full max-w-[440px]">
+          <div className="flex items-center gap-2 mt-4 w-full max-w-[440px]">
             <KButton
               width="full"
               size="lg"
@@ -204,6 +235,16 @@ function BtcSurgeShareDialog() {
             >
               <Copy size={18} />
               {isExporting ? "처리 중..." : "이미지 복사"}
+            </KButton>
+            <KButton
+              width="full"
+              size="lg"
+              onClick={onClickSaveImage}
+              disabled={isExporting}
+              className="h-[44px] gap-2 !text-white bg-neutral-700 hover:bg-neutral-600 rounded-3xl"
+            >
+              <Download size={18} />
+              이미지 저장
             </KButton>
           </div>
         </div>
