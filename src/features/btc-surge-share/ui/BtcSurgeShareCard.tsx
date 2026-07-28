@@ -9,7 +9,7 @@ import {
   useMarketChartData,
 } from "@/entities/bitcoin/client";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
-import { BtcTextLogo } from "@/shared/ui";
+import { BtcTextLogo, UpdownIcon } from "@/shared/ui";
 
 type ShareCardTimeframe = "1D" | "7D" | "30D";
 
@@ -81,7 +81,7 @@ function generateSvgCurvePath(data: number[], width: number, height: number) {
 }
 
 /**
- * 현재가와 변동률로부터 해당 통화의 변동액을 역산한다.
+ * 현재가와 변동률로부터 해당 통화의 변동액을 역산.
  *
  * 차트는 바이낸스 BTCUSDT( 달러 ) 기준이라 원화 시계열이 없으므로, 변동률을 각 통화의
  * 현재가에 적용해 변동액을 구한다. ( 기간 내 환율 변동은 반영되지 않는 근사값 )
@@ -107,7 +107,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   const bitcoinPrice = useBitcoinStore((state) => state.bitcoinPrice);
   const { marketChartData } = useMarketChartData(TIMEFRAME_INTERVAL_MAP[timeframe]);
 
-  // 카드가 열린 시각을 고정한다. 다이얼로그가 닫히면 언마운트되므로 열 때마다 다시 계산된다.
+  // 카드가 열린 시각을 고정한다. 다이얼로그가 닫히면 언마운트되므로 열 때마다 다시 계산.
   const [capturedAtKst] = useState<string>(getCurrentDateTimeKST);
 
   /** 바이낸스 BTCUSDT 종가 시계열 ( 달러 기준 ) */
@@ -153,7 +153,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
     [currentPriceUsd, changePercent],
   );
 
-  // 고가·저가·거래량은 차트·변동률과 동일한 바이낸스 BTCUSDT 롤링 24시간 기준( 달러 )이다.
+  // 고가·저가·거래량은 차트·변동률과 동일한 바이낸스 BTCUSDT 롤링 24시간 기준( 달러 ).
   const high24hUsd = useMemo(() => {
     if (btc24hStats?.highPriceUsd && btc24hStats.highPriceUsd > 0) return btc24hStats.highPriceUsd;
     return 0;
@@ -255,8 +255,8 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       {/* 상단 헤더: 브랜드 로고 + 상태 뱃지 */}
       <div className="relative z-10 flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <KIcon icon="bitcoin" color="white" size={24} />
-          <BtcTextLogo color="white" height={24} width={110} />
+          <KIcon icon="bitcoin" color="white" size={28} />
+          <BtcTextLogo color="white" height={32} width={136} />
         </div>
 
         <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/10">
@@ -294,7 +294,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       <div className="relative z-10 mb-0">
         <div className="flex items-baseline gap-2 mb-1">
           <span
-            className="text-5xl font-black tracking-tight font-number"
+            className="flex items-center text-5xl font-black tracking-tight font-number"
             style={{
               color: themeColor,
               filter: isUp
@@ -302,7 +302,8 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
                 : "drop-shadow(0 0 25px rgba(255,82,82,0.45))",
             }}
           >
-            {isUp ? "▲" : "▼"} {isUp ? "+" : ""}
+            <UpdownIcon isUp={isUp} size={36} className="mr-1" />
+            {isUp ? "+" : ""}
             {changePercent.toFixed(2)}%
           </span>
         </div>
@@ -323,7 +324,14 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
 
           <div className="flex items-baseline justify-between gap-2.5">
             <span className="text-3xl font-black text-white tracking-tight font-number">
-              {currentPriceUsd > 0 ? `$${currentPriceUsdText}` : "-"}
+              {currentPriceUsd > 0 ? (
+                <>
+                  <span className="pl-[2px] pr-1">$</span>
+                  {currentPriceUsdText}
+                </>
+              ) : (
+                "-"
+              )}
             </span>
             <span
               className="text-md font-bold tracking-tight font-number"
