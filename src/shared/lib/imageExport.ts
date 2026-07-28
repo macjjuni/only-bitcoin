@@ -20,6 +20,7 @@ const CAPTURE_ROOT_STYLE = {
   margin: "0",
   transform: "scale(1)",
   transformOrigin: "top left",
+  borderRadius: "0",
 } as const;
 
 const CAPTURE_OPTIONS = {
