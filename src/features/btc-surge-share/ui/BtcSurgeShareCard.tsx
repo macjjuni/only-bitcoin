@@ -261,7 +261,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
 
         <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/10">
           <span
-            className={`flex items-center gap-1 px-2 py-0.5 text-[11px] font-bold rounded-full ${
+            className={`flex items-center gap-1 px-2 py-0.5 text-sm font-bold rounded-full ${
               isUp ? "text-[#00E676] bg-emerald-500/10" : "text-[#FF5252] bg-rose-500/10"
             }`}
           >
@@ -276,7 +276,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
               key={tf}
               type="button"
               onClick={() => onClickTimeframe(tf)}
-              className={`px-2 py-0.5 text-[11px] font-bold rounded-full transition-colors cursor-pointer ${
+              className={`px-2 py-0.5 text-sm font-bold rounded-full transition-colors cursor-pointer ${
                 timeframe === tf
                   ? isUp
                     ? "bg-[#00E676] text-black shadow-md"
@@ -377,7 +377,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
         </svg>
 
         {/* 차트 가로축 시간 텍스트 (영문) */}
-        <div className="flex justify-between items-center text-[11px] font-semibold text-white mt-1 px-1">
+        <div className="flex justify-between items-center text-sm font-semibold text-white px-1">
           <span>{timeframe} Ago</span>
           <span>Now</span>
         </div>
@@ -389,7 +389,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
             key={statItem.label}
             className={`flex flex-col gap-1.5 min-w-0 px-1.5 border-x ${statIndex === 1 ? "border-white/10" : "border-transparent"}`}
           >
-            <div className="text-s font-medium text-neutral-400">{statItem.label}</div>
+            <div className="text-sm font-medium text-neutral-400">{statItem.label}</div>
             <div
               className="text-md font-bold font-number truncate"
               style={{ color: statItem.color }}
