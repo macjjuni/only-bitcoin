@@ -11,7 +11,7 @@ import {
   kToast,
 } from "kku-ui";
 import { Copy, Download, X } from "lucide-react";
-import { memo, useCallback, useRef, useState } from "react";
+import { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   captureElementToPngBlob,
   captureElementToPngDataUrl,
@@ -39,6 +39,7 @@ function BtcSurgeShareDialog() {
   const [isExporting, setIsExporting] = useState(false);
   const [cardScale, setCardScale] = useState(1);
   const [scaledCardHeight, setScaledCardHeight] = useState<number>();
+  const [isIosDevice, setIsIosDevice] = useState(false);
   // endregion
 
   // region [Privates]
@@ -155,11 +156,6 @@ function BtcSurgeShareDialog() {
   };
 
   const onClickSaveImage = async () => {
-    if (isIos()) {
-      kToast.error("iOS에서는 이미지 저장을 지원하지 않습니다.");
-      return;
-    }
-
     const cardElement = cardRef.current;
 
     if (!cardElement || isExporting) {
@@ -179,6 +175,13 @@ function BtcSurgeShareDialog() {
       setIsExporting(false);
     }
   };
+  // endregion
+
+
+  // region [Life Cycles]
+  useEffect(() => {
+    setIsIosDevice(isIos());
+  }, []);
   // endregion
 
   return (
@@ -236,16 +239,18 @@ function BtcSurgeShareDialog() {
               <Copy size={18} />
               {isExporting ? "처리 중..." : "이미지 복사"}
             </KButton>
-            <KButton
-              width="full"
-              size="lg"
-              onClick={onClickSaveImage}
-              disabled={isExporting}
-              className="h-[44px] gap-2 !text-white bg-neutral-700 hover:bg-neutral-600 rounded-3xl"
-            >
-              <Download size={18} />
-              이미지 저장
-            </KButton>
+            {!isIosDevice && (
+              <KButton
+                width="full"
+                size="lg"
+                onClick={onClickSaveImage}
+                disabled={isExporting}
+                className="h-[44px] gap-2 !text-white bg-neutral-700 hover:bg-neutral-600 rounded-3xl"
+              >
+                <Download size={18} />
+                이미지 저장
+              </KButton>
+            )}
           </div>
         </div>
       </KDialogContent>
