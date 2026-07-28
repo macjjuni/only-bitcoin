@@ -1,6 +1,7 @@
 "use client";
 
 import {
+  KButton,
   KDialog,
   KDialogContent,
   KDialogDescription,
@@ -152,7 +153,7 @@ function BtcSurgeShareDialog() {
   return (
     <KDialog open={isOpen} onOpenChange={onOpenChange} blur={3} size="md">
       <KDialogOverlay className="bg-black/70 backdrop-blur-md" />
-      <KDialogContent className="!top-[44%] p-0 border-none bg-transparent shadow-none max-w-[460px] w-[92vw] [&>button]:hidden">
+      <KDialogContent className="!top-[42%] p-0 border-none bg-transparent shadow-none max-w-[460px] w-[92vw] [&>button]:hidden">
         <KDialogHeader className="sr-only">
           <KDialogTitle>비트코인 급등 알림 카드</KDialogTitle>
           <KDialogDescription>
@@ -194,15 +195,16 @@ function BtcSurgeShareDialog() {
 
           {/* 캡처 & 공유 액션 버튼 그룹 */}
           <div className="flex items-center mt-4 w-full max-w-[440px]">
-            <button
-              type="button"
+            <KButton
+              width="full"
+              size="lg"
               onClick={onClickCopyImage}
               disabled={isExporting}
-              className="w-full flex items-center justify-center gap-2 py-3 px-4 rounded-2xl bg-emerald-500 hover:bg-emerald-400 active:scale-[0.98] text-black font-extrabold text-sm transition-all shadow-[0_0_20px_rgba(0,230,118,0.4)] cursor-pointer"
+              className="h-[44px] gap-2 !text-white bg-bitcoin rounded-3xl"
             >
               <Copy size={18} />
               {isExporting ? "처리 중..." : "이미지 복사"}
-            </button>
+            </KButton>
           </div>
         </div>
       </KDialogContent>
