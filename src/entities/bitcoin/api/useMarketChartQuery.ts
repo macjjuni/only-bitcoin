@@ -6,20 +6,14 @@ import type { MarketChartFormattedData } from "../model/market";
 import type { MarketChartIntervalType } from "../model/types";
 import { type BinanceInterval, fetchBinanceKlines } from "./binance";
 import { fetchBlockchainMarketPriceAll } from "./blockchain";
-import { fetchUpbitCandles, type UpbitCandleType } from "./upbit";
 
 /**
- * 인터벌별 Upbit Klines 파라미터 매핑 (KRW 차트 우선)
- */
-const UPBIT_INTERVAL_MAP: Partial<Record<MarketChartIntervalType, { type: UpbitCandleType; count: number }>> = {
-  "1d": { type: "minutes/5", count: 200 },
-  "7d": { type: "minutes/60", count: 168 },
-  "1m": { type: "minutes/240", count: 180 },
-  "1y": { type: "days", count: 365 },
-};
-
-/**
- * 인터벌별 Binance Klines 파라미터 매핑 (폴백용)
+ * 인터벌별 Binance Klines 파라미터 매핑 ( BTCUSDT 종가 기준 )
+ * - 1D: 5분봉 × 288 (24h)
+ * - 7D: 1시간봉 × 168 (7일)
+ * - 1M: 4시간봉 × 180 (30일)
+ * - 1Y: 1일봉 × 365
+ * - 5Y: 1주봉 × 260 (≈ 52주 × 5)
  */
 const BINANCE_INTERVAL_MAP: Record<
   Exclude<MarketChartIntervalType, "all">,
@@ -37,17 +31,6 @@ async function fetchMarketChart(
   interval: MarketChartIntervalType,
 ): Promise<MarketChartFormattedData> {
   try {
-    if (interval in UPBIT_INTERVAL_MAP) {
-      const upbitMap = UPBIT_INTERVAL_MAP[interval]!;
-      const upbitData = await fetchUpbitCandles(upbitMap.type, upbitMap.count);
-      if (upbitData.price && upbitData.price.length >= 10) {
-        if (isDev) {
-          console.log(`✅ 업비트 마켓 차트(${interval}) 데이터 초기화!`);
-        }
-        return upbitData;
-      }
-    }
-
     const data =
       interval === "all"
         ? await fetchBlockchainMarketPriceAll()

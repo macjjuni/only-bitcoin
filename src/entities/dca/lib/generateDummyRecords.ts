@@ -1,4 +1,4 @@
-import type { TradeRecord } from "@/entities/dca";
+import type { TradeRecord } from "../model/dcaStore";
 
 /**
  * 개발 환경에서 테스트용 더미 매매 기록을 생성한다.

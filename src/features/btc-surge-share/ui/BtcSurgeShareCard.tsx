@@ -2,17 +2,48 @@
 
 import { KIcon } from "kku-ui";
 import { memo, type RefObject, useId, useMemo, useState } from "react";
-import { useBitcoinStore } from "@/entities/bitcoin";
+import { type MarketChartIntervalType, useBitcoinStore } from "@/entities/bitcoin";
 import {
-  formatKoreanVolume,
-  useBtcTickerQuery,
+  formatUsdVolume,
+  useBinanceTicker24hQuery,
   useMarketChartData,
-  usePriceMiniChartData,
 } from "@/entities/bitcoin/client";
+import { getCurrentDateTimeKST } from "@/shared/lib/date";
+import { BtcTextLogo } from "@/shared/ui";
+
+type ShareCardTimeframe = "1D" | "7D" | "30D";
+
+const TIMEFRAME_LIST: readonly ShareCardTimeframe[] = ["1D", "7D", "30D"];
+
+/** 카드 타임프레임 → 마켓 차트 조회 인터벌 매핑 */
+const TIMEFRAME_INTERVAL_MAP: Record<ShareCardTimeframe, MarketChartIntervalType> = {
+  "1D": "1d",
+  "7D": "7d",
+  "30D": "1m",
+};
+
+/** 곡선을 그리기 위해 필요한 최소 가격 포인트 개수 */
+const MINIMUM_CHART_POINT_COUNT = 10;
+
+/**
+ * SNS 확산( 네트워크 효과 )을 위한 서비스 도메인.
+ *
+ * 캡처 시점에만 노출하는 방식은 `html-to-image` 에 클론 훅이 없어 DOM 토글이 필요하고,
+ * 그 리렌더 대기 구간이 Safari 클립보드의 user gesture 동기 제약을 깨뜨리므로 상시 노출한다.
+ */
+const SERVICE_DOMAIN = "ONLY-BTC.APP";
+
+/**
+ * 카드 고정 디자인 폭( px ).
+ *
+ * 캡처 결과물을 모든 기기에서 동일하게 유지하기 위해 카드는 뷰포트와 무관하게 이 폭을 고정한다.
+ * 좁은 화면에서는 호출부가 `transform: scale()` 로 축소해 노출하며, 캡처 시에는
+ * `CAPTURE_ROOT_STYLE` 의 `scale(1)` 이 원본 크기를 복원한다.
+ * 같은 이유로 카드 내부에는 뷰포트 기준 반응형 분기( `sm:` 등 )를 두지 않는다.
+ */
+export const BTC_SURGE_CARD_DESIGN_WIDTH = 440;
 
 export interface BtcSurgeShareCardProps {
-  /** 수동 타임프레임 선택 ( 기본: 1D ) */
-  initialTimeframe?: "1D" | "7D" | "30D";
   cardRef?: RefObject<HTMLDivElement | null>;
 }
 
@@ -24,137 +55,178 @@ function generateSvgCurvePath(data: number[], width: number, height: number) {
     return { linePath: "", areaPath: "", lastX: width, lastY: height / 2 };
   }
 
-  const min = Math.min(...data);
-  const max = Math.max(...data);
-  const range = max - min || 1;
+  const minPrice = Math.min(...data);
+  const maxPrice = Math.max(...data);
+  const priceRange = maxPrice - minPrice || 1;
 
-  const points = data.map((val, i) => {
-    const x = (i / (data.length - 1)) * width;
+  const points = data.map((price, pointIndex) => {
+    const x = (pointIndex / (data.length - 1)) * width;
     // 하단 및 상단 12px 패딩 고려
-    const y = height - ((val - min) / range) * (height - 24) - 12;
+    const y = height - ((price - minPrice) / priceRange) * (height - 24) - 12;
     return { x, y };
   });
 
   let linePath = `M ${points[0].x.toFixed(2)},${points[0].y.toFixed(2)}`;
-  for (let i = 0; i < points.length - 1; i++) {
-    const p0 = points[i];
-    const p1 = points[i + 1];
-    const cpX = ((p0.x + p1.x) / 2).toFixed(2);
-    linePath += ` C ${cpX},${p0.y.toFixed(2)} ${cpX},${p1.y.toFixed(2)} ${p1.x.toFixed(2)},${p1.y.toFixed(2)}`;
+  for (let pointIndex = 0; pointIndex < points.length - 1; pointIndex++) {
+    const startPoint = points[pointIndex];
+    const endPoint = points[pointIndex + 1];
+    const controlPointX = ((startPoint.x + endPoint.x) / 2).toFixed(2);
+    linePath += ` C ${controlPointX},${startPoint.y.toFixed(2)} ${controlPointX},${endPoint.y.toFixed(2)} ${endPoint.x.toFixed(2)},${endPoint.y.toFixed(2)}`;
   }
 
   const lastPoint = points[points.length - 1];
   const areaPath = `${linePath} L ${lastPoint.x.toFixed(2)},${height} L ${points[0].x.toFixed(2)},${height} Z`;
 
-  return { linePath, areaPath, lastX: lastPoint.x, lastY: lastPoint.y, min, max };
+  return { linePath, areaPath, lastX: lastPoint.x, lastY: lastPoint.y };
 }
 
-/** KST 기준 현재 시각을 "YYYY.MM.DD · HH:mm KST" 형식으로 포맷 */
-function formatKstTimestamp(): string {
-  const now = new Date();
-  const year = now.getFullYear();
-  const month = String(now.getMonth() + 1).padStart(2, "0");
-  const day = String(now.getDate()).padStart(2, "0");
-  const hours = String(now.getHours()).padStart(2, "0");
-  const minutes = String(now.getMinutes()).padStart(2, "0");
-  return `${year}.${month}.${day} · ${hours}:${minutes} KST`;
+/**
+ * 현재가와 변동률로부터 해당 통화의 변동액을 역산한다.
+ *
+ * 차트는 바이낸스 BTCUSDT( 달러 ) 기준이라 원화 시계열이 없으므로, 변동률을 각 통화의
+ * 현재가에 적용해 변동액을 구한다. ( 기간 내 환율 변동은 반영되지 않는 근사값 )
+ */
+function calculateChangeAmount(currentPrice: number, changeRatePercent: number): number {
+  const changeRate = changeRatePercent / 100;
+
+  if (currentPrice <= 0 || changeRate <= -1) {
+    return 0;
+  }
+
+  return Math.round(currentPrice - currentPrice / (1 + changeRate));
 }
 
-function BtcSurgeShareCard({ initialTimeframe = "1D", cardRef }: BtcSurgeShareCardProps) {
+function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   // region [Hooks]
-  const [timeframe, setTimeframe] = useState<"1D" | "7D" | "30D">(initialTimeframe);
+  const [timeframe, setTimeframe] = useState<ShareCardTimeframe>("1D");
   const rawId = useId();
   const glowFilterId = `surgeGlow-${rawId.replace(/:/g, "")}`;
   const gradientId = `surgeGrad-${rawId.replace(/:/g, "")}`;
 
-  const { data: btcTicker } = useBtcTickerQuery();
+  const { data: btc24hStats } = useBinanceTicker24hQuery();
   const bitcoinPrice = useBitcoinStore((state) => state.bitcoinPrice);
-  const { priceMiniChartData } = usePriceMiniChartData();
-  const { marketChartData: marketChart7d } = useMarketChartData("7d");
-  const { marketChartData: marketChart30d } = useMarketChartData("1m");
+  const { marketChartData } = useMarketChartData(TIMEFRAME_INTERVAL_MAP[timeframe]);
 
-  const rawPrices = useMemo<number[]>(() => {
-    if (timeframe === "7D" && marketChart7d?.price && marketChart7d.price.length >= 10) {
-      return marketChart7d.price;
-    }
-    if (timeframe === "30D" && marketChart30d?.price && marketChart30d.price.length >= 10) {
-      return marketChart30d.price;
-    }
-    if (priceMiniChartData?.price && priceMiniChartData.price.length >= 10) {
-      return priceMiniChartData.price;
+  // 카드가 열린 시각을 고정한다. 다이얼로그가 닫히면 언마운트되므로 열 때마다 다시 계산된다.
+  const [capturedAtKst] = useState<string>(getCurrentDateTimeKST);
+
+  /** 바이낸스 BTCUSDT 종가 시계열 ( 달러 기준 ) */
+  const usdPrices = useMemo<number[]>(() => {
+    if (marketChartData?.price && marketChartData.price.length >= MINIMUM_CHART_POINT_COUNT) {
+      return marketChartData.price;
     }
     return [];
-  }, [timeframe, priceMiniChartData, marketChart7d, marketChart30d]);
+  }, [marketChartData]);
 
-  const isDataReady = rawPrices.length >= 2;
-
-  const currentPrice = useMemo(() => {
-    if (bitcoinPrice?.krw && bitcoinPrice.krw > 0) return bitcoinPrice.krw;
-    if (isDataReady) return rawPrices[rawPrices.length - 1];
-    return 0;
-  }, [bitcoinPrice, rawPrices, isDataReady]);
+  const isChartDataReady = usdPrices.length >= 2;
 
   const changePercent = useMemo(() => {
-    if (isDataReady) {
-      const start = rawPrices[0];
-      const end = rawPrices[rawPrices.length - 1];
-      if (start > 0) return ((end - start) / start) * 100;
+    if (isChartDataReady) {
+      const startPrice = usdPrices[0];
+      const endPrice = usdPrices[usdPrices.length - 1];
+      if (startPrice > 0) return ((endPrice - startPrice) / startPrice) * 100;
     }
-    if (bitcoinPrice?.krwChange24h) return parseFloat(bitcoinPrice.krwChange24h);
+    if (bitcoinPrice?.usdChange24h) return Number.parseFloat(bitcoinPrice.usdChange24h);
     return 0;
-  }, [rawPrices, bitcoinPrice, isDataReady]);
+  }, [usdPrices, bitcoinPrice, isChartDataReady]);
 
   const isUp = changePercent >= 0;
 
-  const changeAmount = useMemo(() => {
-    if (isDataReady) {
-      return Math.round(rawPrices[rawPrices.length - 1] - rawPrices[0]);
-    }
-    return Math.round((currentPrice * changePercent) / 100);
-  }, [rawPrices, currentPrice, changePercent, isDataReady]);
-
-  const high24h = useMemo(() => {
-    if (btcTicker?.high_price && btcTicker.high_price > 0) return btcTicker.high_price;
-    if (isDataReady) return Math.max(...rawPrices);
+  const currentPriceKrw = useMemo(() => {
+    if (bitcoinPrice?.krw && bitcoinPrice.krw > 0) return bitcoinPrice.krw;
     return 0;
-  }, [btcTicker, rawPrices, isDataReady]);
+  }, [bitcoinPrice]);
 
-  const low24h = useMemo(() => {
-    if (btcTicker?.low_price && btcTicker.low_price > 0) return btcTicker.low_price;
-    if (isDataReady) return Math.min(...rawPrices);
+  const currentPriceUsd = useMemo(() => {
+    if (bitcoinPrice?.usd && bitcoinPrice.usd > 0) return bitcoinPrice.usd;
+    if (isChartDataReady) return usdPrices[usdPrices.length - 1];
     return 0;
-  }, [btcTicker, rawPrices, isDataReady]);
+  }, [bitcoinPrice, usdPrices, isChartDataReady]);
+
+  const changeAmountKrw = useMemo(
+    () => calculateChangeAmount(currentPriceKrw, changePercent),
+    [currentPriceKrw, changePercent],
+  );
+
+  const changeAmountUsd = useMemo(
+    () => calculateChangeAmount(currentPriceUsd, changePercent),
+    [currentPriceUsd, changePercent],
+  );
+
+  // 고가·저가·거래량은 차트·변동률과 동일한 바이낸스 BTCUSDT 롤링 24시간 기준( 달러 )이다.
+  const high24hUsd = useMemo(() => {
+    if (btc24hStats?.highPriceUsd && btc24hStats.highPriceUsd > 0) return btc24hStats.highPriceUsd;
+    return 0;
+  }, [btc24hStats]);
+
+  const low24hUsd = useMemo(() => {
+    if (btc24hStats?.lowPriceUsd && btc24hStats.lowPriceUsd > 0) return btc24hStats.lowPriceUsd;
+    return 0;
+  }, [btc24hStats]);
 
   const formattedVolume = useMemo(() => {
-    if (btcTicker?.acc_trade_price_24h) return formatKoreanVolume(btcTicker.acc_trade_price_24h);
+    if (btc24hStats?.quoteVolumeUsd) return formatUsdVolume(btc24hStats.quoteVolumeUsd);
     return "-";
-  }, [btcTicker]);
-
-  const formattedTimestamp = useMemo(() => formatKstTimestamp(), [currentPrice]);
+  }, [btc24hStats]);
 
   const { linePath, areaPath, lastX, lastY } = useMemo(
-    () => generateSvgCurvePath(rawPrices, 360, 140),
-    [rawPrices],
+    () => generateSvgCurvePath(usdPrices, 360, 140),
+    [usdPrices],
   );
 
   const themeColor = isUp ? "#00E676" : "#FF5252";
   // endregion
 
-
   // region [Events]
-  const onClickTimeframe = (tf: "1D" | "7D" | "30D") => {
-    setTimeframe(tf);
+  const onClickTimeframe = (selectedTimeframe: ShareCardTimeframe) => {
+    setTimeframe(selectedTimeframe);
   };
   // endregion
 
+  // region [Templates]
+  const changeSign = isUp ? "+" : "-";
+
+  const currentPriceUsdText = useMemo(
+    () => currentPriceUsd.toLocaleString("en-US", { maximumFractionDigits: 0 }),
+    [currentPriceUsd],
+  );
+
+  const changeAmountKrwText = useMemo(
+    () => Math.abs(changeAmountKrw).toLocaleString(),
+    [changeAmountKrw],
+  );
+
+  const changeAmountUsdText = useMemo(
+    () => Math.abs(changeAmountUsd).toLocaleString("en-US"),
+    [changeAmountUsd],
+  );
+
+  const high24hUsdText = useMemo(() => {
+    if (high24hUsd <= 0) return "-";
+    return `$${high24hUsd.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+  }, [high24hUsd]);
+
+  const low24hUsdText = useMemo(() => {
+    if (low24hUsd <= 0) return "-";
+    return `$${low24hUsd.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
+  }, [low24hUsd]);
+
+  /** 24시간 통계 셀 목록 ( 고가 · 저가 · 거래량 ) */
+  const statItemList = useMemo(
+    () => [
+      { label: "24H 고가($)", value: high24hUsdText, color: "#FFFFFF" },
+      { label: "24H 저가($)", value: low24hUsdText, color: "#FFFFFF" },
+      { label: "거래량($)", value: formattedVolume, color: themeColor },
+    ],
+    [high24hUsdText, low24hUsdText, formattedVolume, themeColor],
+  );
+  // endregion
 
   return (
     <div
       ref={cardRef}
-      className={`relative w-full max-w-[440px] mx-auto rounded-[32px] p-6 text-white select-none overflow-hidden border transition-all duration-300 ${
-        isUp
-          ? "border-emerald-500/30 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_40px_rgba(0,230,118,0.15)] bg-[#0a0d14]"
-          : "border-rose-500/30 shadow-[0_20px_50px_rgba(0,0,0,0.8),0_0_40px_rgba(255,82,82,0.15)] bg-[#0f0a0d]"
+      className={`relative w-[440px] rounded-[32px] p-6 text-white select-none overflow-hidden border transition-all duration-300 ${
+        isUp ? "border-emerald-500/30 bg-[#0a0d14]" : "border-rose-500/30 bg-[#0f0a0d]"
       }`}
       style={{
         backgroundImage: isUp
@@ -183,10 +255,8 @@ function BtcSurgeShareCard({ initialTimeframe = "1D", cardRef }: BtcSurgeShareCa
       {/* 상단 헤더: 브랜드 로고 + 상태 뱃지 */}
       <div className="relative z-10 flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <KIcon icon="bitcoin" color="white" size={28} />
-          <span className="font-black tracking-wider text-2xl sm:text-xl uppercase text-white font-sans">
-            BITCOIN
-          </span>
+          <KIcon icon="bitcoin" color="white" size={24} />
+          <BtcTextLogo color="white" height={24} width={110} />
         </div>
 
         <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/10">
@@ -201,7 +271,7 @@ function BtcSurgeShareCard({ initialTimeframe = "1D", cardRef }: BtcSurgeShareCa
             />
             LIVE
           </span>
-          {(["1D", "7D", "30D"] as const).map((tf) => (
+          {TIMEFRAME_LIST.map((tf) => (
             <button
               key={tf}
               type="button"
@@ -221,10 +291,10 @@ function BtcSurgeShareCard({ initialTimeframe = "1D", cardRef }: BtcSurgeShareCa
       </div>
 
       {/* 수치 및 가격 강조 섹션 */}
-      <div className="relative z-10 mb-4">
+      <div className="relative z-10 mb-0">
         <div className="flex items-baseline gap-2 mb-1">
           <span
-            className="text-4xl sm:text-5xl font-black tracking-tight"
+            className="text-5xl font-black tracking-tight font-number"
             style={{
               color: themeColor,
               filter: isUp
@@ -237,21 +307,34 @@ function BtcSurgeShareCard({ initialTimeframe = "1D", cardRef }: BtcSurgeShareCa
           </span>
         </div>
 
-        <div className="flex items-baseline gap-2.5">
-          <span className="text-2xl sm:text-3xl font-black text-white tracking-tight">
-            {currentPrice > 0 ? `₩${currentPrice.toLocaleString()}` : "-"}
-          </span>
-          <span className="text-sm font-bold tracking-tight" style={{ color: themeColor }}>
-            {changeAmount !== 0 && (
-              <>
-                {isUp ? "+" : "-"}₩{Math.abs(changeAmount).toLocaleString()}
-              </>
-            )}
-          </span>
+        {/* 원화 · 달러 현재가 ( 변동액은 선택 타임프레임 변동률 기준 ) */}
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-baseline justify-between gap-2.5">
+            <span className="text-3xl font-black text-white tracking-tight font-number">
+              {currentPriceKrw > 0 ? `₩${currentPriceKrw.toLocaleString()}` : "-"}
+            </span>
+            <span
+              className="text-md font-bold tracking-tight font-number"
+              style={{ color: themeColor }}
+            >
+              {changeAmountKrw !== 0 ? `${changeSign}₩${changeAmountKrwText}` : ""}
+            </span>
+          </div>
+
+          <div className="flex items-baseline justify-between gap-2.5">
+            <span className="text-3xl font-black text-white tracking-tight font-number">
+              {currentPriceUsd > 0 ? `$${currentPriceUsdText}` : "-"}
+            </span>
+            <span
+              className="text-md font-bold tracking-tight font-number"
+              style={{ color: themeColor }}
+            >
+              {changeAmountUsd !== 0 ? `${changeSign}$${changeAmountUsdText}` : ""}
+            </span>
+          </div>
         </div>
       </div>
 
-      {/* 스파크라인 SVG 차트 섹션 */}
       <div className="relative z-10 w-full my-3">
         <svg viewBox="0 0 360 140" className="w-full h-auto overflow-visible" aria-hidden="true">
           <defs>
@@ -300,32 +383,36 @@ function BtcSurgeShareCard({ initialTimeframe = "1D", cardRef }: BtcSurgeShareCa
         </div>
       </div>
 
-      {/* 24시간 하단 스탯 박스 메트릭스 */}
-      <div className="relative z-10 grid grid-cols-3 gap-2 p-3.5 rounded-2xl bg-white/[0.04] backdrop-blur-md border border-white/10 my-4 text-center">
-        <div>
-          <div className="text-[11px] font-medium text-neutral-400 mb-0.5">24H 고가</div>
-          <div className="text-xs sm:text-sm font-bold text-white font-mono">
-            {high24h > 0 ? `₩${high24h.toLocaleString()}` : "-"}
+      <div className="relative z-10 grid grid-cols-3 px-2 py-2.5 rounded-2xl bg-white/[0.04] backdrop-blur-md border border-white/10 my-4 text-center">
+        {statItemList.map((statItem, statIndex) => (
+          <div
+            key={statItem.label}
+            className={`flex flex-col gap-1.5 min-w-0 px-1.5 border-x ${statIndex === 1 ? "border-white/10" : "border-transparent"}`}
+          >
+            <div className="text-s font-medium text-neutral-400">{statItem.label}</div>
+            <div
+              className="text-md font-bold font-number truncate"
+              style={{ color: statItem.color }}
+            >
+              {statItem.value}
+            </div>
           </div>
-        </div>
-        <div className="border-x border-white/10 px-1">
-          <div className="text-[11px] font-medium text-neutral-400 mb-0.5">24H 저가</div>
-          <div className="text-xs sm:text-sm font-bold text-white font-mono">
-            {low24h > 0 ? `₩${low24h.toLocaleString()}` : "-"}
-          </div>
-        </div>
-        <div>
-          <div className="text-[11px] font-medium text-neutral-400 mb-0.5">거래량</div>
-          <div className="text-xs sm:text-sm font-bold font-mono" style={{ color: themeColor }}>
-            {formattedVolume}
-          </div>
-        </div>
+        ))}
       </div>
 
-      {/* 하단 메타 정보 */}
-      <div className="relative z-10 flex justify-between items-center text-[11px] font-medium text-neutral-400 pt-4 border-t border-white/10">
-        <span>BTC / KRW · INDEX</span>
-        <span>{formattedTimestamp}</span>
+      {/* 하단 메타 정보 ( 좌측 서비스 도메인은 SNS 확산용 워터마크 ) */}
+      <div className="relative z-10 flex justify-between items-center gap-2 text-[11px] font-medium text-neutral-400 pt-4 border-t border-white/10">
+        <span
+          className="flex items-center gap-1.5 font-black tracking-wider text-white text-xs uppercase whitespace-nowrap flex-shrink-0"
+          style={{ textShadow: `0 0 14px ${themeColor}80` }}
+        >
+          <span
+            className="text-sm w-1.5 h-1.5 rounded-full flex-shrink-0"
+            style={{ backgroundColor: themeColor }}
+          />
+          {SERVICE_DOMAIN}
+        </span>
+        <span className="text-xs font-number min-w-0 truncate">{capturedAtKst}</span>
       </div>
     </div>
   );
