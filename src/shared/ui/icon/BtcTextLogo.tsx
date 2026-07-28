@@ -28,7 +28,7 @@ const BtcTextLogo = ({
         fill={color}
         fontSize="26"
         fontWeight="900"
-        letterSpacing="0.05em"
+        letterSpacing="0"
         fontFamily="var(--font-sans, system-ui, -apple-system, sans-serif)"
         className="uppercase"
       >

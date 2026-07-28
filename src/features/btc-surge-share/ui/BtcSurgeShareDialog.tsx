@@ -160,10 +160,8 @@ function BtcSurgeShareDialog() {
           </KDialogDescription>
         </KDialogHeader>
 
-        {/* min-w-0: 그리드 아이템의 min-content 가 다이얼로그 폭을 넘겨 화면 밖으로 밀리는 것을 막는다. */}
         <div className="flex flex-col items-center w-full min-w-0">
-          {/* 다이얼로그 닫기 버튼 */}
-          <div className="w-full flex justify-end mb-2">
+          <div className="w-full flex justify-end mb-3">
             <button
               type="button"
               onClick={closeModal}
@@ -174,7 +172,6 @@ function BtcSurgeShareDialog() {
             </button>
           </div>
 
-          {/* SNS 캡처 대상 카키/다크 에메랄드 카드 ( 좁은 화면에서는 축소해 노출 ) */}
           <div ref={setCardScaleAreaRef} className="w-full flex justify-center">
             <div
               className="overflow-hidden"

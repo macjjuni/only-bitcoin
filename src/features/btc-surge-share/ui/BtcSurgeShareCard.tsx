@@ -29,14 +29,6 @@ const MINIMUM_CHART_POINT_COUNT = 10;
  */
 const SERVICE_DOMAIN = "ONLY-BTC.APP";
 
-/**
- * 카드 고정 디자인 폭( px ).
- *
- * 캡처 결과물을 모든 기기에서 동일하게 유지하기 위해 카드는 뷰포트와 무관하게 이 폭을 고정한다.
- * 좁은 화면에서는 호출부가 `transform: scale()` 로 축소해 노출하며, 캡처 시에는
- * `CAPTURE_ROOT_STYLE` 의 `scale(1)` 이 원본 크기를 복원한다.
- * 같은 이유로 카드 내부에는 뷰포트 기준 반응형 분기( `sm:` 등 )를 두지 않는다.
- */
 export const BTC_SURGE_CARD_DESIGN_WIDTH = 440;
 
 export interface BtcSurgeShareCardProps {
@@ -180,7 +172,6 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
     [changeAmountUsd],
   );
   // endregion
-  // endregion
 
   return (
     <div
@@ -215,14 +206,14 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       {/* 상단 헤더: 브랜드 로고 + 상태 뱃지 */}
       <div className="relative z-10 flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <KIcon icon="bitcoin" color="#F7931A" size={28} />
-          <BtcTextLogo color="#fff" height={28} width={130} />
+          <KIcon icon="bitcoin" color="#F7931A" size={38} />
+          <BtcTextLogo color="#fff" height={36} width={156} />
         </div>
 
         <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/10">
           <span
-            className={`flex items-center gap-1 px-2 py-0.5 text-sm font-bold rounded-full ${
-              isUp ? "text-[#00E676] bg-emerald-500/10" : "text-[#FF5252] bg-rose-500/10"
+            className={`flex items-center gap-1 pl-2 pr-2.5 py-1 text-sm font-bold rounded-full ${
+              isUp ? "text-[#00E676] bg-emerald-500/20" : "text-[#FF5252] bg-rose-500/20"
             }`}
           >
             <span
@@ -236,7 +227,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
               key={tf}
               type="button"
               onClick={() => onClickTimeframe(tf)}
-              className={`px-2 py-0.5 text-sm font-bold rounded-full transition-colors cursor-pointer ${
+              className={`px-2 py-1 text-sm font-bold rounded-full transition-colors cursor-pointer ${
                 timeframe === tf
                   ? isUp
                     ? "bg-[#00E676] text-black shadow-md"
@@ -269,9 +260,9 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
         </div>
 
         {/* 원화 · 달러 현재가 ( 변동액은 선택 타임프레임 변동률 기준 ) */}
-        <div className="flex flex-col gap-0.5">
+        <div className="flex flex-col">
           <div className="flex items-baseline justify-between gap-2.5">
-            <span className="text-3xl font-black text-white tracking-tight font-number">
+            <span className="text-2xl font-black text-white tracking-tight font-number">
               {currentPriceKrw > 0 ? `₩${currentPriceKrw.toLocaleString()}` : "-"}
             </span>
             <span
@@ -283,10 +274,10 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
           </div>
 
           <div className="flex items-baseline justify-between gap-2.5">
-            <span className="text-3xl font-black text-white tracking-tight font-number">
+            <span className="text-2xl font-black text-white tracking-tight font-number">
               {currentPriceUsd > 0 ? (
                 <>
-                  <span className="pl-[2px] pr-1">$</span>
+                  <span className="px-1">$</span>
                   {currentPriceUsdText}
                 </>
               ) : (
@@ -352,7 +343,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       </div>
 
       {/* 하단 메타 정보 ( 좌측 서비스 도메인은 SNS 확산용 워터마크 ) */}
-      <div className="relative z-10 flex justify-between items-center gap-2 text-sm font-medium text-neutral-400 pt-4 border-t border-white/10">
+      <div className="relative z-10 flex justify-between items-center gap-2 text-sm font-medium text-neutral-200 pt-4 border-t border-white/10">
         <span
           className="flex items-center gap-1.5 font-black tracking-wider text-white text-sm uppercase whitespace-nowrap flex-shrink-0"
           style={{ textShadow: `0 0 14px ${themeColor}80` }}
