@@ -13,6 +13,7 @@ export interface SettingTypes {
   isUsdtStandard: boolean;
   isCountUp: boolean;
   isBackgroundImg: boolean;
+  isLab: boolean;
   deferredPrompt: BeforeInstallPromptEvent | null;
 }
 
@@ -23,6 +24,7 @@ export interface SettingSlice {
   setUsdtStandard: (isUsdtStandard: boolean) => void;
   setIsCountUp: (isCountUp: boolean) => void;
   setIsBackgroundImg: (isBackgroundImg: boolean) => void;
+  setIsLab: (isLab: boolean) => void;
   setDeferredPrompt: (deferredPrompt: BeforeInstallPromptEvent | null) => void;
 }
 
@@ -33,6 +35,7 @@ export const createSettingSlice: StateCreator<SettingSlice> = (set) => ({
     isUsdtStandard: false,
     isCountUp: true,
     isBackgroundImg: true,
+    isLab: false,
     deferredPrompt: null,
   },
   setInitialPath: (path) =>
@@ -55,6 +58,10 @@ export const createSettingSlice: StateCreator<SettingSlice> = (set) => ({
   setIsBackgroundImg: (isBackgroundImg) =>
     set((state) => ({
       setting: { ...state.setting, isBackgroundImg },
+    })),
+  setIsLab: (isLab) =>
+    set((state) => ({
+      setting: { ...state.setting, isLab },
     })),
   setDeferredPrompt: (deferredPrompt) =>
     set((state) => ({
