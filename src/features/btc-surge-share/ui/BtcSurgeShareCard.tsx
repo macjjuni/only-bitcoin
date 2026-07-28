@@ -3,23 +3,19 @@
 import { KIcon } from "kku-ui";
 import { memo, type RefObject, useId, useMemo, useState } from "react";
 import { type MarketChartIntervalType, useBitcoinStore } from "@/entities/bitcoin";
-import {
-  formatUsdVolume,
-  useBinanceTicker24hQuery,
-  useMarketChartData,
-} from "@/entities/bitcoin/client";
+import { useMarketChartData } from "@/entities/bitcoin/client";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
 import { BtcTextLogo, UpdownIcon } from "@/shared/ui";
 
-type ShareCardTimeframe = "1D" | "7D" | "30D";
+type ShareCardTimeframe = "1D" | "7D" | "1M";
 
-const TIMEFRAME_LIST: readonly ShareCardTimeframe[] = ["1D", "7D", "30D"];
+const TIMEFRAME_LIST: readonly ShareCardTimeframe[] = ["1D", "7D", "1M"];
 
 /** 카드 타임프레임 → 마켓 차트 조회 인터벌 매핑 */
 const TIMEFRAME_INTERVAL_MAP: Record<ShareCardTimeframe, MarketChartIntervalType> = {
   "1D": "1d",
   "7D": "7d",
-  "30D": "1m",
+  "1M": "1m",
 };
 
 /** 곡선을 그리기 위해 필요한 최소 가격 포인트 개수 */
@@ -103,7 +99,6 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   const glowFilterId = `surgeGlow-${rawId.replace(/:/g, "")}`;
   const gradientId = `surgeGrad-${rawId.replace(/:/g, "")}`;
 
-  const { data: btc24hStats } = useBinanceTicker24hQuery();
   const bitcoinPrice = useBitcoinStore((state) => state.bitcoinPrice);
   const { marketChartData } = useMarketChartData(TIMEFRAME_INTERVAL_MAP[timeframe]);
 
@@ -153,22 +148,6 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
     [currentPriceUsd, changePercent],
   );
 
-  // 고가·저가·거래량은 차트·변동률과 동일한 바이낸스 BTCUSDT 롤링 24시간 기준( 달러 ).
-  const high24hUsd = useMemo(() => {
-    if (btc24hStats?.highPriceUsd && btc24hStats.highPriceUsd > 0) return btc24hStats.highPriceUsd;
-    return 0;
-  }, [btc24hStats]);
-
-  const low24hUsd = useMemo(() => {
-    if (btc24hStats?.lowPriceUsd && btc24hStats.lowPriceUsd > 0) return btc24hStats.lowPriceUsd;
-    return 0;
-  }, [btc24hStats]);
-
-  const formattedVolume = useMemo(() => {
-    if (btc24hStats?.quoteVolumeUsd) return formatUsdVolume(btc24hStats.quoteVolumeUsd);
-    return "-";
-  }, [btc24hStats]);
-
   const { linePath, areaPath, lastX, lastY } = useMemo(
     () => generateSvgCurvePath(usdPrices, 360, 140),
     [usdPrices],
@@ -200,26 +179,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
     () => Math.abs(changeAmountUsd).toLocaleString("en-US"),
     [changeAmountUsd],
   );
-
-  const high24hUsdText = useMemo(() => {
-    if (high24hUsd <= 0) return "-";
-    return `$${high24hUsd.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-  }, [high24hUsd]);
-
-  const low24hUsdText = useMemo(() => {
-    if (low24hUsd <= 0) return "-";
-    return `$${low24hUsd.toLocaleString("en-US", { maximumFractionDigits: 0 })}`;
-  }, [low24hUsd]);
-
-  /** 24시간 통계 셀 목록 ( 고가 · 저가 · 거래량 ) */
-  const statItemList = useMemo(
-    () => [
-      { label: "24H 고가($)", value: high24hUsdText, color: "#FFFFFF" },
-      { label: "24H 저가($)", value: low24hUsdText, color: "#FFFFFF" },
-      { label: "거래량($)", value: formattedVolume, color: themeColor },
-    ],
-    [high24hUsdText, low24hUsdText, formattedVolume, themeColor],
-  );
+  // endregion
   // endregion
 
   return (
@@ -255,8 +215,8 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       {/* 상단 헤더: 브랜드 로고 + 상태 뱃지 */}
       <div className="relative z-10 flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <KIcon icon="bitcoin" color="white" size={24} />
-          <BtcTextLogo color="white" height={24} width={110} />
+          <KIcon icon="bitcoin" color="white" size={28} />
+          <BtcTextLogo color="white" height={28} width={130} />
         </div>
 
         <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/10">
@@ -389,23 +349,6 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
           <span>{timeframe} Ago</span>
           <span>Now</span>
         </div>
-      </div>
-
-      <div className="relative z-10 grid grid-cols-3 px-2 py-2.5 rounded-2xl bg-white/[0.04] backdrop-blur-md border border-white/10 my-4 text-center">
-        {statItemList.map((statItem, statIndex) => (
-          <div
-            key={statItem.label}
-            className={`flex flex-col gap-1.5 min-w-0 px-1.5 border-x ${statIndex === 1 ? "border-white/10" : "border-transparent"}`}
-          >
-            <div className="text-sm font-medium text-neutral-400">{statItem.label}</div>
-            <div
-              className="text-md font-bold font-number truncate"
-              style={{ color: statItem.color }}
-            >
-              {statItem.value}
-            </div>
-          </div>
-        ))}
       </div>
 
       {/* 하단 메타 정보 ( 좌측 서비스 도메인은 SNS 확산용 워터마크 ) */}

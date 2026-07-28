@@ -175,7 +175,7 @@ function BtcSurgeShareDialog() {
   return (
     <KDialog open={isOpen} onOpenChange={onOpenChange} blur={3} size="md">
       <KDialogOverlay className="bg-black/70 backdrop-blur-md" />
-      <KDialogContent className="p-0 border-none bg-transparent shadow-none max-w-[460px] w-[92vw] [&>button]:hidden">
+      <KDialogContent className="!top-[44%] p-0 border-none bg-transparent shadow-none max-w-[460px] w-[92vw] [&>button]:hidden">
         <KDialogHeader className="sr-only">
           <KDialogTitle>비트코인 급등 알림 카드</KDialogTitle>
           <KDialogDescription>
