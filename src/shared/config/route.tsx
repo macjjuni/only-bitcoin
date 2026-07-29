@@ -96,6 +96,13 @@ const clientRoutes: ClientRoute[] = [
     isFavorite: false,
     icon: null,
   },
+  {
+    title: "Corporate Treasury",
+    path: "/treasury",
+    isNav: false,
+    isFavorite: false,
+    icon: null,
+  },
   { title: "BIP39", path: "/orange-pill/bip39", isNav: false, isFavorite: false, icon: null },
   { title: "Meme", path: "/orange-pill/meme", isNav: false, isFavorite: false, icon: null },
   {

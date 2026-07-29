@@ -17,6 +17,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/cagr",
     "/premium",
     "/solo-mining",
+    "/treasury",
     "/orange-pill",
     "/orange-pill/meme",
     "/orange-pill/bip39",

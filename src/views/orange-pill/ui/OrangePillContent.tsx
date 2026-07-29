@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { CalendarRange, ChevronRight, ExternalLink, TableProperties } from "lucide-react";
+import { Building2, ChevronRight, ExternalLink, TableProperties } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { useCallback } from "react";
 import { allRouteList } from "@/shared/config/route";
@@ -88,6 +88,17 @@ const OrangePillContent = () => {
     router.push(routePath);
   }, [router]);
 
+  const handleTreasuryRoute = useCallback(() => {
+    const routePath = allRouteList.find((item) => item.path.includes("/treasury"))?.path;
+
+    if (!routePath) {
+      console.warn("기업 트레저리 경로를 찾을 수 없습니다.");
+      return;
+    }
+
+    router.push(routePath);
+  }, [router]);
+
   const handleBIP39Route = useCallback(() => {
     const routePath = allRouteList.find((item) => item.path.includes("/bip39"))?.path;
 
@@ -126,6 +137,12 @@ const OrangePillContent = () => {
           label="월별 등락률"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleCagrRoute}
+        />
+        <ListRow
+          icon={<Building2 size={24} />}
+          label="기업 비트코인 트레저리"
+          rightElement={<ChevronRight className="text-muted-foreground" />}
+          onClick={handleTreasuryRoute}
         />
         <ListRow
           icon={<HalfCircleIcon size={24} />}
