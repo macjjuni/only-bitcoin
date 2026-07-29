@@ -312,19 +312,13 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
         </div>
       </div>
 
-      {/* eslint-disable-next-line @next/next/no-img-element */}
       {coinImageDataUrl && (
-        <img
-          src={coinImageDataUrl}
-          alt=""
-          width={116}
-          height={116}
-          className="absolute top-20 right-6 pointer-events-none transition-[filter] duration-300"
-        style={{
-          filter: `drop-shadow(0 0 20px ${themeColor}80)`,
-          transform: "translateZ(0)",
-        }}
-          draggable={false}
+        <div
+          className="absolute top-20 right-6 w-[116px] h-[116px] pointer-events-none bg-contain bg-center bg-no-repeat"
+          style={{
+            backgroundImage: `url(${coinImageDataUrl})`,
+            filter: `drop-shadow(0 0 20px ${themeColor}80)`,
+          }}
         />
       )}
 
