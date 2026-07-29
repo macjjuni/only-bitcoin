@@ -27,7 +27,7 @@ import {
   registerCaptureOverlay,
 } from "@/shared/lib/imageExport";
 import { useBtcSurgeShareStore } from "../model/useBtcSurgeShareStore";
-import { BTC_SURGE_CARD_DESIGN_WIDTH, BtcSurgeShareCard, COIN_OVERLAY } from "./BtcSurgeShareCard";
+import { BTC_SURGE_CARD_DESIGN_WIDTH, BtcSurgeShareCard, COIN_OVERLAY_BASE } from "./BtcSurgeShareCard";
 
 const SHARE_IMAGE_FILE_NAME = "only-btc-app.png";
 const SHARE_TITLE = "ONLY-BTC.APP 비트코인 시세 알림";
@@ -45,6 +45,15 @@ function BtcSurgeShareDialog() {
   // endregion
 
   // region [Privates]
+  /** 캡처 직전 카드 DOM에서 themeColor를 읽어 오버레이를 등록한다. */
+  const registerOverlayFromCard = useCallback(() => {
+    const themeColor = cardRef.current?.dataset.themeColor ?? "#F7931A";
+    registerCaptureOverlay({
+      ...COIN_OVERLAY_BASE,
+      shadowColor: `${themeColor}80`,
+    });
+  }, []);
+
   /**
    * 카드 고정 디자인 폭( 440px )을 현재 다이얼로그 폭에 맞춰 축소할 배율을 계산한다.
    *
@@ -134,6 +143,7 @@ function BtcSurgeShareDialog() {
     }
 
     setIsExporting(true);
+    registerOverlayFromCard();
 
     try {
       // Android 는 clipboard.write 가 성공으로 응답해도 실제로 이미지가 저장되지 않는 경우가 있어 공유 시트를 우선한다.
@@ -153,6 +163,7 @@ function BtcSurgeShareDialog() {
       console.error("이미지 복사 실패:", error);
       kToast.error("이미지 복사에 실패했습니다.");
     } finally {
+      clearCaptureOverlays();
       setIsExporting(false);
     }
   };
@@ -165,6 +176,7 @@ function BtcSurgeShareDialog() {
     }
 
     setIsExporting(true);
+    registerOverlayFromCard();
 
     try {
       const dataUrl = await captureElementToPngDataUrl(cardElement);
@@ -174,6 +186,7 @@ function BtcSurgeShareDialog() {
       console.error("이미지 저장 실패:", error);
       kToast.error("이미지 저장에 실패했습니다.");
     } finally {
+      clearCaptureOverlays();
       setIsExporting(false);
     }
   };
@@ -185,12 +198,6 @@ function BtcSurgeShareDialog() {
     setIsIosDevice(isIos());
   }, []);
 
-  useEffect(() => {
-    if (isOpen) {
-      registerCaptureOverlay(COIN_OVERLAY);
-    }
-    return () => clearCaptureOverlays();
-  }, [isOpen]);
   // endregion
 
   return (

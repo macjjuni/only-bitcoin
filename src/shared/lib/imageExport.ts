@@ -99,6 +99,8 @@ export interface OverlayImageInfo {
   size: number;
   top: number;
   right: number;
+  shadowColor?: string;
+  shadowBlur?: number;
 }
 
 function loadImage(src: string): Promise<HTMLImageElement> {
@@ -123,7 +125,17 @@ async function compositeOverlay(canvas: HTMLCanvasElement, overlay: OverlayImage
   const x = canvas.width - overlay.right * CAPTURE_PIXEL_RATIO - scaledSize;
   const y = overlay.top * CAPTURE_PIXEL_RATIO;
 
+  if (overlay.shadowColor) {
+    ctx.shadowColor = overlay.shadowColor;
+    ctx.shadowBlur = (overlay.shadowBlur ?? 20) * CAPTURE_PIXEL_RATIO;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
+  }
+
   ctx.drawImage(overlayImg, x, y, scaledSize, scaledSize);
+
+  ctx.shadowColor = "transparent";
+  ctx.shadowBlur = 0;
 }
 
 function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
