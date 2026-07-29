@@ -12,6 +12,9 @@ const nextConfig: NextConfig = {
     removeConsole: process.env.NODE_ENV === "production",
   },
   allowedDevOrigins: ["192.168.68.*"],
+  images: {
+    remotePatterns: [{ protocol: "https", hostname: "raw.githubusercontent.com" }],
+  },
   devIndicators: false,
   async headers() {
     return [

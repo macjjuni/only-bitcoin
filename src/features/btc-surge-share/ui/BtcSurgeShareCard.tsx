@@ -1,6 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
+import Image from "next/image";
 import { memo, type RefObject, useId, useMemo, useState } from "react";
 import { type MarketChartIntervalType, useBitcoinStore } from "@/entities/bitcoin";
 import { useMarketChartData } from "@/entities/bitcoin/client";
@@ -265,19 +266,19 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
 
         {/* 원화 · 달러 현재가 ( 변동액은 선택 타임프레임 변동률 기준 ) */}
         <div className="flex flex-col">
-          <div className="flex items-baseline justify-between gap-2.5">
+          <div className="flex items-baseline justify-start gap-2">
             <span className="text-2xl font-black text-white tracking-tight font-number">
               {currentPriceKrw > 0 ? `₩${currentPriceKrw.toLocaleString()}` : "-"}
             </span>
             <span
-              className="text-md font-bold tracking-tight font-number"
+              className="text-sm font-bold tracking-tight font-number"
               style={{ color: themeColor }}
             >
               {changeAmountKrw !== 0 ? `${changeSign}₩${changeAmountKrwText}` : ""}
             </span>
           </div>
 
-          <div className="flex items-baseline justify-between gap-2.5">
+          <div className="flex items-baseline justify-start gap-2">
             <span className="text-2xl font-black text-white tracking-tight font-number">
               {currentPriceUsd > 0 ? (
                 <>
@@ -289,7 +290,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
               )}
             </span>
             <span
-              className="text-md font-bold tracking-tight font-number"
+              className="text-sm font-bold tracking-tight font-number"
               style={{ color: themeColor }}
             >
               {changeAmountUsd !== 0 ? `${changeSign}$${changeAmountUsdText}` : ""}
@@ -297,6 +298,19 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
           </div>
         </div>
       </div>
+
+      <Image
+        src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/public/images/btc-3d-card.png"
+        alt="Bitcoin 3D image"
+        width={116}
+        height={116}
+        className="absolute top-20 right-6 pointer-events-none transition-[filter] duration-300"
+        style={{
+          filter: `drop-shadow(0 0 20px ${themeColor}80)`,
+          transform: "translateZ(0)",
+        }}
+        draggable={false}
+      />
 
       <div className="relative z-10 w-full my-3">
         <svg viewBox="0 0 360 140" className="w-full h-auto overflow-visible" aria-hidden="true">
