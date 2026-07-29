@@ -1,7 +1,6 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import Image from "next/image";
 import { memo, type RefObject, useId, useMemo, useState } from "react";
 import { type MarketChartIntervalType, useBitcoinStore } from "@/entities/bitcoin";
 import { useMarketChartData } from "@/entities/bitcoin/client";
@@ -299,9 +298,10 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
         </div>
       </div>
 
-      <Image
-        src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/public/images/btc-3d-card.png"
-        alt="Bitcoin 3D image"
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/images/btc-3d-card.png"
+        alt=""
         width={116}
         height={116}
         className="absolute top-20 right-6 pointer-events-none transition-[filter] duration-300"
