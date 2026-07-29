@@ -108,6 +108,10 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   const isChartDataReady = usdPrices.length >= 2;
 
   const changePercent = useMemo(() => {
+    if (timeframe === "1D" && bitcoinPrice?.usdChange24h) {
+      return Number.parseFloat(bitcoinPrice.usdChange24h);
+    }
+
     if (isChartDataReady) {
       const startPrice = usdPrices[0];
       const endPrice = usdPrices[usdPrices.length - 1];
@@ -115,7 +119,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
     }
     if (bitcoinPrice?.usdChange24h) return Number.parseFloat(bitcoinPrice.usdChange24h);
     return 0;
-  }, [usdPrices, bitcoinPrice, isChartDataReady]);
+  }, [timeframe, usdPrices, bitcoinPrice, isChartDataReady]);
 
   const isUp = changePercent >= 0;
 
