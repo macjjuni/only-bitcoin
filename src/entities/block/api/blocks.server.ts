@@ -13,7 +13,7 @@ const MEMPOOL_INFO_URL = "https://mempool.space/api/mempool";
 const REVALIDATE_SECONDS = 60 * 10;
 
 const EMPTY_BLOCK_DATA: InitialBlocks = {
-  blocks: [{ id: "", height: 0, timestamp: 0, size: 0, poolName: "-" }],
+  blocks: [{ id: "", height: 0, timestamp: 0, size: 0, poolName: "-", difficulty: 0 }],
   fees: { economyFee: 0, fastestFee: 0, halfHourFee: 0, hourFee: 0, minimumFee: 0 },
   mempoolInfo: { txCount: 0, vsize: 0 },
 };
@@ -50,11 +50,12 @@ export const fetchInitialBlocks = async (): Promise<InitialBlocks> => {
   ]);
 
   const sanitizedBlocks: BlockTypes[] = (blocks ?? [])
-    .map(({ id, height, timestamp, size, extras }) => ({
+    .map(({ id, height, timestamp, size, difficulty, extras }) => ({
       id,
       height,
       timestamp,
       size,
+      difficulty,
       poolName: extras.pool.name,
     }))
     .sort((a, b) => b.height - a.height);

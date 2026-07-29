@@ -11,6 +11,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/blocks",
     "/btc2fiat",
     "/premium",
+    "/solo-mining",
     "/orange-pill",
     "/orange-pill/meme",
     "/orange-pill/bip39",

@@ -16,11 +16,12 @@ export default function useMempoolSocket() {
   const handleMempoolBlocks = useCallback((blocks: MemPoolBlockTypes[]) => {
     const { setBlockData } = useBlockStore.getState();
     const sanitizedBlocks: BlockTypes[] = blocks
-      .map(({ id, height, timestamp, size, extras }) => ({
+      .map(({ id, height, timestamp, size, difficulty, extras }) => ({
         id,
         height,
         timestamp,
         size,
+        difficulty,
         poolName: extras.pool.name,
       }))
       .sort((a, b) => b.height - a.height);
@@ -34,8 +35,15 @@ export default function useMempoolSocket() {
     const isContained = blockData.some((blockItem) => blockItem.height === block.height);
     if (isContained) return;
 
-    const { id, height, size, timestamp, extras } = block;
-    const sanitizedBlock: BlockTypes = { id, height, size, timestamp, poolName: extras.pool.name };
+    const { id, height, size, timestamp, difficulty, extras } = block;
+    const sanitizedBlock: BlockTypes = {
+      id,
+      height,
+      size,
+      timestamp,
+      difficulty,
+      poolName: extras.pool.name,
+    };
 
     kToast.info(`${comma(height)}번째 블록 채굴!️`, { duration: 3500 });
     useConfettiStore.getState().show();

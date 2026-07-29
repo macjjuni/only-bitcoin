@@ -2,7 +2,7 @@
 
 import { useLottie } from "lottie-react";
 import LightningLottieData from "@/shared/assets/lottie/lightning.json";
-import { CountText, UpdownIcon } from "@/shared/ui";
+import { CountText, TransitionLink, UpdownIcon } from "@/shared/ui";
 
 interface MiningMetricHeaderProps {
   hasData: boolean;
@@ -24,7 +24,7 @@ export default function MiningMetricHeader({
 
   return (
     <div className="flex flex-col justify-start gap-2 text-current relative">
-      <div className="flex justify-start items-center px-2">
+      <div className="flex justify-between items-center gap-2 px-2">
         <div className="flex gap-2 relative">
           <span className="text-base font-number font-bold">{allTimeHighValue}</span>
 
@@ -41,6 +41,13 @@ export default function MiningMetricHeader({
             </span>
           )}
         </div>
+
+        <TransitionLink
+          href="/solo-mining"
+          className="shrink-0 text-xs font-bold text-bitcoin active:scale-[0.97]"
+        >
+          내 채굴 확률 &rsaquo;
+        </TransitionLink>
       </div>
     </div>
   );
