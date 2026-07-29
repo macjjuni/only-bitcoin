@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { memo, type RefObject, useId, useMemo, useState } from "react";
+import { memo, type RefObject, useEffect, useId, useMemo, useState } from "react";
 import { type MarketChartIntervalType, useBitcoinStore } from "@/entities/bitcoin";
 import { useMarketChartData } from "@/entities/bitcoin/client";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
@@ -87,6 +87,7 @@ function calculateChangeAmount(currentPrice: number, changeRatePercent: number):
 function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   // region [Hooks]
   const [timeframe, setTimeframe] = useState<ShareCardTimeframe>("1D");
+  const [coinImageDataUrl, setCoinImageDataUrl] = useState("");
   const rawId = useId();
   const glowFilterId = `surgeGlow-${rawId.replace(/:/g, "")}`;
   const gradientId = `surgeGrad-${rawId.replace(/:/g, "")}`;
@@ -156,6 +157,19 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   const onClickTimeframe = (selectedTimeframe: ShareCardTimeframe) => {
     setTimeframe(selectedTimeframe);
   };
+  // endregion
+
+
+  // region [Life Cycles]
+  useEffect(() => {
+    fetch("/images/btc-3d-card.png")
+      .then((res) => res.blob())
+      .then((blob) => {
+        const reader = new FileReader();
+        reader.onloadend = () => setCoinImageDataUrl(reader.result as string);
+        reader.readAsDataURL(blob);
+      });
+  }, []);
   // endregion
 
   // region [Templates]
@@ -299,18 +313,20 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       </div>
 
       {/* eslint-disable-next-line @next/next/no-img-element */}
-      <img
-        src="/images/btc-3d-card.png"
-        alt=""
-        width={116}
-        height={116}
-        className="absolute top-20 right-6 pointer-events-none transition-[filter] duration-300"
+      {coinImageDataUrl && (
+        <img
+          src={coinImageDataUrl}
+          alt=""
+          width={116}
+          height={116}
+          className="absolute top-20 right-6 pointer-events-none transition-[filter] duration-300"
         style={{
           filter: `drop-shadow(0 0 20px ${themeColor}80)`,
           transform: "translateZ(0)",
         }}
-        draggable={false}
-      />
+          draggable={false}
+        />
+      )}
 
       <div className="relative z-10 w-full my-3">
         <svg viewBox="0 0 360 140" className="w-full h-auto overflow-visible" aria-hidden="true">
