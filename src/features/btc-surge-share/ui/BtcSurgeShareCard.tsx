@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { memo, type RefObject, useCallback, useId, useMemo, useState } from "react";
+import { memo, type RefObject, useId, useMemo, useState } from "react";
 import { type MarketChartIntervalType, useBitcoinStore } from "@/entities/bitcoin";
 import { useMarketChartData } from "@/entities/bitcoin/client";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
@@ -159,21 +159,6 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   // endregion
 
 
-  /** canvas에 이미지를 그려 래스터화 — html-to-image iOS 캡처 호환 */
-  const coinCanvasRef = useCallback((canvas: HTMLCanvasElement | null) => {
-    if (!canvas) return;
-    const ctx = canvas.getContext("2d");
-    if (!ctx) return;
-
-    const img = new Image();
-    img.onload = () => {
-      canvas.width = img.naturalWidth;
-      canvas.height = img.naturalHeight;
-      ctx.clearRect(0, 0, canvas.width, canvas.height);
-      ctx.drawImage(img, 0, 0);
-    };
-    img.src = "/images/btc-3d-card.png";
-  }, []);
 
   // region [Templates]
   const changeSign = isUp ? "+" : "-";
@@ -315,10 +300,15 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
         </div>
       </div>
 
-      <canvas
-        ref={coinCanvasRef}
-        className="absolute top-20 right-6 w-[116px] h-[116px] pointer-events-none"
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src="/images/btc-3d-card.png"
+        alt=""
+        width={116}
+        height={116}
+        className="absolute top-20 right-6 pointer-events-none"
         style={{ filter: `drop-shadow(0 0 20px ${themeColor}80)` }}
+        draggable={false}
       />
 
       <div className="relative z-10 w-full my-3">

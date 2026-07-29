@@ -83,24 +83,56 @@ export function isImageFileShareSupported(imageFile: File): boolean {
   return navigator.canShare({ files: [imageFile] });
 }
 
+/** Safari 재시도 설정 */
+const RETRY_MAX_ATTEMPTS = 10;
+const RETRY_DELAY_MS = 300;
+const RETRY_MIN_BLOB_SIZE = 500_000;
+
 /**
  * DOM 엘리먼트를 PNG Data URL 로 캡처한다.
+ *
+ * Safari 이미지 로딩 지연 대응을 위해 빈 결과일 경우 재시도한다.
  */
-export function captureElementToPngDataUrl(element: HTMLElement): Promise<string> {
+export async function captureElementToPngDataUrl(element: HTMLElement): Promise<string> {
+  const EMPTY_DATA_URL_THRESHOLD = 1000;
+
+  for (let attempt = 0; attempt < RETRY_MAX_ATTEMPTS; attempt++) {
+    const dataUrl = await toPng(element, CAPTURE_OPTIONS);
+
+    if (dataUrl && dataUrl.length > EMPTY_DATA_URL_THRESHOLD) {
+      return dataUrl;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+  }
+
   return toPng(element, CAPTURE_OPTIONS);
 }
 
 /**
- * DOM 엘리먼트를 PNG Blob 으로 캡처한다. 변환 실패 시 예외를 던진다.
+ * DOM 엘리먼트를 PNG Blob 으로 캡처한다.
+ *
+ * Safari 는 이미지 로딩을 지연시켜 첫 시도에서 이미지가 누락될 수 있다.
+ * Blob 크기가 임계값 미만이면 재시도하여 모든 리소스가 포함된 결과를 보장한다.
  */
 export async function captureElementToPngBlob(element: HTMLElement): Promise<Blob> {
-  const capturedImageBlob = await toBlob(element, CAPTURE_OPTIONS);
+  let blob: Blob | null = null;
 
-  if (!capturedImageBlob) {
+  for (let attempt = 0; attempt < RETRY_MAX_ATTEMPTS; attempt++) {
+    blob = await toBlob(element, CAPTURE_OPTIONS);
+
+    if (blob && blob.size > RETRY_MIN_BLOB_SIZE) {
+      return blob;
+    }
+
+    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+  }
+
+  if (!blob) {
     throw new Error("이미지 Blob 생성에 실패했습니다.");
   }
 
-  return capturedImageBlob;
+  return blob;
 }
 
 /**
@@ -144,3 +176,4 @@ export function createPngFile(imageBlob: Blob, fileName: string): File {
 export function isShareAbortedByUser(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
 }
+
