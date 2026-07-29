@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { memo, type RefObject, useEffect, useId, useMemo, useState } from "react";
+import { memo, type RefObject, useCallback, useId, useMemo, useState } from "react";
 import { type MarketChartIntervalType, useBitcoinStore } from "@/entities/bitcoin";
 import { useMarketChartData } from "@/entities/bitcoin/client";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
@@ -87,7 +87,6 @@ function calculateChangeAmount(currentPrice: number, changeRatePercent: number):
 function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   // region [Hooks]
   const [timeframe, setTimeframe] = useState<ShareCardTimeframe>("1D");
-  const [coinImageDataUrl, setCoinImageDataUrl] = useState("");
   const rawId = useId();
   const glowFilterId = `surgeGlow-${rawId.replace(/:/g, "")}`;
   const gradientId = `surgeGrad-${rawId.replace(/:/g, "")}`;
@@ -160,17 +159,21 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   // endregion
 
 
-  // region [Life Cycles]
-  useEffect(() => {
-    fetch("/images/btc-3d-card.png")
-      .then((res) => res.blob())
-      .then((blob) => {
-        const reader = new FileReader();
-        reader.onloadend = () => setCoinImageDataUrl(reader.result as string);
-        reader.readAsDataURL(blob);
-      });
+  /** canvas에 이미지를 그려 래스터화 — html-to-image iOS 캡처 호환 */
+  const coinCanvasRef = useCallback((canvas: HTMLCanvasElement | null) => {
+    if (!canvas) return;
+    const ctx = canvas.getContext("2d");
+    if (!ctx) return;
+
+    const img = new Image();
+    img.onload = () => {
+      canvas.width = img.naturalWidth;
+      canvas.height = img.naturalHeight;
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
+      ctx.drawImage(img, 0, 0);
+    };
+    img.src = "/images/btc-3d-card.png";
   }, []);
-  // endregion
 
   // region [Templates]
   const changeSign = isUp ? "+" : "-";
@@ -312,15 +315,11 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
         </div>
       </div>
 
-      {coinImageDataUrl && (
-        <div
-          className="absolute top-20 right-6 w-[116px] h-[116px] pointer-events-none bg-contain bg-center bg-no-repeat"
-          style={{
-            backgroundImage: `url(${coinImageDataUrl})`,
-            filter: `drop-shadow(0 0 20px ${themeColor}80)`,
-          }}
-        />
-      )}
+      <canvas
+        ref={coinCanvasRef}
+        className="absolute top-20 right-6 w-[116px] h-[116px] pointer-events-none"
+        style={{ filter: `drop-shadow(0 0 20px ${themeColor}80)` }}
+      />
 
       <div className="relative z-10 w-full my-3">
         <svg viewBox="0 0 360 140" className="w-full h-auto overflow-visible" aria-hidden="true">
