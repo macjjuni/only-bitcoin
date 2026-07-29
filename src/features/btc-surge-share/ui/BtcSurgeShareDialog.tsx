@@ -15,6 +15,7 @@ import { memo, useCallback, useEffect, useRef, useState } from "react";
 import {
   captureElementToPngBlob,
   captureElementToPngDataUrl,
+  clearCaptureOverlays,
   copyPngToClipboard,
   createPngFile,
   downloadImageFromDataUrl,
@@ -23,9 +24,10 @@ import {
   isImageFileShareSupported,
   isIos,
   isShareAbortedByUser,
+  registerCaptureOverlay,
 } from "@/shared/lib/imageExport";
 import { useBtcSurgeShareStore } from "../model/useBtcSurgeShareStore";
-import { BTC_SURGE_CARD_DESIGN_WIDTH, BtcSurgeShareCard } from "./BtcSurgeShareCard";
+import { BTC_SURGE_CARD_DESIGN_WIDTH, BtcSurgeShareCard, COIN_OVERLAY } from "./BtcSurgeShareCard";
 
 const SHARE_IMAGE_FILE_NAME = "only-btc-app.png";
 const SHARE_TITLE = "ONLY-BTC.APP 비트코인 시세 알림";
@@ -182,6 +184,13 @@ function BtcSurgeShareDialog() {
   useEffect(() => {
     setIsIosDevice(isIos());
   }, []);
+
+  useEffect(() => {
+    if (isOpen) {
+      registerCaptureOverlay(COIN_OVERLAY);
+    }
+    return () => clearCaptureOverlays();
+  }, [isOpen]);
   // endregion
 
   return (

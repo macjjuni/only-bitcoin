@@ -31,6 +31,14 @@ const SERVICE_DOMAIN = "ONLY-BTC.APP";
 
 export const BTC_SURGE_CARD_DESIGN_WIDTH = 440;
 
+/** html-to-image 캡처 후 canvas에 직접 합성할 코인 이미지 정보 */
+export const COIN_OVERLAY = {
+  src: "/images/btc-3d-card.png",
+  size: 116,
+  top: 80,
+  right: 24,
+} as const;
+
 export interface BtcSurgeShareCardProps {
   cardRef?: RefObject<HTMLDivElement | null>;
 }
@@ -308,6 +316,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
         height={116}
         className="absolute top-20 right-6 pointer-events-none"
         style={{ filter: `drop-shadow(0 0 20px ${themeColor}80)` }}
+        data-capture-ignore=""
         draggable={false}
       />
 

@@ -1,6 +1,6 @@
 "use client";
 
-import { toBlob, toPng } from "html-to-image";
+import { toCanvas } from "html-to-image";
 
 const PNG_MIME_TYPE = "image/png";
 
@@ -23,10 +23,19 @@ const CAPTURE_ROOT_STYLE = {
   borderRadius: "0",
 } as const;
 
+/** data-capture-ignore 속성이 있는 노드를 캡처에서 제외한다. */
+function captureFilter(node: Element): boolean {
+  if (node instanceof HTMLElement && node.dataset.captureIgnore !== undefined) {
+    return false;
+  }
+  return true;
+}
+
 const CAPTURE_OPTIONS = {
   cacheBust: true,
   pixelRatio: CAPTURE_PIXEL_RATIO,
   style: CAPTURE_ROOT_STYLE,
+  filter: captureFilter,
 } as const;
 
 /**
@@ -83,56 +92,95 @@ export function isImageFileShareSupported(imageFile: File): boolean {
   return navigator.canShare({ files: [imageFile] });
 }
 
-/** Safari 재시도 설정 */
-const RETRY_MAX_ATTEMPTS = 10;
-const RETRY_DELAY_MS = 300;
-const RETRY_MIN_BLOB_SIZE = 500_000;
+// region [Overlay Composite]
+
+export interface OverlayImageInfo {
+  src: string;
+  size: number;
+  top: number;
+  right: number;
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
+}
+
+/**
+ * 캡처된 canvas 위에 오버레이 이미지를 직접 합성한다.
+ * Safari foreignObject 이미지 렌더링 제약을 완전히 우회한다.
+ */
+async function compositeOverlay(canvas: HTMLCanvasElement, overlay: OverlayImageInfo): Promise<void> {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
+
+  const overlayImg = await loadImage(overlay.src);
+  const scaledSize = overlay.size * CAPTURE_PIXEL_RATIO;
+  const x = canvas.width - overlay.right * CAPTURE_PIXEL_RATIO - scaledSize;
+  const y = overlay.top * CAPTURE_PIXEL_RATIO;
+
+  ctx.drawImage(overlayImg, x, y, scaledSize, scaledSize);
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error("Canvas toBlob 실패"));
+    }, PNG_MIME_TYPE);
+  });
+}
+
+// endregion
+
+/** 오버레이 이미지 목록. 캡처 시 합성할 이미지가 없으면 빈 배열. */
+let registeredOverlays: OverlayImageInfo[] = [];
+
+/**
+ * 캡처 후 합성할 오버레이 이미지를 등록한다.
+ */
+export function registerCaptureOverlay(overlay: OverlayImageInfo): void {
+  registeredOverlays = [overlay];
+}
+
+/**
+ * 등록된 오버레이를 해제한다.
+ */
+export function clearCaptureOverlays(): void {
+  registeredOverlays = [];
+}
+
+/**
+ * DOM → canvas → (오버레이 합성) → Blob 파이프라인.
+ */
+async function captureToCanvas(element: HTMLElement): Promise<HTMLCanvasElement> {
+  const canvas = await toCanvas(element, CAPTURE_OPTIONS);
+
+  for (const overlay of registeredOverlays) {
+    await compositeOverlay(canvas, overlay);
+  }
+
+  return canvas;
+}
 
 /**
  * DOM 엘리먼트를 PNG Data URL 로 캡처한다.
- *
- * Safari 이미지 로딩 지연 대응을 위해 빈 결과일 경우 재시도한다.
  */
 export async function captureElementToPngDataUrl(element: HTMLElement): Promise<string> {
-  const EMPTY_DATA_URL_THRESHOLD = 1000;
-
-  for (let attempt = 0; attempt < RETRY_MAX_ATTEMPTS; attempt++) {
-    const dataUrl = await toPng(element, CAPTURE_OPTIONS);
-
-    if (dataUrl && dataUrl.length > EMPTY_DATA_URL_THRESHOLD) {
-      return dataUrl;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-  }
-
-  return toPng(element, CAPTURE_OPTIONS);
+  const canvas = await captureToCanvas(element);
+  return canvas.toDataURL(PNG_MIME_TYPE);
 }
 
 /**
  * DOM 엘리먼트를 PNG Blob 으로 캡처한다.
- *
- * Safari 는 이미지 로딩을 지연시켜 첫 시도에서 이미지가 누락될 수 있다.
- * Blob 크기가 임계값 미만이면 재시도하여 모든 리소스가 포함된 결과를 보장한다.
  */
 export async function captureElementToPngBlob(element: HTMLElement): Promise<Blob> {
-  let blob: Blob | null = null;
-
-  for (let attempt = 0; attempt < RETRY_MAX_ATTEMPTS; attempt++) {
-    blob = await toBlob(element, CAPTURE_OPTIONS);
-
-    if (blob && blob.size > RETRY_MIN_BLOB_SIZE) {
-      return blob;
-    }
-
-    await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
-  }
-
-  if (!blob) {
-    throw new Error("이미지 Blob 생성에 실패했습니다.");
-  }
-
-  return blob;
+  const canvas = await captureToCanvas(element);
+  return canvasToBlob(canvas);
 }
 
 /**
@@ -176,4 +224,3 @@ export function createPngFile(imageBlob: Blob, fileName: string): File {
 export function isShareAbortedByUser(error: unknown): boolean {
   return error instanceof DOMException && error.name === "AbortError";
 }
-
