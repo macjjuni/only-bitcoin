@@ -11,3 +11,4 @@ export const BLOCK_PERSIST_KEY = "only-bitcoin-block";
 export const BTC2FIAT_PERSIST_KEY = "only-bitcoin-btc2fiat";
 export const DCA_PERSIST_KEY = "only-bitcoin-dca";
 export const OVERVIEW_PERSIST_KEY = "only-bitcoin-overview";
+export const BTC_SURGE_SHARE_PERSIST_KEY = "only-bitcoin-btc-surge-share";
