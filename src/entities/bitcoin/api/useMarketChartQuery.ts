@@ -78,20 +78,24 @@ function fetchMarketChartByInterval(
   );
 }
 
+/**
+ * 실패를 삼키지 않고 그대로 올린다.
+ *
+ * 빈 배열을 반환하면 TanStack 이 성공으로 간주해 `retry` 도 `isError` 도 동작하지 않고,
+ * 빈 결과가 `staleTime` 동안 캐시된다. `PersistQueryClientProvider` 가 그 캐시를 영속화하므로
+ * 요청이 한 번 실패하면 네트워크가 복구된 뒤에도 새로고침까지 포함해 최대 `staleTime` 동안
+ * 빈 차트가 유지된다.
+ */
 async function fetchMarketChart(
   interval: MarketChartIntervalType,
 ): Promise<MarketChartFormattedData> {
-  try {
-    const data = await fetchMarketChartByInterval(interval);
+  const data = await fetchMarketChartByInterval(interval);
 
-    if (isDev) {
-      console.log("✅ 마켓 차트 데이터 초기화!");
-    }
-
-    return data;
-  } catch {
-    return { date: [], price: [] };
+  if (isDev) {
+    console.log("✅ 마켓 차트 데이터 초기화!");
   }
+
+  return data;
 }
 
 const MINUTE = 1000 * 60;
@@ -118,7 +122,11 @@ const REFRESH_TIME_MAP: Record<MarketChartIntervalType, number> = {
   all: MINUTE * 60,
 };
 
-const useMarketChart = (interval: MarketChartIntervalType) => {
+/**
+ * @param isEnabled `false` 이면 조회와 주기 갱신을 모두 중단한다.
+ *                  상시 마운트된 컴포넌트가 필요할 때만 구독하도록 열어 둔 옵션이다.
+ */
+const useMarketChart = (interval: MarketChartIntervalType, isEnabled = true) => {
   // region [Hooks]
   const refreshTime = REFRESH_TIME_MAP[interval];
 
@@ -148,6 +156,7 @@ const useMarketChart = (interval: MarketChartIntervalType) => {
     queryKey: getMarketChartQueryKey(interval),
     queryFn: () => fetchMarketChart(interval),
     select: selectMarketChartData,
+    enabled: isEnabled,
 
     staleTime: refreshTime,
     gcTime: refreshTime,
