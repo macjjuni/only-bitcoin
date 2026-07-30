@@ -4,7 +4,7 @@ import type { BinanceKline, MarketChartFormattedData } from "../model/market";
 const BINANCE_KLINES_URL = "https://api.binance.com/api/v3/klines";
 const BINANCE_TICKER_24H_URL = "https://api.binance.com/api/v3/ticker/24hr";
 
-export type BinanceInterval = "5m" | "15m" | "1h" | "4h" | "1d" | "1w";
+export type BinanceInterval = "5m" | "15m" | "1h" | "4h" | "12h" | "1d" | "1w";
 
 /**
  * Binance 24시간 티커 응답 ( 가격·수량 계열 필드는 모두 문자열로 내려온다 )

@@ -1,6 +1,6 @@
 "use client";
 
-import { toBlob, toPng } from "html-to-image";
+import { toCanvas } from "html-to-image";
 
 const PNG_MIME_TYPE = "image/png";
 
@@ -23,10 +23,19 @@ const CAPTURE_ROOT_STYLE = {
   borderRadius: "0",
 } as const;
 
+/** data-capture-ignore 속성이 있는 노드를 캡처에서 제외한다. */
+function captureFilter(node: Element): boolean {
+  if (node instanceof HTMLElement && node.dataset.captureIgnore !== undefined) {
+    return false;
+  }
+  return true;
+}
+
 const CAPTURE_OPTIONS = {
   cacheBust: true,
   pixelRatio: CAPTURE_PIXEL_RATIO,
   style: CAPTURE_ROOT_STYLE,
+  filter: captureFilter,
 } as const;
 
 /**
@@ -83,24 +92,107 @@ export function isImageFileShareSupported(imageFile: File): boolean {
   return navigator.canShare({ files: [imageFile] });
 }
 
-/**
- * DOM 엘리먼트를 PNG Data URL 로 캡처한다.
- */
-export function captureElementToPngDataUrl(element: HTMLElement): Promise<string> {
-  return toPng(element, CAPTURE_OPTIONS);
+// region [Overlay Composite]
+
+export interface OverlayImageInfo {
+  src: string;
+  size: number;
+  top: number;
+  right: number;
+  shadowColor?: string;
+  shadowBlur?: number;
+}
+
+function loadImage(src: string): Promise<HTMLImageElement> {
+  return new Promise((resolve, reject) => {
+    const img = new Image();
+    img.onload = () => resolve(img);
+    img.onerror = reject;
+    img.src = src;
+  });
 }
 
 /**
- * DOM 엘리먼트를 PNG Blob 으로 캡처한다. 변환 실패 시 예외를 던진다.
+ * 캡처된 canvas 위에 오버레이 이미지를 직접 합성한다.
+ * Safari foreignObject 이미지 렌더링 제약을 완전히 우회한다.
  */
-export async function captureElementToPngBlob(element: HTMLElement): Promise<Blob> {
-  const capturedImageBlob = await toBlob(element, CAPTURE_OPTIONS);
+async function compositeOverlay(canvas: HTMLCanvasElement, overlay: OverlayImageInfo): Promise<void> {
+  const ctx = canvas.getContext("2d");
+  if (!ctx) return;
 
-  if (!capturedImageBlob) {
-    throw new Error("이미지 Blob 생성에 실패했습니다.");
+  const overlayImg = await loadImage(overlay.src);
+  const scaledSize = overlay.size * CAPTURE_PIXEL_RATIO;
+  const x = canvas.width - overlay.right * CAPTURE_PIXEL_RATIO - scaledSize;
+  const y = overlay.top * CAPTURE_PIXEL_RATIO;
+
+  if (overlay.shadowColor) {
+    ctx.shadowColor = overlay.shadowColor;
+    ctx.shadowBlur = (overlay.shadowBlur ?? 20) * CAPTURE_PIXEL_RATIO;
+    ctx.shadowOffsetX = 0;
+    ctx.shadowOffsetY = 0;
   }
 
-  return capturedImageBlob;
+  ctx.drawImage(overlayImg, x, y, scaledSize, scaledSize);
+
+  ctx.shadowColor = "transparent";
+  ctx.shadowBlur = 0;
+}
+
+function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
+  return new Promise((resolve, reject) => {
+    canvas.toBlob((blob) => {
+      if (blob) resolve(blob);
+      else reject(new Error("Canvas toBlob 실패"));
+    }, PNG_MIME_TYPE);
+  });
+}
+
+// endregion
+
+/** 오버레이 이미지 목록. 캡처 시 합성할 이미지가 없으면 빈 배열. */
+let registeredOverlays: OverlayImageInfo[] = [];
+
+/**
+ * 캡처 후 합성할 오버레이 이미지를 등록한다.
+ */
+export function registerCaptureOverlay(overlay: OverlayImageInfo): void {
+  registeredOverlays = [overlay];
+}
+
+/**
+ * 등록된 오버레이를 해제한다.
+ */
+export function clearCaptureOverlays(): void {
+  registeredOverlays = [];
+}
+
+/**
+ * DOM → canvas → (오버레이 합성) → Blob 파이프라인.
+ */
+async function captureToCanvas(element: HTMLElement): Promise<HTMLCanvasElement> {
+  const canvas = await toCanvas(element, CAPTURE_OPTIONS);
+
+  for (const overlay of registeredOverlays) {
+    await compositeOverlay(canvas, overlay);
+  }
+
+  return canvas;
+}
+
+/**
+ * DOM 엘리먼트를 PNG Data URL 로 캡처한다.
+ */
+export async function captureElementToPngDataUrl(element: HTMLElement): Promise<string> {
+  const canvas = await captureToCanvas(element);
+  return canvas.toDataURL(PNG_MIME_TYPE);
+}
+
+/**
+ * DOM 엘리먼트를 PNG Blob 으로 캡처한다.
+ */
+export async function captureElementToPngBlob(element: HTMLElement): Promise<Blob> {
+  const canvas = await captureToCanvas(element);
+  return canvasToBlob(canvas);
 }
 
 /**

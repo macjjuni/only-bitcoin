@@ -2,21 +2,15 @@
 
 import { KIcon } from "kku-ui";
 import { memo, type RefObject, useId, useMemo, useState } from "react";
-import { type MarketChartIntervalType, useBitcoinStore } from "@/entities/bitcoin";
+import { useBitcoinStore } from "@/entities/bitcoin";
 import { useMarketChartData } from "@/entities/bitcoin/client";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
 import { BtcTextLogo, UpdownIcon } from "@/shared/ui";
-
-type ShareCardTimeframe = "1D" | "7D" | "1M";
-
-const TIMEFRAME_LIST: readonly ShareCardTimeframe[] = ["1D", "7D", "1M"];
-
-/** 카드 타임프레임 → 마켓 차트 조회 인터벌 매핑 */
-const TIMEFRAME_INTERVAL_MAP: Record<ShareCardTimeframe, MarketChartIntervalType> = {
-  "1D": "1d",
-  "7D": "7d",
-  "1M": "1m",
-};
+import {
+  SHARE_CARD_TIMEFRAME_INTERVAL_MAP,
+  type ShareCardTimeframe,
+} from "../model/shareCardTimeframe";
+import { BtcSurgeTimeframeSelector } from "./BtcSurgeTimeframeSelector";
 
 /** 곡선을 그리기 위해 필요한 최소 가격 포인트 개수 */
 const MINIMUM_CHART_POINT_COUNT = 10;
@@ -28,8 +22,17 @@ const MINIMUM_CHART_POINT_COUNT = 10;
  * 그 리렌더 대기 구간이 Safari 클립보드의 user gesture 동기 제약을 깨뜨리므로 상시 노출한다.
  */
 const SERVICE_DOMAIN = "ONLY-BTC.APP";
-
 export const BTC_SURGE_CARD_DESIGN_WIDTH = 440;
+export const COIN_IMAGE_SRC = "/images/btc-3d-card.png";
+
+/** html-to-image 캡처 후 canvas에 직접 합성할 코인 이미지 기본 정보 */
+export const COIN_OVERLAY_BASE = {
+  src: COIN_IMAGE_SRC,
+  size: 116,
+  top: 80,
+  right: 24,
+  shadowBlur: 20,
+} as const;
 
 export interface BtcSurgeShareCardProps {
   cardRef?: RefObject<HTMLDivElement | null>;
@@ -92,7 +95,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   const gradientId = `surgeGrad-${rawId.replace(/:/g, "")}`;
 
   const bitcoinPrice = useBitcoinStore((state) => state.bitcoinPrice);
-  const { marketChartData } = useMarketChartData(TIMEFRAME_INTERVAL_MAP[timeframe]);
+  const { marketChartData } = useMarketChartData(SHARE_CARD_TIMEFRAME_INTERVAL_MAP[timeframe]);
 
   // 카드가 열린 시각을 고정한다. 다이얼로그가 닫히면 언마운트되므로 열 때마다 다시 계산.
   const [capturedAtKst] = useState<string>(getCurrentDateTimeKST);
@@ -153,13 +156,24 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   // endregion
 
   // region [Events]
-  const onClickTimeframe = (selectedTimeframe: ShareCardTimeframe) => {
+  const onChangeTimeframe = (selectedTimeframe: ShareCardTimeframe) => {
     setTimeframe(selectedTimeframe);
   };
   // endregion
 
   // region [Templates]
   const changeSign = isUp ? "+" : "-";
+
+  /**
+   * 변동률 표기. 정수부가 세 자리 이상( 100% 이상 )이면 소수점을 버린다.
+   *
+   * 5Y · 10Y 처럼 변동률이 커지면 48px 폰트에서 텍스트가 카드 폭을 넘기므로 자릿수를 줄인다.
+   */
+  const changePercentText = useMemo(() => {
+    const hasThreeDigitIntegerPart = Math.abs(changePercent) >= 100;
+
+    return changePercent.toFixed(hasThreeDigitIntegerPart ? 0 : 2);
+  }, [changePercent]);
 
   const currentPriceUsdText = useMemo(
     () => currentPriceUsd.toLocaleString("en-US", { maximumFractionDigits: 0 }),
@@ -180,6 +194,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   return (
     <div
       ref={cardRef}
+      data-theme-color={themeColor}
       className={`relative w-[440px] rounded-[32px] p-6 text-white select-none overflow-hidden border transition-all duration-300 ${
         isUp ? "border-emerald-500/30 bg-[#0a0d14]" : "border-rose-500/30 bg-[#0f0a0d]"
       }`}
@@ -226,22 +241,11 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
             />
             LIVE
           </span>
-          {TIMEFRAME_LIST.map((tf) => (
-            <button
-              key={tf}
-              type="button"
-              onClick={() => onClickTimeframe(tf)}
-              className={`px-2 py-1 text-sm font-bold rounded-full transition-colors cursor-pointer ${
-                timeframe === tf
-                  ? isUp
-                    ? "bg-[#00E676] text-black shadow-md"
-                    : "bg-[#FF5252] text-white shadow-md"
-                  : "text-neutral-400 hover:text-neutral-200"
-              }`}
-            >
-              {tf}
-            </button>
-          ))}
+          <BtcSurgeTimeframeSelector
+            selectedTimeframe={timeframe}
+            isUp={isUp}
+            onChangeTimeframe={onChangeTimeframe}
+          />
         </div>
       </div>
 
@@ -259,25 +263,25 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
           >
             <UpdownIcon isUp={isUp} size={36} className="mr-1" />
             {isUp ? "+" : ""}
-            {changePercent.toFixed(2)}%
+            {changePercentText}%
           </span>
         </div>
 
         {/* 원화 · 달러 현재가 ( 변동액은 선택 타임프레임 변동률 기준 ) */}
         <div className="flex flex-col">
-          <div className="flex items-baseline justify-between gap-2.5">
+          <div className="flex items-baseline justify-start gap-2">
             <span className="text-2xl font-black text-white tracking-tight font-number">
               {currentPriceKrw > 0 ? `₩${currentPriceKrw.toLocaleString()}` : "-"}
             </span>
             <span
-              className="text-md font-bold tracking-tight font-number"
+              className="text-sm font-bold tracking-tight font-number"
               style={{ color: themeColor }}
             >
               {changeAmountKrw !== 0 ? `${changeSign}₩${changeAmountKrwText}` : ""}
             </span>
           </div>
 
-          <div className="flex items-baseline justify-between gap-2.5">
+          <div className="flex items-baseline justify-start gap-2">
             <span className="text-2xl font-black text-white tracking-tight font-number">
               {currentPriceUsd > 0 ? (
                 <>
@@ -289,7 +293,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
               )}
             </span>
             <span
-              className="text-md font-bold tracking-tight font-number"
+              className="text-sm font-bold tracking-tight font-number"
               style={{ color: themeColor }}
             >
               {changeAmountUsd !== 0 ? `${changeSign}$${changeAmountUsdText}` : ""}
@@ -297,6 +301,18 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
           </div>
         </div>
       </div>
+
+      {/* eslint-disable-next-line @next/next/no-img-element */}
+      <img
+        src={COIN_IMAGE_SRC}
+        alt=""
+        width={116}
+        height={116}
+        className="absolute top-20 right-6 pointer-events-none"
+        style={{ filter: `drop-shadow(0 0 20px ${themeColor}80)` }}
+        data-capture-ignore=""
+        draggable={false}
+      />
 
       <div className="relative z-10 w-full my-3">
         <svg viewBox="0 0 360 140" className="w-full h-auto overflow-visible" aria-hidden="true">
