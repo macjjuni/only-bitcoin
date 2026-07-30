@@ -28,12 +28,12 @@ const MINIMUM_CHART_POINT_COUNT = 10;
  * 그 리렌더 대기 구간이 Safari 클립보드의 user gesture 동기 제약을 깨뜨리므로 상시 노출한다.
  */
 const SERVICE_DOMAIN = "ONLY-BTC.APP";
-
 export const BTC_SURGE_CARD_DESIGN_WIDTH = 440;
+export const COIN_IMAGE_SRC = "/images/btc-3d-card-1.png";
 
 /** html-to-image 캡처 후 canvas에 직접 합성할 코인 이미지 기본 정보 */
 export const COIN_OVERLAY_BASE = {
-  src: "/images/btc-3d-card.png",
+  src: COIN_IMAGE_SRC,
   size: 116,
   top: 80,
   right: 24,
@@ -166,8 +166,6 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
     setTimeframe(selectedTimeframe);
   };
   // endregion
-
-
 
   // region [Templates]
   const changeSign = isUp ? "+" : "-";
@@ -312,7 +310,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
 
       {/* eslint-disable-next-line @next/next/no-img-element */}
       <img
-        src="/images/btc-3d-card.png"
+        src={COIN_IMAGE_SRC}
         alt=""
         width={116}
         height={116}
