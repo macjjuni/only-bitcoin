@@ -27,6 +27,7 @@ import {
   registerCaptureOverlay,
 } from "@/shared/lib/imageExport";
 import { useBtcSurgeShareStore } from "../model/useBtcSurgeShareStore";
+import { useShareCardChart } from "../model/useShareCardChart";
 import {
   BTC_SURGE_CARD_DESIGN_WIDTH,
   BtcSurgeShareCard,
@@ -40,6 +41,9 @@ function BtcSurgeShareDialog() {
   // region [Hooks]
   const isOpen = useBtcSurgeShareStore((state) => state.isOpen);
   const closeModal = useBtcSurgeShareStore((state) => state.closeModal);
+  // 카드와 동일한 쿼리를 구독한다. queryKey 를 공유하므로 추가 요청은 발생하지 않는다.
+  // 이 컴포넌트는 모든 페이지에 상시 마운트되므로 열려 있을 때만 구독한다.
+  const { isChartDataReady } = useShareCardChart(isOpen);
   const cardRef = useRef<HTMLDivElement>(null);
   const cardScaleAreaRef = useRef<HTMLDivElement>(null);
   const [isExporting, setIsExporting] = useState(false);
@@ -114,14 +118,34 @@ function BtcSurgeShareDialog() {
   );
 
   /**
-   * 클립보드 이미지 쓰기를 지원하지 않는 환경의 폴백. 네이티브 공유 시트로 카드를 내보낸다.
+   * 카드 이미지를 클립보드에 복사하고 성공 여부를 반환한다.
+   *
+   * Safari 는 user gesture 동기 구간에서만 클립보드 쓰기를 허용하므로 Blob 을 await 하지 않는다.
+   * 같은 이유로 호출부에서도 이 함수 이전에 await 이 있으면 안 된다.
+   * ( async 함수 본문은 첫 await 까지 동기 실행되므로 `copyPngToClipboard` 호출 자체는 제스처 구간에 남는다 )
+   *
+   * 제스처 만료 · 권한 거부로 실패해도 예외를 올리지 않고 `false` 를 반환해 공유 시트 폴백으로 넘긴다.
+   */
+  const copyCardImageToClipboard = async (cardElement: HTMLElement) => {
+    try {
+      await copyPngToClipboard(() => captureElementToPngBlob(cardElement));
+      return true;
+    } catch (error) {
+      console.error("클립보드 복사 실패, 공유 시트로 폴백:", error);
+      return false;
+    }
+  };
+
+  /**
+   * 클립보드 이미지 쓰기를 지원하지 않거나 실패한 환경의 폴백. 네이티브 공유 시트로 카드를 내보낸다.
    */
   const shareCardImageFile = async (cardElement: HTMLElement) => {
     const capturedImageBlob = await captureElementToPngBlob(cardElement);
     const shareImageFile = createPngFile(capturedImageBlob, SHARE_IMAGE_FILE_NAME);
 
     if (!isImageFileShareSupported(shareImageFile)) {
-      kToast.info("이미지 저장을 이용해 주세요.");
+      // iOS 는 "이미지 저장" 버튼을 숨기므로 남는 경로가 없다. 다른 문구로 안내한다.
+      kToast.info(isIosDevice ? "화면을 캡처해 주세요." : "이미지 저장을 이용해 주세요.");
       return;
     }
 
@@ -142,7 +166,7 @@ function BtcSurgeShareDialog() {
   const onClickCopyImage = async () => {
     const cardElement = cardRef.current;
 
-    if (!cardElement || isExporting) {
+    if (!cardElement || isExporting || !isChartDataReady) {
       return;
     }
 
@@ -151,9 +175,13 @@ function BtcSurgeShareDialog() {
 
     try {
       // Android 는 clipboard.write 가 성공으로 응답해도 실제로 이미지가 저장되지 않는 경우가 있어 공유 시트를 우선한다.
-      if (!isAndroid() && isImageClipboardSupported()) {
-        // Safari 는 user gesture 동기 구간에서만 클립보드 쓰기를 허용하므로 Blob 을 await 하지 않는다.
-        await copyPngToClipboard(() => captureElementToPngBlob(cardElement));
+      // 단축 평가로 `copyCardImageToClipboard` 를 동기 구간에서 호출해 Safari 제스처 컨텍스트를 유지한다.
+      const isCopiedToClipboard =
+        !isAndroid() &&
+        isImageClipboardSupported() &&
+        (await copyCardImageToClipboard(cardElement));
+
+      if (isCopiedToClipboard) {
         kToast.success("클립보드에 복사되었습니다.");
         return;
       }
@@ -175,7 +203,7 @@ function BtcSurgeShareDialog() {
   const onClickSaveImage = async () => {
     const cardElement = cardRef.current;
 
-    if (!cardElement || isExporting) {
+    if (!cardElement || isExporting || !isChartDataReady) {
       return;
     }
 
@@ -194,6 +222,13 @@ function BtcSurgeShareDialog() {
       setIsExporting(false);
     }
   };
+  // endregion
+
+  // endregion
+
+  // region [Templates]
+  /** 시계열이 없으면 라벨과 수치가 어긋난 카드가 만들어지므로 내보내기를 막는다. */
+  const isExportDisabled = isExporting || !isChartDataReady;
   // endregion
 
   // region [Life Cycles]
@@ -252,7 +287,7 @@ function BtcSurgeShareDialog() {
               width="full"
               size="lg"
               onClick={onClickCopyImage}
-              disabled={isExporting}
+              disabled={isExportDisabled}
               className="h-[44px] gap-2 !text-white bg-bitcoin rounded-3xl"
             >
               <Copy size={18} />
@@ -263,7 +298,7 @@ function BtcSurgeShareDialog() {
                 width="full"
                 size="lg"
                 onClick={onClickSaveImage}
-                disabled={isExporting}
+                disabled={isExportDisabled}
                 className="h-[44px] gap-2 !text-white bg-neutral-700 hover:bg-neutral-600 rounded-3xl"
               >
                 <Download size={18} />

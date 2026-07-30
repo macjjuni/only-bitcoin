@@ -3,17 +3,12 @@
 import { KIcon } from "kku-ui";
 import { memo, type RefObject, useId, useMemo, useState } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
-import { useMarketChartData } from "@/entities/bitcoin/client";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
 import { BtcTextLogo, UpdownIcon } from "@/shared/ui";
-import {
-  SHARE_CARD_TIMEFRAME_INTERVAL_MAP,
-  type ShareCardTimeframe,
-} from "../model/shareCardTimeframe";
+import type { ShareCardTimeframe } from "../model/shareCardTimeframe";
+import { useBtcSurgeShareStore } from "../model/useBtcSurgeShareStore";
+import { useShareCardChart } from "../model/useShareCardChart";
 import { BtcSurgeTimeframeSelector } from "./BtcSurgeTimeframeSelector";
-
-/** 곡선을 그리기 위해 필요한 최소 가격 포인트 개수 */
-const MINIMUM_CHART_POINT_COUNT = 10;
 
 /**
  * SNS 확산( 네트워크 효과 )을 위한 서비스 도메인.
@@ -89,27 +84,23 @@ function calculateChangeAmount(currentPrice: number, changeRatePercent: number):
 
 function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   // region [Hooks]
-  const [timeframe, setTimeframe] = useState<ShareCardTimeframe>("1D");
+  const setTimeframe = useBtcSurgeShareStore((state) => state.setTimeframe);
+  const { timeframe, usdPrices, isChartDataReady, isChartDataLoading } = useShareCardChart();
   const rawId = useId();
   const glowFilterId = `surgeGlow-${rawId.replace(/:/g, "")}`;
   const gradientId = `surgeGrad-${rawId.replace(/:/g, "")}`;
 
   const bitcoinPrice = useBitcoinStore((state) => state.bitcoinPrice);
-  const { marketChartData } = useMarketChartData(SHARE_CARD_TIMEFRAME_INTERVAL_MAP[timeframe]);
 
   // 카드가 열린 시각을 고정한다. 다이얼로그가 닫히면 언마운트되므로 열 때마다 다시 계산.
   const [capturedAtKst] = useState<string>(getCurrentDateTimeKST);
 
-  /** 바이낸스 BTCUSDT 종가 시계열 ( 달러 기준 ) */
-  const usdPrices = useMemo<number[]>(() => {
-    if (marketChartData?.price && marketChartData.price.length >= MINIMUM_CHART_POINT_COUNT) {
-      return marketChartData.price;
-    }
-    return [];
-  }, [marketChartData]);
-
-  const isChartDataReady = usdPrices.length >= 2;
-
+  /**
+   * 24시간 변동률은 `1D` 라벨에서만 의미가 있으므로 그 외 기간의 폴백으로 쓰지 않는다.
+   *
+   * 시계열이 없을 때 24시간 값으로 대체하면 `7D` 라벨에 24시간 수치가 붙은 카드가 만들어진다.
+   * ( 바이낸스 요청이 실패하면 빈 시계열이 정상 응답으로 돌아오므로 이 상태가 계속 유지된다 )
+   */
   const changePercent = useMemo(() => {
     if (timeframe === "1D" && bitcoinPrice?.usdChange24h) {
       return Number.parseFloat(bitcoinPrice.usdChange24h);
@@ -120,9 +111,15 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       const endPrice = usdPrices[usdPrices.length - 1];
       if (startPrice > 0) return ((endPrice - startPrice) / startPrice) * 100;
     }
-    if (bitcoinPrice?.usdChange24h) return Number.parseFloat(bitcoinPrice.usdChange24h);
+
     return 0;
   }, [timeframe, usdPrices, bitcoinPrice, isChartDataReady]);
+
+  /** 시계열이 없어도 `1D` 는 24시간 변동률로 즉시 표기할 수 있다. */
+  const isChangePercentReady = useMemo(
+    () => isChartDataReady || (timeframe === "1D" && Boolean(bitcoinPrice?.usdChange24h)),
+    [isChartDataReady, timeframe, bitcoinPrice],
+  );
 
   const isUp = changePercent >= 0;
 
@@ -189,6 +186,43 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
     () => Math.abs(changeAmountUsd).toLocaleString("en-US"),
     [changeAmountUsd],
   );
+
+  /** 변동률 자리. 시계열도 24시간 값도 없으면 수치 대신 자리표시자를 둔다. */
+  const ChangePercentTemplate = useMemo(() => {
+    if (!isChangePercentReady) {
+      return (
+        <span className="flex items-center text-5xl font-black tracking-tight font-number text-neutral-700">
+          --%
+        </span>
+      );
+    }
+
+    return (
+      <span
+        className="flex items-center text-5xl font-black tracking-tight font-number"
+        style={{
+          color: themeColor,
+          filter: isUp
+            ? "drop-shadow(0 0 25px rgba(0,230,118,0.45))"
+            : "drop-shadow(0 0 25px rgba(255,82,82,0.45))",
+        }}
+      >
+        <UpdownIcon isUp={isUp} size={36} className="mr-1" />
+        {isUp ? "+" : ""}
+        {changePercentText}%
+      </span>
+    );
+  }, [isChangePercentReady, isUp, themeColor, changePercentText]);
+
+  /**
+   * 차트 자리. 시계열이 없으면 곡선 대신 상태 문구를 같은 높이로 채운다.
+   *
+   * 곡선 영역과 동일한 종횡비를 유지해야 축소 배율 계산( `scaledCardHeight` )과
+   * 캡처 결과 높이가 로딩 전후로 흔들리지 않는다.
+   */
+  const chartPlaceholderMessage = isChartDataLoading
+    ? "차트 데이터를 불러오는 중"
+    : "차트 데이터를 불러오지 못했어요";
   // endregion
 
   return (
@@ -251,21 +285,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
 
       {/* 수치 및 가격 강조 섹션 */}
       <div className="relative z-10 mb-0">
-        <div className="flex items-baseline gap-2 mb-1">
-          <span
-            className="flex items-center text-5xl font-black tracking-tight font-number"
-            style={{
-              color: themeColor,
-              filter: isUp
-                ? "drop-shadow(0 0 25px rgba(0,230,118,0.45))"
-                : "drop-shadow(0 0 25px rgba(255,82,82,0.45))",
-            }}
-          >
-            <UpdownIcon isUp={isUp} size={36} className="mr-1" />
-            {isUp ? "+" : ""}
-            {changePercentText}%
-          </span>
-        </div>
+        <div className="flex items-baseline gap-2 mb-1">{ChangePercentTemplate}</div>
 
         {/* 원화 · 달러 현재가 ( 변동액은 선택 타임프레임 변동률 기준 ) */}
         <div className="flex flex-col">
@@ -315,45 +335,53 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       />
 
       <div className="relative z-10 w-full my-3">
-        <svg viewBox="0 0 360 140" className="w-full h-auto overflow-visible" aria-hidden="true">
-          <defs>
-            <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor={themeColor} stopOpacity="0.4" />
-              <stop offset="100%" stopColor={themeColor} stopOpacity="0.0" />
-            </linearGradient>
-            <filter id={glowFilterId} x="-20%" y="-20%" width="140%" height="140%">
-              <feGaussianBlur stdDeviation="3" result="blur" />
-              <feMerge>
-                <feMergeNode in="blur" />
-                <feMergeNode in="SourceGraphic" />
-              </feMerge>
-            </filter>
-          </defs>
+        {!isChartDataReady && (
+          <div className="w-full aspect-[360/140] flex items-center justify-center text-sm font-semibold text-neutral-500">
+            {chartPlaceholderMessage}
+          </div>
+        )}
 
-          {/* 영역 그라데이션 */}
-          {areaPath && <path d={areaPath} fill={`url(#${gradientId})`} />}
+        {isChartDataReady && (
+          <svg viewBox="0 0 360 140" className="w-full h-auto overflow-visible" aria-hidden="true">
+            <defs>
+              <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
+                <stop offset="0%" stopColor={themeColor} stopOpacity="0.4" />
+                <stop offset="100%" stopColor={themeColor} stopOpacity="0.0" />
+              </linearGradient>
+              <filter id={glowFilterId} x="-20%" y="-20%" width="140%" height="140%">
+                <feGaussianBlur stdDeviation="3" result="blur" />
+                <feMerge>
+                  <feMergeNode in="blur" />
+                  <feMergeNode in="SourceGraphic" />
+                </feMerge>
+              </filter>
+            </defs>
 
-          {/* 차트 곡선 */}
-          {linePath && (
-            <path
-              d={linePath}
-              fill="none"
-              stroke={themeColor}
-              strokeWidth="3.5"
-              strokeLinecap="round"
-              strokeLinejoin="round"
-              filter={`url(#${glowFilterId})`}
-            />
-          )}
+            {/* 영역 그라데이션 */}
+            {areaPath && <path d={areaPath} fill={`url(#${gradientId})`} />}
 
-          {/* 차트 종점 펄스 지점 */}
-          {linePath && (
-            <g transform={`translate(${lastX}, ${lastY})`}>
-              <circle r="7" fill={themeColor} className="animate-ping opacity-75" />
-              <circle r="4" fill="#FFFFFF" stroke={themeColor} strokeWidth="2" />
-            </g>
-          )}
-        </svg>
+            {/* 차트 곡선 */}
+            {linePath && (
+              <path
+                d={linePath}
+                fill="none"
+                stroke={themeColor}
+                strokeWidth="3.5"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+                filter={`url(#${glowFilterId})`}
+              />
+            )}
+
+            {/* 차트 종점 펄스 지점 */}
+            {linePath && (
+              <g transform={`translate(${lastX}, ${lastY})`}>
+                <circle r="7" fill={themeColor} className="animate-ping opacity-75" />
+                <circle r="4" fill="#FFFFFF" stroke={themeColor} strokeWidth="2" />
+              </g>
+            )}
+          </svg>
+        )}
 
         {/* 차트 가로축 시간 텍스트 (영문) */}
         <div className="flex justify-between items-center text-sm font-semibold text-white px-1">
