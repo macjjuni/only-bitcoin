@@ -27,7 +27,11 @@ import {
   registerCaptureOverlay,
 } from "@/shared/lib/imageExport";
 import { useBtcSurgeShareStore } from "../model/useBtcSurgeShareStore";
-import { BTC_SURGE_CARD_DESIGN_WIDTH, BtcSurgeShareCard, COIN_OVERLAY_BASE } from "./BtcSurgeShareCard";
+import {
+  BTC_SURGE_CARD_DESIGN_WIDTH,
+  BtcSurgeShareCard,
+  COIN_OVERLAY_BASE,
+} from "./BtcSurgeShareCard";
 
 const SHARE_IMAGE_FILE_NAME = "only-btc-app.png";
 const SHARE_TITLE = "ONLY-BTC.APP 비트코인 시세 알림";
@@ -191,7 +195,6 @@ function BtcSurgeShareDialog() {
     }
   };
   // endregion
-
 
   // region [Life Cycles]
   useEffect(() => {
