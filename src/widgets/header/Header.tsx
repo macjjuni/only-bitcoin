@@ -4,7 +4,7 @@ import { KIcon } from "kku-ui";
 import { usePathname } from "next/navigation";
 import { hideHeaderPathList } from "@/shared/config/route";
 import useSettingStore from "@/shared/stores/settingStore";
-import { TransitionLink } from "@/shared/ui";
+import { BtcTextLogo, TransitionLink } from "@/shared/ui";
 import ConnectionDot from "./components/connection-dot/ConnectionDot";
 import SettingButton from "./components/setting-button/SettingButton";
 
@@ -12,6 +12,7 @@ export default function Header() {
   // region [Hooks]
   const pathname = usePathname();
   const initialPath = useSettingStore((state) => state.setting.initialPath);
+  const theme = useSettingStore((state) => state.theme);
   // endregion
 
   // 몰입형 페이지는 헤더를 렌더링하지 않는다.
@@ -39,8 +40,8 @@ export default function Header() {
           className="flex justify-start items-center gap-2 text-current dark:text-current !no-underline
               text-3xl font-bold"
         >
-          <KIcon id="bitcoin" icon="bitcoin" size={36} />
-          ₿itcoin
+          <KIcon id="bitcoin" icon="bitcoin" size={38} />
+          <BtcTextLogo color={theme === "dark" ? "#ffffff" : "#000000"} height={36} width={148} />
         </TransitionLink>
       </h2>
 

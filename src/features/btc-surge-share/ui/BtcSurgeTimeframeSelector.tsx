@@ -58,7 +58,7 @@ function BtcSurgeTimeframeSelector(props: BtcSurgeTimeframeSelectorProps) {
         <button
           type="button"
           aria-label="차트 기간 선택"
-          className="flex items-center gap-1.5 px-2.5 p y-1 text-sm font-bold rounded-full cursor-pointer transition-colors"
+          className="flex items-center gap-1.5 px-2.5 py-1 text-sm font-bold rounded-full cursor-pointer transition-colors"
           style={{ color: themeColor }}
         >
           {selectedTimeframe}
@@ -83,10 +83,11 @@ function BtcSurgeTimeframeSelector(props: BtcSurgeTimeframeSelectorProps) {
       <KPopoverContent
         align="end"
         side="bottom"
-        sideOffset={12}
+        sideOffset={16}
+        alignOffset={-4}
         className="!bg-[#111318]/95 !border-white/15 !backdrop-blur-xl !shadow-[0_8px_32px_rgba(0,0,0,0.6)] !rounded-2xl !p-2"
       >
-        <div className="grid grid-cols-3 gap-1">{TimeframeItemListTemplate}</div>
+        <div className="grid grid-cols-3 gap-1 auto-cols-min">{TimeframeItemListTemplate}</div>
       </KPopoverContent>
     </KPopover>
   );
