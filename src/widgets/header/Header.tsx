@@ -12,7 +12,6 @@ export default function Header() {
   // region [Hooks]
   const pathname = usePathname();
   const initialPath = useSettingStore((state) => state.setting.initialPath);
-  const theme = useSettingStore((state) => state.theme);
   // endregion
 
   // 몰입형 페이지는 헤더를 렌더링하지 않는다.
@@ -41,7 +40,7 @@ export default function Header() {
               text-3xl font-bold"
         >
           <KIcon id="bitcoin" icon="bitcoin" size={38} />
-          <BtcTextLogo color={theme === "dark" ? "#ffffff" : "#000000"} height={36} width={148} />
+          <BtcTextLogo height={36} width={148} />
         </TransitionLink>
       </h2>
 
