@@ -10,16 +10,13 @@ const BLOCK_VSIZE = 1_000_000;
 
 /** 혼잡도 단계. 대기 물량(블록 수) 상한 기준으로 앞에서부터 매칭. */
 const CONGESTION_LEVELS = [
-  {
-    maxBlocks: 2,
-    label: "원활",
-    dotClassName: "bg-emerald-500",
-    textClassName: "text-emerald-500",
-  },
-  { maxBlocks: 10, label: "보통", dotClassName: "bg-amber-500", textClassName: "text-amber-500" },
+  { maxBlocks: 5, label: "원활", dotClassName: "bg-emerald-500", textClassName: "text-emerald-500" },
+  { maxBlocks: 15, label: "양호", dotClassName: "bg-teal-500", textClassName: "text-teal-500" },
+  { maxBlocks: 30, label: "보통", dotClassName: "bg-amber-500", textClassName: "text-amber-500" },
+  { maxBlocks: 50, label: "혼잡", dotClassName: "bg-orange-500", textClassName: "text-orange-500" },
   {
     maxBlocks: Number.POSITIVE_INFINITY,
-    label: "혼잡",
+    label: "매우 혼잡",
     dotClassName: "bg-red-500",
     textClassName: "text-red-500",
   },
