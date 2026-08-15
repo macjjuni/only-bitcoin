@@ -26,7 +26,6 @@ const EXTERNAL_LINKS = {
   BTC_MAP: "http://btcmap.kr",
   FIAT_GOV_BITCOIN_DOC: "https://finished-snake-h7zp8jm.gamma.site",
   SATOSHOP: "https://satoshop.org",
-  LN_FORTUNE: "https://ln-fortune.vercel.app",
 } as const;
 // endregion
 
@@ -123,12 +122,6 @@ const OrangePillContent = () => {
           label="비트코인 결제 매장"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.BTC_MAP)}
-        />
-        <ListRow
-          icon={<LazyImage src="https://ln-fortune.vercel.app/favicon.ico" />}
-          label="Lightning Fortune"
-          rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.LN_FORTUNE)}
         />
       </ListGroup>
 
