@@ -38,7 +38,7 @@ const BlocksGuideArticle = () => {
         </header>
 
         <div className="flex flex-col">
-          <GuideSection title="비트코인 블록이란?" defaultOpen>
+          <GuideSection title="비트코인 블록이란?">
             <GuideParagraph>
               블록은 비트코인 거래 내역을 담는 하나의 묶음입니다. 여러 개의 거래(트랜잭션)가 모여
               하나의 블록을 이루고, 이 블록들이 사슬처럼 순서대로 연결되어 모두가 함께 나눠 갖는{" "}
