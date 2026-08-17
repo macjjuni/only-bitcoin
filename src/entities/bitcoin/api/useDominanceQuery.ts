@@ -3,28 +3,25 @@ import { kToast } from "kku-ui";
 import { useEffect } from "react";
 import { isDev } from "@/shared/utils/common";
 import fetcher from "@/shared/utils/fetcher";
-import { calculateBitcoinDominance } from "../lib/dominance";
-import type { ICurrency } from "../model/types";
+import { floorToDecimal } from "@/shared/utils/number";
+import type { CoinGeckoGlobalResponse } from "../model/types";
 
-const BTC_DOMINANCE_API_URL =
-  "https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false";
+const BTC_DOMINANCE_API_URL = "https://api.coingecko.com/api/v3/global";
 
 const fetchBitcoinDominance = async (): Promise<number> => {
   try {
-    const data: ICurrency[] = await fetcher<ICurrency[]>(BTC_DOMINANCE_API_URL);
+    const { data } = await fetcher<CoinGeckoGlobalResponse>(BTC_DOMINANCE_API_URL);
 
     if (isDev) {
       console.log("✅ 도미넌스 데이터 초기화!");
     }
-    return calculateBitcoinDominance(data);
+    return floorToDecimal(data.market_cap_percentage.btc, 2);
   } catch {
     throw Error("❌ 도미넌스 데이터 초기화 실패!");
   }
 };
 
-/**
- * @param initialDominance SSR 로 미리 조회한 도미넌스. 첫 렌더의 표시값이자 크롤러가 읽는 값이다.
- */
+/** @param initialDominance SSR 초기 도미넌스. 첫 렌더 표시값이자 크롤러용 값임. */
 const useBitcoinDominanceQuery = (initialDominance = 0): number => {
   // region [Hooks]
 
@@ -43,7 +40,7 @@ const useBitcoinDominanceQuery = (initialDominance = 0): number => {
     refetchOnMount: true,
     retry: 3,
     initialData: initialDominance || undefined,
-    // 서버 값은 최대 12시간 캐시된 값이므로 즉시 stale 로 두어 마운트 직후 재조회시킨다.
+    // 서버 캐시 10분이므로 즉시 stale 처리함. 마운트 직후 재조회됨.
     initialDataUpdatedAt: 0,
   });
 

@@ -116,7 +116,10 @@ function loadImage(src: string): Promise<HTMLImageElement> {
  * 캡처된 canvas 위에 오버레이 이미지를 직접 합성한다.
  * Safari foreignObject 이미지 렌더링 제약을 완전히 우회한다.
  */
-async function compositeOverlay(canvas: HTMLCanvasElement, overlay: OverlayImageInfo): Promise<void> {
+async function compositeOverlay(
+  canvas: HTMLCanvasElement,
+  overlay: OverlayImageInfo,
+): Promise<void> {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
