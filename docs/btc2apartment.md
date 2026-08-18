@@ -213,6 +213,36 @@ GET /api/apartment/raemian-one-bailey   → 전 기간 한 번에
 
 콜드는 구당 한 번뿐이고, 같은 구의 다른 단지는 전부 웜이다.
 
+### 4.2.1 캐시 계층 ( 클라이언트 · 엣지 · 서버 )
+
+연 단위 집계라 하루는 묵어도 값이 달라지지 않는다. 세 층 모두 **24시간**으로 맞춘다.
+
+| 층 | 수단 | 주기 |
+| --- | --- | --- |
+| 클라이언트 메모리 | TanStack `staleTime` | 24시간 |
+| 클라이언트 영속 | `gcTime` + `PersistQueryClientProvider` ( localStorage ) | 24시간 |
+| 엣지 · CDN | `Cache-Control: public, s-maxage=86400, stale-while-revalidate=86400` | 24시간 |
+| 서버 데이터 | `unstable_cache` (지역코드 × 월) | 확정 월 30일 / 최근 3개월 6시간 |
+
+- `gcTime` 은 `PersistQueryClientProvider` 의 기본 `maxAge`( 24시간 )와 **같은 값**으로 맞춘다.
+  `gcTime` 이 더 짧으면 localStorage 에서 복원한 데이터가 예상보다 빨리 정리된다.
+- `stale-while-revalidate` 덕분에 만료 직후 요청도 기존 값을 즉시 받고 갱신은 뒤에서 돈다.
+
+**⚠️ 불완전한 응답은 어느 층에서도 캐시하지 않는다**
+
+| 층 | 처리 |
+| --- | --- |
+| 엣지 | `isIncomplete` 이면 `Cache-Control: no-store` |
+| 클라이언트 | `isIncomplete` 이면 `staleTime: 0` + `refetchOnMount: true` |
+| 서버 | 실패한 달은 `unstable_cache` 에 보관되지 않음 ( 13.3 ) |
+
+세 층 중 하나라도 빠지면 초당 제한으로 생긴 빈 달이 그 층에 눌러앉는다.
+오류 응답( 404 · 500 )도 `no-store` 다.
+
+> 엣지 캐시가 24시간이므로 최근 3개월의 서버 캐시 6시간 주기는 그만큼 자주 노출되지 않는다.
+> 신규 신고분이 화면에 반영되기까지 최대 하루가 걸린다는 뜻인데,
+> 연 중앙값은 몇 건으로 움직이지 않으므로 감수한다.
+
 ### 4.3 호출량 상한
 
 랜드마크 11개가 **4개 구**에 몰려 있다.

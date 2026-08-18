@@ -14,6 +14,25 @@ import { type BtcDailyKrwMap, getBtcDailyKrwMap } from "@/entities/bitcoin/serve
  * 동일 레이어끼리는 서로 참조하지 않으므로 조합은 이 라우트가 맡는다.
  */
 
+const DAY_IN_SECONDS = 60 * 60 * 24;
+
+/**
+ * CDN·브라우저에 내려보낼 캐시 정책.
+ *
+ * 연 단위 집계라 하루는 묵어도 된다. `stale-while-revalidate` 를 함께 주어
+ * 만료 직후 요청도 기존 값을 즉시 받고, 갱신은 뒤에서 돌게 한다.
+ *
+ * **불완전한 응답은 절대 캐시하지 않는다.** 초당 제한으로 일부 월이 빠진 결과가
+ * 엣지에 24시간 박히면, 서버 캐시에서 막아 둔 문제( 13.3 )가 CDN 층에서 되살아난다.
+ */
+function resolveCacheControl(isIncomplete: boolean): string {
+  if (isIncomplete) {
+    return "no-store";
+  }
+
+  return `public, s-maxage=${DAY_IN_SECONDS}, stale-while-revalidate=${DAY_IN_SECONDS}`;
+}
+
 interface RouteContext {
   params: Promise<{ apartmentId: string }>;
 }
@@ -43,7 +62,11 @@ export async function GET(_request: Request, context: RouteContext) {
   const landmark = findLandmarkApartment(apartmentId);
 
   if (!landmark) {
-    return NextResponse.json({ error: "UNKNOWN_APARTMENT" }, { status: 404 });
+    // 오류 응답은 캐시하지 않는다. 화이트리스트가 바뀌면 즉시 반영되어야 한다.
+    return NextResponse.json(
+      { error: "UNKNOWN_APARTMENT" },
+      { status: 404, headers: { "Cache-Control": "no-store" } },
+    );
   }
 
   // 첫 실거래 이전 구간은 조회하지 않아 불필요한 외부 호출을 막는다.
@@ -56,17 +79,22 @@ export async function GET(_request: Request, context: RouteContext) {
       collectBtcDailyKrwMaps(startYear, currentYear),
     ]);
 
-    return NextResponse.json(
-      buildApartmentSeries({
-        landmark,
-        districtTrades: districtResult.trades,
-        years: districtResult.years,
-        btcDailyKrwMapByYear,
-        isIncomplete: districtResult.isIncomplete,
-      }),
-    );
+    const series = buildApartmentSeries({
+      landmark,
+      districtTrades: districtResult.trades,
+      years: districtResult.years,
+      btcDailyKrwMapByYear,
+      isIncomplete: districtResult.isIncomplete,
+    });
+
+    return NextResponse.json(series, {
+      headers: { "Cache-Control": resolveCacheControl(series.isIncomplete) },
+    });
   } catch (error) {
     console.error("아파트 실거래 집계 오류", error);
-    return NextResponse.json({ error: "INTERNAL_SERVER_ERROR" }, { status: 500 });
+    return NextResponse.json(
+      { error: "INTERNAL_SERVER_ERROR" },
+      { status: 500, headers: { "Cache-Control": "no-store" } },
+    );
   }
 }

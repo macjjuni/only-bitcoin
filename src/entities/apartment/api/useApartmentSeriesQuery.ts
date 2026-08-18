@@ -7,12 +7,17 @@ import type { LandmarkApartment } from "../model/types";
 const MINUTE_IN_MS = 1000 * 60;
 
 /**
- * 진행 중인 연도가 섞여 있으므로 하루보다 짧게 잡는다.
- * 확정 구간은 서버 캐시가 30일 단위로 잡고 있어 클라이언트가 길게 들고 있을 이유가 없다.
+ * 연 단위 집계라 하루 정도 묵어도 값이 달라지지 않는다.
+ * 새 실거래가 몇 건 들어와도 그 해 중앙값은 거의 움직이지 않는다.
  */
-const SERIES_STALE_TIME = MINUTE_IN_MS * 30;
+const SERIES_STALE_TIME = MINUTE_IN_MS * 60 * 24;
 
-const SERIES_GC_TIME = MINUTE_IN_MS * 60 * 12;
+/**
+ * `PersistQueryClientProvider` 의 기본 `maxAge` 와 같은 24시간으로 맞춘다.
+ * `gcTime` 이 `maxAge` 보다 짧으면 localStorage 에서 복원한 데이터가
+ * 예상보다 빨리 정리된다.
+ */
+const SERIES_GC_TIME = MINUTE_IN_MS * 60 * 24;
 
 async function fetchApartmentSeries(apartmentID: string): Promise<ApartmentSeriesResponse> {
   const response = await fetch(`/api/apartment/${apartmentID}`);
