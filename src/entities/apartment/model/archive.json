@@ -1,0 +1,5200 @@
+{
+  "generatedAt": "2026-08-18",
+  "settledThroughYear": 2025,
+  "apartments": {
+    "raemian-one-bailey": [
+      {
+        "year": 2023,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2795000000,
+            "medianPriceInBtc": 75.99557538107229,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 74,
+            "medianPriceInKrw": 3220000000,
+            "medianPriceInBtc": 90.61743682107277,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3920000000,
+            "medianPriceInBtc": 96.81714521418223,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 101,
+            "medianPriceInKrw": 4700000000,
+            "medianPriceInBtc": 132.4055553990478,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 116,
+            "medianPriceInKrw": 5450000000,
+            "medianPriceInBtc": 148.61879959641132,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 3390000000,
+            "medianPriceInBtc": 39.51415509111044,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 4750000000,
+            "medianPriceInBtc": 55.2023432109824,
+            "dealCount": 26,
+            "btcConvertedDealCount": 26
+          },
+          {
+            "areaInSquareMeter": 101,
+            "medianPriceInKrw": 5700000000,
+            "medianPriceInBtc": 60.45051542018411,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 116,
+            "medianPriceInKrw": 6500000000,
+            "medianPriceInBtc": 72.37156964596295,
+            "dealCount": 11,
+            "btcConvertedDealCount": 11
+          },
+          {
+            "areaInSquareMeter": 133,
+            "medianPriceInKrw": 7725000000,
+            "medianPriceInBtc": 65.84634356237808,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 4225000000,
+            "medianPriceInBtc": 31.442347996957295,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 5750000000,
+            "medianPriceInBtc": 40.37077368462989,
+            "dealCount": 29,
+            "btcConvertedDealCount": 29
+          },
+          {
+            "areaInSquareMeter": 101,
+            "medianPriceInKrw": 6990000000,
+            "medianPriceInBtc": 49.933533932173006,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 116,
+            "medianPriceInKrw": 7750000000,
+            "medianPriceInBtc": 50.60840077081596,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 133,
+            "medianPriceInKrw": 8900000000,
+            "medianPriceInBtc": 65.90452121768669,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 234,
+            "medianPriceInKrw": 16500000000,
+            "medianPriceInBtc": 134.38232994526973,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      }
+    ],
+    "banpo-xi": [
+      {
+        "year": 2014,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 875000000,
+            "medianPriceInBtc": 1403.7054871399237,
+            "dealCount": 49,
+            "btcConvertedDealCount": 49
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1270000000,
+            "medianPriceInBtc": 2199.5822709188637,
+            "dealCount": 65,
+            "btcConvertedDealCount": 65
+          },
+          {
+            "areaInSquareMeter": 132,
+            "medianPriceInKrw": 1777500000,
+            "medianPriceInBtc": 3866.3554878743903,
+            "dealCount": 28,
+            "btcConvertedDealCount": 28
+          },
+          {
+            "areaInSquareMeter": 165,
+            "medianPriceInKrw": 1995000000,
+            "medianPriceInBtc": 4163.469716705625,
+            "dealCount": 25,
+            "btcConvertedDealCount": 25
+          },
+          {
+            "areaInSquareMeter": 194,
+            "medianPriceInKrw": 2175000000,
+            "medianPriceInBtc": 4286.128928419861,
+            "dealCount": 22,
+            "btcConvertedDealCount": 22
+          },
+          {
+            "areaInSquareMeter": 216,
+            "medianPriceInKrw": 2230000000,
+            "medianPriceInBtc": 3444.4830307730444,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 2575000000,
+            "medianPriceInBtc": 4559.6540199125175,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          }
+        ]
+      },
+      {
+        "year": 2015,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 980000000,
+            "medianPriceInBtc": 3571.9383813387467,
+            "dealCount": 28,
+            "btcConvertedDealCount": 28
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1357750000,
+            "medianPriceInBtc": 4646.723246974969,
+            "dealCount": 106,
+            "btcConvertedDealCount": 106
+          },
+          {
+            "areaInSquareMeter": 132,
+            "medianPriceInKrw": 1930000000,
+            "medianPriceInBtc": 6651.3549476210155,
+            "dealCount": 19,
+            "btcConvertedDealCount": 19
+          },
+          {
+            "areaInSquareMeter": 165,
+            "medianPriceInKrw": 2103750000,
+            "medianPriceInBtc": 7074.886640512208,
+            "dealCount": 26,
+            "btcConvertedDealCount": 26
+          },
+          {
+            "areaInSquareMeter": 194,
+            "medianPriceInKrw": 2322500000,
+            "medianPriceInBtc": 7672.584483996514,
+            "dealCount": 24,
+            "btcConvertedDealCount": 24
+          },
+          {
+            "areaInSquareMeter": 216,
+            "medianPriceInKrw": 2257500000,
+            "medianPriceInBtc": 7963.041170801429,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 2730000000,
+            "medianPriceInBtc": 9764.276266960955,
+            "dealCount": 17,
+            "btcConvertedDealCount": 17
+          }
+        ]
+      },
+      {
+        "year": 2016,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1065000000,
+            "medianPriceInBtc": 1777.529425498948,
+            "dealCount": 32,
+            "btcConvertedDealCount": 32
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1482500000,
+            "medianPriceInBtc": 2205.791464250176,
+            "dealCount": 69,
+            "btcConvertedDealCount": 69
+          },
+          {
+            "areaInSquareMeter": 132,
+            "medianPriceInKrw": 1982500000,
+            "medianPriceInBtc": 2977.937560162929,
+            "dealCount": 33,
+            "btcConvertedDealCount": 33
+          },
+          {
+            "areaInSquareMeter": 165,
+            "medianPriceInKrw": 2217500000,
+            "medianPriceInBtc": 3090.0793960007577,
+            "dealCount": 26,
+            "btcConvertedDealCount": 26
+          },
+          {
+            "areaInSquareMeter": 194,
+            "medianPriceInKrw": 2397500000,
+            "medianPriceInBtc": 3435.822812884906,
+            "dealCount": 30,
+            "btcConvertedDealCount": 30
+          },
+          {
+            "areaInSquareMeter": 216,
+            "medianPriceInKrw": 2428000000,
+            "medianPriceInBtc": 4557.131119152298,
+            "dealCount": 13,
+            "btcConvertedDealCount": 13
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 2890000000,
+            "medianPriceInBtc": 4995.610256272679,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          }
+        ]
+      },
+      {
+        "year": 2017,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1255000000,
+            "medianPriceInBtc": 477.4869963636282,
+            "dealCount": 24,
+            "btcConvertedDealCount": 24
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1692500000,
+            "medianPriceInBtc": 596.7751855488694,
+            "dealCount": 96,
+            "btcConvertedDealCount": 96
+          },
+          {
+            "areaInSquareMeter": 132,
+            "medianPriceInKrw": 2200000000,
+            "medianPriceInBtc": 868.4782373268893,
+            "dealCount": 28,
+            "btcConvertedDealCount": 28
+          },
+          {
+            "areaInSquareMeter": 165,
+            "medianPriceInKrw": 2450000000,
+            "medianPriceInBtc": 585.1391206410395,
+            "dealCount": 37,
+            "btcConvertedDealCount": 37
+          },
+          {
+            "areaInSquareMeter": 194,
+            "medianPriceInKrw": 2530000000,
+            "medianPriceInBtc": 1039.373476217401,
+            "dealCount": 19,
+            "btcConvertedDealCount": 19
+          },
+          {
+            "areaInSquareMeter": 216,
+            "medianPriceInKrw": 2665000000,
+            "medianPriceInBtc": 770.4480328776255,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 3000000000,
+            "medianPriceInBtc": 1042.7028728226733,
+            "dealCount": 21,
+            "btcConvertedDealCount": 21
+          }
+        ]
+      },
+      {
+        "year": 2018,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1750000000,
+            "medianPriceInBtc": 236.36470877365446,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2160000000,
+            "medianPriceInBtc": 262.1486407907986,
+            "dealCount": 38,
+            "btcConvertedDealCount": 38
+          },
+          {
+            "areaInSquareMeter": 132,
+            "medianPriceInKrw": 2780000000,
+            "medianPriceInBtc": 332.5756669458069,
+            "dealCount": 13,
+            "btcConvertedDealCount": 13
+          },
+          {
+            "areaInSquareMeter": 165,
+            "medianPriceInKrw": 2912500000,
+            "medianPriceInBtc": 333.0761495135956,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 194,
+            "medianPriceInKrw": 2880000000,
+            "medianPriceInBtc": 333.6536350046031,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 216,
+            "medianPriceInKrw": 3200000000,
+            "medianPriceInBtc": 442.6695546229863,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 3425000000,
+            "medianPriceInBtc": 420.69086695142516,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          }
+        ]
+      },
+      {
+        "year": 2019,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1860000000,
+            "medianPriceInBtc": 184.11516991479778,
+            "dealCount": 43,
+            "btcConvertedDealCount": 43
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2390000000,
+            "medianPriceInBtc": 229.9520258548236,
+            "dealCount": 70,
+            "btcConvertedDealCount": 70
+          },
+          {
+            "areaInSquareMeter": 132,
+            "medianPriceInKrw": 3150000000,
+            "medianPriceInBtc": 310.82077757875885,
+            "dealCount": 15,
+            "btcConvertedDealCount": 15
+          },
+          {
+            "areaInSquareMeter": 165,
+            "medianPriceInKrw": 3390000000,
+            "medianPriceInBtc": 291.0370879120879,
+            "dealCount": 15,
+            "btcConvertedDealCount": 15
+          },
+          {
+            "areaInSquareMeter": 194,
+            "medianPriceInKrw": 3500000000,
+            "medianPriceInBtc": 401.7085324926269,
+            "dealCount": 15,
+            "btcConvertedDealCount": 15
+          },
+          {
+            "areaInSquareMeter": 216,
+            "medianPriceInKrw": 3665000000,
+            "medianPriceInBtc": 352.9808340556679,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 4090000000,
+            "medianPriceInBtc": 399.56909215551855,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          }
+        ]
+      },
+      {
+        "year": 2020,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2025000000,
+            "medianPriceInBtc": 175.62346329469617,
+            "dealCount": 13,
+            "btcConvertedDealCount": 13
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2700000000,
+            "medianPriceInBtc": 224.5798807403392,
+            "dealCount": 53,
+            "btcConvertedDealCount": 53
+          },
+          {
+            "areaInSquareMeter": 132,
+            "medianPriceInKrw": 3470000000,
+            "medianPriceInBtc": 275.4036087369421,
+            "dealCount": 13,
+            "btcConvertedDealCount": 13
+          },
+          {
+            "areaInSquareMeter": 165,
+            "medianPriceInKrw": 3655000000,
+            "medianPriceInBtc": 318.04157897712673,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          },
+          {
+            "areaInSquareMeter": 194,
+            "medianPriceInKrw": 3775000000,
+            "medianPriceInBtc": 326.4929642631938,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 216,
+            "medianPriceInKrw": 4000000000,
+            "medianPriceInBtc": 322.3917390117681,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 4247000000,
+            "medianPriceInBtc": 341.3475808845355,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          }
+        ]
+      },
+      {
+        "year": 2021,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2412500000,
+            "medianPriceInBtc": 53.324631050894496,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3000000000,
+            "medianPriceInBtc": 66.71332954197472,
+            "dealCount": 27,
+            "btcConvertedDealCount": 27
+          },
+          {
+            "areaInSquareMeter": 132,
+            "medianPriceInKrw": 3750000000,
+            "medianPriceInBtc": 73.41509307918831,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 165,
+            "medianPriceInKrw": 4150000000,
+            "medianPriceInBtc": 86.63345717474968,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 194,
+            "medianPriceInKrw": 4555000000,
+            "medianPriceInBtc": 83.10872864921889,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 216,
+            "medianPriceInKrw": 4600000000,
+            "medianPriceInBtc": 94.86684145163515,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 6100000000,
+            "medianPriceInBtc": 101.26228678177978,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2820000000,
+            "medianPriceInBtc": 72.71789582258896,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3670000000,
+            "medianPriceInBtc": 73.6862516967229,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 132,
+            "medianPriceInKrw": 4500000000,
+            "medianPriceInBtc": 88.65760817191867,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 165,
+            "medianPriceInKrw": 5400000000,
+            "medianPriceInBtc": 165.53087744861955,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 216,
+            "medianPriceInKrw": 7050000000,
+            "medianPriceInBtc": 194.11426990260082,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 7500000000,
+            "medianPriceInBtc": 147.72503446917472,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2350000000,
+            "medianPriceInBtc": 66.08504101330396,
+            "dealCount": 19,
+            "btcConvertedDealCount": 19
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3170000000,
+            "medianPriceInBtc": 84.6128892733564,
+            "dealCount": 33,
+            "btcConvertedDealCount": 33
+          },
+          {
+            "areaInSquareMeter": 132,
+            "medianPriceInKrw": 4550000000,
+            "medianPriceInBtc": 117.57634824907481,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 165,
+            "medianPriceInKrw": 5400000000,
+            "medianPriceInBtc": 136.8156767665576,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 194,
+            "medianPriceInKrw": 6000000000,
+            "medianPriceInBtc": 157.82413130967726,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 216,
+            "medianPriceInKrw": 6350000000,
+            "medianPriceInBtc": 178.0372809060592,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 6750000000,
+            "medianPriceInBtc": 180.85460427916405,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2780000000,
+            "medianPriceInBtc": 31.794143518763843,
+            "dealCount": 33,
+            "btcConvertedDealCount": 33
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3480000000,
+            "medianPriceInBtc": 37.30247631890899,
+            "dealCount": 49,
+            "btcConvertedDealCount": 49
+          },
+          {
+            "areaInSquareMeter": 132,
+            "medianPriceInKrw": 5100000000,
+            "medianPriceInBtc": 56.938895709407646,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 165,
+            "medianPriceInKrw": 5700000000,
+            "medianPriceInBtc": 60.17291796425518,
+            "dealCount": 13,
+            "btcConvertedDealCount": 13
+          },
+          {
+            "areaInSquareMeter": 194,
+            "medianPriceInKrw": 6000000000,
+            "medianPriceInBtc": 64.90642132459513,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 216,
+            "medianPriceInKrw": 6600000000,
+            "medianPriceInBtc": 70.15529831946172,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 7100000000,
+            "medianPriceInBtc": 76.0806669381282,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 3350000000,
+            "medianPriceInBtc": 23.572661941821615,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 4190000000,
+            "medianPriceInBtc": 29.820193208125275,
+            "dealCount": 50,
+            "btcConvertedDealCount": 50
+          },
+          {
+            "areaInSquareMeter": 132,
+            "medianPriceInKrw": 5625000000,
+            "medianPriceInBtc": 42.154095852087465,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 165,
+            "medianPriceInKrw": 5900000000,
+            "medianPriceInBtc": 45.18275371415858,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 194,
+            "medianPriceInKrw": 6675000000,
+            "medianPriceInBtc": 44.13045353555048,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 216,
+            "medianPriceInKrw": 6630000000,
+            "medianPriceInBtc": 46.69044707253356,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 7500000000,
+            "medianPriceInBtc": 58.294010889292196,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          }
+        ]
+      }
+    ],
+    "raemian-firstige": [
+      {
+        "year": 2014,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 977500000,
+            "medianPriceInBtc": 1674.8902769675433,
+            "dealCount": 28,
+            "btcConvertedDealCount": 28
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1400000000,
+            "medianPriceInBtc": 2621.573842219292,
+            "dealCount": 55,
+            "btcConvertedDealCount": 55
+          },
+          {
+            "areaInSquareMeter": 115,
+            "medianPriceInKrw": 1847500000,
+            "medianPriceInBtc": 3004.354274462777,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 117,
+            "medianPriceInKrw": 1882500000,
+            "medianPriceInBtc": 4150.039457600652,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 135,
+            "medianPriceInKrw": 2105000000,
+            "medianPriceInBtc": 3812.25056862807,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 136,
+            "medianPriceInKrw": 2020000000,
+            "medianPriceInBtc": 5275.450163568516,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 2230000000,
+            "medianPriceInBtc": 3608.161877447388,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 169,
+            "medianPriceInKrw": 2310000000,
+            "medianPriceInBtc": 4358.335462174993,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 198,
+            "medianPriceInKrw": 2400000000,
+            "medianPriceInBtc": 4137.443011761812,
+            "dealCount": 24,
+            "btcConvertedDealCount": 24
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 2740000000,
+            "medianPriceInBtc": 4565.016624589226,
+            "dealCount": 23,
+            "btcConvertedDealCount": 23
+          }
+        ]
+      },
+      {
+        "year": 2015,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1070000000,
+            "medianPriceInBtc": 3997.0998819745228,
+            "dealCount": 23,
+            "btcConvertedDealCount": 23
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1500000000,
+            "medianPriceInBtc": 5321.5510993856005,
+            "dealCount": 67,
+            "btcConvertedDealCount": 67
+          },
+          {
+            "areaInSquareMeter": 115,
+            "medianPriceInKrw": 2017500000,
+            "medianPriceInBtc": 6882.338624065091,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 117,
+            "medianPriceInKrw": 1980000000,
+            "medianPriceInBtc": 7259.03227292386,
+            "dealCount": 11,
+            "btcConvertedDealCount": 11
+          },
+          {
+            "areaInSquareMeter": 135,
+            "medianPriceInKrw": 2190000000,
+            "medianPriceInBtc": 7952.529696439076,
+            "dealCount": 22,
+            "btcConvertedDealCount": 22
+          },
+          {
+            "areaInSquareMeter": 136,
+            "medianPriceInKrw": 2240000000,
+            "medianPriceInBtc": 8498.553562284651,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 2410000000,
+            "medianPriceInBtc": 8173.458432852371,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 169,
+            "medianPriceInKrw": 2495000000,
+            "medianPriceInBtc": 8796.793121163057,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 198,
+            "medianPriceInKrw": 2860000000,
+            "medianPriceInBtc": 9887.975576402057,
+            "dealCount": 18,
+            "btcConvertedDealCount": 18
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 2930000000,
+            "medianPriceInBtc": 10313.556881741455,
+            "dealCount": 17,
+            "btcConvertedDealCount": 17
+          }
+        ]
+      },
+      {
+        "year": 2016,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1170000000,
+            "medianPriceInBtc": 1780.9241267454638,
+            "dealCount": 29,
+            "btcConvertedDealCount": 29
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1597500000,
+            "medianPriceInBtc": 2440.0377732966695,
+            "dealCount": 64,
+            "btcConvertedDealCount": 64
+          },
+          {
+            "areaInSquareMeter": 115,
+            "medianPriceInKrw": 2130000000,
+            "medianPriceInBtc": 3988.0558289620594,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 117,
+            "medianPriceInKrw": 2220000000,
+            "medianPriceInBtc": 3104.8615472707697,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 135,
+            "medianPriceInKrw": 2450000000,
+            "medianPriceInBtc": 3771.659964276044,
+            "dealCount": 15,
+            "btcConvertedDealCount": 15
+          },
+          {
+            "areaInSquareMeter": 136,
+            "medianPriceInKrw": 2290000000,
+            "medianPriceInBtc": 4736.99549420712,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 2645000000,
+            "medianPriceInBtc": 4787.675049250482,
+            "dealCount": 13,
+            "btcConvertedDealCount": 13
+          },
+          {
+            "areaInSquareMeter": 169,
+            "medianPriceInKrw": 2910000000,
+            "medianPriceInBtc": 4308.122667909223,
+            "dealCount": 11,
+            "btcConvertedDealCount": 11
+          },
+          {
+            "areaInSquareMeter": 198,
+            "medianPriceInKrw": 3001000000,
+            "medianPriceInBtc": 4917.995524971127,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 3107500000,
+            "medianPriceInBtc": 5625.212255559212,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          }
+        ]
+      },
+      {
+        "year": 2017,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1447500000,
+            "medianPriceInBtc": 519.0330577241059,
+            "dealCount": 22,
+            "btcConvertedDealCount": 22
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1830000000,
+            "medianPriceInBtc": 595.5423605378796,
+            "dealCount": 62,
+            "btcConvertedDealCount": 62
+          },
+          {
+            "areaInSquareMeter": 115,
+            "medianPriceInKrw": 2467500000,
+            "medianPriceInBtc": 626.5736508237794,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 117,
+            "medianPriceInKrw": 2380000000,
+            "medianPriceInBtc": 1063.783280053375,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 135,
+            "medianPriceInKrw": 2720000000,
+            "medianPriceInBtc": 918.3402135653946,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 2850000000,
+            "medianPriceInBtc": 1163.1753470715191,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 169,
+            "medianPriceInKrw": 2755000000,
+            "medianPriceInBtc": 884.2855342072816,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 198,
+            "medianPriceInKrw": 3180000000,
+            "medianPriceInBtc": 635.6150194320018,
+            "dealCount": 19,
+            "btcConvertedDealCount": 19
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 3320000000,
+            "medianPriceInBtc": 1432.0379244930468,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          }
+        ]
+      },
+      {
+        "year": 2018,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1830000000,
+            "medianPriceInBtc": 221.22234720659918,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2390000000,
+            "medianPriceInBtc": 249.37057906725812,
+            "dealCount": 25,
+            "btcConvertedDealCount": 25
+          },
+          {
+            "areaInSquareMeter": 115,
+            "medianPriceInKrw": 3100000000,
+            "medianPriceInBtc": 402.649694765554,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 117,
+            "medianPriceInKrw": 2710000000,
+            "medianPriceInBtc": 208.7262631557582,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 135,
+            "medianPriceInKrw": 3265000000,
+            "medianPriceInBtc": 393.30610861246413,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 3300000000,
+            "medianPriceInBtc": 363.079099375221,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 169,
+            "medianPriceInKrw": 3555000000,
+            "medianPriceInBtc": 430.1582339229398,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 198,
+            "medianPriceInKrw": 3495000000,
+            "medianPriceInBtc": 356.6282886165473,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 3925000000,
+            "medianPriceInBtc": 453.98252865210213,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          }
+        ]
+      },
+      {
+        "year": 2019,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1945000000,
+            "medianPriceInBtc": 188.51537562650378,
+            "dealCount": 22,
+            "btcConvertedDealCount": 22
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2675000000,
+            "medianPriceInBtc": 234.96155585707825,
+            "dealCount": 38,
+            "btcConvertedDealCount": 38
+          },
+          {
+            "areaInSquareMeter": 115,
+            "medianPriceInKrw": 3300000000,
+            "medianPriceInBtc": 308.94478655672685,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 117,
+            "medianPriceInKrw": 3550000000,
+            "medianPriceInBtc": 346.3153392082985,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 135,
+            "medianPriceInKrw": 3390000000,
+            "medianPriceInBtc": 368.84824822767905,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 136,
+            "medianPriceInKrw": 3200000000,
+            "medianPriceInBtc": 346.6955579631636,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 4000000000,
+            "medianPriceInBtc": 318.3952877497413,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 169,
+            "medianPriceInKrw": 3950000000,
+            "medianPriceInBtc": 400.3151738323737,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 198,
+            "medianPriceInKrw": 4010000000,
+            "medianPriceInBtc": 374.4617112900206,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 4290000000,
+            "medianPriceInBtc": 325.4732535113905,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          }
+        ]
+      },
+      {
+        "year": 2020,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2285000000,
+            "medianPriceInBtc": 182.65328464208392,
+            "dealCount": 26,
+            "btcConvertedDealCount": 26
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2960000000,
+            "medianPriceInBtc": 235.10694714512994,
+            "dealCount": 37,
+            "btcConvertedDealCount": 37
+          },
+          {
+            "areaInSquareMeter": 115,
+            "medianPriceInKrw": 3842500000,
+            "medianPriceInBtc": 238.26733038547547,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 117,
+            "medianPriceInKrw": 3900000000,
+            "medianPriceInBtc": 198.3925119544206,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 135,
+            "medianPriceInKrw": 4100000000,
+            "medianPriceInBtc": 324.26420260095824,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 136,
+            "medianPriceInKrw": 3700000000,
+            "medianPriceInBtc": 292.53376713410717,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 4200000000,
+            "medianPriceInBtc": 338.4,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 169,
+            "medianPriceInKrw": 4270000000,
+            "medianPriceInBtc": 324.7148288973384,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 198,
+            "medianPriceInKrw": 4400000000,
+            "medianPriceInBtc": 352.8796723882548,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 4810000000,
+            "medianPriceInBtc": 398.9095499013538,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          }
+        ]
+      },
+      {
+        "year": 2021,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2635000000,
+            "medianPriceInBtc": 52.67967213045587,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3295000000,
+            "medianPriceInBtc": 61.62397060918238,
+            "dealCount": 24,
+            "btcConvertedDealCount": 24
+          },
+          {
+            "areaInSquareMeter": 115,
+            "medianPriceInKrw": 4120000000,
+            "medianPriceInBtc": 84.76527679693396,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 117,
+            "medianPriceInKrw": 4250000000,
+            "medianPriceInBtc": 57.58261411519233,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 135,
+            "medianPriceInKrw": 4580000000,
+            "medianPriceInBtc": 115.96067484026467,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 4775000000,
+            "medianPriceInBtc": 92.52818716431929,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 169,
+            "medianPriceInKrw": 5100000000,
+            "medianPriceInBtc": 103.42256064055263,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 198,
+            "medianPriceInKrw": 4800000000,
+            "medianPriceInBtc": 93.14295420432333,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 6385000000,
+            "medianPriceInBtc": 83.79781989270435,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2550000000,
+            "medianPriceInBtc": 87.03071672354949,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3700000000,
+            "medianPriceInBtc": 72.1353840581665,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 115,
+            "medianPriceInKrw": 4930000000,
+            "medianPriceInBtc": 185.7713467480594,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 135,
+            "medianPriceInKrw": 5450000000,
+            "medianPriceInBtc": 112.48710010319917,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 6000000000,
+            "medianPriceInBtc": 120.85078955849178,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 198,
+            "medianPriceInKrw": 7150000000,
+            "medianPriceInBtc": 139.13754183856153,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 7800000000,
+            "medianPriceInBtc": 150.42489184791967,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2480000000,
+            "medianPriceInBtc": 64.7865006350736,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3480000000,
+            "medianPriceInBtc": 98.11460993890714,
+            "dealCount": 26,
+            "btcConvertedDealCount": 26
+          },
+          {
+            "areaInSquareMeter": 115,
+            "medianPriceInKrw": 4800000000,
+            "medianPriceInBtc": 81.72299310462246,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 117,
+            "medianPriceInKrw": 4925000000,
+            "medianPriceInBtc": 133.59037211440543,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 135,
+            "medianPriceInKrw": 5250000000,
+            "medianPriceInBtc": 129.36451223418672,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 6400000000,
+            "medianPriceInBtc": 168.68418909778995,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 169,
+            "medianPriceInKrw": 6000000000,
+            "medianPriceInBtc": 160.9226913912899,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 198,
+            "medianPriceInKrw": 7300000000,
+            "medianPriceInBtc": 159.27965925007913,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 8100000000,
+            "medianPriceInBtc": 218.96034384883626,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2900000000,
+            "medianPriceInBtc": 33.21547198114219,
+            "dealCount": 21,
+            "btcConvertedDealCount": 21
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3850000000,
+            "medianPriceInBtc": 41.69533220755936,
+            "dealCount": 53,
+            "btcConvertedDealCount": 53
+          },
+          {
+            "areaInSquareMeter": 117,
+            "medianPriceInKrw": 5185000000,
+            "medianPriceInBtc": 58.16464996326451,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 135,
+            "medianPriceInKrw": 5950000000,
+            "medianPriceInBtc": 59.907211386874465,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 6210000000,
+            "medianPriceInBtc": 65.22150103976306,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 169,
+            "medianPriceInKrw": 6625000000,
+            "medianPriceInBtc": 71.3056658311595,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 198,
+            "medianPriceInKrw": 7200000000,
+            "medianPriceInBtc": 87.63344099355096,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 7900000000,
+            "medianPriceInBtc": 107.27865290602934,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 3430000000,
+            "medianPriceInBtc": 27.052933447964378,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 4500000000,
+            "medianPriceInBtc": 32.27172794933339,
+            "dealCount": 29,
+            "btcConvertedDealCount": 29
+          },
+          {
+            "areaInSquareMeter": 117,
+            "medianPriceInKrw": 5590000000,
+            "medianPriceInBtc": 35.84821712324413,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 135,
+            "medianPriceInKrw": 6300000000,
+            "medianPriceInBtc": 43.83279527997328,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 7700000000,
+            "medianPriceInBtc": 57.53653943868249,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 169,
+            "medianPriceInKrw": 7400000000,
+            "medianPriceInBtc": 55.752695277995784,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 198,
+            "medianPriceInKrw": 7750000000,
+            "medianPriceInBtc": 53.67407715215735,
+            "dealCount": 15,
+            "btcConvertedDealCount": 15
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 8449500000,
+            "medianPriceInBtc": 64.29454691369475,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          }
+        ]
+      }
+    ],
+    "acro-river-park": [
+      {
+        "year": 2016,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1355000000,
+            "medianPriceInBtc": 1782.1845790816005,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1880000000,
+            "medianPriceInBtc": 2666.908844686861,
+            "dealCount": 17,
+            "btcConvertedDealCount": 17
+          },
+          {
+            "areaInSquareMeter": 112,
+            "medianPriceInKrw": 2800000000,
+            "medianPriceInBtc": 3548.830218106796,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 129,
+            "medianPriceInKrw": 3010000000,
+            "medianPriceInBtc": 4263.363019169563,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 154,
+            "medianPriceInKrw": 3550000000,
+            "medianPriceInBtc": 5238.3143830301515,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2017,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1463500000,
+            "medianPriceInBtc": 490.7572971052067,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2010000000,
+            "medianPriceInBtc": 725.3649834915313,
+            "dealCount": 46,
+            "btcConvertedDealCount": 46
+          },
+          {
+            "areaInSquareMeter": 112,
+            "medianPriceInKrw": 2710000000,
+            "medianPriceInBtc": 1020.2452462870549,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 129,
+            "medianPriceInKrw": 3270000000,
+            "medianPriceInBtc": 1058.513834337524,
+            "dealCount": 11,
+            "btcConvertedDealCount": 11
+          },
+          {
+            "areaInSquareMeter": 154,
+            "medianPriceInKrw": 3720000000,
+            "medianPriceInBtc": 1164.2342214669054,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 3640000000,
+            "medianPriceInBtc": 233.61268153759895,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 3400000000,
+            "medianPriceInBtc": 727.244606629403,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2018,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1870000000,
+            "medianPriceInBtc": 128.160235310596,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2610000000,
+            "medianPriceInBtc": 310.6145251396648,
+            "dealCount": 29,
+            "btcConvertedDealCount": 29
+          },
+          {
+            "areaInSquareMeter": 112,
+            "medianPriceInKrw": 3215000000,
+            "medianPriceInBtc": 434.96379515869774,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 129,
+            "medianPriceInKrw": 3815000000,
+            "medianPriceInBtc": 513.2393349018546,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 154,
+            "medianPriceInKrw": 4970000000,
+            "medianPriceInBtc": 635.1437699680512,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 4000000000,
+            "medianPriceInBtc": 437.07402184943857,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 3900000000,
+            "medianPriceInBtc": 192.46903222622515,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 178,
+            "medianPriceInKrw": 4300000000,
+            "medianPriceInBtc": 537.3088726567545,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2019,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2180000000,
+            "medianPriceInBtc": 218.84180476613963,
+            "dealCount": 18,
+            "btcConvertedDealCount": 18
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2940000000,
+            "medianPriceInBtc": 288.57293312269616,
+            "dealCount": 33,
+            "btcConvertedDealCount": 33
+          },
+          {
+            "areaInSquareMeter": 112,
+            "medianPriceInKrw": 3850000000,
+            "medianPriceInBtc": 368.8447856206703,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 129,
+            "medianPriceInKrw": 4200000000,
+            "medianPriceInBtc": 341.91315969803543,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 154,
+            "medianPriceInKrw": 5100000000,
+            "medianPriceInBtc": 429.3174166589446,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 4300000000,
+            "medianPriceInBtc": 422.8953579858379,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 5400000000,
+            "medianPriceInBtc": 614.7540983606557,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2020,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2320000000,
+            "medianPriceInBtc": 185.95780974264449,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3100000000,
+            "medianPriceInBtc": 242.38506907974468,
+            "dealCount": 33,
+            "btcConvertedDealCount": 33
+          },
+          {
+            "areaInSquareMeter": 112,
+            "medianPriceInKrw": 3962500000,
+            "medianPriceInBtc": 214.59314070918208,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 129,
+            "medianPriceInKrw": 4279000000,
+            "medianPriceInBtc": 288.1014116969173,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 154,
+            "medianPriceInKrw": 5350000000,
+            "medianPriceInBtc": 407.3397289477692,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 4650000000,
+            "medianPriceInBtc": 410.9952271522008,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 178,
+            "medianPriceInKrw": 5500000000,
+            "medianPriceInBtc": 414.40626883664856,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2021,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2675000000,
+            "medianPriceInBtc": 38.41883959899995,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3595000000,
+            "medianPriceInBtc": 77.24783532190204,
+            "dealCount": 34,
+            "btcConvertedDealCount": 34
+          },
+          {
+            "areaInSquareMeter": 112,
+            "medianPriceInKrw": 4465000000,
+            "medianPriceInBtc": 92.806907316445,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 129,
+            "medianPriceInKrw": 4835000000,
+            "medianPriceInBtc": 82.1838209415327,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 4795000000,
+            "medianPriceInBtc": 68.76936600671984,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 5825000000,
+            "medianPriceInBtc": 151.3889355213209,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 178,
+            "medianPriceInKrw": 6120000000,
+            "medianPriceInBtc": 145.9865137764283,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 4530000000,
+            "medianPriceInBtc": 93.96990964630406,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 112,
+            "medianPriceInKrw": 5400000000,
+            "medianPriceInBtc": 108.13625167711317,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 129,
+            "medianPriceInKrw": 6200000000,
+            "medianPriceInBtc": 131.24121002133182,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2535000000,
+            "medianPriceInBtc": 69.38416304863402,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3680000000,
+            "medianPriceInBtc": 99.70627071599881,
+            "dealCount": 11,
+            "btcConvertedDealCount": 11
+          },
+          {
+            "areaInSquareMeter": 112,
+            "medianPriceInKrw": 5000000000,
+            "medianPriceInBtc": 132.58527875165743,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 234,
+            "medianPriceInKrw": 11000000000,
+            "medianPriceInBtc": 291.02068892534,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2910000000,
+            "medianPriceInBtc": 31.596540032675144,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 4000000000,
+            "medianPriceInBtc": 43.297555228568626,
+            "dealCount": 50,
+            "btcConvertedDealCount": 50
+          },
+          {
+            "areaInSquareMeter": 112,
+            "medianPriceInKrw": 5700000000,
+            "medianPriceInBtc": 62.39663242399894,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 129,
+            "medianPriceInKrw": 7190000000,
+            "medianPriceInBtc": 74.34389154211722,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 6800000000,
+            "medianPriceInBtc": 49.616928128420284,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 178,
+            "medianPriceInKrw": 8500000000,
+            "medianPriceInBtc": 105.67013513345516,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 234,
+            "medianPriceInKrw": 18000000000,
+            "medianPriceInBtc": 231.26437372322795,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 3925000000,
+            "medianPriceInBtc": 29.442880828067253,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 4990000000,
+            "medianPriceInBtc": 33.49596381145736,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 112,
+            "medianPriceInKrw": 6520000000,
+            "medianPriceInBtc": 49.79343504679805,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 129,
+            "medianPriceInKrw": 7700000000,
+            "medianPriceInBtc": 50.9544641081726,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 154,
+            "medianPriceInKrw": 9250000000,
+            "medianPriceInBtc": 67.98021459016617,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 168,
+            "medianPriceInKrw": 9500000000,
+            "medianPriceInBtc": 58.736243353530355,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 178,
+            "medianPriceInKrw": 9500000000,
+            "medianPriceInBtc": 76.61290322580645,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      }
+    ],
+    "eunma": [
+      {
+        "year": 2014,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 76,
+            "medianPriceInKrw": 857500000,
+            "medianPriceInBtc": 1424.8544743826678,
+            "dealCount": 96,
+            "btcConvertedDealCount": 96
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 965000000,
+            "medianPriceInBtc": 1596.5388229518355,
+            "dealCount": 35,
+            "btcConvertedDealCount": 35
+          }
+        ]
+      },
+      {
+        "year": 2015,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 76,
+            "medianPriceInKrw": 912000000,
+            "medianPriceInBtc": 3389.839781898898,
+            "dealCount": 161,
+            "btcConvertedDealCount": 161
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1058750000,
+            "medianPriceInBtc": 3754.4110328320867,
+            "dealCount": 92,
+            "btcConvertedDealCount": 92
+          }
+        ]
+      },
+      {
+        "year": 2016,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 76,
+            "medianPriceInKrw": 1047000000,
+            "medianPriceInBtc": 1804.496153612912,
+            "dealCount": 143,
+            "btcConvertedDealCount": 143
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1171000000,
+            "medianPriceInBtc": 2165.9740016370406,
+            "dealCount": 88,
+            "btcConvertedDealCount": 88
+          }
+        ]
+      },
+      {
+        "year": 2017,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 76,
+            "medianPriceInKrw": 1210000000,
+            "medianPriceInBtc": 438.3214741942935,
+            "dealCount": 190,
+            "btcConvertedDealCount": 190
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1400000000,
+            "medianPriceInBtc": 507.5714492359582,
+            "dealCount": 130,
+            "btcConvertedDealCount": 130
+          }
+        ]
+      },
+      {
+        "year": 2018,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 76,
+            "medianPriceInKrw": 1570000000,
+            "medianPriceInBtc": 199.25857275254864,
+            "dealCount": 79,
+            "btcConvertedDealCount": 79
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1733500000,
+            "medianPriceInBtc": 211.16428966891849,
+            "dealCount": 66,
+            "btcConvertedDealCount": 66
+          }
+        ]
+      },
+      {
+        "year": 2019,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 76,
+            "medianPriceInKrw": 1790000000,
+            "medianPriceInBtc": 188.16376999975265,
+            "dealCount": 124,
+            "btcConvertedDealCount": 124
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1935000000,
+            "medianPriceInBtc": 202.89112574264652,
+            "dealCount": 76,
+            "btcConvertedDealCount": 76
+          }
+        ]
+      },
+      {
+        "year": 2020,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 76,
+            "medianPriceInKrw": 1910000000,
+            "medianPriceInBtc": 163.89200379539378,
+            "dealCount": 51,
+            "btcConvertedDealCount": 51
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2135000000,
+            "medianPriceInBtc": 183.88773126474007,
+            "dealCount": 44,
+            "btcConvertedDealCount": 44
+          }
+        ]
+      },
+      {
+        "year": 2021,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 76,
+            "medianPriceInKrw": 2246500000,
+            "medianPriceInBtc": 49.9405002219557,
+            "dealCount": 32,
+            "btcConvertedDealCount": 32
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2540000000,
+            "medianPriceInBtc": 52.92966738749871,
+            "dealCount": 27,
+            "btcConvertedDealCount": 27
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 76,
+            "medianPriceInKrw": 1952500000,
+            "medianPriceInBtc": 78.49514162055516,
+            "dealCount": 22,
+            "btcConvertedDealCount": 22
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2350000000,
+            "medianPriceInBtc": 81.74197363386553,
+            "dealCount": 13,
+            "btcConvertedDealCount": 13
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 76,
+            "medianPriceInKrw": 2200000000,
+            "medianPriceInBtc": 60.43256997455471,
+            "dealCount": 65,
+            "btcConvertedDealCount": 65
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2430000000,
+            "medianPriceInBtc": 67.89258129243287,
+            "dealCount": 41,
+            "btcConvertedDealCount": 41
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 76,
+            "medianPriceInKrw": 2450000000,
+            "medianPriceInBtc": 26.571413887032943,
+            "dealCount": 35,
+            "btcConvertedDealCount": 35
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2700000000,
+            "medianPriceInBtc": 29.55805609915199,
+            "dealCount": 25,
+            "btcConvertedDealCount": 25
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 76,
+            "medianPriceInKrw": 3100000000,
+            "medianPriceInBtc": 22.75257445032007,
+            "dealCount": 35,
+            "btcConvertedDealCount": 35
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3760000000,
+            "medianPriceInBtc": 25.840512711437682,
+            "dealCount": 26,
+            "btcConvertedDealCount": 26
+          }
+        ]
+      }
+    ],
+    "apgujeong-hyundai-6": [
+      {
+        "year": 2014,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 144,
+            "medianPriceInKrw": 1837500000,
+            "medianPriceInBtc": 3011.526128242548,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 157,
+            "medianPriceInKrw": 2100000000,
+            "medianPriceInBtc": 3554.9055156898294,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 196,
+            "medianPriceInKrw": 2692500000,
+            "medianPriceInBtc": 4931.4999534882845,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2015,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 144,
+            "medianPriceInKrw": 1952500000,
+            "medianPriceInBtc": 6268.928547918618,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 157,
+            "medianPriceInKrw": 2200000000,
+            "medianPriceInBtc": 6372.018141744934,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 196,
+            "medianPriceInKrw": 2900000000,
+            "medianPriceInBtc": 10928.132632924891,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          }
+        ]
+      },
+      {
+        "year": 2016,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 144,
+            "medianPriceInKrw": 2062500000,
+            "medianPriceInBtc": 3542.036073290274,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 157,
+            "medianPriceInKrw": 2350000000,
+            "medianPriceInBtc": 4024.2607571369854,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 196,
+            "medianPriceInKrw": 2925000000,
+            "medianPriceInBtc": 5013.401238705916,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          }
+        ]
+      },
+      {
+        "year": 2017,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 144,
+            "medianPriceInKrw": 2575000000,
+            "medianPriceInBtc": 1159.807196325583,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 157,
+            "medianPriceInKrw": 2960000000,
+            "medianPriceInBtc": 369.93640197471274,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 196,
+            "medianPriceInKrw": 3350000000,
+            "medianPriceInBtc": 2375.3452330284504,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          }
+        ]
+      },
+      {
+        "year": 2018,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 144,
+            "medianPriceInKrw": 3040000000,
+            "medianPriceInBtc": 257.2020355157078,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 157,
+            "medianPriceInKrw": 3500000000,
+            "medianPriceInBtc": 449.27536231884056,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 196,
+            "medianPriceInKrw": 4200000000,
+            "medianPriceInBtc": 525.2680396560861,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2019,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 144,
+            "medianPriceInKrw": 3420000000,
+            "medianPriceInBtc": 342.76173639756433,
+            "dealCount": 13,
+            "btcConvertedDealCount": 13
+          },
+          {
+            "areaInSquareMeter": 157,
+            "medianPriceInKrw": 3700000000,
+            "medianPriceInBtc": 462.8975265017668,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 196,
+            "medianPriceInKrw": 4150000000,
+            "medianPriceInBtc": 673.226307612636,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          }
+        ]
+      },
+      {
+        "year": 2020,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 144,
+            "medianPriceInKrw": 3595000000,
+            "medianPriceInBtc": 241.44359471448269,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 157,
+            "medianPriceInKrw": 3600000000,
+            "medianPriceInBtc": 317.88079470198676,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 196,
+            "medianPriceInKrw": 4800000000,
+            "medianPriceInBtc": 412.33570999055064,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          }
+        ]
+      },
+      {
+        "year": 2021,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 144,
+            "medianPriceInKrw": 4200000000,
+            "medianPriceInBtc": 80.19590982166224,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 196,
+            "medianPriceInKrw": 6200000000,
+            "medianPriceInBtc": 88.26768592899715,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 144,
+            "medianPriceInKrw": 4650000000,
+            "medianPriceInBtc": 166.52342071336486,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 157,
+            "medianPriceInKrw": 4500000000,
+            "medianPriceInBtc": 207.35416090682887,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 144,
+            "medianPriceInKrw": 4715000000,
+            "medianPriceInBtc": 125.65141975561349,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 157,
+            "medianPriceInKrw": 5800000000,
+            "medianPriceInBtc": 201.40287519966665,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 144,
+            "medianPriceInKrw": 5650000000,
+            "medianPriceInBtc": 56.79662802950474,
+            "dealCount": 15,
+            "btcConvertedDealCount": 15
+          },
+          {
+            "areaInSquareMeter": 157,
+            "medianPriceInKrw": 5942500000,
+            "medianPriceInBtc": 69.32337049359617,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 196,
+            "medianPriceInKrw": 6800000000,
+            "medianPriceInBtc": 81.76614881439085,
+            "dealCount": 11,
+            "btcConvertedDealCount": 11
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 144,
+            "medianPriceInKrw": 7480000000,
+            "medianPriceInBtc": 53.92836632068468,
+            "dealCount": 13,
+            "btcConvertedDealCount": 13
+          },
+          {
+            "areaInSquareMeter": 157,
+            "medianPriceInKrw": 7300000000,
+            "medianPriceInBtc": 55.24518932340161,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 196,
+            "medianPriceInKrw": 9700000000,
+            "medianPriceInBtc": 65.44835298901992,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          }
+        ]
+      }
+    ],
+    "dogok-rexle": [
+      {
+        "year": 2014,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 730000000,
+            "medianPriceInBtc": 1376.9669919878947,
+            "dealCount": 54,
+            "btcConvertedDealCount": 54
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1120000000,
+            "medianPriceInBtc": 2084.236812773156,
+            "dealCount": 47,
+            "btcConvertedDealCount": 47
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 1500000000,
+            "medianPriceInBtc": 3112.256850909053,
+            "dealCount": 19,
+            "btcConvertedDealCount": 19
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 1315000000,
+            "medianPriceInBtc": 2461.3415542141242,
+            "dealCount": 19,
+            "btcConvertedDealCount": 19
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 1290000000,
+            "medianPriceInBtc": 2462.5090504715254,
+            "dealCount": 25,
+            "btcConvertedDealCount": 25
+          },
+          {
+            "areaInSquareMeter": 134,
+            "medianPriceInKrw": 1762000000,
+            "medianPriceInBtc": 3621.9934380535515,
+            "dealCount": 19,
+            "btcConvertedDealCount": 19
+          },
+          {
+            "areaInSquareMeter": 138,
+            "medianPriceInKrw": 1700000000,
+            "medianPriceInBtc": 3204.5155771502205,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 176,
+            "medianPriceInKrw": 2400000000,
+            "medianPriceInBtc": 6061.224581023534,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2015,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 805000000,
+            "medianPriceInBtc": 2793.9543961701984,
+            "dealCount": 73,
+            "btcConvertedDealCount": 73
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1220000000,
+            "medianPriceInBtc": 4214.20202264166,
+            "dealCount": 63,
+            "btcConvertedDealCount": 63
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 1597000000,
+            "medianPriceInBtc": 5311.758480428632,
+            "dealCount": 29,
+            "btcConvertedDealCount": 29
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 1400000000,
+            "medianPriceInBtc": 4797.731799282927,
+            "dealCount": 21,
+            "btcConvertedDealCount": 21
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 1435000000,
+            "medianPriceInBtc": 4905.278282397176,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 134,
+            "medianPriceInKrw": 1785000000,
+            "medianPriceInBtc": 6296.280059261877,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 138,
+            "medianPriceInKrw": 1692500000,
+            "medianPriceInBtc": 4451.002318771727,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 176,
+            "medianPriceInKrw": 2375000000,
+            "medianPriceInBtc": 7831.437322059663,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2016,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 845000000,
+            "medianPriceInBtc": 1237.880848211468,
+            "dealCount": 83,
+            "btcConvertedDealCount": 83
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1250000000,
+            "medianPriceInBtc": 1783.1146473781112,
+            "dealCount": 93,
+            "btcConvertedDealCount": 93
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 1665000000,
+            "medianPriceInBtc": 2438.1430429854163,
+            "dealCount": 20,
+            "btcConvertedDealCount": 20
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 1447500000,
+            "medianPriceInBtc": 2129.992376341992,
+            "dealCount": 34,
+            "btcConvertedDealCount": 34
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 1490000000,
+            "medianPriceInBtc": 2063.306108770851,
+            "dealCount": 27,
+            "btcConvertedDealCount": 27
+          },
+          {
+            "areaInSquareMeter": 134,
+            "medianPriceInKrw": 1842500000,
+            "medianPriceInBtc": 2597.55456094932,
+            "dealCount": 26,
+            "btcConvertedDealCount": 26
+          },
+          {
+            "areaInSquareMeter": 138,
+            "medianPriceInKrw": 1715000000,
+            "medianPriceInBtc": 2963.903310002642,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 176,
+            "medianPriceInKrw": 2341250000,
+            "medianPriceInBtc": 3751.8444888949007,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          }
+        ]
+      },
+      {
+        "year": 2017,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 980000000,
+            "medianPriceInBtc": 372.27194416930274,
+            "dealCount": 71,
+            "btcConvertedDealCount": 71
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1400000000,
+            "medianPriceInBtc": 495.37480859424954,
+            "dealCount": 86,
+            "btcConvertedDealCount": 86
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 1785000000,
+            "medianPriceInBtc": 628.0935206691212,
+            "dealCount": 28,
+            "btcConvertedDealCount": 28
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 1597500000,
+            "medianPriceInBtc": 579.0240488919601,
+            "dealCount": 48,
+            "btcConvertedDealCount": 48
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 1592500000,
+            "medianPriceInBtc": 534.8663357615283,
+            "dealCount": 50,
+            "btcConvertedDealCount": 50
+          },
+          {
+            "areaInSquareMeter": 134,
+            "medianPriceInKrw": 1947500000,
+            "medianPriceInBtc": 524.0324905066542,
+            "dealCount": 38,
+            "btcConvertedDealCount": 38
+          },
+          {
+            "areaInSquareMeter": 176,
+            "medianPriceInKrw": 2405000000,
+            "medianPriceInBtc": 442.6989681451194,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2018,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1362500000,
+            "medianPriceInBtc": 157.4912736825537,
+            "dealCount": 26,
+            "btcConvertedDealCount": 26
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1790000000,
+            "medianPriceInBtc": 211.1731843575419,
+            "dealCount": 29,
+            "btcConvertedDealCount": 29
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 2325000000,
+            "medianPriceInBtc": 282.607018410552,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 2115000000,
+            "medianPriceInBtc": 280.3796048696387,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 2100000000,
+            "medianPriceInBtc": 275.12886597938143,
+            "dealCount": 13,
+            "btcConvertedDealCount": 13
+          },
+          {
+            "areaInSquareMeter": 134,
+            "medianPriceInKrw": 2450000000,
+            "medianPriceInBtc": 254.42236296134527,
+            "dealCount": 19,
+            "btcConvertedDealCount": 19
+          },
+          {
+            "areaInSquareMeter": 138,
+            "medianPriceInKrw": 2600000000,
+            "medianPriceInBtc": 354.94880546075086,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2019,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1597500000,
+            "medianPriceInBtc": 141.4068925951135,
+            "dealCount": 38,
+            "btcConvertedDealCount": 38
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2180000000,
+            "medianPriceInBtc": 202.15556870282424,
+            "dealCount": 34,
+            "btcConvertedDealCount": 34
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 2430000000,
+            "medianPriceInBtc": 256.73534072900156,
+            "dealCount": 15,
+            "btcConvertedDealCount": 15
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 2295000000,
+            "medianPriceInBtc": 237.85296615465433,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 2225000000,
+            "medianPriceInBtc": 220.4064322571428,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 134,
+            "medianPriceInKrw": 2800000000,
+            "medianPriceInBtc": 226.88598979013045,
+            "dealCount": 15,
+            "btcConvertedDealCount": 15
+          },
+          {
+            "areaInSquareMeter": 138,
+            "medianPriceInKrw": 2695000000,
+            "medianPriceInBtc": 201.47485851142017,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 176,
+            "medianPriceInKrw": 3080000000,
+            "medianPriceInBtc": 249.60876369327073,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          }
+        ]
+      },
+      {
+        "year": 2020,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1750000000,
+            "medianPriceInBtc": 153.1393568147014,
+            "dealCount": 19,
+            "btcConvertedDealCount": 19
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2350000000,
+            "medianPriceInBtc": 201.72382641963833,
+            "dealCount": 34,
+            "btcConvertedDealCount": 34
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 3160000000,
+            "medianPriceInBtc": 191.35501866341338,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 2630000000,
+            "medianPriceInBtc": 247.72701892402296,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 2804500000,
+            "medianPriceInBtc": 246.91477496676757,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 134,
+            "medianPriceInKrw": 3350000000,
+            "medianPriceInBtc": 272.40773286467487,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 138,
+            "medianPriceInKrw": 3300000000,
+            "medianPriceInBtc": 284.6545329077892,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 176,
+            "medianPriceInKrw": 4100000000,
+            "medianPriceInBtc": 371.59346834815534,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2021,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2150000000,
+            "medianPriceInBtc": 39.06853883803133,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2890000000,
+            "medianPriceInBtc": 61.90208216094541,
+            "dealCount": 17,
+            "btcConvertedDealCount": 17
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 3395000000,
+            "medianPriceInBtc": 85.96178760444243,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 3230000000,
+            "medianPriceInBtc": 55.066676315744054,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 3490000000,
+            "medianPriceInBtc": 76.33754757425959,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 134,
+            "medianPriceInKrw": 4200000000,
+            "medianPriceInBtc": 71.08075427301546,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 138,
+            "medianPriceInKrw": 3680000000,
+            "medianPriceInBtc": 99.22614393183595,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2400000000,
+            "medianPriceInBtc": 89.26246885111765,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2990000000,
+            "medianPriceInBtc": 98.18589863474845,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 134,
+            "medianPriceInKrw": 4230000000,
+            "medianPriceInBtc": 137.54308382649413,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 176,
+            "medianPriceInKrw": 5650000000,
+            "medianPriceInBtc": 162.19043661310482,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1827500000,
+            "medianPriceInBtc": 52.38268438233814,
+            "dealCount": 32,
+            "btcConvertedDealCount": 32
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2595000000,
+            "medianPriceInBtc": 73.14312900387422,
+            "dealCount": 36,
+            "btcConvertedDealCount": 36
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 3555000000,
+            "medianPriceInBtc": 97.44064184987583,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 3230000000,
+            "medianPriceInBtc": 82.64462809917356,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 3060000000,
+            "medianPriceInBtc": 79.89556135770235,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 134,
+            "medianPriceInKrw": 4025000000,
+            "medianPriceInBtc": 108.64529726388467,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 176,
+            "medianPriceInKrw": 4850000000,
+            "medianPriceInBtc": 136.43908065378233,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2200000000,
+            "medianPriceInBtc": 23.219328522121117,
+            "dealCount": 31,
+            "btcConvertedDealCount": 31
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2945000000,
+            "medianPriceInBtc": 32.38951308246391,
+            "dealCount": 34,
+            "btcConvertedDealCount": 34
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 3615000000,
+            "medianPriceInBtc": 36.529928420996555,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 3340000000,
+            "medianPriceInBtc": 37.40578557749381,
+            "dealCount": 11,
+            "btcConvertedDealCount": 11
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 3510000000,
+            "medianPriceInBtc": 39.08924589794459,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 134,
+            "medianPriceInKrw": 4075000000,
+            "medianPriceInBtc": 47.59817691180884,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          },
+          {
+            "areaInSquareMeter": 176,
+            "medianPriceInKrw": 3725000000,
+            "medianPriceInBtc": 40.99082245746858,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2650000000,
+            "medianPriceInBtc": 17.84802063559135,
+            "dealCount": 29,
+            "btcConvertedDealCount": 29
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3450000000,
+            "medianPriceInBtc": 25.58452229775155,
+            "dealCount": 25,
+            "btcConvertedDealCount": 25
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 4150000000,
+            "medianPriceInBtc": 28.654277233559778,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 4160000000,
+            "medianPriceInBtc": 27.773661975275203,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 3850000000,
+            "medianPriceInBtc": 28.037130456823114,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 134,
+            "medianPriceInKrw": 4450000000,
+            "medianPriceInBtc": 33.26016097917914,
+            "dealCount": 15,
+            "btcConvertedDealCount": 15
+          },
+          {
+            "areaInSquareMeter": 138,
+            "medianPriceInKrw": 4700000000,
+            "medianPriceInBtc": 29.276922310260627,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 176,
+            "medianPriceInKrw": 5950000000,
+            "medianPriceInBtc": 44.44610442967058,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      }
+    ],
+    "tower-palace-1": [
+      {
+        "year": 2014,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1165000000,
+            "medianPriceInBtc": 2124.4662335878043,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 1315000000,
+            "medianPriceInBtc": 2618.4955872674286,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 121,
+            "medianPriceInKrw": 1460000000,
+            "medianPriceInBtc": 3380.1767957484412,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 137,
+            "medianPriceInKrw": 1575000000,
+            "medianPriceInBtc": 2594.531502103919,
+            "dealCount": 18,
+            "btcConvertedDealCount": 18
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 1975000000,
+            "medianPriceInBtc": 3578.1753488407876,
+            "dealCount": 15,
+            "btcConvertedDealCount": 15
+          },
+          {
+            "areaInSquareMeter": 174,
+            "medianPriceInKrw": 2645000000,
+            "medianPriceInBtc": 4369.292074916231,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 3700000000,
+            "medianPriceInBtc": 11211.774666358799,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 4097500000,
+            "medianPriceInBtc": 8549.62493825471,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          }
+        ]
+      },
+      {
+        "year": 2015,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1080000000,
+            "medianPriceInBtc": 3852.457085089942,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 1440000000,
+            "medianPriceInBtc": 5085.95077525132,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 121,
+            "medianPriceInKrw": 1525000000,
+            "medianPriceInBtc": 5232.63902720664,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 137,
+            "medianPriceInKrw": 1740000000,
+            "medianPriceInBtc": 6288.526441067615,
+            "dealCount": 22,
+            "btcConvertedDealCount": 22
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 2215000000,
+            "medianPriceInBtc": 7331.717025156375,
+            "dealCount": 18,
+            "btcConvertedDealCount": 18
+          },
+          {
+            "areaInSquareMeter": 174,
+            "medianPriceInKrw": 2560000000,
+            "medianPriceInBtc": 8935.362564438543,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 3960000000,
+            "medianPriceInBtc": 9437.537088805793,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2016,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 78,
+            "medianPriceInKrw": 1380000000,
+            "medianPriceInBtc": 2064.490648642766,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1150000000,
+            "medianPriceInBtc": 1665.9820783105283,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 1400000000,
+            "medianPriceInBtc": 2749.2545121464864,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 137,
+            "medianPriceInKrw": 1740000000,
+            "medianPriceInBtc": 2589.560277038302,
+            "dealCount": 15,
+            "btcConvertedDealCount": 15
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 2250000000,
+            "medianPriceInBtc": 3315.0330659531573,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 174,
+            "medianPriceInKrw": 2640000000,
+            "medianPriceInBtc": 3493.0392211417893,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 3920000000,
+            "medianPriceInBtc": 5864.350248318581,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 3935000000,
+            "medianPriceInBtc": 5775.854715152413,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          }
+        ]
+      },
+      {
+        "year": 2017,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1207500000,
+            "medianPriceInBtc": 344.4840014333274,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 1550000000,
+            "medianPriceInBtc": 523.9300091445243,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 121,
+            "medianPriceInKrw": 1595000000,
+            "medianPriceInBtc": 549.447839782603,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 137,
+            "medianPriceInKrw": 1790000000,
+            "medianPriceInBtc": 561.8271783692373,
+            "dealCount": 26,
+            "btcConvertedDealCount": 26
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 2080000000,
+            "medianPriceInBtc": 288.16906667049125,
+            "dealCount": 27,
+            "btcConvertedDealCount": 27
+          },
+          {
+            "areaInSquareMeter": 174,
+            "medianPriceInKrw": 2415000000,
+            "medianPriceInBtc": 787.1423033974045,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 3995000000,
+            "medianPriceInBtc": 2416.0370407367914,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2018,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1475000000,
+            "medianPriceInBtc": 137.7636687644843,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 1640000000,
+            "medianPriceInBtc": 96.68999881361965,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 121,
+            "medianPriceInKrw": 1880000000,
+            "medianPriceInBtc": 219.9833074997019,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 137,
+            "medianPriceInKrw": 2015000000,
+            "medianPriceInBtc": 204.26230365908887,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 2450000000,
+            "medianPriceInBtc": 270.1005025125628,
+            "dealCount": 27,
+            "btcConvertedDealCount": 27
+          },
+          {
+            "areaInSquareMeter": 174,
+            "medianPriceInKrw": 2710000000,
+            "medianPriceInBtc": 279.24329430195655,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 5000000000,
+            "medianPriceInBtc": 553.5250598273869,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2019,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 78,
+            "medianPriceInKrw": 1000000000,
+            "medianPriceInBtc": 91.79364787956673,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1750000000,
+            "medianPriceInBtc": 139.45334289584827,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 2030000000,
+            "medianPriceInBtc": 194.7200898708107,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 121,
+            "medianPriceInKrw": 2080000000,
+            "medianPriceInBtc": 333.733442959432,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 137,
+            "medianPriceInKrw": 2300000000,
+            "medianPriceInBtc": 210.9704641350211,
+            "dealCount": 21,
+            "btcConvertedDealCount": 21
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 2625000000,
+            "medianPriceInBtc": 242.22561001393737,
+            "dealCount": 20,
+            "btcConvertedDealCount": 20
+          },
+          {
+            "areaInSquareMeter": 174,
+            "medianPriceInKrw": 3200000000,
+            "medianPriceInBtc": 349.78010576129316,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 4200000000,
+            "medianPriceInBtc": 385.5333210941803,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 5200000000,
+            "medianPriceInBtc": 414.37564746194914,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2020,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 78,
+            "medianPriceInKrw": 1665000000,
+            "medianPriceInBtc": 110.0587564386549,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2140000000,
+            "medianPriceInBtc": 155.74443619073497,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 2400000000,
+            "medianPriceInBtc": 194.42644199611146,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 137,
+            "medianPriceInKrw": 2795000000,
+            "medianPriceInBtc": 175.35511189886793,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 3000000000,
+            "medianPriceInBtc": 255.5966860567601,
+            "dealCount": 19,
+            "btcConvertedDealCount": 19
+          },
+          {
+            "areaInSquareMeter": 174,
+            "medianPriceInKrw": 3400000000,
+            "medianPriceInBtc": 279.8656644810491,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 4685000000,
+            "medianPriceInBtc": 308.30640384898015,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 5350000000,
+            "medianPriceInBtc": 447.96114879008627,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2021,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 78,
+            "medianPriceInKrw": 1800000000,
+            "medianPriceInBtc": 23.02438026043132,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2100000000,
+            "medianPriceInBtc": 49.313138429024306,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 2915000000,
+            "medianPriceInBtc": 56.564271762431076,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 137,
+            "medianPriceInKrw": 3015000000,
+            "medianPriceInBtc": 57.78881197029505,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 3600000000,
+            "medianPriceInBtc": 74.39553626782393,
+            "dealCount": 13,
+            "btcConvertedDealCount": 13
+          },
+          {
+            "areaInSquareMeter": 174,
+            "medianPriceInKrw": 3590000000,
+            "medianPriceInBtc": 66.27529168512775,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 4825000000,
+            "medianPriceInBtc": 90.14816060385255,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 5495000000,
+            "medianPriceInBtc": 85.86119674127936,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2725000000,
+            "medianPriceInBtc": 71.27506684817334,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 2340000000,
+            "medianPriceInBtc": 62.13159152461367,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 121,
+            "medianPriceInKrw": 3535000000,
+            "medianPriceInBtc": 85.63110228525315,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 137,
+            "medianPriceInKrw": 3600000000,
+            "medianPriceInBtc": 120.21589279804495,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 4300000000,
+            "medianPriceInBtc": 99.37479120577692,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 174,
+            "medianPriceInKrw": 4800000000,
+            "medianPriceInBtc": 156.55577299412917,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 7300000000,
+            "medianPriceInBtc": 275.0772477202502,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 301,
+            "medianPriceInKrw": 8700000000,
+            "medianPriceInBtc": 221.695589022246,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2280000000,
+            "medianPriceInBtc": 61.31019360389726,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 2900000000,
+            "medianPriceInBtc": 80.52871265133844,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 137,
+            "medianPriceInKrw": 3565000000,
+            "medianPriceInBtc": 94.30057540410576,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 4750000000,
+            "medianPriceInBtc": 116.79762157570609,
+            "dealCount": 11,
+            "btcConvertedDealCount": 11
+          },
+          {
+            "areaInSquareMeter": 174,
+            "medianPriceInKrw": 5450000000,
+            "medianPriceInBtc": 138.74105511107172,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 7450000000,
+            "medianPriceInBtc": 193.63726152726517,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 301,
+            "medianPriceInKrw": 9900000000,
+            "medianPriceInBtc": 261.0139998418097,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 78,
+            "medianPriceInKrw": 2400000000,
+            "medianPriceInBtc": 40.49949375632804,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 3400000000,
+            "medianPriceInBtc": 37.64893475661071,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 121,
+            "medianPriceInKrw": 4000000000,
+            "medianPriceInBtc": 48.41174443906722,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 137,
+            "medianPriceInKrw": 3677500000,
+            "medianPriceInBtc": 38.605990805593045,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 4800000000,
+            "medianPriceInBtc": 52.74981692710596,
+            "dealCount": 11,
+            "btcConvertedDealCount": 11
+          },
+          {
+            "areaInSquareMeter": 174,
+            "medianPriceInKrw": 5500000000,
+            "medianPriceInBtc": 56.41103826802866,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          },
+          {
+            "areaInSquareMeter": 222,
+            "medianPriceInKrw": 6035000000,
+            "medianPriceInBtc": 102.49041395499539,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 7565000000,
+            "medianPriceInBtc": 96.43683951055542,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 78,
+            "medianPriceInKrw": 2400000000,
+            "medianPriceInBtc": 19.308591518701174,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2887500000,
+            "medianPriceInBtc": 20.7505398605827,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          },
+          {
+            "areaInSquareMeter": 120,
+            "medianPriceInKrw": 3670000000,
+            "medianPriceInBtc": 24.958515818394496,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 137,
+            "medianPriceInKrw": 4450000000,
+            "medianPriceInBtc": 32.96540484480332,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 164,
+            "medianPriceInKrw": 4980000000,
+            "medianPriceInBtc": 33.44315901602794,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 174,
+            "medianPriceInKrw": 5800000000,
+            "medianPriceInBtc": 42.07084319546866,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 8200000000,
+            "medianPriceInBtc": 59.56704925177975,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      }
+    ],
+    "jamsil-else": [
+      {
+        "year": 2014,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 749500000,
+            "medianPriceInBtc": 1223.7817532437516,
+            "dealCount": 74,
+            "btcConvertedDealCount": 74
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 929500000,
+            "medianPriceInBtc": 1684.2635937121358,
+            "dealCount": 140,
+            "btcConvertedDealCount": 140
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 1310000000,
+            "medianPriceInBtc": 2667.011092099132,
+            "dealCount": 25,
+            "btcConvertedDealCount": 25
+          }
+        ]
+      },
+      {
+        "year": 2015,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 800000000,
+            "medianPriceInBtc": 2900.627105220766,
+            "dealCount": 87,
+            "btcConvertedDealCount": 87
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 976000000,
+            "medianPriceInBtc": 3469.369546807589,
+            "dealCount": 200,
+            "btcConvertedDealCount": 200
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 1389500000,
+            "medianPriceInBtc": 4477.446851377532,
+            "dealCount": 26,
+            "btcConvertedDealCount": 26
+          }
+        ]
+      },
+      {
+        "year": 2016,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 880000000,
+            "medianPriceInBtc": 1409.2392688561488,
+            "dealCount": 81,
+            "btcConvertedDealCount": 81
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1050000000,
+            "medianPriceInBtc": 1664.3269571228102,
+            "dealCount": 240,
+            "btcConvertedDealCount": 240
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 1480000000,
+            "medianPriceInBtc": 2143.1707269975127,
+            "dealCount": 28,
+            "btcConvertedDealCount": 28
+          }
+        ]
+      },
+      {
+        "year": 2017,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1030000000,
+            "medianPriceInBtc": 442.0908593723376,
+            "dealCount": 77,
+            "btcConvertedDealCount": 77
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1290000000,
+            "medianPriceInBtc": 490.87310141764465,
+            "dealCount": 201,
+            "btcConvertedDealCount": 201
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 1637500000,
+            "medianPriceInBtc": 667.3143203326432,
+            "dealCount": 36,
+            "btcConvertedDealCount": 36
+          }
+        ]
+      },
+      {
+        "year": 2018,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1373500000,
+            "medianPriceInBtc": 161.17241958798633,
+            "dealCount": 46,
+            "btcConvertedDealCount": 46
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1625000000,
+            "medianPriceInBtc": 187.92434529582928,
+            "dealCount": 105,
+            "btcConvertedDealCount": 105
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 2090000000,
+            "medianPriceInBtc": 212.6693408636592,
+            "dealCount": 18,
+            "btcConvertedDealCount": 18
+          }
+        ]
+      },
+      {
+        "year": 2019,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1455000000,
+            "medianPriceInBtc": 158.556667217224,
+            "dealCount": 80,
+            "btcConvertedDealCount": 80
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1790000000,
+            "medianPriceInBtc": 178.88426095649498,
+            "dealCount": 182,
+            "btcConvertedDealCount": 182
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 2450000000,
+            "medianPriceInBtc": 248.8350419384902,
+            "dealCount": 19,
+            "btcConvertedDealCount": 19
+          }
+        ]
+      },
+      {
+        "year": 2020,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1680000000,
+            "medianPriceInBtc": 150.80789946140035,
+            "dealCount": 35,
+            "btcConvertedDealCount": 35
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2000000000,
+            "medianPriceInBtc": 176.3730027067144,
+            "dealCount": 95,
+            "btcConvertedDealCount": 95
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 2500000000,
+            "medianPriceInBtc": 213.85799828913602,
+            "dealCount": 13,
+            "btcConvertedDealCount": 13
+          }
+        ]
+      },
+      {
+        "year": 2021,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1905000000,
+            "medianPriceInBtc": 38.187394129948785,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2420000000,
+            "medianPriceInBtc": 43.369175627240146,
+            "dealCount": 25,
+            "btcConvertedDealCount": 25
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 2995000000,
+            "medianPriceInBtc": 51.749447430384606,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1607500000,
+            "medianPriceInBtc": 57.69544435621199,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2100000000,
+            "medianPriceInBtc": 78.839590443686,
+            "dealCount": 33,
+            "btcConvertedDealCount": 33
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1850000000,
+            "medianPriceInBtc": 51.19939319237698,
+            "dealCount": 45,
+            "btcConvertedDealCount": 45
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2257500000,
+            "medianPriceInBtc": 59.433147695646056,
+            "dealCount": 72,
+            "btcConvertedDealCount": 72
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 3262500000,
+            "medianPriceInBtc": 87.3514448197331,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2050000000,
+            "medianPriceInBtc": 22.22858023196954,
+            "dealCount": 37,
+            "btcConvertedDealCount": 37
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2480000000,
+            "medianPriceInBtc": 27.130093702331664,
+            "dealCount": 87,
+            "btcConvertedDealCount": 87
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 3320000000,
+            "medianPriceInBtc": 37.575358339319465,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2550000000,
+            "medianPriceInBtc": 18.286492587664814,
+            "dealCount": 49,
+            "btcConvertedDealCount": 49
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 3090000000,
+            "medianPriceInBtc": 21.3825545944902,
+            "dealCount": 129,
+            "btcConvertedDealCount": 129
+          },
+          {
+            "areaInSquareMeter": 119,
+            "medianPriceInKrw": 3975000000,
+            "medianPriceInBtc": 25.693355685994497,
+            "dealCount": 14,
+            "btcConvertedDealCount": 14
+          }
+        ]
+      }
+    ],
+    "helio-city": [
+      {
+        "year": 2018,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": []
+      },
+      {
+        "year": 2019,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 39,
+            "medianPriceInKrw": 975700000,
+            "medianPriceInBtc": 86.16974300097148,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1518300000,
+            "medianPriceInBtc": 134.0899055020754,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 110,
+            "medianPriceInKrw": 1896850000,
+            "medianPriceInBtc": 167.52185816479732,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2020,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1700000000,
+            "medianPriceInBtc": 74.43763833224571,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1870000000,
+            "medianPriceInBtc": 138.7443635102324,
+            "dealCount": 11,
+            "btcConvertedDealCount": 11
+          },
+          {
+            "areaInSquareMeter": 110,
+            "medianPriceInKrw": 2485000000,
+            "medianPriceInBtc": 119.24184261036469,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2021,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 39,
+            "medianPriceInKrw": 1240000000,
+            "medianPriceInBtc": 23.27519092583171,
+            "dealCount": 26,
+            "btcConvertedDealCount": 26
+          },
+          {
+            "areaInSquareMeter": 49,
+            "medianPriceInKrw": 1580000000,
+            "medianPriceInBtc": 28.825804568342697,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1765000000,
+            "medianPriceInBtc": 32.30627290402484,
+            "dealCount": 30,
+            "btcConvertedDealCount": 30
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2120000000,
+            "medianPriceInBtc": 38.72707288589682,
+            "dealCount": 85,
+            "btcConvertedDealCount": 85
+          },
+          {
+            "areaInSquareMeter": 99,
+            "medianPriceInKrw": 2295000000,
+            "medianPriceInBtc": 40.50538201234547,
+            "dealCount": 9,
+            "btcConvertedDealCount": 9
+          },
+          {
+            "areaInSquareMeter": 110,
+            "medianPriceInKrw": 2580000000,
+            "medianPriceInBtc": 49.5613886404195,
+            "dealCount": 8,
+            "btcConvertedDealCount": 8
+          },
+          {
+            "areaInSquareMeter": 130,
+            "medianPriceInKrw": 3275000000,
+            "medianPriceInBtc": 71.24658123942581,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 39,
+            "medianPriceInKrw": 1110000000,
+            "medianPriceInBtc": 35.38903930598582,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 49,
+            "medianPriceInKrw": 1508500000,
+            "medianPriceInBtc": 37.16204872534327,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1287000000,
+            "medianPriceInBtc": 58.84235552304316,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1855000000,
+            "medianPriceInBtc": 70.55978547995032,
+            "dealCount": 50,
+            "btcConvertedDealCount": 50
+          },
+          {
+            "areaInSquareMeter": 110,
+            "medianPriceInKrw": 2760000000,
+            "medianPriceInBtc": 84.83031440541015,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 130,
+            "medianPriceInKrw": 3080000000,
+            "medianPriceInBtc": 111.99592742082106,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 39,
+            "medianPriceInKrw": 1041500000,
+            "medianPriceInBtc": 31.67272418609317,
+            "dealCount": 40,
+            "btcConvertedDealCount": 40
+          },
+          {
+            "areaInSquareMeter": 49,
+            "medianPriceInKrw": 1390000000,
+            "medianPriceInBtc": 38.949812567028246,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1557500000,
+            "medianPriceInBtc": 48.37830240357496,
+            "dealCount": 40,
+            "btcConvertedDealCount": 40
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1890000000,
+            "medianPriceInBtc": 52.92525042802443,
+            "dealCount": 168,
+            "btcConvertedDealCount": 168
+          },
+          {
+            "areaInSquareMeter": 99,
+            "medianPriceInKrw": 2130000000,
+            "medianPriceInBtc": 57.42574257425743,
+            "dealCount": 21,
+            "btcConvertedDealCount": 21
+          },
+          {
+            "areaInSquareMeter": 110,
+            "medianPriceInKrw": 2480000000,
+            "medianPriceInBtc": 65.1590851654409,
+            "dealCount": 16,
+            "btcConvertedDealCount": 16
+          },
+          {
+            "areaInSquareMeter": 130,
+            "medianPriceInKrw": 2880000000,
+            "medianPriceInBtc": 73.1688405407455,
+            "dealCount": 4,
+            "btcConvertedDealCount": 4
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 39,
+            "medianPriceInKrw": 1230000000,
+            "medianPriceInBtc": 13.315139643902546,
+            "dealCount": 37,
+            "btcConvertedDealCount": 37
+          },
+          {
+            "areaInSquareMeter": 49,
+            "medianPriceInKrw": 1542000000,
+            "medianPriceInBtc": 18.110255233863764,
+            "dealCount": 17,
+            "btcConvertedDealCount": 17
+          },
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1780000000,
+            "medianPriceInBtc": 19.125395152792414,
+            "dealCount": 41,
+            "btcConvertedDealCount": 41
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2100000000,
+            "medianPriceInBtc": 22.908668682071614,
+            "dealCount": 205,
+            "btcConvertedDealCount": 205
+          },
+          {
+            "areaInSquareMeter": 99,
+            "medianPriceInKrw": 2350000000,
+            "medianPriceInBtc": 26.576991918424905,
+            "dealCount": 19,
+            "btcConvertedDealCount": 19
+          },
+          {
+            "areaInSquareMeter": 110,
+            "medianPriceInKrw": 2650000000,
+            "medianPriceInBtc": 28.69989476705252,
+            "dealCount": 35,
+            "btcConvertedDealCount": 35
+          },
+          {
+            "areaInSquareMeter": 130,
+            "medianPriceInKrw": 3055000000,
+            "medianPriceInBtc": 33.62684251989793,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 150,
+            "medianPriceInKrw": 3600000000,
+            "medianPriceInBtc": 43.46461256127303,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 39,
+            "medianPriceInKrw": 1437500000,
+            "medianPriceInBtc": 10.511435325749808,
+            "dealCount": 34,
+            "btcConvertedDealCount": 34
+          },
+          {
+            "areaInSquareMeter": 49,
+            "medianPriceInKrw": 1840000000,
+            "medianPriceInBtc": 13.699089093927004,
+            "dealCount": 12,
+            "btcConvertedDealCount": 12
+          },
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 2090000000,
+            "medianPriceInBtc": 15.947251399217972,
+            "dealCount": 33,
+            "btcConvertedDealCount": 33
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2500000000,
+            "medianPriceInBtc": 18.185519440863132,
+            "dealCount": 163,
+            "btcConvertedDealCount": 163
+          },
+          {
+            "areaInSquareMeter": 99,
+            "medianPriceInKrw": 3025000000,
+            "medianPriceInBtc": 18.768302973147367,
+            "dealCount": 11,
+            "btcConvertedDealCount": 11
+          },
+          {
+            "areaInSquareMeter": 110,
+            "medianPriceInKrw": 2917500000,
+            "medianPriceInBtc": 21.163254044979382,
+            "dealCount": 28,
+            "btcConvertedDealCount": 28
+          },
+          {
+            "areaInSquareMeter": 130,
+            "medianPriceInKrw": 3660000000,
+            "medianPriceInBtc": 22.760002099821648,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          }
+        ]
+      }
+    ],
+    "mapo-raemian-prugio": [
+      {
+        "year": 2014,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 542000000,
+            "medianPriceInBtc": 1074.8634244224559,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 639500000,
+            "medianPriceInBtc": 1788.340901640442,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          }
+        ]
+      },
+      {
+        "year": 2015,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 610000000,
+            "medianPriceInBtc": 2214.4328401717457,
+            "dealCount": 32,
+            "btcConvertedDealCount": 32
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 748000000,
+            "medianPriceInBtc": 2636.475859310518,
+            "dealCount": 45,
+            "btcConvertedDealCount": 45
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 900000000,
+            "medianPriceInBtc": 3190.652432586046,
+            "dealCount": 11,
+            "btcConvertedDealCount": 11
+          }
+        ]
+      },
+      {
+        "year": 2016,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 670000000,
+            "medianPriceInBtc": 918.2888238740402,
+            "dealCount": 111,
+            "btcConvertedDealCount": 111
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 820000000,
+            "medianPriceInBtc": 1161.6455879667078,
+            "dealCount": 105,
+            "btcConvertedDealCount": 105
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 1000000000,
+            "medianPriceInBtc": 1401.8024405291953,
+            "dealCount": 25,
+            "btcConvertedDealCount": 25
+          }
+        ]
+      },
+      {
+        "year": 2017,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 716000000,
+            "medianPriceInBtc": 329.2152131535173,
+            "dealCount": 138,
+            "btcConvertedDealCount": 138
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 894000000,
+            "medianPriceInBtc": 342.4153098206456,
+            "dealCount": 132,
+            "btcConvertedDealCount": 132
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 1150000000,
+            "medianPriceInBtc": 322.25635606228656,
+            "dealCount": 45,
+            "btcConvertedDealCount": 45
+          }
+        ]
+      },
+      {
+        "year": 2018,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 972500000,
+            "medianPriceInBtc": 108.90269285478945,
+            "dealCount": 66,
+            "btcConvertedDealCount": 66
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1300000000,
+            "medianPriceInBtc": 159.45911468299528,
+            "dealCount": 55,
+            "btcConvertedDealCount": 55
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 1415000000,
+            "medianPriceInBtc": 140.70554340278602,
+            "dealCount": 28,
+            "btcConvertedDealCount": 28
+          },
+          {
+            "areaInSquareMeter": 145,
+            "medianPriceInKrw": 1675000000,
+            "medianPriceInBtc": 182.93056986467587,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2019,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1152500000,
+            "medianPriceInBtc": 113.21521694547798,
+            "dealCount": 108,
+            "btcConvertedDealCount": 108
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1444000000,
+            "medianPriceInBtc": 137.51861629175704,
+            "dealCount": 88,
+            "btcConvertedDealCount": 88
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 1700000000,
+            "medianPriceInBtc": 158.3457526080477,
+            "dealCount": 19,
+            "btcConvertedDealCount": 19
+          },
+          {
+            "areaInSquareMeter": 145,
+            "medianPriceInKrw": 1670000000,
+            "medianPriceInBtc": 167.016701670167,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2020,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1395000000,
+            "medianPriceInBtc": 109.28487235548506,
+            "dealCount": 82,
+            "btcConvertedDealCount": 82
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1650000000,
+            "medianPriceInBtc": 129.34027777777777,
+            "dealCount": 59,
+            "btcConvertedDealCount": 59
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 1910000000,
+            "medianPriceInBtc": 144.8156001389528,
+            "dealCount": 20,
+            "btcConvertedDealCount": 20
+          },
+          {
+            "areaInSquareMeter": 145,
+            "medianPriceInKrw": 2000000000,
+            "medianPriceInBtc": 161.90399093337652,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          }
+        ]
+      },
+      {
+        "year": 2021,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1550000000,
+            "medianPriceInBtc": 27.32422525824725,
+            "dealCount": 27,
+            "btcConvertedDealCount": 27
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1850000000,
+            "medianPriceInBtc": 33.99933574562554,
+            "dealCount": 33,
+            "btcConvertedDealCount": 33
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 2200000000,
+            "medianPriceInBtc": 49.011384062312764,
+            "dealCount": 7,
+            "btcConvertedDealCount": 7
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1475000000,
+            "medianPriceInBtc": 39.10897684216009,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1832500000,
+            "medianPriceInBtc": 48.39122190807397,
+            "dealCount": 10,
+            "btcConvertedDealCount": 10
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 2200000000,
+            "medianPriceInBtc": 76.7138573122254,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1350000000,
+            "medianPriceInBtc": 36.28544550463647,
+            "dealCount": 51,
+            "btcConvertedDealCount": 51
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1635000000,
+            "medianPriceInBtc": 45.11835181901826,
+            "dealCount": 40,
+            "btcConvertedDealCount": 40
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 2000000000,
+            "medianPriceInBtc": 51.935918221538294,
+            "dealCount": 13,
+            "btcConvertedDealCount": 13
+          },
+          {
+            "areaInSquareMeter": 145,
+            "medianPriceInKrw": 2420000000,
+            "medianPriceInBtc": 61.64348667787457,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1490000000,
+            "medianPriceInBtc": 15.766361568170996,
+            "dealCount": 77,
+            "btcConvertedDealCount": 77
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 1850000000,
+            "medianPriceInBtc": 20.445107017357046,
+            "dealCount": 91,
+            "btcConvertedDealCount": 91
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 2197500000,
+            "medianPriceInBtc": 24.454427438134367,
+            "dealCount": 32,
+            "btcConvertedDealCount": 32
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 59,
+            "medianPriceInKrw": 1815000000,
+            "medianPriceInBtc": 13.126454858032599,
+            "dealCount": 108,
+            "btcConvertedDealCount": 108
+          },
+          {
+            "areaInSquareMeter": 84,
+            "medianPriceInKrw": 2130000000,
+            "medianPriceInBtc": 15.24745269286754,
+            "dealCount": 107,
+            "btcConvertedDealCount": 107
+          },
+          {
+            "areaInSquareMeter": 114,
+            "medianPriceInKrw": 2520000000,
+            "medianPriceInBtc": 18.19505094614265,
+            "dealCount": 31,
+            "btcConvertedDealCount": 31
+          },
+          {
+            "areaInSquareMeter": 145,
+            "medianPriceInKrw": 3000000000,
+            "medianPriceInBtc": 20.371300911276194,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          }
+        ]
+      }
+    ]
+  }
+}

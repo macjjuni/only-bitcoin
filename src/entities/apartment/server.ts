@@ -7,4 +7,9 @@
  * BTC 시세와의 조합은 `app` 레이어에서 한다. 이 엔티티는 `entities/bitcoin` 을 참조하지 않는다.
  */
 export { type DistrictTradesResult, fetchDistrictTrades } from "./api/aptTrade.server";
-export { buildApartmentSeries } from "./lib/buildApartmentSeries";
+export {
+  ARCHIVE_GENERATED_AT,
+  getArchivedYearPoints,
+  resolveRuntimeStartYear,
+} from "./lib/archive";
+export { buildYearPoints, composeApartmentSeries } from "./lib/buildApartmentSeries";

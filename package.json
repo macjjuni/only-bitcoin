@@ -10,6 +10,7 @@
     "format": "biome format --write .",
     "check": "biome check --write .",
     "check:cycles": "node scripts/check-cycles.mjs",
+    "build:apartment-archive": "node --env-file-if-exists=.env.local --experimental-strip-types --import ./scripts/ts-loader.mjs --no-warnings scripts/build-apartment-archive.ts",
     "test": "vitest run",
     "screenshot": "playwright install chromium && node scripts/screenshot.mjs"
   },

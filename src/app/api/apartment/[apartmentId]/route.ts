@@ -1,6 +1,12 @@
 import { NextResponse } from "next/server";
 import { CHART_START_YEAR, findLandmarkApartment } from "@/entities/apartment";
-import { buildApartmentSeries, fetchDistrictTrades } from "@/entities/apartment/server";
+import {
+  buildYearPoints,
+  composeApartmentSeries,
+  fetchDistrictTrades,
+  getArchivedYearPoints,
+  resolveRuntimeStartYear,
+} from "@/entities/apartment/server";
 import { type BtcDailyKrwMap, getBtcDailyKrwMap } from "@/entities/bitcoin/server";
 
 /**
@@ -70,22 +76,35 @@ export async function GET(_request: Request, context: RouteContext) {
   }
 
   // 첫 실거래 이전 구간은 조회하지 않아 불필요한 외부 호출을 막는다.
-  const startYear = Math.max(CHART_START_YEAR, landmark.earliestDealYear);
+  const earliestYear = Math.max(CHART_START_YEAR, landmark.earliestDealYear);
   const currentYear = new Date().getUTCFullYear();
+
+  /**
+   * 확정된 과거 연도는 `archive.json` 에서 그대로 가져온다.
+   * 런타임 조회는 아카이브 마지막 연도 다음부터라 구당 152회가 8회로 줄어든다.
+   */
+  const archivedYearPoints = getArchivedYearPoints(landmark.apartmentID);
+  const runtimeStartYear = resolveRuntimeStartYear(landmark.apartmentID, earliestYear);
 
   try {
     const [districtResult, btcDailyKrwMapByYear] = await Promise.all([
-      fetchDistrictTrades(landmark.lawdCode, startYear),
-      collectBtcDailyKrwMaps(startYear, currentYear),
+      fetchDistrictTrades(landmark.lawdCode, runtimeStartYear),
+      collectBtcDailyKrwMaps(runtimeStartYear, currentYear),
     ]);
 
-    const series = buildApartmentSeries({
+    const runtimeYearPoints = buildYearPoints({
       landmark,
       districtTrades: districtResult.trades,
       years: districtResult.years,
       btcDailyKrwMapByYear,
-      isIncomplete: districtResult.isIncomplete,
     });
+
+    // 겹치는 연도는 런타임 쪽이 이긴다 — 아카이브가 낡았을 수 있다.
+    const series = composeApartmentSeries(
+      landmark,
+      [archivedYearPoints, runtimeYearPoints],
+      districtResult.isIncomplete,
+    );
 
     return NextResponse.json(series, {
       headers: { "Cache-Control": resolveCacheControl(series.isIncomplete) },

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { normalizeServiceKey } from "./aptTrade.server";
+import { normalizeServiceKey } from "../lib/serviceKey";
 
 /** 실제 발급 키 형태 ( 뒷부분만 ) */
 const ENCODED_TAIL = "yl%2BvRkfaLXVJ2YDnyuStwINyyqBwpUrO4cdahc%2Bz7054QsexZTetyZkDqQ%3D%3D";

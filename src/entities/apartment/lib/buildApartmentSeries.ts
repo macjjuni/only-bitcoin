@@ -32,33 +32,31 @@ export interface ApartmentSeriesResponse {
   years: ApartmentYearPoint[];
 }
 
-export interface BuildApartmentSeriesParams {
+export interface BuildYearPointsParams {
   landmark: LandmarkApartment;
-  /** 해당 구의 전체 기간 거래 ( 단지 필터링 전 ) */
+  /** 해당 구의 거래 ( 단지 필터링 전 ) */
   districtTrades: ApartmentTrade[];
   years: Array<{ year: number; settledThroughMonth: number; isPartialYear: boolean }>;
   /** 연도 → 그 해의 일별 BTC 원화 시세 */
   btcDailyKrwMapByYear: ReadonlyMap<number, BtcDailyKrwMap>;
-  isIncomplete: boolean;
 }
 
 /**
- * 한 단지의 전체 시계열을 집계해 응답 형태로 만든다.
+ * 거래를 연도별 시계열 점으로 집계한다.
  *
- * fetch 를 하지 않는 순수 함수다. 데이터 수집은 `app` 레이어(라우트 핸들러)가 맡고,
- * 이 함수는 받은 거래와 시세만 조합한다.
+ * fetch 를 하지 않는 순수 함수다. 데이터 수집은 `app` 레이어(라우트 핸들러)와
+ * 아카이브 생성 스크립트가 맡고, 이 함수는 받은 거래와 시세만 조합한다.
  * ( `entities/apartment` 가 `entities/bitcoin` 을 직접 참조하면 동일 레이어 간 cross-import 가 된다 )
  *
- * 원시 거래 목록은 절대 응답에 담지 않는다. 거래일 단위 BTC 환산은 개별 거래가 있어야
+ * 원시 거래 목록은 절대 결과에 담지 않는다. 거래일 단위 BTC 환산은 개별 거래가 있어야
  * 가능한데, 그걸 클라이언트로 내리면 수천 건이 페이로드에 실려 집계의 의미가 사라진다.
  */
-export function buildApartmentSeries({
+export function buildYearPoints({
   landmark,
   districtTrades,
   years,
   btcDailyKrwMapByYear,
-  isIncomplete,
-}: BuildApartmentSeriesParams): ApartmentSeriesResponse {
+}: BuildYearPointsParams): ApartmentYearPoint[] {
   const landmarkTrades = filterLandmarkTrades(districtTrades, landmark);
 
   const tradesByYear = new Map<number, ApartmentTrade[]>();
@@ -74,36 +72,60 @@ export function buildApartmentSeries({
     tradesByYear.set(trade.dealYear, [trade]);
   }
 
+  return years.map<ApartmentYearPoint>(({ year, settledThroughMonth, isPartialYear }) => {
+    const yearTrades = tradesByYear.get(year) ?? [];
+    const btcDailyKrwMap = btcDailyKrwMapByYear.get(year) ?? new Map<string, number>();
+    const areaBuckets: ApartmentAreaBucket[] = [];
+
+    for (const [areaInSquareMeter, trades] of groupTradesByAreaBucket(yearTrades)) {
+      const { medianPriceInBtc, convertedDealCount } = convertTradesToBtcMedian(
+        trades,
+        btcDailyKrwMap,
+      );
+
+      areaBuckets.push({
+        areaInSquareMeter,
+        medianPriceInKrw: calculateMedian(trades.map((trade) => trade.priceInKrw)),
+        medianPriceInBtc,
+        dealCount: trades.length,
+        btcConvertedDealCount: convertedDealCount,
+      });
+    }
+
+    areaBuckets.sort((left, right) => left.areaInSquareMeter - right.areaInSquareMeter);
+
+    return { year, isPartialYear, settledThroughMonth, areaBuckets };
+  });
+}
+
+/**
+ * 아카이브 구간과 런타임 조회 구간을 합쳐 최종 응답을 만든다.
+ *
+ * 과거 확정 연도는 `archive.json` 에서 오고, 그 이후만 공공 API 로 조회한다.
+ * 두 출처의 연도가 겹치면 **런타임 쪽을 우선**한다 — 아카이브가 낡았을 수 있기 때문이다.
+ */
+export function composeApartmentSeries(
+  landmark: LandmarkApartment,
+  yearPointGroups: ApartmentYearPoint[][],
+  isIncomplete: boolean,
+): ApartmentSeriesResponse {
+  const yearPointByYear = new Map<number, ApartmentYearPoint>();
+
+  for (const yearPoints of yearPointGroups) {
+    for (const yearPoint of yearPoints) {
+      yearPointByYear.set(yearPoint.year, yearPoint);
+    }
+  }
+
+  const years = [...yearPointByYear.values()].sort((left, right) => left.year - right.year);
+
   const availableAreas = new Set<number>();
 
-  const yearPoints = years.map<ApartmentYearPoint>(
-    ({ year, settledThroughMonth, isPartialYear }) => {
-      const yearTrades = tradesByYear.get(year) ?? [];
-      const btcDailyKrwMap = btcDailyKrwMapByYear.get(year) ?? new Map<string, number>();
-      const areaBuckets: ApartmentAreaBucket[] = [];
-
-      for (const [areaInSquareMeter, trades] of groupTradesByAreaBucket(yearTrades)) {
-        const { medianPriceInBtc, convertedDealCount } = convertTradesToBtcMedian(
-          trades,
-          btcDailyKrwMap,
-        );
-
-        availableAreas.add(areaInSquareMeter);
-
-        areaBuckets.push({
-          areaInSquareMeter,
-          medianPriceInKrw: calculateMedian(trades.map((trade) => trade.priceInKrw)),
-          medianPriceInBtc,
-          dealCount: trades.length,
-          btcConvertedDealCount: convertedDealCount,
-        });
-      }
-
-      areaBuckets.sort((left, right) => left.areaInSquareMeter - right.areaInSquareMeter);
-
-      return { year, isPartialYear, settledThroughMonth, areaBuckets };
-    },
-  );
+  for (const yearPoint of years) {
+    for (const bucket of yearPoint.areaBuckets) {
+      availableAreas.add(bucket.areaInSquareMeter);
+    }
+  }
 
   return {
     apartmentID: landmark.apartmentID,
@@ -117,6 +139,6 @@ export function buildApartmentSeries({
     defaultAreaInSquareMeter: landmark.defaultAreaInSquareMeter,
     availableAreas: [...availableAreas].sort((left, right) => left - right),
     isIncomplete,
-    years: yearPoints,
+    years,
   };
 }

@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import type { ApartmentTrade, LandmarkApartment } from "../model/types";
-import { buildApartmentSeries } from "./buildApartmentSeries";
+import {
+  type ApartmentYearPoint,
+  buildYearPoints,
+  composeApartmentSeries,
+} from "./buildApartmentSeries";
 import type { BtcDailyKrwMap } from "./convertDealsToBtc";
 
 const landmark: LandmarkApartment = {
@@ -34,20 +38,24 @@ const YEARS = [
   { year: 2026, settledThroughMonth: 8, isPartialYear: true },
 ];
 
-const build = (
+const buildPoints = (
   districtTrades: ApartmentTrade[],
   btcByYear: Array<[number, BtcDailyKrwMap]> = [],
-  isIncomplete = false,
-) =>
-  buildApartmentSeries({
+): ApartmentYearPoint[] =>
+  buildYearPoints({
     landmark,
     districtTrades,
     years: YEARS,
     btcDailyKrwMapByYear: new Map(btcByYear),
-    isIncomplete,
   });
 
-describe("buildApartmentSeries", () => {
+const build = (
+  districtTrades: ApartmentTrade[],
+  btcByYear: Array<[number, BtcDailyKrwMap]> = [],
+  isIncomplete = false,
+) => composeApartmentSeries(landmark, [buildPoints(districtTrades, btcByYear)], isIncomplete);
+
+describe("buildYearPoints · composeApartmentSeries", () => {
   it("거래를 연도별로 나눈다", () => {
     const result = build([
       makeTrade({ dealYear: 2024, dealDate: "2024-03-01" }),
@@ -55,14 +63,18 @@ describe("buildApartmentSeries", () => {
       makeTrade({ dealYear: 2025, dealDate: "2025-09-01" }),
     ]);
 
-    expect(result.years.map((point) => point.areaBuckets[0]?.dealCount ?? 0)).toEqual([1, 2, 0]);
+    expect(
+      result.years.map((point: ApartmentYearPoint) => point.areaBuckets[0]?.dealCount ?? 0),
+    ).toEqual([1, 2, 0]);
   });
 
   it("요청한 연도는 거래가 없어도 빠짐없이 돌려준다", () => {
     const result = build([]);
 
-    expect(result.years.map((point) => point.year)).toEqual([2024, 2025, 2026]);
-    expect(result.years.every((point) => point.areaBuckets.length === 0)).toBe(true);
+    expect(result.years.map((point: ApartmentYearPoint) => point.year)).toEqual([2024, 2025, 2026]);
+    expect(result.years.every((point: ApartmentYearPoint) => point.areaBuckets.length === 0)).toBe(
+      true,
+    );
   });
 
   it("같은 구의 다른 단지를 걸러낸다", () => {
@@ -141,5 +153,98 @@ describe("buildApartmentSeries", () => {
       "isIncomplete",
       "years",
     ]);
+  });
+
+  it("아카이브 구간과 런타임 구간을 합친다", () => {
+    const archived: ApartmentYearPoint[] = [
+      {
+        year: 2023,
+        isPartialYear: false,
+        settledThroughMonth: 12,
+        areaBuckets: [
+          {
+            areaInSquareMeter: 84,
+            medianPriceInKrw: 3_920_000_000,
+            medianPriceInBtc: 96.8,
+            dealCount: 10,
+            btcConvertedDealCount: 10,
+          },
+        ],
+      },
+    ];
+
+    const result = composeApartmentSeries(landmark, [archived, buildPoints([makeTrade()])], false);
+
+    expect(result.years.map((point: ApartmentYearPoint) => point.year)).toEqual([
+      2023, 2024, 2025, 2026,
+    ]);
+    expect(result.years[0].areaBuckets[0].medianPriceInBtc).toBe(96.8);
+  });
+
+  it("연도가 겹치면 런타임 쪽이 아카이브를 덮는다", () => {
+    // 아카이브가 낡아 그 해 거래가 덜 담겼을 수 있다.
+    const staleArchive: ApartmentYearPoint[] = [
+      {
+        year: 2025,
+        isPartialYear: false,
+        settledThroughMonth: 12,
+        areaBuckets: [
+          {
+            areaInSquareMeter: 84,
+            medianPriceInKrw: 1,
+            medianPriceInBtc: 1,
+            dealCount: 1,
+            btcConvertedDealCount: 1,
+          },
+        ],
+      },
+    ];
+
+    const result = composeApartmentSeries(
+      landmark,
+      [staleArchive, buildPoints([makeTrade(), makeTrade()])],
+      false,
+    );
+
+    const year2025 = result.years.find((point: ApartmentYearPoint) => point.year === 2025);
+
+    expect(year2025?.areaBuckets[0].dealCount).toBe(2);
+    expect(year2025?.areaBuckets[0].medianPriceInKrw).toBe(6_000_000_000);
+  });
+
+  it("병합 결과를 연도 오름차순으로 정렬한다", () => {
+    const outOfOrder: ApartmentYearPoint[] = [
+      { year: 2022, isPartialYear: false, settledThroughMonth: 12, areaBuckets: [] },
+      { year: 2020, isPartialYear: false, settledThroughMonth: 12, areaBuckets: [] },
+    ];
+
+    const result = composeApartmentSeries(landmark, [outOfOrder, buildPoints([])], false);
+
+    expect(result.years.map((point: ApartmentYearPoint) => point.year)).toEqual([
+      2020, 2022, 2024, 2025, 2026,
+    ]);
+  });
+
+  it("평형 목록은 아카이브와 런타임을 합쳐 모은다", () => {
+    const archived: ApartmentYearPoint[] = [
+      {
+        year: 2023,
+        isPartialYear: false,
+        settledThroughMonth: 12,
+        areaBuckets: [
+          {
+            areaInSquareMeter: 133,
+            medianPriceInKrw: 1,
+            medianPriceInBtc: 1,
+            dealCount: 1,
+            btcConvertedDealCount: 1,
+          },
+        ],
+      },
+    ];
+
+    const result = composeApartmentSeries(landmark, [archived, buildPoints([makeTrade()])], false);
+
+    expect(result.availableAreas).toEqual([84, 133]);
   });
 });
