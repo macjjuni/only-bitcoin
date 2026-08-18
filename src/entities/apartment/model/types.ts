@@ -45,6 +45,14 @@ export interface LandmarkApartment {
   jibunList: string[];
   /** 첫 실거래가 발생한 연도. 이전 구간은 조회하지 않아 불필요한 외부 호출을 막는다. */
   earliestDealYear: number;
+  /**
+   * 기본으로 선택할 평형 버킷( `Math.floor(excluUseAr)` 기준 ).
+   *
+   * 연도별 거래로 매번 계산하면 표본이 얇은 단지에서 해마다 값이 바뀐다.
+   * ( 타워팰리스1 은 84㎡ 비중이 경계선이라 2021→164, 2022→84, 2024→164 로 흔들렸다 )
+   * 여러 해의 누적 거래로 한 번 정해 고정한다. `selectDefaultAreaBucket` 로 산출한다.
+   */
+  defaultAreaInSquareMeter: number;
 }
 
 /** 집계된 시계열 한 점 ( = 막대 하나 ) */

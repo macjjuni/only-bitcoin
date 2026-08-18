@@ -31,6 +31,7 @@ const makeLandmark = (overrides: Partial<LandmarkApartment> = {}): LandmarkApart
   aptNames: ["래미안원베일리"],
   jibunList: ["1"],
   earliestDealYear: 2023,
+  defaultAreaInSquareMeter: 84,
   ...overrides,
 });
 

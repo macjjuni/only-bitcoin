@@ -20,6 +20,7 @@ const landmarkApartments: LandmarkApartment[] = [
     aptNames: ["래미안원베일리"],
     jibunList: ["1"],
     earliestDealYear: 2023,
+    defaultAreaInSquareMeter: 84,
   },
   {
     apartmentID: "banpo-xi",
@@ -31,6 +32,7 @@ const landmarkApartments: LandmarkApartment[] = [
     aptNames: ["반포자이"],
     jibunList: ["20-43"],
     earliestDealYear: 2009,
+    defaultAreaInSquareMeter: 84,
   },
   {
     apartmentID: "raemian-firstige",
@@ -41,6 +43,7 @@ const landmarkApartments: LandmarkApartment[] = [
     aptNames: ["래미안퍼스티지"],
     jibunList: ["18-1"],
     earliestDealYear: 2009,
+    defaultAreaInSquareMeter: 84,
   },
   {
     apartmentID: "acro-river-park",
@@ -52,6 +55,7 @@ const landmarkApartments: LandmarkApartment[] = [
     aptNames: ["아크로리버파크"],
     jibunList: ["2-12"],
     earliestDealYear: 2016,
+    defaultAreaInSquareMeter: 84,
   },
   {
     apartmentID: "eunma",
@@ -62,6 +66,7 @@ const landmarkApartments: LandmarkApartment[] = [
     aptNames: ["은마"],
     jibunList: ["316"],
     earliestDealYear: 2014,
+    defaultAreaInSquareMeter: 84,
   },
   {
     apartmentID: "apgujeong-hyundai-6",
@@ -77,6 +82,7 @@ const landmarkApartments: LandmarkApartment[] = [
     aptNames: ["현대6차(78~81,83,84,86,87동)"],
     jibunList: ["456"],
     earliestDealYear: 2014,
+    defaultAreaInSquareMeter: 144,
   },
   {
     apartmentID: "dogok-rexle",
@@ -87,6 +93,7 @@ const landmarkApartments: LandmarkApartment[] = [
     aptNames: ["도곡렉슬"],
     jibunList: ["527"],
     earliestDealYear: 2014,
+    defaultAreaInSquareMeter: 84,
   },
   {
     apartmentID: "tower-palace-1",
@@ -98,6 +105,7 @@ const landmarkApartments: LandmarkApartment[] = [
     aptNames: ["타워팰리스1"],
     jibunList: ["467"],
     earliestDealYear: 2014,
+    defaultAreaInSquareMeter: 164,
   },
   {
     apartmentID: "jamsil-else",
@@ -108,6 +116,7 @@ const landmarkApartments: LandmarkApartment[] = [
     aptNames: ["잠실엘스"],
     jibunList: ["19"],
     earliestDealYear: 2014,
+    defaultAreaInSquareMeter: 84,
   },
   {
     apartmentID: "helio-city",
@@ -118,6 +127,7 @@ const landmarkApartments: LandmarkApartment[] = [
     aptNames: ["헬리오시티"],
     jibunList: ["913"],
     earliestDealYear: 2018,
+    defaultAreaInSquareMeter: 84,
   },
   {
     apartmentID: "mapo-raemian-prugio",
@@ -134,6 +144,7 @@ const landmarkApartments: LandmarkApartment[] = [
     ],
     jibunList: ["777"],
     earliestDealYear: 2014,
+    defaultAreaInSquareMeter: 84,
   },
 ];
 
