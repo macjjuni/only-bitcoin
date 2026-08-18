@@ -1,22 +1,31 @@
 "use client";
 
 import { memo, useMemo } from "react";
-import type { ApartmentYearPoint, LandmarkApartment } from "@/entities/apartment";
+import type { ApartmentYearPoint, LandmarkApartment, PriceUnit } from "@/entities/apartment";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { useMounted } from "@/shared/lib/hooks";
-import { Card, CardContent } from "@/shared/ui";
+import { SegmentedControl } from "@/shared/ui";
 import { formatBtcCount, formatKrwInEok } from "../lib/buildChartSeries";
+
+const PRICE_UNIT_OPTIONS = [
+  { label: "₿ BTC", value: "BTC" as const },
+  { label: "₩ KRW", value: "KRW" as const },
+];
 
 interface ApartmentSummaryCardProps {
   landmark: LandmarkApartment | undefined;
   yearPoints: ApartmentYearPoint[];
   areaInSquareMeter: number | null;
+  priceUnit: PriceUnit;
+  onChangePriceUnit: (priceUnit: PriceUnit) => void;
 }
 
 const ApartmentSummaryCard = ({
   landmark,
   yearPoints,
   areaInSquareMeter,
+  priceUnit,
+  onChangePriceUnit,
 }: ApartmentSummaryCardProps) => {
   // region [Hooks]
   const krwPrice = useBitcoinStore((state) => state.bitcoinPrice.krw);
@@ -105,17 +114,24 @@ const ApartmentSummaryCard = ({
   // endregion
 
   return (
-    <Card className="font-number">
-      <CardContent className="flex flex-col gap-1 p-4">
-        <span className="text-base font-bold">{landmark?.displayName ?? "-"}</span>
-        {SubtitleTemplate}
-        <div className="mt-2 flex flex-col gap-0.5">
-          <span className="text-xs text-muted-foreground">지금 사려면</span>
-          {HeadlineTemplate}
-          {LatestDealTemplate}
-        </div>
-      </CardContent>
-    </Card>
+    <div className="flex flex-col gap-1 font-number">
+      <div className="flex items-center justify-between gap-2">
+        <span className="text-lg font-bold">{landmark?.displayName ?? "-"}</span>
+        <SegmentedControl
+          options={PRICE_UNIT_OPTIONS}
+          value={priceUnit}
+          onChange={(value) => onChangePriceUnit(value as PriceUnit)}
+          size="sm"
+          className="w-[132px]"
+        />
+      </div>
+      {SubtitleTemplate}
+      <div className="mt-2 flex flex-col gap-0.5">
+        <span className="text-xs text-muted-foreground">지금 사려면</span>
+        {HeadlineTemplate}
+        {LatestDealTemplate}
+      </div>
+    </div>
   );
 };
 

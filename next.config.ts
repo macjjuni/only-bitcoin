@@ -16,6 +16,16 @@ const nextConfig: NextConfig = {
   async headers() {
     return [
       {
+        // 아파트 이미지: 건물 사진은 변경되지 않으므로 1년 immutable 캐싱
+        source: "/images/apartments/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=31536000, immutable",
+          },
+        ],
+      },
+      {
         // public 폴더 내 정적 리소스 (이미지, 파비콘, 폰트, 매니페스트 등)
         source: "/:all*(svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|otf|eot|manifest.json)",
         headers: [

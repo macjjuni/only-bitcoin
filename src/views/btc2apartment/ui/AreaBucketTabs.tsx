@@ -50,7 +50,7 @@ const AreaBucketTabs = ({
   }
 
   return (
-    <div className="flex gap-1.5 overflow-x-auto pb-0.5 font-number scrollbar-none">
+    <div className="flex gap-1.5 overflow-x-auto pb-2.5 pl-4 -mx-4 font-number scrollbar-none">
       {AreaChipListTemplate}
     </div>
   );

@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useMemo } from "react";
 import { findLandmarkApartment, useApartmentSeriesQuery } from "@/entities/apartment";
+import { Card, CardContent } from "@/shared/ui";
 import { resolveSelectedArea } from "../lib/buildChartSeries";
 import useBtc2ApartmentStore from "../model/btc2ApartmentStore";
 import ApartmentSelector from "./ApartmentSelector";
@@ -73,26 +74,31 @@ const Btc2ApartmentPanel = () => {
 
   return (
     <>
-      <ApartmentSummaryCard
-        landmark={landmark}
-        yearPoints={series?.years ?? []}
-        areaInSquareMeter={resolvedArea}
-      />
-      <AreaBucketTabs
-        availableAreas={series?.availableAreas ?? []}
-        selectedAreaInSquareMeter={resolvedArea}
-        onSelectArea={onSelectArea}
-      />
-      <Btc2ApartmentChart
-        yearPoints={series?.years ?? []}
-        areaInSquareMeter={resolvedArea}
-        priceUnit={priceUnit}
-        onChangePriceUnit={setPriceUnit}
-        isLoading={isLoading}
-        hasIncompleteYear={hasIncompleteYear}
-      />
-      {ErrorTemplate}
       <ApartmentSelector selectedApartmentID={apartmentID} onSelectApartment={onSelectApartment} />
+      <Card>
+        <CardContent className="flex flex-col gap-4 px-4 py-3">
+          <ApartmentSummaryCard
+            landmark={landmark}
+            yearPoints={series?.years ?? []}
+            areaInSquareMeter={resolvedArea}
+            priceUnit={priceUnit}
+            onChangePriceUnit={setPriceUnit}
+          />
+          <AreaBucketTabs
+            availableAreas={series?.availableAreas ?? []}
+            selectedAreaInSquareMeter={resolvedArea}
+            onSelectArea={onSelectArea}
+          />
+          <Btc2ApartmentChart
+            yearPoints={series?.years ?? []}
+            areaInSquareMeter={resolvedArea}
+            priceUnit={priceUnit}
+            isLoading={isLoading}
+            hasIncompleteYear={hasIncompleteYear}
+          />
+          {ErrorTemplate}
+        </CardContent>
+      </Card>
     </>
   );
 };

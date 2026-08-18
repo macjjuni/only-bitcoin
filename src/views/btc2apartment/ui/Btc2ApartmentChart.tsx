@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { memo, useMemo } from "react";
 import type { ApartmentYearPoint, PriceUnit } from "@/entities/apartment";
 import useSettingStore from "@/shared/stores/settingStore";
-import { Card, CardContent, SegmentedControl } from "@/shared/ui";
 import { buildChartSeries } from "../lib/buildChartSeries";
 import {
   createApartmentChartOptions,
@@ -14,18 +13,12 @@ import {
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const CHART_HEIGHT = 240;
-
-const PRICE_UNIT_OPTIONS = [
-  { label: "₿ BTC", value: "BTC" as const },
-  { label: "₩ KRW", value: "KRW" as const },
-];
+const CHART_HEIGHT = 280;
 
 interface Btc2ApartmentChartProps {
   yearPoints: ApartmentYearPoint[];
   areaInSquareMeter: number | null;
   priceUnit: PriceUnit;
-  onChangePriceUnit: (priceUnit: PriceUnit) => void;
   isLoading: boolean;
   hasIncompleteYear: boolean;
 }
@@ -34,7 +27,6 @@ const Btc2ApartmentChart = ({
   yearPoints,
   areaInSquareMeter,
   priceUnit,
-  onChangePriceUnit,
   isLoading,
   hasIncompleteYear,
 }: Btc2ApartmentChartProps) => {
@@ -85,12 +77,6 @@ const Btc2ApartmentChart = ({
   );
   // endregion
 
-  // region [Events]
-  const onChangeUnit = (value: string) => {
-    onChangePriceUnit(value as PriceUnit);
-  };
-  // endregion
-
   // region [Templates]
   const StatusTemplate = useMemo(() => {
     if (isLoading) {
@@ -133,21 +119,10 @@ const Btc2ApartmentChart = ({
   // endregion
 
   return (
-    <Card className="font-number">
-      <CardContent className="flex flex-col gap-2 p-4 pb-2">
-        <div className="flex items-center justify-between gap-2">
-          <SegmentedControl
-            options={PRICE_UNIT_OPTIONS}
-            value={priceUnit}
-            onChange={onChangeUnit}
-            size="sm"
-            className="w-[132px]"
-          />
-          {StatusTemplate}
-        </div>
-        {ChartBodyTemplate}
-      </CardContent>
-    </Card>
+    <div className="flex flex-col gap-2 font-number -mt-4">
+      {StatusTemplate}
+      {ChartBodyTemplate}
+    </div>
   );
 };
 
