@@ -9,6 +9,7 @@ import ApartmentSelector from "./ApartmentSelector";
 import ApartmentSummaryCard from "./ApartmentSummaryCard";
 import AreaBucketTabs from "./AreaBucketTabs";
 import Btc2ApartmentChart from "./Btc2ApartmentChart";
+import DataSourceFooter from "./DataSourceFooter";
 
 const Btc2ApartmentPanel = () => {
   // region [Hooks]
@@ -99,6 +100,7 @@ const Btc2ApartmentPanel = () => {
           {ErrorTemplate}
         </CardContent>
       </Card>
+      <DataSourceFooter />
     </>
   );
 };
