@@ -22,8 +22,7 @@ const Btc2ApartmentPanel = () => {
 
   const landmark = useMemo(() => findLandmarkApartment(apartmentID), [apartmentID]);
 
-  const { yearResponses, availableAreas, isLoading, isError, hasIncompleteYear } =
-    useApartmentSeriesQuery(landmark);
+  const { series, isLoading, isError, hasIncompleteYear } = useApartmentSeriesQuery(landmark);
   // endregion
 
   // region [Privates]
@@ -34,11 +33,11 @@ const Btc2ApartmentPanel = () => {
   const resolvedArea = useMemo(
     () =>
       resolveSelectedArea(
-        availableAreas,
+        series?.availableAreas ?? [],
         selectedAreaInSquareMeter,
-        landmark?.defaultAreaInSquareMeter,
+        series?.defaultAreaInSquareMeter,
       ),
-    [availableAreas, selectedAreaInSquareMeter, landmark],
+    [series, selectedAreaInSquareMeter],
   );
   // endregion
 
@@ -76,16 +75,16 @@ const Btc2ApartmentPanel = () => {
     <>
       <ApartmentSummaryCard
         landmark={landmark}
-        yearResponses={yearResponses}
+        yearPoints={series?.years ?? []}
         areaInSquareMeter={resolvedArea}
       />
       <AreaBucketTabs
-        availableAreas={availableAreas}
+        availableAreas={series?.availableAreas ?? []}
         selectedAreaInSquareMeter={resolvedArea}
         onSelectArea={onSelectArea}
       />
       <Btc2ApartmentChart
-        yearResponses={yearResponses}
+        yearPoints={series?.years ?? []}
         areaInSquareMeter={resolvedArea}
         priceUnit={priceUnit}
         onChangePriceUnit={setPriceUnit}

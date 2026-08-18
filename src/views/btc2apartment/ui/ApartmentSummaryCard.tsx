@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, useMemo } from "react";
-import type { ApartmentYearResponse, LandmarkApartment } from "@/entities/apartment";
+import type { ApartmentYearPoint, LandmarkApartment } from "@/entities/apartment";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { useMounted } from "@/shared/lib/hooks";
 import { Card, CardContent } from "@/shared/ui";
@@ -9,13 +9,13 @@ import { formatBtcCount, formatKrwInEok } from "../lib/buildChartSeries";
 
 interface ApartmentSummaryCardProps {
   landmark: LandmarkApartment | undefined;
-  yearResponses: ApartmentYearResponse[];
+  yearPoints: ApartmentYearPoint[];
   areaInSquareMeter: number | null;
 }
 
 const ApartmentSummaryCard = ({
   landmark,
-  yearResponses,
+  yearPoints,
   areaInSquareMeter,
 }: ApartmentSummaryCardProps) => {
   // region [Hooks]
@@ -30,18 +30,18 @@ const ApartmentSummaryCard = ({
       return null;
     }
 
-    for (let index = yearResponses.length - 1; index >= 0; index -= 1) {
-      const bucket = yearResponses[index].areaBuckets.find(
+    for (let index = yearPoints.length - 1; index >= 0; index -= 1) {
+      const bucket = yearPoints[index].areaBuckets.find(
         (areaBucket) => areaBucket.areaInSquareMeter === areaInSquareMeter,
       );
 
       if (bucket?.medianPriceInKrw) {
-        return { year: yearResponses[index].year, priceInKrw: bucket.medianPriceInKrw };
+        return { year: yearPoints[index].year, priceInKrw: bucket.medianPriceInKrw };
       }
     }
 
     return null;
-  }, [yearResponses, areaInSquareMeter]);
+  }, [yearPoints, areaInSquareMeter]);
 
   /**
    * 헤드라인만 **실시간** 시세를 쓴다.

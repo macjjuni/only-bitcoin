@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { memo, useMemo } from "react";
-import type { ApartmentYearResponse, PriceUnit } from "@/entities/apartment";
+import type { ApartmentYearPoint, PriceUnit } from "@/entities/apartment";
 import useSettingStore from "@/shared/stores/settingStore";
 import { Card, CardContent, SegmentedControl } from "@/shared/ui";
 import { buildChartSeries } from "../lib/buildChartSeries";
@@ -22,7 +22,7 @@ const PRICE_UNIT_OPTIONS = [
 ];
 
 interface Btc2ApartmentChartProps {
-  yearResponses: ApartmentYearResponse[];
+  yearPoints: ApartmentYearPoint[];
   areaInSquareMeter: number | null;
   priceUnit: PriceUnit;
   onChangePriceUnit: (priceUnit: PriceUnit) => void;
@@ -31,7 +31,7 @@ interface Btc2ApartmentChartProps {
 }
 
 const Btc2ApartmentChart = ({
-  yearResponses,
+  yearPoints,
   areaInSquareMeter,
   priceUnit,
   onChangePriceUnit,
@@ -42,8 +42,8 @@ const Btc2ApartmentChart = ({
   const isDark = useSettingStore((store) => store.theme) === "dark";
 
   const chartPoints = useMemo(
-    () => buildChartSeries(yearResponses, areaInSquareMeter, priceUnit),
-    [yearResponses, areaInSquareMeter, priceUnit],
+    () => buildChartSeries(yearPoints, areaInSquareMeter, priceUnit),
+    [yearPoints, areaInSquareMeter, priceUnit],
   );
 
   const isLogScale = useMemo(

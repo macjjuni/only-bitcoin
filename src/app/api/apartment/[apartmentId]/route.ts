@@ -1,14 +1,14 @@
 import { NextResponse } from "next/server";
 import { CHART_START_YEAR, findLandmarkApartment } from "@/entities/apartment";
-import { buildApartmentYear, fetchDistrictYearlyTrades } from "@/entities/apartment/server";
-import { getBtcDailyKrwMap } from "@/entities/bitcoin/server";
+import { buildApartmentSeries, fetchDistrictTrades } from "@/entities/apartment/server";
+import { type BtcDailyKrwMap, getBtcDailyKrwMap } from "@/entities/bitcoin/server";
 
 /**
- * 단지별 연 단위 실거래 집계.
+ * 단지의 전체 연도 실거래 집계.
  *
- * 한 번에 한 연도만 조회한다. 공공 API 가 (시군구 × 월) 단위라 한 연도가 12회 호출인데,
- * 13년치를 한 요청에 몰면 첫 응답이 수십 초가 된다. 연도로 쪼개면 클라이언트가
- * 최신 연도부터 받아 막대를 하나씩 채울 수 있고, 각 연도가 개별 캐시된다.
+ * 연도별로 라우트를 나누지 않는다. 서버리스에서는 요청마다 인스턴스가 분리될 수 있어
+ * 공공 API 발사 간격 제한이 요청 간에 공유되지 않는다. 13개 연도를 13개 요청으로 나누면
+ * 각자 자기 페이스로 쏘아 초당 제한에 걸린다. 한 요청에서 전부 처리해야 페이싱이 동작한다.
  *
  * `entities/apartment` 와 `entities/bitcoin` 을 조합하는 지점이다.
  * 동일 레이어끼리는 서로 참조하지 않으므로 조합은 이 라우트가 맡는다.
@@ -18,27 +18,21 @@ interface RouteContext {
   params: Promise<{ apartmentId: string }>;
 }
 
-function parseYear(rawYear: string | null): number | null {
-  if (!rawYear) {
-    return null;
-  }
+/** 연도별 BTC 일별 시세를 모아 온다. 실패한 연도는 빈 Map 이라 BTC 환산만 건너뛴다. */
+async function collectBtcDailyKrwMaps(
+  startYear: number,
+  endYear: number,
+): Promise<Map<number, BtcDailyKrwMap>> {
+  const years = Array.from({ length: endYear - startYear + 1 }, (_, index) => startYear + index);
 
-  const year = Number.parseInt(rawYear, 10);
+  const entries = await Promise.all(
+    years.map(async (year) => [year, await getBtcDailyKrwMap(year)] as const),
+  );
 
-  if (Number.isNaN(year)) {
-    return null;
-  }
-
-  const currentYear = new Date().getUTCFullYear();
-
-  if (year < CHART_START_YEAR || year > currentYear) {
-    return null;
-  }
-
-  return year;
+  return new Map(entries);
 }
 
-export async function GET(request: Request, context: RouteContext) {
+export async function GET(_request: Request, context: RouteContext) {
   const { apartmentId } = await context.params;
 
   /**
@@ -52,45 +46,27 @@ export async function GET(request: Request, context: RouteContext) {
     return NextResponse.json({ error: "UNKNOWN_APARTMENT" }, { status: 404 });
   }
 
-  const year = parseYear(new URL(request.url).searchParams.get("year"));
-
-  if (year === null) {
-    return NextResponse.json({ error: "INVALID_YEAR" }, { status: 400 });
-  }
-
-  // 첫 실거래 이전 연도는 외부 호출 없이 빈 결과로 끊는다.
-  if (year < landmark.earliestDealYear) {
-    return NextResponse.json({
-      apartmentID: landmark.apartmentID,
-      displayName: landmark.displayName,
-      year,
-      isPartialYear: false,
-      settledThroughMonth: 12,
-      defaultAreaInSquareMeter: landmark.defaultAreaInSquareMeter,
-      isIncomplete: false,
-      areaBuckets: [],
-    });
-  }
+  // 첫 실거래 이전 구간은 조회하지 않아 불필요한 외부 호출을 막는다.
+  const startYear = Math.max(CHART_START_YEAR, landmark.earliestDealYear);
+  const currentYear = new Date().getUTCFullYear();
 
   try {
-    const [districtResult, btcDailyKrwMap] = await Promise.all([
-      fetchDistrictYearlyTrades(landmark.lawdCode, year),
-      getBtcDailyKrwMap(year),
+    const [districtResult, btcDailyKrwMapByYear] = await Promise.all([
+      fetchDistrictTrades(landmark.lawdCode, startYear),
+      collectBtcDailyKrwMaps(startYear, currentYear),
     ]);
 
     return NextResponse.json(
-      buildApartmentYear({
+      buildApartmentSeries({
         landmark,
-        year,
         districtTrades: districtResult.trades,
-        btcDailyKrwMap,
-        settledThroughMonth: districtResult.settledThroughMonth,
-        isPartialYear: districtResult.isPartialYear,
+        years: districtResult.years,
+        btcDailyKrwMapByYear,
         isIncomplete: districtResult.isIncomplete,
       }),
     );
   } catch (error) {
-    console.error("아파트 연간 실거래 집계 오류", error);
+    console.error("아파트 실거래 집계 오류", error);
     return NextResponse.json({ error: "INTERNAL_SERVER_ERROR" }, { status: 500 });
   }
 }

@@ -1,4 +1,4 @@
-import type { ApartmentYearResponse, PriceUnit } from "@/entities/apartment";
+import type { ApartmentYearPoint, PriceUnit } from "@/entities/apartment";
 
 export interface ChartPoint {
   year: number;
@@ -16,7 +16,7 @@ export interface ChartPoint {
  * 덕분에 단위를 토글해도 재요청이 발생하지 않는다.
  */
 export function buildChartSeries(
-  yearResponses: ApartmentYearResponse[],
+  yearPoints: ApartmentYearPoint[],
   areaInSquareMeter: number | null,
   priceUnit: PriceUnit,
 ): ChartPoint[] {
@@ -24,8 +24,8 @@ export function buildChartSeries(
     return [];
   }
 
-  return yearResponses.map((yearResponse) => {
-    const bucket = yearResponse.areaBuckets.find(
+  return yearPoints.map((yearPoint) => {
+    const bucket = yearPoint.areaBuckets.find(
       (areaBucket) => areaBucket.areaInSquareMeter === areaInSquareMeter,
     );
 
@@ -37,11 +37,11 @@ export function buildChartSeries(
      * 0 으로 채우면 "그 해에는 공짜였다" 로 읽힌다.
      */
     return {
-      year: yearResponse.year,
+      year: yearPoint.year,
       value,
       dealCount: bucket?.dealCount ?? 0,
-      isPartialYear: yearResponse.isPartialYear,
-      settledThroughMonth: yearResponse.settledThroughMonth,
+      isPartialYear: yearPoint.isPartialYear,
+      settledThroughMonth: yearPoint.settledThroughMonth,
     };
   });
 }

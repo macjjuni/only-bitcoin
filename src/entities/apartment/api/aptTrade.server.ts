@@ -115,8 +115,12 @@ const delay = (milliseconds: number) => new Promise((resolve) => setTimeout(reso
  * 공공 API 는 이를 초당 제한 초과로 막는다( 코드 23 ).
  *
  * 개별 요청의 동시성이 아니라 **프로세스 전체의 발사 간격**을 제한해야 한다.
+ *
+ * 152개월 연속 발사로 실측한 결과 25ms(34 req/s) 까지는 초당 제한에 걸리지 않았다.
+ * 다만 서버리스에서 인스턴스가 여러 개 뜨면 각자 이 속도로 쏘므로 합산 속도는 배수가 된다.
+ * 안전 마진을 두고 40ms(22 req/s) 로 잡는다 — 콜드 스타트 152회가 약 7초.
  */
-const MIN_REQUEST_INTERVAL_MS = 70;
+const MIN_REQUEST_INTERVAL_MS = 40;
 
 let lastRequestStartedAt = 0;
 let requestQueueTail: Promise<void> = Promise.resolve();
@@ -226,11 +230,16 @@ async function mapWithConcurrencyLimit<Item, Result>(
   return results;
 }
 
-export interface YearlyTradesResult {
-  trades: ApartmentTrade[];
-  /** 실제로 조회한 마지막 월. 진행 중인 연도면 12보다 작다. */
+export interface YearMeta {
+  year: number;
+  /** 집계가 끝난 마지막 월. 진행 중인 연도면 12보다 작다. */
   settledThroughMonth: number;
   isPartialYear: boolean;
+}
+
+export interface DistrictTradesResult {
+  trades: ApartmentTrade[];
+  years: YearMeta[];
   /**
    * 일부 월 조회에 실패해 집계가 불완전한지 여부.
    *
@@ -241,28 +250,41 @@ export interface YearlyTradesResult {
 }
 
 /**
- * 한 단지가 아니라 **한 구의 1년치**를 모아 온다.
+ * 한 구의 **여러 해치를 한 번에** 모아 온다.
  *
- * 단지 필터링은 호출부가 맡는다. 이렇게 해야 같은 구의 다른 단지가
+ * 연도별로 쪼개 라우트를 나누지 않는 이유:
+ * 서버리스에서는 요청마다 인스턴스가 분리될 수 있어 `scheduleRateLimited` 의
+ * 전역 발사 간격이 서로에게 적용되지 않는다. 13개 연도를 13개 요청으로 나누면
+ * 각자 자기 페이스로 쏘아 공공 API 의 초당 제한에 걸린다.
+ * 한 요청 안에서 전체 월을 하나의 큐로 흘려보내야 페이싱이 실제로 동작한다.
+ *
+ * 단지 필터링은 호출부가 맡는다. 그래야 같은 구의 다른 단지가
  * 동일한 `(지역코드 × 월)` 캐시를 그대로 재사용할 수 있다.
  */
-export async function fetchDistrictYearlyTrades(
+export async function fetchDistrictTrades(
   lawdCode: string,
-  year: number,
-): Promise<YearlyTradesResult> {
+  startYear: number,
+): Promise<DistrictTradesResult> {
   const currentYearMonth = getCurrentDealYearMonth();
   const currentYear = Number(currentYearMonth.slice(0, 4));
   const currentMonth = Number(currentYearMonth.slice(4, 6));
 
-  const isPartialYear = year >= currentYear;
-  const lastMonth = isPartialYear ? currentMonth : 12;
+  const years: YearMeta[] = [];
+  const dealYearMonths: DealYearMonth[] = [];
 
-  const dealYearMonths = Array.from({ length: lastMonth }, (_, index) =>
-    toDealYearMonth(year, index + 1),
-  );
+  for (let year = startYear; year <= currentYear; year += 1) {
+    const isPartialYear = year === currentYear;
+    const lastMonth = isPartialYear ? currentMonth : 12;
+
+    years.push({ year, settledThroughMonth: lastMonth, isPartialYear });
+
+    for (let month = 1; month <= lastMonth; month += 1) {
+      dealYearMonths.push(toDealYearMonth(year, month));
+    }
+  }
 
   /**
-   * 한 달이 실패해도 나머지 11개월로 연 집계는 성립한다.
+   * 한 달이 실패해도 나머지로 집계는 성립한다.
    * 그러나 그 사실을 숨기지는 않는다 — `isIncomplete` 로 올려보낸다.
    */
   const monthlyResults = await mapWithConcurrencyLimit(
@@ -284,8 +306,7 @@ export async function fetchDistrictYearlyTrades(
 
   return {
     trades: succeededResults.flat(),
-    settledThroughMonth: lastMonth,
-    isPartialYear,
+    years,
     isIncomplete: succeededResults.length < monthlyResults.length,
   };
 }

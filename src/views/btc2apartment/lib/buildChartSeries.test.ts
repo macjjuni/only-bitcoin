@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { ApartmentYearResponse } from "@/entities/apartment";
+import type { ApartmentYearPoint } from "@/entities/apartment";
 import { shouldUseLogScale } from "../ui/createApartmentChartOptions";
 import {
   buildChartSeries,
@@ -11,15 +11,11 @@ import {
 const makeYear = (
   year: number,
   buckets: Array<{ area: number; krw: number | null; btc: number | null; count: number }>,
-  overrides: Partial<ApartmentYearResponse> = {},
-): ApartmentYearResponse => ({
-  apartmentID: "raemian-one-bailey",
-  displayName: "래미안원베일리",
+  overrides: Partial<ApartmentYearPoint> = {},
+): ApartmentYearPoint => ({
   year,
   isPartialYear: false,
   settledThroughMonth: 12,
-  defaultAreaInSquareMeter: 84,
-  isIncomplete: false,
   areaBuckets: buckets.map((bucket) => ({
     areaInSquareMeter: bucket.area,
     medianPriceInKrw: bucket.krw,
