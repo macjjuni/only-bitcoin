@@ -5,6 +5,7 @@ import {
   buildChartSeries,
   formatBtcCount,
   formatKrwInEok,
+  isLowSampleYear,
   resolveSelectedArea,
 } from "./buildChartSeries";
 
@@ -158,5 +159,21 @@ describe("shouldUseLogScale", () => {
     expect(shouldUseLogScale([100])).toBe(false);
     expect(shouldUseLogScale([])).toBe(false);
     expect(shouldUseLogScale([null, null])).toBe(false);
+  });
+});
+
+describe("isLowSampleYear", () => {
+  it("거래가 3건 미만이면 표본 부족으로 본다", () => {
+    expect(isLowSampleYear(1)).toBe(true);
+    expect(isLowSampleYear(2)).toBe(true);
+  });
+
+  it("3건 이상이면 표본 부족이 아니다", () => {
+    expect(isLowSampleYear(3)).toBe(false);
+    expect(isLowSampleYear(29)).toBe(false);
+  });
+
+  it("거래가 아예 없는 해는 막대 자체가 없으므로 제외한다", () => {
+    expect(isLowSampleYear(0)).toBe(false);
   });
 });

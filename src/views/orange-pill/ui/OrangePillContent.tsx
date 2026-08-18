@@ -6,6 +6,7 @@ import { useTransitionRouter } from "next-view-transitions";
 import { useCallback } from "react";
 import { allRouteList } from "@/shared/config/route";
 import {
+  BuildingIcon,
   DiscordIcon,
   HalfCircleIcon,
   LazyImage,
@@ -68,6 +69,17 @@ const OrangePillContent = () => {
     router.push(routePath);
   }, [router]);
 
+  const handleBtc2ApartmentRoute = useCallback(() => {
+    const routePath = allRouteList.find((item) => item.path.includes("/btc2apartment"))?.path;
+
+    if (!routePath) {
+      console.warn("BTC to Apartment 경로를 찾을 수 없습니다.");
+      return;
+    }
+
+    router.push(routePath);
+  }, [router]);
+
   const handleBIP39Route = useCallback(() => {
     const routePath = allRouteList.find((item) => item.path.includes("/bip39"))?.path;
 
@@ -94,6 +106,12 @@ const OrangePillContent = () => {
           label="DCA 계산기"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleDcaRoute}
+        />
+        <ListRow
+          icon={<BuildingIcon size={26} />}
+          label="아파트 몇 채? BTC 환산"
+          rightElement={<ChevronRight className="text-muted-foreground" />}
+          onClick={handleBtc2ApartmentRoute}
         />
         <ListRow
           icon={<HalfCircleIcon size={28} />}

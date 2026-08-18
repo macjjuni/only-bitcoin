@@ -84,3 +84,17 @@ export function formatBtcCount(btcCount: number): string {
 
   return btcCount.toFixed(2);
 }
+
+/**
+ * 연 중앙값을 대표값으로 믿기 위한 최소 거래 건수.
+ *
+ * 표본이 1~2건이면 그 해 값은 통계가 아니라 우연이다.
+ * ( 원베일리 84㎡ 는 월별로 쪼갰을 때 12개월 중 3개월이 표본 1건이었다 — 10.1 )
+ * 연 단위로 합치면 대부분 해소되지만, 신축 첫 해나 대형 평형은 여전히 얇다.
+ */
+export const MIN_RELIABLE_DEAL_COUNT = 3;
+
+/** 그 해 값이 표본 부족인지. 거래가 아예 없는 해는 막대 자체가 없으므로 제외한다. */
+export function isLowSampleYear(dealCount: number): boolean {
+  return dealCount > 0 && dealCount < MIN_RELIABLE_DEAL_COUNT;
+}

@@ -1,6 +1,6 @@
 import type { ApexOptions } from "apexcharts";
 import type { PriceUnit } from "@/entities/apartment";
-import { formatBtcCount, formatKrwInEok } from "../lib/buildChartSeries";
+import { formatBtcCount, formatKrwInEok, isLowSampleYear } from "../lib/buildChartSeries";
 
 const BITCOIN_COLOR = "#f7931a";
 const KRW_COLOR_DARK = "#9ca3af";
@@ -136,7 +136,11 @@ export const createApartmentChartOptions = ({
             return "거래 없음";
           }
 
-          // 표본이 얇은 해는 대표성이 떨어지므로 건수를 함께 보여 준다.
+          // 표본이 얇은 해는 대표성이 떨어지므로 건수와 함께 그 사실을 알린다.
+          if (isLowSampleYear(dealCount)) {
+            return `${formatValue(value)} · ${dealCount}건 (표본 부족)`;
+          }
+
           return `${formatValue(value)} · ${dealCount}건`;
         },
         title: { formatter: () => "" },
