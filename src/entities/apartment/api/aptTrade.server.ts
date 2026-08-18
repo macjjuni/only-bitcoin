@@ -108,6 +108,37 @@ const RETRY_BASE_DELAY_MS = 400;
 const delay = (milliseconds: number) => new Promise((resolve) => setTimeout(resolve, milliseconds));
 
 /**
+ * 프로세스 전역 요청 간격 제한.
+ *
+ * 동시성만 제한해서는 부족하다. 클라이언트가 13개 연도를 동시에 요청하면
+ * 라우트 핸들러가 13개 병렬로 뜨고, 각자 동시성 8을 쓰므로 순간 100회 이상이 나간다.
+ * 공공 API 는 이를 초당 제한 초과로 막는다( 코드 23 ).
+ *
+ * 개별 요청의 동시성이 아니라 **프로세스 전체의 발사 간격**을 제한해야 한다.
+ */
+const MIN_REQUEST_INTERVAL_MS = 70;
+
+let lastRequestStartedAt = 0;
+let requestQueueTail: Promise<void> = Promise.resolve();
+
+/** 직전 요청 시작 시각으로부터 최소 간격이 지난 뒤에 실행되도록 순번을 잡는다. */
+function scheduleRateLimited<T>(task: () => Promise<T>): Promise<T> {
+  const slot = requestQueueTail.then(async () => {
+    const waitMs = lastRequestStartedAt + MIN_REQUEST_INTERVAL_MS - Date.now();
+
+    if (waitMs > 0) {
+      await delay(waitMs);
+    }
+
+    lastRequestStartedAt = Date.now();
+  });
+
+  requestQueueTail = slot.catch(() => undefined);
+
+  return slot.then(task);
+}
+
+/**
  * (지역코드 × 월) 한 칸을 실제로 조회한다.
  *
  * **실패하면 반드시 던진다.** 빈 배열로 흡수하면 안 된다.
@@ -127,9 +158,9 @@ async function fetchMonthlyTradesFromApi(
 
   for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt += 1) {
     try {
-      const response = await fetch(buildAptTradeUrl(lawdCode, dealYearMonth), {
-        cache: "no-store",
-      });
+      const response = await scheduleRateLimited(() =>
+        fetch(buildAptTradeUrl(lawdCode, dealYearMonth), { cache: "no-store" }),
+      );
 
       if (!response.ok) {
         lastErrorMessage = `HTTP ${response.status}`;

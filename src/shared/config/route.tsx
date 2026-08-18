@@ -1,5 +1,12 @@
 import type { ReactNode } from "react";
-import { BlockIcon, DashboardIcon, ExchangeIcon, PillIcon, PremiumIcon } from "@/shared/ui/icon";
+import {
+  BlockIcon,
+  BuildingIcon,
+  DashboardIcon,
+  ExchangeIcon,
+  PillIcon,
+  PremiumIcon,
+} from "@/shared/ui/icon";
 
 interface ClientRoute {
   title: string;
@@ -55,6 +62,14 @@ const clientRoutes: ClientRoute[] = [
     isNav: true,
     isFavorite: true,
     icon: <ExchangeIcon size={26} />,
+  },
+  {
+    title: "BTC To Apartment",
+    subtitle: "Apartment",
+    path: "/btc2apartment",
+    isNav: false,
+    isFavorite: true,
+    icon: <BuildingIcon size={24} />,
   },
   {
     title: "Premium",
