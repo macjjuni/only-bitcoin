@@ -6,12 +6,16 @@
  * 아카이브 이후 구간만 조회하면 된다. ( 구당 152회 → 8회 )
  *
  * 앱 런타임이 아니라 **개발자가 수동으로** 돌린다.
- *   pnpm build:apartment-archive
+ *   pnpm build:apartment-archive            항상 재생성
+ *   pnpm build:apartment-archive --if-stale 낡았을 때만 재생성 ( pnpm dev 가 부른다 )
  *
  * 다시 돌려야 할 때
- * - 해가 바뀌고 2월이 지난 뒤 ( 직전 연도 신고 지연분 마감 )
- * - 랜드마크를 추가했을 때
- * - 집계 로직을 바꿨을 때
+ * - 해가 바뀌고 2월이 지난 뒤 ( 직전 연도 신고 지연분 마감 )  -> --if-stale 이 감지한다
+ * - 랜드마크를 추가했을 때                                  -> --if-stale 이 감지한다
+ * - 집계 로직을 바꿨을 때                                   -> 감지 못 한다. 직접 돌려야 한다
+ *
+ * `--if-stale` 은 실패해도 종료 코드 0 이다. 개발 서버 기동을 막지 않기 위해서다.
+ * 아카이브가 낡아도 런타임이 빈 구간을 실시간으로 메우므로 앱은 정상 동작한다.
  *
  * 돌리는 것을 잊어도 앱은 정상 동작한다. 라우트가 아카이브 마지막 연도 다음부터
  * 현재까지를 실시간으로 메꾸므로, 호출량만 늘어날 뿐이다.
@@ -20,7 +24,7 @@
  * 아카이브와 런타임 결과가 어긋날 여지가 없다.
  */
 
-import { writeFileSync } from "node:fs";
+import { readFileSync, writeFileSync } from "node:fs";
 import { dirname, resolve } from "node:path";
 import { fileURLToPath } from "node:url";
 import {
@@ -55,6 +59,9 @@ const RETRY_BASE_DELAY_MS = 400;
  */
 const SETTLED_PREVIOUS_YEAR_FROM_MONTH = 3;
 
+/** 낡았을 때만 생성하는 모드. `pnpm dev` 가 이 플래그로 부른다. */
+const IS_IF_STALE_MODE = process.argv.includes("--if-stale");
+
 const OUTPUT_PATH = resolve(
   dirname(fileURLToPath(import.meta.url)),
   "../src/entities/apartment/model/archive.json",
@@ -73,6 +80,35 @@ function resolveSettledThroughYear(now: Date): number {
   }
 
   return year - 1;
+}
+
+/**
+ * 아카이브를 다시 만들어야 하는 이유. 최신이면 `null`.
+ *
+ * 집계 로직 변경은 감지할 수 없다. 그건 개발자가 직접 돌려야 한다.
+ */
+function resolveStaleReason(settledThroughYear: number): string | null {
+  let archive: { settledThroughYear?: number; apartments?: Record<string, unknown> };
+
+  try {
+    archive = JSON.parse(readFileSync(OUTPUT_PATH, "utf-8"));
+  } catch {
+    return "아카이브 파일이 없습니다";
+  }
+
+  if ((archive.settledThroughYear ?? 0) < settledThroughYear) {
+    return `확정 연도가 밀렸습니다 (${archive.settledThroughYear} < ${settledThroughYear})`;
+  }
+
+  const missingLandmarks = landmarkApartmentList
+    .filter((landmark) => !archive.apartments?.[landmark.apartmentID])
+    .map((landmark) => landmark.displayName);
+
+  if (missingLandmarks.length > 0) {
+    return `아카이브에 없는 단지: ${missingLandmarks.join(", ")}`;
+  }
+
+  return null;
 }
 
 let requestCount = 0;
@@ -175,13 +211,30 @@ async function fetchDistrictArchiveTrades(
 }
 
 async function main() {
+  const settledThroughYear = resolveSettledThroughYear(new Date());
+
+  if (IS_IF_STALE_MODE) {
+    const staleReason = resolveStaleReason(settledThroughYear);
+
+    if (!staleReason) {
+      console.log(`아파트 아카이브 최신 (확정 ~${settledThroughYear}). 생성을 건너뜁니다.`);
+      return;
+    }
+
+    console.log(`아파트 아카이브 갱신이 필요합니다 — ${staleReason}`);
+  }
+
   if (!SERVICE_KEY) {
+    if (IS_IF_STALE_MODE) {
+      console.warn("  DATA_GO_KR_SERVICE_KEY 가 없어 건너뜁니다. .env.local 을 확인하세요.");
+      return;
+    }
+
     console.error("DATA_GO_KR_SERVICE_KEY 가 없습니다. .env.local 을 확인하세요.");
     process.exit(1);
   }
 
   const startedAt = Date.now();
-  const settledThroughYear = resolveSettledThroughYear(new Date());
 
   console.log(`아파트 실거래 아카이브 생성`);
   console.log(`  구간: ${CHART_START_YEAR} ~ ${settledThroughYear} (확정 연도만)`);
@@ -260,12 +313,11 @@ async function main() {
   }
 
   if (brokenBuckets.length > 0) {
-    console.error(`
-❌ BTC 환산 누락 ${brokenBuckets.length}건. 아카이브를 저장하지 않습니다.`);
     for (const broken of brokenBuckets.slice(0, 10)) {
       console.error(`   ${broken}`);
     }
-    process.exit(1);
+
+    throw new Error(`BTC 환산 누락 ${brokenBuckets.length}건. 아카이브를 저장하지 않습니다`);
   }
 
   const archive = {
@@ -294,4 +346,19 @@ async function main() {
   }
 }
 
-await main();
+/**
+ * `--if-stale` 은 실패해도 0 으로 끝낸다. 개발 서버 기동을 막지 않기 위해서다.
+ * 수동 실행은 기존대로 실패를 그대로 드러낸다.
+ */
+try {
+  await main();
+} catch (error) {
+  if (!IS_IF_STALE_MODE) {
+    throw error;
+  }
+
+  console.warn(`
+⚠ 아카이브 갱신 실패 — 기존 아카이브로 계속합니다.`);
+  console.warn(`  ${error instanceof Error ? error.message : error}`);
+  console.warn(`  런타임이 빈 구간을 실시간 조회로 메우므로 앱은 정상 동작합니다.`);
+}
