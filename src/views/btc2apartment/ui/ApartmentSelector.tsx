@@ -57,7 +57,12 @@ const ApartmentSelector = ({ selectedApartmentID, onSelectApartment }: Apartment
   // endregion
 
   return (
-    <div className={["-mx-2 transition-opacity duration-500", isReady ? "opacity-100" : "opacity-0"].join(" ")}>
+    <div
+      className={[
+        "-mx-2 transition-opacity duration-500",
+        isReady ? "opacity-100" : "opacity-0",
+      ].join(" ")}
+    >
       <Swiper
         effect="coverflow"
         grabCursor
