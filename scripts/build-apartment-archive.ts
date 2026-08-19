@@ -82,26 +82,46 @@ function resolveSettledThroughYear(now: Date): number {
   return year - 1;
 }
 
+interface ApartmentArchive {
+  generatedAt: string;
+  settledThroughYear: number;
+  apartments: Record<string, ApartmentYearPoint[]>;
+}
+
+/** 기존 아카이브. 없거나 깨졌으면 `null` ( 전 구간 재생성으로 떨어진다 ). */
+function readExistingArchive(): ApartmentArchive | null {
+  try {
+    const parsed = JSON.parse(readFileSync(OUTPUT_PATH, "utf-8")) as ApartmentArchive;
+
+    if (typeof parsed?.settledThroughYear !== "number" || !parsed?.apartments) {
+      return null;
+    }
+
+    return parsed;
+  } catch {
+    return null;
+  }
+}
+
 /**
  * 아카이브를 다시 만들어야 하는 이유. 최신이면 `null`.
  *
  * 집계 로직 변경은 감지할 수 없다. 그건 개발자가 직접 돌려야 한다.
  */
-function resolveStaleReason(settledThroughYear: number): string | null {
-  let archive: { settledThroughYear?: number; apartments?: Record<string, unknown> };
-
-  try {
-    archive = JSON.parse(readFileSync(OUTPUT_PATH, "utf-8"));
-  } catch {
+function resolveStaleReason(
+  archive: ApartmentArchive | null,
+  settledThroughYear: number,
+): string | null {
+  if (!archive) {
     return "아카이브 파일이 없습니다";
   }
 
-  if ((archive.settledThroughYear ?? 0) < settledThroughYear) {
+  if (archive.settledThroughYear < settledThroughYear) {
     return `확정 연도가 밀렸습니다 (${archive.settledThroughYear} < ${settledThroughYear})`;
   }
 
   const missingLandmarks = landmarkApartmentList
-    .filter((landmark) => !archive.apartments?.[landmark.apartmentID])
+    .filter((landmark) => !archive.apartments[landmark.apartmentID])
     .map((landmark) => landmark.displayName);
 
   if (missingLandmarks.length > 0) {
@@ -109,6 +129,59 @@ function resolveStaleReason(settledThroughYear: number): string | null {
   }
 
   return null;
+}
+
+/**
+ * 다시 받을 최근 연도 수.
+ *
+ * 신고 지연( 계약 후 30일 )과 뒤늦은 해제 신고는 몇 달 안에 들어오므로,
+ * 최근 2년만 다시 받으면 과거 연도의 변화는 사실상 전부 잡힌다.
+ * 2014년 거래가 2027년에 바뀌는 일은 없다.
+ */
+const REFETCH_RECENT_YEAR_COUNT = 2;
+
+/**
+ * 이 구를 어느 연도부터 다시 받을지 정한다.
+ *
+ * 기존 아카이브가 있으면 최근 몇 해만 받고 나머지는 재사용한다.
+ * 다만 이 구에 아카이브가 없는 단지가 있으면( 랜드마크 추가 ) 전 구간이 필요하다.
+ */
+function resolveRefetchStartYear(
+  lawdCode: string,
+  archive: ApartmentArchive | null,
+  settledThroughYear: number,
+): number {
+  if (!archive) {
+    return CHART_START_YEAR;
+  }
+
+  const hasMissingLandmark = landmarkApartmentList
+    .filter((landmark) => landmark.lawdCode === lawdCode)
+    .some((landmark) => !archive.apartments[landmark.apartmentID]);
+
+  if (hasMissingLandmark) {
+    return CHART_START_YEAR;
+  }
+
+  return Math.max(CHART_START_YEAR, settledThroughYear - REFETCH_RECENT_YEAR_COUNT + 1);
+}
+
+/**
+ * 재사용할 옛 연도와 새로 만든 연도를 합친다. **새로 만든 쪽이 이긴다.**
+ *
+ * 재조회 범위에 든 연도는 방금 값으로 덮이고, 그 이전 연도만 아카이브에서 살아남는다.
+ */
+function mergeYearPoints(
+  archivedYearPoints: ApartmentYearPoint[],
+  freshYearPoints: ApartmentYearPoint[],
+): ApartmentYearPoint[] {
+  const yearPointByYear = new Map<number, ApartmentYearPoint>();
+
+  for (const yearPoint of [...archivedYearPoints, ...freshYearPoints]) {
+    yearPointByYear.set(yearPoint.year, yearPoint);
+  }
+
+  return [...yearPointByYear.values()].sort((left, right) => left.year - right.year);
 }
 
 let requestCount = 0;
@@ -212,9 +285,10 @@ async function fetchDistrictArchiveTrades(
 
 async function main() {
   const settledThroughYear = resolveSettledThroughYear(new Date());
+  const existingArchive = readExistingArchive();
 
   if (IS_IF_STALE_MODE) {
-    const staleReason = resolveStaleReason(settledThroughYear);
+    const staleReason = resolveStaleReason(existingArchive, settledThroughYear);
 
     if (!staleReason) {
       console.log(`아파트 아카이브 최신 (확정 ~${settledThroughYear}). 생성을 건너뜁니다.`);
@@ -236,20 +310,38 @@ async function main() {
 
   const startedAt = Date.now();
 
+  /**
+   * 증분 갱신은 `--if-stale` 에서만 한다.
+   *
+   * 수동 실행은 집계 로직을 바꿨을 때 돌리는 길이다. 그때 옛 연도를 재사용하면
+   * 옛 로직으로 만든 값이 그대로 남으므로, 수동은 항상 전 구간을 다시 만든다.
+   */
+  const reusableArchive = IS_IF_STALE_MODE ? existingArchive : null;
+
   console.log(`아파트 실거래 아카이브 생성`);
   console.log(`  구간: ${CHART_START_YEAR} ~ ${settledThroughYear} (확정 연도만)`);
+  console.log(`  방식: ${reusableArchive ? "증분 ( 최근 연도만 재조회 )" : "전 구간 재생성"}`);
 
   // 같은 구를 여러 단지가 공유하므로 구 단위로 한 번만 훑는다.
   const lawdCodes = [...new Set(landmarkApartmentList.map((landmark) => landmark.lawdCode))];
 
   console.log(`  대상: 단지 ${landmarkApartmentList.length}개 / 지역 ${lawdCodes.length}곳\n`);
 
+  const refetchStartYearByLawdCode = new Map(
+    lawdCodes.map((lawdCode) => [
+      lawdCode,
+      resolveRefetchStartYear(lawdCode, reusableArchive, settledThroughYear),
+    ]),
+  );
+
   const tradesByLawdCode = new Map<string, ApartmentTrade[]>();
 
   for (const lawdCode of lawdCodes) {
+    const refetchStartYear = refetchStartYearByLawdCode.get(lawdCode) ?? CHART_START_YEAR;
+
     tradesByLawdCode.set(
       lawdCode,
-      await fetchDistrictArchiveTrades(lawdCode, CHART_START_YEAR, settledThroughYear),
+      await fetchDistrictArchiveTrades(lawdCode, refetchStartYear, settledThroughYear),
     );
   }
 
@@ -260,35 +352,42 @@ async function main() {
    * 첫 구현이 그랬고, 당시 실패가 조용히 삼켜져 아카이브 622개 버킷 중 290개가
    * BTC 시세 결측인 채로 생성됐다.
    */
+  const btcStartYear = Math.min(...refetchStartYearByLawdCode.values());
   const btcDailyKrwMapByYear = new Map<number, BtcDailyKrwMap>();
 
-  for (let year = CHART_START_YEAR; year <= settledThroughYear; year += 1) {
+  for (let year = btcStartYear; year <= settledThroughYear; year += 1) {
     btcDailyKrwMapByYear.set(year, await fetchBtcDailyKrwMap(year));
     process.stdout.write(`\r  ${year} 완료   `);
   }
 
   process.stdout.write("\n");
 
-  const years = Array.from({ length: settledThroughYear - CHART_START_YEAR + 1 }, (_, index) => ({
-    year: CHART_START_YEAR + index,
-    settledThroughMonth: 12,
-    isPartialYear: false,
-  }));
-
   const apartments: Record<string, ApartmentYearPoint[]> = {};
 
   for (const landmark of landmarkApartmentList) {
     const districtTrades = tradesByLawdCode.get(landmark.lawdCode) ?? [];
+    const refetchStartYear = refetchStartYearByLawdCode.get(landmark.lawdCode) ?? CHART_START_YEAR;
 
-    // 첫 실거래 이전 연도는 담지 않는다. 빈 막대만 늘어난다.
-    const landmarkYears = years.filter(({ year }) => year >= landmark.earliestDealYear);
+    const years = [];
 
-    apartments[landmark.apartmentID] = buildYearPoints({
+    for (let year = refetchStartYear; year <= settledThroughYear; year += 1) {
+      // 첫 실거래 이전 연도는 담지 않는다. 빈 막대만 늘어난다.
+      if (year >= landmark.earliestDealYear) {
+        years.push({ year, settledThroughMonth: 12, isPartialYear: false });
+      }
+    }
+
+    const freshYearPoints = buildYearPoints({
       landmark,
       districtTrades,
-      years: landmarkYears,
+      years,
       btcDailyKrwMapByYear,
     });
+
+    apartments[landmark.apartmentID] = mergeYearPoints(
+      reusableArchive?.apartments[landmark.apartmentID] ?? [],
+      freshYearPoints,
+    );
   }
 
   /**
