@@ -5,6 +5,7 @@ import Image from "next/image";
 import { memo, type RefObject, useMemo, useState } from "react";
 import {
   type ApartmentYearPoint,
+  getApartmentCaptureImagePath,
   getApartmentImagePath,
   type LandmarkApartment,
 } from "@/entities/apartment";
@@ -59,6 +60,9 @@ function ApartmentShareCard({
 
   // region [Privates]
   const imageSrc = landmark ? getApartmentImagePath(landmark.apartmentID) : "";
+
+  /** 캡처 합성은 최적화 경로로 받는다. 표시용과 캐시를 공유하고 7일 캐시가 걸린다. */
+  const captureBackgroundSrc = landmark ? getApartmentCaptureImagePath(landmark.apartmentID) : "";
 
   /** 원화가 몇 배 올랐는지. 비트코인 배수와 나란히 놓아야 반전이 읽힌다. */
   const krwRiseMultiple = stats ? stats.krw.currentValue / stats.krw.baseValue : 0;
@@ -165,7 +169,7 @@ function ApartmentShareCard({
     */
     <div
       ref={cardRef}
-      data-background-src={imageSrc}
+      data-background-src={captureBackgroundSrc}
       className="font-pretendard relative w-[440px] overflow-hidden rounded-[32px] select-none"
     >
       {/* 단지 사진. 캡처에서는 제외하고 canvas 에 직접 합성한다. */}

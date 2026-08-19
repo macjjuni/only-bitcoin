@@ -103,9 +103,17 @@ export interface OverlayImageInfo {
   shadowBlur?: number;
 }
 
+/**
+ * 합성용 이미지를 로드한다.
+ *
+ * 단지 사진은 GitHub raw 에서 오는 교차 출처 리소스다. `crossOrigin` 없이 받아
+ * `drawImage` 하면 canvas 가 오염되어 `toDataURL` · `toBlob` 이 `SecurityError` 로
+ * 죽는다. ( 캡처가 통째로 실패한다 ) `src` 대입 **전**에 지정해야 적용된다.
+ */
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = src;

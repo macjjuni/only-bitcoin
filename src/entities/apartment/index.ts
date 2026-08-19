@@ -4,7 +4,7 @@ export {
   useApartmentSeriesQuery,
 } from "./api/useApartmentSeriesQuery";
 export { toAreaBucket } from "./lib/aggregateTrades";
-export { getApartmentImagePath } from "./lib/apartmentImage";
+export { getApartmentCaptureImagePath, getApartmentImagePath } from "./lib/apartmentImage";
 export type {
   ApartmentAreaBucket,
   ApartmentSeriesResponse,
