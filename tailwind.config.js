@@ -10,6 +10,8 @@ export default {
       fontFamily: {
         default: ["var(--default-font)"],
         number: ["var(--number-font)"],
+        // 한글 본문용. 기본 폰트에 한글 글리프가 없어 시스템 폰트로 폴백되는 것을 막는다.
+        pretendard: ["Pretendard", "var(--default-font)"],
       },
       colors: {
         bitcoin: "rgb(var(--bitcoin-rgb) / <alpha-value>)",

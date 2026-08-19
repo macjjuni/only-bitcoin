@@ -2,6 +2,7 @@
 
 import { memo, useCallback, useMemo } from "react";
 import { findLandmarkApartment, useApartmentSeriesQuery } from "@/entities/apartment";
+import { ApartmentShareDialog } from "@/features/btc2apartment-share";
 import { Card, CardContent } from "@/shared/ui";
 import { resolveSelectedArea } from "../lib/buildChartSeries";
 import useBtc2ApartmentStore from "../model/btc2ApartmentStore";
@@ -111,6 +112,17 @@ const Btc2ApartmentPanel = ({ archiveGeneratedAt }: Btc2ApartmentPanelProps) => 
         </CardContent>
       </Card>
       <DataSourceFooter archiveGeneratedAt={archiveGeneratedAt} />
+
+      {/*
+        공유 카드는 이 패널이 이미 가진 데이터를 그대로 쓴다. 전역에 띄우고 스스로
+        조회하게 하면 같은 시리즈를 두 곳에서 구독하게 되고, features 가 views 의
+        선택 상태를 거꾸로 참조해야 한다.
+      */}
+      <ApartmentShareDialog
+        landmark={landmark}
+        yearPoints={series?.years ?? []}
+        areaInSquareMeter={resolvedArea}
+      />
     </>
   );
 };
