@@ -5,6 +5,7 @@ import { findLandmarkApartment, useApartmentSeriesQuery } from "@/entities/apart
 import { ApartmentShareDialog } from "@/features/btc2apartment-share";
 import { Card, CardContent } from "@/shared/ui";
 import { resolveSelectedArea } from "../lib/buildChartSeries";
+import { useApartmentQuerySync } from "../lib/useApartmentQuerySync";
 import useBtc2ApartmentStore from "../model/btc2ApartmentStore";
 import ApartmentSelector from "./ApartmentSelector";
 import ApartmentSummaryCard from "./ApartmentSummaryCard";
@@ -32,6 +33,9 @@ const Btc2ApartmentPanel = ({ archiveGeneratedAt }: Btc2ApartmentPanelProps) => 
   const setApartmentID = useBtc2ApartmentStore((state) => state.setApartmentID);
   const setPriceUnit = useBtc2ApartmentStore((state) => state.setPriceUnit);
   const setSelectedArea = useBtc2ApartmentStore((state) => state.setSelectedArea);
+
+  // 진입 시 쿼리로 단지를 맞추고, 이후 선택이 바뀔 때마다 쿼리를 갱신한다.
+  useApartmentQuerySync(apartmentID, setApartmentID);
 
   const landmark = useMemo(() => findLandmarkApartment(apartmentID), [apartmentID]);
 
