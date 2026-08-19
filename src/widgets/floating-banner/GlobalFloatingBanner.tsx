@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BtcSurgeShareDialog } from "@/features/btc-surge-share";
 import { hideBottomNavPathList } from "@/shared/config/route";
+import ApartmentShareFloatingBanner from "./ui/ApartmentShareFloatingBanner";
 import BlocksCountdownFloatingBanner from "./ui/BlocksCountdownFloatingBanner";
 import Btc2FiatFloatingBanner from "./ui/Btc2FiatFloatingBanner";
 import BtcSurgeShareFloatingBanner from "./ui/BtcSurgeShareFloatingBanner";
@@ -45,6 +46,14 @@ const BANNER_CONFIGS: BannerConfig[] = [
     useIsVisible: () => {
       const pathname = usePathname();
       return pathname === "/" || pathname === "/overview";
+    },
+  },
+  {
+    id: "btc2apartment-share",
+    Component: ApartmentShareFloatingBanner,
+    useIsVisible: () => {
+      const pathname = usePathname();
+      return pathname.startsWith("/btc2apartment");
     },
   },
   {

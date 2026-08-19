@@ -2,7 +2,7 @@ import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
 import useConfettiStore from "@/shared/stores/confettiStore";
-import { deepEqual } from "@/shared/utils/common";
+import { deepEqual, isDev } from "@/shared/utils/common";
 import { comma } from "@/shared/utils/string";
 import type { BlockTypes, FeesTypes } from "../../model/blockSlice";
 import useBlockStore from "../../model/blockStore";
@@ -75,7 +75,7 @@ export default function useMempoolSocket() {
 
     socket.onopen = () => {
       kToast.success("Mempool 연결!");
-      if (process.env.NODE_ENV === "development") {
+      if (isDev) {
         console.log("✅ Mempool 소켓 연결");
       }
       socket.send(JSON.stringify({ action: "want", data: ["blocks", "stats"] }));

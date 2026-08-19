@@ -6,11 +6,12 @@ import { FlaskConical, QrCode as QrCodeIcon, ShieldCheck } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, useCallback } from "react";
 import { QRCode } from "react-qrcode-logo";
+import { env } from "@/shared/config/env";
 import useSettingStore from "@/shared/stores/settingStore";
 import { ListGroup, ListRow, ListRowAccordion } from "@/shared/ui";
 
-const LIGHTNING_ADDRESS = process.env.NEXT_PUBLIC_DONATION_ADDRESS || "";
-const FEEDBACK_URL = process.env.NEXT_PUBLIC_FEEDBACK_URL || "https://x.com/a7w2en7z_";
+const LIGHTNING_ADDRESS = env.NEXT_PUBLIC_DONATION_ADDRESS;
+const FEEDBACK_URL = env.NEXT_PUBLIC_FEEDBACK_URL;
 const DONATE_VALUE = "donation" as const;
 
 /**
@@ -110,7 +111,7 @@ const InfoListRowGroup = () => {
         label="버전 정보"
         rightElement={
           <span className="text-[17px] text-muted-foreground">
-            {process.env.NEXT_PUBLIC_APP_VERSION || "-"}
+            {env.NEXT_PUBLIC_APP_VERSION || "-"}
           </span>
         }
       />

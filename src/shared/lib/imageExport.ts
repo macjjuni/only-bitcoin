@@ -103,9 +103,17 @@ export interface OverlayImageInfo {
   shadowBlur?: number;
 }
 
+/**
+ * 합성용 이미지를 로드한다.
+ *
+ * 단지 사진은 GitHub raw 에서 오는 교차 출처 리소스다. `crossOrigin` 없이 받아
+ * `drawImage` 하면 canvas 가 오염되어 `toDataURL` · `toBlob` 이 `SecurityError` 로
+ * 죽는다. ( 캡처가 통째로 실패한다 ) `src` 대입 **전**에 지정해야 적용된다.
+ */
 function loadImage(src: string): Promise<HTMLImageElement> {
   return new Promise((resolve, reject) => {
     const img = new Image();
+    img.crossOrigin = "anonymous";
     img.onload = () => resolve(img);
     img.onerror = reject;
     img.src = src;
@@ -141,6 +149,45 @@ async function compositeOverlay(
   ctx.shadowBlur = 0;
 }
 
+/**
+ * 캡처된 canvas **아래**에 배경 이미지를 깐다.
+ *
+ * `destination-over` 는 이미 그려진 픽셀을 건드리지 않고 투명한 곳만 채운다.
+ * 따라서 카드 루트에 불투명 배경색이 없어야 하고, 사진 위 어둡게 까는 그라데이션은
+ * 반투명이어야 한다. ( 그래야 알파 합성으로 "사진 위 그라데이션" 이 재현된다 )
+ *
+ * `<img>` 를 그대로 캡처하지 않는 이유는 코인 오버레이와 같다 — Safari 는
+ * foreignObject 안의 이미지를 그리지 못하는 경우가 있는데, 배경 사진은 이 카드의
+ * 전부라 실패하면 카드가 통째로 빈 그림이 된다.
+ */
+async function compositeBackground(canvas: HTMLCanvasElement, src: string): Promise<void> {
+  const ctx = canvas.getContext("2d");
+
+  if (!ctx) {
+    return;
+  }
+
+  const backgroundImg = await loadImage(src);
+
+  // `object-fit: cover` 와 같은 규칙으로 잘라 넣는다. 비율이 틀어지면 건물이 늘어난다.
+  const scale = Math.max(
+    canvas.width / backgroundImg.naturalWidth,
+    canvas.height / backgroundImg.naturalHeight,
+  );
+  const drawWidth = backgroundImg.naturalWidth * scale;
+  const drawHeight = backgroundImg.naturalHeight * scale;
+
+  ctx.globalCompositeOperation = "destination-over";
+  ctx.drawImage(
+    backgroundImg,
+    (canvas.width - drawWidth) / 2,
+    (canvas.height - drawHeight) / 2,
+    drawWidth,
+    drawHeight,
+  );
+  ctx.globalCompositeOperation = "source-over";
+}
+
 function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -155,6 +202,9 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
 /** 오버레이 이미지 목록. 캡처 시 합성할 이미지가 없으면 빈 배열. */
 let registeredOverlays: OverlayImageInfo[] = [];
 
+/** 캡처 결과 아래에 깔 배경 이미지. 없으면 `null`. */
+let registeredBackgroundSrc: string | null = null;
+
 /**
  * 캡처 후 합성할 오버레이 이미지를 등록한다.
  */
@@ -163,20 +213,34 @@ export function registerCaptureOverlay(overlay: OverlayImageInfo): void {
 }
 
 /**
- * 등록된 오버레이를 해제한다.
+ * 캡처 결과 아래에 깔 배경 이미지를 등록한다.
  */
-export function clearCaptureOverlays(): void {
-  registeredOverlays = [];
+export function registerCaptureBackground(src: string): void {
+  registeredBackgroundSrc = src;
 }
 
 /**
- * DOM → canvas → (오버레이 합성) → Blob 파이프라인.
+ * 등록된 오버레이와 배경을 해제한다.
+ */
+export function clearCaptureOverlays(): void {
+  registeredOverlays = [];
+  registeredBackgroundSrc = null;
+}
+
+/**
+ * DOM → canvas → (오버레이·배경 합성) → Blob 파이프라인.
  */
 async function captureToCanvas(element: HTMLElement): Promise<HTMLCanvasElement> {
   const canvas = await toCanvas(element, CAPTURE_OPTIONS);
 
   for (const overlay of registeredOverlays) {
     await compositeOverlay(canvas, overlay);
+  }
+
+  // 배경은 항상 마지막이다. 오버레이보다 먼저 깔면 destination-over 가 오버레이의
+  // 투명 영역까지 덮어 그림자가 사라진다.
+  if (registeredBackgroundSrc) {
+    await compositeBackground(canvas, registeredBackgroundSrc);
   }
 
   return canvas;

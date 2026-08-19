@@ -16,13 +16,13 @@ import { QRCode } from "react-qrcode-logo";
 import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/entities/quiz";
 import { useCopyOnClick } from "@/shared/lib/hooks";
 import useConfettiStore from "@/shared/stores/confettiStore";
+import { isDev } from "@/shared/utils/common";
 import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
 import useQuizState from "./useQuizState";
 
 // region [Privates]
 const LIMIT_KEY = `${QUIZ_COOKIE_KEY}_done`;
 const COUNT_COOLDOWN_KEY = `${QUIZ_COOKIE_KEY}_cd`;
-const isDev = process.env.NODE_ENV === "development";
 
 const checkPwaEnv = (): boolean => {
   if (typeof window === "undefined") return false;

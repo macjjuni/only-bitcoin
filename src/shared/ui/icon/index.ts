@@ -1,6 +1,7 @@
 export { default as AnimationIcon } from "./AnimationIcon";
 export { default as BlockIcon } from "./BlockIcon";
 export { default as BtcTextLogo } from "./BtcTextLogo";
+export { default as BuildingIcon } from "./BuildingIcon";
 export { default as CurrencyIcon } from "./CurrencyIcon";
 // Navigation Icon
 export { default as DashboardIcon } from "./DashboardIcon";
@@ -17,3 +18,4 @@ export { default as PremiumIcon } from "./PremiumIcon";
 export { default as SaveIcon } from "./SaveIcon";
 export { default as SettingIcon } from "./SettingIcon";
 export { default as ShootingStarIcon } from "./ShootingStarIcon";
+export { default as WonIcon } from "./WonIcon";

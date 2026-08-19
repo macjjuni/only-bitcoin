@@ -6,5 +6,6 @@
  * 타입은 `model/types` 에 있으므로 클라이언트 컴포넌트는 `@/entities/bitcoin` 에서 가져간다.
  * (`client.ts` 로 클라이언트 전용 훅을 나누는 것과 대칭 구조)
  */
+export { type BtcDailyKrwMap, getBtcDailyKrwMap } from "./api/btcDailyKrw.server";
 export { fetchInitialMacro } from "./api/macro.server";
 export { fetchInitialPrice } from "./api/price.server";

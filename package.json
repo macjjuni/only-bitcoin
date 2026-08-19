@@ -1,15 +1,17 @@
 {
   "name": "only-btc",
-  "version": "v4.0.3",
+  "version": "v4.1.0",
   "private": true,
   "scripts": {
-    "dev": "next dev",
+    "dev": "pnpm archive:ensure && next dev",
     "build": "next build",
     "start": "next start -p 4004",
     "lint": "biome lint .",
     "format": "biome format --write .",
     "check": "biome check --write .",
     "check:cycles": "node scripts/check-cycles.mjs",
+    "build:apartment-archive": "node --env-file-if-exists=.env.local --experimental-strip-types --import ./scripts/ts-loader.mjs --no-warnings scripts/build-apartment-archive.ts",
+    "archive:ensure": "pnpm build:apartment-archive --if-stale",
     "test": "vitest run",
     "screenshot": "playwright install chromium && node scripts/screenshot.mjs"
   },
