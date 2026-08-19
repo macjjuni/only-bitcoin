@@ -11,7 +11,17 @@ import AreaBucketTabs from "./AreaBucketTabs";
 import Btc2ApartmentChart from "./Btc2ApartmentChart";
 import DataSourceFooter from "./DataSourceFooter";
 
-const Btc2ApartmentPanel = () => {
+interface Btc2ApartmentPanelProps {
+  /**
+   * 아카이브 생성일. 서버 컴포넌트에서 내려받는다.
+   *
+   * `archive.json` 을 클라이언트에서 직접 import 하면 90KB 짜리 확정 연도 집계가
+   * 통째로 번들에 실린다. 필요한 것은 날짜 한 줄뿐이므로 prop 으로 받는다.
+   */
+  archiveGeneratedAt: string;
+}
+
+const Btc2ApartmentPanel = ({ archiveGeneratedAt }: Btc2ApartmentPanelProps) => {
   // region [Hooks]
   const apartmentID = useBtc2ApartmentStore((state) => state.apartmentID);
   const priceUnit = useBtc2ApartmentStore((state) => state.priceUnit);
@@ -100,7 +110,7 @@ const Btc2ApartmentPanel = () => {
           {ErrorTemplate}
         </CardContent>
       </Card>
-      <DataSourceFooter />
+      <DataSourceFooter archiveGeneratedAt={archiveGeneratedAt} />
     </>
   );
 };

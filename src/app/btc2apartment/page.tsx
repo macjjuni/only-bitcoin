@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { ARCHIVE_GENERATED_AT } from "@/entities/apartment/server";
 import { env } from "@/shared/config/env";
 import { PageLayout } from "@/shared/ui/layout";
 import { Btc2ApartmentPanel } from "@/views/btc2apartment";
@@ -12,7 +13,7 @@ export const metadata: Metadata = {
 export default function Btc2ApartmentPage() {
   return (
     <PageLayout className="gap-3">
-      <Btc2ApartmentPanel />
+      <Btc2ApartmentPanel archiveGeneratedAt={ARCHIVE_GENERATED_AT} />
     </PageLayout>
   );
 }
