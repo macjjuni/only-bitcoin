@@ -160,6 +160,31 @@ function ApartmentShareCard({
       </p>
     );
   }, [stats, krwRiseMultiple]);
+
+  // 보류: 산정 방식 고지. 카드가 캡처되어 페이지를 떠나면 `DataSourceFooter` 를 볼 수
+  // 없어서 넣었다가, 노출 여부를 다시 판단하기로 하고 잠시 꺼 둔다.
+  // /**
+  //  * 산정 방식 고지.
+  //  *
+  //  * 카드는 캡처되어 페이지를 떠나므로 `DataSourceFooter` 의 접힘 영역을 볼 수 없다.
+  //  * "45배 싸졌다" 는 숫자만 남았을 때 근거를 묻는 사람에게 최소한의 답이 되도록
+  //  * 출처 · 집계 단위 · 환산 시점 세 가지만 남긴다. ( 나머지는 페이지에서 본다 )
+  //  *
+  //  * 결론 문장을 이기면 안 되므로 오른쪽 아래에 작게 붙인다.
+  //  */
+  // const MethodologyTemplate = useMemo(() => {
+  //   if (!stats) {
+  //     return null;
+  //   }
+  //
+  //   return (
+  //     <p className="mt-3 text-right text-[11px] leading-snug text-white/45">
+  //       국토교통부 실거래가 · 같은 평형 연도별 중앙값
+  //       <br />
+  //       BTC 환산은 계약일 종가 기준, 현재 값만 실시간 시세
+  //     </p>
+  //   );
+  // }, [stats]);
   // endregion
 
   return (
@@ -214,6 +239,7 @@ function ApartmentShareCard({
 
         {ComparisonTemplate}
         {PunchlineTemplate}
+        {/* {MethodologyTemplate} */}
 
         <div className="mt-6 flex items-center justify-between gap-2 border-t border-white/15 pt-4">
           <span
