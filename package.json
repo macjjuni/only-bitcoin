@@ -1,6 +1,6 @@
 {
   "name": "only-btc",
-  "version": "v4.0.3",
+  "version": "v4.1.0",
   "private": true,
   "scripts": {
     "dev": "pnpm archive:ensure && next dev",
