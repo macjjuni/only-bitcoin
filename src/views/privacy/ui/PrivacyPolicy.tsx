@@ -1,10 +1,11 @@
 import type { ReactNode } from "react";
+import { env } from "@/shared/config/env";
 import { PRIVACY_EFFECTIVE_DATE_LABEL } from "@/shared/constants/policy";
 import { Card, CollapseSection, HighlightText } from "@/shared/ui";
 
 // region [Constants]
 const SERVICE_DOMAIN = "only-btc.app";
-const FEEDBACK_URL = process.env.NEXT_PUBLIC_FEEDBACK_URL || "https://x.com/a7w2en7z_";
+const FEEDBACK_URL = env.NEXT_PUBLIC_FEEDBACK_URL;
 
 const GOOGLE_AD_SETTINGS_URL = "https://myadcenter.google.com/";
 const GOOGLE_AD_POLICY_URL = "https://policies.google.com/technologies/ads";

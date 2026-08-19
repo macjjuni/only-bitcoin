@@ -2,6 +2,7 @@
 
 import { KIcon } from "kku-ui";
 import { usePathname } from "next/navigation";
+import { env } from "@/shared/config/env";
 import { hideHeaderPathList } from "@/shared/config/route";
 import useSettingStore from "@/shared/stores/settingStore";
 import { BtcTextLogo, TransitionLink } from "@/shared/ui";
@@ -33,7 +34,9 @@ export default function Header() {
         .filter(Boolean)
         .join(" ")}
     >
-      <h2 className="font-bold tracking-[-1px] text-current">
+      <h2
+        className={`font-bold tracking-[-1px] text-current${env.NEXT_PUBLIC_LOGO ? " opacity-0" : ""}`}
+      >
         <TransitionLink
           href={initialPath}
           className="flex justify-start items-center gap-2 text-current dark:text-current !no-underline
