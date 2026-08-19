@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { isSuccessfulAptTradeResponse, parseAptTradeXml } from "./parseAptTradeXml";
+import {
+  countItemElements,
+  isSuccessfulAptTradeResponse,
+  parseAptTradeXml,
+  readTotalCount,
+} from "./parseAptTradeXml";
 
 /** 실제 공공 API 응답에서 가져온 항목 형태 ( 필드 순서까지 동일 ) */
 const makeItemXml = (overrides: Record<string, string> = {}) => {
@@ -32,10 +37,12 @@ const makeItemXml = (overrides: Record<string, string> = {}) => {
     .join("")}</item>`;
 };
 
-const wrapResponse = (itemsXml: string, resultCode = "000") =>
+const wrapResponse = (itemsXml: string, resultCode = "000", totalCount?: number) =>
   `<?xml version="1.0" encoding="utf-8" standalone="yes"?><response><header>` +
   `<resultCode>${resultCode}</resultCode><resultMsg>OK</resultMsg></header>` +
-  `<body><items>${itemsXml}</items><numOfRows>10</numOfRows></body></response>`;
+  `<body><items>${itemsXml}</items><numOfRows>10</numOfRows>` +
+  (totalCount === undefined ? "" : `<totalCount>${totalCount}</totalCount>`) +
+  `</body></response>`;
 
 describe("parseAptTradeXml", () => {
   it("거래 항목을 파싱한다", () => {
@@ -118,5 +125,44 @@ describe("isSuccessfulAptTradeResponse", () => {
   it("그 외 코드는 실패로 본다", () => {
     expect(isSuccessfulAptTradeResponse(wrapResponse("", "30"))).toBe(false);
     expect(isSuccessfulAptTradeResponse("")).toBe(false);
+  });
+});
+
+/**
+ * 이 두 함수가 잡는 버그:
+ * `numOfRows` 를 넘는 달은 응답이 잘리는데, 잘렸다는 사실은 `totalCount` 와
+ * 실제 `<item>` 수를 비교해야만 드러난다. 확인하지 않아 608개월 중 6개월이
+ * 조용히 누락됐다 ( 송파구 2017-05 는 1,320건 중 999건만 들어왔다 ).
+ */
+describe("readTotalCount", () => {
+  it("응답의 전체 건수를 읽는다", () => {
+    expect(readTotalCount(wrapResponse(makeItemXml(), "000", 1320))).toBe(1320);
+  });
+
+  it("totalCount 가 없으면 0 을 돌려준다", () => {
+    expect(readTotalCount(wrapResponse(makeItemXml()))).toBe(0);
+  });
+});
+
+describe("countItemElements", () => {
+  it("응답에 담긴 item 수를 센다", () => {
+    const xml = wrapResponse(makeItemXml() + makeItemXml() + makeItemXml());
+
+    expect(countItemElements(xml)).toBe(3);
+  });
+
+  it("item 이 없으면 0 이다", () => {
+    expect(countItemElements(wrapResponse(""))).toBe(0);
+  });
+
+  /**
+   * 파싱 결과 길이로 대신하면 안 된다. 해제 건이 걸러져 항상 이 값 이하가 되고,
+   * 그 차이를 "잘렸다" 로 오해하면 있지도 않은 다음 페이지를 계속 요청하게 된다.
+   */
+  it("해제 건도 포함해 센다 ( 파싱 결과 길이와 다르다 )", () => {
+    const xml = wrapResponse(makeItemXml() + makeItemXml({ cdealType: "O" }));
+
+    expect(countItemElements(xml)).toBe(2);
+    expect(parseAptTradeXml(xml)).toHaveLength(1);
   });
 });

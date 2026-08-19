@@ -1,5 +1,10 @@
 import { unstable_cache } from "next/cache";
-import { isSuccessfulAptTradeResponse, parseAptTradeXml } from "../lib/parseAptTradeXml";
+import {
+  countItemElements,
+  isSuccessfulAptTradeResponse,
+  parseAptTradeXml,
+  readTotalCount,
+} from "../lib/parseAptTradeXml";
 import { buildAptTradeUrl } from "../lib/serviceKey";
 import type { ApartmentTrade } from "../model/types";
 
@@ -116,18 +121,25 @@ function scheduleRateLimited<T>(task: () => Promise<T>): Promise<T> {
  * 그래서 `no-store` 로 받아 Next 가 원본 응답을 캐시하지 못하게 하고,
  * 캐싱은 성공했을 때만 값을 보관하는 `unstable_cache` 에 맡긴다.
  */
-async function fetchMonthlyTradesFromApi(
+async function fetchTradePageXml(
   lawdCode: string,
   dealYearMonth: DealYearMonth,
-): Promise<ApartmentTrade[]> {
+  pageNo: number,
+): Promise<string> {
   let lastErrorMessage = "";
 
   for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt += 1) {
     try {
       const response = await scheduleRateLimited(() =>
-        fetch(buildAptTradeUrl(process.env.DATA_GO_KR_SERVICE_KEY ?? "", lawdCode, dealYearMonth), {
-          cache: "no-store",
-        }),
+        fetch(
+          buildAptTradeUrl(
+            process.env.DATA_GO_KR_SERVICE_KEY ?? "",
+            lawdCode,
+            dealYearMonth,
+            pageNo,
+          ),
+          { cache: "no-store" },
+        ),
       );
 
       if (!response.ok) {
@@ -136,7 +148,7 @@ async function fetchMonthlyTradesFromApi(
         const xml = await response.text();
 
         if (isSuccessfulAptTradeResponse(xml)) {
-          return parseAptTradeXml(xml);
+          return xml;
         }
 
         lastErrorMessage = xml.includes("PER_SECOND") ? "초당 요청 제한 초과" : "응답 오류";
@@ -150,7 +162,40 @@ async function fetchMonthlyTradesFromApi(
     }
   }
 
-  throw new Error(`실거래가 조회 실패 ${lawdCode}/${dealYearMonth}: ${lastErrorMessage}`);
+  throw new Error(
+    `실거래가 조회 실패 ${lawdCode}/${dealYearMonth} p${pageNo}: ${lastErrorMessage}`,
+  );
+}
+
+/**
+ * 무한 페이징 방어. `MAX_ROWS_PER_PAGE` 가 3,000 이고 실측 최대가 1,320건이므로
+ * 정상 상황에서 2페이지를 넘길 일이 없다.
+ */
+const MAX_PAGES_PER_MONTH = 5;
+
+async function fetchMonthlyTradesFromApi(
+  lawdCode: string,
+  dealYearMonth: DealYearMonth,
+): Promise<ApartmentTrade[]> {
+  const trades: ApartmentTrade[] = [];
+  let receivedItemCount = 0;
+
+  for (let pageNo = 1; pageNo <= MAX_PAGES_PER_MONTH; pageNo += 1) {
+    const xml = await fetchTradePageXml(lawdCode, dealYearMonth, pageNo);
+    const itemCount = countItemElements(xml);
+
+    trades.push(...parseAptTradeXml(xml));
+    receivedItemCount += itemCount;
+
+    // 다 받았거나, 빈 페이지가 나왔으면 끝이다.
+    if (receivedItemCount >= readTotalCount(xml) || itemCount === 0) {
+      return trades;
+    }
+  }
+
+  throw new Error(
+    `실거래가 페이지 한도 초과 ${lawdCode}/${dealYearMonth}: ${MAX_PAGES_PER_MONTH}페이지로 부족`,
+  );
 }
 
 /**

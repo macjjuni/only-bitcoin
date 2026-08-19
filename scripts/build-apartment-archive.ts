@@ -28,8 +28,10 @@ import {
   buildYearPoints,
 } from "../src/entities/apartment/lib/buildApartmentSeries";
 import {
+  countItemElements,
   isSuccessfulAptTradeResponse,
   parseAptTradeXml,
+  readTotalCount,
 } from "../src/entities/apartment/lib/parseAptTradeXml";
 import { buildAptTradeUrl } from "../src/entities/apartment/lib/serviceKey";
 import { landmarkApartmentList } from "../src/entities/apartment/model/landmarks";
@@ -75,17 +77,21 @@ function resolveSettledThroughYear(now: Date): number {
 
 let requestCount = 0;
 
-/** 공공 API 한 칸을 조회한다. 재시도 후에도 실패하면 던진다. */
-async function fetchMonthlyTrades(
+/** 무한 페이징 방어. 라우트와 동일한 값. */
+const MAX_PAGES_PER_MONTH = 5;
+
+/** 공공 API 한 페이지를 조회한다. 재시도 후에도 실패하면 던진다. */
+async function fetchTradePageXml(
   lawdCode: string,
   dealYearMonth: string,
-): Promise<ApartmentTrade[]> {
+  pageNo: number,
+): Promise<string> {
   let lastErrorMessage = "";
 
   for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt += 1) {
     try {
       requestCount += 1;
-      const response = await fetch(buildAptTradeUrl(SERVICE_KEY, lawdCode, dealYearMonth));
+      const response = await fetch(buildAptTradeUrl(SERVICE_KEY, lawdCode, dealYearMonth, pageNo));
 
       if (!response.ok) {
         lastErrorMessage = `HTTP ${response.status}`;
@@ -93,7 +99,7 @@ async function fetchMonthlyTrades(
         const xml = await response.text();
 
         if (isSuccessfulAptTradeResponse(xml)) {
-          return parseAptTradeXml(xml);
+          return xml;
         }
 
         lastErrorMessage = xml.includes("PER_SECOND") ? "초당 요청 제한 초과" : "응답 오류";
@@ -107,7 +113,41 @@ async function fetchMonthlyTrades(
     }
   }
 
-  throw new Error(`실거래가 조회 실패 ${lawdCode}/${dealYearMonth}: ${lastErrorMessage}`);
+  throw new Error(
+    `실거래가 조회 실패 ${lawdCode}/${dealYearMonth} p${pageNo}: ${lastErrorMessage}`,
+  );
+}
+
+/**
+ * `(지역코드 × 월)` 한 칸을 **끝까지** 조회한다.
+ *
+ * `totalCount` 를 확인하지 않으면 `numOfRows` 를 넘는 달이 조용히 잘린다.
+ * 아카이브는 한 번 커밋되면 그대로 굳으므로 여기서 잘리면 영구적이다.
+ */
+async function fetchMonthlyTrades(
+  lawdCode: string,
+  dealYearMonth: string,
+): Promise<ApartmentTrade[]> {
+  const trades: ApartmentTrade[] = [];
+  let receivedItemCount = 0;
+
+  for (let pageNo = 1; pageNo <= MAX_PAGES_PER_MONTH; pageNo += 1) {
+    const xml = await fetchTradePageXml(lawdCode, dealYearMonth, pageNo);
+    const itemCount = countItemElements(xml);
+
+    trades.push(...parseAptTradeXml(xml));
+    receivedItemCount += itemCount;
+
+    if (receivedItemCount >= readTotalCount(xml) || itemCount === 0) {
+      return trades;
+    }
+
+    await delay(MIN_REQUEST_INTERVAL_MS);
+  }
+
+  throw new Error(
+    `실거래가 페이지 한도 초과 ${lawdCode}/${dealYearMonth}: ${MAX_PAGES_PER_MONTH}페이지로 부족`,
+  );
 }
 
 /** 한 구의 확정 구간 전체를 순차 조회한다. 발사 간격을 지켜 초당 제한을 피한다. */

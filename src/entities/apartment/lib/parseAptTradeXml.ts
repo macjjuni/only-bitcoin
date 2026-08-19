@@ -99,3 +99,30 @@ export function isSuccessfulAptTradeResponse(xml: string): boolean {
 
   return resultCode === "00" || resultCode === "000";
 }
+
+/**
+ * 그 달의 **전체** 거래 건수.
+ *
+ * `numOfRows` 를 넘으면 응답이 잘리는데, 잘렸다는 사실은 이 값과 실제 `<item>` 수를
+ * 비교해야만 알 수 있다. 확인하지 않으면 "거래가 그만큼뿐" 인 것처럼 보인다.
+ */
+export function readTotalCount(xml: string): number {
+  const parsed = Number.parseInt(readTagValue(xml, "totalCount"), 10);
+
+  if (Number.isNaN(parsed)) {
+    return 0;
+  }
+
+  return parsed;
+}
+
+/**
+ * 응답에 실제로 담긴 `<item>` 수.
+ *
+ * `parseAptTradeXml` 의 결과 길이로는 대신할 수 없다. 그쪽은 계약 해제 건과
+ * 무효 건을 걸러내므로 항상 이 값 이하가 되고, 그 차이를 "잘렸다" 로 오해하면
+ * 있지도 않은 다음 페이지를 무한히 요청하게 된다.
+ */
+export function countItemElements(xml: string): number {
+  return xml.split("<item>").length - 1;
+}
