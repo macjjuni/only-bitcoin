@@ -1,11 +1,13 @@
 "use client";
 
+import { KSpinner } from "kku-ui";
 import dynamic from "next/dynamic";
 import { memo, useMemo } from "react";
 import type { ApartmentYearPoint, PriceUnit } from "@/entities/apartment";
 import useSettingStore from "@/shared/stores/settingStore";
 import { buildChartSeries } from "../lib/buildChartSeries";
 import {
+  BITCOIN_COLOR,
   createApartmentChartOptions,
   resolvePartialYearColor,
   shouldUseLogScale,
@@ -78,20 +80,32 @@ const Btc2ApartmentChart = ({
   // endregion
 
   // region [Templates]
+  /**
+   * 로딩은 차트 자리의 스피너가 알린다. 여기서 또 "불러오는 중" 을 띄우면
+   * 같은 상태가 위아래로 두 번 보인다.
+   */
   const StatusTemplate = useMemo(() => {
-    if (isLoading) {
-      return <span className="text-xs text-muted-foreground">불러오는 중…</span>;
+    if (isLoading || !hasIncompleteYear) {
+      return null;
     }
 
-    if (hasIncompleteYear) {
-      return <span className="text-xs text-muted-foreground">일부 기간 데이터 누락</span>;
-    }
-
-    return null;
+    return <span className="text-xs text-muted-foreground">일부 기간 데이터 누락</span>;
   }, [isLoading, hasIncompleteYear]);
 
   const ChartBodyTemplate = useMemo(() => {
     const hasAnyValue = chartPoints.some((point) => point.value !== null);
+
+    if (isLoading && !hasAnyValue) {
+      return (
+        <div
+          className="flex flex-col items-center justify-center gap-3"
+          style={{ height: CHART_HEIGHT }}
+        >
+          <KSpinner color={BITCOIN_COLOR} />
+          <span className="text-sm text-muted-foreground">실거래 데이터를 불러오는 중이에요.</span>
+        </div>
+      );
+    }
 
     if (!hasAnyValue) {
       return (
@@ -99,7 +113,7 @@ const Btc2ApartmentChart = ({
           className="flex items-center justify-center text-sm text-muted-foreground"
           style={{ height: CHART_HEIGHT }}
         >
-          {isLoading ? "실거래 데이터를 불러오는 중이에요." : "표시할 실거래가 없어요."}
+          표시할 실거래가 없어요.
         </div>
       );
     }
