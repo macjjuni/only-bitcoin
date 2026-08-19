@@ -139,7 +139,7 @@ pnpm check:cycles  # 모듈 순환 참조 검사
 
 <br>
 
-<details open>
+<details>
     <summary><b>v4.0.3 (2026.07.12)</b></summary>
     <div markdown="1">
         <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/overview.jpg" width="220" alt="v4.0.3 overview">
@@ -156,6 +156,38 @@ pnpm check:cycles  # 모듈 순환 참조 검사
 - Blocks 페이지에 비트코인 블록/채굴/반감기/수수료 설명 추가
 - FSD(Feature-Sliced Design) 아키텍처 적용
 - 전반적인 UI 개선
+</details>
+
+<br>
+
+<details open>
+    <summary><b>v4.1.0 (2026.08.19)</b></summary>
+    <div markdown="1">
+
+**새 페이지**
+
+- BTC to Apartment 추가 — 서울 랜드마크 아파트 실거래가를 비트코인으로 환산해 연도별 막대 차트로 비교, 단지 캐러셀 선택과 전용면적별 집계 지원
+- DCA 계산기 추가 — 매수·매도 기록, 이동평균법 실현손익, 누적 보유량 차트, 요약/차트 탭, 프라이빗 모드(금액 마스킹), 기록 필터·정렬
+- 반감기 카운트다운 추가 — 우주 배경 연출과 반감기 도달 시각 효과
+- 개인정보처리방침 페이지 추가
+
+**공유 카드**
+
+- 비트코인 급등 알림 SNS 공유 카드 추가 — 타임프레임 9종 선택, 이미지 복사·저장, iOS·안드로이드 공유 시트 분기
+- 아파트 비트코인 환산 공유 카드 추가 — 선택한 단지가 쿼리스트링에 반영되어 링크로 공유 가능
+- 밈(Meme) 갤러리에 클립보드 복사 및 iOS 저장 폴백 추가
+
+**개선**
+
+- Blocks 실시간 수수료 카드에 멤풀 혼잡도 5단계 표시 추가
+- 오버뷰·프리미엄·블록 페이지 SSR 적용 및 시작 페이지 쿠키 기반 리다이렉트로 SEO·초기 렌더 개선
+- 글로벌 플로팅 배너와 스크롤업 버튼 도입
+- 설정에 실험실(Lab) 항목 추가
+- 도미넌스를 CoinGecko `/global` 로, BTC 원화 시세를 빗썸 일봉으로 통일
+- 단지 사진을 GitHub raw 로 서빙하고 이미지 캐시 수명을 7일로 조정
+- iOS 터치 UX(콜아웃 차단·눌림 피드백) 및 라이트 모드 대비 개선
+- DCA 계산 로직에 vitest 단위 테스트 도입
+  </div>
 </details>
 
 
