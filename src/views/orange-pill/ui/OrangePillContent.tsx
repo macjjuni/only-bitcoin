@@ -109,7 +109,7 @@ const OrangePillContent = () => {
         />
         <ListRow
           icon={<BuildingIcon size={26} />}
-          label="아파트 몇 채? BTC 환산"
+          label="아파트 몇 BTC?"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleBtc2ApartmentRoute}
         />
