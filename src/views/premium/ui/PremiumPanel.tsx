@@ -79,7 +79,7 @@ const PremiumPanel = ({ initialPrice, initialMacro }: PremiumPanelTypes) => {
       {PremiumDataList.map((item) => (
         <div key={item.title} className={SURFACE_CLASS}>
           <div className={`${HEADER_CLASS} pb-0.5 font-thin`}>
-            <h3 className={`${TITLE_CLASS} text-md opacity-70 font-normal`}>{item.title}</h3>
+            <h3 className={`${TITLE_CLASS} text-base opacity-70 font-normal`}>{item.title}</h3>
           </div>
           <div className={`${CONTENT_CLASS} flex flex-col gap-1 items-center font-bold`}>
             {currency.includes("KRW") && (
@@ -100,7 +100,7 @@ const PremiumPanel = ({ initialPrice, initialMacro }: PremiumPanelTypes) => {
 
       <div className={SURFACE_CLASS}>
         <div className={`${HEADER_CLASS} pb-0.5 font-thin`}>
-          <h3 className={`${TITLE_CLASS} text-md opacity-70 font-normal`}>
+          <h3 className={`${TITLE_CLASS} text-base opacity-70 font-normal`}>
             {!isUsdtStandard ? "실시간 환율(USD/KRW)" : "USDT/KRW"}
           </h3>
         </div>

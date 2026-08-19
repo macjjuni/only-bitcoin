@@ -40,7 +40,7 @@ const UnitDropdownMenu = (props: UnitDropdownMenuProps) => {
     <KDropdownMenu size="md">
       <KDropdownMenuTrigger
         id="UnitDropdownMenu"
-        className={`flex gap-0.5 items-center rounded-[3px] text-md font-bold px-1 py-[3px]
+        className={`flex gap-0.5 items-center rounded-[3px] text-base font-bold px-1 py-[3px]
          bg-neutral-200 dark:bg-neutral-700 data-[state=open]:bg-neutral-300 dark:data-[state=open]:bg-neutral-500
           ${currentUnit === "SATS" && "tracking-[-1.5px] "}`}
       >

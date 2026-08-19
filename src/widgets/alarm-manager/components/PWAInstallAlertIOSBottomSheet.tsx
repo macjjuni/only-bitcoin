@@ -43,7 +43,7 @@ export default function PWAInstallAlertIOSBottomSheet() {
         <div className="flex flex-col gap-4">
           <div className="flex flex-row items-center gap-5">
             <KIcon icon="app" size={48} color="#1796EE" />
-            <p className="flex-1 text-md leading-tight font-medium break-keep">
+            <p className="flex-1 text-base leading-tight font-medium break-keep">
               앱으로 설치하여 홈 화면에서 더 빠르고 편리하게 이용해 보세요.
             </p>
           </div>

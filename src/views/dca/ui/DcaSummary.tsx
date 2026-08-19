@@ -169,7 +169,7 @@ const DcaSummary = () => {
                     maxLength={12}
                     value={targetInput}
                     onChange={onChangeTargetInput}
-                    className="font-number text-md font-bold text-right h-full"
+                    className="font-number text-base font-bold text-right h-full"
                   />
                 </InputGroup>
                 <KButton variant="ghost" size="icon" onClick={onClickSaveTarget}>
@@ -177,7 +177,7 @@ const DcaSummary = () => {
                 </KButton>
               </div>
             ) : (
-              <span className="flex min-w-0 items-center gap-1 text-md font-bold">
+              <span className="flex min-w-0 items-center gap-1 text-base font-bold">
                 <span className="flex-none text-xl text-bitcoin">₿</span>
                 <strong className="truncate text-xl">
                   {isPrivateMode ? "****" : formatBtc(targetBtcCount)}

@@ -47,14 +47,14 @@ const PriceTicker = () => {
 
   return (
     <Card>
-      <CardContent className="flex justify-evenly gap-4 items-center h-[44px] p-3 font-number text-md font-bold">
+      <CardContent className="flex justify-evenly gap-4 items-center h-[44px] p-3 font-number text-base font-bold">
         {tickers.map(({ code, sign, price, change }) => {
           const isUp = change >= 0;
 
           return (
             <div
               key={code}
-              className="flex justify-start items-center gap-1.5 whitespace-nowrap text-md"
+              className="flex justify-start items-center gap-1.5 whitespace-nowrap text-base"
             >
               <span className="text-bitcoin">₿</span>
               <span>

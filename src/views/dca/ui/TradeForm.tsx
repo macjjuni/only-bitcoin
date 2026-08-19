@@ -151,7 +151,7 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
             max={getTodayString()}
             value={date}
             onChange={onChangeDate}
-            className="font-number text-md font-bold h-full"
+            className="font-number text-base font-bold h-full"
           />
         </InputGroup>
       </div>
@@ -169,7 +169,7 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
             placeholder="0.001"
             value={btcCountInput}
             onChange={onChangeBtcCount}
-            className="font-number text-md font-bold text-right h-full"
+            className="font-number text-base font-bold text-right h-full"
           />
         </InputGroup>
         {isOverMaxBtc ? (
@@ -200,7 +200,7 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
             placeholder="150,000,000"
             value={priceInput}
             onChange={onChangePrice}
-            className="font-number text-md font-bold text-right h-full"
+            className="font-number text-base font-bold text-right h-full"
           />
         </InputGroup>
       </div>

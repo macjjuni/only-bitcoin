@@ -86,7 +86,7 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
           </span>
           {record.date}
         </span>
-        <span className="whitespace-nowrap text-md font-bold">
+        <span className="whitespace-nowrap text-base font-bold">
           <span className="text-bitcoin">₿</span> {isBuy ? "" : "-"}
           {isPrivateMode ? "****" : formatBtc(record.btcCount)}
         </span>
@@ -96,7 +96,7 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
         <span className="truncate text-xs text-muted-foreground">
           ₩{isPrivateMode ? "****" : comma(record.price)}
         </span>
-        <span className="truncate text-md font-bold">
+        <span className="truncate text-base font-bold">
           ₩{isPrivateMode ? "****" : comma(totalAmount)}
         </span>
         {recordProfit && (

@@ -176,7 +176,7 @@ const HalvingCountdown = ({ initialBlockHeight }: HalvingCountdownProps) => {
           </h1>
 
           {rewardTransition && (
-            <p className="font-number mt-0.5 flex items-center gap-2 text-md">
+            <p className="font-number mt-0.5 flex items-center gap-2 text-base">
               <span className="text-white/40 line-through">{rewardTransition.before} BTC</span>
               <span aria-hidden className="text-white/30">
                 →
@@ -196,7 +196,7 @@ const HalvingCountdown = ({ initialBlockHeight }: HalvingCountdownProps) => {
         </div>
 
         <div className="glass-card w-full rounded-2xl p-4">
-          <div className="flex items-center justify-between text-md">
+          <div className="flex items-center justify-between text-base">
             <span className="font-bold text-white/80">반감기 진행률</span>
             <span className="font-number font-bold text-bitcoin">{halvingPercent}%</span>
           </div>
@@ -211,19 +211,19 @@ const HalvingCountdown = ({ initialBlockHeight }: HalvingCountdownProps) => {
               >
                 현재 블록
               </dt>
-              <dd className="font-number text-md font-bold text-white">
+              <dd className="font-number text-base font-bold text-white">
                 {currentBlockHeight.toLocaleString()}
               </dd>
             </div>
             <div className="flex flex-col gap-0.5">
               <dt className="text-sm text-white/50">남은 블록</dt>
-              <dd className="font-number text-md font-bold text-bitcoin">
+              <dd className="font-number text-base font-bold text-bitcoin">
                 {restBlockCount.toLocaleString()}
               </dd>
             </div>
             <div className="flex flex-col gap-0.5">
               <dt className="text-sm text-white/50">예상 반감기</dt>
-              <dd className="font-number text-md font-bold text-white">{expectedDate}</dd>
+              <dd className="font-number text-base font-bold text-white">{expectedDate}</dd>
             </div>
           </dl>
         </div>

@@ -144,7 +144,7 @@ const ConvertCard = (props: ConvertCardProps) => {
           </div>
         </CardTitle>
         {!inputActive && (topDescription || bottomDescription) && (
-          <CardDescription className="flex flex-col gap-1.5 text-right text-md text-current">
+          <CardDescription className="flex flex-col gap-1.5 text-right text-base text-current">
             {isPremium && topDescription && <span className="font-bold">= {topDescription}</span>}
             {bottomDescription && <span className="font-bold">* {bottomDescription}</span>}
           </CardDescription>

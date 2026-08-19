@@ -247,7 +247,7 @@ export default function SurpriseQuiz() {
               <KDialogHeader className="items-center text-center">
                 <div className="text-4xl">🎁</div>
                 <KDialogTitle className="text-2xl font-black">깜짝 비트코인 퀴즈!</KDialogTitle>
-                <KDialogDescription className="pt-2 text-md">
+                <KDialogDescription className="pt-2 text-base">
                   {quizData?.question}
                 </KDialogDescription>
               </KDialogHeader>
