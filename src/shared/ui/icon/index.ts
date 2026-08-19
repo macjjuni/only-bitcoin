@@ -18,3 +18,4 @@ export { default as PremiumIcon } from "./PremiumIcon";
 export { default as SaveIcon } from "./SaveIcon";
 export { default as SettingIcon } from "./SettingIcon";
 export { default as ShootingStarIcon } from "./ShootingStarIcon";
+export { default as WonIcon } from "./WonIcon";
