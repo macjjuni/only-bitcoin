@@ -8,8 +8,8 @@ import { SegmentedControl } from "@/shared/ui";
 import { formatBtcCount, formatKrwInEok } from "../lib/buildChartSeries";
 
 const PRICE_UNIT_OPTIONS = [
-  { label: "₿ BTC", value: "BTC" as const },
-  { label: "₩ KRW", value: "KRW" as const },
+  { label: "BTC", value: "BTC" as const },
+  { label: "KRW", value: "KRW" as const },
 ];
 
 interface ApartmentSummaryCardProps {
@@ -122,12 +122,12 @@ const ApartmentSummaryCard = ({
           value={priceUnit}
           onChange={(value) => onChangePriceUnit(value as PriceUnit)}
           size="sm"
-          className="w-[132px]"
+          className="w-[116px]"
         />
       </div>
       {SubtitleTemplate}
       <div className="mt-2 flex flex-col gap-0.5">
-        <span className="text-xs text-muted-foreground">지금 사려면</span>
+        <span className="text-sm text-base">지금 사려면</span>
         {HeadlineTemplate}
         {LatestDealTemplate}
       </div>
