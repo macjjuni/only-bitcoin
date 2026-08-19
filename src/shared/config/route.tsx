@@ -20,7 +20,7 @@ interface ClientRoute {
   hideBottomNav?: boolean;
 }
 
-/** 전환 방향은 이 배열의 인덱스 순서로 결정되므로, 하위 페이지는 상위 경로 뒤에 둔다. */
+/** 전환 방향은 이 배열의 인덱스 순서로 결정되므로, 하위 페이지는 상위 경로 뒤에 둠. */
 const clientRoutes: ClientRoute[] = [
   {
     title: "Overview",
@@ -64,11 +64,11 @@ const clientRoutes: ClientRoute[] = [
     icon: <ExchangeIcon size={26} />,
   },
   {
-    title: "BTC To Apartment",
+    title: "아파트 몇 BTC?",
     subtitle: "Apartment",
     path: "/btc2apartment",
     isNav: false,
-    isFavorite: true,
+    isFavorite: false,
     icon: <BuildingIcon size={24} />,
   },
   {
