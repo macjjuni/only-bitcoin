@@ -6,23 +6,9 @@ import { memo, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { Swiper as SwiperType } from "swiper";
 import { EffectCoverflow } from "swiper/modules";
 import { Swiper, SwiperSlide } from "swiper/react";
-import { landmarkApartmentList } from "@/entities/apartment";
+import { getApartmentImagePath, landmarkApartmentList } from "@/entities/apartment";
 import "swiper/css";
 import "swiper/css/effect-coverflow";
-
-/** apartmentID → 이미지 파일명 매핑. 파일명이 ID와 다른 단지만 등록한다. */
-const IMAGE_FILENAME_MAP: Record<string, string> = {
-  "banpo-xi": "banpo-zai",
-  "acro-river-park": "arco",
-  "apgujeong-hyundai-6": "apgujeong-hyundai-6th",
-  "tower-palace-1": "tower-palace-1st",
-  "jamsil-else": "jamsil-els",
-};
-
-function getImagePath(apartmentID: string): string {
-  const filename = IMAGE_FILENAME_MAP[apartmentID] ?? apartmentID;
-  return `/images/apartments/${filename}.webp`;
-}
 
 const LAST_SLIDE_INDEX = landmarkApartmentList.length - 1;
 
@@ -186,7 +172,7 @@ const ApartmentSelector = ({ selectedApartmentID, onSelectApartment }: Apartment
               >
                 <div className="relative aspect-video">
                   <Image
-                    src={getImagePath(item.apartmentID)}
+                    src={getApartmentImagePath(item.apartmentID)}
                     alt={item.displayName}
                     fill
                     sizes="(max-width: 524px) 70vw, 370px"
