@@ -1,6 +1,7 @@
 import { cookies } from "next/headers";
 import { NextResponse } from "next/server";
 import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT, quizData } from "@/entities/quiz";
+import { isDev } from "@/shared/utils/common";
 
 // region [Privates]
 const LIMIT_KEY = `${QUIZ_COOKIE_KEY}_done`;
@@ -77,8 +78,6 @@ const fetchWalletBalance = async (): Promise<number> => {
 
 export async function GET() {
   try {
-    const isDev = process.env.NODE_ENV === "development";
-
     // 개발 환경: 조건 없이 바로 퀴즈 반환
     if (isDev) {
       const quiz = getRandomQuiz();

@@ -3,9 +3,9 @@ import { NextResponse } from "next/server";
 import { sendLnPayment } from "@/entities/lightning-wallet/server";
 import { claimRewardToken, releaseRewardToken, validateRewardToken } from "@/entities/quiz/server";
 import { env } from "@/shared/config/env";
+import { isDev } from "@/shared/utils/common";
 
 // region [Privates]
-const isDev = process.env.NODE_ENV === "development";
 const DOMAIN = isDev
   ? "https://unresonant-elfreda-unreasonably.ngrok-free.dev"
   : env.NEXT_PUBLIC_URL;
