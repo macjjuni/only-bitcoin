@@ -15,7 +15,7 @@ import {
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
 
-const CHART_HEIGHT = 280;
+const CHART_HEIGHT = 266;
 
 interface Btc2ApartmentChartProps {
   yearPoints: ApartmentYearPoint[];
