@@ -5,6 +5,7 @@ import {
   composeApartmentSeries,
   fetchDistrictTrades,
   getArchivedYearPoints,
+  getCurrentSeoulYear,
   resolveRuntimeStartYear,
 } from "@/entities/apartment/server";
 import { type BtcDailyKrwMap, getBtcDailyKrwMap } from "@/entities/bitcoin/server";
@@ -77,7 +78,8 @@ export async function GET(_request: Request, context: RouteContext) {
 
   // 첫 실거래 이전 구간은 조회하지 않아 불필요한 외부 호출을 막는다.
   const earliestYear = Math.max(CHART_START_YEAR, landmark.earliestDealYear);
-  const currentYear = new Date().getUTCFullYear();
+  // KST 기준이어야 한다. fetchDistrictTrades 가 KST 로 월을 잡으므로 여기만 UTC 면 어긋난다.
+  const currentYear = getCurrentSeoulYear();
 
   /**
    * 확정된 과거 연도는 `archive.json` 에서 그대로 가져온다.

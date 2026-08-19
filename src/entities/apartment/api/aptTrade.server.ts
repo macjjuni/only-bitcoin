@@ -59,6 +59,18 @@ function getCurrentDealYearMonth(): DealYearMonth {
 }
 
 /**
+ * 현재 시점(KST) 기준 연도.
+ *
+ * 조회 범위를 정하는 쪽은 모두 이 값을 써야 한다. `new Date().getUTCFullYear()` 로
+ * 따로 구하면 KST 1월 1일 00:00~08:59 의 9시간 동안 UTC 가 아직 전년도라
+ * 거래는 새해 것까지 모으면서 그 해 BTC 시세는 수집하지 않는 상태가 된다
+ * ( 그 연도 환산이 통째로 0건이 된다 ).
+ */
+export function getCurrentSeoulYear(): number {
+  return Number(getCurrentDealYearMonth().slice(0, 4));
+}
+
+/**
  * 데이터가 확정된 월인지 여부.
  * 확정된 과거 월은 값이 변하지 않으므로 사실상 영구 캐시해도 된다.
  */
