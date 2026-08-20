@@ -12,6 +12,19 @@ import type { LandmarkApartment } from "./types";
  */
 const landmarkApartments: LandmarkApartment[] = [
   {
+    apartmentID: "nine-one-hannam",
+    displayName: "나인원한남",
+    lawdCode: "11170",
+    districtName: "서울 용산구",
+    legalDongName: "한남동",
+    aptNames: ["나인원한남"],
+    jibunList: ["829"],
+    /** 2019년 준공이지만 임대 후 분양전환이라 매매 실거래는 2021년부터다. */
+    earliestDealYear: 2021,
+    // 84㎡ 가 없는 대형 전용 단지다. 206·244·273 중 거래 최다인 206 을 기본으로 쓴다.
+    defaultAreaInSquareMeter: 206,
+  },
+  {
     apartmentID: "raemian-one-bailey",
     displayName: "래미안원베일리",
     lawdCode: "11650",
@@ -151,8 +164,13 @@ const landmarkApartments: LandmarkApartment[] = [
 /** 화이트리스트 전체 ( 선택 목록 렌더링용 ) */
 export const landmarkApartmentList: readonly LandmarkApartment[] = landmarkApartments;
 
-/** 기본 선택 단지 */
-export const DEFAULT_APARTMENT_ID = "raemian-one-bailey";
+/**
+ * 기본 선택 단지.
+ *
+ * 목록 첫 항목에서 끌어온다. 쿼리가 없는 진입은 `getFirstApartmentID()`( = 목록 첫 항목 )로
+ * 정렬되므로, 여기에 다른 값을 박아 두면 스토어 초기값과 실제 표시가 어긋난다.
+ */
+export const DEFAULT_APARTMENT_ID = landmarkApartments[0].apartmentID;
 
 /**
  * 식별자로 랜드마크를 찾는다. 화이트리스트에 없으면 `undefined` 를 돌려주고,

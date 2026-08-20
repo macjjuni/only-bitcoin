@@ -1,7 +1,121 @@
 {
-  "generatedAt": "2026-08-19",
+  "generatedAt": "2026-08-20",
   "settledThroughYear": 2025,
   "apartments": {
+    "nine-one-hannam": [
+      {
+        "year": 2021,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 206,
+            "medianPriceInKrw": 6600000000,
+            "medianPriceInBtc": 108.7355194822278,
+            "dealCount": 6,
+            "btcConvertedDealCount": 6
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 7900000000,
+            "medianPriceInBtc": 124.92291149448916,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          },
+          {
+            "areaInSquareMeter": 273,
+            "medianPriceInKrw": 8400000000,
+            "medianPriceInBtc": 120.62379735202045,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      },
+      {
+        "year": 2022,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 206,
+            "medianPriceInKrw": 8975000000,
+            "medianPriceInBtc": 243.56738968737335,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2023,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 206,
+            "medianPriceInKrw": 9150000000,
+            "medianPriceInBtc": 212.1107012696359,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          }
+        ]
+      },
+      {
+        "year": 2024,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 206,
+            "medianPriceInKrw": 9950000000,
+            "medianPriceInBtc": 136.41409936164308,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 12000000000,
+            "medianPriceInBtc": 120.12012012012012,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          },
+          {
+            "areaInSquareMeter": 273,
+            "medianPriceInKrw": 22000000000,
+            "medianPriceInBtc": 236.06163354650414,
+            "dealCount": 3,
+            "btcConvertedDealCount": 3
+          }
+        ]
+      },
+      {
+        "year": 2025,
+        "isPartialYear": false,
+        "settledThroughMonth": 12,
+        "areaBuckets": [
+          {
+            "areaInSquareMeter": 206,
+            "medianPriceInKrw": 12900000000,
+            "medianPriceInBtc": 96.73828720732817,
+            "dealCount": 2,
+            "btcConvertedDealCount": 2
+          },
+          {
+            "areaInSquareMeter": 244,
+            "medianPriceInKrw": 15800000000,
+            "medianPriceInBtc": 99.65370338075189,
+            "dealCount": 5,
+            "btcConvertedDealCount": 5
+          },
+          {
+            "areaInSquareMeter": 273,
+            "medianPriceInKrw": 25000000000,
+            "medianPriceInBtc": 169.62837814915085,
+            "dealCount": 1,
+            "btcConvertedDealCount": 1
+          }
+        ]
+      }
+    ],
     "raemian-one-bailey": [
       {
         "year": 2023,
