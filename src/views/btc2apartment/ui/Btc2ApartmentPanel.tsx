@@ -11,6 +11,7 @@ import ApartmentSelector from "./ApartmentSelector";
 import ApartmentSummaryCard from "./ApartmentSummaryCard";
 import AreaBucketTabs from "./AreaBucketTabs";
 import Btc2ApartmentChart from "./Btc2ApartmentChart";
+import Btc2ApartmentTitle from "./Btc2ApartmentTitle";
 import DataSourceFooter from "./DataSourceFooter";
 
 interface Btc2ApartmentPanelProps {
@@ -90,6 +91,7 @@ const Btc2ApartmentPanel = ({ archiveGeneratedAt }: Btc2ApartmentPanelProps) => 
 
   return (
     <>
+      <Btc2ApartmentTitle />
       <ApartmentSelector selectedApartmentID={apartmentID} onSelectApartment={onSelectApartment} />
       <Card>
         <CardContent className="flex flex-col gap-4 px-4 py-3">
