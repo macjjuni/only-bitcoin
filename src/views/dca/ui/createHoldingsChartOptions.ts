@@ -1,7 +1,6 @@
 import type { ApexOptions } from "apexcharts";
+import { BITCOIN_COLOR } from "@/shared/config/color";
 import { formatBtc } from "../lib/format";
-
-const BITCOIN_COLOR = "#f7931a";
 
 export interface CreateHoldingsChartOptionsParams {
   isDark: boolean;

@@ -3,6 +3,7 @@
 import { KIcon } from "kku-ui";
 import { memo, type RefObject, useId, useMemo, useState } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
+import { BITCOIN_COLOR } from "@/shared/config/color";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
 import { BtcTextLogo, UpdownIcon } from "@/shared/ui";
 import type { ShareCardTimeframe } from "../model/shareCardTimeframe";
@@ -259,7 +260,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       {/* 상단 헤더: 브랜드 로고 + 상태 뱃지 */}
       <div className="relative z-10 flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <KIcon icon="bitcoin" color="#F7931A" size={38} />
+          <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={38} />
           <BtcTextLogo color="#fff" height={36} width={156} />
         </div>
 

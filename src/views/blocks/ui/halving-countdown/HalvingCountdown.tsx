@@ -165,13 +165,13 @@ const HalvingCountdown = ({ initialBlockHeight }: HalvingCountdownProps) => {
           <span
             className={`glass-card rounded-full px-4 py-1.5 text-[12px] font-medium tracking-wide ${
               isHalvingGrace
-                ? "text-bitcoin ring-1 ring-bitcoin/40 shadow-[0_0_20px_rgba(247,147,26,0.35)]"
+                ? "text-bitcoin ring-1 ring-bitcoin/40 shadow-[0_0_20px_rgb(var(--bitcoin-rgb)/0.35)]"
                 : "text-white/70"
             }`}
           >
             {isHalvingGrace ? `🎉 ${halvingOrdinal}번째 반감기 도달` : "다음 반감기까지"}
           </span>
-          <h1 className="font-number text-2xl font-bold text-white drop-shadow-[0_0_18px_rgba(247,147,26,0.5)]">
+          <h1 className="font-number text-2xl font-bold text-white drop-shadow-[0_0_18px_rgb(var(--bitcoin-rgb)/0.5)]">
             {displayHalvingData.blockHeight.toLocaleString()} 블록
           </h1>
 
@@ -181,7 +181,7 @@ const HalvingCountdown = ({ initialBlockHeight }: HalvingCountdownProps) => {
               <span aria-hidden className="text-white/30">
                 →
               </span>
-              <span className="font-bold text-bitcoin drop-shadow-[0_0_12px_rgba(247,147,26,0.5)]">
+              <span className="font-bold text-bitcoin drop-shadow-[0_0_12px_rgb(var(--bitcoin-rgb)/0.5)]">
                 {rewardTransition.after} BTC
               </span>
             </p>

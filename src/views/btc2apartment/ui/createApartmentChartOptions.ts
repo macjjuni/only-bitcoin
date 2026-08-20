@@ -1,9 +1,8 @@
 import type { ApexOptions } from "apexcharts";
 import type { PriceUnit } from "@/entities/apartment";
+import { BITCOIN_COLOR } from "@/shared/config/color";
 import { formatBtcCount, formatKrwInEok, isLowSampleYear } from "../lib/buildChartSeries";
 
-/** 차트 막대와 로딩 스피너가 공유하는 브랜드 색 */
-export const BITCOIN_COLOR = "#f7931a";
 const KRW_COLOR_DARK = "#9ca3af";
 const KRW_COLOR_LIGHT = "#6b7280";
 

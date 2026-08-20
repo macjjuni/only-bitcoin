@@ -86,6 +86,7 @@ html.slide-first::view-transition-new(root) {
   :root {
     color-scheme: light;
     /* Tailwind 알파 변형(bg-up/15 등)을 지원하기 위해 RGB 트리플릿을 원본으로 두고 색상 변수를 파생한다. */
+    /* 바꿀 때 `@/shared/config/color` 의 `BITCOIN_COLOR` 도 같이 바꿔야 함. */
     --bitcoin-rgb: 247 147 26; /* #f7931a */
     --up-rgb: 34 197 94; /* #22c55e */
     --down-rgb: 239 68 68; /* #ef4444 */
@@ -135,9 +136,9 @@ html.slide-first::view-transition-new(root) {
     will-change: opacity, transform;
     background: radial-gradient(
       ellipse 58% 100% at 50% 100%,
-      rgba(247, 147, 26, 0.42) 0%,
-      rgba(247, 147, 26, 0.18) 38%,
-      rgba(247, 147, 26, 0) 72%
+      rgb(var(--bitcoin-rgb) / 0.42) 0%,
+      rgb(var(--bitcoin-rgb) / 0.18) 38%,
+      rgb(var(--bitcoin-rgb) / 0) 72%
     );
   }
 

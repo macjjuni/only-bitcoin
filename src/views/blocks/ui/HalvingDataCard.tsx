@@ -66,7 +66,7 @@ const HalvingDataCard = ({ initialBlockHeight }: HalvingDataCardProps) => {
                     className={[
                       "whitespace-nowrap px-1.5 py-0.5 font-number text-base transition-colors",
                       isLast ? "border-none" : "border-b border-border",
-                      isActive ? "font-bold text-[#F7931A]" : "text-current",
+                      isActive ? "font-bold text-bitcoin" : "text-current",
                     ].join(" ")}
                   >
                     {value}

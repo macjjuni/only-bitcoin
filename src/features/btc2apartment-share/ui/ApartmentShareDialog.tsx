@@ -76,8 +76,8 @@ function ApartmentShareDialog({
   /**
    * 캡처 직전 QR canvas 를 오버레이로 등록한다.
    *
-   * 카드는 다이얼로그 폭에 맞춰 `transform` 으로 축소되어 있으므로 화면 좌표를
-   * 디자인 좌표( 440px 기준 )로 되돌려 넘긴다. 합성은 항상 원본 크기에서 일어난다.
+   * 카드가 `transform` 으로 축소돼 있어 화면 좌표를 디자인 좌표( 440px )로 되돌려 넘김.
+   * 합성은 항상 원본 크기에서 일어남.
    */
   const registerQrOverlayFromCard = useCallback(() => {
     const cardElement = cardRef.current;

@@ -98,9 +98,9 @@ export interface OverlayImageInfo {
   src: string;
   size: number;
   top: number;
-  /** 오른쪽 모서리 기준 위치. `left` 를 주면 무시한다. */
+  /** 오른쪽 모서리 기준 위치. `left` 가 있으면 무시함. */
   right?: number;
-  /** 왼쪽 모서리 기준 위치. 카드 본문 흐름에 놓인 요소는 이쪽이 계산하기 쉽다. */
+  /** 왼쪽 모서리 기준 위치. 본문 흐름에 놓인 요소는 이쪽이 계산하기 쉬움. */
   left?: number;
   shadowColor?: string;
   shadowBlur?: number;

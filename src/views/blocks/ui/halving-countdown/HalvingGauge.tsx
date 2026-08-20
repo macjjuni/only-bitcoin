@@ -7,7 +7,7 @@ const TICKS = [25, 50, 75] as const;
 
 /** 반감기 도달 연출용 프리즘 그라디언트. 양 끝을 같은 색으로 맞춰 흐름이 끊기지 않게 한다. */
 const REACHED_GRADIENT =
-  "bg-[linear-gradient(90deg,#F7931A,#FFD54F,#FFF3C4,#FF7AC8,#A66BFF,#FFD54F,#F7931A)]";
+  "bg-[linear-gradient(90deg,rgb(var(--bitcoin-rgb)),#FFD54F,#FFF3C4,#FF7AC8,#A66BFF,#FFD54F,rgb(var(--bitcoin-rgb)))]";
 
 interface HalvingGaugeProps {
   /** 진행률 (0~100) */
@@ -22,8 +22,8 @@ const HalvingGauge = ({ percent, isReached = false }: HalvingGaugeProps) => {
 
   /** 도달 시에는 흐르는 프리즘 그라디언트 + 다중 글로우로 전환한다. */
   const fillClassName = isReached
-    ? `${REACHED_GRADIENT} bg-[length:300%_100%] animate-aurora-flow shadow-[0_0_22px_rgba(247,147,26,0.9),0_0_40px_rgba(166,107,255,0.5)] motion-reduce:animate-none`
-    : "bg-gradient-to-r from-bitcoin/50 via-bitcoin to-[#FFB74D] shadow-[0_0_16px_rgba(247,147,26,0.85)]";
+    ? `${REACHED_GRADIENT} bg-[length:300%_100%] animate-aurora-flow shadow-[0_0_22px_rgb(var(--bitcoin-rgb)/0.9),0_0_40px_rgba(166,107,255,0.5)] motion-reduce:animate-none`
+    : "bg-gradient-to-r from-bitcoin/50 via-bitcoin to-[#FFB74D] shadow-[0_0_16px_rgb(var(--bitcoin-rgb)/0.85)]";
   // endregion
 
   return (

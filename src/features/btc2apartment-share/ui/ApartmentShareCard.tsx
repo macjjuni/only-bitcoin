@@ -10,6 +10,7 @@ import {
   getApartmentImagePath,
   type LandmarkApartment,
 } from "@/entities/apartment";
+import { BITCOIN_COLOR } from "@/shared/config/color";
 import { env } from "@/shared/config/env";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
 import { BtcTextLogo, WonIcon } from "@/shared/ui";
@@ -25,8 +26,6 @@ const SERVICE_DOMAIN = "ONLY-BTC.APP";
 
 export const APARTMENT_CARD_DESIGN_WIDTH = 440;
 
-const BITCOIN_COLOR = "#F7931A";
-
 /**
  * 배수 뱃지.
  *
@@ -38,19 +37,18 @@ const MULTIPLE_BADGE_CLASS = "w-[70px] whitespace-nowrap text-left";
 /**
  * 비교 행의 글자 크기.
  *
- * 440px 카드에서 `비트코인으로는` 라벨 · 값 · 배수 뱃지가 한 줄에 들어가야 한다.
- * 15px 로 두면 값에 단위( `개` )를 붙이는 순간 한글 폰트가 넓은 기기( Pretendard 미설치 시
- * 시스템 폰트로 폴백 )에서 줄이 넘쳐 라벨이 두 줄로 접힌다.
+ * 440px 안에 라벨 · 값 · 배수 뱃지가 한 줄로 들어가야 함.
+ * 15px 에 단위( `개` )까지 붙이면 한글 폰트가 넓은 기기에서 라벨이 두 줄로 접힘.
  */
 const COMPARISON_ROW_CLASS = "text-[14px] font-bold";
 
-/** QR 표시 크기( 디자인 px ). 3배 캡처에서 모듈 하나가 5px 이상 남는 크기다. */
+/** QR 표시 크기( 디자인 px ). */
 const SHARE_QR_SIZE = 48;
 
-/** QR 을 감싸는 흰 판의 여백. 코드 둘레의 quiet zone 을 겸한다. */
-const SHARE_QR_PADDING = 5;
+/** 흰 판 여백. 코드 둘레의 quiet zone 을 겸함. */
+const SHARE_QR_PADDING = 4;
 
-/** canvas 를 표시 크기의 몇 배로 그릴지. 캡처 배율과 맞춰야 확대해도 뭉개지지 않는다. */
+/** canvas 를 표시 크기의 몇 배로 그릴지. 캡처 배율과 맞춰야 확대해도 안 뭉개짐. */
 const SHARE_QR_RENDER_SCALE = 3;
 
 /** 캡처 후 합성할 때 다이얼로그가 QR canvas 를 찾는 id. */
@@ -59,8 +57,8 @@ export const SHARE_QR_CANVAS_ID = "apartment-share-qr";
 /**
  * 카드에 실을 공유 주소.
  *
- * 지금 보고 있는 경로 · 쿼리( `?apartment=...` )를 그대로 쓰되 도메인만 서비스 주소로 고정한다.
- * 로컬에서 캡처한 카드에 `localhost` QR 이 박히면 받은 사람이 열 수 없다.
+ * 현재 경로 · 쿼리( `?apartment=...` )를 그대로 쓰고 도메인만 서비스 주소로 고정함.
+ * 로컬에서 캡처한 카드에 `localhost` QR 이 박히면 받은 사람이 못 엶.
  */
 function buildCurrentShareUrl(): string {
   if (typeof window === "undefined") {
@@ -92,7 +90,7 @@ function ApartmentShareCard({
   // 카드를 연 시각을 고정한다. 다이얼로그가 닫히면 언마운트되므로 열 때마다 다시 계산.
   const [capturedAtKst] = useState<string>(getCurrentDateTimeKST);
 
-  /** 마운트 후에 채운다. 초기값으로 `window` 를 읽으면 서버 렌더 결과와 어긋난다. */
+  /** 마운트 후에 채움. 초기값으로 `window` 를 읽으면 서버 렌더와 어긋남. */
   const [shareUrl, setShareUrl] = useState("");
 
   const stats = useMemo(
@@ -207,14 +205,14 @@ function ApartmentShareCard({
     );
   }, [stats, krwRiseMultiple]);
 
-  /** 카드는 이미지로만 퍼진다. 도메인 워터마크로는 **지금 이 단지**로 보낼 수 없다. */
+  /** 카드는 이미지로만 퍼짐. 도메인 워터마크로는 **지금 이 단지**로 못 보냄. */
   const ShareQrTemplate = useMemo(() => {
     if (!shareUrl) {
       return null;
     }
 
     return (
-      /* QR 은 밝은 바탕에서만 읽힌다. canvas 가 캡처에서 빠져도 자리가 무너지지 않게 크기를 고정한다. */
+      /* QR 은 밝은 바탕에서만 읽힘. canvas 가 캡처에서 빠져도 안 무너지게 크기를 고정함. */
       <div
         className="ml-auto flex-none rounded-lg bg-white"
         style={{
@@ -224,9 +222,9 @@ function ApartmentShareCard({
         }}
       >
         {/*
-          canvas 는 캡처에서 빼고 `ApartmentShareDialog` 가 결과 canvas 에 직접 합성한다.
-          단지 사진 · 코인 이미지와 같은 이유다. ( Safari 는 foreignObject 안의 이미지를
-          그리지 못하는 경우가 있어 그대로 두면 QR 만 빈칸으로 나온다 )
+          canvas 는 캡처에서 빼고 `ApartmentShareDialog` 가 결과 canvas 에 직접 합성함.
+          단지 사진 · 코인 이미지와 같은 이유. ( Safari 는 foreignObject 안의 이미지를
+          못 그리는 경우가 있어 그대로 두면 QR 만 빈칸으로 나옴 )
         */}
         <span data-capture-ignore="" className="block">
           <QRCode
