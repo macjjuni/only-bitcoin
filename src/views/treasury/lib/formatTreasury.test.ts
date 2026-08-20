@@ -3,6 +3,7 @@ import {
   convertCountryCodeToFlagEmoji,
   extractTickerCode,
   formatBtcAmount,
+  formatBtcCount,
   formatKstDateTime,
   formatPercent,
   formatSignedPercent,
@@ -103,5 +104,15 @@ describe("convertCountryCodeToFlagEmoji", () => {
   it("형식이 맞지 않으면 중립 깃발로 대체한다", () => {
     expect(convertCountryCodeToFlagEmoji("")).toBe("🏳️");
     expect(convertCountryCodeToFlagEmoji("USA")).toBe("🏳️");
+  });
+});
+
+describe("formatBtcCount", () => {
+  it("단위 없이 정수 수량만 돌려준다", () => {
+    expect(formatBtcCount(1_282_516.7)).toBe("1,282,517");
+  });
+
+  it("수량이 없으면 0 을 돌려준다", () => {
+    expect(formatBtcCount(0)).toBe("0");
   });
 });

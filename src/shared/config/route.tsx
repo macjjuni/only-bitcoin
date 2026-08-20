@@ -18,6 +18,8 @@ interface ClientRoute {
   replace?: string;
   hideHeader?: boolean;
   hideBottomNav?: boolean;
+  /** 페이지 상단이 히어로인지. 헤더가 히어로의 그라데이션을 이어 그림. */
+  hasHeroGradient?: boolean;
 }
 
 /** 전환 방향은 이 배열의 인덱스 순서로 결정되므로, 하위 페이지는 상위 경로 뒤에 둠. */
@@ -102,6 +104,7 @@ const clientRoutes: ClientRoute[] = [
     isNav: false,
     isFavorite: false,
     icon: null,
+    hasHeroGradient: true,
   },
   { title: "BIP39", path: "/orange-pill/bip39", isNav: false, isFavorite: false, icon: null },
   { title: "Meme", path: "/orange-pill/meme", isNav: false, isFavorite: false, icon: null },
@@ -135,6 +138,11 @@ export const navigationRouteList = clientRoutes.filter(
 /** 헤더를 렌더링하지 않을 경로 목록 */
 export const hideHeaderPathList = clientRoutes
   .filter(({ hideHeader }) => hideHeader)
+  .map(({ path }) => path);
+
+/** 헤더가 페이지 히어로의 그라데이션을 이어 그릴 경로 목록 */
+export const heroGradientPathList = clientRoutes
+  .filter(({ hasHeroGradient }) => hasHeroGradient)
   .map(({ path }) => path);
 
 /** 하단 네비게이션을 렌더링하지 않을 경로 목록 */

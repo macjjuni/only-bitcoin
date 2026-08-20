@@ -53,7 +53,9 @@ export default function TreasuryCompanyRow({ company, rank }: TreasuryCompanyRow
       <dl className="flex items-center justify-between gap-2 pl-8 text-xs">
         <div className="flex items-center gap-1">
           <dt className="text-muted-foreground">평단가</dt>
-          <dd className="font-number font-bold">{formatUsdPrice(company.averageEntryPriceInUsd)}</dd>
+          <dd className="font-number font-bold">
+            {formatUsdPrice(company.averageEntryPriceInUsd)}
+          </dd>
         </div>
         <div className="flex items-center gap-1">
           <dt className="text-muted-foreground">수익률</dt>
