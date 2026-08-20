@@ -1,11 +1,12 @@
 import type { MetadataRoute } from "next";
+import { PRIVACY_EFFECTIVE_DATE } from "@/shared/constants/policy";
 
 const BASE_URL = "https://only-btc.app";
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // #region 1. Static Routes
   // `/`는 `/overview`를 canonical로 가리키므로 사이트맵에는 정규 URL만 제출.
-  // `/settings` 이하는 robots.txt 에서 Disallow 라 사이트맵에서도 뺌.
+  // `/settings` 는 robots.txt 에서 Disallow 라 제출하지 않음.
   const staticRoutes = [
     "/overview",
     "/blocks",
@@ -23,6 +24,17 @@ export default function sitemap(): MetadataRoute.Sitemap {
     changeFrequency: "daily" as const,
     priority: route === "/overview" ? 1.0 : 0.8,
   }));
+
+  // 정책 문서는 시세 페이지와 갱신 주기·중요도가 다르므로 따로 제출.
+  // lastModified 는 배포 시각이 아니라 방침 시행일로 고정.
+  const policyRoutes = [
+    {
+      url: `${BASE_URL}/privacy`,
+      lastModified: new Date(PRIVACY_EFFECTIVE_DATE),
+      changeFrequency: "yearly" as const,
+      priority: 0.3,
+    },
+  ];
   // #endregion
 
   // #region 2. Dynamic Routes (예: 비트코인 관련 동적 페이지)
@@ -30,7 +42,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // const dynamicRoutes = fetchDynamicCoinRoutes();
   // #endregion
 
-  return staticRoutes;
+  return [...staticRoutes, ...policyRoutes];
 }
 
 // // #region Helper Functions
