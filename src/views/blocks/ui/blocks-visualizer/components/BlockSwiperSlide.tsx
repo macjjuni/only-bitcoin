@@ -46,7 +46,7 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
       ].join(" ");
     }
     return [
-      "bg-gradient-to-b from-[#ffb152] to-[#F7931A]",
+      "bg-gradient-to-b from-[#ffb152] to-bitcoin",
       "before:bg-[#ed8a13] after:bg-[#c9740e]",
     ].join(" ");
   }, [isUnmined, isGenesis]);

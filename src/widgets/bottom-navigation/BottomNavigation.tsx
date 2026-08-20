@@ -48,7 +48,7 @@ export default function BottomNavigation() {
                 href={path}
                 onClick={onClickNavItem}
                 className={`relative flex flex-col gap-1 items-center justify-center rounded-lg press-feedback z-10 ${
-                  isActive ? "text-[#F7931A]" : "text-black dark:text-white"
+                  isActive ? "text-bitcoin" : "text-black dark:text-white"
                 } w-[60px] h-[60px]`}
               >
                 {isActive && (

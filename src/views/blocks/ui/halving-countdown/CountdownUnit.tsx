@@ -36,7 +36,7 @@ const CountdownUnit = ({
         className={[
           "justify-center text-[26px] font-bold leading-none transition-colors duration-500",
           isLow
-            ? "text-bitcoin drop-shadow-[0_0_12px_rgba(247,147,26,0.65)]"
+            ? "text-bitcoin drop-shadow-[0_0_12px_rgb(var(--bitcoin-rgb)/0.65)]"
             : "text-white drop-shadow-[0_0_10px_rgba(255,255,255,0.25)]",
         ].join(" ")}
       />

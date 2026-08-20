@@ -98,7 +98,10 @@ export interface OverlayImageInfo {
   src: string;
   size: number;
   top: number;
-  right: number;
+  /** 오른쪽 모서리 기준 위치. `left` 가 있으면 무시함. */
+  right?: number;
+  /** 왼쪽 모서리 기준 위치. 본문 흐름에 놓인 요소는 이쪽이 계산하기 쉬움. */
+  left?: number;
   shadowColor?: string;
   shadowBlur?: number;
 }
@@ -133,7 +136,10 @@ async function compositeOverlay(
 
   const overlayImg = await loadImage(overlay.src);
   const scaledSize = overlay.size * CAPTURE_PIXEL_RATIO;
-  const x = canvas.width - overlay.right * CAPTURE_PIXEL_RATIO - scaledSize;
+  const x =
+    overlay.left === undefined
+      ? canvas.width - (overlay.right ?? 0) * CAPTURE_PIXEL_RATIO - scaledSize
+      : overlay.left * CAPTURE_PIXEL_RATIO;
   const y = overlay.top * CAPTURE_PIXEL_RATIO;
 
   if (overlay.shadowColor) {

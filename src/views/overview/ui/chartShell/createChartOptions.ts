@@ -1,4 +1,5 @@
 import type { ApexOptions } from "apexcharts";
+import { BITCOIN_COLOR } from "@/shared/config/color";
 
 export interface CreateChartOptionsParams {
   isDark: boolean;
@@ -29,11 +30,11 @@ export const createChartOptions = ({
     animations: { enabled: false },
   },
   theme: { mode: isDark ? "dark" : "light" },
-  colors: [isDark ? "#f7931a" : "#f7931a"],
+  colors: [BITCOIN_COLOR],
   stroke: { curve: "smooth", width: strokeWidth },
   fill: {
     type: "gradient",
-    colors: ["#f7931a"],
+    colors: [BITCOIN_COLOR],
     gradient: {
       shadeIntensity: 1,
       opacityFrom: isDark ? 0.66 : 0.7,
@@ -43,7 +44,7 @@ export const createChartOptions = ({
   },
   markers: {
     size: 0,
-    colors: ["#f7931a"],
+    colors: [BITCOIN_COLOR],
     hover: { size: 4, sizeOffset: 0 },
   },
   tooltip: {
@@ -92,7 +93,7 @@ export const createChartOptions = ({
             y: maxPoint.y,
             marker: {
               size: 4,
-              fillColor: "#f7931a",
+              fillColor: BITCOIN_COLOR,
               strokeColor: "#fff",
               strokeWidth: 2,
             },

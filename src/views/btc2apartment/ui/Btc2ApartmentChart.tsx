@@ -4,10 +4,10 @@ import { KSpinner } from "kku-ui";
 import dynamic from "next/dynamic";
 import { memo, useMemo } from "react";
 import type { ApartmentYearPoint, PriceUnit } from "@/entities/apartment";
+import { BITCOIN_COLOR } from "@/shared/config/color";
 import useSettingStore from "@/shared/stores/settingStore";
 import { buildChartSeries } from "../lib/buildChartSeries";
 import {
-  BITCOIN_COLOR,
   createApartmentChartOptions,
   resolvePartialYearColor,
   shouldUseLogScale,

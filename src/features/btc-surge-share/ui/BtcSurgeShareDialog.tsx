@@ -12,6 +12,7 @@ import {
 } from "kku-ui";
 import { Copy, Download, X } from "lucide-react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
+import { BITCOIN_COLOR } from "@/shared/config/color";
 import {
   captureElementToPngBlob,
   captureElementToPngDataUrl,
@@ -55,7 +56,7 @@ function BtcSurgeShareDialog() {
   // region [Privates]
   /** 캡처 직전 카드 DOM에서 themeColor를 읽어 오버레이를 등록한다. */
   const registerOverlayFromCard = useCallback(() => {
-    const themeColor = cardRef.current?.dataset.themeColor ?? "#F7931A";
+    const themeColor = cardRef.current?.dataset.themeColor ?? BITCOIN_COLOR;
     registerCaptureOverlay({
       ...COIN_OVERLAY_BASE,
       shadowColor: `${themeColor}80`,

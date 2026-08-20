@@ -3,6 +3,7 @@
 import { KSpinner } from "kku-ui";
 import dynamic from "next/dynamic";
 import { useCallback, useMemo } from "react";
+import { BITCOIN_COLOR } from "@/shared/config/color";
 import useSettingStore from "@/shared/stores/settingStore";
 import ChartChanger from "../chartChanger/ChartChanger";
 import { createChartOptions } from "./createChartOptions";
@@ -94,7 +95,7 @@ export default function OverviewChartShell<T extends string | number>({
       <div className="relative w-full" style={{ height: chartHeight }}>
         {isLoading ? (
           <div className={loadingClassName ?? "flex justify-center items-center w-full h-full"}>
-            <KSpinner color="#F7931A" />
+            <KSpinner color={BITCOIN_COLOR} />
           </div>
         ) : (
           <ReactApexChart
