@@ -11,16 +11,53 @@ import type { LandmarkApartment } from "./types";
  * 항목을 추가할 때는 반드시 공공 API 응답으로 표기를 검증한다.
  */
 /**
- * 정렬은 **구 → 단지 모두 평단가 내림차순**이다.
+ * 정렬은 **용산구 먼저, 나머지는 구·단지 모두 평단가 내림차순**이다.
  *
  * 캐러셀 첫 장이 곧 쿼리 없는 진입의 기본 화면이라( `DEFAULT_APARTMENT_ID` )
  * 순서가 인상을 정한다. 가격은 사용자가 이미 머릿속에 가진 서열이라 설명이 필요 없고,
  * 구로 묶여 있어 스와이프 중에 자기 위치를 잃지 않는다.
  *
- * 구의 대표값은 **그 구에서 가장 비싼 단지의 평단가**다 ( 2025 확정 연도, 기본 평형 기준 ).
+ * 평단가만 보면 서초구( 2.26억 )가 용산구( 2.07억 )보다 근소하게 앞선다. 그런데 용산구
+ * 두 단지는 기본 평형이 206·235㎡ 라, 84㎡ 단지와 평단가로 직접 견주면 대형이 불리하다.
+ * 총액은 나인원한남 129억·한남더힐 109억으로 래미안원베일리( 57.5억 )의 두 배다.
+ * 그래서 용산구를 맨 앞에 두고, 그 뒤부터 평단가 내림차순을 적용한다.
+ *
+ * 구의 대표 평단가는 **그 구에서 가장 비싼 단지** 기준이다 ( 2025 확정 연도, 기본 평형 ).
  * 단지 수가 구마다 달라 평균을 쓰면 한 단지뿐인 구가 과소평가된다.
  */
 const landmarkApartments: LandmarkApartment[] = [
+  // 용산구 — 대형 랜드마크. 총액 109~129억
+  {
+    apartmentID: "nine-one-hannam",
+    displayName: "나인원한남",
+    lawdCode: "11170",
+    districtName: "서울 용산구",
+    legalDongName: "한남동",
+    aptNames: ["나인원한남"],
+    jibunList: ["829"],
+    /** 2019년 준공이지만 임대 후 분양전환이라 매매 실거래는 2021년부터다. */
+    earliestDealYear: 2021,
+    // 84㎡ 가 없는 대형 전용 단지다. 206·244·273 중 거래 최다인 206 을 기본으로 쓴다.
+    defaultAreaInSquareMeter: 206,
+  },
+  {
+    apartmentID: "hannam-the-hill",
+    displayName: "한남더힐",
+    lawdCode: "11170",
+    districtName: "서울 용산구",
+    legalDongName: "한남동",
+    // 한남동에는 `한남힐스테이트`·`파르크한남`·`한남파라곤` 등이 있어 부분일치면 섞인다.
+    aptNames: ["한남더힐"],
+    jibunList: ["810"],
+    earliestDealYear: 2014,
+    /**
+     * 84㎡ 가 없어 최다 버킷 규칙을 타면 59㎡( 205건 )가 기본이 된다.
+     * 임대로 지어질 때 들어간 소형이라 이 단지를 대표하지 못하고, 2위 235㎡( 175건 )와
+     * 30건 차이뿐이다. **두 버킷 모두 2014~2026 전 연도에 거래가 있어** 막대는 어느 쪽이든
+     * 꽉 차므로, 규칙의 목적( 빈 막대 방지 )을 해치지 않는 선에서 235㎡ 를 쓴다.
+     */
+    defaultAreaInSquareMeter: 235,
+  },
   // 서초구 — 평당 2.26억
   {
     apartmentID: "raemian-one-bailey",
@@ -67,20 +104,6 @@ const landmarkApartments: LandmarkApartment[] = [
     jibunList: ["20-43"],
     earliestDealYear: 2009,
     defaultAreaInSquareMeter: 84,
-  },
-  // 용산구 — 평당 2.07억
-  {
-    apartmentID: "nine-one-hannam",
-    displayName: "나인원한남",
-    lawdCode: "11170",
-    districtName: "서울 용산구",
-    legalDongName: "한남동",
-    aptNames: ["나인원한남"],
-    jibunList: ["829"],
-    /** 2019년 준공이지만 임대 후 분양전환이라 매매 실거래는 2021년부터다. */
-    earliestDealYear: 2021,
-    // 84㎡ 가 없는 대형 전용 단지다. 206·244·273 중 거래 최다인 206 을 기본으로 쓴다.
-    defaultAreaInSquareMeter: 206,
   },
   // 강남구 — 평당 1.72억
   {
