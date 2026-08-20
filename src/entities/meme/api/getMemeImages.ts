@@ -11,7 +11,7 @@ export const getMemeImages = async (): Promise<MemeImageResponseData[]> => {
     }
 
     const url = `${baseUrl}/meme.json`;
-    console.log(url);
+    // console.log(url); // 디버그용, 필요할 때만 켬
     const response = await fetch(url, {
       next: { revalidate: 3600 * 3 }, // 3시간 동안 캐시
     });

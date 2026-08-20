@@ -102,7 +102,7 @@ const clientRoutes: ClientRoute[] = [
   { title: "Settings", path: "/settings", isNav: false, isFavorite: false, icon: null },
   {
     title: "Privacy Policy",
-    path: "/settings/privacy",
+    path: "/privacy",
     isNav: false,
     isFavorite: false,
     icon: null,

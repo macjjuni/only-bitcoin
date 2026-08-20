@@ -6,15 +6,18 @@ const BASE_URL = "https://only-btc.app";
 export default function sitemap(): MetadataRoute.Sitemap {
   // #region 1. Static Routes
   // `/`는 `/overview`를 canonical로 가리키므로 사이트맵에는 정규 URL만 제출.
+  // `/settings` 는 robots.txt 에서 Disallow 라 제출하지 않음.
   const staticRoutes = [
     "/overview",
     "/blocks",
+    "/blocks/countdown",
     "/btc2fiat",
+    "/btc2apartment",
+    "/dca",
     "/premium",
     "/orange-pill",
     "/orange-pill/meme",
     "/orange-pill/bip39",
-    "/settings",
   ].map((route) => ({
     url: `${BASE_URL}${route}`,
     lastModified: new Date(),
@@ -26,7 +29,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
   // lastModified 는 배포 시각이 아니라 방침 시행일로 고정.
   const policyRoutes = [
     {
-      url: `${BASE_URL}/settings/privacy`,
+      url: `${BASE_URL}/privacy`,
       lastModified: new Date(PRIVACY_EFFECTIVE_DATE),
       changeFrequency: "yearly" as const,
       priority: 0.3,

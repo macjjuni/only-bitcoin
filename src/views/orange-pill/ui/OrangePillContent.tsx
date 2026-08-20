@@ -114,7 +114,7 @@ const OrangePillContent = () => {
           onClick={handleBtc2ApartmentRoute}
         />
         <ListRow
-          icon={<HalfCircleIcon size={28} />}
+          icon={<HalfCircleIcon size={24} />}
           label="반감기 카운트다운"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleHalvingCountdownRoute}

@@ -24,7 +24,7 @@ const DONATE_VALUE = "donation" as const;
  */
 const DONATION_ROW_CLASS = "donation-row";
 
-const PRIVACY_PATH = "/settings/privacy";
+const PRIVACY_PATH = "/privacy";
 
 const InfoListRowGroup = () => {
   // region [Hooks]
