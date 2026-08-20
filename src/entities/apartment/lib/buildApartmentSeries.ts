@@ -131,10 +131,10 @@ export function composeApartmentSeries(
     apartmentID: landmark.apartmentID,
     displayName: landmark.displayName,
     /**
-     * 기본 평형은 `landmarks.ts` 에 고정된 값을 쓴다.
+     * 기본 평형은 `landmarks.ts` 에 고정된 값을 씀.
      *
-     * 연도별 거래로 매번 계산하면 표본이 얇은 단지에서 해마다 값이 바뀐다.
-     * 타워팰리스1 은 84㎡ 비중이 경계선(약 10%)이라 2021→164, 2022→84, 2024→164 로 흔들렸다.
+     * 연도별 거래로 매번 계산하면 표본이 얇은 단지에서 해마다 값이 바뀜.
+     * 타워팰리스1 은 84㎡ 비중이 경계선(약 10%)이라 2021→164, 2022→84, 2024→164 로 흔들림.
      */
     defaultAreaInSquareMeter: landmark.defaultAreaInSquareMeter,
     availableAreas: [...availableAreas].sort((left, right) => left - right),
