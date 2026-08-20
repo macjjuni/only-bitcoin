@@ -3,6 +3,7 @@
 > 브랜치: `feature/btc2apartment`
 > 작성일: 2026-08-18
 > 상태: **계획 검토 중** (구현 착수 전)
+> 랜드마크 추가 절차: [`src/entities/apartment/README.md`](../src/entities/apartment/README.md)
 
 ---
 
