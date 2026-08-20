@@ -13,12 +13,12 @@ const PUBLIC_TREASURY_API_URL =
   "https://api.coingecko.com/api/v3/companies/public_treasury/bitcoin";
 
 /**
- * 서버 캐시 주기(초). 6시간.
+ * 서버 캐시 주기(초). 10분.
  *
- * 기업 트레저리는 공시 기반이라 하루에도 몇 번씩 바뀌는 값이 아니다.
- * CoinGecko 무료 티어의 분당 호출 제한도 있어 페이지 단위 ISR 로 6시간마다만 갱신한다.
+ * 기업 트레저리는 공시 기반이라 자주 바뀌지 않으나,
+ * CoinGecko 무료 티어 제한(Public)을 고려해 페이지 단위 ISR 로 10분마다 갱신한다.
  */
-export const PUBLIC_TREASURY_REVALIDATE_SECONDS = 60 * 60 * 6;
+export const PUBLIC_TREASURY_REVALIDATE_SECONDS = 60 * 10;
 
 const EMPTY_SNAPSHOT: Omit<PublicTreasurySnapshot, "fetchedAt"> = {
   summary: {

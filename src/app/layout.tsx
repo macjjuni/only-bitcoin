@@ -1,4 +1,4 @@
-import { GoogleAnalytics } from "@next/third-parties/google";
+import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import type { Metadata, Viewport } from "next";
 import { ViewTransitions } from "next-view-transitions";
 import type { ReactNode } from "react";
@@ -87,7 +87,12 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           <script dangerouslySetInnerHTML={{ __html: THEME_INITIALIZATION_SCRIPT }} />
         </head>
         <body>
-          {isProduction && <GoogleAnalytics gaId={env.NEXT_PUBLIC_GA_TRACKING_ID} />}
+          {isProduction && env.NEXT_PUBLIC_GTM_ID && (
+            <GoogleTagManager gtmId={env.NEXT_PUBLIC_GTM_ID} />
+          )}
+          {isProduction && env.NEXT_PUBLIC_GA_TRACKING_ID && (
+            <GoogleAnalytics gaId={env.NEXT_PUBLIC_GA_TRACKING_ID} />
+          )}
           <QueryProvider>
             <Initializer />
             <DefaultLayout>
