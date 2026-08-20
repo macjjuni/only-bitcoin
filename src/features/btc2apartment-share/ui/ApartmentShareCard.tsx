@@ -21,44 +21,20 @@ import {
   formatMultiple,
 } from "../lib/buildShareStats";
 
-/** SNS 확산( 네트워크 효과 )을 위한 서비스 도메인 워터마크 */
 const SERVICE_DOMAIN = "ONLY-BTC.APP";
-
 export const APARTMENT_CARD_DESIGN_WIDTH = 440;
-
-/**
- * 배수 뱃지.
- *
- * 폭을 고정하고 왼쪽 맞춤한다. 값 길이가 행마다 다르므로( `9.3억 → 33.1억` vs `1,684개 → 36.9개` )
- * 그냥 흘려보내면 두 행의 ▲ · ▼ 가 서로 어긋난 자리에서 시작한다.
- */
-const MULTIPLE_BADGE_CLASS = "w-[70px] whitespace-nowrap text-left";
-
-/**
- * 비교 행의 글자 크기.
- *
- * 440px 안에 라벨 · 값 · 배수 뱃지가 한 줄로 들어가야 함.
- * 15px 에 단위( `개` )까지 붙이면 한글 폰트가 넓은 기기에서 라벨이 두 줄로 접힘.
- */
-const COMPARISON_ROW_CLASS = "text-[14px] font-bold";
-
-/** QR 표시 크기( 디자인 px ). */
-const SHARE_QR_SIZE = 48;
-
-/** 흰 판 여백. 코드 둘레의 quiet zone 을 겸함. */
-const SHARE_QR_PADDING = 4;
-
-/** canvas 를 표시 크기의 몇 배로 그릴지. 캡처 배율과 맞춰야 확대해도 안 뭉개짐. */
-const SHARE_QR_RENDER_SCALE = 3;
-
-/** 캡처 후 합성할 때 다이얼로그가 QR canvas 를 찾는 id. */
-export const SHARE_QR_CANVAS_ID = "apartment-share-qr";
+const MULTIPLE_BADGE_CLASS = "w-[70px] whitespace-nowrap text-left"; // 배수 뱃지
+const COMPARISON_ROW_CLASS = "text-[14px] font-bold"; // 비교 행의 글자 크기
+const SHARE_QR_SIZE = 48; // QR 표시 크기( 디자인 px ). 최장 URL 이 37 모듈이라 여기가 인식 하한임
+const SHARE_QR_PADDING = 6; // 흰 판 여백 겸 quiet zone. 규격이 모듈 4개분이라 6px 아래로는 못 내림
+const SHARE_QR_RENDER_SCALE = 3; // canvas 를 표시 크기의 몇 배로 그릴지. 캡처 배율과 맞춰야 확대해도 안 뭉개짐
+export const SHARE_QR_CANVAS_ID = "apartment-share-qr"; // 캡처 후 합성할 때 다이얼로그가 QR canvas 를 찾는 id
 
 /**
  * 카드에 실을 공유 주소.
  *
- * 현재 경로 · 쿼리( `?apartment=...` )를 그대로 쓰고 도메인만 서비스 주소로 고정함.
- * 로컬에서 캡처한 카드에 `localhost` QR 이 박히면 받은 사람이 못 엶.
+ * 경로 · 쿼리( `?apartment=...` )를 그대로 쓰고 도메인만 서비스 주소로 고정함.
+ * 쿼리를 빼면 받은 사람이 기본 단지로 떨어지고, `localhost` 가 박히면 아예 못 엶.
  */
 function buildCurrentShareUrl(): string {
   if (typeof window === "undefined") {
@@ -205,7 +181,7 @@ function ApartmentShareCard({
     );
   }, [stats, krwRiseMultiple]);
 
-  /** 카드는 이미지로만 퍼짐. 도메인 워터마크로는 **지금 이 단지**로 못 보냄. */
+  /** 카드는 이미지로만 퍼짐. 도메인 워터마크로는 **지금 이 단지**로 못 보냄. 로고 옆 우측 상단에 둠. */
   const ShareQrTemplate = useMemo(() => {
     if (!shareUrl) {
       return null;
@@ -222,9 +198,8 @@ function ApartmentShareCard({
         }}
       >
         {/*
-          canvas 는 캡처에서 빼고 `ApartmentShareDialog` 가 결과 canvas 에 직접 합성함.
-          단지 사진 · 코인 이미지와 같은 이유. ( Safari 는 foreignObject 안의 이미지를
-          못 그리는 경우가 있어 그대로 두면 QR 만 빈칸으로 나옴 )
+          canvas 는 캡처에서 빼고 `ApartmentShareDialog` 가 결과에 직접 합성함. 단지 사진과 같은 이유임.
+          Safari 가 foreignObject 안 이미지를 못 그려서 그대로 두면 QR 만 빈칸으로 나옴.
         */}
         <span data-capture-ignore="" className="block">
           <QRCode
@@ -271,10 +246,13 @@ function ApartmentShareCard({
       <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/75 to-black/90" />
 
       <div className="relative flex flex-col p-6 text-white">
-        {/* 급등 알림 카드와 같은 규격. 두 카드가 같은 서비스에서 나온 것으로 읽혀야 한다. */}
-        <div className="mb-8 flex items-center gap-2">
-          <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={38} />
-          <BtcTextLogo color="#fff" height={36} width={156} />
+        {/* 급등 알림 카드와 같은 규격. QR 이 로고보다 커서 `items-center` 면 로고가 내려앉으므로 위 맞춤 씀. */}
+        <div className="mb-6 flex items-start gap-2">
+          <div className="flex items-center gap-2">
+            <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={38} />
+            <BtcTextLogo color="#fff" height={36} width={156} />
+          </div>
+          {ShareQrTemplate}
         </div>
         <div className="mb-1 text-[26px] font-bold leading-tight tracking-tight">
           {landmark?.displayName ?? "-"}
@@ -292,10 +270,7 @@ function ApartmentShareCard({
         <div className="mb-6">{HeadlineTemplate}</div>
         {ComparisonTemplate}
 
-        <div className="mt-3 flex items-center gap-4">
-          {PunchlineTemplate}
-          {ShareQrTemplate}
-        </div>
+        <div className="mt-3">{PunchlineTemplate}</div>
 
         {/* {MethodologyTemplate} */}
         <div className="mt-6 flex items-center justify-between gap-2 border-t border-white/15 pt-4">
