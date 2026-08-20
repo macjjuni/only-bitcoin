@@ -63,7 +63,7 @@ function ApartmentShareCard({
   bitcoinPriceInKrw,
 }: ApartmentShareCardProps) {
   // region [Hooks]
-  // 카드를 연 시각을 고정한다. 다이얼로그가 닫히면 언마운트되므로 열 때마다 다시 계산.
+  // 카드를 연 시각을 고정함. 다이얼로그가 닫히면 언마운트되므로 열 때마다 다시 계산함.
   const [capturedAtKst] = useState<string>(getCurrentDateTimeKST);
 
   /** 마운트 후에 채움. 초기값으로 `window` 를 읽으면 서버 렌더와 어긋남. */
@@ -78,10 +78,10 @@ function ApartmentShareCard({
   // region [Privates]
   const imageSrc = landmark ? getApartmentImagePath(landmark.apartmentID) : "";
 
-  /** 캡처 합성은 최적화 경로로 받는다. 표시용과 캐시를 공유하고 7일 캐시가 걸린다. */
+  /** 캡처 합성은 최적화 경로로 받음. 표시용과 캐시를 공유하고 7일 캐시가 걸림. */
   const captureBackgroundSrc = landmark ? getApartmentCaptureImagePath(landmark.apartmentID) : "";
 
-  /** 원화가 몇 배 올랐는지. 비트코인 배수와 나란히 놓아야 반전이 읽힌다. */
+  /** 원화가 몇 배 올랐는지. 비트코인 배수와 나란히 놓아야 반전이 읽힘. */
   const krwRiseMultiple = stats ? stats.krw.currentValue / stats.krw.baseValue : 0;
   // endregion
 
@@ -104,8 +104,8 @@ function ApartmentShareCard({
   /**
    * 카드의 전부인 블록.
    *
-   * 같은 아파트·같은 기간인데 위아래 줄의 방향이 반대다. 원화 줄을 위에 두면
-   * "올랐다" 로 읽히고 끝나므로, 비트코인 줄을 강조색으로 아래에 놓아 결론이 되게 한다.
+   * 같은 아파트 · 같은 기간인데 위아래 줄의 방향이 반대임. 원화 줄을 위에 두면
+   * "올랐다" 로 읽히고 끝나므로, 비트코인 줄을 강조색으로 아래에 놓아 결론이 되게 함.
    */
   const ComparisonTemplate = useMemo(() => {
     if (!stats) {
@@ -228,7 +228,7 @@ function ApartmentShareCard({
       data-background-src={captureBackgroundSrc}
       className="font-pretendard relative w-[440px] overflow-hidden rounded-[32px] select-none"
     >
-      {/* 단지 사진. 캡처에서는 제외하고 canvas 에 직접 합성한다. */}
+      {/* 단지 사진. 캡처에서는 빼고 canvas 에 직접 합성함. */}
       {imageSrc && (
         <Image
           src={imageSrc}
@@ -242,7 +242,7 @@ function ApartmentShareCard({
         />
       )}
 
-      {/* 글자가 사진 어디에 얹혀도 읽히도록 아래로 갈수록 짙어지는 막을 깐다. */}
+      {/* 글자가 사진 어디에 얹혀도 읽히게 아래로 갈수록 짙어지는 막을 깔았음. */}
       <div className="absolute inset-0 bg-gradient-to-b from-black/55 via-black/75 to-black/90" />
 
       <div className="relative flex flex-col p-6 text-white">
