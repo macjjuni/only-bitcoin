@@ -24,7 +24,7 @@ import {
 const SERVICE_DOMAIN = "ONLY-BTC.APP";
 export const APARTMENT_CARD_DESIGN_WIDTH = 440;
 const MULTIPLE_BADGE_CLASS = "w-[70px] whitespace-nowrap text-left"; // 배수 뱃지
-const COMPARISON_ROW_CLASS = "text-[14px] font-bold"; // 비교 행의 글자 크기
+const COMPARISON_ROW_CLASS = "text-base font-bold"; // 비교 행의 글자 크기
 const SHARE_QR_SIZE = 48; // QR 표시 크기( 디자인 px ). 최장 URL 이 37 모듈이라 여기가 인식 하한임
 const SHARE_QR_PADDING = 6; // 흰 판 여백 겸 quiet zone. 규격이 모듈 4개분이라 6px 아래로는 못 내림
 const SHARE_QR_RENDER_SCALE = 3; // canvas 를 표시 크기의 몇 배로 그릴지. 캡처 배율과 맞춰야 확대해도 안 뭉개짐
@@ -114,7 +114,7 @@ function ApartmentShareCard({
 
     return (
       <div className="rounded-2xl border border-white/15 bg-black/60 p-4">
-        <div className="mb-3 font-number text-sm font-bold tracking-widest text-white/80">
+        <div className="mb-4 font-number text-sm font-bold tracking-widest text-white/80">
           {stats.baseYear} → {stats.latestYear}
         </div>
 
@@ -165,7 +165,7 @@ function ApartmentShareCard({
     }
 
     return (
-      <p className="text-[15px] font-bold leading-relaxed text-white/85">
+      <p className="text-lg font-bold leading-relaxed text-white/85">
         같은 집인데 원화로는{" "}
         <span className="text-[#FF6B6B]">
           <span className="font-number">{krwRiseMultiple.toFixed(1)}</span>배 비싸졌고
@@ -247,7 +247,7 @@ function ApartmentShareCard({
 
       <div className="relative flex flex-col p-6 text-white">
         {/* 급등 알림 카드와 같은 규격. QR 이 로고보다 커서 `items-center` 면 로고가 내려앉으므로 위 맞춤 씀. */}
-        <div className="mb-6 flex items-start gap-2">
+        <div className="mb-3 flex items-start gap-2">
           <div className="flex items-center gap-2">
             <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={38} />
             <BtcTextLogo color="#fff" height={36} width={156} />
@@ -266,7 +266,7 @@ function ApartmentShareCard({
             </>
           )}
         </div>
-        <div className="mb-1 text-sm font-bold text-white/60">지금 이 집 한 채의 값</div>
+        <div className="mb-1 text-base font-bold text-white/80">지금 이 집 한 채의 값</div>
         <div className="mb-6">{HeadlineTemplate}</div>
         {ComparisonTemplate}
 
