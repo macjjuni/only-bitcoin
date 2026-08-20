@@ -171,19 +171,6 @@ const landmarkApartments: LandmarkApartment[] = [
     earliestDealYear: 2017,
     defaultAreaInSquareMeter: 84,
   },
-  {
-    apartmentID: "olympic-park-foreon",
-    displayName: "올림픽파크포레온",
-    lawdCode: "11740",
-    districtName: "서울 강동구",
-    legalDongName: "둔촌동",
-    aptNames: ["올림픽파크포레온"],
-    // 둔촌주공 재건축이지만 지번은 `170` 이 아니라 `633` 이다.
-    jibunList: ["633"],
-    /** 2025년 준공. 입주 전 입주권 거래가 2024년부터 잡힌다. */
-    earliestDealYear: 2024,
-    defaultAreaInSquareMeter: 84,
-  },
 ];
 
 /** 화이트리스트 전체 ( 선택 목록 렌더링용 ) */

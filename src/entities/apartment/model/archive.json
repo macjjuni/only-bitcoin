@@ -5234,64 +5234,6 @@
           }
         ]
       }
-    ],
-    "olympic-park-foreon": [
-      {
-        "year": 2024,
-        "isPartialYear": false,
-        "settledThroughMonth": 12,
-        "areaBuckets": [
-          {
-            "areaInSquareMeter": 29,
-            "medianPriceInKrw": 851210000,
-            "medianPriceInBtc": 5.553518535433277,
-            "dealCount": 1,
-            "btcConvertedDealCount": 1
-          },
-          {
-            "areaInSquareMeter": 49,
-            "medianPriceInKrw": 1620000000,
-            "medianPriceInBtc": 10.569307253676422,
-            "dealCount": 1,
-            "btcConvertedDealCount": 1
-          },
-          {
-            "areaInSquareMeter": 59,
-            "medianPriceInKrw": 1874730000,
-            "medianPriceInBtc": 12.95020552920419,
-            "dealCount": 2,
-            "btcConvertedDealCount": 2
-          },
-          {
-            "areaInSquareMeter": 84,
-            "medianPriceInKrw": 2208000000,
-            "medianPriceInBtc": 15.097435897435897,
-            "dealCount": 3,
-            "btcConvertedDealCount": 3
-          }
-        ]
-      },
-      {
-        "year": 2025,
-        "isPartialYear": false,
-        "settledThroughMonth": 12,
-        "areaBuckets": [
-          {
-            "areaInSquareMeter": 39,
-            "medianPriceInKrw": 1300010000,
-            "medianPriceInBtc": 10.569616651083377,
-            "dealCount": 3,
-            "btcConvertedDealCount": 3
-          },
-          {
-            "areaInSquareMeter": 49,
-            "medianPriceInKrw": 2050000000,
-            "medianPriceInBtc": 11.95342246893568,
-            "dealCount": 1,
-            "btcConvertedDealCount": 1
-          }
-        ]
-      }
     ]
   }
 }
