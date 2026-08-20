@@ -25,9 +25,7 @@ export function calculateMedianSecondsToFindBlock(
   hashrateInHashPerSecond: number,
   networkDifficulty: number,
 ): number {
-  return (
-    calculateExpectedSecondsToFindBlock(hashrateInHashPerSecond, networkDifficulty) * Math.LN2
-  );
+  return calculateExpectedSecondsToFindBlock(hashrateInHashPerSecond, networkDifficulty) * Math.LN2;
 }
 
 /**

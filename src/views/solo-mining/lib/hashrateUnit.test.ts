@@ -1,9 +1,5 @@
 import { describe, expect, it } from "vitest";
-import {
-  convertHashrateToHashPerSecond,
-  isHashrateUnit,
-  isOverMaxHashrate,
-} from "./hashrateUnit";
+import { convertHashrateToHashPerSecond, isHashrateUnit, isOverMaxHashrate } from "./hashrateUnit";
 
 describe("convertHashrateToHashPerSecond", () => {
   it("단위에 맞는 배수를 적용한다", () => {

@@ -32,10 +32,7 @@ export function isHashrateUnit(value: unknown): value is HashrateUnit {
  * 사용자 입력 문자열을 H/s 단위 숫자로 변환한다.
  * 음수·NaN·Infinity·상한 초과는 모두 0 을 돌려주어 이후 계산이 Infinity 로 오염되지 않게 한다.
  */
-export function convertHashrateToHashPerSecond(
-  hashrateInput: string,
-  unit: HashrateUnit,
-): number {
+export function convertHashrateToHashPerSecond(hashrateInput: string, unit: HashrateUnit): number {
   const parsedHashrate = Number.parseFloat(hashrateInput);
 
   if (!Number.isFinite(parsedHashrate) || parsedHashrate <= 0) {

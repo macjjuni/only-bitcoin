@@ -29,9 +29,9 @@ export default function SoloMiningGuideArticle() {
         <section className="flex flex-col gap-1.5">
           <h3 className="text-sm font-bold">평균과 중앙값은 다릅니다</h3>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            소요 시간은 지수분포를 따르므로 중앙값은 평균의 약 0.693배입니다. &ldquo;평균 100년&rdquo;
-            은 100년을 채워야 캔다는 뜻이 아니라, 절반은 69년 안에 캐고 나머지는 그보다 오래 걸린다는
-            뜻입니다.
+            소요 시간은 지수분포를 따르므로 중앙값은 평균의 약 0.693배입니다. &ldquo;평균
+            100년&rdquo; 은 100년을 채워야 캔다는 뜻이 아니라, 절반은 69년 안에 캐고 나머지는 그보다
+            오래 걸린다는 뜻입니다.
           </p>
         </section>
 

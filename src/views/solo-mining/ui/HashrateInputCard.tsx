@@ -10,8 +10,8 @@ import {
   SegmentedControl,
   type SegmentedControlOption,
 } from "@/shared/ui";
-import { type HashrateUnit, HASHRATE_UNITS } from "../lib/hashrateUnit";
-import { type MinerPreset, MINER_PRESETS } from "../model/constants";
+import { HASHRATE_UNITS, type HashrateUnit } from "../lib/hashrateUnit";
+import { MINER_PRESETS, type MinerPreset } from "../model/constants";
 import MinerPresetButton from "./MinerPresetButton";
 
 const hashrateUnitOptions: Array<SegmentedControlOption<HashrateUnit>> = HASHRATE_UNITS.map(

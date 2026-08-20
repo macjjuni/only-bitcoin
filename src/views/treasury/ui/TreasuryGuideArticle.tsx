@@ -19,7 +19,8 @@ export default function TreasuryGuideArticle() {
         <section className="flex flex-col gap-1.5">
           <h3 className="text-sm font-bold">평단가와 수익률은 어떻게 계산하나요?</h3>
           <p className="text-sm leading-relaxed text-muted-foreground">
-            평단가는 <b>공시된 매입 총액 ÷ 보유 수량</b>이고, 수익률은 <b>(평가액 - 매입액) ÷ 매입액</b>
+            평단가는 <b>공시된 매입 총액 ÷ 보유 수량</b>이고, 수익률은{" "}
+            <b>(평가액 - 매입액) ÷ 매입액</b>
             입니다. 매입 금액을 공시하지 않은 기업은 평단가와 수익률이 &ldquo;-&rdquo; 로 표시되며,
             전체 합산 수익률에서도 매입액 0으로 잡히므로 실제보다 보수적으로 나옵니다.
           </p>
