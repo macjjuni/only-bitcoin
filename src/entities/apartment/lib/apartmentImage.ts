@@ -12,15 +12,24 @@ const IMAGE_FILENAME_MAP: Record<string, string> = {
 };
 
 /**
+ * 🚧 임시 — Vercel 프리뷰에서 신규 단지 사진을 확인하려고 `public` 경로로 돌려놨음.
+ *
+ * GitHub raw 는 `main` 에 머지된 파일만 내려주므로 프리뷰에서는 새 사진이 전부 404 다.
+ * 확인이 끝나면 이 줄을 지우고 아래 주석 처리한 두 상수를 되살린다.
+ * 같은 출처라 `crossOrigin` 없이도 캡처가 되지만, 있어도 무해해서 호출부는 그대로 둠.
+ */
+const IMAGE_BASE_URL = "/images/apartments";
+
+/**
  * 사진을 읽어올 GitHub 브랜치.
  *
  * 파일이 아직 머지되지 않은 브랜치에만 있으면 raw 주소가 404 가 되므로,
  * 그동안은 이 값만 작업 브랜치명( 예: `feature/btc2apartment` )으로 바꿔 쓴다.
  */
-const IMAGE_SOURCE_BRANCH = "main";
+// const IMAGE_SOURCE_BRANCH = "main";
 
 /** 단지 사진 CDN 베이스. 배포본 용량에서 사진을 빼기 위해 GitHub raw 를 쓴다. */
-const IMAGE_BASE_URL = `https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/${IMAGE_SOURCE_BRANCH}/public/images/apartments`;
+// const IMAGE_BASE_URL = `https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/${IMAGE_SOURCE_BRANCH}/public/images/apartments`;
 
 /**
  * 단지 사진 주소.
