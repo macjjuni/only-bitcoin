@@ -128,6 +128,21 @@ function resolveStaleReason(
     return `아카이브에 없는 단지: ${missingLandmarks.join(", ")}`;
   }
 
+  /**
+   * 목록에서 빠진 단지도 갱신 사유다.
+   *
+   * 없는 단지만 보면 **제거는 감지되지 않아** 죽은 집계가 아카이브에 눌러앉는다.
+   * 읽는 쪽이 식별자로만 찾으니 동작은 멀쩡하고, 그래서 더 오래 남는다.
+   */
+  const removedApartmentIDs = Object.keys(archive.apartments).filter(
+    (apartmentID) =>
+      !landmarkApartmentList.some((landmark) => landmark.apartmentID === apartmentID),
+  );
+
+  if (removedApartmentIDs.length > 0) {
+    return `목록에서 빠진 단지: ${removedApartmentIDs.join(", ")}`;
+  }
+
   return null;
 }
 
