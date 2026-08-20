@@ -34,21 +34,61 @@ const EMPTY_SNAPSHOT: Omit<PublicTreasurySnapshot, "fetchedAt"> = {
   hasFetchFailed: true,
 };
 
+const MAX_FETCH_ATTEMPTS = 3;
+const RETRY_BASE_DELAY_MS = 1000;
+
+const delay = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms));
+
 /**
- * 외부 API 호출. 실패해도 페이지 렌더링은 계속되어야 하므로 null 로 흡수한다.
+ * 외부 API 호출. 429(Too Many Requests) 또는 일시적 네트워크 장애 시 지수 백오프로 재시도한다.
+ * 실패해도 페이지 렌더링은 계속되어야 하므로 최종 실패 시 null 로 흡수한다.
  */
 const fetchPublicTreasury = async (): Promise<PublicTreasuryResponse | null> => {
-  try {
-    const response = await fetch(PUBLIC_TREASURY_API_URL, {
-      next: { revalidate: PUBLIC_TREASURY_REVALIDATE_SECONDS },
-    });
-    if (!response.ok) return null;
+  let lastErrorMessage = "";
 
-    return (await response.json()) as PublicTreasuryResponse;
-  } catch (error) {
-    console.warn(`상장기업 트레저리 조회 실패: ${PUBLIC_TREASURY_API_URL}`, error);
-    return null;
+  for (let attempt = 1; attempt <= MAX_FETCH_ATTEMPTS; attempt += 1) {
+    try {
+      const headers: Record<string, string> = {
+        accept: "application/json",
+      };
+
+      const response = await fetch(PUBLIC_TREASURY_API_URL, {
+        next: { revalidate: PUBLIC_TREASURY_REVALIDATE_SECONDS },
+        headers,
+      });
+
+      if (response.ok) {
+        return (await response.json()) as PublicTreasuryResponse;
+      }
+
+      lastErrorMessage = `HTTP ${response.status} (${response.statusText})`;
+
+      // 429 Rate Limit 또는 5xx 서버 에러 발생 시 재시도
+      if (response.status === 429 || response.status >= 500) {
+        if (attempt < MAX_FETCH_ATTEMPTS) {
+          const waitTime = RETRY_BASE_DELAY_MS * 2 ** (attempt - 1);
+          console.warn(
+            `[CoinGecko ${response.status}] 상장기업 트레저리 조회 재시도 (${attempt}/${MAX_FETCH_ATTEMPTS}) ${waitTime}ms 후 대기...`,
+          );
+          await delay(waitTime);
+          continue;
+        }
+      }
+
+      // 그 외 4xx 클라이언트 에러는 재시도 없이 중단
+      break;
+    } catch (error) {
+      lastErrorMessage = error instanceof Error ? error.message : "알 수 없는 오류";
+      if (attempt < MAX_FETCH_ATTEMPTS) {
+        await delay(RETRY_BASE_DELAY_MS * 2 ** (attempt - 1));
+      }
+    }
   }
+
+  console.warn(
+    `상장기업 트레저리 조회 최종 실패: ${PUBLIC_TREASURY_API_URL} (${lastErrorMessage})`,
+  );
+  return null;
 };
 
 /** 보유량 내림차순 정렬. API 도 같은 순서로 주지만 순서를 응답에 의존하지 않는다. */
