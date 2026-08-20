@@ -10,20 +10,18 @@ import type { LandmarkApartment } from "./types";
  * 임의로 추정해서 넣으면 조회 결과가 0건이 되므로( 예: 존재하지 않는 `압구정현대` )
  * 항목을 추가할 때는 반드시 공공 API 응답으로 표기를 검증한다.
  */
+/**
+ * 정렬은 **구 → 단지 모두 평단가 내림차순**이다.
+ *
+ * 캐러셀 첫 장이 곧 쿼리 없는 진입의 기본 화면이라( `DEFAULT_APARTMENT_ID` )
+ * 순서가 인상을 정한다. 가격은 사용자가 이미 머릿속에 가진 서열이라 설명이 필요 없고,
+ * 구로 묶여 있어 스와이프 중에 자기 위치를 잃지 않는다.
+ *
+ * 구의 대표값은 **그 구에서 가장 비싼 단지의 평단가**다 ( 2025 확정 연도, 기본 평형 기준 ).
+ * 단지 수가 구마다 달라 평균을 쓰면 한 단지뿐인 구가 과소평가된다.
+ */
 const landmarkApartments: LandmarkApartment[] = [
-  {
-    apartmentID: "nine-one-hannam",
-    displayName: "나인원한남",
-    lawdCode: "11170",
-    districtName: "서울 용산구",
-    legalDongName: "한남동",
-    aptNames: ["나인원한남"],
-    jibunList: ["829"],
-    /** 2019년 준공이지만 임대 후 분양전환이라 매매 실거래는 2021년부터다. */
-    earliestDealYear: 2021,
-    // 84㎡ 가 없는 대형 전용 단지다. 206·244·273 중 거래 최다인 206 을 기본으로 쓴다.
-    defaultAreaInSquareMeter: 206,
-  },
+  // 서초구 — 평당 2.26억
   {
     apartmentID: "raemian-one-bailey",
     displayName: "래미안원베일리",
@@ -33,29 +31,6 @@ const landmarkApartments: LandmarkApartment[] = [
     aptNames: ["래미안원베일리"],
     jibunList: ["1"],
     earliestDealYear: 2023,
-    defaultAreaInSquareMeter: 84,
-  },
-  {
-    apartmentID: "banpo-xi",
-    displayName: "반포자이",
-    lawdCode: "11650",
-    districtName: "서울 서초구",
-    legalDongName: "반포동",
-    // 부분일치를 쓰면 잠원동 `신반포자이` 가 섞인다.
-    aptNames: ["반포자이"],
-    jibunList: ["20-43"],
-    earliestDealYear: 2009,
-    defaultAreaInSquareMeter: 84,
-  },
-  {
-    apartmentID: "raemian-firstige",
-    displayName: "래미안퍼스티지",
-    lawdCode: "11650",
-    districtName: "서울 서초구",
-    legalDongName: "반포동",
-    aptNames: ["래미안퍼스티지"],
-    jibunList: ["18-1"],
-    earliestDealYear: 2009,
     defaultAreaInSquareMeter: 84,
   },
   {
@@ -71,16 +46,43 @@ const landmarkApartments: LandmarkApartment[] = [
     defaultAreaInSquareMeter: 84,
   },
   {
-    apartmentID: "eunma",
-    displayName: "은마",
-    lawdCode: "11680",
-    districtName: "서울 강남구",
-    legalDongName: "대치동",
-    aptNames: ["은마"],
-    jibunList: ["316"],
-    earliestDealYear: 2014,
+    apartmentID: "raemian-firstige",
+    displayName: "래미안퍼스티지",
+    lawdCode: "11650",
+    districtName: "서울 서초구",
+    legalDongName: "반포동",
+    aptNames: ["래미안퍼스티지"],
+    jibunList: ["18-1"],
+    earliestDealYear: 2009,
     defaultAreaInSquareMeter: 84,
   },
+  {
+    apartmentID: "banpo-xi",
+    displayName: "반포자이",
+    lawdCode: "11650",
+    districtName: "서울 서초구",
+    legalDongName: "반포동",
+    // 부분일치를 쓰면 잠원동 `신반포자이` 가 섞인다.
+    aptNames: ["반포자이"],
+    jibunList: ["20-43"],
+    earliestDealYear: 2009,
+    defaultAreaInSquareMeter: 84,
+  },
+  // 용산구 — 평당 2.07억
+  {
+    apartmentID: "nine-one-hannam",
+    displayName: "나인원한남",
+    lawdCode: "11170",
+    districtName: "서울 용산구",
+    legalDongName: "한남동",
+    aptNames: ["나인원한남"],
+    jibunList: ["829"],
+    /** 2019년 준공이지만 임대 후 분양전환이라 매매 실거래는 2021년부터다. */
+    earliestDealYear: 2021,
+    // 84㎡ 가 없는 대형 전용 단지다. 206·244·273 중 거래 최다인 206 을 기본으로 쓴다.
+    defaultAreaInSquareMeter: 206,
+  },
+  // 강남구 — 평당 1.72억
   {
     apartmentID: "apgujeong-hyundai-6",
     displayName: "압구정 현대6차",
@@ -98,6 +100,17 @@ const landmarkApartments: LandmarkApartment[] = [
     defaultAreaInSquareMeter: 144,
   },
   {
+    apartmentID: "eunma",
+    displayName: "은마",
+    lawdCode: "11680",
+    districtName: "서울 강남구",
+    legalDongName: "대치동",
+    aptNames: ["은마"],
+    jibunList: ["316"],
+    earliestDealYear: 2014,
+    defaultAreaInSquareMeter: 84,
+  },
+  {
     apartmentID: "dogok-rexle",
     displayName: "도곡렉슬",
     lawdCode: "11680",
@@ -108,6 +121,19 @@ const landmarkApartments: LandmarkApartment[] = [
     earliestDealYear: 2014,
     defaultAreaInSquareMeter: 84,
   },
+  // 성동구 — 평당 1.65억
+  {
+    apartmentID: "trimage",
+    displayName: "트리마제",
+    lawdCode: "11200",
+    districtName: "서울 성동구",
+    legalDongName: "성수동1가",
+    aptNames: ["트리마제"],
+    jibunList: ["718"],
+    earliestDealYear: 2017,
+    defaultAreaInSquareMeter: 84,
+  },
+  // 송파구 — 평당 1.22억
   {
     apartmentID: "jamsil-else",
     displayName: "잠실엘스",
@@ -130,6 +156,7 @@ const landmarkApartments: LandmarkApartment[] = [
     earliestDealYear: 2018,
     defaultAreaInSquareMeter: 84,
   },
+  // 마포구 — 평당 0.84억
   {
     apartmentID: "mapo-raemian-prugio",
     displayName: "마포래미안푸르지오",
@@ -145,30 +172,6 @@ const landmarkApartments: LandmarkApartment[] = [
     ],
     jibunList: ["777"],
     earliestDealYear: 2014,
-    defaultAreaInSquareMeter: 84,
-  },
-  {
-    apartmentID: "acro-seoul-forest",
-    displayName: "아크로서울포레스트",
-    lawdCode: "11200",
-    districtName: "서울 성동구",
-    legalDongName: "성수동1가",
-    // 부분일치를 쓰면 `아크로파크`( 성수동 )·`다울아크로빌` 같은 무관한 단지가 섞인다.
-    aptNames: ["아크로서울포레스트"],
-    jibunList: ["685-700"],
-    earliestDealYear: 2021,
-    // 84㎡ 가 없는 대형 전용 단지다. 거래 최다인 159㎡ 를 기본으로 쓴다.
-    defaultAreaInSquareMeter: 159,
-  },
-  {
-    apartmentID: "trimage",
-    displayName: "트리마제",
-    lawdCode: "11200",
-    districtName: "서울 성동구",
-    legalDongName: "성수동1가",
-    aptNames: ["트리마제"],
-    jibunList: ["718"],
-    earliestDealYear: 2017,
     defaultAreaInSquareMeter: 84,
   },
 ];
