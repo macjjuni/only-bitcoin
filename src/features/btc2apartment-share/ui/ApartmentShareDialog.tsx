@@ -27,9 +27,14 @@ import {
   isIos,
   isShareAbortedByUser,
   registerCaptureBackground,
+  registerCaptureOverlay,
 } from "@/shared/lib/imageExport";
 import { useApartmentShareStore } from "../model/useApartmentShareStore";
-import { APARTMENT_CARD_DESIGN_WIDTH, ApartmentShareCard } from "./ApartmentShareCard";
+import {
+  APARTMENT_CARD_DESIGN_WIDTH,
+  ApartmentShareCard,
+  SHARE_QR_CANVAS_ID,
+} from "./ApartmentShareCard";
 
 const SHARE_IMAGE_FILE_NAME = "only-btc-app-apartment.png";
 const SHARE_TITLE = "ONLY-BTC.APP 아파트 비트코인 환산";
@@ -66,6 +71,32 @@ function ApartmentShareDialog({
     if (backgroundSrc) {
       registerCaptureBackground(backgroundSrc);
     }
+  }, []);
+
+  /**
+   * 캡처 직전 QR canvas 를 오버레이로 등록한다.
+   *
+   * 카드는 다이얼로그 폭에 맞춰 `transform` 으로 축소되어 있으므로 화면 좌표를
+   * 디자인 좌표( 440px 기준 )로 되돌려 넘긴다. 합성은 항상 원본 크기에서 일어난다.
+   */
+  const registerQrOverlayFromCard = useCallback(() => {
+    const cardElement = cardRef.current;
+    const qrCanvas = cardElement?.querySelector<HTMLCanvasElement>(`#${SHARE_QR_CANVAS_ID}`);
+
+    if (!cardElement || !qrCanvas) {
+      return;
+    }
+
+    const cardRect = cardElement.getBoundingClientRect();
+    const qrRect = qrCanvas.getBoundingClientRect();
+    const displayScale = cardRect.width / APARTMENT_CARD_DESIGN_WIDTH;
+
+    registerCaptureOverlay({
+      src: qrCanvas.toDataURL(),
+      size: qrRect.width / displayScale,
+      top: (qrRect.top - cardRect.top) / displayScale,
+      left: (qrRect.left - cardRect.left) / displayScale,
+    });
   }, []);
 
   /**
@@ -170,6 +201,7 @@ function ApartmentShareDialog({
 
     setIsExporting(true);
     registerBackgroundFromCard();
+    registerQrOverlayFromCard();
 
     try {
       // Android 는 clipboard.write 가 성공해도 실제로 저장되지 않는 경우가 있어 공유 시트를 우선한다.
@@ -207,6 +239,7 @@ function ApartmentShareDialog({
 
     setIsExporting(true);
     registerBackgroundFromCard();
+    registerQrOverlayFromCard();
 
     try {
       const dataUrl = await captureElementToPngDataUrl(cardElement);

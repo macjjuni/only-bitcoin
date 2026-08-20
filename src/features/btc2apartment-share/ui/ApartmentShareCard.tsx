@@ -2,13 +2,15 @@
 
 import { KIcon } from "kku-ui";
 import Image from "next/image";
-import { memo, type RefObject, useMemo, useState } from "react";
+import { memo, type RefObject, useEffect, useMemo, useState } from "react";
+import { QRCode } from "react-qrcode-logo";
 import {
   type ApartmentYearPoint,
   getApartmentCaptureImagePath,
   getApartmentImagePath,
   type LandmarkApartment,
 } from "@/entities/apartment";
+import { env } from "@/shared/config/env";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
 import { BtcTextLogo, WonIcon } from "@/shared/ui";
 import {
@@ -28,10 +30,48 @@ const BITCOIN_COLOR = "#F7931A";
 /**
  * 배수 뱃지.
  *
- * 폭을 고정하고 왼쪽 맞춤한다. 값 길이가 행마다 다르므로( `9.3억 → 33.1억` vs `1,684 → 36.9` )
+ * 폭을 고정하고 왼쪽 맞춤한다. 값 길이가 행마다 다르므로( `9.3억 → 33.1억` vs `1,684개 → 36.9개` )
  * 그냥 흘려보내면 두 행의 ▲ · ▼ 가 서로 어긋난 자리에서 시작한다.
  */
-const MULTIPLE_BADGE_CLASS = "w-[74px] whitespace-nowrap text-left";
+const MULTIPLE_BADGE_CLASS = "w-[70px] whitespace-nowrap text-left";
+
+/**
+ * 비교 행의 글자 크기.
+ *
+ * 440px 카드에서 `비트코인으로는` 라벨 · 값 · 배수 뱃지가 한 줄에 들어가야 한다.
+ * 15px 로 두면 값에 단위( `개` )를 붙이는 순간 한글 폰트가 넓은 기기( Pretendard 미설치 시
+ * 시스템 폰트로 폴백 )에서 줄이 넘쳐 라벨이 두 줄로 접힌다.
+ */
+const COMPARISON_ROW_CLASS = "text-[14px] font-bold";
+
+/** QR 표시 크기( 디자인 px ). 3배 캡처에서 모듈 하나가 5px 이상 남는 크기다. */
+const SHARE_QR_SIZE = 48;
+
+/** QR 을 감싸는 흰 판의 여백. 코드 둘레의 quiet zone 을 겸한다. */
+const SHARE_QR_PADDING = 5;
+
+/** canvas 를 표시 크기의 몇 배로 그릴지. 캡처 배율과 맞춰야 확대해도 뭉개지지 않는다. */
+const SHARE_QR_RENDER_SCALE = 3;
+
+/** 캡처 후 합성할 때 다이얼로그가 QR canvas 를 찾는 id. */
+export const SHARE_QR_CANVAS_ID = "apartment-share-qr";
+
+/**
+ * 카드에 실을 공유 주소.
+ *
+ * 지금 보고 있는 경로 · 쿼리( `?apartment=...` )를 그대로 쓰되 도메인만 서비스 주소로 고정한다.
+ * 로컬에서 캡처한 카드에 `localhost` QR 이 박히면 받은 사람이 열 수 없다.
+ */
+function buildCurrentShareUrl(): string {
+  if (typeof window === "undefined") {
+    return env.NEXT_PUBLIC_URL;
+  }
+
+  return new URL(
+    `${window.location.pathname}${window.location.search}`,
+    env.NEXT_PUBLIC_URL,
+  ).toString();
+}
 
 export interface ApartmentShareCardProps {
   cardRef?: RefObject<HTMLDivElement | null>;
@@ -51,6 +91,9 @@ function ApartmentShareCard({
   // region [Hooks]
   // 카드를 연 시각을 고정한다. 다이얼로그가 닫히면 언마운트되므로 열 때마다 다시 계산.
   const [capturedAtKst] = useState<string>(getCurrentDateTimeKST);
+
+  /** 마운트 후에 채운다. 초기값으로 `window` 를 읽으면 서버 렌더 결과와 어긋난다. */
+  const [shareUrl, setShareUrl] = useState("");
 
   const stats = useMemo(
     () => buildApartmentShareStats({ yearPoints, areaInSquareMeter, bitcoinPriceInKrw }),
@@ -102,13 +145,15 @@ function ApartmentShareCard({
         </div>
 
         <div className="flex items-center justify-between gap-3">
-          <span className="flex items-center gap-2 text-[15px] font-bold text-white/70">
+          <span
+            className={`${COMPARISON_ROW_CLASS} flex items-center gap-2 whitespace-nowrap text-white/70`}
+          >
             <WonIcon size={19} />
             원화로는
           </span>
-          <span className="flex items-center gap-3 text-[15px] font-bold text-white/70">
-            <span>
-              <span className="font-number">{formatKrwInEok(stats.krw.baseValue)}</span>억 {` → `}
+          <span className={`${COMPARISON_ROW_CLASS} flex items-center gap-3 text-white/70`}>
+            <span className="whitespace-nowrap">
+              <span className="font-number">{formatKrwInEok(stats.krw.baseValue)}</span>억{` → `}
               <span className="font-number">{formatKrwInEok(stats.krw.currentValue)}</span>억
             </span>
             <span className={`${MULTIPLE_BADGE_CLASS} text-[#FF6B6B]`}>
@@ -120,16 +165,17 @@ function ApartmentShareCard({
         <div className="my-3 h-px bg-white/10" />
 
         <div className="flex items-center justify-between gap-3">
-          <span className="flex items-center gap-2 text-[15px] font-bold text-white">
+          <span
+            className={`${COMPARISON_ROW_CLASS} flex items-center gap-2 whitespace-nowrap text-white`}
+          >
             <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={19} />
             비트코인으로는
           </span>
-          <span className="flex items-center gap-3 text-[15px] font-bold text-white">
-            <div>
-              <span className="font-number">{formatBtcCount(stats.btc.baseValue)}</span>
-              {` → `}
-              <span className="font-number">{formatBtcCount(stats.btc.currentValue)}</span>
-            </div>
+          <span className={`${COMPARISON_ROW_CLASS} flex items-center gap-3 text-white`}>
+            <span className="whitespace-nowrap">
+              <span className="font-number">{formatBtcCount(stats.btc.baseValue)}</span>개{` → `}
+              <span className="font-number">{formatBtcCount(stats.btc.currentValue)}</span>개
+            </span>
             <span className={MULTIPLE_BADGE_CLASS} style={{ color: BITCOIN_COLOR }}>
               ▼ <span className="font-number">{formatMultiple(stats.btcCheaperMultiple)}</span>배
             </span>
@@ -145,7 +191,7 @@ function ApartmentShareCard({
     }
 
     return (
-      <p className="mt-3 text-[15px] font-bold leading-relaxed text-white/85">
+      <p className="text-[15px] font-bold leading-relaxed text-white/85">
         같은 집인데 원화로는{" "}
         <span className="text-[#FF6B6B]">
           <span className="font-number">{krwRiseMultiple.toFixed(1)}</span>배 비싸졌고
@@ -161,37 +207,49 @@ function ApartmentShareCard({
     );
   }, [stats, krwRiseMultiple]);
 
-  // 보류: 산정 방식 고지. 카드가 캡처되어 페이지를 떠나면 `DataSourceFooter` 를 볼 수
-  // 없어서 넣었다가, 노출 여부를 다시 판단하기로 하고 잠시 꺼 둔다.
-  // /**
-  //  * 산정 방식 고지.
-  //  *
-  //  * 카드는 캡처되어 페이지를 떠나므로 `DataSourceFooter` 의 접힘 영역을 볼 수 없다.
-  //  * "45배 싸졌다" 는 숫자만 남았을 때 근거를 묻는 사람에게 최소한의 답이 되도록
-  //  * 출처 · 집계 단위 · 환산 시점 세 가지만 남긴다. ( 나머지는 페이지에서 본다 )
-  //  *
-  //  * 결론 문장을 이기면 안 되므로 오른쪽 아래에 작게 붙인다.
-  //  */
-  // const MethodologyTemplate = useMemo(() => {
-  //   if (!stats) {
-  //     return null;
-  //   }
-  //
-  //   return (
-  //     <p className="mt-3 text-right text-[11px] leading-snug text-white/45">
-  //       국토교통부 실거래가 · 같은 평형 연도별 중앙값
-  //       <br />
-  //       BTC 환산은 계약일 종가 기준, 현재 값만 실시간 시세
-  //     </p>
-  //   );
-  // }, [stats]);
+  /** 카드는 이미지로만 퍼진다. 도메인 워터마크로는 **지금 이 단지**로 보낼 수 없다. */
+  const ShareQrTemplate = useMemo(() => {
+    if (!shareUrl) {
+      return null;
+    }
+
+    return (
+      /* QR 은 밝은 바탕에서만 읽힌다. canvas 가 캡처에서 빠져도 자리가 무너지지 않게 크기를 고정한다. */
+      <div
+        className="ml-auto flex-none rounded-lg bg-white"
+        style={{
+          width: SHARE_QR_SIZE + SHARE_QR_PADDING * 2,
+          height: SHARE_QR_SIZE + SHARE_QR_PADDING * 2,
+          padding: SHARE_QR_PADDING,
+        }}
+      >
+        {/*
+          canvas 는 캡처에서 빼고 `ApartmentShareDialog` 가 결과 canvas 에 직접 합성한다.
+          단지 사진 · 코인 이미지와 같은 이유다. ( Safari 는 foreignObject 안의 이미지를
+          그리지 못하는 경우가 있어 그대로 두면 QR 만 빈칸으로 나온다 )
+        */}
+        <span data-capture-ignore="" className="block">
+          <QRCode
+            id={SHARE_QR_CANVAS_ID}
+            value={shareUrl}
+            size={SHARE_QR_SIZE * SHARE_QR_RENDER_SCALE}
+            quietZone={0}
+            ecLevel="M"
+            style={{ display: "block", width: SHARE_QR_SIZE, height: SHARE_QR_SIZE }}
+          />
+        </span>
+      </div>
+    );
+  }, [shareUrl]);
+  // endregion
+
+  // region [Life Cycles]
+  useEffect(() => {
+    setShareUrl(buildCurrentShareUrl());
+  }, []);
   // endregion
 
   return (
-    /*
-      루트에 배경색을 두지 않는다. 캡처 후 canvas **아래**로 사진을 합성하는 방식이라
-      ( `registerCaptureBackground` ) 사진이 보일 자리가 투명해야 한다.
-    */
     <div
       ref={cardRef}
       data-background-src={captureBackgroundSrc}
@@ -220,7 +278,6 @@ function ApartmentShareCard({
           <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={38} />
           <BtcTextLogo color="#fff" height={36} width={156} />
         </div>
-
         <div className="mb-1 text-[26px] font-bold leading-tight tracking-tight">
           {landmark?.displayName ?? "-"}
         </div>
@@ -233,14 +290,16 @@ function ApartmentShareCard({
             </>
           )}
         </div>
-
         <div className="mb-1 text-sm font-bold text-white/60">지금 이 집 한 채의 값</div>
         <div className="mb-6">{HeadlineTemplate}</div>
-
         {ComparisonTemplate}
-        {PunchlineTemplate}
-        {/* {MethodologyTemplate} */}
 
+        <div className="mt-3 flex items-center gap-4">
+          {PunchlineTemplate}
+          {ShareQrTemplate}
+        </div>
+
+        {/* {MethodologyTemplate} */}
         <div className="mt-6 flex items-center justify-between gap-2 border-t border-white/15 pt-4">
           <span
             className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-white"
