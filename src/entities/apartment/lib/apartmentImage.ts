@@ -8,7 +8,6 @@ const IMAGE_FILENAME_MAP: Record<string, string> = {
   "banpo-xi": "banpo-zai",
   "acro-river-park": "arco",
   "apgujeong-hyundai-6": "apgujeong-hyundai-6th",
-  "tower-palace-1": "tower-palace-1st",
   "jamsil-else": "jamsil-els",
 };
 

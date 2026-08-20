@@ -109,18 +109,6 @@ const landmarkApartments: LandmarkApartment[] = [
     defaultAreaInSquareMeter: 84,
   },
   {
-    apartmentID: "tower-palace-1",
-    displayName: "타워팰리스1",
-    lawdCode: "11680",
-    districtName: "서울 강남구",
-    legalDongName: "도곡동",
-    // 1/2/3차는 별개 단지다. 84㎡ 가 존재하는 것은 1차뿐이라 1차만 채택한다.
-    aptNames: ["타워팰리스1"],
-    jibunList: ["467"],
-    earliestDealYear: 2014,
-    defaultAreaInSquareMeter: 164,
-  },
-  {
     apartmentID: "jamsil-else",
     displayName: "잠실엘스",
     lawdCode: "11710",
@@ -157,6 +145,43 @@ const landmarkApartments: LandmarkApartment[] = [
     ],
     jibunList: ["777"],
     earliestDealYear: 2014,
+    defaultAreaInSquareMeter: 84,
+  },
+  {
+    apartmentID: "acro-seoul-forest",
+    displayName: "아크로서울포레스트",
+    lawdCode: "11200",
+    districtName: "서울 성동구",
+    legalDongName: "성수동1가",
+    // 부분일치를 쓰면 `아크로파크`( 성수동 )·`다울아크로빌` 같은 무관한 단지가 섞인다.
+    aptNames: ["아크로서울포레스트"],
+    jibunList: ["685-700"],
+    earliestDealYear: 2021,
+    // 84㎡ 가 없는 대형 전용 단지다. 거래 최다인 159㎡ 를 기본으로 쓴다.
+    defaultAreaInSquareMeter: 159,
+  },
+  {
+    apartmentID: "trimage",
+    displayName: "트리마제",
+    lawdCode: "11200",
+    districtName: "서울 성동구",
+    legalDongName: "성수동1가",
+    aptNames: ["트리마제"],
+    jibunList: ["718"],
+    earliestDealYear: 2017,
+    defaultAreaInSquareMeter: 84,
+  },
+  {
+    apartmentID: "olympic-park-foreon",
+    displayName: "올림픽파크포레온",
+    lawdCode: "11740",
+    districtName: "서울 강동구",
+    legalDongName: "둔촌동",
+    aptNames: ["올림픽파크포레온"],
+    // 둔촌주공 재건축이지만 지번은 `170` 이 아니라 `633` 이다.
+    jibunList: ["633"],
+    /** 2025년 준공. 입주 전 입주권 거래가 2024년부터 잡힌다. */
+    earliestDealYear: 2024,
     defaultAreaInSquareMeter: 84,
   },
 ];
