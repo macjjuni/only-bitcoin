@@ -4,21 +4,21 @@ import {
   fetchBtcMonthlyUsdMap,
   resolveMonthlyUsdYears,
 } from "../lib/btcMonthlyUsd";
+import {
+  getArchivedMonthlyUsdMap,
+  resolveRuntimeStartYear,
+} from "../lib/btcMonthlyUsdArchive";
 
 /**
  * BTC 달러 월별 종가 ( 서버 캐시 래퍼 ).
  *
- * 수집 로직은 `lib/btcMonthlyUsd` 에 있고 여기서는 캐싱만 얹음.
+ * 확정 연도는 `btcMonthlyUsdArchive.json` 에서 읽고, 진행 중인 연도만 API 로 조회한다.
+ * 아카이브 덕분에 재생성당 API 호출이 17회에서 1회로 줄어든다.
  *
- * **연도별로 따로 캐시함.** 2010~현재를 한 덩어리로 묶으면 만료될 때마다
- * 업스트림 17회가 통째로 다시 나감. 연도별로 쪼개면 확정된 16개 연도는
- * 30일 동안 안 움직이고 진행 중인 한 해만 다시 받아 재생성당 1회로 떨어짐.
- *
- * `unstable_cache` 는 함수가 던지면 아무것도 보관하지 않음.
- * 커버리지가 모자란 결과가 캐시에 굳지 않도록 하는 장치임.
+ * 아카이브가 낡아도 앱은 정상 동작한다. `resolveRuntimeStartYear` 이후 연도를
+ * API 로 메꾸므로 호출량만 늘어날 뿐 데이터가 비지 않는다.
  */
 
-const DAYS_30_IN_SECONDS = 60 * 60 * 24 * 30;
 const HOURS_6_IN_SECONDS = 60 * 60 * 6;
 
 export type { BtcMonthlyUsdMap };
@@ -31,16 +31,7 @@ export type { BtcMonthlyUsdMap };
  * 1시간으로 두면 `page.tsx` 에 6시간을 적어도 빌드 결과가 1시간으로 내려앉음
  * ( `next build` 의 Revalidate 열에서 확인됨 ). 그래서 둘을 같은 값으로 맞춰 둠.
  * 한쪽만 바꾸면 조용히 다른 쪽이 무시되므로 항상 같이 바꿔야 함.
- *
- * 확정된 연도는 30일이라 최솟값 계산에 끼어들지 않음.
  */
-function resolveRevalidateSeconds(year: number): number {
-  if (year >= new Date().getUTCFullYear()) {
-    return HOURS_6_IN_SECONDS;
-  }
-
-  return DAYS_30_IN_SECONDS;
-}
 
 /**
  * `unstable_cache` 는 `Map` 을 직렬화하지 못하므로 배열로 넘겼다가 되돌림.
@@ -49,21 +40,22 @@ function getBtcMonthlyUsdMapByYear(year: number): Promise<[string, number][]> {
   return unstable_cache(
     async () => [...(await fetchBtcMonthlyUsdMap(year)).entries()],
     ["btc-monthly-usd", String(year)],
-    { revalidate: resolveRevalidateSeconds(year), tags: ["btc-monthly-usd"] },
+    { revalidate: HOURS_6_IN_SECONDS, tags: ["btc-monthly-usd"] },
   )();
 }
 
 /**
  * 2010년부터 지금까지의 월별 종가를 한 Map 으로 합쳐 돌려줌.
  *
- * 병렬로 쏘지 않고 순차로 도는 이유는 콜드 캐시일 때 17개 요청이 한꺼번에
- * blockchain.com 으로 몰리는 것을 피하기 위함임. 캐시가 더워진 뒤에는
- * 대부분 즉시 반환되므로 순차 비용이 사실상 없음.
+ * 확정 연도는 아카이브에서 즉시 읽고, 아카이브 이후 연도만 API 로 조회한다.
  */
 export async function getBtcMonthlyUsdMap(): Promise<BtcMonthlyUsdMap> {
-  const monthlyCloseMap = new Map<string, number>();
+  const monthlyCloseMap = new Map<string, number>(getArchivedMonthlyUsdMap());
 
-  for (const year of resolveMonthlyUsdYears()) {
+  const runtimeStartYear = resolveRuntimeStartYear();
+  const runtimeYears = resolveMonthlyUsdYears().filter((year) => year >= runtimeStartYear);
+
+  for (const year of runtimeYears) {
     for (const [monthKey, price] of await getBtcMonthlyUsdMapByYear(year)) {
       monthlyCloseMap.set(monthKey, price);
     }
