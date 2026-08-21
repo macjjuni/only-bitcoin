@@ -30,6 +30,7 @@ export {
 } from "./ListGroup";
 export { default as Lottie } from "./lottie/Lottie";
 export { default as NotKeyNotYourBitcoin } from "./NotKeyNotYourBitcoin";
+export { default as PageTitle } from "./PageTitle";
 export {
   default as SegmentedControl,
   type SegmentedControlOption,

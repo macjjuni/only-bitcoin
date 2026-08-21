@@ -10,7 +10,7 @@ import ApartmentSelector from "./ApartmentSelector";
 import ApartmentSummaryCard from "./ApartmentSummaryCard";
 import AreaBucketTabs from "./AreaBucketTabs";
 import Btc2ApartmentChart from "./Btc2ApartmentChart";
-import Btc2ApartmentTitle from "./Btc2ApartmentTitle";
+import { PageTitle } from "@/shared/ui";
 import DataSourceFooter from "./DataSourceFooter";
 
 interface Btc2ApartmentPanelProps {
@@ -88,7 +88,7 @@ const Btc2ApartmentPanel = ({ archiveGeneratedAt }: Btc2ApartmentPanelProps) => 
 
   return (
     <>
-      <Btc2ApartmentTitle />
+      <PageTitle label="BTC to Apartment" title="아파트 실거래 × BTC" as="h2" />
       <ApartmentSelector selectedApartmentID={apartmentID} onSelectApartment={onSelectApartment} />
       <div className="flex flex-col gap-4 p-2">
         <ApartmentSummaryCard

@@ -1,8 +1,9 @@
 import type { Metadata } from "next";
 import { Suspense } from "react";
 import { env } from "@/shared/config/env";
+import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
-import { CagrScreen, CagrTitle } from "@/views/cagr";
+import { CagrScreen } from "@/views/cagr";
 import CagrLoading from "./loading";
 
 const PAGE_TITLE = "월별 등락률";
@@ -41,7 +42,11 @@ export const revalidate = 21600;
 export default function CagrPage() {
   return (
     <PageLayout className="gap-3">
-      <CagrTitle />
+      <PageTitle
+        label="Monthly Returns"
+        title="비트코인 월별 등락률"
+        description="매월 마지막 날 가격을 기준으로 한 등락률이에요. 연간 열은 월별 수익률의 복리 합산이에요."
+      />
       <Suspense fallback={<CagrLoading />}>
         <CagrScreen />
       </Suspense>

@@ -1,5 +1,6 @@
 import type { Metadata } from "next";
 import { env } from "@/shared/config/env";
+import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import { DcaPanel } from "@/views/dca";
 
@@ -11,6 +12,11 @@ export const metadata: Metadata = {
 export default function DcaPage() {
   return (
     <PageLayout className="gap-3">
+      <PageTitle
+        label="DCA Calculator"
+        title="비트코인 DCA 계산기"
+        description="비트코인 매수 기록을 관리하고 평단가와 목표 달성 현황을 확인해 보세요."
+      />
       <DcaPanel />
     </PageLayout>
   );
