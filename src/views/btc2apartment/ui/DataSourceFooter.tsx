@@ -1,5 +1,6 @@
 import { memo } from "react";
 import { Card, CardContent, CollapseSection } from "@/shared/ui";
+import { MIN_RELIABLE_DEAL_COUNT } from "../lib/buildChartSeries";
 
 interface DataSourceFooterProps {
   archiveGeneratedAt: string;
@@ -32,6 +33,11 @@ const DataSourceFooter = ({ archiveGeneratedAt }: DataSourceFooterProps) => {
               <li>선택한 평형의 해당 연도 실거래 중앙값(평균이 아닌 중앙값으로 이상치 방어)</li>
               <li>계약 해제 건 제외, 직거래 포함</li>
               <li>전용면적은 소수점 이하 버림으로 그룹핑(예: 84.38㎡, 84.99㎡ → 84㎡)</li>
+              <li>거래가 한 건도 없는 해는 0이 아니라 빈칸으로 둡니다</li>
+              <li>
+                연 거래 {MIN_RELIABLE_DEAL_COUNT}건 미만인 해는 중앙값이 통계보다 우연에 가까워
+                툴팁에 &lsquo;표본 부족&rsquo;으로 표시합니다
+              </li>
             </ul>
           </div>
 
