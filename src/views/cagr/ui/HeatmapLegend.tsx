@@ -21,7 +21,7 @@ const HEAT_GRADIENT = [
 
 const HeatmapLegend = () => (
   // 표는 페이지 끝까지 빠져나가지만 눈금은 글줄과 같은 `px-5` 에 맞춤. 양 끝 캡이 글자라서 그럼.
-  <div className="flex items-center gap-2 px-5 text-[10px] tabular-nums text-muted-foreground">
+  <div className="flex items-center gap-2 px-2 text-[10px] tabular-nums text-muted-foreground">
     <span>-{HEAT_DOMAIN_PERCENT}%</span>
     <div className="h-2.5 flex-1 rounded-sm" style={{ background: HEAT_GRADIENT }} />
     <span>+{HEAT_DOMAIN_PERCENT}%</span>

@@ -17,6 +17,9 @@ const CagrTitle = () => {
       <h1 className="mb-2.5 text-[19px] font-bold leading-tight tracking-tight">
         비트코인 월별 등락률
       </h1>
+      <p className="text-sm font-pretendard leading-relaxed text-muted-foreground">
+        매월 마지막 날 가격을 기준으로 한 등락률이에요. 연간 열은 월별 수익률의 복리 합산이에요.
+      </p>
     </div>
   );
 };

@@ -1,6 +1,5 @@
 import { getBtcMonthlyUsdMap } from "@/entities/bitcoin/server";
 import { buildMonthlyReturnGrid } from "../lib/buildMonthlyReturnGrid";
-import CagrTitle from "./CagrTitle";
 import MonthlyReturnHeatmap from "./MonthlyReturnHeatmap";
 
 /**
@@ -25,22 +24,13 @@ const CagrScreen = async () => {
   const monthlyReturnRows = buildMonthlyReturnGrid(monthlyCloseMap);
 
   return (
-    <>
-      <CagrTitle />
-
-      <div className="flex flex-col gap-3">
-        <p className="px-5 text-[12px] leading-relaxed text-muted-foreground">
-          각 칸은 전월 종가 대비 변화율이에요. 연간 열은 그 열두 칸을 복리로 곱한 값이라 범위가 달라
-          색을 칠하지 않았어요.
-        </p>
-
+    <div className="flex flex-col gap-3">
         <MonthlyReturnHeatmap rows={monthlyReturnRows} />
 
-        <p className="px-5 text-[10px] text-muted-foreground">
+        <p className="px-2 text-[12px] text-muted-foreground">
           2010년 8월부터의 blockchain.com 달러 종가 기준
         </p>
-      </div>
-    </>
+    </div>
   );
 };
 

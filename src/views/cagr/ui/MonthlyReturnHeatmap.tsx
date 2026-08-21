@@ -14,13 +14,14 @@ import HeatmapLegend from "./HeatmapLegend";
  */
 
 /** 셀 하나의 최소 폭. 이보다 좁으면 `-100%` 가 줄바꿈됨. */
-const CELL_CLASS_NAME = "min-w-[44px] rounded-[3px] px-1.5 py-1.5 text-center";
+const CELL_CLASS_NAME =
+  "min-w-[30px] sm:min-w-[44px] rounded-[3px] px-0.5 sm:px-1.5 py-1 sm:py-1.5 text-center";
 
 /** 스크롤되는 셀을 가려야 하므로 반드시 불투명색임. 페이지 배경과 살짝 달라 축 구실도 함. */
 const YEAR_HEADER_CLASS_NAME =
-  "sticky left-0 z-10 rounded-[3px] bg-neutral-100 px-1.5 py-1.5 text-right font-medium dark:bg-neutral-900";
+  "sticky left-0 z-10 rounded-[3px] bg-neutral-100 px-0.5 sm:px-1.5 py-1 sm:py-1.5 text-center font-medium dark:bg-neutral-900";
 
-const ANNUAL_COLUMN_CLASS_NAME = "border-l border-neutral-300 pl-2 dark:border-neutral-600";
+const ANNUAL_COLUMN_CLASS_NAME = " border-neutral-300 pl-1 dark:border-neutral-600";
 
 interface MonthlyReturnHeatmapProps {
   rows: MonthlyReturnRow[];
@@ -45,11 +46,14 @@ const MonthlyReturnHeatmap = ({ rows }: MonthlyReturnHeatmapProps) => {
         연도
       </th>
       {MONTH_COLUMN_LABELS.map((monthLabel) => (
-        <th key={monthLabel} scope="col" className="px-1.5 py-1.5 font-medium">
+        <th key={monthLabel} scope="col" className="px-0.5 sm:px-1.5 py-1 sm:py-1.5 font-medium">
           {monthLabel}
         </th>
       ))}
-      <th scope="col" className={`px-1.5 py-1.5 font-bold ${ANNUAL_COLUMN_CLASS_NAME}`}>
+      <th
+        scope="col"
+        className={`px-0.5 sm:px-1.5 py-1 sm:py-1.5 font-bold ${ANNUAL_COLUMN_CLASS_NAME}`}
+      >
         연간
       </th>
     </tr>
@@ -84,8 +88,8 @@ const MonthlyReturnHeatmap = ({ rows }: MonthlyReturnHeatmapProps) => {
         스크롤 컨테이너에 좌우 패딩을 주면 안 됨. `sticky left-0` 은 패딩 안쪽에 붙는데
         스크롤되는 셀은 패딩 영역까지 지나가서, 고정된 연도 열 왼쪽으로 색이 비쳐 보임.
       */}
-      <div className="-mx-2 overflow-x-auto">
-        <table className="w-full border-separate border-spacing-[2px] font-number text-[11px] tabular-nums">
+      <div className="-mx-2 pb-2 overflow-x-auto">
+        <table className="w-full border-separate border-spacing-[1px] sm:border-spacing-[2px] font-number text-[10px] sm:text-[11px] tabular-nums">
           <caption className="sr-only">
             비트코인 월별 등락률. 행은 연도, 열은 월이며 각 칸은 전월 종가 대비 변화율임.
           </caption>

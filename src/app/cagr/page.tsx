@@ -1,7 +1,9 @@
 import type { Metadata } from "next";
 import { env } from "@/shared/config/env";
 import { PageLayout } from "@/shared/ui/layout";
-import { CagrScreen } from "@/views/cagr";
+import { Suspense } from "react";
+import { CagrScreen, CagrTitle } from "@/views/cagr";
+import CagrLoading from "./loading";
 
 const PAGE_TITLE = "월별 등락률";
 const PAGE_DESCRIPTION =
@@ -39,7 +41,10 @@ export const revalidate = 21600;
 export default function CagrPage() {
   return (
     <PageLayout className="gap-3">
-      <CagrScreen />
+      <CagrTitle />
+      <Suspense fallback={<CagrLoading />}>
+        <CagrScreen />
+      </Suspense>
     </PageLayout>
   );
 }
