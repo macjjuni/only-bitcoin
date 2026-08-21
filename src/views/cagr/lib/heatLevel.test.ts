@@ -55,14 +55,14 @@ describe("resolveHeatClassName", () => {
 
   /**
    * 이 테스트가 잡는 버그:
-   * 클래스를 템플릿 문자열로 조립하면 Tailwind 가 못 수집해 프로덕션에서 색이 사라짐.
-   * 리터럴 테이블이 유지되는지를 값으로 고정함.
+   * 알파 변형( `bg-up/20` )으로 되돌리면 카드 없는 이 페이지에서 매트릭스 배경이
+   * 셀을 통해 비침. 불투명 유틸을 쓰는지를 값으로 고정함.
    */
-  it("단계마다 리터럴 클래스를 돌려준다", () => {
-    expect(resolveHeatClassName(5)).toBe("bg-up/20");
-    expect(resolveHeatClassName(40)).toBe("bg-up");
-    expect(resolveHeatClassName(-5)).toBe("bg-down/20");
-    expect(resolveHeatClassName(-40)).toBe("bg-down");
+  it("단계마다 불투명 유틸 클래스를 돌려준다", () => {
+    expect(resolveHeatClassName(5)).toBe("heat-up-1");
+    expect(resolveHeatClassName(40)).toBe("heat-up-5");
+    expect(resolveHeatClassName(-5)).toBe("heat-down-1");
+    expect(resolveHeatClassName(-40)).toBe("heat-down-5");
   });
 });
 

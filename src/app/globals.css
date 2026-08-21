@@ -54,12 +54,34 @@
 :where(.dark) .glass-surface { @apply bg-neutral-900/30; }
 
 /*
-  월별 등락률 히트맵의 데이터 없는 달.
-  무색으로 두면 "0% 인 달" 과 구분이 안 되므로 빗금으로 비어 있음을 드러냄.
-  쉼표가 많아 Tailwind 임의값으로 쓰기 어려워 유틸로 뺌.
+  월별 등락률 히트맵의 셀 색 5단계.
+
+  `bg-up/40` 같은 알파 변형을 쓰면 안 됨. `body.show-bg` 의 매트릭스 배경이
+  셀을 통해 그대로 비쳐서 낮은 단계일수록 숫자가 안 읽힘. 카드로 감쌌을 때는
+  `glass-surface` 가 가려 줬지만 이 페이지는 카드를 안 씀.
+  그래서 페이지 배경색과 미리 섞어 **불투명색**으로 만들어 둠.
+
+  `--background` 가 테마에 따라 바뀌므로 다크 모드도 이 한 벌로 같이 처리됨.
+*/
+.heat-up-1 { background-color: color-mix(in srgb, var(--up-color) 20%, hsl(var(--background))); }
+.heat-up-2 { background-color: color-mix(in srgb, var(--up-color) 40%, hsl(var(--background))); }
+.heat-up-3 { background-color: color-mix(in srgb, var(--up-color) 60%, hsl(var(--background))); }
+.heat-up-4 { background-color: color-mix(in srgb, var(--up-color) 80%, hsl(var(--background))); }
+.heat-up-5 { background-color: var(--up-color); }
+
+.heat-down-1 { background-color: color-mix(in srgb, var(--down-color) 20%, hsl(var(--background))); }
+.heat-down-2 { background-color: color-mix(in srgb, var(--down-color) 40%, hsl(var(--background))); }
+.heat-down-3 { background-color: color-mix(in srgb, var(--down-color) 60%, hsl(var(--background))); }
+.heat-down-4 { background-color: color-mix(in srgb, var(--down-color) 80%, hsl(var(--background))); }
+.heat-down-5 { background-color: var(--down-color); }
+
+/*
+  데이터 없는 달. 무색으로 두면 "0% 인 달" 과 구분이 안 되므로 빗금으로 비어 있음을 드러냄.
+  빗금은 이미지 레이어, 바탕은 배경색 레이어로 나눠 여기도 불투명하게 유지함.
 */
 .heat-empty {
-  background: repeating-linear-gradient(
+  background-color: hsl(var(--background));
+  background-image: repeating-linear-gradient(
     45deg,
     transparent,
     transparent 3px,
@@ -68,7 +90,7 @@
   );
 }
 :where(.dark) .heat-empty {
-  background: repeating-linear-gradient(
+  background-image: repeating-linear-gradient(
     45deg,
     transparent,
     transparent 3px,

@@ -34,22 +34,26 @@ export function resolveHeatLevel(returnRate: number | null): number {
 /**
  * 단계별 배경 클래스.
  *
- * **템플릿 문자열로 조립하면 안 됨.** Tailwind 는 소스를 정적으로 훑어 클래스를
- * 수집하므로 `bg-up/${alpha}` 같은 형태는 못 잡아냄. 개발 서버에서는 다른 파일이
- * 이미 쓰고 있어 우연히 보이다가 프로덕션 빌드에서 색이 통째로 사라짐.
+ * Tailwind 의 `bg-up/40` 같은 알파 변형이 아니라 `globals.css` 에 직접 정의한
+ * **불투명색** 유틸임. 이 페이지는 카드로 감싸지 않아 알파를 쓰면 `body.show-bg` 의
+ * 매트릭스 배경이 셀을 통해 비쳐 낮은 단계의 숫자가 안 읽힘.
+ *
+ * **템플릿 문자열로 조립하면 안 됨.** 지금은 직접 정의한 클래스라 Tailwind 수집
+ * 대상이 아니지만, 알파 변형으로 되돌릴 일이 생기면 조립한 이름은 못 잡아내
+ * 개발 서버에서만 보이다가 프로덕션 빌드에서 색이 통째로 사라짐.
  */
 const HEAT_CLASS_NAME_BY_LEVEL: Record<number, string> = {
-  [-5]: "bg-down",
-  [-4]: "bg-down/80",
-  [-3]: "bg-down/60",
-  [-2]: "bg-down/40",
-  [-1]: "bg-down/20",
+  [-5]: "heat-down-5",
+  [-4]: "heat-down-4",
+  [-3]: "heat-down-3",
+  [-2]: "heat-down-2",
+  [-1]: "heat-down-1",
   0: "",
-  1: "bg-up/20",
-  2: "bg-up/40",
-  3: "bg-up/60",
-  4: "bg-up/80",
-  5: "bg-up",
+  1: "heat-up-1",
+  2: "heat-up-2",
+  3: "heat-up-3",
+  4: "heat-up-4",
+  5: "heat-up-5",
 };
 
 /** 결측 달. 0% 와 구분돼야 하므로 무색이 아니라 빗금으로 표시함. */

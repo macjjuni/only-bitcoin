@@ -16,7 +16,7 @@ import HeatmapLegend from "./HeatmapLegend";
 /** 셀 하나의 최소 폭. 이보다 좁으면 `-100%` 가 줄바꿈됨. */
 const CELL_CLASS_NAME = "min-w-[44px] rounded-[3px] px-1.5 py-1 text-center";
 
-/** 스크롤해도 남아야 하므로 유리 표면을 안 쓰고 불투명색을 깖. */
+/** 스크롤되는 셀을 가려야 하므로 반드시 불투명색임. 페이지 배경과 살짝 달라 축 구실도 함. */
 const YEAR_HEADER_CLASS_NAME =
   "sticky left-0 z-10 rounded-[3px] bg-neutral-100 px-1.5 py-1 text-right font-medium dark:bg-neutral-900";
 
@@ -80,7 +80,7 @@ const MonthlyReturnHeatmap = ({ rows }: MonthlyReturnHeatmapProps) => {
   return (
     <div className="flex flex-col gap-3">
       {/*
-        카드 좌우 여백까지 파고들어야 좁은 화면에서 열이 하나라도 더 보임.
+        표만 페이지 좌우 끝까지 빠져나가야 좁은 화면에서 열이 하나라도 더 보임.
         스크롤 컨테이너에 좌우 패딩을 주면 안 됨. `sticky left-0` 은 패딩 안쪽에 붙는데
         스크롤되는 셀은 패딩 영역까지 지나가서, 고정된 연도 열 왼쪽으로 색이 비쳐 보임.
       */}
