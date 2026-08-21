@@ -161,7 +161,8 @@ const Btc2ApartmentChart = ({
     }
 
     return (
-      <div className="-mx-5 select-none overflow-hidden" style={{ height: CHART_HEIGHT }}>
+      // 바깥 여백( PageLayout p-2 + 패널 p-2 = 16px )까지만 파고들어야 페이지에 가로 스크롤이 안 생김.
+      <div className="-mx-4 select-none overflow-hidden" style={{ height: CHART_HEIGHT }}>
         <ReactApexChart
           type="line"
           series={chartSeries}
