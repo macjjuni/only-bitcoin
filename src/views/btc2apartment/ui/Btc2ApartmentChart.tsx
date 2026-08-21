@@ -161,7 +161,7 @@ const Btc2ApartmentChart = ({
     }
 
     return (
-      <div className="-mx-6 select-none overflow-hidden" style={{ height: CHART_HEIGHT }}>
+      <div className="-mx-5 select-none overflow-hidden" style={{ height: CHART_HEIGHT }}>
         <ReactApexChart
           type="line"
           series={chartSeries}
