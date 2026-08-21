@@ -25,11 +25,11 @@ const CagrScreen = async () => {
 
   return (
     <div className="flex flex-col gap-3">
-        <MonthlyReturnHeatmap rows={monthlyReturnRows} />
+      <MonthlyReturnHeatmap rows={monthlyReturnRows} />
 
-        <p className="px-2 text-[12px] text-muted-foreground">
-          2010년 8월부터의 blockchain.com 달러 종가 기준
-        </p>
+      <p className="px-2 text-[12px] text-muted-foreground">
+        2010년 8월부터의 blockchain.com 달러 종가 기준
+      </p>
     </div>
   );
 };

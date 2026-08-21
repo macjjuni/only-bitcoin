@@ -1,7 +1,7 @@
 import type { Metadata } from "next";
+import { Suspense } from "react";
 import { env } from "@/shared/config/env";
 import { PageLayout } from "@/shared/ui/layout";
-import { Suspense } from "react";
 import { CagrScreen, CagrTitle } from "@/views/cagr";
 import CagrLoading from "./loading";
 
