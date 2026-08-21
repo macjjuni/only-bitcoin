@@ -55,6 +55,25 @@ const resolveAxisLabelStyle = (isDark: boolean) => ({
   colors: isDark ? "#a1a1aa" : "#71717a",
 });
 
+/**
+ * 4자리 연도 라벨이 슬롯에 꽉 차기 시작하는 개수.
+ *
+ * 11px Roboto Mono 로 "2014" 는 약 26px 인데, 연도가 9개를 넘으면 슬롯이 그보다 좁아져
+ * 라벨끼리 닿는다. ApexCharts 의 `hideOverlappingLabels` 는 **겹쳐야** 숨기고
+ * 닿기만 한 상태는 그냥 두므로( `AxesUtils.checkForOverflowingLabels` ) 직접 솎아낸다.
+ */
+const MAX_UNTHINNED_YEAR_LABELS = 8;
+
+/**
+ * 연도가 많으면 격년만 남긴다.
+ *
+ * ApexCharts 는 `tickAmount` 로 `Math.round(라벨수 / (tickAmount + 1))` 칸마다 하나씩 남긴다.
+ * 라벨 수의 절반을 주면 그 값이 항상 2가 되어 한 해 걸러 하나씩 보인다.
+ * 막대는 전부 그대로 그려지고 축 라벨만 비므로, 빠진 해는 툴팁으로 확인할 수 있다.
+ */
+const resolveYearTickAmount = (yearCount: number): number | undefined =>
+  yearCount > MAX_UNTHINNED_YEAR_LABELS ? Math.ceil(yearCount / 2) : undefined;
+
 /** 연도 축. 진행 중인 연도는 `*` 로 확정 데이터와 구분함. */
 const createYearAxis = (
   years: number[],
@@ -62,6 +81,7 @@ const createYearAxis = (
   isDark: boolean,
 ): ApexOptions["xaxis"] => ({
   categories: years.map((year, index) => (partialYearFlags[index] ? `${year}*` : String(year))),
+  tickAmount: resolveYearTickAmount(years.length),
   axisBorder: { show: false },
   axisTicks: { show: false },
   labels: {

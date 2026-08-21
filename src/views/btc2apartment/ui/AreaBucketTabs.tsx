@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, useMemo } from "react";
+import { memo } from "react";
 
 interface AreaBucketTabsProps {
   availableAreas: number[];
@@ -12,17 +12,20 @@ interface AreaBucketTabsProps {
  * 평형 선택 칩.
  *
  * 단지가 실제로 보유한 평형만 노출한다. 평형 수가 단지마다 2~9개로 달라
- * 균등 분할하는 SegmentedControl 대신 가로 스크롤 칩을 쓴다.
+ * 균등 분할하는 SegmentedControl 대신 가로 스크롤 칩을 씀.
  */
 const AreaBucketTabs = ({
   availableAreas,
   selectedAreaInSquareMeter,
   onSelectArea,
 }: AreaBucketTabsProps) => {
-  // region [Templates]
-  const AreaChipListTemplate = useMemo(
-    () =>
-      availableAreas.map((areaInSquareMeter) => {
+  if (availableAreas.length === 0) {
+    return null;
+  }
+
+  return (
+    <div className="flex gap-1.5 overflow-x-auto pb-2.5 pl-4 -mx-4 mb-2 font-number scrollbar-none">
+      {availableAreas.map((areaInSquareMeter) => {
         const isSelected = areaInSquareMeter === selectedAreaInSquareMeter;
 
         return (
@@ -40,18 +43,7 @@ const AreaBucketTabs = ({
             {areaInSquareMeter}㎡
           </button>
         );
-      }),
-    [availableAreas, selectedAreaInSquareMeter, onSelectArea],
-  );
-  // endregion
-
-  if (availableAreas.length === 0) {
-    return null;
-  }
-
-  return (
-    <div className="flex gap-1.5 overflow-x-auto pb-2.5 pl-4 -mx-4 font-number scrollbar-none">
-      {AreaChipListTemplate}
+      })}
     </div>
   );
 };

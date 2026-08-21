@@ -94,7 +94,7 @@ const Btc2ApartmentPanel = ({ archiveGeneratedAt }: Btc2ApartmentPanelProps) => 
         카드 테두리 · 배경 없이 페이지에 그대로 얹음. `px-4` 는 유지해야 함 —
         `AreaBucketTabs` 의 `-mx-4` 가 이 패딩을 기준으로 가장자리까지 흘러나감.
       */}
-      <div className="flex flex-col gap-4 px-4 py-3">
+      <div className="flex flex-col gap-4 p-2">
         <ApartmentSummaryCard
           landmark={landmark}
           yearPoints={series?.years ?? []}
