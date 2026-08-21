@@ -88,6 +88,7 @@ const clientRoutes: ClientRoute[] = [
     icon: <PillIcon size={20} />,
   },
   { title: "DCA", path: "/dca", isNav: false, isFavorite: false, icon: null },
+  { title: "월별 등락률", path: "/cagr", isNav: false, isFavorite: false, icon: null },
   { title: "BIP39", path: "/orange-pill/bip39", isNav: false, isFavorite: false, icon: null },
   { title: "Meme", path: "/orange-pill/meme", isNav: false, isFavorite: false, icon: null },
   {
