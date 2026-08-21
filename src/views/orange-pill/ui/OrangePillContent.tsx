@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { ChevronRight, ExternalLink, TableProperties } from "lucide-react";
+import { CalendarRange, ChevronRight, ExternalLink, TableProperties } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { useCallback } from "react";
 import { allRouteList } from "@/shared/config/route";
@@ -52,6 +52,17 @@ const OrangePillContent = () => {
 
     if (!routePath) {
       console.warn("DCA 경로를 찾을 수 없습니다.");
+      return;
+    }
+
+    router.push(routePath);
+  }, [router]);
+
+  const handleCagrRoute = useCallback(() => {
+    const routePath = allRouteList.find((item) => item.path.includes("/cagr"))?.path;
+
+    if (!routePath) {
+      console.warn("월별 등락률 경로를 찾을 수 없습니다.");
       return;
     }
 
@@ -112,6 +123,12 @@ const OrangePillContent = () => {
           label="아파트 몇 BTC?"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleBtc2ApartmentRoute}
+        />
+        <ListRow
+          icon={<CalendarRange size={26} />}
+          label="월별 등락률"
+          rightElement={<ChevronRight className="text-muted-foreground" />}
+          onClick={handleCagrRoute}
         />
         <ListRow
           icon={<HalfCircleIcon size={24} />}

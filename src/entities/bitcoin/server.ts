@@ -7,5 +7,6 @@
  * (`client.ts` 로 클라이언트 전용 훅을 나누는 것과 대칭 구조)
  */
 export { type BtcDailyKrwMap, getBtcDailyKrwMap } from "./api/btcDailyKrw.server";
+export { type BtcMonthlyUsdMap, getBtcMonthlyUsdMap } from "./api/btcMonthlyUsd.server";
 export { fetchInitialMacro } from "./api/macro.server";
 export { fetchInitialPrice } from "./api/price.server";

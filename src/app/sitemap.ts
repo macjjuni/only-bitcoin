@@ -14,6 +14,7 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/btc2fiat",
     "/btc2apartment",
     "/dca",
+    "/cagr",
     "/premium",
     "/orange-pill",
     "/orange-pill/meme",

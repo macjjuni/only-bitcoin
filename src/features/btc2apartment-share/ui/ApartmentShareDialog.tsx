@@ -64,7 +64,7 @@ function ApartmentShareDialog({
   // endregion
 
   // region [Privates]
-  /** 캡처 직전 카드 DOM 에서 사진 경로를 읽어 배경 합성에 등록한다. */
+  /** 캡처 직전 카드 DOM 에서 사진 경로를 읽어 배경 합성에 등록함. */
   const registerBackgroundFromCard = useCallback(() => {
     const backgroundSrc = cardRef.current?.dataset.backgroundSrc;
 
@@ -74,7 +74,7 @@ function ApartmentShareDialog({
   }, []);
 
   /**
-   * 캡처 직전 QR canvas 를 오버레이로 등록한다.
+   * 캡처 직전 QR canvas 를 오버레이로 등록함.
    *
    * 카드가 `transform` 으로 축소돼 있어 화면 좌표를 디자인 좌표( 440px )로 되돌려 넘김.
    * 합성은 항상 원본 크기에서 일어남.
@@ -100,11 +100,11 @@ function ApartmentShareDialog({
   }, []);
 
   /**
-   * 카드 고정 디자인 폭( 440px )을 현재 다이얼로그 폭에 맞춰 축소할 배율을 계산한다.
+   * 카드 고정 디자인 폭( 440px )을 현재 다이얼로그 폭에 맞춰 축소할 배율을 계산함.
    *
-   * 축소는 `transform` 으로만 처리하므로 레이아웃 상 카드 크기는 그대로다.
-   * 따라서 축소 상태에서 캡처해도 항상 동일한 해상도의 이미지가 만들어진다.
-   * 다만 `transform` 은 주변 레이아웃을 밀어내지 못하므로 래퍼 높이를 직접 지정한다.
+   * 축소는 `transform` 으로만 처리하므로 레이아웃 상 카드 크기는 그대로임.
+   * 따라서 축소 상태에서 캡처해도 항상 동일한 해상도의 이미지가 만들어짐.
+   * 다만 `transform` 은 주변 레이아웃을 밀어내지 못하므로 래퍼 높이를 직접 지정함.
    */
   const updateCardScale = useCallback(() => {
     const scaleArea = cardScaleAreaRef.current;
@@ -121,11 +121,11 @@ function ApartmentShareDialog({
   }, []);
 
   /**
-   * 축소 영역이 마운트되는 시점에 배율 계산과 크기 관찰을 시작한다.
+   * 축소 영역이 마운트되는 시점에 배율 계산과 크기 관찰을 시작함.
    *
    * Radix `DialogContent` 는 `Presence` 로 감싸여 있어 포털 내용이 이 컴포넌트보다 나중
-   * 커밋에 마운트된다. `isOpen` 의존 `useEffect` 는 ref 가 `null` 인 채로 실행되고 다시
-   * 실행되지 않으므로 콜백 ref 로 처리한다.
+   * 커밋에 마운트됨. `isOpen` 의존 `useEffect` 는 ref 가 `null` 인 채로 실행되고 다시
+   * 실행되지 않으므로 콜백 ref 로 처리함.
    */
   const setCardScaleAreaRef = useCallback(
     (scaleArea: HTMLDivElement | null) => {
@@ -153,10 +153,10 @@ function ApartmentShareDialog({
   );
 
   /**
-   * 카드 이미지를 클립보드에 복사하고 성공 여부를 반환한다.
+   * 카드 이미지를 클립보드에 복사하고 성공 여부를 반환함.
    *
-   * Safari 는 user gesture 동기 구간에서만 클립보드 쓰기를 허용하므로 Blob 을 await 하지 않는다.
-   * 같은 이유로 호출부에서도 이 함수 이전에 await 이 있으면 안 된다.
+   * Safari 는 user gesture 동기 구간에서만 클립보드 쓰기를 허용하므로 Blob 을 await 하지 않음.
+   * 같은 이유로 호출부에서도 이 함수 이전에 await 이 있으면 안 됨.
    */
   const copyCardImageToClipboard = async (cardElement: HTMLElement) => {
     try {
@@ -204,8 +204,8 @@ function ApartmentShareDialog({
     registerQrOverlayFromCard();
 
     try {
-      // Android 는 clipboard.write 가 성공해도 실제로 저장되지 않는 경우가 있어 공유 시트를 우선한다.
-      // 단축 평가로 동기 구간에서 호출해 Safari 제스처 컨텍스트를 유지한다.
+      // Android 는 clipboard.write 가 성공해도 실제로 저장되지 않는 경우가 있어 공유 시트를 우선함.
+      // 단축 평가로 동기 구간에서 호출해 Safari 제스처 컨텍스트를 유지함.
       const isCopiedToClipboard =
         !isAndroid() &&
         isImageClipboardSupported() &&
@@ -265,11 +265,11 @@ function ApartmentShareDialog({
     <KDialog open={isOpen} onOpenChange={onOpenChange} blur={3} size="md">
       <KDialogOverlay className="bg-black/70 backdrop-blur-md" />
       {/*
-        급등 알림 카드와 **시작 위치**를 맞춘 값이다.
+        급등 알림 카드와 **시작 위치**를 맞춘 값임.
         두 다이얼로그 모두 중앙 기준으로 앉는데 이 카드가 81px 더 높아,
-        같은 42% 를 쓰면 위로 그만큼 더 올라가 서로 다른 자리에서 시작한다.
+        같은 42% 를 쓰면 위로 그만큼 더 올라가 서로 다른 자리에서 시작함.
       */}
-      <KDialogContent className="!top-[47%] p-0 border-none bg-transparent shadow-none max-w-[460px] w-[92vw] [&>button]:hidden">
+      <KDialogContent className="p-0 border-none bg-transparent shadow-none max-w-[460px] w-[92vw] [&>button]:hidden">
         <KDialogHeader className="sr-only">
           <KDialogTitle>아파트 비트코인 환산 카드</KDialogTitle>
           <KDialogDescription>
