@@ -11,6 +11,7 @@ import {
   createApartmentChartOptions,
   resolveLogAxisRange,
   resolvePartialYearColor,
+  resolveYearLabels,
   shouldUseLogScale,
   toLogSpace,
 } from "./createApartmentChartOptions";
@@ -86,11 +87,19 @@ const Btc2ApartmentChart = ({
    * ( `fill.opacity` 배열은 시리즈 단위라 막대 하나만 다르게 칠할 수 없다 )
    */
   const chartSeries = useMemo(() => {
+    /**
+     * 축 라벨은 `x` 로 정해진다( `resolveYearLabels` 주석 참고 ).
+     * 옵션 쪽 `xaxis.categories` 와 같은 배열을 써야 축과 데이터가 어긋나지 않는다.
+     */
+    const yearLabels = resolveYearLabels(
+      btcPoints.map((point) => point.year),
+      btcPoints.map((point) => point.isPartialYear),
+    );
+
     /** `partialYearColor` 를 주지 않으면( 선 시리즈 ) 색을 덮어쓰지 않는다. */
     const toSeriesData = (points: ChartPoint[], partialYearColor?: string) =>
-      points.map((point) => ({
-        // 진행 중인 연도는 라벨에 `*` 를 붙여 확정 데이터와 구분한다.
-        x: point.isPartialYear ? `${point.year}*` : String(point.year),
+      points.map((point, index) => ({
+        x: yearLabels[index],
         y: point.value,
         ...(point.isPartialYear && partialYearColor ? { fillColor: partialYearColor } : {}),
       }));

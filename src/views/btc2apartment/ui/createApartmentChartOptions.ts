@@ -14,8 +14,8 @@ const KRW_COLOR_LIGHT = "#6b7280";
  */
 const PARTIAL_YEAR_ALPHA = "73";
 
-/** 선택 단위에 따른 막대 색 */
-export function resolveSeriesColor(priceUnit: PriceUnit, isDark: boolean): string {
+/** 단위별 시리즈 색 */
+function resolveSeriesColor(priceUnit: PriceUnit, isDark: boolean): string {
   if (priceUnit === "BTC") {
     return BITCOIN_COLOR;
   }
@@ -65,14 +65,52 @@ const resolveAxisLabelStyle = (isDark: boolean) => ({
 const MAX_UNTHINNED_YEAR_LABELS = 8;
 
 /**
- * 연도가 많으면 격년만 남긴다.
+ * 연도가 많으면 격년만 남긴다. 막대는 전부 그리고 축 라벨만 비우므로 빠진 해는 툴팁으로 볼 수 있다.
  *
- * ApexCharts 는 `tickAmount` 로 `Math.round(라벨수 / (tickAmount + 1))` 칸마다 하나씩 남긴다.
- * 라벨 수의 절반을 주면 그 값이 항상 2가 되어 한 해 걸러 하나씩 보인다.
- * 막대는 전부 그대로 그려지고 축 라벨만 비므로, 빠진 해는 툴팁으로 확인할 수 있다.
+ * `xaxis.tickAmount` 를 쓰지 않는 이유: ApexCharts 는 인덱스 0부터 세어( `i % n === 0` )
+ * 라벨을 남기는데, 연도 개수가 **짝수**면 마지막 인덱스가 홀수라 진행 중인 연도 라벨이 빠진다.
+ * ( 트리마제 2017~2026 = 10개 → 2026* 막대만 라벨 없이 남았다 )
+ * 제일 궁금한 값이 올해이므로 **끝에서부터** 세어 마지막 라벨을 항상 남긴다.
  */
-const resolveYearTickAmount = (yearCount: number): number | undefined =>
-  yearCount > MAX_UNTHINNED_YEAR_LABELS ? Math.ceil(yearCount / 2) : undefined;
+const shouldShowYearLabel = (index: number, yearCount: number): boolean =>
+  yearCount <= MAX_UNTHINNED_YEAR_LABELS || (yearCount - 1 - index) % 2 === 0;
+
+/**
+ * 솎아낸 해의 자리표시자. 폭 0 인 공백( zero-width space )을 인덱스만큼 반복해 만든다.
+ *
+ * 그냥 빈 문자열을 쓰면 안 된다. 이 값은 축 라벨인 **동시에 데이터포인트의 키**라,
+ * 여러 해가 같은 `""` 를 가지면 ApexCharts 가 한 칸으로 합쳐 막대가 사라진다.
+ * ( 실제로 10개 막대가 5개로 줄고 선이 끊겼다 )
+ * 인덱스만큼 반복하면 서로 다른 문자열이 되면서 화면에는 아무것도 안 그려진다.
+ */
+/** 소스에 보이지 않는 문자가 박히지 않도록 이스케이프로 적는다. */
+const ZERO_WIDTH_SPACE = "\u200B";
+
+const toBlankYearLabel = (index: number) => ZERO_WIDTH_SPACE.repeat(index + 1);
+
+/**
+ * 축에 그릴 연도 라벨. 솎아낸 해는 눈에 보이지 않는 자리표시자다.
+ *
+ * 이 값은 `xaxis.categories` 와 **시리즈 데이터의 `x`** 양쪽에 같은 것을 넣어야 한다.
+ * `{ x, y }` 형태로 데이터를 넘기면 ApexCharts 는 `categories` 를 무시하고 `x` 로 축을 만든다.
+ * ( 진행 중인 연도 막대만 흐리게 칠하려면 `fillColor` 때문에 객체 형태가 강제된다 )
+ *
+ * `labels.formatter` 로 비우는 방법은 못 쓴다. v5 런타임은 카테고리 축 formatter 에
+ * 인덱스( `opts.i` )를 넘기지 않아 몇 번째 라벨인지 알 수 없다.
+ * ( `src/` 에는 넘기는 코드가 있지만 실제 `dist` 는 인자 없이 부른다 )
+ *
+ * 막대는 전부 그려지고 축 라벨만 비므로, 빠진 해는 hover 로 확인할 수 있다.
+ * 툴팁 머리말은 `tooltip.x.formatter` 가 `years` 로 직접 만들어 영향받지 않는다.
+ */
+export function resolveYearLabels(years: number[], partialYearFlags: boolean[]): string[] {
+  return years.map((year, index) => {
+    if (!shouldShowYearLabel(index, years.length)) {
+      return toBlankYearLabel(index);
+    }
+
+    return partialYearFlags[index] ? `${year}*` : String(year);
+  });
+}
 
 /** 연도 축. 진행 중인 연도는 `*` 로 확정 데이터와 구분함. */
 const createYearAxis = (
@@ -80,8 +118,7 @@ const createYearAxis = (
   partialYearFlags: boolean[],
   isDark: boolean,
 ): ApexOptions["xaxis"] => ({
-  categories: years.map((year, index) => (partialYearFlags[index] ? `${year}*` : String(year))),
-  tickAmount: resolveYearTickAmount(years.length),
+  categories: resolveYearLabels(years, partialYearFlags),
   axisBorder: { show: false },
   axisTicks: { show: false },
   labels: {
@@ -227,7 +264,14 @@ export const createApartmentChartOptions = ({
   /** 축에 그려진 값( 로그 공간일 수 있다 )을 사람이 읽는 BTC 개수로 되돌린다. */
   const toBtcCount = (value: number) => (btcLogRange ? fromLogSpace(value) : value);
 
-  /** 건수는 두 줄에 반복하지 않고 KRW 줄에만 붙임. 두 시리즈가 같은 거래를 집계한 값이라 같음. */
+  /**
+   * 건수는 두 줄에 반복하지 않고 KRW 줄에만 붙인다.
+   *
+   * BTC 쪽에는 시세를 못 구한 거래를 뺀 `btcConvertedDealCount` 가 따로 있지만,
+   * 아카이브 683개 버킷 전부에서 `dealCount` 와 값이 같았다.
+   * ( 빗썸 거래 중단 구간을 blockchain.com 시세로 메워 결측이 남지 않는다 )
+   * 같은 숫자를 두 줄에 반복할 이유가 없어 한 줄로 둔다.
+   */
   const describeDealCount = (dataPointIndex: number) => {
     const dealCount = dealCounts[dataPointIndex] ?? 0;
 

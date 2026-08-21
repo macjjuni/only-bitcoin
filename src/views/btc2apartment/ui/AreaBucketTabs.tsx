@@ -25,7 +25,7 @@ const AreaBucketTabs = ({
 
   return (
     <div className="flex gap-1.5 overflow-x-auto pb-2.5 pl-4 -mx-4 mb-2 font-number scrollbar-none">
-      {availableAreas.map((areaInSquareMeter) => {
+      {availableAreas.map((areaInSquareMeter, index) => {
         const isSelected = areaInSquareMeter === selectedAreaInSquareMeter;
 
         return (
@@ -38,6 +38,7 @@ const AreaBucketTabs = ({
               isSelected
                 ? "bg-bitcoin text-white"
                 : "bg-neutral-200/70 text-muted-foreground dark:bg-neutral-800",
+              index === availableAreas.length - 1 ? "mr-4" : "",
             ].join(" ")}
           >
             {areaInSquareMeter}㎡
