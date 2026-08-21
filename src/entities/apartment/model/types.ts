@@ -1,4 +1,4 @@
-/** 차트 Y축 단위 */
+/** 차트에 함께 그리는 두 가격 단위 */
 export type PriceUnit = "BTC" | "KRW";
 
 /**

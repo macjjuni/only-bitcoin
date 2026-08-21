@@ -3,7 +3,6 @@
 import { memo, useCallback, useMemo } from "react";
 import { findLandmarkApartment, useApartmentSeriesQuery } from "@/entities/apartment";
 import { ApartmentShareDialog } from "@/features/btc2apartment-share";
-import { Card, CardContent } from "@/shared/ui";
 import { resolveSelectedArea } from "../lib/buildChartSeries";
 import { useApartmentQuerySync } from "../lib/useApartmentQuerySync";
 import useBtc2ApartmentStore from "../model/btc2ApartmentStore";
@@ -27,12 +26,10 @@ interface Btc2ApartmentPanelProps {
 const Btc2ApartmentPanel = ({ archiveGeneratedAt }: Btc2ApartmentPanelProps) => {
   // region [Hooks]
   const apartmentID = useBtc2ApartmentStore((state) => state.apartmentID);
-  const priceUnit = useBtc2ApartmentStore((state) => state.priceUnit);
   const selectedAreaInSquareMeter = useBtc2ApartmentStore(
     (state) => state.selectedAreaInSquareMeter,
   );
   const setApartmentID = useBtc2ApartmentStore((state) => state.setApartmentID);
-  const setPriceUnit = useBtc2ApartmentStore((state) => state.setPriceUnit);
   const setSelectedArea = useBtc2ApartmentStore((state) => state.setSelectedArea);
 
   // 진입 시 쿼리로 단지를 맞추고, 이후 선택이 바뀔 때마다 쿼리를 갱신한다.
@@ -93,30 +90,29 @@ const Btc2ApartmentPanel = ({ archiveGeneratedAt }: Btc2ApartmentPanelProps) => 
     <>
       <Btc2ApartmentTitle />
       <ApartmentSelector selectedApartmentID={apartmentID} onSelectApartment={onSelectApartment} />
-      <Card>
-        <CardContent className="flex flex-col gap-4 px-4 py-3">
-          <ApartmentSummaryCard
-            landmark={landmark}
-            yearPoints={series?.years ?? []}
-            areaInSquareMeter={resolvedArea}
-            priceUnit={priceUnit}
-            onChangePriceUnit={setPriceUnit}
-          />
-          <AreaBucketTabs
-            availableAreas={series?.availableAreas ?? []}
-            selectedAreaInSquareMeter={resolvedArea}
-            onSelectArea={onSelectArea}
-          />
-          <Btc2ApartmentChart
-            yearPoints={series?.years ?? []}
-            areaInSquareMeter={resolvedArea}
-            priceUnit={priceUnit}
-            isLoading={isLoading}
-            hasIncompleteYear={hasIncompleteYear}
-          />
-          {ErrorTemplate}
-        </CardContent>
-      </Card>
+      {/*
+        카드 테두리 · 배경 없이 페이지에 그대로 얹음. `px-4` 는 유지해야 함 —
+        `AreaBucketTabs` 의 `-mx-4` 가 이 패딩을 기준으로 가장자리까지 흘러나감.
+      */}
+      <div className="flex flex-col gap-4 px-4 py-3">
+        <ApartmentSummaryCard
+          landmark={landmark}
+          yearPoints={series?.years ?? []}
+          areaInSquareMeter={resolvedArea}
+        />
+        <AreaBucketTabs
+          availableAreas={series?.availableAreas ?? []}
+          selectedAreaInSquareMeter={resolvedArea}
+          onSelectArea={onSelectArea}
+        />
+        <Btc2ApartmentChart
+          yearPoints={series?.years ?? []}
+          areaInSquareMeter={resolvedArea}
+          isLoading={isLoading}
+          hasIncompleteYear={hasIncompleteYear}
+        />
+        {ErrorTemplate}
+      </div>
       <DataSourceFooter archiveGeneratedAt={archiveGeneratedAt} />
 
       {/*
