@@ -14,11 +14,11 @@ import HeatmapLegend from "./HeatmapLegend";
  */
 
 /** 셀 하나의 최소 폭. 이보다 좁으면 `-100%` 가 줄바꿈됨. */
-const CELL_CLASS_NAME = "min-w-[44px] rounded-[3px] px-1.5 py-1 text-center";
+const CELL_CLASS_NAME = "min-w-[44px] rounded-[3px] px-1.5 py-1.5 text-center";
 
 /** 스크롤되는 셀을 가려야 하므로 반드시 불투명색임. 페이지 배경과 살짝 달라 축 구실도 함. */
 const YEAR_HEADER_CLASS_NAME =
-  "sticky left-0 z-10 rounded-[3px] bg-neutral-100 px-1.5 py-1 text-right font-medium dark:bg-neutral-900";
+  "sticky left-0 z-10 rounded-[3px] bg-neutral-100 px-1.5 py-1.5 text-right font-medium dark:bg-neutral-900";
 
 const ANNUAL_COLUMN_CLASS_NAME = "border-l border-neutral-300 pl-2 dark:border-neutral-600";
 
@@ -45,11 +45,11 @@ const MonthlyReturnHeatmap = ({ rows }: MonthlyReturnHeatmapProps) => {
         연도
       </th>
       {MONTH_COLUMN_LABELS.map((monthLabel) => (
-        <th key={monthLabel} scope="col" className="px-1.5 py-1 font-medium">
+        <th key={monthLabel} scope="col" className="px-1.5 py-1.5 font-medium">
           {monthLabel}
         </th>
       ))}
-      <th scope="col" className={`px-1.5 py-1 font-bold ${ANNUAL_COLUMN_CLASS_NAME}`}>
+      <th scope="col" className={`px-1.5 py-1.5 font-bold ${ANNUAL_COLUMN_CLASS_NAME}`}>
         연간
       </th>
     </tr>
