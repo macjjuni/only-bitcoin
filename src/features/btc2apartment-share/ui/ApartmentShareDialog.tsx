@@ -14,6 +14,7 @@ import { Copy, Download, X } from "lucide-react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import type { ApartmentYearPoint, LandmarkApartment } from "@/entities/apartment";
 import { useBitcoinStore } from "@/entities/bitcoin";
+import { useApartmentShareStore } from "@/features/btc2apartment-share";
 import {
   captureElementToPngBlob,
   captureElementToPngDataUrl,
@@ -29,7 +30,6 @@ import {
   registerCaptureBackground,
   registerCaptureOverlay,
 } from "@/shared/lib/imageExport";
-import { useApartmentShareStore } from "../model/useApartmentShareStore";
 import {
   APARTMENT_CARD_DESIGN_WIDTH,
   ApartmentShareCard,
@@ -264,12 +264,7 @@ function ApartmentShareDialog({
   return (
     <KDialog open={isOpen} onOpenChange={onOpenChange} blur={3} size="md">
       <KDialogOverlay className="bg-black/70 backdrop-blur-md" />
-      {/*
-        급등 알림 카드와 **시작 위치**를 맞춘 값임.
-        두 다이얼로그 모두 중앙 기준으로 앉는데 이 카드가 81px 더 높아,
-        같은 42% 를 쓰면 위로 그만큼 더 올라가 서로 다른 자리에서 시작함.
-      */}
-      <KDialogContent className="p-0 border-none bg-transparent shadow-none max-w-[460px] w-[92vw] [&>button]:hidden">
+      <KDialogContent className="!top-[45%] p-0 border-none bg-transparent shadow-none max-w-[460px] w-[92vw] [&>button]:hidden">
         <KDialogHeader className="sr-only">
           <KDialogTitle>아파트 비트코인 환산 카드</KDialogTitle>
           <KDialogDescription>
