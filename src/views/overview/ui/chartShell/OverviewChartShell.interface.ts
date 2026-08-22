@@ -1,5 +1,3 @@
-import type { ReactNode } from "react";
-
 export interface ChartIntervalOption<T extends string | number> {
   text: string;
   value: T;
@@ -22,6 +20,7 @@ export interface OverviewChartShellProps<T extends string | number> {
   fillOpacityTo: { light: number; dark: number };
   fillStops: [number, number];
   chartHeight: number;
-  topSlot?: ReactNode;
+  title?: string;
+  percentage?: number;
   loadingClassName?: string;
 }

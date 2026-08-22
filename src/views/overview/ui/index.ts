@@ -1,5 +1,4 @@
 export { default as BlockHalvingCard } from "./block-halving-card/BlockHalvingCard";
-export { default as ChartChanger } from "./chartChanger/ChartChanger";
 export { default as ClientChart } from "./clientChart/ClientChart";
 export { default as MacroWidgetPanel } from "./macro-widget-panel/MacroWidgetPanel";
 export { default as WidgetItem } from "./macro-widget-panel/WidgetItem";

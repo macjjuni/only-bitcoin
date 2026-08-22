@@ -5,6 +5,7 @@ export interface CreateChartOptionsParams {
   isDark: boolean;
   formatter: (val: number) => string;
   maxPoint: { x: number; y: number } | null;
+  maxPointRatio: number;
   strokeWidth: number;
   fillOpacityTo: { light: number; dark: number };
   fillStops: [number, number];
@@ -14,10 +15,21 @@ export interface CreateChartOptionsParams {
  * 두 차트(Market/MiningMetric)가 공유하는 ApexOptions 객체 생성
  * 시각 차이값(strokeWidth, fillOpacityTo, fillStops)은 호출부에서 주입
  */
+/**
+ * 최고점 위치 비율(0~1)에 따라 라벨 앵커와 오프셋 결정
+ * 좌측 끝 → start, 우측 끝 → end, 중앙 → middle
+ */
+const getMaxPointLabelPosition = (ratio: number) => {
+  if (ratio < 0.15) return { textAnchor: "start" as const, offsetX: 8 };
+  if (ratio > 0.85) return { textAnchor: "end" as const, offsetX: -8 };
+  return { textAnchor: "middle" as const, offsetX: 0 };
+};
+
 export const createChartOptions = ({
   isDark,
   formatter,
   maxPoint,
+  maxPointRatio,
   strokeWidth,
   fillOpacityTo,
   fillStops,
@@ -77,7 +89,7 @@ export const createChartOptions = ({
     strokeDashArray: 3,
     xaxis: { lines: { show: false } },
     yaxis: { lines: { show: true } },
-    padding: { left: 0, right: 0, top: -10, bottom: 0 },
+    padding: { left: 0, right: 0, top: 0, bottom: 0 },
   },
   dataLabels: { enabled: false },
   annotations: {
@@ -103,6 +115,8 @@ export const createChartOptions = ({
               borderWidth: 1,
               borderRadius: 4,
               fontFamily: "Roboto Mono",
+              textAnchor: getMaxPointLabelPosition(maxPointRatio).textAnchor,
+              offsetX: getMaxPointLabelPosition(maxPointRatio).offsetX,
               style: {
                 background: isDark ? "hsl(0 0% 7.1%)" : "#fff",
                 color: isDark ? "#fff" : "#000",

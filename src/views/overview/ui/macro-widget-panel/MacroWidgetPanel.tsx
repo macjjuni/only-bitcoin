@@ -200,7 +200,7 @@ export default function MacroWidgetPanel({
 
   return (
     <>
-      <div className="flex flex-col my-2">
+      <div className="flex flex-col pt-2">
         {isEditMode && (
           <div className="flex justify-end items-center pb-1">
             <button

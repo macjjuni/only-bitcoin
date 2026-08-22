@@ -7,7 +7,6 @@ import { formatDifficulty, formatHashrate } from "@/shared/utils/number";
 import useOverviewStore from "../../model/overviewStore";
 import OverviewChartShell from "../chartShell/OverviewChartShell";
 import type { ChartIntervalOption } from "../chartShell/OverviewChartShell.interface";
-import MiningMetricHeader from "./MiningMetricHeader";
 
 /*
  * 해시레이트 모든 차트는 데이터 크기가 많아 시간기반 균일 샘플링으로 최적화(64%) 했으나,
@@ -69,10 +68,8 @@ export default function MiningMetricChart() {
 
   const allTimeHighValue = useMemo(() => {
     if (!data) return "";
-    if (overviewChart === "hashrate")
-      return `Hashrate: ${formatHashrate(data.currentHashrate || 0)}`;
-    if (overviewChart === "difficulty")
-      return `Difficulty: ${formatDifficulty(data.currentDifficulty || 0)}`;
+    if (overviewChart === "hashrate") return formatHashrate(data.currentHashrate || 0);
+    if (overviewChart === "difficulty") return formatDifficulty(data.currentDifficulty || 0);
     return "";
   }, [data, overviewChart]);
   // endregion
@@ -96,15 +93,10 @@ export default function MiningMetricChart() {
       strokeWidth={1.8}
       fillOpacityTo={{ light: 0.9, dark: 0.06 }}
       fillStops={[0, 80]}
-      chartHeight={185}
+      chartHeight={200}
       loadingClassName="flex justify-center items-center aspect-[2/1]"
-      topSlot={
-        <MiningMetricHeader
-          hasData={!!data}
-          allTimeHighValue={allTimeHighValue}
-          percentage={percentage}
-        />
-      }
+      title={allTimeHighValue}
+      percentage={percentage}
     />
   );
 }
