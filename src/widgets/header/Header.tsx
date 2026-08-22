@@ -17,6 +17,7 @@ export default function Header() {
   const pathname = usePathname();
   const initialPath = useSettingStore((state) => state.setting.initialPath);
   const isHeaderHidden = useScrollDirection();
+  const hideGradient = pathname === "/overview" || pathname === "/" || pathname === "/btc2fiat";
   // endregion
 
   // 몰입형 페이지는 헤더를 렌더링하지 않는다.
@@ -34,8 +35,8 @@ export default function Header() {
         `transition-transform duration-[${TRANSITION_DURATION}ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]`,
         isHeaderHidden ? "-translate-y-full" : "translate-y-0",
         // 하단 그라데이션 (ease-out 곡선 근사 스탑으로 자연스럽게 페이드)
-        "after:content-[''] after:absolute after:top-full after:left-0 after:w-full after:h-[18px] after:pointer-events-none",
-        "after:bg-[linear-gradient(to_bottom,hsl(var(--background))_0%,hsl(var(--background)/0.87)_14%,hsl(var(--background)/0.7)_28%,hsl(var(--background)/0.5)_42%,hsl(var(--background)/0.32)_56%,hsl(var(--background)/0.17)_70%,hsl(var(--background)/0.07)_84%,hsl(var(--background)/0)_100%)]",
+        !hideGradient && "after:content-[''] after:absolute after:top-full after:left-0 after:w-full after:h-[18px] after:pointer-events-none",
+        !hideGradient && "after:bg-[linear-gradient(to_bottom,hsl(var(--background))_0%,hsl(var(--background)/0.87)_14%,hsl(var(--background)/0.7)_28%,hsl(var(--background)/0.5)_42%,hsl(var(--background)/0.32)_56%,hsl(var(--background)/0.17)_70%,hsl(var(--background)/0.07)_84%,hsl(var(--background)/0)_100%)]",
       ]
         .filter(Boolean)
         .join(" ")}
