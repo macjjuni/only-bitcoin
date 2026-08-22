@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo } from "react";
 import { calcPercentage, getNextHalvingData, useBlockStore } from "@/entities/block";
 import blockLottieJson from "@/shared/assets/lottie/blocks.json";
 import { calcDate } from "@/shared/lib/date";
+import { HalfIcon } from "@/shared/ui";
 import { comma } from "@/shared/utils/string";
 
 const totalSegments = 24 as const;
@@ -84,7 +85,10 @@ export default function BlockHalvingCard({ initialBlockHeight }: BlockHalvingCar
   return (
     <div className="flex flex-col justify-between gap-2 p-0 mt-2 border-none">
       {/* .block-halving-card__header */}
-      <h2 className="text-[20px] leading-6 font-bold">Bitcoin Halving</h2>
+      <h2 className="flex items-center gap-1.5 text-[20px] leading-6 font-bold">
+        <HalfIcon size={20} />
+        Bitcoin Halving
+      </h2>
 
       {/* .block-halving-card__content */}
       <div className="flex justify-between items-center gap-4">

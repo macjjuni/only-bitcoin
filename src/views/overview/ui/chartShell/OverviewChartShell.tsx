@@ -14,7 +14,7 @@ import dynamic from "next/dynamic";
 import { useCallback, useMemo } from "react";
 import { BITCOIN_COLOR } from "@/shared/config/color";
 import useSettingStore from "@/shared/stores/settingStore";
-import { CountText, UpdownIcon } from "@/shared/ui";
+import { ChartColumnIcon, CountText, UpdownIcon } from "@/shared/ui";
 import useOverviewStore, { type OverviewChartType } from "../../model/overviewStore";
 import { createChartOptions } from "./createChartOptions";
 import type { OverviewChartShellProps } from "./OverviewChartShell.interface";
@@ -104,6 +104,7 @@ export default function OverviewChartShell<T extends string | number>({
           <div className="flex items-center gap-2 relative">
             <KDropdownMenu>
               <KDropdownMenuTrigger className="flex items-center gap-0.5 text-[20px] leading-6 font-bold">
+                <ChartColumnIcon size={20} className="mr-1" />
                 {selectedChartLabel}
                 <ChevronDown size={16} />
               </KDropdownMenuTrigger>

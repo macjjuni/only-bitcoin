@@ -2,6 +2,7 @@ export { default as AnimationIcon } from "./AnimationIcon";
 export { default as BlockIcon } from "./BlockIcon";
 export { default as BtcTextLogo } from "./BtcTextLogo";
 export { default as BuildingIcon } from "./BuildingIcon";
+export { default as ChartColumnIcon } from "./ChartColumnIcon";
 export { default as CurrencyIcon } from "./CurrencyIcon";
 // Navigation Icon
 export { default as DashboardIcon } from "./DashboardIcon";
@@ -9,6 +10,7 @@ export { default as DiscordIcon } from "./DiscordIcon";
 export { default as EditIcon } from "./EditIcon";
 export { default as ExchangeIcon } from "./ExchangeIcon";
 export { default as HalfCircleIcon } from "./HalfCircleIcon";
+export { default as HalfIcon } from "./HalfIcon";
 export { default as IosShareIcon } from "./IosShareIcon";
 export { default as MinerIcon } from "./MinerIcon";
 export { default as NaverIcon } from "./NaverIcon";
