@@ -93,9 +93,9 @@ export default function BlockHalvingCard({ initialBlockHeight }: BlockHalvingCar
       {/* .block-halving-card__content */}
       <div className="flex justify-between items-center gap-4">
         {/* .block-halving-card__gauge */}
-        <div className="flex w-[70%] h-9 gap-0.5">{renderSegments}</div>
+        <div className="flex w-[70%] h-[36px] gap-0.5">{renderSegments}</div>
 
-        <span className="text-xl font-bold pr-1 text-current drop-shadow-[0_0_10px_rgba(var(--font-rgb),0.5)]">
+        <span className="text-2xl font-bold pr-1 text-current drop-shadow-[0_0_10px_rgba(var(--font-rgb),0.5)]">
           {halvingPercent}%
         </span>
       </div>
@@ -114,7 +114,7 @@ export default function BlockHalvingCard({ initialBlockHeight }: BlockHalvingCar
           <span className="font-number font-bold text-base">{comma(recentBlockHeight)}</span>
         </div>
 
-        <div className="w-px h-9 bg-current" />
+        <div className="w-px h-9 bg-current opacity-20" />
 
         <div className="flex flex-col gap-1">
           <span className="text-[12px] opacity-70">Remaining</span>
@@ -123,7 +123,7 @@ export default function BlockHalvingCard({ initialBlockHeight }: BlockHalvingCar
           </span>
         </div>
 
-        <div className="w-px h-9 bg-current" />
+        <div className="w-px h-9 bg-current opacity-20" />
 
         <div className="flex flex-col gap-1">
           <span className="text-[12px] opacity-70">Estimated Date</span>
