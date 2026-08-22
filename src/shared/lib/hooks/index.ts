@@ -7,4 +7,5 @@ export { default as useInitializeDisabledZoom } from "./useInitializeDisabledZoo
 export { default as useInitializePage } from "./useInitializePage";
 export { default as useInitializePWA } from "./useInitializePWA";
 export { default as useMounted } from "./useMounted";
+export { default as useScrollDirection } from "./useScrollDirection";
 export { default as useTheme } from "./useTheme";

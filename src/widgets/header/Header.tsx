@@ -4,15 +4,19 @@ import { KIcon } from "kku-ui";
 import { usePathname } from "next/navigation";
 import { env } from "@/shared/config/env";
 import { hideHeaderPathList } from "@/shared/config/route";
+import { useScrollDirection } from "@/shared/lib/hooks";
 import useSettingStore from "@/shared/stores/settingStore";
 import { BtcTextLogo, TransitionLink } from "@/shared/ui";
 import ConnectionDot from "./components/connection-dot/ConnectionDot";
 import SettingButton from "./components/setting-button/SettingButton";
 
+const TRANSITION_DURATION = 420;
+
 export default function Header() {
   // region [Hooks]
   const pathname = usePathname();
   const initialPath = useSettingStore((state) => state.setting.initialPath);
+  const isHeaderHidden = useScrollDirection();
   // endregion
 
   // 몰입형 페이지는 헤더를 렌더링하지 않는다.
@@ -24,9 +28,11 @@ export default function Header() {
     <header
       className={[
         "only-btc__header",
-        "relative shrink-0 bg-background",
+        "absolute top-0 left-0 right-0 bg-background",
         "flex justify-between items-center gap-1 w-full h-header p-2 pb-1.5",
         "z-[10] select-none tap-highlight-transparent",
+        `transition-transform duration-[${TRANSITION_DURATION}ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]`,
+        isHeaderHidden ? "-translate-y-full" : "translate-y-0",
         // 하단 그라데이션 (ease-out 곡선 근사 스탑으로 자연스럽게 페이드)
         "after:content-[''] after:absolute after:top-full after:left-0 after:w-full after:h-[20px] after:pointer-events-none",
         "after:bg-[linear-gradient(to_bottom,hsl(var(--background))_0%,hsl(var(--background)/0.87)_14%,hsl(var(--background)/0.7)_28%,hsl(var(--background)/0.5)_42%,hsl(var(--background)/0.32)_56%,hsl(var(--background)/0.17)_70%,hsl(var(--background)/0.07)_84%,hsl(var(--background)/0)_100%)]",
