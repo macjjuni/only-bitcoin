@@ -166,7 +166,8 @@ html.slide-first::view-transition-new(root) {
     -moz-osx-font-smoothing: grayscale;
   }
 
-  .dark body::before {
+  html.dark body::before,
+  body.dark::before {
     content: "";
     position: fixed;
     left: 50%;
@@ -175,7 +176,7 @@ html.slide-first::view-transition-new(root) {
     height: 38vh;
     transform: translateX(-50%);
     transform-origin: 50% 100%;
-    z-index: -1;
+    z-index: 0;
     pointer-events: none;
     filter: blur(8px);
     @apply animate-ember-glow;
