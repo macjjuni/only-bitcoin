@@ -83,9 +83,9 @@ export default function BlockHalvingCard({ initialBlockHeight }: BlockHalvingCar
   // endregion
 
   return (
-    <div className="flex flex-col justify-between gap-2 p-0 mt-2 border-none">
+    <div className="flex flex-col justify-between gap-2.5 p-0 border-none">
       {/* .block-halving-card__header */}
-      <h2 className="flex items-center gap-1.5 text-[20px] leading-6 font-bold">
+      <h2 className="flex items-center gap-1.5 text-[20px] leading-6 font-bold py-0.5">
         <HalfIcon size={20} />
         Bitcoin Halving
       </h2>

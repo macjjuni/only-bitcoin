@@ -20,7 +20,7 @@ export default async function OverviewScreen() {
   const initialBlockHeight = initialBlockData.blocks[0]?.height ?? 0;
 
   return (
-    <PageLayout>
+    <PageLayout className="!pt-0 !gap-3">
       <PricePanel initialPrice={initialPrice} />
       <MacroWidgetPanel
         initialMacro={initialMacro}

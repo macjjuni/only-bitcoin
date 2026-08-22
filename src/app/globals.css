@@ -202,7 +202,7 @@ html.slide-first::view-transition-new(root) {
     background-size: 420px;
     background-repeat: no-repeat;
     background-attachment: fixed;
-    background-position: center calc(50% - (theme(height.navigation) / 2));
+    background-position: center calc(50% - (theme(height.navigation) / 2) - 12px);
     z-index: 1;
 
     &::after {
