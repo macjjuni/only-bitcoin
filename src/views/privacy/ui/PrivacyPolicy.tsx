@@ -13,11 +13,13 @@ const GOOGLE_ANALYTICS_OPT_OUT_URL = "https://tools.google.com/dlpage/gaoptout";
 
 /** 서비스가 시세·지표를 조회하는 외부 데이터 출처. */
 const DATA_SOURCES = [
-  "비트코인 시세: Upbit, Bithumb, Binance, Coinbase",
+  "비트코인 시세(실시간): Upbit, Bithumb, Binance, Coinbase",
+  "비트코인 시세(과거 BTC/USD): blockchain.com",
   "도미넌스(BTC.D): CoinGecko",
   "공포·탐욕 지수: alternative.me",
   "원/달러 환율: Naver(KEB)",
   "블록·트랜잭션 정보: mempool.space",
+  "아파트 실거래가: 국토교통부 공공데이터(data.go.kr)",
 ];
 // endregion
 
