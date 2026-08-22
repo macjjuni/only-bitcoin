@@ -5,8 +5,8 @@ import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import { MemeClientPage } from "@/views/meme";
 
-const PAGE_TITLE = "비트맥시 전용 밈 저장소";
-const PAGE_DESCRIPTION = "비트맥시를 위한 성지";
+const PAGE_TITLE = "비트맥시 밈 저장소";
+const PAGE_DESCRIPTION = "X에서 봤던 그 밈! 다 모아놓은 저장소";
 
 export const metadata: Metadata = {
   title: `${env.NEXT_PUBLIC_TITLE} - Meme`,

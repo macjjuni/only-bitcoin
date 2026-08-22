@@ -105,7 +105,7 @@ const OrangePillContent = () => {
       <ListGroup header="유틸리티">
         <ListRow
           icon={<ShootingStarIcon size={28} />}
-          label="비트맥시 전용 밈 저장소"
+          label="비트맥시 밈 저장소"
           rightElement={<ChevronRight className="text-muted-foreground" />}
           onClick={handleMemeRoute}
         />
