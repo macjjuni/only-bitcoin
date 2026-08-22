@@ -1,6 +1,8 @@
 import type { Metadata } from "next";
 import { getMemeImages } from "@/entities/meme";
 import { env } from "@/shared/config/env";
+import { PageTitle } from "@/shared/ui";
+import { PageLayout } from "@/shared/ui/layout";
 import { MemeClientPage } from "@/views/meme";
 
 const PAGE_TITLE = "비트맥시 전용 밈 저장소";
@@ -34,5 +36,11 @@ export const metadata: Metadata = {
 
 export default async function Page() {
   const initialImages = await getMemeImages();
-  return <MemeClientPage initialImages={initialImages} />;
+
+  return (
+    <PageLayout className="gap-4">
+      <PageTitle label="BITMAXIES MEME" title={PAGE_TITLE} description={PAGE_DESCRIPTION} />
+      <MemeClientPage initialImages={initialImages} />
+    </PageLayout>
+  );
 }

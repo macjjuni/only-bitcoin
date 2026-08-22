@@ -2,7 +2,6 @@
 
 import { useCallback, useMemo, useState } from "react";
 import type { MemeImageResponseData } from "@/entities/meme";
-import { PageLayout } from "@/shared/ui/layout";
 import Gallery from "./Gallery";
 import TagList from "./TagList";
 
@@ -27,10 +26,10 @@ const MemeClientPage = ({ initialImages }: MemeClientPageProps) => {
   // endregion
 
   return (
-    <PageLayout>
+    <>
       <TagList tags={tags} selected={selectedTag} onChangeTag={onChangeTag} />
       <Gallery images={initialImages} selected={selectedTag} />
-    </PageLayout>
+    </>
   );
 };
 

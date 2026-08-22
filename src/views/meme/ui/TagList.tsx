@@ -38,7 +38,7 @@ const TagList = ({ tags, selected, onChangeTag }: TagListProps) => {
   // endregion
 
   return (
-    <div className="-mx-2 py-2 px-2.5 pb-4 overflow-x-auto scrollbar-hide">
+    <div className="-mx-2 px-2.5 py-4 bg-bitcoin  overflow-x-auto scrollbar-hide">
       <div className="flex flex-col gap-2 w-max">
         {tagRows.map((row, rowIndex) => (
           <div key={`tag-row-${rowIndex}`} className="flex gap-2">
@@ -49,10 +49,10 @@ const TagList = ({ tags, selected, onChangeTag }: TagListProps) => {
                 data-tag={tag}
                 onClick={onClickTag}
                 className={classNames(
-                  "px-3.5 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95 shadow-sm whitespace-nowrap select-none",
+                  "px-3.5 py-2 rounded-full text-sm font-medium transition-all duration-200 hover:scale-105 active:scale-95 whitespace-nowrap select-none",
                   tag === selected
-                    ? "bg-gradient-to-r from-bitcoin to-[#ff8c00] text-white shadow-md"
-                    : "bg-white border border-neutral-300 text-neutral-700 hover:border-bitcoin hover:text-bitcoin dark:bg-neutral-800 dark:border-neutral-600 dark:text-neutral-200 dark:hover:border-bitcoin",
+                    ? "bg-white text-bitcoin shadow-md font-bold"
+                    : "bg-white/25 text-white hover:bg-white/40",
                 )}
               >
                 {tag}
