@@ -104,6 +104,10 @@ export default {
             animationTimingFunction: "ease-in",
           },
         },
+        "glow-pulse": {
+          "0%, 100%": { opacity: "0" },
+          "50%": { opacity: "1" },
+        },
       },
       animation: {
         wiggle: "wiggle 0.36s ease-in-out infinite",
@@ -120,6 +124,7 @@ export default {
         "aurora-flow": "auroraFlow 4s linear infinite",
         "blob-drift-a": "blobDriftA 20s ease-in-out infinite",
         "blob-drift-b": "blobDriftB 24s ease-in-out infinite",
+        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
       },
     },
   },
