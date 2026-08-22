@@ -99,7 +99,7 @@ export default function OverviewChartShell<T extends string | number>({
 
   return (
     <div className="relative flex flex-col justify-between gap-2 -mx-2 w-[calc(100%+1rem)] select-none overflow-hidden">
-      <div className="flex justify-between items-center px-2 py-1">
+      <div className="flex justify-between items-center px-2 py-0.5">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 relative">
             <KDropdownMenu>
@@ -127,9 +127,10 @@ export default function OverviewChartShell<T extends string | number>({
             {title && (
               <div className="flex items-center gap-1">
                 <span className="text-sm font-number font-bold">{title}</span>
-
                 {percentage !== undefined && Math.abs(percentage) > 0.01 && (
-                  <span className={`flex justify-center items-center font-number font-bold text-[12px] leading-4 ${percentage >= 0 ? "text-up" : "text-down"}`}>
+                  <span
+                    className={`flex justify-center items-center font-number font-bold text-[12px] leading-4 ${percentage >= 0 ? "text-up" : "text-down"}`}
+                  >
                     <UpdownIcon isUp={percentage >= 0} className="mr-0.5" />
                     <CountText value={Math.abs(percentage)} decimals={2} />%
                   </span>

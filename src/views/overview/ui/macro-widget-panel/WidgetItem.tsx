@@ -44,7 +44,7 @@ export default function WidgetItem({
   const widgetClass = useMemo(
     () =>
       [
-        "relative flex flex-col gap-1 py-1 px-0.5 select-none tap-highlight-transparent",
+        "relative flex flex-col gap-1 p-0.5 select-none tap-highlight-transparent",
         isEditMode ? "animate-wiggle" : "",
         onClick ? "cursor-pointer" : "",
       ]

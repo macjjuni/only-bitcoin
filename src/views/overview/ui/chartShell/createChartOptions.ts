@@ -83,7 +83,7 @@ export const createChartOptions = ({
     },
     tooltip: { enabled: false },
   },
-  yaxis: { show: false },
+  yaxis: { show: false, tickAmount: 6 },
   grid: {
     borderColor: isDark ? "rgba(255,255,255,0.07)" : "rgba(0,0,0,0.06)",
     strokeDashArray: 3,
