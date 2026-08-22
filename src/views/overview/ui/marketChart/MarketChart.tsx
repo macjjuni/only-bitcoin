@@ -48,7 +48,7 @@ export default function MarketChart() {
       strokeWidth={1.48}
       fillOpacityTo={{ light: 0.6, dark: 0.06 }}
       fillStops={[0, 90]}
-      chartHeight={200}
+      chartHeight={188}
     />
   );
 }
