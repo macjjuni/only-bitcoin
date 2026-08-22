@@ -7,7 +7,6 @@ import { useCallback } from "react";
 import { allRouteList } from "@/shared/config/route";
 import {
   BuildingIcon,
-  DiscordIcon,
   HalfCircleIcon,
   LazyImage,
   ListGroup,
@@ -21,9 +20,7 @@ import { onRouteToExternalLink } from "@/shared/utils/common";
 
 // region [Constants]
 const EXTERNAL_LINKS = {
-  CITADEL_DISCORD: "https://discord.gg/citadel21",
   ATOMIC_BTC_NOTION: "http://atomicbtc.kr",
-  CITADEL_CAFE: "https://cafe.naver.com/btcforever",
   BTC_MAP: "http://btcmap.kr",
   FIAT_GOV_BITCOIN_DOC: "https://finished-snake-h7zp8jm.gamma.site",
   SATOSHOP: "https://satoshop.org",
@@ -173,22 +170,6 @@ const OrangePillContent = () => {
           label="화폐와 정부 그리고 비트코인"
           rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
           onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.FIAT_GOV_BITCOIN_DOC)}
-        />
-      </ListGroup>
-
-      {/* 커뮤니티 그룹 */}
-      <ListGroup header="커뮤니티" className="!mt-4">
-        <ListRow
-          icon={<DiscordIcon size={28} />}
-          label="BITCOIN⚡️CITADEL"
-          rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_DISCORD)}
-        />
-        <ListRow
-          icon={<NaverIcon size={28} />}
-          label="비트코인⚡️지분전쟁: 시타델"
-          rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_CAFE)}
         />
       </ListGroup>
     </>
