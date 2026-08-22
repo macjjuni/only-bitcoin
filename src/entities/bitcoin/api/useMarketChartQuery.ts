@@ -28,6 +28,7 @@ const BINANCE_INTERVAL_MAP: Record<
   { interval: BinanceInterval; limit: number }
 > = {
   "1d": { interval: "5m", limit: 288 },
+  "3d": { interval: "15m", limit: 288 },
   "7d": { interval: "1h", limit: 168 },
   "1m": { interval: "4h", limit: 180 },
   "3m": { interval: "12h", limit: 180 },
@@ -111,6 +112,7 @@ const MINUTE = 1000 * 60;
  */
 const REFRESH_TIME_MAP: Record<MarketChartIntervalType, number> = {
   "1d": MINUTE * 5,
+  "3d": MINUTE * 5,
   "7d": MINUTE * 5,
   "1m": MINUTE * 5,
   "3m": MINUTE * 30,

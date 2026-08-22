@@ -1,10 +1,11 @@
 import type { MarketChartIntervalType } from "@/entities/bitcoin";
 
-export type ShareCardTimeframe = "1D" | "7D" | "1M" | "3M" | "6M" | "1Y" | "3Y" | "5Y" | "10Y";
+export type ShareCardTimeframe = "1D" | "3D" | "7D" | "1M" | "3M" | "6M" | "1Y" | "3Y" | "5Y" | "10Y";
 
 /** 드롭다운 메뉴에 노출되는 전체 타임프레임 ( 짧은 기간 → 긴 기간 순 ) */
 export const SHARE_CARD_TIMEFRAME_LIST: readonly ShareCardTimeframe[] = [
   "1D",
+  "3D",
   "7D",
   "1M",
   "3M",
@@ -21,6 +22,7 @@ export const SHARE_CARD_TIMEFRAME_INTERVAL_MAP: Record<
   MarketChartIntervalType
 > = {
   "1D": "1d",
+  "3D": "3d",
   "7D": "7d",
   "1M": "1m",
   "3M": "3m",

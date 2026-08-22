@@ -87,7 +87,7 @@ function BtcSurgeTimeframeSelector(props: BtcSurgeTimeframeSelectorProps) {
         alignOffset={-4}
         className="!bg-[#111318]/95 !border-white/15 !backdrop-blur-xl !shadow-[0_8px_32px_rgba(0,0,0,0.6)] !rounded-2xl !p-2"
       >
-        <div className="grid grid-cols-3 gap-1 auto-cols-min">{TimeframeItemListTemplate}</div>
+        <div className="grid grid-cols-5 gap-1">{TimeframeItemListTemplate}</div>
       </KPopoverContent>
     </KPopover>
   );
