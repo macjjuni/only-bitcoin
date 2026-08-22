@@ -5,8 +5,8 @@ import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import { Bip39Page } from "@/views/bip39";
 
-const PAGE_TITLE = "BIP39 니모닉 생성기";
-const PAGE_DESCRIPTION = "비트코인 니모닉과 엔트로피를 확인해보세요.";
+const PAGE_TITLE = "BIP39 단어 검색";
+const PAGE_DESCRIPTION = "니모닉 단어 목록과 시드 도트를 확인해보세요.";
 
 export const metadata: Metadata = {
   title: `${env.NEXT_PUBLIC_TITLE} - BIP39`,
