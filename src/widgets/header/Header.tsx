@@ -2,10 +2,14 @@
 
 import { KIcon } from "kku-ui";
 import { usePathname } from "next/navigation";
+import type { CSSProperties } from "react";
 import { env } from "@/shared/config/env";
-import { useScrollDirection } from "@/shared/lib/hooks";
-import { buildHeroGradientStyle } from "@/shared/config/heroGradient";
+import {
+  buildHeroGradientStyle,
+  HERO_GRADIENT_FADE_DISTANCE_IN_PX,
+} from "@/shared/config/heroGradient";
 import { heroGradientPathList, hideHeaderPathList } from "@/shared/config/route";
+import { useContentScrollProgress, useScrollDirection } from "@/shared/lib/hooks";
 import useSettingStore from "@/shared/stores/settingStore";
 import { BtcTextLogo, TransitionLink } from "@/shared/ui";
 import ConnectionDot from "./components/connection-dot/ConnectionDot";
@@ -48,12 +52,19 @@ export default function Header() {
         `transition-transform duration-[${TRANSITION_DURATION}ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]`,
         isHeaderHidden ? "-translate-y-full" : "translate-y-0",
         // 하단 그라데이션 (ease-out 곡선 근사 스탑으로 자연스럽게 페이드)
-        !hideGradient && "after:content-[''] after:absolute after:top-full after:left-0 after:w-full after:h-[18px] after:pointer-events-none",
+        !hideGradient &&
+          "after:content-[''] after:absolute after:top-full after:left-0 after:w-full after:h-[18px] after:pointer-events-none",
         !hideGradient && "after:opacity-[var(--header-fade-opacity)]",
-        !hideGradient && "after:bg-[linear-gradient(to_bottom,hsl(var(--background))_0%,hsl(var(--background)/0.87)_14%,hsl(var(--background)/0.7)_28%,hsl(var(--background)/0.5)_42%,hsl(var(--background)/0.32)_56%,hsl(var(--background)/0.17)_70%,hsl(var(--background)/0.07)_84%,hsl(var(--background)/0)_100%)]",
+        !hideGradient &&
+          "after:bg-[linear-gradient(to_bottom,hsl(var(--background))_0%,hsl(var(--background)/0.87)_14%,hsl(var(--background)/0.7)_28%,hsl(var(--background)/0.5)_42%,hsl(var(--background)/0.32)_56%,hsl(var(--background)/0.17)_70%,hsl(var(--background)/0.07)_84%,hsl(var(--background)/0)_100%)]",
       ]
         .filter(Boolean)
         .join(" ")}
+      style={
+        {
+          "--header-fade-opacity": bottomFadeOpacity,
+        } as CSSProperties
+      }
     >
       {hasHeroGradient && (
         <div

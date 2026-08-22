@@ -1,5 +1,6 @@
 import { GoogleAnalytics, GoogleTagManager } from "@next/third-parties/google";
 import type { Metadata, Viewport } from "next";
+import Script from "next/script";
 import { ViewTransitions } from "next-view-transitions";
 import type { ReactNode } from "react";
 import Initializer from "@/app/initializers/Initializer";
@@ -78,13 +79,18 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
       <html lang="ko" suppressHydrationWarning>
         <head>
           {isProduction && env.NEXT_PUBLIC_ADSENSE_CLIENT_ID && (
-            <script
+            <Script
               async
               src={`https://pagead2.googlesyndication.com/pagead/js/adsbygoogle.js?client=${env.NEXT_PUBLIC_ADSENSE_CLIENT_ID}`}
               crossOrigin="anonymous"
+              strategy="afterInteractive"
             />
           )}
-          <script dangerouslySetInnerHTML={{ __html: THEME_INITIALIZATION_SCRIPT }} />
+          <Script
+            id="theme-init"
+            strategy="beforeInteractive"
+            dangerouslySetInnerHTML={{ __html: THEME_INITIALIZATION_SCRIPT }}
+          />
         </head>
         <body>
           {isProduction && env.NEXT_PUBLIC_GTM_ID && (

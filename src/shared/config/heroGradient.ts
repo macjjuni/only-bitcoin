@@ -5,6 +5,7 @@ import type { CSSProperties } from "react";
  * 히어로가 이만큼 밀어서 그리므로 어긋나면 이음매가 보임.
  */
 export const HERO_GRADIENT_HEADER_HEIGHT_IN_PX = 50;
+export const HERO_GRADIENT_FADE_DISTANCE_IN_PX = 120;
 
 /** 그라데이션 한 장의 높이(px). 헤더 + 히어로 상단을 덮음. */
 const HERO_GRADIENT_HEIGHT_IN_PX = 340;
