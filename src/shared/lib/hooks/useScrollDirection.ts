@@ -1,7 +1,7 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import { useCallback, useEffect, useRef, useState } from "react";
 
 const SCROLL_THRESHOLD = 10;
 const HEADER_HEIGHT = 50;
@@ -13,7 +13,6 @@ export default function useScrollDirection() {
   const [isHeaderHidden, setIsHeaderHidden] = useState(false);
   const lastScrollY = useRef(0);
   // endregion
-
 
   // region [Events]
   const onScroll = useCallback(() => {
@@ -48,7 +47,6 @@ export default function useScrollDirection() {
     lastScrollY.current = currentScrollY;
   }, []);
   // endregion
-
 
   // region [Life Cycles]
   // pathname 변경 시 상태 초기화

@@ -216,7 +216,9 @@ async function main() {
   const entryCount = sortedEntries.length;
 
   console.log("\n완료");
-  console.log(`  blockchain.com 호출 ${settledThroughYear - refetchStartYear + 1}회 / ${elapsedSeconds}초`);
+  console.log(
+    `  blockchain.com 호출 ${settledThroughYear - refetchStartYear + 1}회 / ${elapsedSeconds}초`,
+  );
   console.log(`  ${OUTPUT_PATH}`);
   console.log(`  ${sizeInKb}KB / ${entryCount}개월`);
 }

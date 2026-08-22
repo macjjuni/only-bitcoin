@@ -4,10 +4,7 @@ import {
   fetchBtcMonthlyUsdMap,
   resolveMonthlyUsdYears,
 } from "../lib/btcMonthlyUsd";
-import {
-  getArchivedMonthlyUsdMap,
-  resolveRuntimeStartYear,
-} from "../lib/btcMonthlyUsdArchive";
+import { getArchivedMonthlyUsdMap, resolveRuntimeStartYear } from "../lib/btcMonthlyUsdArchive";
 
 /**
  * BTC 달러 월별 종가 ( 서버 캐시 래퍼 ).

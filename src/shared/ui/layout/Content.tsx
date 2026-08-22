@@ -1,7 +1,7 @@
 "use client";
 
-import type { ReactNode } from "react";
 import { usePathname } from "next/navigation";
+import type { ReactNode } from "react";
 import { hideHeaderPathList } from "@/shared/config/route";
 import { useFadeInByPath } from "@/shared/lib/hooks";
 

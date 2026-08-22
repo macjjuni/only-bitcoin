@@ -13,9 +13,7 @@ const PageTitle = ({ label, title, description, as: Tag = "h1" }: PageTitleProps
       </span>
       <Tag className="mb-2.5 text-[19px] font-bold leading-tight tracking-tight">{title}</Tag>
       {description && (
-        <p className="text-sm leading-relaxed text-muted-foreground">
-          {description}
-        </p>
+        <p className="text-sm leading-relaxed text-muted-foreground">{description}</p>
       )}
     </div>
   );

@@ -3,6 +3,7 @@
 import { memo, useCallback, useMemo } from "react";
 import { findLandmarkApartment, useApartmentSeriesQuery } from "@/entities/apartment";
 import { ApartmentShareDialog } from "@/features/btc2apartment-share";
+import { PageTitle } from "@/shared/ui";
 import { resolveSelectedArea } from "../lib/buildChartSeries";
 import { useApartmentQuerySync } from "../lib/useApartmentQuerySync";
 import useBtc2ApartmentStore from "../model/btc2ApartmentStore";
@@ -10,7 +11,6 @@ import ApartmentSelector from "./ApartmentSelector";
 import ApartmentSummaryCard from "./ApartmentSummaryCard";
 import AreaBucketTabs from "./AreaBucketTabs";
 import Btc2ApartmentChart from "./Btc2ApartmentChart";
-import { PageTitle } from "@/shared/ui";
 import DataSourceFooter from "./DataSourceFooter";
 
 interface Btc2ApartmentPanelProps {
