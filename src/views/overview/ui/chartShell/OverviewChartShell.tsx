@@ -99,13 +99,13 @@ export default function OverviewChartShell<T extends string | number>({
 
   return (
     <div className="relative flex flex-col justify-between gap-2 -mx-2 w-[calc(100%+1rem)] select-none overflow-hidden">
-      <div className="flex justify-between items-center px-2">
+      <div className="flex justify-between items-center px-2 py-1">
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 relative">
             <KDropdownMenu>
-              <KDropdownMenuTrigger className="flex items-center gap-0.5 text-lg font-bold">
+              <KDropdownMenuTrigger className="flex items-center gap-0.5 text-[20px] leading-6 font-bold">
                 {selectedChartLabel}
-                <ChevronDown size={14} />
+                <ChevronDown size={16} />
               </KDropdownMenuTrigger>
 
               <KDropdownMenuContent align="start" side="bottom" sideOffset={8}>
@@ -129,9 +129,9 @@ export default function OverviewChartShell<T extends string | number>({
                 <span className="text-sm font-number font-bold">{title}</span>
 
                 {percentage !== undefined && Math.abs(percentage) > 0.01 && (
-                  <span className="flex justify-center items-center gap-0.5 font-number font-bold text-[12px] leading-4">
-                    <UpdownIcon isUp={percentage > 0} />
-                    <CountText value={percentage} decimals={2} />%
+                  <span className={`flex justify-center items-center font-number font-bold text-[12px] leading-4 ${percentage >= 0 ? "text-up" : "text-down"}`}>
+                    <UpdownIcon isUp={percentage >= 0} className="mr-0.5" />
+                    <CountText value={Math.abs(percentage)} decimals={2} />%
                   </span>
                 )}
               </div>
@@ -139,17 +139,19 @@ export default function OverviewChartShell<T extends string | number>({
           </div>
         </div>
 
-        <div className="flex items-center gap-2 shrink-0">
+        <div className="shrink-0">
           <KDropdownMenu>
             <KDropdownMenuTrigger
               className={[
-                "flex items-center gap-1 px-2 py-1 rounded-lg text-sm font-medium transition-colors duration-150",
-                "bg-gray-100 dark:bg-gray-800",
-                "data-[state=open]:bg-gray-200 dark:data-[state=open]:bg-gray-700",
+                "flex items-center gap-0.5 px-2.5 py-1.5 rounded-full text-xs font-bold tracking-wide transition-all duration-200",
+                "border border-gray-200 dark:border-gray-700",
+                "hover:border-gray-300 dark:hover:border-gray-600",
+                "data-[state=open]:border-orange-400 data-[state=open]:text-orange-500",
+                "dark:data-[state=open]:border-orange-500 dark:data-[state=open]:text-orange-400",
               ].join(" ")}
             >
+              <ChevronDown size={16} />
               {currentText}
-              <ChevronDown size={14} />
             </KDropdownMenuTrigger>
 
             <KDropdownMenuContent align="end" side="bottom" sideOffset={8} className="min-w-0">
