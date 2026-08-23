@@ -14,7 +14,7 @@ import { Copy, Download, X } from "lucide-react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import type { ApartmentYearPoint, LandmarkApartment } from "@/entities/apartment";
 import { useBitcoinStore } from "@/entities/bitcoin";
-import { useApartmentShareStore } from "@/features/btc2apartment-share";
+import { useApartmentShareStore } from "../model/useApartmentShareStore";
 import {
   captureElementToPngBlob,
   captureElementToPngDataUrl,

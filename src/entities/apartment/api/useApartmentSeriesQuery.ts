@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import type { ApartmentSeriesResponse } from "@/entities/apartment";
+import type { ApartmentSeriesResponse } from "../lib/buildApartmentSeries";
 import type { LandmarkApartment } from "../model/types";
 
 const MINUTE_IN_MS = 1000 * 60;
