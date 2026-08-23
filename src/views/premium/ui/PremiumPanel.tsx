@@ -73,7 +73,20 @@ const PremiumPanel = ({ initialPrice, initialMacro }: PremiumPanelTypes) => {
       <div className="border-b border-border pt-[26px] px-5 pb-[22px]">
         <div className="flex items-baseline justify-between">
           <div className="flex flex-col gap-1">
-            <span className={`font-pretendard text-[12px] font-bold tracking-[.1em] ${signColor}`}>
+            <span
+              className={`inline-flex items-center gap-1.5 self-start px-2.5 py-1 rounded-full text-xs font-semibold font-pretendard tracking-wide border ${
+                isPositive
+                  ? "bg-up/10 text-up border-up/25"
+                  : isNegative
+                    ? "bg-down/10 text-down border-down/25"
+                    : "bg-muted text-muted-foreground border-border"
+              }`}
+            >
+              <span
+                className={`w-1.5 h-1.5 rounded-full ${
+                  isPositive ? "bg-up" : isNegative ? "bg-down" : "bg-muted-foreground"
+                }`}
+              />
               {isPositive ? "프리미엄" : isNegative ? "역프리미엄" : "동일"}
             </span>
           </div>
