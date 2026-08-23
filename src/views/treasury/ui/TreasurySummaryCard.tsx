@@ -55,7 +55,7 @@ export default function TreasurySummaryCard({ summary, fetchedAt }: TreasurySumm
           Public Company Treasury
         </span>
         <h2 className="mb-2.5 text-[19px] font-bold leading-tight tracking-tight">
-          상장기업이 보유한 비트코인
+          상장기업 비트코인 트레저리
         </h2>
 
         {/* 히어로 숫자. 폭이 좁아지면 글자도 같이 줄어야 9자리 수가 안 넘침. */}
