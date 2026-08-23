@@ -1,7 +1,13 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { Building2, CalendarRange, ChevronRight, ExternalLink, TableProperties } from "lucide-react";
+import {
+  Building2,
+  CalendarRange,
+  ChevronRight,
+  ExternalLink,
+  TableProperties,
+} from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { useCallback } from "react";
 import { allRouteList } from "@/shared/config/route";

@@ -1,7 +1,12 @@
 import { memo } from "react";
 import type { IconTypes } from "./icon";
 
-const ChartColumnIcon = ({ size = "100%", color = "currentColor", style, className }: IconTypes) => {
+const ChartColumnIcon = ({
+  size = "100%",
+  color = "currentColor",
+  style,
+  className,
+}: IconTypes) => {
   return (
     <svg
       fill={color}

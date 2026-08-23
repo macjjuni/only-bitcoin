@@ -49,6 +49,11 @@
     0 20px 40px rgba(0, 0, 0, 0.4);
 }
 
+.glass-bg {
+  background: rgba(255, 255, 255, 0.045);
+  backdrop-filter: blur(8px);
+}
+
 .glass-surface { @apply bg-neutral-100/30 backdrop-blur-sm; }
 .glass-surface [class~="bg-background"] { background-color: transparent; }
 :where(.dark) .glass-surface { @apply bg-neutral-900/30; }
