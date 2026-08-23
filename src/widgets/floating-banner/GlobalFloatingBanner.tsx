@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { BtcSurgeShareDialog } from "@/features/btc-surge-share";
+import { PremiumShareDialog, PremiumShareFloatingBanner } from "@/features/premium-share";
 import { hideBottomNavPathList } from "@/shared/config/route";
 import ApartmentShareFloatingBanner from "./ui/ApartmentShareFloatingBanner";
 import BlocksCountdownFloatingBanner from "./ui/BlocksCountdownFloatingBanner";
@@ -46,6 +47,14 @@ const BANNER_CONFIGS: BannerConfig[] = [
     useIsVisible: () => {
       const pathname = usePathname();
       return pathname === "/" || pathname === "/overview";
+    },
+  },
+  {
+    id: "premium-share",
+    Component: PremiumShareFloatingBanner,
+    useIsVisible: () => {
+      const pathname = usePathname();
+      return pathname.startsWith("/premium");
     },
   },
   {
@@ -134,6 +143,7 @@ export default function GlobalFloatingBanner() {
         ))}
       </div>
       <BtcSurgeShareDialog />
+      <PremiumShareDialog />
     </>
   );
 }

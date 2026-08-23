@@ -36,5 +36,9 @@ export {
   type SegmentedControlOption,
   type SegmentedControlProps,
 } from "./SegmentedControl";
+export {
+  default as ShareCardQr,
+  type ShareCardQrProps,
+} from "./ShareCardQr";
 export { default as TransitionLink } from "./TransitionLink";
 export { default as UpdownIcon } from "./UpdownIcon";

@@ -31,7 +31,7 @@ const PremiumField = () => {
               <div className="space-y-2">
                 <h4 className="font-semibold text-sm">프리미엄이란?</h4>
                 <p className="text-sm leading-relaxed">
-                  비트코인 가격에 추가 비율을 적용하여 계산합니다. 거래소마다 다른 시세 차이나 김치
+                  비트코인 가격에 추가 비율을 적용하여 계산합니다. 거래소마다 다른 시세 차이나 한국
                   프리미엄 등을 반영할 때 유용합니다.
                 </p>
                 <div className="text-xs opacity-80 mt-1 pt-1.5 border-t">

@@ -20,7 +20,7 @@ export default function Header() {
   const hideGradient = pathname === "/overview" || pathname === "/" || pathname === "/btc2fiat";
   // endregion
 
-  // 몰입형 페이지는 헤더를 렌더링하지 않는다.
+  // 몰입형 페이지는 헤더를 안 그림.
   if (hideHeaderPathList.includes(pathname)) {
     return null;
   }
@@ -35,8 +35,10 @@ export default function Header() {
         `transition-transform duration-[${TRANSITION_DURATION}ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]`,
         isHeaderHidden ? "-translate-y-full" : "translate-y-0",
         // 하단 그라데이션 (ease-out 곡선 근사 스탑으로 자연스럽게 페이드)
-        !hideGradient && "after:content-[''] after:absolute after:top-full after:left-0 after:w-full after:h-[18px] after:pointer-events-none",
-        !hideGradient && "after:bg-[linear-gradient(to_bottom,hsl(var(--background))_0%,hsl(var(--background)/0.87)_14%,hsl(var(--background)/0.7)_28%,hsl(var(--background)/0.5)_42%,hsl(var(--background)/0.32)_56%,hsl(var(--background)/0.17)_70%,hsl(var(--background)/0.07)_84%,hsl(var(--background)/0)_100%)]",
+        !hideGradient &&
+          "after:content-[''] after:absolute after:top-full after:left-0 after:w-full after:h-[18px] after:pointer-events-none",
+        !hideGradient &&
+          "after:bg-[linear-gradient(to_bottom,hsl(var(--background))_0%,hsl(var(--background)/0.87)_14%,hsl(var(--background)/0.7)_28%,hsl(var(--background)/0.5)_42%,hsl(var(--background)/0.32)_56%,hsl(var(--background)/0.17)_70%,hsl(var(--background)/0.07)_84%,hsl(var(--background)/0)_100%)]",
       ]
         .filter(Boolean)
         .join(" ")}
@@ -49,8 +51,8 @@ export default function Header() {
           className="flex justify-start items-center gap-2 text-current dark:text-current !no-underline
               text-3xl font-bold"
         >
-          <KIcon id="bitcoin" icon="bitcoin" size={30} />
-          <BtcTextLogo height={32} width={132} />
+          <KIcon id="bitcoin" icon="bitcoin" size={38} />
+          <BtcTextLogo height={36} width={148} />
         </TransitionLink>
       </h2>
 

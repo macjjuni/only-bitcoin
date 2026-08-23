@@ -4,6 +4,7 @@ export const env = {
   /** `.env` 가 아니라 `next.config.ts` 가 `package.json` 버전에서 주입한다. */
   NEXT_PUBLIC_APP_VERSION: process.env.NEXT_PUBLIC_APP_VERSION || "",
   NEXT_PUBLIC_GA_TRACKING_ID: process.env.NEXT_PUBLIC_GA_TRACKING_ID || "",
+  NEXT_PUBLIC_GTM_ID: process.env.NEXT_PUBLIC_GTM_ID || "",
   NEXT_PUBLIC_MEME_IMAGE_URL: process.env.NEXT_PUBLIC_MEME_IMAGE_URL || "",
   NEXT_PUBLIC_ADSENSE_CLIENT_ID: process.env.NEXT_PUBLIC_ADSENSE_CLIENT_ID || "",
   NEXT_PUBLIC_DONATION_ADDRESS: process.env.NEXT_PUBLIC_DONATION_ADDRESS || "",

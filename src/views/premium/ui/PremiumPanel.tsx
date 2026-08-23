@@ -1,6 +1,5 @@
 "use client";
 
-import { KSkeleton } from "kku-ui";
 import { memo, useMemo } from "react";
 import type { InitialMacro, InitialPrice } from "@/entities/bitcoin";
 import { useBitcoinStore } from "@/entities/bitcoin";
@@ -9,116 +8,200 @@ import useSettingStore from "@/shared/stores/settingStore";
 import { CountText } from "@/shared/ui";
 import { calcPremiumPercent } from "@/shared/utils/calculate";
 
-const SURFACE_CLASS = "rounded-md text-card-foreground";
-const HEADER_CLASS = "flex flex-col space-y-1.5 p-4";
-const TITLE_CLASS = "leading-none tracking-tight flex justify-start items-center";
-const CONTENT_CLASS = "p-4 pt-0";
-
 interface PremiumPanelTypes {
-  /** SSR 로 미리 조회한 시세 */
   initialPrice: InitialPrice;
-  /** SSR 로 미리 조회한 매크로 지표(환율 사용) */
   initialMacro: InitialMacro;
 }
 
+const SCALE_GRADIENT = [
+  "linear-gradient(90deg,",
+  "rgb(var(--down-rgb) / .55),",
+  "transparent 38%,",
+  "hsl(var(--foreground) / .12) 49%,",
+  "hsl(var(--foreground) / .12) 51%,",
+  "transparent 62%,",
+  "rgb(var(--up-rgb) / .55))",
+].join(" ");
+
+/** 스케일 바 최대 범위 (±SCALE_RANGE %) */
+const SCALE_RANGE = 10;
+
+const GRID_COLS = "1.15fr 1fr .78fr";
+
 const PremiumPanel = ({ initialPrice, initialMacro }: PremiumPanelTypes) => {
   // region [Hooks]
-  const currency = useSettingStore((state) => state.setting.currency);
   const { krw: socketKrw, usd: socketUsd } = useBitcoinStore((state) => state.bitcoinPrice);
   const { value: storeExRate, date: storeExRateDate } = useBitcoinStore((state) => state.exRate);
+  const krwMarket = useBitcoinStore((state) => state.krwMarket);
+  const usdMarket = useBitcoinStore((state) => state.usdMarket);
   const isUsdtStandard = useSettingStore((state) => state.setting.isUsdtStandard);
 
-  /**
-   * 소켓/환율 쿼리가 값을 채우기 전(= 서버 렌더링 및 첫 페인트)에는 SSR 값으로 대체한다.
-   * 채워지는 즉시 실시간 값이 우선한다.
-   */
   const krw = socketKrw || initialPrice.krw;
   const usd = socketUsd || initialPrice.usd;
   const usdExRate = storeExRate || initialMacro.usdExRate;
   const date = storeExRateDate || initialMacro.usdExRateDate;
   // endregion
 
-  // region [Templates]
-  const PremiumDataList = useMemo(() => {
-    const usdKoreaPrice = krw / usdExRate;
-    const krwGlobalPrice = usd * usdExRate;
-
-    return [
-      { title: "프리미엄 가격", krw: krw - krwGlobalPrice, usd: usdKoreaPrice - usd },
-      { title: "한국 가격", krw, usd: usdKoreaPrice },
-      { title: "해외 가격", krw: krwGlobalPrice, usd },
-    ];
-  }, [krw, usd, usdExRate]);
-
-  const PremiumPercent = useMemo(
+  // region [Privates]
+  const premiumPercent = useMemo(
     () => calcPremiumPercent(krw, usd, usdExRate),
     [krw, usd, usdExRate],
   );
+
+  const { usdKoreaPrice, krwGlobalPrice, premiumKrw, premiumUsd } = useMemo(() => {
+    const koreaUsd = usdExRate ? krw / usdExRate : 0;
+    const globalKrw = usd * usdExRate;
+    return {
+      usdKoreaPrice: koreaUsd,
+      krwGlobalPrice: globalKrw,
+      premiumKrw: krw - globalKrw,
+      premiumUsd: koreaUsd - usd,
+    };
+  }, [krw, usd, usdExRate]);
+
+  const isPositive = premiumPercent > 0;
+  const isNegative = premiumPercent < 0;
+  const signColor = isPositive ? "text-up" : isNegative ? "text-down" : "text-muted-foreground";
+  const signBg = isPositive ? "bg-up" : isNegative ? "bg-down" : "bg-muted-foreground";
+  const markerPos =
+    Math.min(Math.max((premiumPercent + SCALE_RANGE) / (SCALE_RANGE * 2), 0), 1) * 100;
   // endregion
 
   return (
     <>
-      <div className={SURFACE_CLASS}>
-        <div className={`${HEADER_CLASS} pt-0 pb-3`}>
-          <h3 className={`${TITLE_CLASS} text-2xl font-bold`}>한국 프리미엄</h3>
+      {/* ── 1. 프리미엄 히어로 블록 ─────────────────────── */}
+      <div className="border-b border-border pt-[26px] px-5 pb-[22px]">
+        <div className="flex items-baseline justify-between">
+          <div className="flex flex-col gap-1">
+            <span className={`font-pretendard text-[12px] font-bold tracking-[.1em] ${signColor}`}>
+              {isPositive ? "프리미엄" : isNegative ? "역프리미엄" : "동일"}
+            </span>
+          </div>
+
+          <div
+            className={`font-number text-[66px] font-bold leading-[.9] tracking-[-.05em] tabular-nums ${signColor}`}
+          >
+            {isPositive && "+"}
+            <CountText value={premiumPercent} decimals={2} />%
+          </div>
         </div>
-        <div
-          className={`${CONTENT_CLASS} flex items-center gap-1 text-[40px] text-current font-bold`}
-        >
-          {usdExRate ? (
-            <>
-              <span className="text-3xl">{PremiumPercent > 0 ? "+" : ""}</span>
-              <CountText value={PremiumPercent} decimals={2} />%
-            </>
-          ) : (
-            <KSkeleton className="text-3xl text-transparent">Loading</KSkeleton>
-          )}
+
+        {/* Scale Bar (-SCALE_RANGE% ~ +SCALE_RANGE%) */}
+        <div className="relative mt-4">
+          <div className="h-2 w-full" style={{ background: SCALE_GRADIENT }} />
+
+          {/* 0% center tick */}
+          <div
+            className="absolute top-0 left-1/2 w-px h-2 -translate-x-1/2"
+            style={{ background: "hsl(var(--foreground) / .3)" }}
+          />
+
+          {/* current value marker */}
+          <div
+            className={`absolute top-0 h-2 w-[3px] -translate-x-1/2 ${signBg}`}
+            style={{ left: `${markerPos}%` }}
+          />
+
+          {/* scale labels */}
+          <div className="flex justify-between font-pretendard text-xs text-muted-foreground mt-1.5">
+            <span>-{SCALE_RANGE}%</span>
+            <span>0</span>
+            <span>+{SCALE_RANGE}%</span>
+          </div>
         </div>
       </div>
 
-      {PremiumDataList.map((item) => (
-        <div key={item.title} className={SURFACE_CLASS}>
-          <div className={`${HEADER_CLASS} pb-0.5 font-thin`}>
-            <h3 className={`${TITLE_CLASS} text-base opacity-70 font-normal`}>{item.title}</h3>
-          </div>
-          <div className={`${CONTENT_CLASS} flex flex-col gap-1 items-center font-bold`}>
-            {currency.includes("KRW") && (
-              <div className="w-full flex items-baseline">
-                <CountText className="text-2xl font-bold" value={item.krw} />
-                <span className="text-base font-bold ml-1">KRW</span>
-              </div>
-            )}
-            {currency.includes("USD") && (
-              <div className="w-full flex items-baseline">
-                <CountText className="text-2xl font-bold" value={item.usd} />
-                <span className="text-base font-bold ml-1">USD</span>
-              </div>
-            )}
-          </div>
+      {/* ── 2. 원장 테이블 ──────────────────────────────── */}
+      <div className="glass-bg">
+        {/* Header */}
+        <div
+          className="grid border-b border-border py-2.5 px-5 font-pretendard text-xs tracking-[.12em] text-muted-foreground uppercase"
+          style={{ gridTemplateColumns: GRID_COLS }}
+        >
+          <span>구분</span>
+          <span className="text-right">KRW</span>
+          <span className="text-right">USD</span>
         </div>
-      ))}
 
-      <div className={SURFACE_CLASS}>
-        <div className={`${HEADER_CLASS} pb-0.5 font-thin`}>
-          <h3 className={`${TITLE_CLASS} text-base opacity-70 font-normal`}>
-            {!isUsdtStandard ? "실시간 환율(USD/KRW)" : "USDT/KRW"}
-          </h3>
-        </div>
-        <div className={`${CONTENT_CLASS} flex flex-col items-center font-bold`}>
-          <div className="flex justify-between items-end w-full">
-            <div className="flex items-baseline">
-              <span className="text-2xl font-bold">1</span>
-              <span className="text-base font-bold ml-1">{!isUsdtStandard ? "USD" : "USDT"}</span>
-              <span className="text-2xl mx-2 font-light opacity-50">/</span>
-              <CountText className="text-2xl font-bold" value={usdExRate} decimals={1} />
-              <span className="text-base font-bold ml-1">KRW</span>
-            </div>
-            <div className="mb-[3px]">
-              <span className="font-number text-sm layout-max:text-base">
-                ({formatDate(date, "YYYY.MM.DD")})
-              </span>
-            </div>
+        {/* 한국 가격 */}
+        <div
+          className="grid items-center border-b border-border py-[17px] px-5"
+          style={{ gridTemplateColumns: GRID_COLS }}
+        >
+          <div className="flex flex-col">
+            <span className="font-pretendard text-base leading-5">한국 가격</span>
+            <span className="font-number text-xs tracking-[.05em] text-muted-foreground">
+              {krwMarket}
+            </span>
           </div>
+          <CountText
+            className="text-right text-lg font-bold tracking-[-.035em] tabular-nums"
+            value={krw}
+          />
+          <CountText
+            className="text-right text-lg font-bold tracking-[-.035em] tabular-nums"
+            value={Math.round(usdKoreaPrice)}
+          />
+        </div>
+
+        {/* 해외 가격 */}
+        <div
+          className="grid items-center border-b border-border py-[17px] px-5"
+          style={{ gridTemplateColumns: GRID_COLS }}
+        >
+          <div className="flex flex-col">
+            <span className="font-pretendard text-base leading-5">해외 가격</span>
+            <span className="font-number text-xs tracking-[.05em] text-muted-foreground">
+              {usdMarket}
+            </span>
+          </div>
+          <CountText
+            className="text-right text-lg font-bold tracking-[-.035em] tabular-nums"
+            value={Math.round(krwGlobalPrice)}
+          />
+          <CountText
+            className="text-right text-lg font-bold tracking-[-.035em] tabular-nums"
+            value={Math.round(usd)}
+          />
+        </div>
+
+        {/* 프리미엄 차이 (SPREAD) */}
+        <div
+          className="grid items-center border-b border-border py-[17px] px-5 bg-black/[.035] dark:bg-white/[.035]"
+          style={{ gridTemplateColumns: GRID_COLS }}
+        >
+          <div className="flex flex-col">
+            <span className="font-pretendard text-base leading-5">프리미엄 차이</span>
+            <span className="font-number text-xs tracking-[.05em] text-muted-foreground">
+              SPREAD
+            </span>
+          </div>
+          <div
+            className={`text-right font-number text-lg font-bold tracking-[-.035em] tabular-nums ${signColor}`}
+          >
+            {premiumKrw > 0 && "+"}
+            <CountText value={Math.round(premiumKrw)} />
+          </div>
+          <div
+            className={`text-right font-number text-lg font-bold tracking-[-.035em] tabular-nums ${signColor}`}
+          >
+            {premiumUsd > 0 && "+"}
+            <CountText value={Math.round(premiumUsd)} />
+          </div>
+        </div>
+      </div>
+
+      {/* ── 3. 환율 행 ──────────────────────────────────── */}
+      <div className="glass-bg flex items-end justify-between py-[18px] px-5">
+        <div className="flex flex-col gap-0.5">
+          <span className="font-pretendard text-base leading-5">{`실시간 환율(${isUsdtStandard ? "USDT" : "USD"}/KRW)`}</span>
+          <span className="font-number text-xs text-muted-foreground">
+            {formatDate(date, "YYYY.MM.DD")} 업데이트
+          </span>
+        </div>
+        <div className="flex items-baseline gap-1">
+          <CountText className="text-[24px] font-bold" value={usdExRate} decimals={1} />
+          <span className="font-pretendard text-xs text-muted-foreground">KRW</span>
         </div>
       </div>
     </>

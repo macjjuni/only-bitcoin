@@ -6,6 +6,7 @@ export interface BlockTypes {
   timestamp: number; // 블록 생성 타임스탬프
   size: number;
   poolName: string;
+  difficulty: number; // 채굴 난이도. persist 된 구버전 캐시에는 없을 수 있어 getCurrentDifficulty 로 읽는다.
 }
 
 export interface FeesTypes {
@@ -31,7 +32,7 @@ export interface BlockSlice {
 }
 
 export const createBlockSlice: StateCreator<BlockSlice> = (set) => ({
-  blockData: [{ id: "", height: 0, timestamp: 0, size: 0, poolName: "-" }],
+  blockData: [{ id: "", height: 0, timestamp: 0, size: 0, poolName: "-", difficulty: 0 }],
   setBlockData: (blockData) => set(() => ({ blockData: [...blockData] })),
   fees: { economyFee: 0, fastestFee: 0, halfHourFee: 0, hourFee: 0, minimumFee: 0 },
   setFees: (fees) => set(() => ({ fees })),
