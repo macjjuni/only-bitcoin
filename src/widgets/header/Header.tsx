@@ -51,8 +51,8 @@ export default function Header() {
           className="flex justify-start items-center gap-2 text-current dark:text-current !no-underline
               text-3xl font-bold"
         >
-          <KIcon id="bitcoin" icon="bitcoin" size={38} />
-          <BtcTextLogo height={36} width={148} />
+          <KIcon id="bitcoin" icon="bitcoin" size={30} />
+          <BtcTextLogo height={32} width={132} />
         </TransitionLink>
       </h2>
 
