@@ -1,12 +1,15 @@
 import type { Metadata } from "next";
 import { fetchInitialMacro, fetchInitialPrice } from "@/entities/bitcoin/server";
 import { env } from "@/shared/config/env";
+import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
-import { PremiumLottie, PremiumPanel } from "@/views/premium";
+import { PremiumPanel } from "@/views/premium";
+
+const description = "실시간 비트코인 한국 프리미엄 현황을 실시간으로 확인하세요." as const;
 
 export const metadata: Metadata = {
   title: `${env.NEXT_PUBLIC_TITLE} - Premium`,
-  description: "실시간 비트코인 김치 프리미엄 현황을 실시간으로 확인하세요.",
+  description,
 };
 
 export default async function PremiumPage() {
@@ -16,8 +19,8 @@ export default async function PremiumPage() {
   ]);
 
   return (
-    <PageLayout className="relative overflow-x-hidden isolation-auto gap-2.5 !pt-4">
-      <PremiumLottie />
+    <PageLayout className="!gap-0 !px-0">
+      <PageTitle label="Kimchi Premium" title="비트코인 한국 프리미엄" description={description} />
       <PremiumPanel initialPrice={initialPrice} initialMacro={initialMacro} />
     </PageLayout>
   );

@@ -3,7 +3,6 @@
 import { KIcon } from "kku-ui";
 import Image from "next/image";
 import { memo, type RefObject, useEffect, useMemo, useState } from "react";
-import { QRCode } from "react-qrcode-logo";
 import {
   type ApartmentYearPoint,
   getApartmentCaptureImagePath,
@@ -13,7 +12,7 @@ import {
 import { BITCOIN_COLOR } from "@/shared/config/color";
 import { env } from "@/shared/config/env";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
-import { BtcTextLogo, WonIcon } from "@/shared/ui";
+import { BtcTextLogo, ShareCardQr, WonIcon } from "@/shared/ui";
 import {
   buildApartmentShareStats,
   formatBtcCount,
@@ -25,9 +24,6 @@ const SERVICE_DOMAIN = "ONLY-BTC.APP";
 export const APARTMENT_CARD_DESIGN_WIDTH = 440;
 const MULTIPLE_BADGE_CLASS = "w-[70px] whitespace-nowrap text-left"; // 배수 뱃지
 const COMPARISON_ROW_CLASS = "text-base font-bold"; // 비교 행의 글자 크기
-const SHARE_QR_SIZE = 48; // QR 표시 크기( 디자인 px ). 최장 URL 이 37 모듈이라 여기가 인식 하한임
-const SHARE_QR_PADDING = 6; // 흰 판 여백 겸 quiet zone. 규격이 모듈 4개분이라 6px 아래로는 못 내림
-const SHARE_QR_RENDER_SCALE = 3; // canvas 를 표시 크기의 몇 배로 그릴지. 캡처 배율과 맞춰야 확대해도 안 뭉개짐
 export const SHARE_QR_CANVAS_ID = "apartment-share-qr"; // 캡처 후 합성할 때 다이얼로그가 QR canvas 를 찾는 id
 
 /**
@@ -181,41 +177,6 @@ function ApartmentShareCard({
     );
   }, [stats, krwRiseMultiple]);
 
-  /** 카드는 이미지로만 퍼짐. 도메인 워터마크로는 **지금 이 단지**로 못 보냄. 로고 옆 우측 상단에 둠. */
-  const ShareQrTemplate = useMemo(() => {
-    if (!shareUrl) {
-      return null;
-    }
-
-    return (
-      /* QR 은 밝은 바탕에서만 읽힘. canvas 가 캡처에서 빠져도 안 무너지게 크기를 고정함. */
-      <div
-        className="ml-auto flex-none rounded-lg bg-white"
-        style={{
-          width: SHARE_QR_SIZE + SHARE_QR_PADDING * 2,
-          height: SHARE_QR_SIZE + SHARE_QR_PADDING * 2,
-          padding: SHARE_QR_PADDING,
-        }}
-      >
-        {/*
-          canvas 는 캡처에서 빼고 `ApartmentShareDialog` 가 결과에 직접 합성함. 단지 사진과 같은 이유임.
-          Safari 가 foreignObject 안 이미지를 못 그려서 그대로 두면 QR 만 빈칸으로 나옴.
-        */}
-        <span data-capture-ignore="" className="block">
-          <QRCode
-            id={SHARE_QR_CANVAS_ID}
-            value={shareUrl}
-            size={SHARE_QR_SIZE * SHARE_QR_RENDER_SCALE}
-            quietZone={0}
-            ecLevel="M"
-            style={{ display: "block", width: SHARE_QR_SIZE, height: SHARE_QR_SIZE }}
-          />
-        </span>
-      </div>
-    );
-  }, [shareUrl]);
-  // endregion
-
   // region [Life Cycles]
   useEffect(() => {
     setShareUrl(buildCurrentShareUrl());
@@ -247,15 +208,12 @@ function ApartmentShareCard({
 
       <div className="relative flex flex-col p-6 text-white">
         {/* 급등 알림 카드와 같은 규격. QR 이 로고보다 커서 `items-center` 면 로고가 내려앉으므로 위 맞춤 씀. */}
-        <div
-          className="mb-3 flex items-start gap-2"
-          style={{ minHeight: SHARE_QR_SIZE + SHARE_QR_PADDING * 2 }}
-        >
+        <div className="mb-3 flex items-start gap-2 min-h-[60px]">
           <div className="flex items-center gap-2">
             <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={38} />
             <BtcTextLogo color="#fff" height={36} width={156} />
           </div>
-          {ShareQrTemplate}
+          <ShareCardQr id={SHARE_QR_CANVAS_ID} value={shareUrl} />
         </div>
         <div className="mb-1 text-[26px] font-bold leading-tight tracking-tight">
           {landmark?.displayName ?? "-"}

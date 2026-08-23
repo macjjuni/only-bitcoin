@@ -1,4 +1,59 @@
+import type { BlockTypes } from "../model/blockSlice";
 import { blockHalvingData } from "../model/constants";
+
+/** 난이도 1 을 풀기 위해 평균적으로 시도해야 하는 해시 수 (2³²). */
+export const HASHES_PER_DIFFICULTY = 2 ** 32;
+
+/** 프로토콜이 목표로 하는 블록 생성 간격(초). */
+export const TARGET_BLOCK_INTERVAL_SECONDS = 600;
+
+/**
+ * 최신 블록의 채굴 난이도.
+ *
+ * 스토어가 persist 되므로 `difficulty` 필드가 없던 구버전 캐시가 남아 있을 수 있고,
+ * 소켓 연결 전에는 높이 0 짜리 빈 블록만 존재한다. 두 경우 모두 0 을 돌려주어
+ * 호출부가 "아직 모르는 상태"와 실제 난이도를 구분할 수 있게 한다.
+ */
+export const getCurrentDifficulty = (blocks: BlockTypes[]): number => {
+  const latestDifficulty = blocks[0]?.difficulty;
+
+  if (typeof latestDifficulty !== "number" || !Number.isFinite(latestDifficulty)) {
+    return 0;
+  }
+  if (latestDifficulty <= 0) {
+    return 0;
+  }
+
+  return latestDifficulty;
+};
+
+/**
+ * 난이도로부터 역산한 네트워크 전체 해시레이트(H/s).
+ * 관측된 블록 시간에서 추정한 값과 달리 단기 변동에 흔들리지 않는다.
+ */
+export const calculateNetworkHashrate = (difficulty: number): number => {
+  if (!Number.isFinite(difficulty) || difficulty <= 0) {
+    return 0;
+  }
+
+  return (difficulty * HASHES_PER_DIFFICULTY) / TARGET_BLOCK_INTERVAL_SECONDS;
+};
+
+/**
+ * 해당 블록 높이 시점의 블록 보조금(BTC).
+ * 반감기 상수를 그대로 쓰므로 2028년 반감기 이후에도 코드 수정 없이 동작한다.
+ */
+export const getCurrentBlockSubsidy = (blockHeight: number): number => {
+  if (!Number.isFinite(blockHeight) || blockHeight < 0) {
+    return 0;
+  }
+
+  const currentHalvingEra = [...blockHalvingData]
+    .reverse()
+    .find((halvingEra) => halvingEra.blockHeight <= blockHeight);
+
+  return currentHalvingEra ? Number(currentHalvingEra.blockReward) : 0;
+};
 
 /** 현재 블록 높이 기준 다음 반감기 정보 */
 export const getNextHalvingData = (currentHeight: number) => {

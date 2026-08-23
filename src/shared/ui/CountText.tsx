@@ -20,7 +20,7 @@ const CountText = (props: CountTextTypes) => {
   const isCountUp = useSettingStore((state) => state.setting.isCountUp);
   const { className, value, duration = 0.3, decimals = 0, separator = "," } = props;
 
-  const rootClass = useMemo(() => (className ? ` ${className}` : ""), [className]);
+  const rootClass = useMemo(() => (className ? className : ""), [className]);
 
   const startValue = useMemo(() => {
     if (!isCountUp) {

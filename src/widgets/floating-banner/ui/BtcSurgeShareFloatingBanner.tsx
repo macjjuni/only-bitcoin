@@ -10,9 +10,7 @@ export default function BtcSurgeShareFloatingBanner() {
   return (
     <div className="relative">
       {/* 비트코인 컬러 글로우 펄스 (iOS WebKit filter:blur 레이어 이슈 방지를 위해 box-shadow 사용) */}
-      <span
-        className="absolute inset-0 rounded-full shadow-[0_0_20px_rgba(247,147,26,0.6)] pointer-events-none animate-glow-pulse"
-      />
+      <span className="absolute inset-0 rounded-full shadow-[0_0_20px_rgba(247,147,26,0.6)] pointer-events-none animate-glow-pulse" />
 
       <FloatingBannerButton
         onClick={openModal}
