@@ -80,7 +80,9 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
     <div
       ref={cardRef}
       data-background-src={BG_SRC}
-      className="font-pretendard relative w-[440px] overflow-hidden rounded-[32px] select-none"
+      className={`font-pretendard relative w-[440px] overflow-hidden rounded-[32px] select-none border transition-all duration-300 ${
+        isPositive ? "border-emerald-500/30" : "border-rose-500/30"
+      }`}
     >
       {/* 배경 이미지. 캡처에서는 빼고 canvas 에 직접 합성함. */}
       <Image
@@ -221,7 +223,7 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
         {/* 푸터 */}
         <div className="mt-6 flex items-center justify-between gap-2 border-t border-white/15 pt-4">
           <span
-            className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-white"
+            className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-white font-jetbrains"
             style={{ textShadow: `0 0 14px ${themeColor}80` }}
           >
             <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: themeColor }} />
