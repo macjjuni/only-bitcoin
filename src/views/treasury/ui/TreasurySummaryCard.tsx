@@ -1,10 +1,6 @@
 import type { PublicTreasurySummary } from "@/entities/treasury";
 import { BITCOIN_COLOR } from "@/shared/config/color";
 import {
-  buildHeroGradientStyle,
-  HERO_GRADIENT_HEADER_HEIGHT_IN_PX,
-} from "@/shared/config/heroGradient";
-import {
   formatBtcCount,
   formatKstDateTime,
   formatPercent,
@@ -32,7 +28,7 @@ const SUPPLY_GAUGE_SEGMENT_INDEXES = Array.from(
 );
 
 /** 게이지 · 지표 박스의 공통 틀. 틴트 위에 얹히므로 배경은 반투명으로 씀. */
-const PANEL_CLASS_NAME = "rounded-xl border border-border bg-background/55";
+const PANEL_CLASS_NAME = "rounded-xl border border-border bg-background/55 glass-bg";
 
 /**
  * 상장기업 전체 합산 지표. 페이지 최상단을 통째로 쓰는 히어로임.
@@ -53,10 +49,7 @@ export default function TreasurySummaryCard({ summary, fetchedAt }: TreasurySumm
   // endregion
 
   return (
-    <section
-      style={buildHeroGradientStyle(HERO_GRADIENT_HEADER_HEIGHT_IN_PX)}
-      className="-mx-2 -mt-2.5 select-none"
-    >
+    <section className="-mx-2 -mt-2.5 select-none">
       <div className="flex flex-col px-5 pb-5 pt-4">
         <span className="mb-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-bitcoin">
           Public Company Treasury
