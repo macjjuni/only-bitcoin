@@ -17,7 +17,6 @@ import {
   captureElementToPngDataUrl,
   clearCaptureOverlays,
   copyPngToClipboard,
-  registerCaptureBackground,
   createPngFile,
   downloadImageFromDataUrl,
   isAndroid,
@@ -25,6 +24,7 @@ import {
   isImageFileShareSupported,
   isIos,
   isShareAbortedByUser,
+  registerCaptureBackground,
   registerCaptureOverlay,
 } from "@/shared/lib/imageExport";
 import { usePremiumShareStore } from "../model/usePremiumShareStore";
@@ -114,6 +114,35 @@ function PremiumShareDialog() {
     });
   }, []);
 
+  /**
+   * 카드 이미지를 클립보드에 복사하고 성공 여부를 반환함.
+   *
+   * Safari 는 user gesture 동기 구간에서만 클립보드 쓰기를 허용하므로 Blob 을 await 하지 않음.
+   * 같은 이유로 호출부에서도 이 함수 이전에 await 이 있으면 안 됨.
+   */
+  const copyCardImageToClipboard = async (cardElement: HTMLElement) => {
+    try {
+      await copyPngToClipboard(() => captureElementToPngBlob(cardElement));
+      return true;
+    } catch (error) {
+      console.error("클립보드 복사 실패, 공유 시트로 폴백:", error);
+      return false;
+    }
+  };
+
+  /** 클립보드 이미지 쓰기를 지원하지 않거나 실패한 환경의 폴백. */
+  const shareCardImageFile = async (cardElement: HTMLElement) => {
+    const capturedImageBlob = await captureElementToPngBlob(cardElement);
+    const shareImageFile = createPngFile(capturedImageBlob, SHARE_IMAGE_FILE_NAME);
+
+    if (!isImageFileShareSupported(shareImageFile)) {
+      kToast.info(isIosDevice ? "화면을 캡처해 주세요." : "이미지 저장을 이용해 주세요.");
+      return;
+    }
+
+    await navigator.share({ files: [shareImageFile], title: SHARE_TITLE });
+  };
+
   useEffect(() => {
     setIsIosDevice(isIos());
   }, []);
@@ -142,36 +171,25 @@ function PremiumShareDialog() {
     registerQrOverlayFromCard();
 
     try {
-      if (isIosDevice || isAndroid()) {
-        const pngBlob = await captureElementToPngBlob(cardElement);
-        const imageFile = createPngFile(pngBlob, SHARE_IMAGE_FILE_NAME);
+      // Android 는 clipboard.write 가 성공해도 실제로 저장되지 않는 경우가 있어 공유 시트를 우선함.
+      // 단축 평가로 동기 구간에서 호출해 Safari 제스처 컨텍스트를 유지함.
+      const isCopiedToClipboard =
+        !isAndroid() &&
+        isImageClipboardSupported() &&
+        (await copyCardImageToClipboard(cardElement));
 
-        if (!isImageFileShareSupported(imageFile)) {
-          kToast.error("이 브라우저에서는 공유 기능을 이용할 수 없습니다.");
-          return;
-        }
-
-        try {
-          await navigator.share({
-            title: SHARE_TITLE,
-            files: [imageFile],
-          });
-        } catch (shareError) {
-          if (!isShareAbortedByUser(shareError)) {
-            throw shareError;
-          }
-        }
+      if (isCopiedToClipboard) {
+        kToast.success("클립보드에 복사되었습니다.");
         return;
       }
 
-      if (!isImageClipboardSupported()) {
-        kToast.error("이 브라우저는 클립보드 이미지 복사를 지원하지 않습니다.");
+      await shareCardImageFile(cardElement);
+    } catch (error) {
+      if (isShareAbortedByUser(error)) {
         return;
       }
 
-      await copyPngToClipboard(() => captureElementToPngBlob(cardElement));
-      kToast.success("이미지가 클립보드에 복사되었습니다.");
-    } catch {
+      console.error("이미지 복사 실패:", error);
       kToast.error("이미지 복사에 실패했습니다.");
     } finally {
       clearCaptureOverlays();
@@ -256,7 +274,7 @@ function PremiumShareDialog() {
               className="h-[44px] gap-2 !text-white bg-bitcoin rounded-3xl font-extrabold"
             >
               <Copy size={18} />
-              {isExporting ? "처리 중..." : isIosDevice ? "이미지 공유하기" : "클립보드 복사"}
+              {isExporting ? "처리 중..." : "이미지 복사"}
             </KButton>
             {!isIosDevice && (
               <KButton

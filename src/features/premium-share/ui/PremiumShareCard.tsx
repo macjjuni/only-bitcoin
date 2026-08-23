@@ -3,22 +3,19 @@
 import { KIcon } from "kku-ui";
 import Image from "next/image";
 import { memo, type RefObject, useEffect, useMemo, useState } from "react";
-import { QRCode } from "react-qrcode-logo";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { krwMarketOptions, usdMarketOptions } from "@/entities/bitcoin/model/market";
 import { BITCOIN_COLOR } from "@/shared/config/color";
 import { env } from "@/shared/config/env";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
 import useSettingStore from "@/shared/stores/settingStore";
-import { BtcTextLogo, CountText } from "@/shared/ui";
+import { BtcTextLogo, ShareCardQr } from "@/shared/ui";
 import { calcPremiumPercent } from "@/shared/utils/calculate";
 
 export const PREMIUM_SHARE_CARD_DESIGN_WIDTH = 440;
 const SERVICE_DOMAIN = "ONLY-BTC.APP";
-const BACKGROUND_IMAGE_SRC = "/images/premium/premium-bg.webp";
-const SHARE_QR_SIZE = 48;
-const SHARE_QR_PADDING = 6;
-const SHARE_QR_RENDER_SCALE = 3;
+const BG_UP_IMAGE_SRC = "/images/premium/premium-up-bg.webp";
+const BG_DOWN_IMAGE_SRC = "/images/premium/premium-down-bg.webp";
 export const SHARE_QR_CANVAS_ID = "premium-share-qr";
 
 const UP_COLOR = "#22c55e";
@@ -66,42 +63,11 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
   const isPositive = PremiumPercent > 0;
   const isNegative = PremiumPercent < 0;
 
+  const BG_SRC = useMemo(() => (isPositive ? BG_UP_IMAGE_SRC : BG_DOWN_IMAGE_SRC), [isPositive]);
   const themeColor = isPositive ? UP_COLOR : isNegative ? DOWN_COLOR : "#FFFFFF";
 
   const krwMarketLabel = krwMarketOptions.find((o) => o.value === krwMarket)?.label ?? krwMarket;
   const usdMarketLabel = usdMarketOptions.find((o) => o.value === usdMarket)?.label ?? usdMarket;
-  // endregion
-
-  // region [Templates]
-  const ShareQrTemplate = useMemo(() => {
-    if (!shareUrl) {
-      return null;
-    }
-
-    return (
-      <div
-        className="ml-auto flex-none rounded-lg bg-white"
-        style={{
-          width: SHARE_QR_SIZE + SHARE_QR_PADDING * 2,
-          height: SHARE_QR_SIZE + SHARE_QR_PADDING * 2,
-          padding: SHARE_QR_PADDING,
-        }}
-      >
-        <span data-capture-ignore="" className="block">
-          <QRCode
-            id={SHARE_QR_CANVAS_ID}
-            value={shareUrl}
-            size={SHARE_QR_SIZE * SHARE_QR_RENDER_SCALE}
-            quietZone={0}
-            ecLevel="M"
-            qrStyle="dots"
-            eyeRadius={8}
-            style={{ display: "block", width: SHARE_QR_SIZE, height: SHARE_QR_SIZE }}
-          />
-        </span>
-      </div>
-    );
-  }, [shareUrl]);
   // endregion
 
   // region [Life Cycles]
@@ -113,13 +79,13 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
   return (
     <div
       ref={cardRef}
-      data-background-src={BACKGROUND_IMAGE_SRC}
+      data-background-src={BG_SRC}
       className="font-pretendard relative w-[440px] overflow-hidden rounded-[32px] select-none"
     >
       {/* 배경 이미지. 캡처에서는 빼고 canvas 에 직접 합성함. */}
       <Image
-        src={BACKGROUND_IMAGE_SRC}
-        alt=""
+        src={BG_SRC}
+        alt="bitcoin premium"
         fill
         sizes="440px"
         priority
@@ -133,24 +99,21 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
 
       <div className="relative flex flex-col p-6 text-white">
         {/* 헤더: 로고 + QR */}
-        <div
-          className="mb-3 flex items-start gap-2"
-          style={{ minHeight: SHARE_QR_SIZE + SHARE_QR_PADDING * 2 }}
-        >
+        <div className="mb-3 flex items-start gap-2 min-h-[60px]">
           <div className="flex items-center gap-2">
             <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={38} />
             <BtcTextLogo color="#fff" height={36} width={156} />
           </div>
-          {ShareQrTemplate}
+          <ShareCardQr id={SHARE_QR_CANVAS_ID} value={shareUrl} />
         </div>
 
         {/* 타이틀 */}
-        <div className="mb-1 text-[26px] font-bold leading-tight tracking-tight">
+        <div className="mb-1.5 text-[26px] font-bold leading-tight tracking-tight">
           비트코인 한국 프리미엄
         </div>
 
         {/* 상태 뱃지 */}
-        <div className="mb-6">
+        <div className="mb-4">
           <span
             className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold border"
             style={{
@@ -173,20 +136,15 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
           </span>
         </div>
 
-        {/* 라벨 */}
-        <div className="mb-1 text-base font-bold text-white/80">실시간 시세 차율</div>
-
         {/* 히어로: 프리미엄 % */}
         <div
           className="mb-6 flex items-baseline gap-1"
           style={{ color: themeColor, filter: `drop-shadow(0 0 25px ${themeColor}60)` }}
         >
           <span className="text-4xl font-black">{isPositive ? "+" : ""}</span>
-          <CountText
-            className="text-[56px] font-black font-number tracking-tight"
-            value={PremiumPercent}
-            decimals={2}
-          />
+          <span className="text-[56px] font-black font-number tracking-tight">
+            {PremiumPercent.toFixed(2)}
+          </span>
           <span className="text-4xl font-black ml-0.5">%</span>
         </div>
 
@@ -194,9 +152,13 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
         <div className="rounded-2xl border border-white/15 bg-black/60 p-4">
           {/* 환율 정보 행 */}
           <div className="mb-4 flex items-center gap-1.5 text-sm font-bold text-white/70">
-            <span>{!isUsdtStandard ? "환율" : "USDT"}</span>
+            {!isUsdtStandard && <span>환율:</span>}
             <span className="text-white font-number">
-              1 {!isUsdtStandard ? "USD" : "USDT"} = <CountText value={usdExRate} decimals={1} />{" "}
+              1 {!isUsdtStandard ? "USD" : "USDT"} ={" "}
+              {usdExRate.toLocaleString("ko-KR", {
+                minimumFractionDigits: 1,
+                maximumFractionDigits: 1,
+              })}{" "}
               KRW
             </span>
           </div>
@@ -221,7 +183,7 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
                 style={{ color: themeColor }}
               >
                 {diffKrw >= 0 ? "+" : ""}
-                <CountText value={diffKrw} /> KRW
+                {Math.round(diffKrw).toLocaleString()} KRW
               </span>
             )}
           </div>
@@ -246,7 +208,11 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
                 style={{ color: themeColor }}
               >
                 {diffUsd >= 0 ? "+" : ""}
-                <CountText value={diffUsd} decimals={2} /> USD
+                {diffUsd.toLocaleString("en-US", {
+                  minimumFractionDigits: 2,
+                  maximumFractionDigits: 2,
+                })}{" "}
+                USD
               </span>
             )}
           </div>
