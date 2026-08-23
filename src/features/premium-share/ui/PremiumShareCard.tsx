@@ -94,6 +94,8 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
             size={SHARE_QR_SIZE * SHARE_QR_RENDER_SCALE}
             quietZone={0}
             ecLevel="M"
+            qrStyle="dots"
+            eyeRadius={8}
             style={{ display: "block", width: SHARE_QR_SIZE, height: SHARE_QR_SIZE }}
           />
         </span>
@@ -179,17 +181,13 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
           className="mb-6 flex items-baseline gap-1"
           style={{ color: themeColor, filter: `drop-shadow(0 0 25px ${themeColor}60)` }}
         >
-          <span className="text-4xl font-black">
-            {isPositive ? "+" : ""}
-          </span>
+          <span className="text-4xl font-black">{isPositive ? "+" : ""}</span>
           <CountText
             className="text-[56px] font-black font-number tracking-tight"
             value={PremiumPercent}
             decimals={2}
           />
-          <span className="text-4xl font-black ml-0.5">
-            %
-          </span>
+          <span className="text-4xl font-black ml-0.5">%</span>
         </div>
 
         {/* 비교 블록 */}
