@@ -12,11 +12,12 @@ import {
 } from "kku-ui";
 import { Copy, Download, X } from "lucide-react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
-import { BITCOIN_COLOR } from "@/shared/config/color";
 import {
   captureElementToPngBlob,
   captureElementToPngDataUrl,
+  clearCaptureOverlays,
   copyPngToClipboard,
+  registerCaptureBackground,
   createPngFile,
   downloadImageFromDataUrl,
   isAndroid,
@@ -24,9 +25,13 @@ import {
   isImageFileShareSupported,
   isIos,
   isShareAbortedByUser,
+  registerCaptureOverlay,
 } from "@/shared/lib/imageExport";
 import { usePremiumShareStore } from "../model/usePremiumShareStore";
-import PremiumShareCard, { PREMIUM_SHARE_CARD_DESIGN_WIDTH } from "./PremiumShareCard";
+import PremiumShareCard, {
+  PREMIUM_SHARE_CARD_DESIGN_WIDTH,
+  SHARE_QR_CANVAS_ID,
+} from "./PremiumShareCard";
 
 const SHARE_IMAGE_FILE_NAME = "only-btc-premium.png";
 const SHARE_TITLE = "ONLY-BTC.APP 비트코인 한국 프리미엄 현황";
@@ -74,6 +79,41 @@ function PremiumShareDialog() {
     [updateCardScale],
   );
 
+  /** 캡처 직전 카드 DOM 에서 사진 경로를 읽어 배경 합성에 등록함. */
+  const registerBackgroundFromCard = useCallback(() => {
+    const backgroundSrc = cardRef.current?.dataset.backgroundSrc;
+
+    if (backgroundSrc) {
+      registerCaptureBackground(backgroundSrc);
+    }
+  }, []);
+
+  /**
+   * 캡처 직전 QR canvas 를 오버레이로 등록함.
+   *
+   * 카드가 `transform` 으로 축소돼 있어 화면 좌표를 디자인 좌표( 440px )로 되돌려 넘김.
+   * 합성은 항상 원본 크기에서 일어남.
+   */
+  const registerQrOverlayFromCard = useCallback(() => {
+    const cardElement = cardRef.current;
+    const qrCanvas = cardElement?.querySelector<HTMLCanvasElement>(`#${SHARE_QR_CANVAS_ID}`);
+
+    if (!cardElement || !qrCanvas) {
+      return;
+    }
+
+    const cardRect = cardElement.getBoundingClientRect();
+    const qrRect = qrCanvas.getBoundingClientRect();
+    const displayScale = cardRect.width / PREMIUM_SHARE_CARD_DESIGN_WIDTH;
+
+    registerCaptureOverlay({
+      src: qrCanvas.toDataURL(),
+      size: qrRect.width / displayScale,
+      top: (qrRect.top - cardRect.top) / displayScale,
+      left: (qrRect.left - cardRect.left) / displayScale,
+    });
+  }, []);
+
   useEffect(() => {
     setIsIosDevice(isIos());
   }, []);
@@ -98,6 +138,8 @@ function PremiumShareDialog() {
     if (!cardElement || isExporting) return;
 
     setIsExporting(true);
+    registerBackgroundFromCard();
+    registerQrOverlayFromCard();
 
     try {
       if (isIosDevice || isAndroid()) {
@@ -132,15 +174,18 @@ function PremiumShareDialog() {
     } catch {
       kToast.error("이미지 복사에 실패했습니다.");
     } finally {
+      clearCaptureOverlays();
       setIsExporting(false);
     }
-  }, [isExporting, isIosDevice]);
+  }, [isExporting, isIosDevice, registerBackgroundFromCard, registerQrOverlayFromCard]);
 
   const handleClickDownload = useCallback(async () => {
     const cardElement = cardRef.current;
     if (!cardElement || isExporting) return;
 
     setIsExporting(true);
+    registerBackgroundFromCard();
+    registerQrOverlayFromCard();
 
     try {
       const pngDataUrl = await captureElementToPngDataUrl(cardElement);
@@ -149,9 +194,10 @@ function PremiumShareDialog() {
     } catch {
       kToast.error("이미지 저장에 실패했습니다.");
     } finally {
+      clearCaptureOverlays();
       setIsExporting(false);
     }
-  }, [isExporting]);
+  }, [isExporting, registerBackgroundFromCard, registerQrOverlayFromCard]);
   // endregion
 
   if (!isOpen) return null;
