@@ -70,37 +70,37 @@ const OrangePillContent = () => {
     () => [
       {
         title: "밈 저장소",
-        icon: <ShootingStarIcon size={30} />,
+        icon: <ShootingStarIcon size={32} />,
         onClick: onClickMemeUtility,
       },
       {
         title: "아파트 몇 BTC?",
-        icon: <BuildingIcon size={26} className={ICON_CLASS} />,
+        icon: <BuildingIcon size={28} className={ICON_CLASS} />,
         onClick: onClickBtc2ApartmentUtility,
       },
       {
         title: "트레저리",
-        icon: <Building2 size={26} strokeWidth={1.8} />,
+        icon: <Building2 size={28} strokeWidth={1.8} />,
         onClick: onClickTreasuryUtility,
       },
       {
         title: "DCA 계산기",
-        icon: <MinerIcon size={32} />,
+        icon: <MinerIcon size={34} />,
         onClick: onClickDcaUtility,
       },
       {
         title: "월별 등락률",
-        icon: <CalendarIcon size={26} className={ICON_CLASS} />,
+        icon: <CalendarIcon size={28} className={ICON_CLASS} />,
         onClick: onClickCagrUtility,
       },
       {
         title: "반감기 카운트",
-        icon: <HalfCircleIcon size={24} />,
+        icon: <HalfCircleIcon size={26} />,
         onClick: onClickHalvingCountdownUtility,
       },
       {
         title: "BIP39",
-        icon: <TableProperties size={26} strokeWidth={1.8} />,
+        icon: <TableProperties size={28} strokeWidth={1.8} />,
         onClick: onClickBIP39Utility,
       },
     ],
@@ -122,15 +122,15 @@ const OrangePillContent = () => {
         유틸리티
       </h2>
 
-      <div className="glass-surface grid grid-cols-4 overflow-hidden rounded-2xl border border-neutral-300 px-2 py-4 dark:border-neutral-600">
+      <div className="glass-surface grid grid-cols-4 overflow-hidden rounded-2xl border border-neutral-300 px-2 py-2 dark:border-neutral-600">
         {UtilityCardsTemplate.map((utilityCard) => (
           <button
             key={utilityCard.title}
             type="button"
-            className="flex min-h-24 flex-col items-center justify-center gap-3 rounded-xl px-1 py-4 text-center transition-[background-color,transform] duration-200 hover:bg-orange-500/5 active:scale-95"
+            className="flex min-h-24 flex-col items-center justify-center gap-3 rounded-xl px-1 py-3 text-center transition-[background-color,transform] duration-200 hover:bg-orange-500/5 active:scale-95"
             onClick={utilityCard.onClick}
           >
-            <span className="flex size-11 items-center justify-center rounded-full bg-orange-500/10 dark:bg-orange-400/15">
+            <span className="flex size-12 items-center justify-center rounded-full bg-orange-500/10 dark:bg-orange-400/15">
               {utilityCard.icon}
             </span>
             <span className="text-xs font-semibold whitespace-nowrap leading-tight break-keep text-foreground">
