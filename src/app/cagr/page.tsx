@@ -45,7 +45,7 @@ export default function CagrPage() {
       <PageTitle
         label="Monthly Returns"
         title="비트코인 월별 등락률"
-        description="매월 마지막 날 가격을 기준으로 한 등락률이에요. 연간 열은 월별 수익률의 복리 합산이에요."
+        description="월별 등락률과 연간 복리 수익률을 확인하세요."
       />
       <Suspense fallback={<CagrLoading />}>
         <CagrScreen />
