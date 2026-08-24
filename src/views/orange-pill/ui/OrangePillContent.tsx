@@ -1,37 +1,10 @@
 "use client";
 
-import { KIcon } from "kku-ui";
-import {
-  Building2,
-  CalendarRange,
-  ChevronRight,
-  ExternalLink,
-  TableProperties,
-} from "lucide-react";
+import { Building2, TableProperties } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
-import { useCallback } from "react";
+import { useCallback, useMemo } from "react";
 import { allRouteList } from "@/shared/config/route";
-import {
-  BuildingIcon,
-  HalfCircleIcon,
-  LazyImage,
-  ListGroup,
-  ListRow,
-  MinerIcon,
-  NaverIcon,
-  PageIcon,
-  ShootingStarIcon,
-} from "@/shared/ui";
-import { onRouteToExternalLink } from "@/shared/utils/common";
-
-// region [Constants]
-const EXTERNAL_LINKS = {
-  ATOMIC_BTC_NOTION: "http://atomicbtc.kr",
-  BTC_MAP: "http://btcmap.kr",
-  FIAT_GOV_BITCOIN_DOC: "https://finished-snake-h7zp8jm.gamma.site",
-  SATOSHOP: "https://satoshop.org",
-} as const;
-// endregion
+import { BuildingIcon, HalfCircleIcon, MinerIcon, RateIcon, ShootingStarIcon } from "@/shared/ui";
 
 const OrangePillContent = () => {
   // region [Hooks]
@@ -39,163 +12,129 @@ const OrangePillContent = () => {
   // endregion
 
   // region [Privates]
-  const handleMemeRoute = useCallback(() => {
-    const routePath = allRouteList.find((item) => item.path.includes("meme"))?.path;
+  const navigateToUtility = useCallback(
+    (pathKeyword: string, utilityName: string) => {
+      const routePath = allRouteList.find((item) => item.path.includes(pathKeyword))?.path;
 
-    if (!routePath) {
-      console.warn("Meme 경로를 찾을 수 없습니다.");
-      return;
-    }
+      if (!routePath) {
+        console.warn(`${utilityName} 경로를 찾을 수 없습니다.`);
+        return;
+      }
 
-    router.push(routePath);
-  }, [router]);
+      router.push(routePath);
+    },
+    [router],
+  );
+  // endregion
 
-  const handleDcaRoute = useCallback(() => {
-    const routePath = allRouteList.find((item) => item.path.includes("/dca"))?.path;
+  // region [Events]
+  const onClickMemeUtility = useCallback(() => {
+    navigateToUtility("meme", "Meme");
+  }, [navigateToUtility]);
 
-    if (!routePath) {
-      console.warn("DCA 경로를 찾을 수 없습니다.");
-      return;
-    }
+  const onClickDcaUtility = useCallback(() => {
+    navigateToUtility("/dca", "DCA");
+  }, [navigateToUtility]);
 
-    router.push(routePath);
-  }, [router]);
+  const onClickBtc2ApartmentUtility = useCallback(() => {
+    navigateToUtility("/btc2apartment", "아파트 몇 BTC?");
+  }, [navigateToUtility]);
 
-  const handleCagrRoute = useCallback(() => {
-    const routePath = allRouteList.find((item) => item.path.includes("/cagr"))?.path;
+  const onClickCagrUtility = useCallback(() => {
+    navigateToUtility("/cagr", "월별 등락률");
+  }, [navigateToUtility]);
 
-    if (!routePath) {
-      console.warn("월별 등락률 경로를 찾을 수 없습니다.");
-      return;
-    }
+  const onClickTreasuryUtility = useCallback(() => {
+    navigateToUtility("/treasury", "기업 비트코인 트레저리");
+  }, [navigateToUtility]);
 
-    router.push(routePath);
-  }, [router]);
+  const onClickHalvingCountdownUtility = useCallback(() => {
+    navigateToUtility("/countdown", "반감기 카운트다운");
+  }, [navigateToUtility]);
 
-  const handleHalvingCountdownRoute = useCallback(() => {
-    const routePath = allRouteList.find((item) => item.path.includes("/countdown"))?.path;
+  const onClickBIP39Utility = useCallback(() => {
+    navigateToUtility("/bip39", "BIP39");
+  }, [navigateToUtility]);
+  // endregion
 
-    if (!routePath) {
-      console.warn("반감기 카운트다운 경로를 찾을 수 없습니다.");
-      return;
-    }
-
-    router.push(routePath);
-  }, [router]);
-
-  const handleBtc2ApartmentRoute = useCallback(() => {
-    const routePath = allRouteList.find((item) => item.path.includes("/btc2apartment"))?.path;
-
-    if (!routePath) {
-      console.warn("BTC to Apartment 경로를 찾을 수 없습니다.");
-      return;
-    }
-
-    router.push(routePath);
-  }, [router]);
-
-  const handleTreasuryRoute = useCallback(() => {
-    const routePath = allRouteList.find((item) => item.path.includes("/treasury"))?.path;
-
-    if (!routePath) {
-      console.warn("기업 트레저리 경로를 찾을 수 없습니다.");
-      return;
-    }
-
-    router.push(routePath);
-  }, [router]);
-
-  const handleBIP39Route = useCallback(() => {
-    const routePath = allRouteList.find((item) => item.path.includes("/bip39"))?.path;
-
-    if (!routePath) {
-      console.warn("BIP39 경로를 찾을 수 없습니다.");
-      return;
-    }
-
-    router.push(routePath);
-  }, [router]);
+  // region [Templates]
+  const UtilityCardsTemplate = useMemo(
+    () => [
+      {
+        title: "비트맥시 밈 저장소",
+        icon: <ShootingStarIcon size={32} />,
+        onClick: onClickMemeUtility,
+      },
+      {
+        title: "DCA 계산기",
+        icon: <MinerIcon size={32} />,
+        onClick: onClickDcaUtility,
+      },
+      {
+        title: "아파트 몇 BTC?",
+        icon: <BuildingIcon size={24} />,
+        onClick: onClickBtc2ApartmentUtility,
+      },
+      {
+        title: "월별 등락률",
+        icon: <RateIcon size={30} />,
+        onClick: onClickCagrUtility,
+      },
+      {
+        title: "기업 비트코인 트레저리",
+        icon: <Building2 size={30} strokeWidth={1.8} />,
+        onClick: onClickTreasuryUtility,
+      },
+      {
+        title: "반감기 카운트다운",
+        icon: <HalfCircleIcon size={30} />,
+        onClick: onClickHalvingCountdownUtility,
+      },
+      {
+        title: "BIP39",
+        icon: <TableProperties size={30} strokeWidth={1.8} />,
+        onClick: onClickBIP39Utility,
+      },
+    ],
+    [
+      onClickBIP39Utility,
+      onClickBtc2ApartmentUtility,
+      onClickCagrUtility,
+      onClickDcaUtility,
+      onClickHalvingCountdownUtility,
+      onClickMemeUtility,
+      onClickTreasuryUtility,
+    ],
+  );
+  // endregion
 
   return (
-    <>
-      {/* 유틸리티 */}
-      <ListGroup header="유틸리티">
-        <ListRow
-          icon={<ShootingStarIcon size={28} />}
-          label="비트맥시 밈 저장소"
-          rightElement={<ChevronRight className="text-muted-foreground" />}
-          onClick={handleMemeRoute}
-        />
-        <ListRow
-          icon={<MinerIcon size={28} />}
-          label="DCA 계산기"
-          rightElement={<ChevronRight className="text-muted-foreground" />}
-          onClick={handleDcaRoute}
-        />
-        <ListRow
-          icon={<BuildingIcon size={26} />}
-          label="아파트 몇 BTC?"
-          rightElement={<ChevronRight className="text-muted-foreground" />}
-          onClick={handleBtc2ApartmentRoute}
-        />
-        <ListRow
-          icon={<CalendarRange size={26} />}
-          label="월별 등락률"
-          rightElement={<ChevronRight className="text-muted-foreground" />}
-          onClick={handleCagrRoute}
-        />
-        <ListRow
-          icon={<Building2 size={24} />}
-          label="기업 비트코인 트레저리"
-          rightElement={<ChevronRight className="text-muted-foreground" />}
-          onClick={handleTreasuryRoute}
-        />
-        <ListRow
-          icon={<HalfCircleIcon size={24} />}
-          label="반감기 카운트다운"
-          rightElement={<ChevronRight className="text-muted-foreground" />}
-          onClick={handleHalvingCountdownRoute}
-        />
-        <ListRow
-          icon={<TableProperties size={24} />}
-          label="BIP39"
-          rightElement={<ChevronRight className="text-muted-foreground" />}
-          onClick={handleBIP39Route}
-        />
-      </ListGroup>
+    <section aria-labelledby="utility-heading">
+      <h2 id="utility-heading" className="mb-2 px-1 text-sm font-semibold text-muted-foreground">
+        유틸리티
+      </h2>
 
-      {/* 서비스 */}
-      <ListGroup header="서비스" className="!mt-4">
-        <ListRow
-          icon={<LazyImage src="https://satoshop.org/icon.svg?icon.12fecbu508vdu.svg" />}
-          label="사토샵"
-          rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.SATOSHOP)}
-        />
-        <ListRow
-          icon={<NaverIcon size={28} />}
-          label="비트코인 결제 매장"
-          rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.BTC_MAP)}
-        />
-      </ListGroup>
+      <div className="glass-surface grid grid-cols-4 overflow-hidden rounded-2xl border border-neutral-300 p-2 dark:border-neutral-600">
+        {UtilityCardsTemplate.map((utilityCard) => (
+          <button
+            key={utilityCard.title}
+            type="button"
+            className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl px-1 py-3 text-center transition-[background-color,transform] duration-200 hover:bg-orange-500/5 active:scale-95"
+            onClick={utilityCard.onClick}
+          >
+            <span className="flex size-11 items-center justify-center rounded-full bg-orange-500/10 text-orange-500 dark:bg-orange-400/15 dark:text-orange-400">
+              {utilityCard.icon}
+            </span>
+            <span className="text-xs font-semibold leading-tight break-keep text-foreground">
+              {utilityCard.title}
+            </span>
+          </button>
+        ))}
+      </div>
 
-      {/* 아카데미 */}
-      <ListGroup header="아카데미" className="!mt-4">
-        <ListRow
-          icon={<KIcon icon="notion" size={28} />}
-          label="ATOMIC⚡️₿ITCOIN 노션"
-          rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.ATOMIC_BTC_NOTION)}
-        />
-        <ListRow
-          icon={<PageIcon size={28} />}
-          label="화폐와 정부 그리고 비트코인"
-          rightElement={<ExternalLink size={20} className="text-muted-foreground" />}
-          onClick={() => onRouteToExternalLink(EXTERNAL_LINKS.FIAT_GOV_BITCOIN_DOC)}
-        />
-      </ListGroup>
-    </>
+      {/* 서비스 영역 임시 비활성화 */}
+      {/* 아카데미 영역 임시 비활성화 */}
+    </section>
   );
 };
 
