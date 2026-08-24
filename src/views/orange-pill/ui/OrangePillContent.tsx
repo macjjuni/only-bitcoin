@@ -12,6 +12,8 @@ import {
   ShootingStarIcon,
 } from "@/shared/ui";
 
+const ICON_CLASS = "text-orange-500 dark:text-orange-400";
+
 const OrangePillContent = () => {
   // region [Hooks]
   const router = useTransitionRouter();
@@ -68,37 +70,37 @@ const OrangePillContent = () => {
     () => [
       {
         title: "밈 저장소",
-        icon: <ShootingStarIcon size={34} />,
+        icon: <ShootingStarIcon size={30} />,
         onClick: onClickMemeUtility,
       },
       {
         title: "아파트 몇 BTC?",
-        icon: <BuildingIcon size={30} />,
+        icon: <BuildingIcon size={26} className={ICON_CLASS} />,
         onClick: onClickBtc2ApartmentUtility,
       },
       {
-        title: "기업 트레저리",
-        icon: <Building2 size={30} strokeWidth={1.8} />,
+        title: "트레저리",
+        icon: <Building2 size={26} strokeWidth={1.8} />,
         onClick: onClickTreasuryUtility,
       },
       {
         title: "DCA 계산기",
-        icon: <MinerIcon size={36} />,
+        icon: <MinerIcon size={32} />,
         onClick: onClickDcaUtility,
       },
       {
         title: "월별 등락률",
-        icon: <CalendarIcon size={30} />,
+        icon: <CalendarIcon size={26} className={ICON_CLASS} />,
         onClick: onClickCagrUtility,
       },
       {
         title: "반감기 카운트",
-        icon: <HalfCircleIcon size={28} />,
+        icon: <HalfCircleIcon size={24} />,
         onClick: onClickHalvingCountdownUtility,
       },
       {
         title: "BIP39",
-        icon: <TableProperties size={30} strokeWidth={1.8} />,
+        icon: <TableProperties size={26} strokeWidth={1.8} />,
         onClick: onClickBIP39Utility,
       },
     ],
@@ -120,7 +122,7 @@ const OrangePillContent = () => {
         유틸리티
       </h2>
 
-      <div className="glass-surface grid grid-cols-3 overflow-hidden rounded-2xl border border-neutral-300 px-2 py-4 dark:border-neutral-600">
+      <div className="glass-surface grid grid-cols-4 overflow-hidden rounded-2xl border border-neutral-300 px-2 py-4 dark:border-neutral-600">
         {UtilityCardsTemplate.map((utilityCard) => (
           <button
             key={utilityCard.title}
@@ -128,7 +130,7 @@ const OrangePillContent = () => {
             className="flex min-h-24 flex-col items-center justify-center gap-3 rounded-xl px-1 py-4 text-center transition-[background-color,transform] duration-200 hover:bg-orange-500/5 active:scale-95"
             onClick={utilityCard.onClick}
           >
-            <span className="flex size-12 items-center justify-center rounded-full bg-orange-500/10 text-orange-500 dark:bg-orange-400/15 dark:text-orange-400">
+            <span className="flex size-11 items-center justify-center rounded-full bg-orange-500/10 dark:bg-orange-400/15">
               {utilityCard.icon}
             </span>
             <span className="text-xs font-semibold whitespace-nowrap leading-tight break-keep text-foreground">
