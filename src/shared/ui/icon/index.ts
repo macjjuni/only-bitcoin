@@ -2,6 +2,7 @@ export { default as AnimationIcon } from "./AnimationIcon";
 export { default as BlockIcon } from "./BlockIcon";
 export { default as BtcTextLogo } from "./BtcTextLogo";
 export { default as BuildingIcon } from "./BuildingIcon";
+export { default as CalendarIcon } from "./CalendarIcon";
 export { default as ChartColumnIcon } from "./ChartColumnIcon";
 export { default as CurrencyIcon } from "./CurrencyIcon";
 // Navigation Icon
@@ -17,7 +18,6 @@ export { default as NaverIcon } from "./NaverIcon";
 export { default as PageIcon } from "./PageIcon";
 export { default as PillIcon } from "./PillIcon";
 export { default as PremiumIcon } from "./PremiumIcon";
-export { default as RateIcon } from "./RateIcon";
 export { default as SaveIcon } from "./SaveIcon";
 export { default as SettingIcon } from "./SettingIcon";
 export { default as ShootingStarIcon } from "./ShootingStarIcon";

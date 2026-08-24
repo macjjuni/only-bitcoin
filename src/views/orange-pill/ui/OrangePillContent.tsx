@@ -4,7 +4,13 @@ import { Building2, TableProperties } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { useCallback, useMemo } from "react";
 import { allRouteList } from "@/shared/config/route";
-import { BuildingIcon, HalfCircleIcon, MinerIcon, RateIcon, ShootingStarIcon } from "@/shared/ui";
+import {
+  BuildingIcon,
+  CalendarIcon,
+  HalfCircleIcon,
+  MinerIcon,
+  ShootingStarIcon,
+} from "@/shared/ui";
 
 const OrangePillContent = () => {
   // region [Hooks]
@@ -61,33 +67,33 @@ const OrangePillContent = () => {
   const UtilityCardsTemplate = useMemo(
     () => [
       {
-        title: "비트맥시 밈 저장소",
-        icon: <ShootingStarIcon size={32} />,
+        title: "밈 저장소",
+        icon: <ShootingStarIcon size={34} />,
         onClick: onClickMemeUtility,
       },
       {
-        title: "DCA 계산기",
-        icon: <MinerIcon size={32} />,
-        onClick: onClickDcaUtility,
-      },
-      {
         title: "아파트 몇 BTC?",
-        icon: <BuildingIcon size={24} />,
+        icon: <BuildingIcon size={30} />,
         onClick: onClickBtc2ApartmentUtility,
       },
       {
-        title: "월별 등락률",
-        icon: <RateIcon size={30} />,
-        onClick: onClickCagrUtility,
-      },
-      {
-        title: "기업 비트코인 트레저리",
+        title: "기업 트레저리",
         icon: <Building2 size={30} strokeWidth={1.8} />,
         onClick: onClickTreasuryUtility,
       },
       {
-        title: "반감기 카운트다운",
-        icon: <HalfCircleIcon size={30} />,
+        title: "DCA 계산기",
+        icon: <MinerIcon size={36} />,
+        onClick: onClickDcaUtility,
+      },
+      {
+        title: "월별 등락률",
+        icon: <CalendarIcon size={30} />,
+        onClick: onClickCagrUtility,
+      },
+      {
+        title: "반감기 카운트",
+        icon: <HalfCircleIcon size={28} />,
         onClick: onClickHalvingCountdownUtility,
       },
       {
@@ -114,18 +120,18 @@ const OrangePillContent = () => {
         유틸리티
       </h2>
 
-      <div className="glass-surface grid grid-cols-4 overflow-hidden rounded-2xl border border-neutral-300 p-2 dark:border-neutral-600">
+      <div className="glass-surface grid grid-cols-3 overflow-hidden rounded-2xl border border-neutral-300 px-2 py-4 dark:border-neutral-600">
         {UtilityCardsTemplate.map((utilityCard) => (
           <button
             key={utilityCard.title}
             type="button"
-            className="flex min-h-24 flex-col items-center justify-center gap-2 rounded-xl px-1 py-3 text-center transition-[background-color,transform] duration-200 hover:bg-orange-500/5 active:scale-95"
+            className="flex min-h-24 flex-col items-center justify-center gap-3 rounded-xl px-1 py-4 text-center transition-[background-color,transform] duration-200 hover:bg-orange-500/5 active:scale-95"
             onClick={utilityCard.onClick}
           >
-            <span className="flex size-11 items-center justify-center rounded-full bg-orange-500/10 text-orange-500 dark:bg-orange-400/15 dark:text-orange-400">
+            <span className="flex size-12 items-center justify-center rounded-full bg-orange-500/10 text-orange-500 dark:bg-orange-400/15 dark:text-orange-400">
               {utilityCard.icon}
             </span>
-            <span className="text-xs font-semibold leading-tight break-keep text-foreground">
+            <span className="text-xs font-semibold whitespace-nowrap leading-tight break-keep text-foreground">
               {utilityCard.title}
             </span>
           </button>
