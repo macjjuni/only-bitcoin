@@ -13,6 +13,20 @@
     -ms-overflow-style: none;
     scrollbar-width: none;
   }
+  .cagr-table-scrollbar {
+    scrollbar-color: color-mix(in srgb, currentColor 32%, transparent) transparent;
+    scrollbar-width: thin;
+  }
+  .cagr-table-scrollbar::-webkit-scrollbar {
+    height: 4px;
+  }
+  .cagr-table-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .cagr-table-scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: color-mix(in srgb, currentColor 32%, transparent);
+  }
   /* iOS에서 링크 길게 누를 때 뜨는 콜아웃 메뉴(열기·링크 복사·공유 등) 차단 */
   .touch-callout-none {
     -webkit-touch-callout: none;
