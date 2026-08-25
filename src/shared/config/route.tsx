@@ -80,7 +80,7 @@ const clientRoutes: ClientRoute[] = [
     icon: <PremiumIcon size={20} />,
   },
   {
-    title: "Orange Pill",
+    title: "오렌지 서비스",
     subtitle: "Orange",
     path: "/orange",
     isNav: true,

@@ -14,7 +14,7 @@ import {
 
 const ICON_CLASS = "text-orange-500 dark:text-orange-400";
 
-const OrangePillContent = () => {
+const OrangeContent = () => {
   // region [Hooks]
   const router = useTransitionRouter();
   // endregion
@@ -146,4 +146,4 @@ const OrangePillContent = () => {
   );
 };
 
-export default OrangePillContent;
+export default OrangeContent;
