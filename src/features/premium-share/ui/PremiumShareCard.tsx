@@ -192,7 +192,7 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
 
           <div className="my-3 h-px bg-white/10" />
 
-          {/* 해외 거래소 USD 가격 */}
+          {/* 해외 거래소 USD 가격 (원화 환산) */}
           <div className="flex items-center gap-2 mb-0.5">
             <span className="flex h-2 w-2 rounded-full bg-sky-400" />
             <span className="text-xs font-bold text-white/70">
@@ -201,22 +201,11 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
           </div>
           <div className="flex items-baseline justify-start gap-2">
             <span className="text-2xl font-black text-white tracking-tight font-number">
-              <span className="px-1">$</span>
-              {usd.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              ₩{Math.round(usd * usdExRate).toLocaleString()}
             </span>
-            {currency.includes("USD") && diffUsd !== 0 && (
-              <span
-                className="text-sm font-bold tracking-tight font-number"
-                style={{ color: themeColor }}
-              >
-                {diffUsd >= 0 ? "+" : ""}
-                {diffUsd.toLocaleString("en-US", {
-                  minimumFractionDigits: 2,
-                  maximumFractionDigits: 2,
-                })}{" "}
-                USD
-              </span>
-            )}
+            <span className="text-sm font-bold tracking-tight text-white/50 font-number">
+              ${usd.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+            </span>
           </div>
         </div>
 
