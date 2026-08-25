@@ -9,6 +9,7 @@ import {
   CalendarIcon,
   HalfCircleIcon,
   MinerIcon,
+  PageTitle,
   ShootingStarIcon,
 } from "@/shared/ui";
 
@@ -117,12 +118,15 @@ const OrangeContent = () => {
   // endregion
 
   return (
-    <section aria-labelledby="utility-heading">
-      <h2 id="utility-heading" className="mb-2 px-1 text-sm font-semibold text-muted-foreground">
-        유틸리티
-      </h2>
+    <section aria-label="서비스">
+      <PageTitle
+        as="h2"
+        label="Orange"
+        title="오렌지 서비스"
+        description="비트코인을 더 깊게 파고들 수 있도록 재밌는 서비스들을 모아봤습니다."
+      />
 
-      <div className="glass-surface grid grid-cols-4 overflow-hidden rounded-2xl border border-neutral-300 px-2 py-2 dark:border-neutral-600">
+      <div className="grid grid-cols-4 overflow-hidden rounded-2xl">
         {UtilityCardsTemplate.map((utilityCard) => (
           <button
             key={utilityCard.title}
@@ -139,6 +143,24 @@ const OrangeContent = () => {
           </button>
         ))}
       </div>
+
+      {/* <div className="grid grid-cols-[2fr_3fr] gap-1 overflow-hidden rounded-2xl px-2 py-2"> */}
+      {/*   {UtilityCardsTemplate.map((utilityCard) => ( */}
+      {/*     <button */}
+      {/*       key={utilityCard.title} */}
+      {/*       type="button" */}
+      {/*       className="flex min-h-12 items-center gap-2.5 rounded-xl text-left transition-[background-color,transform] duration-200 hover:bg-orange-500/5 active:scale-95" */}
+      {/*       onClick={utilityCard.onClick} */}
+      {/*     > */}
+      {/*       <span className="flex size-9 shrink-0 items-center justify-center rounded-full"> */}
+      {/*         {utilityCard.icon} */}
+      {/*       </span> */}
+      {/*       <span className="text-base font-pretendard leading-tight break-keep text-foreground"> */}
+      {/*         {utilityCard.title} */}
+      {/*       </span> */}
+      {/*     </button> */}
+      {/*   ))} */}
+      {/* </div> */}
 
       {/* 서비스 영역 임시 비활성화 */}
       {/* 아카데미 영역 임시 비활성화 */}
