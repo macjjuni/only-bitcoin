@@ -146,7 +146,7 @@ pnpm check:cycles  # 모듈 순환 참조 검사
         <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/blocks.jpg" width="220" alt="v4.0.3 blocks">
         <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/btc2fiat.jpg" width="220" alt="v4.0.3 btc2fiat">
         <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/premium.jpg" width="220" alt="v4.0.3 premium">
-        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/orange-pill.jpg" width="220" alt="v4.0.3 orange-pill">
+        <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/orange.jpg" width="220" alt="v4.0.3 orange">
         <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/meme.jpg" width="220" alt="v4.0.3 meme">
         <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/bip39.jpg" width="220" alt="v4.0.3 bip39">
         <img src="https://raw.githubusercontent.com/macjjuni/only-bitcoin/main/screenshot/settings.jpg" width="220" alt="v4.0.3 settings">

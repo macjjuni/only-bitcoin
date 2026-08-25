@@ -11,10 +11,10 @@ const PAGE_DESCRIPTION = "X에서 봤던 그 밈! 다 모아놓은 저장소";
 export const metadata: Metadata = {
   title: `${env.NEXT_PUBLIC_TITLE} - Meme`,
   description: PAGE_DESCRIPTION,
-  alternates: { canonical: "/orange-pill/meme" },
+  alternates: { canonical: "/meme" },
   openGraph: {
     type: "website",
-    url: "/orange-pill/meme", // metadataBase 기준 상대경로로 씀
+    url: "/meme", // metadataBase 기준 상대경로로 씀
     title: PAGE_TITLE,
     description: PAGE_DESCRIPTION,
     images: [
