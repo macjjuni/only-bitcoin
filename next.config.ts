@@ -32,6 +32,34 @@ const nextConfig: NextConfig = {
       },
     ],
   },
+  /**
+   * `/orange-pill` 경로를 `/orange` 로 옮기면서 남긴 리다이렉트.
+   *
+   * 기존 링크·북마크·검색엔진 색인이 살아 있으니 308 로 영구 이전을 알린다.
+   * ( `permanent: true` = 308, 메서드와 본문을 보존하면서 색인도 새 URL 로 넘김 )
+   * 밈·BIP39 는 `/orange` 하위가 아니라 최상위로 빠졌으므로
+   * 더 넓은 `:path*` 규칙보다 먼저 둬야 한다. ( 위에서부터 순서대로 매칭됨 )
+   */
+  async redirects() {
+    return [
+      {
+        source: "/orange-pill/meme",
+        destination: "/meme",
+        permanent: true,
+      },
+      {
+        source: "/orange-pill/bip39",
+        destination: "/bip39",
+        permanent: true,
+      },
+      {
+        // `:path*` 는 0개 세그먼트도 매칭하므로 `/orange-pill` 자체도 함께 처리된다.
+        source: "/orange-pill/:path*",
+        destination: "/orange/:path*",
+        permanent: true,
+      },
+    ];
+  },
   async headers() {
     return [
       {

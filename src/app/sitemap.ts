@@ -18,9 +18,9 @@ export default function sitemap(): MetadataRoute.Sitemap {
     "/premium",
     "/solo-mining",
     "/treasury",
-    "/orange-pill",
-    "/orange-pill/meme",
-    "/orange-pill/bip39",
+    "/orange",
+    "/meme",
+    "/bip39",
   ].map((route) => ({
     url: `${BASE_URL}${route}`,
     lastModified: new Date(),

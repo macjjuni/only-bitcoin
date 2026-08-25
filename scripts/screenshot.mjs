@@ -38,9 +38,9 @@ const ROUTES = {
   blocks: "/blocks",
   btc2fiat: "/btc2fiat",
   premium: "/premium",
-  "orange-pill": "/orange-pill",
-  meme: "/orange-pill/meme",
-  bip39: "/orange-pill/bip39",
+  orange: "/orange",
+  meme: "/meme",
+  bip39: "/bip39",
   settings: "/settings",
 };
 
