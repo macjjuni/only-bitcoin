@@ -1,5 +1,6 @@
 "use client";
 
+import { KIcon } from "kku-ui";
 import { Building2, Ellipsis, TableProperties } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { type ReactNode, useCallback, useMemo } from "react";
@@ -11,6 +12,7 @@ import {
   HalfCircleIcon,
   MinerIcon,
   NaverIcon,
+  PageIcon,
   PageTitle,
   ShootingStarIcon,
 } from "@/shared/ui";
@@ -19,10 +21,12 @@ import { onRouteToExternalLink } from "@/shared/utils/common";
 // region [Constants]
 const ICON_CLASS = "text-orange-500 dark:text-orange-400";
 
-/** 커뮤니티 외부 링크. 라우팅이 아니라 새 탭으로 여는 주소라 route config 가 아닌 여기서 관리함. */
-const COMMUNITY_LINKS = {
+/** 외부 링크. 라우팅이 아니라 새 탭으로 여는 주소라 route config 가 아닌 여기서 관리함. */
+const EXTERNAL_LINKS = {
   CITADEL_DISCORD: "https://discord.gg/citadel21",
   CITADEL_CAFE: "https://cafe.naver.com/btcforever",
+  ATOMIC_BTC_NOTION: "http://atomicbtc.kr",
+  FIAT_GOV_BITCOIN_DOC: "https://finished-snake-h7zp8jm.gamma.site",
 } as const;
 // endregion
 
@@ -88,11 +92,19 @@ const OrangeContent = () => {
   }, [navigateToUtility]);
 
   const onClickCitadelDiscord = useCallback(() => {
-    onRouteToExternalLink(COMMUNITY_LINKS.CITADEL_DISCORD);
+    onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_DISCORD);
   }, []);
 
   const onClickCitadelCafe = useCallback(() => {
-    onRouteToExternalLink(COMMUNITY_LINKS.CITADEL_CAFE);
+    onRouteToExternalLink(EXTERNAL_LINKS.CITADEL_CAFE);
+  }, []);
+
+  const onClickAtomicNotion = useCallback(() => {
+    onRouteToExternalLink(EXTERNAL_LINKS.ATOMIC_BTC_NOTION);
+  }, []);
+
+  const onClickFiatGovBitcoin = useCallback(() => {
+    onRouteToExternalLink(EXTERNAL_LINKS.FIAT_GOV_BITCOIN_DOC);
   }, []);
   // endregion
 
@@ -151,6 +163,22 @@ const OrangeContent = () => {
     ],
   );
 
+  const AcademyCardsTemplate = useMemo(
+    () => [
+      {
+        title: "ATOMIC⚡️₿ITCOIN",
+        icon: <KIcon icon="notion" size={22} />,
+        onClick: onClickAtomicNotion,
+      },
+      {
+        title: "화폐와 정부 & 비트코인",
+        icon: <PageIcon size={22} />,
+        onClick: onClickFiatGovBitcoin,
+      },
+    ],
+    [onClickAtomicNotion, onClickFiatGovBitcoin],
+  );
+
   const CommunityCardsTemplate = useMemo(
     () => [
       {
@@ -184,18 +212,45 @@ const OrangeContent = () => {
               key={utilityCard.title}
               type="button"
               disabled={utilityCard.isPending}
-              className={`flex min-h-24 flex-col items-center justify-center gap-3 rounded-xl px-1 py-3 text-center transition-[background-color,transform] duration-200 ${
+              className={`flex min-h-24 flex-col items-center justify-center gap-3 rounded-xl px-1 py-3 text-center transition-transform duration-200 ${
                 utilityCard.isPending
                   ? "animate-pulse cursor-default motion-reduce:animate-none"
-                  : "hover:bg-orange-500/5 active:scale-95"
+                  : "active:scale-95"
               }`}
               onClick={utilityCard.onClick}
             >
               <span className="flex size-12 items-center justify-center rounded-full bg-orange-500/10 dark:bg-orange-400/15">
                 {utilityCard.icon}
               </span>
-              <span className="text-xs font-semibold whitespace-nowrap leading-tight break-keep text-foreground">
+              <span className="select-none text-xs font-semibold whitespace-nowrap leading-tight break-keep text-foreground">
                 {utilityCard.title}
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section aria-labelledby="academy-heading" className="mt-6">
+        <h2
+          id="academy-heading"
+          className="mb-2 px-5 font-pretendard text-sm font-semibold text-muted-foreground"
+        >
+          아카데미
+        </h2>
+
+        <div className="grid grid-cols-[2fr_3fr] gap-2">
+          {AcademyCardsTemplate.map((academyCard) => (
+            <button
+              key={academyCard.title}
+              type="button"
+              className="flex min-h-12 items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-transform duration-200 active:scale-95"
+              onClick={academyCard.onClick}
+            >
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-300/50 dark:bg-neutral-800">
+                {academyCard.icon}
+              </span>
+              <span className="select-none text-xs font-semibold leading-tight break-keep text-foreground">
+                {academyCard.title}
               </span>
             </button>
           ))}
@@ -207,7 +262,7 @@ const OrangeContent = () => {
           id="community-heading"
           className="mb-2 px-5 font-pretendard text-sm font-semibold text-muted-foreground"
         >
-          비트맥시 커뮤니티
+          비트코인 커뮤니티
         </h2>
 
         <div className="grid grid-cols-[2fr_3fr] gap-2">
@@ -215,13 +270,13 @@ const OrangeContent = () => {
             <button
               key={communityCard.title}
               type="button"
-              className="flex min-h-12 items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-[background-color,transform] duration-200 hover:bg-orange-500/5 active:scale-95"
+              className="flex min-h-12 items-center gap-2.5 rounded-xl px-2.5 py-2 text-left transition-transform duration-200 active:scale-95"
               onClick={communityCard.onClick}
             >
-              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-orange-500/10 dark:bg-orange-400/15">
+              <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-300/50 dark:bg-neutral-800">
                 {communityCard.icon}
               </span>
-              <span className="text-xs font-semibold leading-tight break-keep text-foreground">
+              <span className="select-none text-xs font-semibold leading-tight break-keep text-foreground">
                 {communityCard.title}
               </span>
             </button>
