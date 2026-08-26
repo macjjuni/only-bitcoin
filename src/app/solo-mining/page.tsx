@@ -1,7 +1,9 @@
 import { fetchInitialBlocks } from "@/entities/block/server";
+import { createFaqSchema, createWebApplicationSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
+import { JsonLd } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
-import { SoloMiningGuideArticle, SoloMiningPanel } from "@/views/solo-mining";
+import { SOLO_MINING_FAQ, SoloMiningGuideArticle, SoloMiningPanel } from "@/views/solo-mining";
 
 export const metadata = createPageMetadata({
   path: "/solo-mining",
@@ -16,6 +18,15 @@ export default async function SoloMiningPage() {
 
   return (
     <PageLayout className="gap-2.5">
+      <JsonLd
+        schema={createWebApplicationSchema({
+          name: "솔로 마이닝 확률 계산기",
+          description:
+            "실시간 채굴 난이도를 기준으로 내 해시레이트의 비트코인 블록 채굴 확률과 기대 소요 시간을 계산합니다.",
+          path: "/solo-mining",
+        })}
+      />
+      <JsonLd schema={createFaqSchema(SOLO_MINING_FAQ)} />
       <SoloMiningPanel initialDifficulty={initialDifficulty} />
       <SoloMiningGuideArticle />
     </PageLayout>

@@ -1,6 +1,7 @@
 import { Suspense } from "react";
+import { createWebApplicationSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
-import { PageTitle } from "@/shared/ui";
+import { JsonLd, PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import { CagrScreen } from "@/views/cagr";
 import CagrLoading from "./loading";
@@ -30,6 +31,13 @@ export const revalidate = 21600;
 export default function CagrPage() {
   return (
     <PageLayout className="gap-3">
+      <JsonLd
+        schema={createWebApplicationSchema({
+          name: "비트코인 월별 등락률",
+          description: PAGE_DESCRIPTION,
+          path: "/cagr",
+        })}
+      />
       <PageTitle
         label="Monthly Returns"
         title="비트코인 월별 등락률"

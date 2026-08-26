@@ -19,6 +19,7 @@ export {
   type InputGroupProps,
 } from "./InputGroup";
 export * from "./icon";
+export { default as JsonLd } from "./JsonLd";
 export { default as LazyImage } from "./LazyImage";
 export {
   default as ListGroup,

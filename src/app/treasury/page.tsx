@@ -1,7 +1,10 @@
 import { fetchPublicTreasurySnapshot } from "@/entities/treasury/server";
+import { createFaqSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
+import { JsonLd } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import {
+  TREASURY_FAQ,
   TreasuryCompanyListCard,
   TreasuryFetchFailedCard,
   TreasuryGuideArticle,
@@ -37,6 +40,7 @@ export default async function TreasuryPage() {
 
   return (
     <PageLayout className="gap-2.5">
+      <JsonLd schema={createFaqSchema(TREASURY_FAQ)} />
       <TreasurySummaryCard summary={summary} fetchedAt={fetchedAt} />
       <TreasuryCompanyListCard companies={companies} />
       <TreasuryGuideArticle />

@@ -1,7 +1,10 @@
 import { fetchInitialBlocks } from "@/entities/block/server";
+import { createFaqSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
+import { JsonLd } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import {
+  BLOCKS_FAQ,
   BlocksExplorer,
   BlocksGuideArticle,
   BlocksVisualizer,
@@ -22,6 +25,7 @@ export default async function BlocksPage() {
 
   return (
     <PageLayout className="block-page__area gap-2.5">
+      <JsonLd schema={createFaqSchema(BLOCKS_FAQ)} />
       <BlocksVisualizer initialBlocks={blocks} />
       <RealtimeTxFees initialFees={fees} initialMempoolInfo={mempoolInfo} />
       <BlocksExplorer />

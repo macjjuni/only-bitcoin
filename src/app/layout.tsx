@@ -6,8 +6,9 @@ import type { ReactNode } from "react";
 import Initializer from "@/app/initializers/Initializer";
 import QueryProvider from "@/app/providers/QueryProvider";
 import { env } from "@/shared/config/env";
+import { organizationSchema, webSiteSchema } from "@/shared/config/jsonLd";
 import { THEME_INITIALIZATION_SCRIPT } from "@/shared/config/theme";
-import { ConfettiEffect } from "@/shared/ui";
+import { ConfettiEffect, JsonLd } from "@/shared/ui";
 import { Content, DefaultLayout } from "@/shared/ui/layout";
 import { BottomNavigation } from "@/widgets/bottom-navigation";
 import { GlobalFloatingBanner } from "@/widgets/floating-banner";
@@ -105,6 +106,9 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           />
         </head>
         <body>
+          {/* 브랜드·사이트 실체. 전 페이지 공통이라 루트에 한 번만 심음. */}
+          <JsonLd schema={organizationSchema} />
+          <JsonLd schema={webSiteSchema} />
           {isProduction && env.NEXT_PUBLIC_GTM_ID && (
             <GoogleTagManager gtmId={env.NEXT_PUBLIC_GTM_ID} />
           )}

@@ -1,5 +1,7 @@
 import { ARCHIVE_GENERATED_AT } from "@/entities/apartment/server";
+import { createWebApplicationSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
+import { JsonLd } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import { Btc2ApartmentPanel } from "@/views/btc2apartment";
 
@@ -21,6 +23,13 @@ export const metadata = createPageMetadata({
 export default function Btc2ApartmentPage() {
   return (
     <PageLayout className="gap-3">
+      <JsonLd
+        schema={createWebApplicationSchema({
+          name: "아파트 몇 BTC?",
+          description: PAGE_DESCRIPTION,
+          path: "/btc2apartment",
+        })}
+      />
       <Btc2ApartmentPanel archiveGeneratedAt={ARCHIVE_GENERATED_AT} />
     </PageLayout>
   );
