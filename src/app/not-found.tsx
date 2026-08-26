@@ -1,18 +1,14 @@
-"use client";
+import type { Metadata } from "next";
+import { NotFoundContent } from "@/views/not-found";
 
-import { KButton } from "kku-ui";
-import { useTransitionRouter } from "next-view-transitions";
+/**
+ * `robots` 는 안 씀. Next 가 not-found 에 `noindex` 를 자동으로 넣어 주므로
+ * 여기서 또 지정하면 robots 메타가 두 개 나감.
+ */
+export const metadata: Metadata = {
+  title: "404 - 페이지를 찾을 수 없습니다",
+};
 
 export default function NotFound() {
-  const router = useTransitionRouter();
-
-  return (
-    <div className="flex h-full flex-col items-center justify-center gap-4">
-      <h2 className="text-base font-bold layout-max:text-xl">404 - Error</h2>
-      <h3 className="text-base mb-4 layout-max:text-xl">페이지를 찾을 수 없습니다.</h3>
-      <KButton variant="outline" onClick={() => router.back()}>
-        뒤로가기
-      </KButton>
-    </div>
-  );
+  return <NotFoundContent />;
 }
