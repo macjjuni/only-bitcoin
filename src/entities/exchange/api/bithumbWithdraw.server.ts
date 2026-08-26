@@ -1,5 +1,6 @@
-import { WITHDRAW_FEE_FALLBACK } from "../model/fallback";
-import type { ExchangeWithdrawInfo } from "../model/types";
+import { buildNetworkKey, EXCHANGE_META, WITHDRAW_FEE_FALLBACK } from "../model/fallback";
+import type { ExchangeWithdrawOption, WithdrawAsset } from "../model/types";
+import { type ExchangeFetchResult, parseQuantity, TARGET_ASSETS } from "./shared";
 
 // region [Types]
 interface BithumbNetworkInfo {
@@ -12,6 +13,7 @@ interface BithumbNetworkInfo {
 
 interface BithumbCoinInfo {
   coinSymbol: string;
+  coinKrwSise: number | null;
   networkInfoList: BithumbNetworkInfo[];
 }
 
@@ -38,23 +40,21 @@ const BITHUMB_COIN_INOUT_URL = "https://gw.bithumb.com/exchange/v1/coin-inout/in
  */
 export const BITHUMB_WITHDRAW_REVALIDATE_SECONDS = 60 * 10;
 
-/** 숫자 문자열을 수로 바꿈. 빈 값·비정상 값은 null 로 흡수함. */
-const parseQuantity = (value: string | null | undefined): number | null => {
-  if (value === null || value === undefined || value === "") return null;
-
-  const parsed = Number(value);
-  return Number.isFinite(parsed) ? parsed : null;
-};
+const buildFallbackResult = (): ExchangeFetchResult => ({
+  meta: { ...EXCHANGE_META.bithumb, source: "fallback" },
+  options: { ...WITHDRAW_FEE_FALLBACK.bithumb },
+  usdtKrwPrice: null,
+});
 // endregion
 
 // region [Transactions]
 /**
- * 빗썸 BTC 온체인 출금 정보를 조회함.
+ * 빗썸의 BTC·USDT 출금 조건을 망별로 조회함.
  *
- * 실패하면 예외를 던지지 않고 폴백을 돌려줌. 이 화면은 수수료 비교가 목적이라
+ * 실패하면 예외를 던지지 않고 폴백을 돌려줌. 이 화면은 비교가 목적이라
  * 한 거래소가 죽어도 나머지는 보여줘야 함.
  */
-export async function fetchBithumbWithdrawInfo(): Promise<ExchangeWithdrawInfo> {
+export async function fetchBithumbWithdrawInfo(): Promise<ExchangeFetchResult> {
   try {
     const response = await fetch(BITHUMB_COIN_INOUT_URL, {
       next: { revalidate: BITHUMB_WITHDRAW_REVALIDATE_SECONDS },
@@ -67,31 +67,49 @@ export async function fetchBithumbWithdrawInfo(): Promise<ExchangeWithdrawInfo> 
 
     if (!response.ok) {
       console.warn(`[bithumb] 출금 정보 조회 실패: HTTP ${response.status}`);
-      return WITHDRAW_FEE_FALLBACK.bithumb;
+      return buildFallbackResult();
     }
 
     const body = (await response.json()) as BithumbCoinInOutResponse;
-    const btc = body.data?.find((coin) => coin.coinSymbol === "BTC");
-    // 라이트닝 등 다른 망이 섞여 들어오므로 온체인(Bitcoin) 망만 고름.
-    const onChain = btc?.networkInfoList?.find((net) => net.networkName === "Bitcoin");
-    const withdrawFeeInBtc = parseQuantity(onChain?.withdrawFeeQuantity);
+    const options: Record<string, ExchangeWithdrawOption> = {};
+    let usdtKrwPrice: number | null = null;
 
-    if (withdrawFeeInBtc === null) {
+    for (const asset of TARGET_ASSETS) {
+      const coin = body.data?.find((item) => item.coinSymbol === asset);
+      if (!coin) continue;
+
+      // 코인별 KRW 시세를 같이 주므로 USDT 환산에 추가 호출이 필요 없음.
+      if (asset === "USDT" && typeof coin.coinKrwSise === "number") {
+        usdtKrwPrice = coin.coinKrwSise;
+      }
+
+      for (const network of coin.networkInfoList ?? []) {
+        const withdrawFee = parseQuantity(network.withdrawFeeQuantity);
+        if (withdrawFee === null) continue;
+
+        options[buildNetworkKey(asset as WithdrawAsset, network.networkName)] = {
+          withdrawFee,
+          minimumWithdraw: parseQuantity(network.withdrawMinimumQuantity),
+          isWithdrawAvailable: network.isWithdrawAvailable ?? null,
+          suspensionMessage: network.suspensionMessage || null,
+        };
+      }
+    }
+
+    // BTC 온체인이 없으면 응답 형태가 바뀐 것으로 보고 통째로 폴백.
+    if (!options[buildNetworkKey("BTC", "Bitcoin")]) {
       console.warn("[bithumb] 응답에서 BTC 온체인 출금 수수료를 찾지 못함");
-      return WITHDRAW_FEE_FALLBACK.bithumb;
+      return buildFallbackResult();
     }
 
     return {
-      ...WITHDRAW_FEE_FALLBACK.bithumb,
-      withdrawFeeInBtc,
-      minimumWithdrawInBtc: parseQuantity(onChain?.withdrawMinimumQuantity),
-      isWithdrawAvailable: onChain?.isWithdrawAvailable ?? null,
-      suspensionMessage: onChain?.suspensionMessage || null,
-      source: "live",
+      meta: { ...EXCHANGE_META.bithumb, source: "live" },
+      options,
+      usdtKrwPrice,
     };
   } catch (error) {
     console.warn("[bithumb] 출금 정보 조회 중 예외:", error);
-    return WITHDRAW_FEE_FALLBACK.bithumb;
+    return buildFallbackResult();
   }
 }
 // endregion

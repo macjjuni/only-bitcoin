@@ -3,14 +3,20 @@
 import { useMemo } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { useBlockStore } from "@/entities/block";
-import type { ExchangeWithdrawInfo } from "@/entities/exchange";
-import { buildOnChainFeeReference, buildWithdrawFeeComparison } from "../lib/calculateWithdrawFee";
-import ExchangeFeeList from "./ExchangeFeeList";
+import type { ExchangeMeta, WithdrawNetworkRow } from "@/entities/exchange";
+import {
+  buildComparisonRows,
+  buildOnChainFeeReference,
+  findWorstBitcoinCell,
+} from "../lib/calculateWithdrawFee";
+import ExchangeFeeTable from "./ExchangeFeeTable";
 import WithdrawFeeSummaryCard from "./WithdrawFeeSummaryCard";
 
 interface WithdrawFeePanelProps {
-  /** 거래소 출금 정보. 시세와 달리 실시간으로 안 바뀌므로 서버 값을 그대로 씀. */
-  exchanges: ExchangeWithdrawInfo[];
+  exchanges: ExchangeMeta[];
+  /** 거래소 출금 조건. 시세와 달리 실시간으로 안 바뀌므로 서버 값을 그대로 씀. */
+  rows: WithdrawNetworkRow[];
+  usdtKrwPrice: number;
   fetchedAt: string;
   verifiedAt: string;
   /** SSR 초기값. 소켓이 값을 채우기 전까지 이걸 씀. */
@@ -19,14 +25,16 @@ interface WithdrawFeePanelProps {
 }
 
 /**
- * 배율 계산을 클라이언트에서 다시 함.
+ * 원화 환산과 배율을 클라이언트에서 다시 계산함.
  *
- * 멤풀 소켓(`Initializer` 에서 전역 연결)과 시세 소켓이 스토어를 계속 갱신하므로,
+ * 멤풀 소켓과 시세 소켓(`Initializer` 에서 전역 연결)이 스토어를 계속 갱신하므로,
  * 서버 렌더 값만 쓰면 화면을 켜둔 동안 숫자가 굳어 버림. 거래소 수수료는 고정이고
  * **온체인 실비와 시세만 움직이므로** 그 둘만 스토어에서 읽어 다시 계산함.
  */
 export default function WithdrawFeePanel({
   exchanges,
+  rows,
+  usdtKrwPrice,
   fetchedAt,
   verifiedAt,
   initialFeeRate,
@@ -47,30 +55,39 @@ export default function WithdrawFeePanel({
     [feeRate, btcKrwPrice],
   );
 
-  const comparisons = useMemo(
-    () => exchanges.map((exchange) => buildWithdrawFeeComparison(exchange, onChain, btcKrwPrice)),
-    [exchanges, onChain, btcKrwPrice],
+  const comparisonRows = useMemo(
+    () => buildComparisonRows({ rows, onChain, btcKrwPrice, usdtKrwPrice }),
+    [rows, onChain, btcKrwPrice, usdtKrwPrice],
   );
 
-  // 정렬이 수수료 오름차순이라 마지막이 가장 비싼 곳.
-  const worst = comparisons[comparisons.length - 1];
+  const worst = useMemo(() => findWorstBitcoinCell(comparisonRows), [comparisonRows]);
 
-  // 다 같은 금액이면 특정 거래소를 지목하지 않고 총칭으로 부름.
+  /** 거래소들의 BTC 수수료가 같으면 한 곳을 지목하는 게 자의적이라 총칭으로 부름. */
   const subjectLabel = useMemo(() => {
-    const isEveryFeeSame = comparisons.every(
-      (item) => item.exchangeFeeInSats === comparisons[0]?.exchangeFeeInSats,
+    const bitcoinRow = comparisonRows.find(
+      (row) => row.asset === "BTC" && row.networkName === "Bitcoin",
     );
+    const cells = Object.values(bitcoinRow?.cells ?? {});
+    const isEveryFeeSame = cells.every(
+      (cell) => cell.withdrawFeeInAsset === cells[0]?.withdrawFeeInAsset,
+    );
+    if (isEveryFeeSame) return "국내 거래소";
 
-    return isEveryFeeSame ? "국내 거래소" : (worst?.exchange.name ?? "거래소");
-  }, [comparisons, worst]);
+    return exchanges.find((exchange) => exchange.id === worst?.[0])?.name ?? "거래소";
+  }, [comparisonRows, exchanges, worst]);
   // endregion
 
   return (
     <>
       {worst && (
-        <WithdrawFeeSummaryCard onChain={onChain} worst={worst} subjectLabel={subjectLabel} />
+        <WithdrawFeeSummaryCard onChain={onChain} worst={worst[1]} subjectLabel={subjectLabel} />
       )}
-      <ExchangeFeeList comparisons={comparisons} fetchedAt={fetchedAt} verifiedAt={verifiedAt} />
+      <ExchangeFeeTable
+        exchanges={exchanges}
+        rows={comparisonRows}
+        fetchedAt={fetchedAt}
+        verifiedAt={verifiedAt}
+      />
     </>
   );
 }

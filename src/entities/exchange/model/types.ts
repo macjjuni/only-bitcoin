@@ -1,34 +1,58 @@
 export type ExchangeId = "upbit" | "bithumb";
 
-/** 값의 출처. 화면에 신선도를 표시하고, 폴백일 때 경고를 띄우는 데 씀. */
+/**
+ * 비교 대상 자산.
+ *
+ * USDT 는 권장 대상이 아니라 **"출금 수수료가 네트워크 비용이 아니라 거래소 정책"** 이라는
+ * 근거로 쓰임. 트론 USDT 가 무료인데 BTC 는 2만원대라는 대비가 그 자체로 증거임.
+ */
+export type WithdrawAsset = "BTC" | "USDT";
+
+/** 값의 출처. 폴백이면 화면에 티를 내야 함. */
 export type WithdrawFeeSource = "live" | "fallback";
 
-/** 거래소 한 곳의 BTC 온체인 출금 정보. 거래소별 응답을 이 형태로 정규화함. */
-export interface ExchangeWithdrawInfo {
-  id: ExchangeId;
-  name: string;
-  /** BTC 단위 출금 수수료. */
-  withdrawFeeInBtc: number;
-  /** 최소 출금 수량(BTC). 거래소가 안 주면 null. */
-  minimumWithdrawInBtc: number | null;
+/** 거래소 한 곳의, 특정 자산·망에 대한 출금 조건. */
+export interface ExchangeWithdrawOption {
+  /** 자산 단위 출금 수수료. 0 이면 무료. */
+  withdrawFee: number;
+  minimumWithdraw: number | null;
   /**
    * 출금 가능 여부.
    *
-   * `null` 은 "가능"이 아니라 **"거래소가 이 정보를 안 준다"** 는 뜻임.
-   * 업비트 수수료 엔드포인트에는 점검 상태가 없어서 항상 null 임. 화면에서 구분해 표시할 것.
+   * `null` 은 "가능" 이 아니라 **"거래소가 이 정보를 안 준다"** 는 뜻임.
+   * 업비트 수수료 엔드포인트에는 점검 상태가 없어 항상 null 임.
    */
   isWithdrawAvailable: boolean | null;
-  /** 점검 사유 등 거래소가 내려주는 안내 문구. */
   suspensionMessage: string | null;
-  source: WithdrawFeeSource;
-  /** 거래소 수수료 안내 페이지. 사용자가 직접 확인할 수 있게 링크로 검. */
+}
+
+/** 표의 한 행. 자산 + 망 조합 하나에 거래소별 조건이 달림. */
+export interface WithdrawNetworkRow {
+  asset: WithdrawAsset;
+  /** 두 거래소가 같은 표기를 쓰므로 그대로 조인 키로 씀. ( Bitcoin / Tron / Ethereum ... ) */
+  networkName: string;
+  /** 해당 거래소가 그 망을 지원하지 않으면 키가 없음. */
+  options: Partial<Record<ExchangeId, ExchangeWithdrawOption>>;
+}
+
+/** 표의 열. */
+export interface ExchangeMeta {
+  id: ExchangeId;
+  name: string;
   referenceUrl: string;
+  source: WithdrawFeeSource;
 }
 
 export interface ExchangeWithdrawSnapshot {
-  exchanges: ExchangeWithdrawInfo[];
-  /** 조회 시각(ISO). 하나라도 폴백이면 그 값은 이 시각과 무관함. */
+  exchanges: ExchangeMeta[];
+  rows: WithdrawNetworkRow[];
+  /**
+   * USDT 원화 시세.
+   *
+   * 빗썸 응답이 코인별 KRW 시세를 같이 주므로 추가 호출 없이 그걸 씀.
+   * 빗썸 조회가 실패하면 null 이고, 그때는 USDT 를 원화로 환산하지 않고 수량만 보여줌.
+   */
+  usdtKrwPrice: number | null;
   fetchedAt: string;
-  /** 전부 폴백으로 떨어졌는지. 화면에 경고를 띄울 때 씀. */
-  hasAllFallback: boolean;
+  hasAnyFallback: boolean;
 }

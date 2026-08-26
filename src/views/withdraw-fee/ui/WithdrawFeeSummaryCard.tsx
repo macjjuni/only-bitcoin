@@ -1,11 +1,11 @@
 import { comma } from "@/shared/utils/string";
-import type { OnChainFeeReference, WithdrawFeeComparison } from "../lib/calculateWithdrawFee";
+import type { OnChainFeeReference, WithdrawCell } from "../lib/calculateWithdrawFee";
 import { REFERENCE_TX_VBYTES } from "../lib/calculateWithdrawFee";
 
 interface WithdrawFeeSummaryCardProps {
   onChain: OnChainFeeReference;
   /** 수수료가 가장 비싼 거래소. 대표 숫자로 씀. */
-  worst: WithdrawFeeComparison;
+  worst: WithdrawCell;
   /**
    * 대표 숫자의 주체 표기.
    *
@@ -30,7 +30,7 @@ export default function WithdrawFeeSummaryCard({
     <section className="-mx-2 select-none">
       <div className="flex flex-col px-5 pb-5 pt-1">
         <strong className="font-number mb-1.5 block text-[clamp(2rem,10vw,3.25rem)] font-black leading-none tracking-tight">
-          {comma(Math.round(worst.exchangeFeeInKrw))}
+          {comma(Math.round(worst.withdrawFeeInKrw))}
           <span className="ml-2 text-[24px] font-black text-bitcoin">원</span>
         </strong>
 

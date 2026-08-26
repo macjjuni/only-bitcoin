@@ -1,6 +1,6 @@
 import { fetchInitialPrice } from "@/entities/bitcoin/server";
 import { fetchInitialBlocks } from "@/entities/block/server";
-import { WITHDRAW_FEE_VERIFIED_AT } from "@/entities/exchange";
+import { USDT_KRW_FALLBACK_PRICE, WITHDRAW_FEE_VERIFIED_AT } from "@/entities/exchange";
 import { fetchExchangeWithdrawSnapshot } from "@/entities/exchange/server";
 import { createFaqSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
@@ -38,6 +38,8 @@ export default async function WithdrawFeePage() {
       {/* 배율은 소켓 값으로 계속 다시 계산됨. 여기 값은 초기 표시용. */}
       <WithdrawFeePanel
         exchanges={snapshot.exchanges}
+        rows={snapshot.rows}
+        usdtKrwPrice={snapshot.usdtKrwPrice ?? USDT_KRW_FALLBACK_PRICE}
         fetchedAt={snapshot.fetchedAt}
         verifiedAt={WITHDRAW_FEE_VERIFIED_AT}
         initialFeeRate={fees.halfHourFee}
