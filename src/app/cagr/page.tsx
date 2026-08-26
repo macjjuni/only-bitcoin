@@ -1,6 +1,5 @@
-import type { Metadata } from "next";
 import { Suspense } from "react";
-import { env } from "@/shared/config/env";
+import { createPageMetadata } from "@/shared/config/metadata";
 import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import { CagrScreen } from "@/views/cagr";
@@ -10,22 +9,11 @@ const PAGE_TITLE = "월별 등락률";
 const PAGE_DESCRIPTION =
   "2010년부터 지금까지 비트코인이 매달 얼마나 오르고 내렸는지 연도 × 월 히트맵 한 장으로";
 
-export const metadata: Metadata = {
-  title: `${env.NEXT_PUBLIC_TITLE} - ${PAGE_TITLE}`,
+export const metadata = createPageMetadata({
+  path: "/cagr",
+  title: PAGE_TITLE,
   description: PAGE_DESCRIPTION,
-  alternates: { canonical: "/cagr" },
-  openGraph: {
-    type: "website",
-    url: "/cagr", // metadataBase 기준 상대경로로 씀
-    title: PAGE_TITLE,
-    description: PAGE_DESCRIPTION,
-  },
-  twitter: {
-    card: "summary_large_image",
-    title: PAGE_TITLE,
-    description: PAGE_DESCRIPTION,
-  },
-};
+});
 
 /**
  * 6시간마다 재생성함. 확정된 달은 다시 안 바뀌고 진행 중인 달만 움직이므로

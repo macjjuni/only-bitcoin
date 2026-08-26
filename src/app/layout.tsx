@@ -20,13 +20,18 @@ export const viewport: Viewport = {
   initialScale: 1,
   maximumScale: 1,
   userScalable: false,
-  themeColor: "#ffffff",
+  // 다크 모드에서도 흰색을 물고 있으면 상단 시스템 바만 하얗게 떠서 테마별로 나눔.
+  themeColor: [
+    { media: "(prefers-color-scheme: light)", color: "#ffffff" },
+    { media: "(prefers-color-scheme: dark)", color: "#000000" },
+  ],
   interactiveWidget: "resizes-content",
 };
 
 export const metadata: Metadata = {
   metadataBase: new URL(env.NEXT_PUBLIC_URL),
-  title: env.NEXT_PUBLIC_TITLE,
+  // 하위 페이지는 고유 제목만 넘기고 브랜드 접미사는 템플릿이 붙임.
+  title: { default: env.NEXT_PUBLIC_TITLE, template: `%s | ${env.NEXT_PUBLIC_TITLE}` },
   description:
     "온리 비트코인 시세 및 사토시, 원화 자동 계산기(BTC/KRW/USD/SAT), Not your keys, not your Bitcoin",
   keywords: ["비트코인", "온리 비트코인", "비트코인 계산기", "사토시 계산기", "비트코인 밈"],
@@ -40,21 +45,28 @@ export const metadata: Metadata = {
     title: "온리 비트코인",
     statusBarStyle: "default",
   },
+  /**
+   * `url` 을 여기서 고정하면 자체 `openGraph` 가 없는 페이지가 전부 홈 URL 을 물고 감.
+   * 페이지별 `og:url` 은 `createPageMetadata` 가 채우므로 루트에서는 잡지 않음.
+   */
   openGraph: {
     type: "website",
-    url: env.NEXT_PUBLIC_URL,
-    title: "온리 비트코인",
+    siteName: env.NEXT_PUBLIC_TITLE,
+    title: { default: "온리 비트코인", template: `%s | ${env.NEXT_PUBLIC_TITLE}` },
     description: "온리 비트코인 시세 및 사토시, 원화 자동 계산기",
     images: [
       {
         url: "/app/og-image.webp", // public 폴더 기준 경로
+        width: 1024, // 실제 파일 크기와 맞춤
+        height: 559,
+        alt: "온리 비트코인 - 비트코인 시세와 계산기",
       },
     ],
   },
   twitter: {
     card: "summary_large_image",
-    title: "온리 비트코인",
-    description: "온리 비트코인 시세 및 사토시, 원화 자동 계산기...",
+    title: { default: "온리 비트코인", template: `%s | ${env.NEXT_PUBLIC_TITLE}` },
+    description: "온리 비트코인 시세 및 사토시, 원화 자동 계산기",
     images: ["/app/og-image.webp"],
   },
   // 아이콘 설정

@@ -1,20 +1,18 @@
-import type { Metadata } from "next";
 import { fetchInitialBlocks } from "@/entities/block/server";
 import { env } from "@/shared/config/env";
+import { createPageMetadata } from "@/shared/config/metadata";
 import { PageLayout } from "@/shared/ui/layout";
 import { HalvingCountdown } from "@/views/blocks";
 import CosmicBackdrop from "@/views/blocks/ui/halving-countdown/CosmicBackdrop";
 
 const SERVICE_DOMAIN = env.NEXT_PUBLIC_URL.replace(/^https?:\/\/(www\.)?/, "");
 
-export const metadata: Metadata = {
-  title: `${env.NEXT_PUBLIC_TITLE} - Halving Countdown`,
+export const metadata = createPageMetadata({
+  path: "/blocks/countdown",
+  title: "Halving Countdown",
   description:
     "비트코인 다음 반감기까지 남은 시간을 실시간으로 확인하세요. 현재 블록 높이와 남은 블록 수, 예상 반감기 날짜를 함께 제공합니다.",
-  alternates: {
-    canonical: "/blocks/countdown",
-  },
-};
+});
 
 export default async function Page() {
   const { blocks } = await fetchInitialBlocks();

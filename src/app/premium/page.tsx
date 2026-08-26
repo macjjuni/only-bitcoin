@@ -1,16 +1,16 @@
-import type { Metadata } from "next";
 import { fetchInitialMacro, fetchInitialPrice } from "@/entities/bitcoin/server";
-import { env } from "@/shared/config/env";
+import { createPageMetadata } from "@/shared/config/metadata";
 import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import { PremiumPanel } from "@/views/premium";
 
 const description = "실시간 비트코인 한국 프리미엄 현황을 실시간으로 확인하세요." as const;
 
-export const metadata: Metadata = {
-  title: `${env.NEXT_PUBLIC_TITLE} - Premium`,
+export const metadata = createPageMetadata({
+  path: "/premium",
+  title: "Premium",
   description,
-};
+});
 
 export default async function PremiumPage() {
   const [initialPrice, initialMacro] = await Promise.all([
