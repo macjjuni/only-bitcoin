@@ -29,14 +29,15 @@ export default function WithdrawFeeSummaryCard({
   return (
     <section className="-mx-2 select-none">
       <div className="flex flex-col px-5 pb-5 pt-1">
-        {/* 비트코인이 계산 단위인 사이트라 히어로는 sats. 원화는 아래에 보조로 둠. */}
+        {/* 비트코인이 계산 단위인 사이트라 히어로는 BTC 수량. sats·원화는 아래에 보조로 둠. */}
         <strong className="font-number mb-1 block text-[clamp(2rem,10vw,3.25rem)] font-black leading-none tracking-tight">
-          {comma(worst.withdrawFeeInSats ?? 0)}
-          <span className="ml-2 text-[24px] font-black text-bitcoin">sats</span>
+          {worst.withdrawFeeInAsset}
+          <span className="ml-2 text-[24px] font-black text-bitcoin">BTC</span>
         </strong>
 
         <p className="font-number mb-1.5 text-sm font-bold text-muted-foreground">
-          {worst.withdrawFeeInAsset} BTC · 약 {comma(Math.round(worst.withdrawFeeInKrw))}원
+          {comma(worst.withdrawFeeInSats ?? 0)} sats · 약{" "}
+          {comma(Math.round(worst.withdrawFeeInKrw))}원
         </p>
 
         <p className="mb-4 text-sm font-bold text-muted-foreground">

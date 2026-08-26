@@ -21,15 +21,11 @@ const formatKst = (iso: string) =>
  * 대표 표기.
  *
  * **원화가 아니라 자산 수량이 주인공임.** 비트코인이 계산 단위인 사이트에서 원화를
- * 앞세우면 전제가 뒤집힘. BTC 는 온체인 실비와 같은 단위(sats)로 둬서 배율이 바로 읽히게 함.
+ * 앞세우면 전제가 뒤집힘. 원화는 감을 잡는 보조 값으로만 아래에 붙임.
  * 수수료 0 은 "0원" 이 아니라 "무료" 로 씀. 값이 안 들어온 것처럼 보이지 않게.
  */
-const formatPrimaryFee = (cell: WithdrawCell, asset: string) => {
-  if (cell.withdrawFeeInAsset === 0) return "무료";
-  if (cell.withdrawFeeInSats !== null) return `${comma(cell.withdrawFeeInSats)} sats`;
-
-  return `${cell.withdrawFeeInAsset} ${asset}`;
-};
+const formatPrimaryFee = (cell: WithdrawCell, asset: string) =>
+  cell.withdrawFeeInAsset === 0 ? "무료" : `${cell.withdrawFeeInAsset} ${asset}`;
 
 /**
  * 자산·망을 행, 거래소를 열로 둔 비교표.
@@ -96,11 +92,6 @@ export default function ExchangeFeeTable({
                             >
                               {formatPrimaryFee(cell, row.asset)}
                             </span>
-                            {cell.withdrawFeeInSats !== null && cell.withdrawFeeInAsset !== 0 && (
-                              <span className="text-[11px] text-muted-foreground">
-                                {cell.withdrawFeeInAsset} {row.asset}
-                              </span>
-                            )}
                             {/* 무료면 "≈ 0원" 은 군더더기라 안 붙임. */}
                             {cell.withdrawFeeInAsset !== 0 && (
                               <span className="text-[11px] text-muted-foreground">
