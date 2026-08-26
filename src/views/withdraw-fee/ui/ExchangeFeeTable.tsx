@@ -154,7 +154,9 @@ export function ExchangeFeeTable({
               일부 거래소는 조회에 실패해 {verifiedAt} 확인값을 표시합니다.
             </span>
           )}
-          <div className="text-center py-2">실제 출금 전에는 거래소 안내를 직접 확인하세요.</div>
+          <div className="text-center pt-2 pb-3">
+            실제 출금 전에는 거래소 안내를 직접 확인하세요.
+          </div>
           <span className="mt-1 border-t border-border pt-2 text-right font-semibold text-foreground">
             업데이트 · {formatKst(fetchedAt)}
           </span>
