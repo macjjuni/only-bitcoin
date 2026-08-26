@@ -128,7 +128,7 @@ function ExchangeFeeRow({ asset, cell, exchange }: ExchangeFeeRowProps) {
       </div>
 
       <div className="min-w-0 text-right">
-        <span className={`font-number block truncate text-xs font-black ${withdrawFeeClassName}`}>
+        <span className={`font-number block truncate text-sm font-black ${withdrawFeeClassName}`}>
           {withdrawFeeLabel}
         </span>
         {withdrawFeeInKrwLabel && (
@@ -138,7 +138,7 @@ function ExchangeFeeRow({ asset, cell, exchange }: ExchangeFeeRowProps) {
         )}
       </div>
 
-      <span className="font-number min-w-0 truncate text-right text-xs font-black text-foreground">
+      <span className="font-number min-w-0 truncate text-right text-sm font-black text-foreground">
         {minimumWithdrawLabel}
       </span>
     </div>
@@ -178,6 +178,10 @@ function NetworkFeeCard({ exchanges, row }: NetworkFeeCardProps) {
             exchange={exchange}
           />
         ))}
+
+        <p className="px-3 py-2.5 text-center text-[10px] font-medium text-muted-foreground">
+          다른 거래소도 추가 예정입니다.
+        </p>
       </div>
     </section>
   );
@@ -255,11 +259,11 @@ export function ExchangeFeeTable({
   // endregion
 
   return (
-    <Card className="w-full">
+    <Card className="w-full font-pretendard">
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-end justify-between gap-3">
           <h2 className="text-md font-bold">거래소별 출금 조건표</h2>
-          <span className="shrink-0 rounded-full bg-muted px-2.5 py-1 text-[11px] font-bold text-muted-foreground">
+          <span className="shrink-0 rounded-full bg-muted px-1.5 py-0.5 text-xs font-bold text-muted-foreground">
             {exchangeCountLabel}
           </span>
         </div>
