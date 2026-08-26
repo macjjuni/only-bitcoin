@@ -32,6 +32,13 @@ export interface OnChainFeeReference {
 /** 표의 한 칸. 거래소가 그 망을 지원하지 않으면 아예 없음. */
 export interface WithdrawCell {
   withdrawFeeInAsset: number;
+  /**
+   * BTC 행에서만 채워짐.
+   *
+   * 온체인 실비도 sats 로 표시하므로 같은 단위로 둬야 `141 sats vs 20,000 sats` 처럼
+   * 배율이 눈으로 바로 읽힘. 다른 자산은 sats 개념이 없어 null.
+   */
+  withdrawFeeInSats: number | null;
   withdrawFeeInKrw: number;
   minimumWithdraw: number | null;
   isWithdrawAvailable: boolean | null;
@@ -99,6 +106,8 @@ export function buildComparisonRows({
 
       cells[exchangeId as ExchangeId] = {
         withdrawFeeInAsset: option.withdrawFee,
+        withdrawFeeInSats:
+          asset === "BTC" ? Math.round(option.withdrawFee * SATOSHI_PER_BTC) : null,
         withdrawFeeInKrw,
         minimumWithdraw: option.minimumWithdraw,
         isWithdrawAvailable: option.isWithdrawAvailable,

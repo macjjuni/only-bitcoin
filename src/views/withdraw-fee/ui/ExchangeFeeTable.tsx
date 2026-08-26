@@ -17,9 +17,19 @@ const formatKst = (iso: string) =>
     timeStyle: "short",
   });
 
-/** 수수료 0 은 "무료" 로 읽는 게 정확함. "0원" 은 값이 안 들어온 것처럼 보임. */
-const formatFee = (cell: WithdrawCell) =>
-  cell.withdrawFeeInAsset === 0 ? "무료" : `${comma(Math.round(cell.withdrawFeeInKrw))}원`;
+/**
+ * 대표 표기.
+ *
+ * **원화가 아니라 자산 수량이 주인공임.** 비트코인이 계산 단위인 사이트에서 원화를
+ * 앞세우면 전제가 뒤집힘. BTC 는 온체인 실비와 같은 단위(sats)로 둬서 배율이 바로 읽히게 함.
+ * 수수료 0 은 "0원" 이 아니라 "무료" 로 씀. 값이 안 들어온 것처럼 보이지 않게.
+ */
+const formatPrimaryFee = (cell: WithdrawCell, asset: string) => {
+  if (cell.withdrawFeeInAsset === 0) return "무료";
+  if (cell.withdrawFeeInSats !== null) return `${comma(cell.withdrawFeeInSats)} sats`;
+
+  return `${cell.withdrawFeeInAsset} ${asset}`;
+};
 
 /**
  * 자산·망을 행, 거래소를 열로 둔 비교표.
@@ -79,14 +89,24 @@ export default function ExchangeFeeTable({
                           <span className="flex flex-col items-end gap-0.5">
                             <span
                               className={
-                                cell.withdrawFeeInAsset === 0 ? "font-bold text-up" : "font-bold"
+                                cell.withdrawFeeInAsset === 0
+                                  ? "font-bold text-up"
+                                  : "font-bold text-bitcoin"
                               }
                             >
-                              {formatFee(cell)}
+                              {formatPrimaryFee(cell, row.asset)}
                             </span>
-                            <span className="text-[11px] text-muted-foreground">
-                              {cell.withdrawFeeInAsset} {row.asset}
-                            </span>
+                            {cell.withdrawFeeInSats !== null && cell.withdrawFeeInAsset !== 0 && (
+                              <span className="text-[11px] text-muted-foreground">
+                                {cell.withdrawFeeInAsset} {row.asset}
+                              </span>
+                            )}
+                            {/* 무료면 "≈ 0원" 은 군더더기라 안 붙임. */}
+                            {cell.withdrawFeeInAsset !== 0 && (
+                              <span className="text-[11px] text-muted-foreground">
+                                ≈ {comma(Math.round(cell.withdrawFeeInKrw))}원
+                              </span>
+                            )}
                             {cell.multipleOfOnChainFee !== null && (
                               <span className="text-[11px] font-bold text-bitcoin">
                                 실비 {cell.multipleOfOnChainFee.toFixed(0)}배
