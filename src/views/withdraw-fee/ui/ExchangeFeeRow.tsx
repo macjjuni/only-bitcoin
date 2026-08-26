@@ -2,7 +2,7 @@ import Image from "next/image";
 import type { ExchangeId, ExchangeMeta, WithdrawAsset } from "@/entities/exchange";
 import { comma } from "@/shared/utils/string";
 import type { WithdrawCell } from "../lib/calculateWithdrawFee";
-import { ASSET_THEME } from "./exchangeFeeTheme";
+import { ASSET_THEME } from "../model/exchangeFeeTheme";
 
 const EXCHANGE_LOGO: Record<ExchangeId, string> = {
   upbit: "/images/logo/upbit-logo.webp",

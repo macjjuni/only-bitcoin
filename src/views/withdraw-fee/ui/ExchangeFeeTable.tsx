@@ -4,7 +4,7 @@ import { useMemo, useState } from "react";
 import type { ExchangeMeta, WithdrawAsset } from "@/entities/exchange";
 import { Card, CardContent, SegmentedControl, type SegmentedControlOption } from "@/shared/ui";
 import type { WithdrawComparisonRow } from "../lib/calculateWithdrawFee";
-import { ASSET_THEME } from "./exchangeFeeTheme";
+import { ASSET_THEME } from "../model/exchangeFeeTheme";
 import { NetworkFeeCard } from "./NetworkFeeCard";
 
 interface ExchangeFeeTableProps {
