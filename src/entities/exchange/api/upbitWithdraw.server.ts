@@ -1,6 +1,11 @@
 import { buildNetworkKey, EXCHANGE_META, WITHDRAW_FEE_FALLBACK } from "../model/fallback";
 import type { ExchangeWithdrawOption, WithdrawAsset } from "../model/types";
-import { type ExchangeFetchResult, parseQuantity, TARGET_ASSETS } from "./shared";
+import {
+  type ExchangeFetchResult,
+  parseQuantity,
+  TARGET_ASSETS,
+  WITHDRAW_REVALIDATE_SECONDS,
+} from "./shared";
 
 // region [Types]
 interface UpbitWithdrawFeeCondition {
@@ -22,16 +27,12 @@ interface UpbitWithdrawFeeResponse {
  * 업비트 수수료 엔드포인트.
  *
  * **`ccx.upbit.com/robots.txt` 는 `Disallow: /` 임.** ( `www.upbit.com` 도 동일 )
- * 그래서 캐시를 24시간으로 길게 잡아 호출을 하루 수 회 수준으로 억제함.
- * 값이 필요할 뿐 트래픽을 쓸 이유는 없으므로 이보다 짧게 줄이지 말 것.
+ * 12시간 캐시라 하루 2회 수준으로만 호출됨. 이보다 짧게 줄이지 말 것.
  *
  * 점검 상태 같은 실시간 필드는 이 응답에 없어서 짧게 캐싱할 이득도 없음.
  * 응답의 `base_time` 이 매일 06:00 KST 라 데이터 자체도 하루 한 번 갱신됨.
  */
 const UPBIT_WITHDRAW_FEE_URL = "https://ccx.upbit.com/api/v1/status/withdraw_fee";
-
-/** 캐시 주기(초). 24시간. 위 주석 참고 — 줄이지 말 것. */
-export const UPBIT_WITHDRAW_REVALIDATE_SECONDS = 60 * 60 * 24;
 
 const buildFallbackResult = (): ExchangeFetchResult => ({
   meta: { ...EXCHANGE_META.upbit, source: "fallback" },
@@ -50,10 +51,9 @@ const buildFallbackResult = (): ExchangeFetchResult => ({
 export async function fetchUpbitWithdrawInfo(): Promise<ExchangeFetchResult> {
   try {
     const response = await fetch(UPBIT_WITHDRAW_FEE_URL, {
-      next: { revalidate: UPBIT_WITHDRAW_REVALIDATE_SECONDS },
+      next: { revalidate: WITHDRAW_REVALIDATE_SECONDS },
       headers: {
         accept: "application/json",
-        "user-agent": "only-btc.app (+https://only-btc.app)",
       },
     });
 

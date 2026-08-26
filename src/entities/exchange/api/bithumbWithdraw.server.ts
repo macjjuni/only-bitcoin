@@ -1,6 +1,11 @@
 import { buildNetworkKey, EXCHANGE_META, WITHDRAW_FEE_FALLBACK } from "../model/fallback";
 import type { ExchangeWithdrawOption, WithdrawAsset } from "../model/types";
-import { type ExchangeFetchResult, parseQuantity, TARGET_ASSETS } from "./shared";
+import {
+  type ExchangeFetchResult,
+  parseQuantity,
+  TARGET_ASSETS,
+  WITHDRAW_REVALIDATE_SECONDS,
+} from "./shared";
 
 // region [Types]
 interface BithumbNetworkInfo {
@@ -32,14 +37,6 @@ interface BithumbCoinInOutResponse {
  */
 const BITHUMB_COIN_INOUT_URL = "https://gw.bithumb.com/exchange/v1/coin-inout/info";
 
-/**
- * 캐시 주기(초). 10분.
- *
- * 수수료 자체는 거의 안 바뀌지만 `isWithdrawAvailable`( 출금 점검 여부 )은 수시로 바뀜.
- * 실시간 가치가 있는 쪽이 이 필드라 주기를 짧게 잡음.
- */
-export const BITHUMB_WITHDRAW_REVALIDATE_SECONDS = 60 * 10;
-
 const buildFallbackResult = (): ExchangeFetchResult => ({
   meta: { ...EXCHANGE_META.bithumb, source: "fallback" },
   options: { ...WITHDRAW_FEE_FALLBACK.bithumb },
@@ -53,15 +50,16 @@ const buildFallbackResult = (): ExchangeFetchResult => ({
  *
  * 실패하면 예외를 던지지 않고 폴백을 돌려줌. 이 화면은 비교가 목적이라
  * 한 거래소가 죽어도 나머지는 보여줘야 함.
+ *
+ * `isWithdrawAvailable`( 출금 점검 여부 )은 수시로 바뀌지만, 다른 거래소와 같은 시점의
+ * 값으로 맞추는 쪽을 택해 12시간 주기를 씀. 화면에도 조회 시각을 같이 표시함.
  */
 export async function fetchBithumbWithdrawInfo(): Promise<ExchangeFetchResult> {
   try {
     const response = await fetch(BITHUMB_COIN_INOUT_URL, {
-      next: { revalidate: BITHUMB_WITHDRAW_REVALIDATE_SECONDS },
+      next: { revalidate: WITHDRAW_REVALIDATE_SECONDS },
       headers: {
         accept: "application/json",
-        // 정체를 숨기지 않음. 문제가 되면 상대가 연락할 수 있어야 함.
-        "user-agent": "only-btc.app (+https://only-btc.app)",
       },
     });
 
