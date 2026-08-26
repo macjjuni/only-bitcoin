@@ -1,6 +1,4 @@
-import { fetchInitialPrice } from "@/entities/bitcoin/server";
-import { fetchInitialBlocks } from "@/entities/block/server";
-import { USDT_KRW_FALLBACK_PRICE, WITHDRAW_FEE_VERIFIED_AT } from "@/entities/exchange";
+import { WITHDRAW_FEE_VERIFIED_AT } from "@/entities/exchange";
 import { fetchExchangeWithdrawSnapshot } from "@/entities/exchange/server";
 import { createFaqSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
@@ -12,7 +10,15 @@ const PAGE_TITLE = "거래소 비트코인 출금 수수료";
 /** 화면에 보이는 제목. 메타 타이틀은 검색어를 더 담아야 해서 따로 둠. */
 const HEADING = "거래소별 출금 수수료";
 const PAGE_DESCRIPTION =
-  "업비트·빗썸의 비트코인 출금 수수료를 실시간 온체인 수수료와 비교해 보세요. 거래소가 실제 네트워크 비용의 몇 배를 받는지 확인할 수 있습니다.";
+  "업비트·빗썸·코빗·바이낸스·크라켄의 비트코인 출금 수수료와 지원 네트워크를 한눈에 비교해 보세요.";
+
+/**
+ * 12시간. 거래소 페처의 `WITHDRAW_REVALIDATE_SECONDS` 와 같은 값으로 맞출 것.
+ *
+ * Next 가 이 export 를 정적으로 읽어야 해서 상수를 import 해 쓸 수 없음.
+ * 여기가 더 짧으면 표의 "업데이트" 시각만 갱신되고 수수료는 그대로라 어긋남.
+ */
+export const revalidate = 43_200;
 
 export const metadata = createPageMetadata({
   path: "/withdraw-fee",
@@ -21,11 +27,7 @@ export const metadata = createPageMetadata({
 });
 
 export default async function WithdrawFeePage() {
-  const [snapshot, initialPrice, { fees }] = await Promise.all([
-    fetchExchangeWithdrawSnapshot(),
-    fetchInitialPrice(),
-    fetchInitialBlocks(),
-  ]);
+  const snapshot = await fetchExchangeWithdrawSnapshot();
 
   return (
     <PageLayout className="gap-2.5">
@@ -33,17 +35,15 @@ export default async function WithdrawFeePage() {
       <PageTitle
         label="Withdraw Fee"
         title={HEADING}
-        description="국내 거래소가 실제 네트워크 비용의 몇 배를 받는지 확인해 보세요."
+        description="출금 수수료와 최소 출금 수량을 한눈에 비교해 보세요."
       />
-      {/* 배율은 소켓 값으로 계속 다시 계산됨. 여기 값은 초기 표시용. */}
+      {/* BTC 원화 환산액은 소켓 시세로 클라이언트에서 계산됨. 서버는 수량만 내려줌. */}
       <WithdrawFeePanel
         exchanges={snapshot.exchanges}
         rows={snapshot.rows}
-        usdtKrwPrice={snapshot.usdtKrwPrice ?? USDT_KRW_FALLBACK_PRICE}
+        usdtKrwPrice={snapshot.usdtKrwPrice}
         fetchedAt={snapshot.fetchedAt}
         verifiedAt={WITHDRAW_FEE_VERIFIED_AT}
-        initialFeeRate={fees.halfHourFee}
-        initialBtcKrwPrice={initialPrice.krw}
       />
       <WithdrawFeeGuideArticle />
     </PageLayout>

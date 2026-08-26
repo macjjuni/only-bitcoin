@@ -50,9 +50,9 @@ export interface ExchangeWithdrawSnapshot {
    * USDT 원화 시세.
    *
    * 빗썸 응답이 코인별 KRW 시세를 같이 주므로 추가 호출 없이 그걸 씀.
-   * 빗썸 조회가 실패하면 null 이고, 그때는 USDT 를 원화로 환산하지 않고 수량만 보여줌.
+   * 빗썸 조회가 실패하면 `USDT_KRW_FALLBACK_PRICE` 로 대체되므로 항상 값이 있음.
    */
-  usdtKrwPrice: number | null;
+  usdtKrwPrice: number;
   fetchedAt: string;
   hasAnyFallback: boolean;
 }
