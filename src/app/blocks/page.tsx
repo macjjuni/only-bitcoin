@@ -1,7 +1,7 @@
 import { fetchInitialBlocks } from "@/entities/block/server";
 import { createFaqSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
-import { JsonLd } from "@/shared/ui";
+import { JsonLd, PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import {
   BLOCKS_FAQ,
@@ -26,6 +26,11 @@ export default async function BlocksPage() {
   return (
     <PageLayout className="block-page__area gap-2.5">
       <JsonLd schema={createFaqSchema(BLOCKS_FAQ)} />
+      <PageTitle
+        label="Blocks"
+        title="비트코인 블록과 트랜잭션 수수료"
+        description="최신 블록 생성 현황과 실시간 수수료를 확인하세요."
+      />
       <BlocksVisualizer initialBlocks={blocks} />
       <RealtimeTxFees initialFees={fees} initialMempoolInfo={mempoolInfo} />
       <BlocksExplorer />

@@ -171,9 +171,10 @@ const HalvingCountdown = ({ initialBlockHeight }: HalvingCountdownProps) => {
           >
             {isHalvingGrace ? `🎉 ${halvingOrdinal}번째 반감기 도달` : "다음 반감기까지"}
           </span>
-          <h1 className="font-number text-2xl font-bold text-white drop-shadow-[0_0_18px_rgb(var(--bitcoin-rgb)/0.5)]">
+          {/* 페이지 제목은 page.tsx 의 srOnly PageTitle(h1)이 맡고, 여기는 그 아래 단계라 h2. */}
+          <h2 className="font-number text-2xl font-bold text-white drop-shadow-[0_0_18px_rgb(var(--bitcoin-rgb)/0.5)]">
             {displayHalvingData.blockHeight.toLocaleString()} 블록
-          </h1>
+          </h2>
 
           {rewardTransition && (
             <p className="font-number mt-0.5 flex items-center gap-2 text-base">

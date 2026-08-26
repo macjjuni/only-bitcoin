@@ -54,9 +54,10 @@ export default function TreasurySummaryCard({ summary, fetchedAt }: TreasurySumm
         <span className="mb-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-bitcoin">
           Public Company Treasury
         </span>
-        <h2 className="mb-2.5 text-[19px] font-bold leading-tight tracking-tight">
+        {/* 페이지의 대표 제목이라 h1. 카드 안이지만 이 화면의 주제가 곧 이 문구임. */}
+        <h1 className="mb-2.5 text-[19px] font-bold leading-tight tracking-tight">
           상장기업 비트코인 트레저리
-        </h2>
+        </h1>
 
         {/* 히어로 숫자. 폭이 좁아지면 글자도 같이 줄어야 9자리 수가 안 넘침. */}
         <strong className="font-number mb-1.5 block text-[clamp(2rem,10vw,3.25rem)] font-black leading-none tracking-tight">

@@ -20,8 +20,8 @@ export default function NotFoundContent() {
 
   return (
     <div className="flex h-full flex-col items-center justify-center gap-4">
-      <h2 className="text-base font-bold layout-max:text-xl">404 - Error</h2>
-      <h3 className="text-base mb-4 layout-max:text-xl">페이지를 찾을 수 없습니다.</h3>
+      <h1 className="text-base font-bold layout-max:text-xl">404 - Error</h1>
+      <h2 className="text-base mb-4 layout-max:text-xl">페이지를 찾을 수 없습니다.</h2>
       <KButton variant="outline" onClick={onClickGoBack}>
         뒤로가기
       </KButton>

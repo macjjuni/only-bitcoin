@@ -1,4 +1,5 @@
 import type { Metadata } from "next";
+import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import { SettingsPage } from "@/views/settings";
 
@@ -16,6 +17,8 @@ export const metadata: Metadata = {
 export default function Page() {
   return (
     <PageLayout className="pt-0.5">
+      {/* noindex 페이지라 SEO 목적은 없음. 스크린 리더용 제목. */}
+      <PageTitle srOnly label="Settings" title="설정" />
       <SettingsPage />
     </PageLayout>
   );

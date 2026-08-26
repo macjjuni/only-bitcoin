@@ -88,7 +88,7 @@ const Btc2ApartmentPanel = ({ archiveGeneratedAt }: Btc2ApartmentPanelProps) => 
 
   return (
     <>
-      <PageTitle label="BTC to Apartment" title="아파트 실거래 × BTC" as="h2" />
+      <PageTitle label="BTC to Apartment" title="아파트 실거래 × BTC" />
       <ApartmentSelector selectedApartmentID={apartmentID} onSelectApartment={onSelectApartment} />
       <div className="flex flex-col gap-4 p-2">
         <ApartmentSummaryCard

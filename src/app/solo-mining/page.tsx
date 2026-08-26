@@ -1,7 +1,7 @@
 import { fetchInitialBlocks } from "@/entities/block/server";
 import { createFaqSchema, createWebApplicationSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
-import { JsonLd } from "@/shared/ui";
+import { JsonLd, PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import { SOLO_MINING_FAQ, SoloMiningGuideArticle, SoloMiningPanel } from "@/views/solo-mining";
 
@@ -27,6 +27,11 @@ export default async function SoloMiningPage() {
         })}
       />
       <JsonLd schema={createFaqSchema(SOLO_MINING_FAQ)} />
+      <PageTitle
+        label="Solo Mining"
+        title="솔로 마이닝 확률 계산기"
+        description="내 해시레이트로 비트코인 블록을 캘 확률과 기대 소요 시간을 계산해 보세요."
+      />
       <SoloMiningPanel initialDifficulty={initialDifficulty} />
       <SoloMiningGuideArticle />
     </PageLayout>

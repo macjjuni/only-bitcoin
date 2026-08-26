@@ -1,5 +1,6 @@
 import { fetchInitialMacro, fetchInitialPrice } from "@/entities/bitcoin/server";
 import { fetchInitialBlocks } from "@/entities/block/server";
+import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import BlockHalvingCard from "../block-halving-card/BlockHalvingCard";
 import ClientChart from "../clientChart/ClientChart";
@@ -21,6 +22,8 @@ export default async function OverviewScreen() {
 
   return (
     <PageLayout className="!pt-0 !gap-3">
+      {/* 시세가 곧 화면인 페이지라 제목 UI 를 두지 않음. 제목 신호만 숨겨서 심음. */}
+      <PageTitle srOnly label="Overview" title="비트코인 실시간 시세와 네트워크 현황" />
       <PricePanel initialPrice={initialPrice} />
       <MacroWidgetPanel
         initialMacro={initialMacro}

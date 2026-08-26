@@ -200,7 +200,6 @@ const OrangeContent = () => {
     <>
       <section aria-label="서비스">
         <PageTitle
-          as="h2"
           label="Orange"
           title="오렌지 서비스"
           description="비트코인을 더 깊게 파고들 수 있도록 재밌는 서비스들을 모아봤습니다."

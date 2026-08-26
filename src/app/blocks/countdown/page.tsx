@@ -2,7 +2,7 @@ import { fetchInitialBlocks } from "@/entities/block/server";
 import { env } from "@/shared/config/env";
 import { createBreadcrumbSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
-import { JsonLd } from "@/shared/ui";
+import { JsonLd, PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import { HalvingCountdown } from "@/views/blocks";
 import CosmicBackdrop from "@/views/blocks/ui/halving-countdown/CosmicBackdrop";
@@ -29,6 +29,7 @@ export default async function Page() {
           { name: "Halving Countdown", path: "/blocks/countdown" },
         ])}
       />
+      <PageTitle srOnly label="Halving Countdown" title="비트코인 반감기 카운트다운" />
       <CosmicBackdrop />
       <p className="relative z-10 w-full text-center text-lg font-bold text-white/70 select-none">
         {SERVICE_DOMAIN}
