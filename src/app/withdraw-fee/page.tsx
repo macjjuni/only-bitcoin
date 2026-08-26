@@ -41,7 +41,6 @@ export default async function WithdrawFeePage() {
       <WithdrawFeePanel
         exchanges={snapshot.exchanges}
         rows={snapshot.rows}
-        usdtKrwPrice={snapshot.usdtKrwPrice}
         fetchedAt={snapshot.fetchedAt}
         verifiedAt={WITHDRAW_FEE_VERIFIED_AT}
       />

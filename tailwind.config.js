@@ -18,6 +18,7 @@ export default {
         bitcoin: "rgb(var(--bitcoin-rgb) / <alpha-value>)",
         up: "rgb(var(--up-rgb) / <alpha-value>)",
         down: "rgb(var(--down-rgb) / <alpha-value>)",
+        tether: "rgb(var(--tether-rgb) / <alpha-value>)",
         background: "hsl(var(--background))",
       },
       height: {

@@ -21,8 +21,6 @@ export interface ExchangeFetchResult {
   meta: ExchangeMeta;
   /** `자산:망` 키. 거래소들이 같은 망 표기를 써서 그대로 조인됨. */
   options: Record<string, ExchangeWithdrawOption>;
-  /** 이 거래소가 USDT 원화 시세를 같이 주면 담음. 없으면 null. */
-  usdtKrwPrice: number | null;
 }
 
 /** 숫자 문자열을 수로 바꿈. 빈 값·비정상 값은 null 로 흡수함. */

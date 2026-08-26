@@ -37,7 +37,6 @@ const UPBIT_WITHDRAW_FEE_URL = "https://ccx.upbit.com/api/v1/status/withdraw_fee
 const buildFallbackResult = (): ExchangeFetchResult => ({
   meta: { ...EXCHANGE_META.upbit, source: "fallback" },
   options: { ...WITHDRAW_FEE_FALLBACK.upbit },
-  usdtKrwPrice: null,
 });
 // endregion
 
@@ -88,8 +87,7 @@ export async function fetchUpbitWithdrawInfo(): Promise<ExchangeFetchResult> {
     return {
       meta: { ...EXCHANGE_META.upbit, source: "live" },
       options,
-      usdtKrwPrice: null,
-    };
+        };
   } catch (error) {
     console.warn("[upbit] 출금 정보 조회 중 예외:", error);
     return buildFallbackResult();

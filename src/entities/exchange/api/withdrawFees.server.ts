@@ -1,4 +1,4 @@
-import { buildNetworkKey, USDT_KRW_FALLBACK_PRICE } from "../model/fallback";
+import { buildNetworkKey } from "../model/fallback";
 import type {
   ExchangeId,
   ExchangeWithdrawSnapshot,
@@ -87,14 +87,9 @@ export async function fetchExchangeWithdrawSnapshot(): Promise<ExchangeWithdrawS
     fetchKrakenWithdrawInfo(),
   ]);
 
-  // 빗썸 응답이 코인별 KRW 시세를 같이 줌. 못 구하면 스테이블코인이라 폴백 값으로 대략 환산.
-  const usdtKrwPrice =
-    results.find((result) => result.usdtKrwPrice !== null)?.usdtKrwPrice ?? USDT_KRW_FALLBACK_PRICE;
-
   return {
     exchanges: results.map((result) => result.meta),
     rows: buildRows(results),
-    usdtKrwPrice,
     fetchedAt: new Date().toISOString(),
     hasAnyFallback: results.some((result) => result.meta.source === "fallback"),
   };

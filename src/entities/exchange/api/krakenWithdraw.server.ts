@@ -28,7 +28,6 @@ const KRAKEN_FUNDING_METHODS_URL = "https://api.kraken.com/funding/v1/methods/wi
 const buildFallbackResult = (): ExchangeFetchResult => ({
   meta: { ...EXCHANGE_META.kraken, source: "fallback" },
   options: { ...WITHDRAW_FEE_FALLBACK.kraken },
-  usdtKrwPrice: null,
 });
 
 const resolveNetworkName = (asset: string, network: string): string | null => {
@@ -112,8 +111,7 @@ async function fetchKrakenWithdrawInfoFromSource(): Promise<ExchangeFetchResult>
     return {
       meta: { ...EXCHANGE_META.kraken, source: "live" },
       options,
-      usdtKrwPrice: null,
-    };
+        };
   } catch (error) {
     console.warn("[kraken] 출금 방법 조회 중 예외:", error);
     return buildFallbackResult();

@@ -7,9 +7,6 @@ import type { ExchangeId, ExchangeMeta, ExchangeWithdrawOption, WithdrawAsset } 
  */
 export const WITHDRAW_FEE_VERIFIED_AT = "2026-08-26" as const;
 
-/** 조회가 실패해도 USDT 를 대략 환산할 수 있게 둔 값. 스테이블코인이라 크게 안 움직임. */
-export const USDT_KRW_FALLBACK_PRICE = 1390;
-
 export const EXCHANGE_META: Record<ExchangeId, Omit<ExchangeMeta, "source">> = {
   upbit: {
     id: "upbit",

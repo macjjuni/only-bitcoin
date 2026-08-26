@@ -40,7 +40,6 @@ const BITHUMB_COIN_INOUT_URL = "https://gw.bithumb.com/exchange/v1/coin-inout/in
 const buildFallbackResult = (): ExchangeFetchResult => ({
   meta: { ...EXCHANGE_META.bithumb, source: "fallback" },
   options: { ...WITHDRAW_FEE_FALLBACK.bithumb },
-  usdtKrwPrice: null,
 });
 // endregion
 
@@ -70,16 +69,10 @@ export async function fetchBithumbWithdrawInfo(): Promise<ExchangeFetchResult> {
 
     const body = (await response.json()) as BithumbCoinInOutResponse;
     const options: Record<string, ExchangeWithdrawOption> = {};
-    let usdtKrwPrice: number | null = null;
 
     for (const asset of TARGET_ASSETS) {
       const coin = body.data?.find((item) => item.coinSymbol === asset);
       if (!coin) continue;
-
-      // 코인별 KRW 시세를 같이 주므로 USDT 환산에 추가 호출이 필요 없음.
-      if (asset === "USDT" && typeof coin.coinKrwSise === "number") {
-        usdtKrwPrice = coin.coinKrwSise;
-      }
 
       for (const network of coin.networkInfoList ?? []) {
         const withdrawFee = parseQuantity(network.withdrawFeeQuantity);
@@ -103,7 +96,6 @@ export async function fetchBithumbWithdrawInfo(): Promise<ExchangeFetchResult> {
     return {
       meta: { ...EXCHANGE_META.bithumb, source: "live" },
       options,
-      usdtKrwPrice,
     };
   } catch (error) {
     console.warn("[bithumb] 출금 정보 조회 중 예외:", error);

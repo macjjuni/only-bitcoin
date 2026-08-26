@@ -56,7 +56,6 @@ const COMPARABLE_NETWORK_NAME_BY_ASSET: Record<WithdrawAsset, Readonly<Record<st
 const buildFallbackResult = (): ExchangeFetchResult => ({
   meta: { ...EXCHANGE_META.binance, source: "fallback" },
   options: { ...WITHDRAW_FEE_FALLBACK.binance },
-  usdtKrwPrice: null,
 });
 
 const resolveSuspensionMessage = (network: BinanceNetworkInfo): string | null =>
@@ -127,8 +126,7 @@ async function fetchBinanceWithdrawInfoFromSource(): Promise<ExchangeFetchResult
     return {
       meta: { ...EXCHANGE_META.binance, source: "live" },
       options,
-      usdtKrwPrice: null,
-    };
+        };
   } catch (error) {
     console.warn("[binance] 출금 정보 조회 중 예외:", error);
     return buildFallbackResult();

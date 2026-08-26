@@ -34,7 +34,6 @@ const KORBIT_CURRENCIES_URL = "https://api.korbit.co.kr/v2/currencies";
 const buildFallbackResult = (): ExchangeFetchResult => ({
   meta: { ...EXCHANGE_META.korbit, source: "fallback" },
   options: { ...WITHDRAW_FEE_FALLBACK.korbit },
-  usdtKrwPrice: null,
 });
 
 const parseWithdrawalAvailability = (withdrawalStatus: string): boolean | null => {
@@ -109,8 +108,7 @@ export async function fetchKorbitWithdrawInfo(): Promise<ExchangeFetchResult> {
     return {
       meta: { ...EXCHANGE_META.korbit, source: "live" },
       options,
-      usdtKrwPrice: null,
-    };
+        };
   } catch (error) {
     console.warn("[korbit] 출금 정보 조회 중 예외:", error);
     return buildFallbackResult();

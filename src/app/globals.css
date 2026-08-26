@@ -155,9 +155,11 @@ html.slide-first::view-transition-new(root) {
     --bitcoin-rgb: 247 147 26; /* #f7931a */
     --up-rgb: 34 197 94; /* #22c55e */
     --down-rgb: 239 68 68; /* #ef4444 */
+    --tether-rgb: 38 161 123; /* #26A17B */
     --bitcoin-color: rgb(var(--bitcoin-rgb));
     --up-color: rgb(var(--up-rgb));
     --down-color: rgb(var(--down-rgb));
+    --tether-color: rgb(var(--tether-rgb));
     --background: 0 0% 100%;
     --header-height: 50px;
     --navigation-height: 82px;

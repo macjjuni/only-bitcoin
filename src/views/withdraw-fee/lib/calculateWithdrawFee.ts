@@ -6,6 +6,7 @@ export interface WithdrawCell {
   /** 해당 자산의 원화 시세를 아직 못 구했으면 null. ( BTC 는 소켓이 붙기 전까지 ) */
   withdrawFeeInKrw: number | null;
   minimumWithdraw: number | null;
+  minimumWithdrawInKrw: number | null;
   isWithdrawAvailable: boolean | null;
   suspensionMessage: string | null;
 }
@@ -51,6 +52,10 @@ export function buildComparisonRows({
         withdrawFeeInAsset: option.withdrawFee,
         withdrawFeeInKrw: assetKrwPrice === null ? null : option.withdrawFee * assetKrwPrice,
         minimumWithdraw: option.minimumWithdraw,
+        minimumWithdrawInKrw:
+          assetKrwPrice === null || option.minimumWithdraw === null
+            ? null
+            : option.minimumWithdraw * assetKrwPrice,
         isWithdrawAvailable: option.isWithdrawAvailable,
         suspensionMessage: option.suspensionMessage,
       };
