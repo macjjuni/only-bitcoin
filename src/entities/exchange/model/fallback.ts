@@ -7,6 +7,16 @@ import type { ExchangeId, ExchangeMeta, ExchangeWithdrawOption, WithdrawAsset } 
  */
 export const WITHDRAW_FEE_VERIFIED_AT = "2026-08-26" as const;
 
+const createFallbackWithdrawOption = (
+  withdrawFee: number,
+  minimumWithdraw: number | null,
+): ExchangeWithdrawOption => ({
+  withdrawFee,
+  minimumWithdraw,
+  isWithdrawAvailable: null,
+  suspensionMessage: null,
+});
+
 export const EXCHANGE_META: Record<ExchangeId, Omit<ExchangeMeta, "source">> = {
   upbit: {
     id: "upbit",
@@ -50,151 +60,36 @@ export const buildNetworkKey = (asset: WithdrawAsset, networkName: string) =>
  */
 export const WITHDRAW_FEE_FALLBACK: Record<ExchangeId, Record<string, ExchangeWithdrawOption>> = {
   upbit: {
-    "BTC:Bitcoin": {
-      withdrawFee: 0.0002,
-      minimumWithdraw: 0.00001,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Tron": {
-      withdrawFee: 0,
-      minimumWithdraw: 0.000001,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Ethereum": {
-      withdrawFee: 4,
-      minimumWithdraw: 0.000001,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Kaia": {
-      withdrawFee: 0.1,
-      minimumWithdraw: 0.000001,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Aptos": {
-      withdrawFee: 0.1,
-      minimumWithdraw: 0.000001,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
+    "BTC:Bitcoin": createFallbackWithdrawOption(0.0002, 0.00001),
+    "USDT:Tron": createFallbackWithdrawOption(0, 0.000001),
+    "USDT:Ethereum": createFallbackWithdrawOption(4, 0.000001),
+    "USDT:Kaia": createFallbackWithdrawOption(0.1, 0.000001),
+    "USDT:Aptos": createFallbackWithdrawOption(0.1, 0.000001),
   },
   bithumb: {
-    "BTC:Bitcoin": {
-      withdrawFee: 0.0002,
-      minimumWithdraw: 0.001,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Tron": {
-      withdrawFee: 0,
-      minimumWithdraw: 0.000001,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Ethereum": {
-      withdrawFee: 4,
-      minimumWithdraw: 4,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Kaia": {
-      withdrawFee: 0.1,
-      minimumWithdraw: 0.1,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Aptos": {
-      withdrawFee: 0.1,
-      minimumWithdraw: 0.1,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
+    "BTC:Bitcoin": createFallbackWithdrawOption(0.0002, 0.001),
+    "USDT:Tron": createFallbackWithdrawOption(0, 0.000001),
+    "USDT:Ethereum": createFallbackWithdrawOption(4, 4),
+    "USDT:Kaia": createFallbackWithdrawOption(0.1, 0.1),
+    "USDT:Aptos": createFallbackWithdrawOption(0.1, 0.1),
   },
   korbit: {
-    "BTC:Bitcoin": {
-      withdrawFee: 0.0008,
-      minimumWithdraw: 0.0001,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Tron": {
-      withdrawFee: 1,
-      minimumWithdraw: 1,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Ethereum": {
-      withdrawFee: 1,
-      minimumWithdraw: 0.1,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
+    "BTC:Bitcoin": createFallbackWithdrawOption(0.0008, 0.0001),
+    "USDT:Tron": createFallbackWithdrawOption(1, 1),
+    "USDT:Ethereum": createFallbackWithdrawOption(1, 0.1),
   },
   binance: {
-    "BTC:Bitcoin": {
-      withdrawFee: 0.00002,
-      minimumWithdraw: 0.0001,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "BTC:Lightning": {
-      withdrawFee: 0.000001,
-      minimumWithdraw: 0.00002,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Tron": {
-      withdrawFee: 1.5,
-      minimumWithdraw: 5,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Ethereum": {
-      withdrawFee: 0.3,
-      minimumWithdraw: 5,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Kaia": {
-      withdrawFee: 0.02,
-      minimumWithdraw: 5,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Aptos": {
-      withdrawFee: 0.1,
-      minimumWithdraw: 5,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
+    "BTC:Bitcoin": createFallbackWithdrawOption(0.00002, 0.0001),
+    "BTC:Lightning": createFallbackWithdrawOption(0.000001, 0.00002),
+    "USDT:Tron": createFallbackWithdrawOption(1.5, 5),
+    "USDT:Ethereum": createFallbackWithdrawOption(0.3, 5),
+    "USDT:Kaia": createFallbackWithdrawOption(0.02, 5),
+    "USDT:Aptos": createFallbackWithdrawOption(0.1, 5),
   },
   kraken: {
-    "BTC:Bitcoin": {
-      withdrawFee: 0.000015,
-      minimumWithdraw: 0.000218,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "BTC:Lightning": {
-      withdrawFee: 0,
-      minimumWithdraw: 0.00001,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Tron": {
-      withdrawFee: 1,
-      minimumWithdraw: 6,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
-    "USDT:Ethereum": {
-      withdrawFee: 0.6286,
-      minimumWithdraw: 0.75432,
-      isWithdrawAvailable: null,
-      suspensionMessage: null,
-    },
+    "BTC:Bitcoin": createFallbackWithdrawOption(0.000015, 0.000218),
+    "BTC:Lightning": createFallbackWithdrawOption(0, 0.00001),
+    "USDT:Tron": createFallbackWithdrawOption(1, 6),
+    "USDT:Ethereum": createFallbackWithdrawOption(0.6286, 0.75432),
   },
 };

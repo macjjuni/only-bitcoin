@@ -1,9 +1,10 @@
-import { buildNetworkKey, EXCHANGE_META, WITHDRAW_FEE_FALLBACK } from "../model/fallback";
-import type { ExchangeWithdrawOption, WithdrawAsset } from "../model/types";
+import { buildNetworkKey, EXCHANGE_META } from "../model/fallback";
+import type { ExchangeWithdrawOption } from "../model/types";
 import {
+  buildExchangeFallbackResult,
   type ExchangeFetchResult,
+  isWithdrawAsset,
   parseQuantity,
-  TARGET_ASSETS,
   WITHDRAW_REVALIDATE_SECONDS,
 } from "./shared";
 
@@ -34,10 +35,7 @@ interface UpbitWithdrawFeeResponse {
  */
 const UPBIT_WITHDRAW_FEE_URL = "https://ccx.upbit.com/api/v1/status/withdraw_fee";
 
-const buildFallbackResult = (): ExchangeFetchResult => ({
-  meta: { ...EXCHANGE_META.upbit, source: "fallback" },
-  options: { ...WITHDRAW_FEE_FALLBACK.upbit },
-});
+const buildFallbackResult = () => buildExchangeFallbackResult("upbit");
 // endregion
 
 // region [Transactions]
@@ -65,12 +63,12 @@ export async function fetchUpbitWithdrawInfo(): Promise<ExchangeFetchResult> {
     const options: Record<string, ExchangeWithdrawOption> = {};
 
     for (const row of body.withdraw_fee_conditions ?? []) {
-      if (!TARGET_ASSETS.includes(row.currency as WithdrawAsset)) continue;
+      if (!isWithdrawAsset(row.currency)) continue;
 
       const withdrawFee = parseQuantity(row.withdraw_fee);
       if (withdrawFee === null) continue;
 
-      options[buildNetworkKey(row.currency as WithdrawAsset, row.network_name)] = {
+      options[buildNetworkKey(row.currency, row.network_name)] = {
         withdrawFee,
         minimumWithdraw: parseQuantity(row.minimum),
         // 이 엔드포인트는 점검 상태를 안 줌. "가능" 이 아니라 "모름" 이므로 null 유지.
@@ -87,7 +85,7 @@ export async function fetchUpbitWithdrawInfo(): Promise<ExchangeFetchResult> {
     return {
       meta: { ...EXCHANGE_META.upbit, source: "live" },
       options,
-        };
+    };
   } catch (error) {
     console.warn("[upbit] 출금 정보 조회 중 예외:", error);
     return buildFallbackResult();

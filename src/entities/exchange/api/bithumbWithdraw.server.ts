@@ -1,6 +1,7 @@
-import { buildNetworkKey, EXCHANGE_META, WITHDRAW_FEE_FALLBACK } from "../model/fallback";
-import type { ExchangeWithdrawOption, WithdrawAsset } from "../model/types";
+import { buildNetworkKey, EXCHANGE_META } from "../model/fallback";
+import type { ExchangeWithdrawOption } from "../model/types";
 import {
+  buildExchangeFallbackResult,
   type ExchangeFetchResult,
   parseQuantity,
   TARGET_ASSETS,
@@ -37,10 +38,7 @@ interface BithumbCoinInOutResponse {
  */
 const BITHUMB_COIN_INOUT_URL = "https://gw.bithumb.com/exchange/v1/coin-inout/info";
 
-const buildFallbackResult = (): ExchangeFetchResult => ({
-  meta: { ...EXCHANGE_META.bithumb, source: "fallback" },
-  options: { ...WITHDRAW_FEE_FALLBACK.bithumb },
-});
+const buildFallbackResult = () => buildExchangeFallbackResult("bithumb");
 // endregion
 
 // region [Transactions]
@@ -78,7 +76,7 @@ export async function fetchBithumbWithdrawInfo(): Promise<ExchangeFetchResult> {
         const withdrawFee = parseQuantity(network.withdrawFeeQuantity);
         if (withdrawFee === null) continue;
 
-        options[buildNetworkKey(asset as WithdrawAsset, network.networkName)] = {
+        options[buildNetworkKey(asset, network.networkName)] = {
           withdrawFee,
           minimumWithdraw: parseQuantity(network.withdrawMinimumQuantity),
           isWithdrawAvailable: network.isWithdrawAvailable ?? null,

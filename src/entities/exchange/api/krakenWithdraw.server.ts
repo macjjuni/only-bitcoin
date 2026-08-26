@@ -1,11 +1,12 @@
 import { createHash, createHmac } from "node:crypto";
 import { unstable_cache } from "next/cache";
-import { buildNetworkKey, EXCHANGE_META, WITHDRAW_FEE_FALLBACK } from "../model/fallback";
+import { buildNetworkKey, EXCHANGE_META } from "../model/fallback";
 import type { ExchangeWithdrawOption } from "../model/types";
 import {
+  buildExchangeFallbackResult,
   type ExchangeFetchResult,
+  isWithdrawAsset,
   parseQuantity,
-  TARGET_ASSETS,
   WITHDRAW_REVALIDATE_SECONDS,
 } from "./shared";
 
@@ -25,10 +26,7 @@ interface KrakenFundingMethodsResponse {
 // region [Privates]
 const KRAKEN_FUNDING_METHODS_URL = "https://api.kraken.com/funding/v1/methods/withdraw";
 
-const buildFallbackResult = (): ExchangeFetchResult => ({
-  meta: { ...EXCHANGE_META.kraken, source: "fallback" },
-  options: { ...WITHDRAW_FEE_FALLBACK.kraken },
-});
+const buildFallbackResult = () => buildExchangeFallbackResult("kraken");
 
 const resolveNetworkName = (asset: string, network: string): string | null => {
   if (asset === "BTC" && network.toLowerCase() === "bitcoin") return "Bitcoin";
@@ -56,14 +54,13 @@ export const parseKrakenWithdrawMethods = (
   for (const method of methods) {
     const asset = method.asset?.name;
     const network = method.network?.network_name;
-    if (!asset || !network || !TARGET_ASSETS.includes(asset as (typeof TARGET_ASSETS)[number]))
-      continue;
+    if (!asset || !network || !isWithdrawAsset(asset)) continue;
 
     const networkName = resolveNetworkName(asset, network);
     const withdrawFee = parseQuantity(method.fees?.base?.amount);
     if (!networkName || withdrawFee === null) continue;
 
-    options[buildNetworkKey(asset as "BTC" | "USDT", networkName)] = {
+    options[buildNetworkKey(asset, networkName)] = {
       withdrawFee,
       minimumWithdraw: parseQuantity(method.minimum_amount),
       isWithdrawAvailable: true,
@@ -111,7 +108,7 @@ async function fetchKrakenWithdrawInfoFromSource(): Promise<ExchangeFetchResult>
     return {
       meta: { ...EXCHANGE_META.kraken, source: "live" },
       options,
-        };
+    };
   } catch (error) {
     console.warn("[kraken] 출금 방법 조회 중 예외:", error);
     return buildFallbackResult();

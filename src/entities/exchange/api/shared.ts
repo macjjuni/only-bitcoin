@@ -1,4 +1,10 @@
-import type { ExchangeMeta, ExchangeWithdrawOption, WithdrawAsset } from "../model/types";
+import { EXCHANGE_META, WITHDRAW_FEE_FALLBACK } from "../model/fallback";
+import type {
+  ExchangeId,
+  ExchangeMeta,
+  ExchangeWithdrawOption,
+  WithdrawAsset,
+} from "../model/types";
 
 /**
  * 비교 대상 자산.
@@ -22,6 +28,15 @@ export interface ExchangeFetchResult {
   /** `자산:망` 키. 거래소들이 같은 망 표기를 써서 그대로 조인됨. */
   options: Record<string, ExchangeWithdrawOption>;
 }
+
+export function isWithdrawAsset(value: string): value is WithdrawAsset {
+  return (TARGET_ASSETS as readonly string[]).includes(value);
+}
+
+export const buildExchangeFallbackResult = (exchangeId: ExchangeId): ExchangeFetchResult => ({
+  meta: { ...EXCHANGE_META[exchangeId], source: "fallback" },
+  options: { ...WITHDRAW_FEE_FALLBACK[exchangeId] },
+});
 
 /** 숫자 문자열을 수로 바꿈. 빈 값·비정상 값은 null 로 흡수함. */
 export function parseQuantity(value: string | null | undefined): number | null {

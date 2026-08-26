@@ -1,7 +1,8 @@
 import { unstable_cache } from "next/cache";
-import { buildNetworkKey, EXCHANGE_META, WITHDRAW_FEE_FALLBACK } from "../model/fallback";
+import { buildNetworkKey, EXCHANGE_META } from "../model/fallback";
 import type { ExchangeWithdrawOption, WithdrawAsset } from "../model/types";
 import {
+  buildExchangeFallbackResult,
   type ExchangeFetchResult,
   parseQuantity,
   TARGET_ASSETS,
@@ -53,10 +54,7 @@ const COMPARABLE_NETWORK_NAME_BY_ASSET: Record<WithdrawAsset, Readonly<Record<st
   },
 };
 
-const buildFallbackResult = (): ExchangeFetchResult => ({
-  meta: { ...EXCHANGE_META.binance, source: "fallback" },
-  options: { ...WITHDRAW_FEE_FALLBACK.binance },
-});
+const buildFallbackResult = () => buildExchangeFallbackResult("binance");
 
 const resolveSuspensionMessage = (network: BinanceNetworkInfo): string | null =>
   network.withdrawDesc || network.specialWithdrawTips || null;
@@ -126,7 +124,7 @@ async function fetchBinanceWithdrawInfoFromSource(): Promise<ExchangeFetchResult
     return {
       meta: { ...EXCHANGE_META.binance, source: "live" },
       options,
-        };
+    };
   } catch (error) {
     console.warn("[binance] 출금 정보 조회 중 예외:", error);
     return buildFallbackResult();

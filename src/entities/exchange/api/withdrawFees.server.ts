@@ -49,8 +49,10 @@ const buildRows = (results: ExchangeFetchResult[]): WithdrawNetworkRow[] => {
   }
 
   /** 자산은 지정 순서(BTC 먼저), 같은 자산 안에서는 수수료가 싼 망부터. */
-  const cheapestFee = (row: WithdrawNetworkRow) =>
-    Math.min(...Object.values(row.options).map((option) => option.withdrawFee));
+  const cheapestFee = (row: WithdrawNetworkRow) => {
+    const fees = Object.values(row.options).map((option) => option.withdrawFee);
+    return fees.length === 0 ? Number.POSITIVE_INFINITY : Math.min(...fees);
+  };
 
   const networkOrder = (row: WithdrawNetworkRow) => {
     if (row.asset === "BTC") {

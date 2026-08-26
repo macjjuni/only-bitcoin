@@ -1,9 +1,10 @@
-import { buildNetworkKey, EXCHANGE_META, WITHDRAW_FEE_FALLBACK } from "../model/fallback";
-import type { ExchangeWithdrawOption, WithdrawAsset } from "../model/types";
+import { buildNetworkKey, EXCHANGE_META } from "../model/fallback";
+import type { ExchangeWithdrawOption } from "../model/types";
 import {
+  buildExchangeFallbackResult,
   type ExchangeFetchResult,
+  isWithdrawAsset,
   parseQuantity,
-  TARGET_ASSETS,
   WITHDRAW_REVALIDATE_SECONDS,
 } from "./shared";
 
@@ -31,10 +32,7 @@ interface KorbitCurrenciesResponse {
 /** 코빗이 문서화한 공개 가상자산 정보 엔드포인트. API 키나 서명이 필요 없다. */
 const KORBIT_CURRENCIES_URL = "https://api.korbit.co.kr/v2/currencies";
 
-const buildFallbackResult = (): ExchangeFetchResult => ({
-  meta: { ...EXCHANGE_META.korbit, source: "fallback" },
-  options: { ...WITHDRAW_FEE_FALLBACK.korbit },
-});
+const buildFallbackResult = () => buildExchangeFallbackResult("korbit");
 
 const parseWithdrawalAvailability = (withdrawalStatus: string): boolean | null => {
   if (withdrawalStatus === "launched") {
@@ -79,8 +77,8 @@ export async function fetchKorbitWithdrawInfo(): Promise<ExchangeFetchResult> {
     const options: Record<string, ExchangeWithdrawOption> = {};
 
     for (const currency of body.data) {
-      const asset = currency.name.toUpperCase() as WithdrawAsset;
-      if (!TARGET_ASSETS.includes(asset)) {
+      const asset = currency.name.toUpperCase();
+      if (!isWithdrawAsset(asset)) {
         continue;
       }
 
@@ -108,7 +106,7 @@ export async function fetchKorbitWithdrawInfo(): Promise<ExchangeFetchResult> {
     return {
       meta: { ...EXCHANGE_META.korbit, source: "live" },
       options,
-        };
+    };
   } catch (error) {
     console.warn("[korbit] 출금 정보 조회 중 예외:", error);
     return buildFallbackResult();

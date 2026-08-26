@@ -1,21 +1,11 @@
 "use client";
 
-import Image from "next/image";
 import { useMemo, useState } from "react";
-import type { ExchangeId, ExchangeMeta, WithdrawAsset } from "@/entities/exchange";
+import type { ExchangeMeta, WithdrawAsset } from "@/entities/exchange";
 import { Card, CardContent, SegmentedControl, type SegmentedControlOption } from "@/shared/ui";
-import { comma } from "@/shared/utils/string";
-import type { WithdrawCell, WithdrawComparisonRow } from "../lib/calculateWithdrawFee";
-
-const EXCHANGE_LOGO: Record<ExchangeId, string> = {
-  upbit: "/images/logo/upbit-logo.webp",
-  bithumb: "/images/logo/bithumb-icon.webp",
-  korbit: "/images/logo/korbit-icon.webp",
-  binance: "/images/logo/binance-icon.webp",
-  kraken: "/images/logo/kraken-icon.webp",
-};
-
-const ROUNDED_LOGO_EXCHANGES: Set<ExchangeId> = new Set(["bithumb", "binance", "kraken"]);
+import type { WithdrawComparisonRow } from "../lib/calculateWithdrawFee";
+import { ASSET_THEME } from "./exchangeFeeTheme";
+import { NetworkFeeCard } from "./NetworkFeeCard";
 
 interface ExchangeFeeTableProps {
   exchanges: ExchangeMeta[];
@@ -31,17 +21,6 @@ interface NetworkTabProps {
   onSelectNetwork: (networkName: string) => void;
 }
 
-interface ExchangeFeeRowProps {
-  asset: WithdrawAsset;
-  cell?: WithdrawCell;
-  exchange: ExchangeMeta;
-}
-
-interface NetworkFeeCardProps {
-  exchanges: ExchangeMeta[];
-  row: WithdrawComparisonRow;
-}
-
 const ASSET_OPTIONS: Array<SegmentedControlOption<WithdrawAsset>> = [
   { label: "BTC", value: "BTC", activeClassName: "bg-bitcoin text-white shadow-sm" },
   { label: "USDT", value: "USDT", activeClassName: "bg-tether text-white shadow-sm" },
@@ -54,48 +33,6 @@ const formatKst = (isoTimestamp: string) =>
     dateStyle: "medium",
     timeStyle: "short",
   });
-
-const formatQuantityNumber = (quantity: number) =>
-  quantity.toLocaleString("en-US", { maximumFractionDigits: 8 });
-
-const AssetQuantity = ({ quantity, asset }: { quantity: number; asset: WithdrawAsset }) => (
-  <>
-    {formatQuantityNumber(quantity)}{" "}
-    <span className="text-[10px] text-muted-foreground -ml-1.5">{asset}</span>
-  </>
-);
-
-/** 수수료 0은 값이 빠진 것처럼 보이지 않도록 `무료`로 표시한다. */
-const formatWithdrawFee = (cell: WithdrawCell, asset: WithdrawAsset) =>
-  cell.withdrawFeeInAsset === 0 ? (
-    "무료"
-  ) : (
-    <AssetQuantity quantity={cell.withdrawFeeInAsset} asset={asset} />
-  );
-
-const formatMinimumWithdraw = (cell: WithdrawCell, asset: WithdrawAsset) => {
-  if (cell.minimumWithdraw === null) {
-    return "정보 없음";
-  }
-
-  return <AssetQuantity quantity={cell.minimumWithdraw} asset={asset} />;
-};
-
-const ASSET_THEME = {
-  BTC: {
-    tab: "border-bitcoin bg-bitcoin/10 text-bitcoin",
-    badge: "bg-bitcoin/10 text-bitcoin",
-    fee: "text-bitcoin",
-  },
-  USDT: {
-    tab: "border-tether bg-tether/10 text-tether",
-    badge: "bg-tether/10 text-tether",
-    fee: "text-tether",
-  },
-} as const satisfies Record<WithdrawAsset, Record<string, string>>;
-
-const resolveWithdrawFeeClassName = (cell: WithdrawCell, asset: WithdrawAsset) =>
-  cell.withdrawFeeInAsset === 0 ? "text-up" : ASSET_THEME[asset].fee;
 // endregion
 
 // region [Templates]
@@ -118,141 +55,6 @@ function NetworkTab({ asset, isSelected, networkName, onSelectNetwork }: Network
     >
       {networkName}
     </button>
-  );
-}
-// endregion
-
-// region [Templates]
-function ExchangeFeeRow({ asset, cell, exchange }: ExchangeFeeRowProps) {
-  const isFallbackValue = exchange.source === "fallback";
-  const isWithdrawUnavailable = cell?.isWithdrawAvailable === false;
-
-  const exchangeId = exchange.id as ExchangeId;
-  const logoSrc = EXCHANGE_LOGO[exchangeId];
-  const logoClassName = ROUNDED_LOGO_EXCHANGES.has(exchangeId)
-    ? "shrink-0 rounded-full"
-    : "shrink-0";
-
-  if (!cell) {
-    return (
-      <div className="grid grid-cols-[5.5rem_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2 px-3 py-3 border-border">
-        <div className="flex items-center gap-1">
-          <Image
-            src={logoSrc}
-            alt={exchange.name}
-            width={18}
-            height={18}
-            className={logoClassName}
-          />
-          <strong className="text-base font-bold">{exchange.name}</strong>
-        </div>
-        <span className="col-span-2 text-right text-xs font-medium text-muted-foreground">
-          미지원
-        </span>
-      </div>
-    );
-  }
-
-  const withdrawFeeLabel = formatWithdrawFee(cell, asset);
-  const minimumWithdrawLabel = formatMinimumWithdraw(cell, asset);
-  const withdrawFeeClassName = resolveWithdrawFeeClassName(cell, asset);
-  // 수수료가 0 이거나 시세가 아직 안 붙은 경우는 원화 줄을 빌 것.
-  const withdrawFeeInKrwLabel =
-    cell.withdrawFeeInAsset === 0 || cell.withdrawFeeInKrw === null
-      ? null
-      : `≈ ${comma(Math.round(cell.withdrawFeeInKrw))}원`;
-  const minimumWithdrawInKrwLabel =
-    cell.minimumWithdrawInKrw === null
-      ? null
-      : `≈ ${comma(Math.round(cell.minimumWithdrawInKrw))}원`;
-
-  return (
-    <div className="grid grid-cols-[5.5rem_minmax(0,1fr)_minmax(0,1fr)] items-center gap-2 px-3 py-2 border-border">
-      <div className="flex min-w-0 flex-col items-start gap-0.5">
-        <div className="flex items-center gap-1.5">
-          <Image
-            src={logoSrc}
-            alt={exchange.name}
-            width={18}
-            height={18}
-            className={logoClassName}
-          />
-          <strong className="text-base font-bold">{exchange.name}</strong>
-        </div>
-        {isFallbackValue && (
-          <span className="rounded-full bg-muted px-1.5 py-0.5 text-[10px] font-bold text-muted-foreground">
-            Fallback Data
-          </span>
-        )}
-        {isWithdrawUnavailable && (
-          <span className="rounded-full bg-down/10 px-1.5 py-0.5 text-[10px] font-bold text-down">
-            출금 중단
-          </span>
-        )}
-      </div>
-
-      <div className="min-w-0 text-right">
-        <span className={`font-number block truncate text-base font-black ${withdrawFeeClassName}`}>
-          {withdrawFeeLabel}
-        </span>
-        {withdrawFeeInKrwLabel && (
-          <span className="font-number block text-[11px] text-muted-foreground">
-            {withdrawFeeInKrwLabel}
-          </span>
-        )}
-      </div>
-
-      <div className="min-w-0 text-right">
-        <span className="font-number block truncate text-base font-black text-foreground">
-          {minimumWithdrawLabel}
-        </span>
-        {minimumWithdrawInKrwLabel && (
-          <span className="font-number block text-[11px] text-muted-foreground">
-            {minimumWithdrawInKrwLabel}
-          </span>
-        )}
-      </div>
-    </div>
-  );
-}
-
-function NetworkFeeCard({ exchanges, row }: NetworkFeeCardProps) {
-  const supportedExchangeCount = Object.keys(row.cells).length;
-  const supportedExchangeLabel = `${supportedExchangeCount}/${exchanges.length} 지원`;
-
-  return (
-    <section className="overflow-hidden rounded-xl border border-border bg-background/60">
-      <header className="flex items-center justify-between gap-3 border-b border-border bg-muted/25 px-3 py-2.5">
-        <div className="flex min-w-0 items-center gap-2">
-          <span
-            className={`rounded-md px-2 py-1 text-xs font-black ${ASSET_THEME[row.asset].badge}`}
-          >
-            {row.asset}
-          </span>
-          <h3 className="truncate text-sm font-bold">{row.networkName}</h3>
-        </div>
-        <span className="shrink-0 text-xs font-medium text-muted-foreground">
-          {supportedExchangeLabel}
-        </span>
-      </header>
-
-      <div className="grid grid-cols-[5.5rem_minmax(0,1fr)_minmax(0,1fr)] gap-2 border-b border-border bg-muted/15 px-3 py-1 text-[10px] font-bold text-muted-foreground">
-        <span>거래소</span>
-        <span className="text-right">출금 수수료</span>
-        <span className="text-right">최소 출금</span>
-      </div>
-
-      <div className="divide-y">
-        {exchanges.map((exchange) => (
-          <ExchangeFeeRow
-            key={exchange.id}
-            asset={row.asset}
-            cell={row.cells[exchange.id]}
-            exchange={exchange}
-          />
-        ))}
-      </div>
-    </section>
   );
 }
 // endregion
