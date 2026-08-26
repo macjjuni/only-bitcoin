@@ -14,7 +14,6 @@ import { Copy, Download, X } from "lucide-react";
 import { memo, useCallback, useEffect, useRef, useState } from "react";
 import type { ApartmentYearPoint, LandmarkApartment } from "@/entities/apartment";
 import { useBitcoinStore } from "@/entities/bitcoin";
-import { useApartmentShareStore } from "../model/useApartmentShareStore";
 import {
   captureElementToPngBlob,
   captureElementToPngDataUrl,
@@ -30,6 +29,7 @@ import {
   registerCaptureBackground,
   registerCaptureOverlay,
 } from "@/shared/lib/imageExport";
+import { useApartmentShareStore } from "../model/useApartmentShareStore";
 import {
   APARTMENT_CARD_DESIGN_WIDTH,
   ApartmentShareCard,
