@@ -1,5 +1,4 @@
 User-agent: *
 Allow: /
-Disallow: /settings
 
 Sitemap: https://only-btc.app/sitemap.xml
