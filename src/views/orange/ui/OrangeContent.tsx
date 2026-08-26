@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { Building2, Ellipsis, HandCoins, TableProperties } from "lucide-react";
+import { Building2, HandCoins, TableProperties } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { allRouteList } from "@/shared/config/route";
@@ -34,10 +34,7 @@ const EXTERNAL_LINKS = {
 interface UtilityCard {
   title: string;
   icon: ReactNode;
-  /** 개발 중 항목은 진입 경로가 없어 핸들러를 두지 않음. */
-  onClick?: () => void;
-  /** 개발 중 표시. 버튼을 잠그고 깜빡이게 함. */
-  isPending?: boolean;
+  onClick: () => void;
 }
 // endregion
 
@@ -126,9 +123,9 @@ const OrangeContent = () => {
         onClick: onClickBtc2ApartmentUtility,
       },
       {
-        title: "출금 수수료",
-        icon: <HandCoins size={28} strokeWidth={1.8} />,
-        onClick: onClickWithdrawFeeUtility,
+        title: "DCA 계산기",
+        icon: <MinerIcon size={34} />,
+        onClick: onClickDcaUtility,
       },
       {
         title: "트레저리",
@@ -136,9 +133,9 @@ const OrangeContent = () => {
         onClick: onClickTreasuryUtility,
       },
       {
-        title: "DCA 계산기",
-        icon: <MinerIcon size={34} />,
-        onClick: onClickDcaUtility,
+        title: "출금 수수료",
+        icon: <HandCoins size={28} strokeWidth={1.8} />,
+        onClick: onClickWithdrawFeeUtility,
       },
       {
         title: "월별 등락률",
@@ -154,11 +151,6 @@ const OrangeContent = () => {
         title: "BIP39",
         icon: <TableProperties size={28} strokeWidth={1.8} />,
         onClick: onClickBIP39Utility,
-      },
-      {
-        title: "개발중",
-        icon: <Ellipsis size={26} strokeWidth={1.8} />,
-        isPending: true,
       },
     ],
     [
@@ -220,12 +212,7 @@ const OrangeContent = () => {
             <button
               key={utilityCard.title}
               type="button"
-              disabled={utilityCard.isPending}
-              className={`flex min-h-24 flex-col items-center justify-center gap-3 rounded-xl px-1 py-3 text-center transition-transform duration-200 ${
-                utilityCard.isPending
-                  ? "animate-pulse cursor-default motion-reduce:animate-none"
-                  : "active:scale-95"
-              }`}
+              className="flex min-h-24 flex-col items-center justify-center gap-3 rounded-xl px-1 py-3 text-center transition-transform duration-200 active:scale-95"
               onClick={utilityCard.onClick}
             >
               <span className="flex size-12 items-center justify-center rounded-full bg-orange-500/10 dark:bg-orange-400/15">
