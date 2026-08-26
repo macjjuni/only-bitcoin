@@ -31,7 +31,7 @@ export default function WithdrawFeeGuideArticle() {
           <p className="text-sm leading-relaxed text-muted-foreground">
             위 표를 보면 트론 USDT 출금은 무료이고 이더리움 USDT는 4 USDT입니다. 이더리움이
             비트코인보다 네트워크가 저렴해서가 아닙니다. 출금 수수료는 각 거래소가 정책으로 정하는
-            값이라 자산과 망에 따라 제각각입니다. 비트코인만 유독 실비 대비 배율이 큰 것도 그
+            값이라 자산과 네트워크에 따라 제각각입니다. 비트코인만 유독 실비 대비 배율이 큰 것도 그
             때문입니다. 다만 수수료가 싸다는 이유로 자산을 고르면, 내가 무엇을 들고 있는지가 아니라
             거래소의 가격 정책이 판단을 대신하게 됩니다.
           </p>

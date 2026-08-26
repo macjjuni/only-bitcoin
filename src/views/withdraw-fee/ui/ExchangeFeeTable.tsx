@@ -51,7 +51,9 @@ export default function ExchangeFeeTable({
           <table className="w-full min-w-[320px] border-collapse text-sm">
             <thead>
               <tr className="border-b border-border">
-                <th className="py-2 pr-2 text-left font-bold text-muted-foreground">자산 · 망</th>
+                <th className="py-2 pr-2 text-left font-bold text-muted-foreground">
+                  자산 · 네트워크
+                </th>
                 {exchanges.map((exchange) => (
                   <th key={exchange.id} className="py-2 pl-2 text-right font-bold">
                     {exchange.name}
@@ -121,8 +123,8 @@ export default function ExchangeFeeTable({
 
         <div className="flex flex-col gap-1 text-xs leading-relaxed text-muted-foreground">
           <span>
-            온체인 실비 배율은 BTC · Bitcoin 행에만 표시합니다. 다른 망은 비교 기준이 달라 같이 놓을
-            수 없습니다.
+            온체인 실비 배율은 BTC · Bitcoin 행에만 표시합니다. 다른 네트워크는 비교 기준이 달라
+            같이 놓을 수 없습니다.
           </span>
           <span>조회 시각 · {formatKst(fetchedAt)}</span>
           {hasAnyFallback && (
