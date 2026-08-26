@@ -28,7 +28,11 @@ export default function WidgetItem({
   onRemove,
 }: WidgetItemProps) {
   // region [Hooks]
-  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({ id });
+  // `roleDescription` 기본값이 영어 "sortable" 이라 한국어로 바꿈.
+  const { attributes, listeners, setNodeRef, transform, transition } = useSortable({
+    id,
+    attributes: { roleDescription: "순서를 바꿀 수 있는 위젯" },
+  });
 
   const style = useMemo(
     () => ({
@@ -82,6 +86,8 @@ export default function WidgetItem({
         {isEditMode && (
           <button
             type="button"
+            // 안에 아이콘뿐이라 이름이 없음. 없으면 스크린 리더가 "버튼" 이라고만 읽음.
+            aria-label={`${label} 위젯 삭제`}
             className="absolute -top-2 -right-[3px] flex justify-center items-center w-6 h-6 rounded-full bg-red-500"
             onClick={onClickRemove}
             onPointerDown={(e) => e.stopPropagation()}

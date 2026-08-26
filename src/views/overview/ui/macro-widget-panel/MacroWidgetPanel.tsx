@@ -1,11 +1,14 @@
 "use client";
 
 import {
+  type Announcements,
   closestCenter,
   DndContext,
   type DragEndEvent,
   PointerSensor,
+  type ScreenReaderInstructions,
   TouchSensor,
+  type UniqueIdentifier,
   useSensor,
   useSensors,
 } from "@dnd-kit/core";
@@ -40,6 +43,15 @@ interface MacroWidgetPanelTypes {
   /** SSR 로 미리 조회한 블록 데이터. Mined % / Fee 위젯에 필요하다. */
   initialBlockData: InitialBlocks;
 }
+
+/**
+ * dnd-kit 기본 안내문은 영어라 `lang="ko"` 인 이 사이트에선 스크린 리더가 그대로 영어로 읽음.
+ * 한국어로 갈아끼움. 렌더마다 새로 만들 이유가 없어 모듈 상수로 둠.
+ */
+const DND_SCREEN_READER_INSTRUCTIONS: ScreenReaderInstructions = {
+  draggable:
+    "스페이스바를 누르면 위젯을 집습니다. 집은 뒤 방향키로 자리를 옮기고, 스페이스바를 다시 누르면 놓습니다. ESC 를 누르면 취소합니다.",
+};
 
 export default function MacroWidgetPanel({
   initialMacro,
@@ -142,6 +154,34 @@ export default function MacroWidgetPanel({
     .filter(Boolean) as MacroVO[];
 
   const unselectedItems = macroDataList.filter((i) => !macroSequence.includes(i.id));
+
+  /** 스크린 리더가 숫자 id 대신 위젯 이름을 읽게 하려고 씀. */
+  const findWidgetLabel = (id: UniqueIdentifier) =>
+    macroDataList.find((item) => item.id === Number(id))?.label ?? "알 수 없는";
+
+  /** 몇 번째 자리인지. 1-based 로 읽어 줌. */
+  const findWidgetPosition = (id: UniqueIdentifier) => macroSequence.indexOf(Number(id)) + 1;
+
+  /**
+   * 드래그 진행 상황 안내.
+   *
+   * `onDragEnd` 시점의 `macroSequence` 는 아직 재정렬 전이지만, `arrayMove` 가 집은 위젯을
+   * `over` 자리로 보내므로 재정렬 전 배열에서 구한 `over` 위치가 곧 최종 위치가 됨.
+   */
+  const dndAnnouncements: Announcements = {
+    onDragStart: ({ active }) =>
+      `${findWidgetLabel(active.id)} 위젯을 집었습니다. ${macroSequence.length}개 중 ${findWidgetPosition(active.id)}번째입니다.`,
+    onDragOver: ({ active, over }) =>
+      over
+        ? `${findWidgetLabel(active.id)} 위젯이 ${findWidgetPosition(over.id)}번째 자리 위에 있습니다.`
+        : `${findWidgetLabel(active.id)} 위젯이 놓을 수 없는 곳에 있습니다.`,
+    onDragEnd: ({ active, over }) =>
+      over
+        ? `${findWidgetLabel(active.id)} 위젯을 ${findWidgetPosition(over.id)}번째 자리에 놓았습니다.`
+        : `${findWidgetLabel(active.id)} 위젯을 제자리에 두었습니다.`,
+    onDragCancel: ({ active }) =>
+      `이동을 취소했습니다. ${findWidgetLabel(active.id)} 위젯이 제자리로 돌아갔습니다.`,
+  };
   // endregion
 
   // region [Events]
@@ -219,6 +259,10 @@ export default function MacroWidgetPanel({
           onDragStart={onDragStart}
           onDragEnd={onDragEnd}
           collisionDetection={closestCenter}
+          accessibility={{
+            screenReaderInstructions: DND_SCREEN_READER_INSTRUCTIONS,
+            announcements: dndAnnouncements,
+          }}
         >
           <SortableContext items={macroSequence} strategy={horizontalListSortingStrategy}>
             <div className={`grid grid-cols-4 gap-3 ${isEditMode ? "cursor-pointer mt-3" : ""}`}>
