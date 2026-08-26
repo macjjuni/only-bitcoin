@@ -27,6 +27,7 @@ const LIVE_ROUTES = [
   "/btc2fiat",
   "/premium",
   "/treasury",
+  "/withdraw-fee",
 ] as const;
 
 /** 코드를 고쳐야 내용이 바뀌는 도구·읽을거리 페이지. */

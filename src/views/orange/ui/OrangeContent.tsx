@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { Building2, Ellipsis, TableProperties } from "lucide-react";
+import { Building2, Ellipsis, HandCoins, TableProperties } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { allRouteList } from "@/shared/config/route";
@@ -79,6 +79,10 @@ const OrangeContent = () => {
     navigateToUtility("/cagr", "월별 등락률");
   }, [navigateToUtility]);
 
+  const onClickWithdrawFeeUtility = useCallback(() => {
+    navigateToUtility("/withdraw-fee", "거래소 출금 수수료");
+  }, [navigateToUtility]);
+
   const onClickTreasuryUtility = useCallback(() => {
     navigateToUtility("/treasury", "기업 비트코인 트레저리");
   }, [navigateToUtility]);
@@ -122,6 +126,11 @@ const OrangeContent = () => {
         onClick: onClickBtc2ApartmentUtility,
       },
       {
+        title: "출금 수수료",
+        icon: <HandCoins size={28} strokeWidth={1.8} />,
+        onClick: onClickWithdrawFeeUtility,
+      },
+      {
         title: "트레저리",
         icon: <Building2 size={28} strokeWidth={1.8} />,
         onClick: onClickTreasuryUtility,
@@ -158,6 +167,7 @@ const OrangeContent = () => {
       onClickCagrUtility,
       onClickDcaUtility,
       onClickHalvingCountdownUtility,
+      onClickWithdrawFeeUtility,
       onClickMemeUtility,
       onClickTreasuryUtility,
     ],
