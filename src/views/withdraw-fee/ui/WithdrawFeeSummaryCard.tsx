@@ -27,12 +27,8 @@ export default function WithdrawFeeSummaryCard({
   subjectLabel,
 }: WithdrawFeeSummaryCardProps) {
   return (
-    <section className="-mx-2 -mt-2.5 select-none">
-      <div className="flex flex-col px-5 pb-5 pt-4">
-        <span className="mb-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-bitcoin">
-          Withdraw Fee
-        </span>
-
+    <section className="-mx-2 select-none">
+      <div className="flex flex-col px-5 pb-5 pt-1">
         <strong className="font-number mb-1.5 block text-[clamp(2rem,10vw,3.25rem)] font-black leading-none tracking-tight">
           {comma(Math.round(worst.exchangeFeeInKrw))}
           <span className="ml-2 text-[24px] font-black text-bitcoin">원</span>

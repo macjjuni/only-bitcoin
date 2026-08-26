@@ -16,6 +16,8 @@ import {
 } from "@/views/withdraw-fee";
 
 const PAGE_TITLE = "거래소 비트코인 출금 수수료";
+/** 화면에 보이는 제목. 메타 타이틀은 검색어를 더 담아야 해서 따로 둠. */
+const HEADING = "거래소별 출금 수수료";
 const PAGE_DESCRIPTION =
   "업비트·빗썸의 비트코인 출금 수수료를 실시간 온체인 수수료와 비교해 보세요. 거래소가 실제 네트워크 비용의 몇 배를 받는지 확인할 수 있습니다.";
 
@@ -48,7 +50,11 @@ export default async function WithdrawFeePage() {
   return (
     <PageLayout className="gap-2.5">
       <JsonLd schema={createFaqSchema(WITHDRAW_FEE_FAQ)} />
-      <PageTitle srOnly label="Withdraw Fee" title={PAGE_TITLE} />
+      <PageTitle
+        label="Withdraw Fee"
+        title={HEADING}
+        description="국내 거래소가 실제 네트워크 비용의 몇 배를 받는지 확인해 보세요."
+      />
       {worst && (
         <WithdrawFeeSummaryCard onChain={onChain} worst={worst} subjectLabel={subjectLabel} />
       )}
