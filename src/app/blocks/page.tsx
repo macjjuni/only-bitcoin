@@ -26,11 +26,8 @@ export default async function BlocksPage() {
   return (
     <PageLayout className="block-page__area gap-2.5">
       <JsonLd schema={createFaqSchema(BLOCKS_FAQ)} />
-      <PageTitle
-        label="Blocks"
-        title="비트코인 블록과 트랜잭션 수수료"
-        description="최신 블록 생성 현황과 실시간 수수료를 확인하세요."
-      />
+      {/* 블록 시각화가 곧 화면이라 제목 UI 를 두지 않음. 제목 신호만 심음. */}
+      <PageTitle srOnly label="Blocks" title="비트코인 블록과 트랜잭션 수수료" />
       <BlocksVisualizer initialBlocks={blocks} />
       <RealtimeTxFees initialFees={fees} initialMempoolInfo={mempoolInfo} />
       <BlocksExplorer />

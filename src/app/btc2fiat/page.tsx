@@ -20,11 +20,8 @@ export default function Btc2FiatPage() {
           path: "/btc2fiat",
         })}
       />
-      <PageTitle
-        label="Calculator"
-        title="비트코인 계산기"
-        description="실시간 시세를 반영해 비트코인, 원화, 달러, 사토시를 서로 환산해 보세요."
-      />
+      {/* 시세 티커와 입력폼이 곧 화면이라 제목 UI 를 두지 않음. 제목 신호만 심음. */}
+      <PageTitle srOnly label="Calculator" title="비트코인 계산기" />
       <PriceTicker />
       <ConvertPanel />
     </PageLayout>
