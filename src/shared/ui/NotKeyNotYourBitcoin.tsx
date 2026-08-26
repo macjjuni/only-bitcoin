@@ -3,13 +3,13 @@
 import { memo, useEffect, useState } from "react";
 
 const bitcoinWiseSayingList = [
-  "Not your keys, not your ₿itcoin.",
+  "Not your keys, not your Bitcoin.",
   "Stay humble and stack sats.",
   "HODL.",
   "Be your own bank.",
   "1BTC = 1BTC",
   "Don't Trust, Verify",
-  "You need ₿itcoin.",
+  "You need Bitcoin.",
 ] as const;
 
 const FADE_OUT_TIME = 500 as const;

@@ -1,11 +1,11 @@
 {
-  "short_name": "Only ₿itcoin",
-  "name": "Only ₿itcoin",
+  "short_name": "Only Bitcoin",
+  "name": "Only Bitcoin",
   "start_url": "/",
   "theme_color": "#000000",
   "background_color": "#000000",
   "display": "standalone",
-  "description": "Only ₿itcoin",
+  "description": "Only Bitcoin",
   "lang": "ko-KR",
   "orientation": "portrait-primary",
   "icons": [

@@ -1,4 +1,4 @@
-# Only ₿itcoin Market Price(PWA) - [🔗 Link](https://only-btc.app)
+# Only Bitcoin Market Price(PWA) - [🔗 Link](https://only-btc.app)
 
 <br>
 <div align="center">
