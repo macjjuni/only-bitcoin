@@ -1,4 +1,4 @@
-export type ExchangeId = "upbit" | "bithumb";
+export type ExchangeId = "upbit" | "bithumb" | "korbit" | "binance" | "kraken";
 
 /**
  * 비교 대상 자산.
@@ -29,7 +29,7 @@ export interface ExchangeWithdrawOption {
 /** 표의 한 행. 자산 + 망 조합 하나에 거래소별 조건이 달림. */
 export interface WithdrawNetworkRow {
   asset: WithdrawAsset;
-  /** 두 거래소가 같은 표기를 쓰므로 그대로 조인 키로 씀. ( Bitcoin / Tron / Ethereum ... ) */
+  /** 거래소들이 같은 표기를 쓰므로 그대로 조인 키로 씀. ( Bitcoin / Tron / Ethereum ... ) */
   networkName: string;
   /** 해당 거래소가 그 망을 지원하지 않으면 키가 없음. */
   options: Partial<Record<ExchangeId, ExchangeWithdrawOption>>;

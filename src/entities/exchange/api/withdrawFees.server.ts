@@ -5,7 +5,10 @@ import type {
   WithdrawAsset,
   WithdrawNetworkRow,
 } from "../model/types";
+import { fetchBinanceWithdrawInfo } from "./binanceWithdraw.server";
 import { fetchBithumbWithdrawInfo } from "./bithumbWithdraw.server";
+import { fetchKorbitWithdrawInfo } from "./korbitWithdraw.server";
+import { fetchKrakenWithdrawInfo } from "./krakenWithdraw.server";
 import { type ExchangeFetchResult, TARGET_ASSETS } from "./shared";
 import { fetchUpbitWithdrawInfo } from "./upbitWithdraw.server";
 
@@ -49,9 +52,21 @@ const buildRows = (results: ExchangeFetchResult[]): WithdrawNetworkRow[] => {
   const cheapestFee = (row: WithdrawNetworkRow) =>
     Math.min(...Object.values(row.options).map((option) => option.withdrawFee));
 
+  const networkOrder = (row: WithdrawNetworkRow) => {
+    if (row.asset === "BTC") {
+      if (row.networkName === "Bitcoin") return 0;
+      if (row.networkName === "Lightning") return 1;
+    }
+
+    return 10;
+  };
+
   return rows.sort((a, b) => {
     const assetOrder = TARGET_ASSETS.indexOf(a.asset) - TARGET_ASSETS.indexOf(b.asset);
     if (assetOrder !== 0) return assetOrder;
+
+    const networkOrderDifference = networkOrder(a) - networkOrder(b);
+    if (networkOrderDifference !== 0) return networkOrderDifference;
 
     return cheapestFee(a) - cheapestFee(b);
   });
@@ -61,10 +76,16 @@ const buildRows = (results: ExchangeFetchResult[]): WithdrawNetworkRow[] => {
  * 거래소별 출금 조건을 모아 표 형태로 돌려줌.
  *
  * 각 페처가 실패를 폴백으로 흡수하므로 여기서는 예외가 안 남.
- * 캐시 주기는 거래소마다 다름. ( 빗썸 10분 / 업비트 24시간 — 각 모듈 주석 참고 )
+ * 캐시 주기는 다섯 거래소 모두 `WITHDRAW_REVALIDATE_SECONDS`( 12시간 )로 같음.
  */
 export async function fetchExchangeWithdrawSnapshot(): Promise<ExchangeWithdrawSnapshot> {
-  const results = await Promise.all([fetchUpbitWithdrawInfo(), fetchBithumbWithdrawInfo()]);
+  const results = await Promise.all([
+    fetchUpbitWithdrawInfo(),
+    fetchBithumbWithdrawInfo(),
+    fetchKorbitWithdrawInfo(),
+    fetchBinanceWithdrawInfo(),
+    fetchKrakenWithdrawInfo(),
+  ]);
 
   // 빗썸 응답이 코인별 KRW 시세를 같이 줌. 못 구하면 스테이블코인이라 폴백 값으로 대략 환산.
   const usdtKrwPrice =

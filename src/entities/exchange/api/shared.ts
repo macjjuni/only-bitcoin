@@ -8,9 +8,18 @@ import type { ExchangeMeta, ExchangeWithdrawOption, WithdrawAsset } from "../mod
  */
 export const TARGET_ASSETS: readonly WithdrawAsset[] = ["BTC", "USDT"];
 
+/**
+ * 모든 거래소 공통 캐시 주기(초). 12시간.
+ *
+ * 거래소별로 주기를 달리 두면 표의 각 행이 서로 다른 시점의 값이 됨. 비교가 목적인 화면이라
+ * 한 시점으로 맞추는 게 중요해서 `/withdraw-fee` 재검증 주기와 같은 값으로 통일함.
+ * 업비트는 `robots.txt` 가 `Disallow: /` 이므로 이보다 짧게 줄이지 말 것.
+ */
+export const WITHDRAW_REVALIDATE_SECONDS = 60 * 60 * 12;
+
 export interface ExchangeFetchResult {
   meta: ExchangeMeta;
-  /** `자산:망` 키. 두 거래소가 같은 망 표기를 써서 그대로 조인됨. */
+  /** `자산:망` 키. 거래소들이 같은 망 표기를 써서 그대로 조인됨. */
   options: Record<string, ExchangeWithdrawOption>;
   /** 이 거래소가 USDT 원화 시세를 같이 주면 담음. 없으면 null. */
   usdtKrwPrice: number | null;

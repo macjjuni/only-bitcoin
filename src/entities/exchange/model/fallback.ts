@@ -21,9 +21,26 @@ export const EXCHANGE_META: Record<ExchangeId, Omit<ExchangeMeta, "source">> = {
     name: "빗썸",
     referenceUrl: "https://www.bithumb.com/react/info/fee",
   },
+  korbit: {
+    id: "korbit",
+    name: "코빗",
+    referenceUrl:
+      "https://www.korbit.co.kr/faq/list/?category=nwYLcgEpuQIHk0chKI0PV&article=5SrSC3yggkWhcSL0O1KSz4",
+  },
+  binance: {
+    id: "binance",
+    name: "바이낸스",
+    referenceUrl: "https://www.binance.com/en/fee/cryptoFee",
+  },
+  kraken: {
+    id: "kraken",
+    name: "크라켄",
+    referenceUrl:
+      "https://support.kraken.com/articles/360000767986-cryptocurrency-withdrawal-fees-and-minimums",
+  },
 };
 
-/** 조회 실패 시 쓰는 값의 키. `자산:망` 형태로 두 거래소 응답을 조인함. */
+/** 조회 실패 시 쓰는 값의 키. `자산:망` 형태로 거래소 응답을 조인함. */
 export const buildNetworkKey = (asset: WithdrawAsset, networkName: string) =>
   `${asset}:${networkName}`;
 
@@ -95,6 +112,90 @@ export const WITHDRAW_FEE_FALLBACK: Record<ExchangeId, Record<string, ExchangeWi
     "USDT:Aptos": {
       withdrawFee: 0.1,
       minimumWithdraw: 0.1,
+      isWithdrawAvailable: null,
+      suspensionMessage: null,
+    },
+  },
+  korbit: {
+    "BTC:Bitcoin": {
+      withdrawFee: 0.0008,
+      minimumWithdraw: 0.0001,
+      isWithdrawAvailable: null,
+      suspensionMessage: null,
+    },
+    "USDT:Tron": {
+      withdrawFee: 1,
+      minimumWithdraw: 1,
+      isWithdrawAvailable: null,
+      suspensionMessage: null,
+    },
+    "USDT:Ethereum": {
+      withdrawFee: 1,
+      minimumWithdraw: 0.1,
+      isWithdrawAvailable: null,
+      suspensionMessage: null,
+    },
+  },
+  binance: {
+    "BTC:Bitcoin": {
+      withdrawFee: 0.00002,
+      minimumWithdraw: 0.0001,
+      isWithdrawAvailable: null,
+      suspensionMessage: null,
+    },
+    "BTC:Lightning": {
+      withdrawFee: 0.000001,
+      minimumWithdraw: 0.00002,
+      isWithdrawAvailable: null,
+      suspensionMessage: null,
+    },
+    "USDT:Tron": {
+      withdrawFee: 1.5,
+      minimumWithdraw: 5,
+      isWithdrawAvailable: null,
+      suspensionMessage: null,
+    },
+    "USDT:Ethereum": {
+      withdrawFee: 0.3,
+      minimumWithdraw: 5,
+      isWithdrawAvailable: null,
+      suspensionMessage: null,
+    },
+    "USDT:Kaia": {
+      withdrawFee: 0.02,
+      minimumWithdraw: 5,
+      isWithdrawAvailable: null,
+      suspensionMessage: null,
+    },
+    "USDT:Aptos": {
+      withdrawFee: 0.1,
+      minimumWithdraw: 5,
+      isWithdrawAvailable: null,
+      suspensionMessage: null,
+    },
+  },
+  kraken: {
+    "BTC:Bitcoin": {
+      withdrawFee: 0.000015,
+      minimumWithdraw: 0.000218,
+      isWithdrawAvailable: null,
+      suspensionMessage: null,
+    },
+    "BTC:Lightning": {
+      withdrawFee: 0,
+      minimumWithdraw: 0.00001,
+      isWithdrawAvailable: null,
+      suspensionMessage: null,
+    },
+    "USDT:Tron": {
+      withdrawFee: 1,
+      minimumWithdraw: 6,
+      isWithdrawAvailable: null,
+      suspensionMessage: null,
+    },
+    "USDT:Ethereum": {
+      withdrawFee: 0.6286,
+      minimumWithdraw: 0.75432,
       isWithdrawAvailable: null,
       suspensionMessage: null,
     },
