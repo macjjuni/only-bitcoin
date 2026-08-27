@@ -1,7 +1,7 @@
 import type { ExchangeMeta } from "@/entities/exchange";
 import type { WithdrawComparisonRow } from "../lib/calculateWithdrawFee";
-import { ExchangeFeeRow } from "./ExchangeFeeRow";
 import { ASSET_THEME } from "../model/exchangeFeeTheme";
+import { ExchangeFeeRow } from "./ExchangeFeeRow";
 
 interface NetworkFeeCardProps {
   exchanges: ExchangeMeta[];

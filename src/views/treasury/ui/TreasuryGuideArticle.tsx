@@ -5,7 +5,7 @@ export default function TreasuryGuideArticle() {
   return (
     <Card className="w-full">
       <CardContent className="flex flex-col gap-4 p-4">
-        <h2 className="text-md font-bold">상장기업 비트코인 트레저리란?</h2>
+        <h2 className="text-base font-bold">상장기업 비트코인 트레저리란?</h2>
 
         <section className="flex flex-col gap-1.5">
           <h3 className="text-sm font-bold">현금 대신 비트코인을 재무제표에 담는 전략</h3>

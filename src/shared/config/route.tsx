@@ -104,6 +104,13 @@ const clientRoutes: ClientRoute[] = [
     icon: null,
   },
   {
+    title: "Bitcoin ETF",
+    path: "/etf",
+    isNav: false,
+    isFavorite: false,
+    icon: null,
+  },
+  {
     title: "출금 수수료",
     path: "/withdraw-fee",
     isNav: false,

@@ -67,7 +67,7 @@ export default function NetworkDifficultyCard(props: NetworkDifficultyCardProps)
               placeholder="140000000000000"
               value={manualDifficultyInput}
               onChange={onChangeManualDifficultyInput}
-              className="font-number text-md font-bold text-right h-full"
+              className="font-number text-base font-bold text-right h-full"
             />
           </InputGroup>
         ) : (

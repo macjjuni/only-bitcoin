@@ -1,18 +1,9 @@
 import Image from "next/image";
-import type { ExchangeId, ExchangeMeta, WithdrawAsset } from "@/entities/exchange";
+import type { ExchangeMeta, WithdrawAsset } from "@/entities/exchange";
 import { comma } from "@/shared/utils/string";
 import type { WithdrawCell } from "../lib/calculateWithdrawFee";
 import { ASSET_THEME } from "../model/exchangeFeeTheme";
-
-const EXCHANGE_LOGO: Record<ExchangeId, string> = {
-  upbit: "/images/logo/upbit-logo.webp",
-  bithumb: "/images/logo/bithumb-icon.webp",
-  korbit: "/images/logo/korbit-icon.webp",
-  binance: "/images/logo/binance-icon.webp",
-  kraken: "/images/logo/kraken-icon.webp",
-};
-
-const ROUNDED_LOGO_EXCHANGES: Set<ExchangeId> = new Set(["bithumb", "binance", "kraken"]);
+import { EXCHANGE_LOGO, resolveLogoClassName } from "../model/exchangeLogo";
 
 interface ExchangeFeeRowProps {
   asset: WithdrawAsset;
@@ -56,11 +47,8 @@ export function ExchangeFeeRow({ asset, cell, exchange }: ExchangeFeeRowProps) {
   const isFallbackValue = exchange.source === "fallback";
   const isWithdrawUnavailable = cell?.isWithdrawAvailable === false;
 
-  const exchangeId = exchange.id;
-  const logoSrc = EXCHANGE_LOGO[exchangeId];
-  const logoClassName = ROUNDED_LOGO_EXCHANGES.has(exchangeId)
-    ? "shrink-0 rounded-full"
-    : "shrink-0";
+  const logoSrc = EXCHANGE_LOGO[exchange.id];
+  const logoClassName = resolveLogoClassName(exchange.id);
 
   const exchangeLabel = (
     <div className="flex min-w-0 flex-col items-start gap-0.5">
