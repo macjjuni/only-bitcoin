@@ -31,7 +31,7 @@ export default async function TreasuryPage() {
 
   if (hasFetchFailed) {
     return (
-      <PageLayout className="gap-2.5">
+      <PageLayout className="gap-2.5 font-pretendard">
         <TreasuryFetchFailedCard />
         <TreasuryGuideArticle />
       </PageLayout>
@@ -39,7 +39,7 @@ export default async function TreasuryPage() {
   }
 
   return (
-    <PageLayout className="gap-2.5">
+    <PageLayout className="gap-2.5 font-pretendard">
       <JsonLd schema={createFaqSchema(TREASURY_FAQ)} />
       <TreasurySummaryCard summary={summary} fetchedAt={fetchedAt} />
       <TreasuryCompanyListCard companies={companies} />

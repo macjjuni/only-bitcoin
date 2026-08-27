@@ -159,7 +159,7 @@ const HalvingCountdown = ({ initialBlockHeight }: HalvingCountdownProps) => {
   // endregion
 
   return (
-    <section className="relative z-[2] flex flex-auto flex-col">
+    <section className="relative z-[2] flex flex-auto flex-col font-pretendard">
       <div className="flex flex-auto flex-col items-center justify-center gap-7">
         <header className="flex flex-col items-center gap-1.5 text-center">
           <span
