@@ -9,6 +9,7 @@ import {
   BuildingIcon,
   CalendarIcon,
   DiscordIcon,
+  EagleIcon,
   HalfCircleIcon,
   MinerIcon,
   NaverIcon,
@@ -84,6 +85,10 @@ const OrangeContent = () => {
     navigateToUtility("/treasury", "기업 비트코인 트레저리");
   }, [navigateToUtility]);
 
+  const onClickEtfUtility = useCallback(() => {
+    navigateToUtility("/etf", "비트코인 현물 ETF 자금 흐름");
+  }, [navigateToUtility]);
+
   const onClickHalvingCountdownUtility = useCallback(() => {
     navigateToUtility("/countdown", "반감기 카운트다운");
   }, [navigateToUtility]);
@@ -133,6 +138,11 @@ const OrangeContent = () => {
         onClick: onClickTreasuryUtility,
       },
       {
+        title: "ETF 자금 흐름",
+        icon: <EagleIcon size={28} className={ICON_CLASS} />,
+        onClick: onClickEtfUtility,
+      },
+      {
         title: "출금 수수료",
         icon: <HandCoins size={28} strokeWidth={1.8} />,
         onClick: onClickWithdrawFeeUtility,
@@ -158,6 +168,7 @@ const OrangeContent = () => {
       onClickBtc2ApartmentUtility,
       onClickCagrUtility,
       onClickDcaUtility,
+      onClickEtfUtility,
       onClickHalvingCountdownUtility,
       onClickWithdrawFeeUtility,
       onClickMemeUtility,

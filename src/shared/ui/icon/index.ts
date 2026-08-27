@@ -8,6 +8,7 @@ export { default as CurrencyIcon } from "./CurrencyIcon";
 // Navigation Icon
 export { default as DashboardIcon } from "./DashboardIcon";
 export { default as DiscordIcon } from "./DiscordIcon";
+export { default as EagleIcon } from "./EagleIcon";
 export { default as EditIcon } from "./EditIcon";
 export { default as ExchangeIcon } from "./ExchangeIcon";
 export { default as HalfCircleIcon } from "./HalfCircleIcon";
