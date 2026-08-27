@@ -26,6 +26,18 @@ const MinerIcon = ({ size = "100%", style, className }: IconTypes) => {
           d="M479.4 425.3c-87.6 0-158.9-71.3-158.9-158.9s71.3-158.9 158.9-158.9 158.9 71.3 158.9 158.9-71.2 158.9-158.9 158.9z m0-260.1c-55.8 0-101.1 45.4-101.1 101.1s45.4 101.1 101.1 101.1S580.5 322 580.5 266.3s-45.3-101.1-101.1-101.1z"
           fill="#2F2F33"
         />
+        <text
+          x="479.4"
+          y="330"
+          fill="#FFFFFF"
+          fontFamily="Arial, sans-serif"
+          fontSize="184"
+          fontWeight="700"
+          textAnchor="middle"
+          transform="rotate(14 479.4 266.3)"
+        >
+          ₿
+        </text>
         <path
           d="M667.3 497.5m-43.3 0a43.3 43.3 0 1 0 86.6 0 43.3 43.3 0 1 0-86.6 0Z"
           fill="#2F2F33"

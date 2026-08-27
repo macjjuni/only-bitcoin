@@ -85,6 +85,10 @@ const OrangeContent = () => {
     navigateToUtility("/treasury", "기업 비트코인 트레저리");
   }, [navigateToUtility]);
 
+  const onClickEtfUtility = useCallback(() => {
+    navigateToUtility("/etf", "ETF 자금 흐름");
+  }, [navigateToUtility]);
+
   const onClickHalvingCountdownUtility = useCallback(() => {
     navigateToUtility("/countdown", "반감기 카운트다운");
   }, [navigateToUtility]);
