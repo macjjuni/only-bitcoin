@@ -12,7 +12,8 @@
     "check:cycles": "node scripts/check-cycles.mjs",
     "build:apartment-archive": "node --env-file-if-exists=.env.local --experimental-strip-types --import ./scripts/ts-loader.mjs --no-warnings scripts/build-apartment-archive.ts",
     "build:btc-monthly-usd-archive": "node --env-file-if-exists=.env.local --experimental-strip-types --import ./scripts/ts-loader.mjs --no-warnings scripts/build-btc-monthly-usd-archive.ts",
-    "archive:ensure": "pnpm build:apartment-archive --if-stale && pnpm build:btc-monthly-usd-archive --if-stale",
+    "build:bitcoin-etf-flow-archive": "node --env-file-if-exists=.env.local --experimental-strip-types --import ./scripts/ts-loader.mjs --no-warnings scripts/build-bitcoin-etf-flow-archive.ts",
+    "archive:ensure": "pnpm build:apartment-archive --if-stale && pnpm build:btc-monthly-usd-archive --if-stale && pnpm build:bitcoin-etf-flow-archive --if-stale",
     "test": "vitest run",
     "screenshot": "playwright install chromium && node scripts/screenshot.mjs"
   },
