@@ -1,3 +1,4 @@
+import { fetchInitialMacro } from "@/entities/bitcoin/server";
 import { fetchBitcoinEtfSnapshot } from "@/entities/etf/server";
 import { createWebApplicationSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
@@ -24,7 +25,10 @@ export const metadata = createPageMetadata({
 export const revalidate = 3600;
 
 export default async function EtfPage() {
-  const snapshot = await fetchBitcoinEtfSnapshot();
+  const [snapshot, initialMacro] = await Promise.all([
+    fetchBitcoinEtfSnapshot(),
+    fetchInitialMacro(),
+  ]);
 
   if (snapshot.hasFetchFailed) {
     return (
@@ -44,7 +48,12 @@ export default async function EtfPage() {
           path: "/etf",
         })}
       />
-      <EtfSummaryHero summary={snapshot.summary} dailyFlows={snapshot.dailyFlows} />
+      <EtfSummaryHero
+        summary={snapshot.summary}
+        dailyFlows={snapshot.dailyFlows}
+        sourceUpdatedAt={snapshot.sourceUpdatedAt}
+        usdExRate={initialMacro.usdExRate}
+      />
       <EtfFlowChart dailyFlows={snapshot.dailyFlows} />
       <EtfFundListCard funds={snapshot.funds} />
       <EtfGuideArticle />

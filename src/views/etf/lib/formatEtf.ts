@@ -31,6 +31,24 @@ export const formatSignedEtfFlowInUsd = (valueInUsd: number): string => {
   return `${signPrefix}${formatAbsoluteUsdCompact(Math.abs(valueInUsd))}`;
 };
 
+/** USD 흐름을 원화 한국식 단위로 변환해 방향과 함께 표시한다. */
+export const formatSignedEtfFlowInKrw = (valueInUsd: number, usdExRate: number): string => {
+  if (!Number.isFinite(valueInUsd) || !Number.isFinite(usdExRate) || usdExRate <= 0) {
+    return "-";
+  }
+
+  const valueInKrw = Math.abs(valueInUsd * usdExRate);
+  const signPrefix = valueInUsd > 0 ? "+" : valueInUsd < 0 ? "−" : "";
+  const formattedValue =
+    valueInKrw >= 1e12
+      ? `${(valueInKrw / 1e12).toFixed(1)}조 원`
+      : valueInKrw >= 1e8
+        ? `${(valueInKrw / 1e8).toFixed(1)}억 원`
+        : `${Math.round(valueInKrw).toLocaleString(KOREAN_LOCALE)}원`;
+
+  return `${signPrefix}${formattedValue}`;
+};
+
 /** AUM처럼 방향이 없는 달러 금액을 축약 표기로 바꾼다. */
 export const formatEtfAumInUsd = (valueInUsd: number | null): string => {
   if (valueInUsd === null || !Number.isFinite(valueInUsd) || valueInUsd <= 0) {
@@ -38,6 +56,28 @@ export const formatEtfAumInUsd = (valueInUsd: number | null): string => {
   }
 
   return formatAbsoluteUsdCompact(valueInUsd);
+};
+
+/** USD 운용자산을 원화 환율로 환산해 한국식 단위로 표시한다. */
+export const formatEtfAumInKrw = (valueInUsd: number | null, usdExRate: number): string => {
+  if (
+    valueInUsd === null ||
+    !Number.isFinite(valueInUsd) ||
+    valueInUsd <= 0 ||
+    !Number.isFinite(usdExRate) ||
+    usdExRate <= 0
+  ) {
+    return "-";
+  }
+
+  const valueInKrw = valueInUsd * usdExRate;
+
+  if (valueInKrw >= 1e12) return `${(valueInKrw / 1e12).toFixed(1)}조 원`;
+  if (valueInKrw >= 1e8) return `${(valueInKrw / 1e8).toFixed(1)}억 원`;
+  if (valueInKrw >= 1e4)
+    return `${Math.round(valueInKrw / 1e4).toLocaleString(KOREAN_LOCALE)}만 원`;
+
+  return `${Math.round(valueInKrw).toLocaleString(KOREAN_LOCALE)}원`;
 };
 
 /** BTC 보유량을 최대 소수 둘째 자리까지 표시한다. */
@@ -58,6 +98,27 @@ export const formatEtfDate = (isoDate: string): string => {
   }
 
   return isoDate.replaceAll("-", ".");
+};
+
+/** ISO 시각을 한국 시간 기준으로 읽기 쉬운 갱신 시각으로 표시한다. */
+export const formatEtfUpdatedAt = (isoTimestamp: string): string => {
+  const timestamp = new Date(isoTimestamp);
+
+  if (Number.isNaN(timestamp.getTime())) {
+    return "-";
+  }
+
+  return new Intl.DateTimeFormat(KOREAN_LOCALE, {
+    timeZone: "Asia/Seoul",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  })
+    .format(timestamp)
+    .replaceAll(". ", ".");
 };
 
 /** ISO 날짜를 차트 축의 `M/D` 형태로 줄인다. */

@@ -1,19 +1,29 @@
 import type { BitcoinEtfDailyFlow, BitcoinEtfSummary } from "@/entities/etf";
 import {
+  formatEtfAumInKrw,
   formatEtfAumInUsd,
   formatEtfDate,
   formatEtfHoldingsInBtc,
+  formatEtfUpdatedAt,
+  formatSignedEtfFlowInKrw,
   formatSignedEtfFlowInUsd,
 } from "../lib/formatEtf";
 
 interface EtfSummaryHeroProps {
   summary: BitcoinEtfSummary;
   dailyFlows: BitcoinEtfDailyFlow[];
+  sourceUpdatedAt: string;
+  usdExRate: number;
 }
 
 const PANEL_CLASS_NAME = "rounded-xl border border-border bg-background/55 glass-bg";
 
-export function EtfSummaryHero({ summary, dailyFlows }: EtfSummaryHeroProps) {
+export function EtfSummaryHero({
+  summary,
+  dailyFlows,
+  sourceUpdatedAt,
+  usdExRate,
+}: EtfSummaryHeroProps) {
   // region [Privates]
   const sevenTradingDayNetFlowInUsd = dailyFlows
     .slice(-7)
@@ -24,6 +34,7 @@ export function EtfSummaryHero({ summary, dailyFlows }: EtfSummaryHeroProps) {
   const sevenDayFlowColorClassName = sevenTradingDayNetFlowInUsd >= 0 ? "text-up" : "text-down";
   const isLatestSourceDatePartiallyReported = summary.latestSourceDate !== summary.referenceDate;
   const hasExcludedFlow = summary.excludedFlowCount > 0;
+  const formattedUpdatedAt = formatEtfUpdatedAt(sourceUpdatedAt);
   // endregion
 
   return (
@@ -40,10 +51,15 @@ export function EtfSummaryHero({ summary, dailyFlows }: EtfSummaryHeroProps) {
         </p>
 
         <div className={`${PANEL_CLASS_NAME} flex flex-col gap-1 mb-2.5 p-4`}>
-          <div className="mb-2 flex items-center justify-between gap-2">
-            <span className="text-xs font-bold text-muted-foreground">일일 추정 순유입</span>
-            <span className="font-number text-xs text-muted-foreground">
-              {formatEtfDate(summary.referenceDate)}
+          <div className="mb-2 flex items-start justify-between gap-3">
+            <div className="flex flex-col gap-1">
+              <span className="text-xs font-bold text-muted-foreground">일일 추정 순유입</span>
+              <strong className="font-number text-base font-black tracking-tight">
+                {formatEtfDate(summary.referenceDate)} 기준
+              </strong>
+            </div>
+            <span className="shrink-0 rounded-full bg-up/10 px-2 py-1 text-[10px] font-bold text-up">
+              최신 업데이트
             </span>
           </div>
           <strong
@@ -51,8 +67,14 @@ export function EtfSummaryHero({ summary, dailyFlows }: EtfSummaryHeroProps) {
           >
             {formatSignedEtfFlowInUsd(summary.estimatedNetFlowInUsd)}
           </strong>
+          <span className="font-number text-xs font-bold text-muted-foreground">
+            {formatSignedEtfFlowInKrw(summary.estimatedNetFlowInUsd, usdExRate)} · KRW
+          </span>
           <p className="mt-2 text-xs text-muted-foreground">
             {summary.validFlowFundCount}/{summary.trackedFundCount}개 ETF 흐름 반영
+          </p>
+          <p className="mt-1 text-[11px] text-muted-foreground">
+            데이터 업데이트 · {formattedUpdatedAt}
           </p>
         </div>
 
@@ -63,6 +85,9 @@ export function EtfSummaryHero({ summary, dailyFlows }: EtfSummaryHeroProps) {
               className={`font-number whitespace-nowrap text-[17px] font-black ${sevenDayFlowColorClassName}`}
             >
               {formatSignedEtfFlowInUsd(sevenTradingDayNetFlowInUsd)}
+            </dd>
+            <dd className="mt-1 font-number text-xs font-bold text-muted-foreground">
+              {formatSignedEtfFlowInKrw(sevenTradingDayNetFlowInUsd, usdExRate)} · KRW
             </dd>
           </div>
           <div className={`${PANEL_CLASS_NAME} px-3 py-4`}>
@@ -75,6 +100,9 @@ export function EtfSummaryHero({ summary, dailyFlows }: EtfSummaryHeroProps) {
             <dt className="mb-2 text-[11px] font-medium text-muted-foreground">추정 운용자산</dt>
             <dd className="font-number whitespace-nowrap text-[17px] font-black">
               {formatEtfAumInUsd(summary.estimatedAumInUsd)}
+            </dd>
+            <dd className="mt-1 text-xs font-medium text-muted-foreground">
+              {formatEtfAumInKrw(summary.estimatedAumInUsd, usdExRate)} · KRW
             </dd>
           </div>
         </dl>
