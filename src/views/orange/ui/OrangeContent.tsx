@@ -86,7 +86,7 @@ const OrangeContent = () => {
   }, [navigateToUtility]);
 
   const onClickEtfUtility = useCallback(() => {
-    navigateToUtility("/etf", "ETF 자금 흐름");
+    navigateToUtility("/etf", "현물 ETF 현황");
   }, [navigateToUtility]);
 
   const onClickHalvingCountdownUtility = useCallback(() => {
@@ -119,7 +119,7 @@ const OrangeContent = () => {
     () => [
       {
         title: "밈 저장소",
-        icon: <ShootingStarIcon size={32} />,
+        icon: <ShootingStarIcon size={30} />,
         onClick: onClickMemeUtility,
       },
       {
@@ -129,37 +129,43 @@ const OrangeContent = () => {
       },
       {
         title: "DCA 계산기",
-        icon: <MinerIcon size={34} />,
+        icon: <MinerIcon size={32} />,
         onClick: onClickDcaUtility,
       },
       {
         title: "트레저리",
-        icon: <Building2 size={28} strokeWidth={1.8} />,
+        icon: <Building2 size={26} strokeWidth={1.8} />,
         onClick: onClickTreasuryUtility,
       },
       {
-        title: "ETF 자금 흐름",
+        title: "현물 ETF 현황",
         icon: <EagleIcon size={28} className={ICON_CLASS} />,
         onClick: onClickEtfUtility,
       },
       {
         title: "출금 수수료",
-        icon: <HandCoins size={28} strokeWidth={1.8} />,
+        icon: (
+          <HandCoins
+            size={28}
+            strokeWidth={1.8}
+            className="[&_circle]:stroke-orange-500 dark:[&_circle]:stroke-orange-400"
+          />
+        ),
         onClick: onClickWithdrawFeeUtility,
       },
       {
         title: "월별 등락률",
-        icon: <CalendarIcon size={28} className={ICON_CLASS} />,
+        icon: <CalendarIcon size={26} className={ICON_CLASS} />,
         onClick: onClickCagrUtility,
       },
       {
         title: "반감기 카운트",
-        icon: <HalfCircleIcon size={26} />,
+        icon: <HalfCircleIcon size={24} />,
         onClick: onClickHalvingCountdownUtility,
       },
       {
         title: "BIP39",
-        icon: <TableProperties size={28} strokeWidth={1.8} />,
+        icon: <TableProperties size={26} strokeWidth={1.8} />,
         onClick: onClickBIP39Utility,
       },
     ],
