@@ -58,8 +58,8 @@ export function EtfSummaryHero({
                 {formatEtfDate(summary.referenceDate)} 기준
               </strong>
             </div>
-            <span className="shrink-0 rounded-full bg-up/10 px-2 py-1 text-[10px] font-bold text-up">
-              최신 업데이트
+            <span className="shrink-0 rounded-full bg-up/10 px-2 py-1.5 text-[10px] font-bold text-up">
+              {formattedUpdatedAt}
             </span>
           </div>
           <strong
@@ -72,9 +72,6 @@ export function EtfSummaryHero({
           </span>
           <p className="mt-2 text-xs text-muted-foreground">
             {summary.validFlowFundCount}/{summary.trackedFundCount}개 ETF 흐름 반영
-          </p>
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            데이터 업데이트 · {formattedUpdatedAt}
           </p>
         </div>
 
