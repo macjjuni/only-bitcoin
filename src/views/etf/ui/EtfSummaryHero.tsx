@@ -38,9 +38,9 @@ export function EtfSummaryHero({
   // endregion
 
   return (
-    <section className="-mx-2 -mt-2.5 select-none">
+    <section className="-mx-2 -mt-2.5 select-none font-pretendard">
       <div className="flex flex-col px-5 pb-5 pt-4">
-        <span className="mb-1.5 text-[11px] font-black uppercase tracking-[0.22em] text-bitcoin">
+        <span className="mb-1.5 font-default text-[11px] font-black uppercase tracking-[0.22em] text-bitcoin">
           Bitcoin ETF Tracker
         </span>
         <h1 className="mb-2 text-[19px] font-bold leading-tight tracking-tight">
@@ -58,8 +58,8 @@ export function EtfSummaryHero({
                 {formatEtfDate(summary.referenceDate)} 기준
               </strong>
             </div>
-            <span className="shrink-0 rounded-full bg-up/10 px-2 py-1 text-[10px] font-bold text-up">
-              최신 업데이트
+            <span className="shrink-0 rounded-full bg-up/10 px-2 py-1.5 text-[10px] font-bold text-up">
+              {formattedUpdatedAt}
             </span>
           </div>
           <strong
@@ -72,9 +72,6 @@ export function EtfSummaryHero({
           </span>
           <p className="mt-2 text-xs text-muted-foreground">
             {summary.validFlowFundCount}/{summary.trackedFundCount}개 ETF 흐름 반영
-          </p>
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            데이터 업데이트 · {formattedUpdatedAt}
           </p>
         </div>
 
@@ -101,7 +98,7 @@ export function EtfSummaryHero({
             <dd className="font-number whitespace-nowrap text-[17px] font-black">
               {formatEtfAumInUsd(summary.estimatedAumInUsd)}
             </dd>
-            <dd className="mt-1 text-xs font-medium text-muted-foreground">
+            <dd className="mt-1 font-number text-xs font-bold text-muted-foreground">
               {formatEtfAumInKrw(summary.estimatedAumInUsd, usdExRate)} · KRW
             </dd>
           </div>

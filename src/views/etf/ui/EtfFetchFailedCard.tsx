@@ -2,7 +2,7 @@ import { Card, CardContent } from "@/shared/ui";
 
 export function EtfFetchFailedCard() {
   return (
-    <Card>
+    <Card className="font-pretendard">
       <CardContent className="flex flex-col gap-2 p-4">
         <strong className="text-base font-bold">ETF 데이터를 불러오지 못했어요</strong>
         <p className="text-sm leading-relaxed text-muted-foreground">

@@ -12,7 +12,7 @@ export const metadata = createPageMetadata({
 
 export default function Btc2FiatPage() {
   return (
-    <PageLayout className="gap-3">
+    <PageLayout className="gap-3 font-pretendard">
       <JsonLd
         schema={createWebApplicationSchema({
           name: "비트코인 계산기",

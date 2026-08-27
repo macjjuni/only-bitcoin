@@ -9,6 +9,7 @@ import {
   BuildingIcon,
   CalendarIcon,
   DiscordIcon,
+  EagleIcon,
   HalfCircleIcon,
   MinerIcon,
   NaverIcon,
@@ -84,6 +85,10 @@ const OrangeContent = () => {
     navigateToUtility("/treasury", "기업 비트코인 트레저리");
   }, [navigateToUtility]);
 
+  const onClickEtfUtility = useCallback(() => {
+    navigateToUtility("/etf", "ETF 자금 흐름");
+  }, [navigateToUtility]);
+
   const onClickHalvingCountdownUtility = useCallback(() => {
     navigateToUtility("/countdown", "반감기 카운트다운");
   }, [navigateToUtility]);
@@ -133,6 +138,11 @@ const OrangeContent = () => {
         onClick: onClickTreasuryUtility,
       },
       {
+        title: "ETF 자금 흐름",
+        icon: <EagleIcon size={28} className={ICON_CLASS} />,
+        onClick: onClickEtfUtility,
+      },
+      {
         title: "출금 수수료",
         icon: <HandCoins size={28} strokeWidth={1.8} />,
         onClick: onClickWithdrawFeeUtility,
@@ -158,6 +168,7 @@ const OrangeContent = () => {
       onClickBtc2ApartmentUtility,
       onClickCagrUtility,
       onClickDcaUtility,
+      onClickEtfUtility,
       onClickHalvingCountdownUtility,
       onClickWithdrawFeeUtility,
       onClickMemeUtility,
@@ -212,13 +223,13 @@ const OrangeContent = () => {
             <button
               key={utilityCard.title}
               type="button"
-              className="flex min-h-24 flex-col items-center justify-center gap-3 rounded-xl px-1 py-3 text-center transition-transform duration-200 active:scale-95"
+              className="flex min-h-24 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-3 text-center transition-transform duration-200 active:scale-95"
               onClick={utilityCard.onClick}
             >
               <span className="flex size-12 items-center justify-center rounded-full bg-orange-500/10 dark:bg-orange-400/15">
                 {utilityCard.icon}
               </span>
-              <span className="select-none text-xs font-semibold whitespace-nowrap leading-tight break-keep text-foreground">
+              <span className="flex min-h-8 items-center justify-center px-1 text-xs font-semibold leading-snug tracking-tighter break-keep text-center text-foreground select-none">
                 {utilityCard.title}
               </span>
             </button>
@@ -245,7 +256,7 @@ const OrangeContent = () => {
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-300/50 dark:bg-neutral-800">
                 {academyCard.icon}
               </span>
-              <span className="select-none text-xs font-semibold leading-tight break-keep text-foreground">
+              <span className="select-none font-pretendard text-xs font-semibold leading-tight tracking-normal break-keep text-foreground">
                 {academyCard.title}
               </span>
             </button>
@@ -272,7 +283,7 @@ const OrangeContent = () => {
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-300/50 dark:bg-neutral-800">
                 {communityCard.icon}
               </span>
-              <span className="select-none text-xs font-semibold leading-tight break-keep text-foreground">
+              <span className="select-none font-pretendard text-xs font-semibold leading-tight break-keep text-foreground">
                 {communityCard.title}
               </span>
             </button>

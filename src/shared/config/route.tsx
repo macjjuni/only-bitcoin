@@ -3,6 +3,7 @@ import {
   BlockIcon,
   BuildingIcon,
   DashboardIcon,
+  EagleIcon,
   ExchangeIcon,
   PillIcon,
   PremiumIcon,
@@ -108,7 +109,7 @@ const clientRoutes: ClientRoute[] = [
     path: "/etf",
     isNav: false,
     isFavorite: false,
-    icon: null,
+    icon: <EagleIcon size={24} />,
   },
   {
     title: "출금 수수료",

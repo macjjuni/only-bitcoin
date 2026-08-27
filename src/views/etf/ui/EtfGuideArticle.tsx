@@ -2,7 +2,7 @@ import { Card, CardContent, CollapseSection } from "@/shared/ui";
 
 export function EtfGuideArticle() {
   return (
-    <Card className="w-full">
+    <Card className="w-full font-pretendard">
       <CardContent className="flex flex-col gap-4 p-4">
         <h2 className="text-base font-bold">ETF 데이터는 어떻게 읽어야 하나요?</h2>
 

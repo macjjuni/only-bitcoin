@@ -43,7 +43,7 @@ const SegmentedControl = <T extends string>(props: SegmentedControlProps<T>) => 
         <button
           key={option.value}
           type="button"
-          className={`rounded-md font-default font-bold transition-colors active:scale-[0.97] ${
+          className={`rounded-md font-pretendard font-bold transition-colors active:scale-[0.97] ${
             SIZE_STYLES[size]
           } ${
             value === option.value

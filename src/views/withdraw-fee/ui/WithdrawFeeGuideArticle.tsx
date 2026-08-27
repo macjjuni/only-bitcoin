@@ -24,7 +24,7 @@ const GuideParagraph = ({ children }: { children: ReactNode }) => (
 /** 검색 유입을 위한 설명 섹션. 접힌 내용도 HTML에 포함되는 네이티브 details를 사용한다. */
 export default function WithdrawFeeGuideArticle() {
   return (
-    <Card className="w-full">
+    <Card className="w-full font-pretendard">
       <article className="flex flex-col gap-2 p-4">
         <header className="flex flex-col gap-1">
           <h2 className="text-[18px] leading-6 tracking-tight font-bold">

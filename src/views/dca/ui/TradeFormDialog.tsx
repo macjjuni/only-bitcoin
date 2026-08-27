@@ -43,7 +43,7 @@ const TradeFormDialog = () => {
       <KDialogOverlay />
       <KDialogContent
         ref={contentRef}
-        className="!top-[44%]"
+        className="!top-[44%] font-pretendard"
         onOpenAutoFocus={onOpenAutoFocusDialog}
       >
         <KDialogHeader>

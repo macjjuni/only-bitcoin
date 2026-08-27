@@ -144,7 +144,7 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
       <SegmentedControl options={tradeTypeOptions} value={tradeType} onChange={onChangeTradeType} />
 
       <div className="flex flex-col gap-1">
-        <span className="text-sm text-muted-foreground font-default">{typeLabel} 날짜</span>
+        <span className="text-sm text-muted-foreground font-pretendard">{typeLabel} 날짜</span>
         <InputGroup size="sm" className="h-10">
           <InputGroupInput
             type="date"
@@ -157,7 +157,9 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="text-sm text-muted-foreground font-default">{typeLabel} 개수 (BTC)</span>
+        <span className="text-sm text-muted-foreground font-pretendard">
+          {typeLabel} 개수 (BTC)
+        </span>
         <InputGroup size="sm" className="h-10">
           <InputGroupAddon align="inline-start" className="!text-bitcoin text-lg font-bold">
             ₿
@@ -173,12 +175,12 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
           />
         </InputGroup>
         {isOverMaxBtc ? (
-          <p className="text-right text-xs text-down font-default">
+          <p className="text-right text-xs text-down font-pretendard">
             총 발행량(₿ {comma(BTC_MAX_COUNT)})보다 많이 입력할 수 없어요.
           </p>
         ) : (
           isOverSell && (
-            <p className="text-right text-xs text-down font-default">
+            <p className="text-right text-xs text-down font-pretendard">
               보유 개수(₿ {formatBtc(sellableBtcCount)})까지만 매도할 수 있어요.
             </p>
           )
@@ -186,7 +188,7 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="text-sm text-muted-foreground font-default">
+        <span className="text-sm text-muted-foreground font-pretendard">
           {typeLabel} 단가 (KRW/BTC)
         </span>
         <InputGroup size="sm" className="h-10">
@@ -206,7 +208,7 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
       </div>
 
       <div className="flex flex-col gap-1">
-        <span className="flex items-center justify-between text-sm text-muted-foreground font-default">
+        <span className="flex items-center justify-between text-sm text-muted-foreground font-pretendard">
           메모 (선택)
           <span className={`font-number text-xs ${isMemoFull ? "text-down" : ""}`}>
             {memoInput.length}/{MEMO_MAX_LENGTH}
@@ -218,18 +220,18 @@ const TradeForm = ({ editRecord, onClose }: TradeFormProps) => {
           placeholder="예: 월급날 정기 매수"
           value={memoInput}
           onChange={onChangeMemo}
-          className="resize-none font-default text-sm"
+          className="resize-none font-pretendard text-sm"
         />
       </div>
 
       {totalAmount > 0 && (
-        <p className="text-right text-sm text-muted-foreground">
+        <p className="text-right text-sm text-muted-foreground font-pretendard">
           총 {typeLabel}금액{" "}
-          <span className="font-bold text-foreground">₩{comma(totalAmount)}</span>
+          <span className="font-number font-bold text-foreground">₩{comma(totalAmount)}</span>
         </p>
       )}
 
-      <div className="flex gap-2">
+      <div className="flex gap-2 font-pretendard">
         <KButton variant="outline" className="flex-1" size="lg" onClick={onClickCancel}>
           취소
         </KButton>

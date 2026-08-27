@@ -13,7 +13,7 @@ export const metadata = createPageMetadata({
 
 export default function OrangePage() {
   return (
-    <PageLayout className="pt-0.5">
+    <PageLayout className="pt-0.5 font-pretendard">
       <OrangeContent />
     </PageLayout>
   );
