@@ -154,7 +154,7 @@ export function EtfFlowChart({ dailyFlows }: EtfFlowChartProps) {
   // endregion
 
   return (
-    <Card>
+    <Card className="font-pretendard">
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>

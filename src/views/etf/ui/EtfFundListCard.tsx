@@ -120,7 +120,7 @@ export function EtfFundListCard({ funds }: EtfFundListCardProps) {
   // endregion
 
   return (
-    <Card>
+    <Card className="font-pretendard">
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
