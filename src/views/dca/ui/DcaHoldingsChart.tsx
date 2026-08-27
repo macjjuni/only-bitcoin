@@ -40,7 +40,7 @@ const DcaHoldingsChart = () => {
   return (
     <Card className="font-number">
       <CardContent className="flex flex-col gap-1 p-4 pb-2">
-        <span className="text-sm text-muted-foreground font-bold">보유량 추이</span>
+        <span className="text-sm text-muted-foreground font-bold font-pretendard">보유량 추이</span>
         <div className="-mx-2 select-none overflow-hidden" style={{ height: CHART_HEIGHT }}>
           <ReactApexChart
             type="area"

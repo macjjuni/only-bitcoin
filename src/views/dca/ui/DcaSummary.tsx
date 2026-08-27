@@ -73,7 +73,7 @@ const DcaSummary = () => {
         <div className="grid grid-cols-2 gap-3">
           <div className="flex min-w-0 flex-col gap-1">
             <div className="flex items-center gap-1.5">
-              <span className="whitespace-nowrap text-sm text-muted-foreground font-bold">
+              <span className="whitespace-nowrap text-sm text-muted-foreground font-bold font-pretendard">
                 총 보유
               </span>
               <KButton
@@ -92,7 +92,7 @@ const DcaSummary = () => {
             </span>
           </div>
           <div className="flex min-w-0 flex-col gap-1 text-right">
-            <span className="whitespace-nowrap text-sm text-muted-foreground font-bold">
+            <span className="whitespace-nowrap text-sm text-muted-foreground font-bold font-pretendard">
               평가금액
             </span>
             <span className="truncate text-xl font-bold">
@@ -102,7 +102,7 @@ const DcaSummary = () => {
         </div>
 
         <div className="flex items-center justify-between gap-2 -mb-2">
-          <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold">
+          <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold font-pretendard">
             남은 개수
           </span>
           <span className="truncate text-lg font-bold">
@@ -114,7 +114,7 @@ const DcaSummary = () => {
         {isDetailOpen && (
           <div className="flex flex-col gap-1">
             <div className="flex items-center justify-between gap-2">
-              <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold">
+              <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold font-pretendard">
                 평단가
               </span>
               <span className="truncate text-lg font-bold">
@@ -122,7 +122,7 @@ const DcaSummary = () => {
               </span>
             </div>
             <div className="flex items-center justify-between gap-2">
-              <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold">
+              <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold font-pretendard">
                 평가손익
               </span>
               <span
@@ -144,7 +144,7 @@ const DcaSummary = () => {
 
         <button
           type="button"
-          className="flex items-center justify-center gap-1 text-xs text-muted-foreground font-default"
+          className="flex items-center justify-center gap-1 text-xs text-muted-foreground font-pretendard"
           onClick={onClickToggleDetail}
         >
           {isDetailOpen ? "접기" : "자세히"}
@@ -156,7 +156,7 @@ const DcaSummary = () => {
 
         <div className="flex flex-col gap-1.5 border-t-[0.75px] border-neutral-300 dark:border-neutral-600 pt-3">
           <div className="flex items-center justify-between gap-2 ">
-            <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold">
+            <span className="flex-none whitespace-nowrap text-sm text-muted-foreground font-bold font-pretendard">
               목표
             </span>
 

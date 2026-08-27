@@ -78,7 +78,7 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
       <div className="flex flex-none flex-col gap-1.5">
         <span className="flex items-center gap-1.5 whitespace-nowrap text-xs text-muted-foreground">
           <span
-            className={`rounded px-1 py-px font-default font-bold ${
+            className={`rounded px-1 py-px font-pretendard font-bold ${
               isBuy ? "bg-up/15 text-up" : "bg-down/15 text-down"
             }`}
           >
@@ -123,7 +123,9 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
               </KButton>
             </KPopoverTrigger>
             <KPopoverContent side="top" align="end" sideOffset={6} className="max-w-60 p-3">
-              <p className="whitespace-pre-wrap break-words text-sm font-default">{record.memo}</p>
+              <p className="whitespace-pre-wrap break-words text-sm font-pretendard">
+                {record.memo}
+              </p>
             </KPopoverContent>
           </KPopover>
         ) : (
@@ -136,7 +138,7 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
               <Ellipsis size={16} />
             </KButton>
           </KDropdownMenuTrigger>
-          <KDropdownMenuContent side="top" align="end" sideOffset={6}>
+          <KDropdownMenuContent side="top" align="end" sideOffset={6} className="font-pretendard">
             <KDropdownMenuItem onSelect={onSelectEditItem}>
               <Pencil size={14} />
               수정
@@ -151,13 +153,13 @@ const TradeListItem = ({ record, currentPrice, onClickEdit }: TradeListItemProps
 
       <KDialog open={isDeleteOpen} onOpenChange={onOpenChangeDeleteDialog} blur={2} size="sm">
         <KDialogOverlay />
-        <KDialogContent className="!top-[44%]">
+        <KDialogContent className="!top-[44%] font-pretendard">
           <KDialogHeader>
             <KDialogTitle>
               <strong>기록 삭제</strong>
             </KDialogTitle>
           </KDialogHeader>
-          <KDialogDescription className="text-sm font-default text-muted-foreground">
+          <KDialogDescription className="text-sm font-pretendard text-muted-foreground">
             {record.date} {tradeTypeText} 기록을 삭제할까요? 되돌릴 수 없어요.
           </KDialogDescription>
           <KDialogFooter>

@@ -27,7 +27,7 @@ const CagrScreen = async () => {
     <div className="flex flex-col gap-3">
       <MonthlyReturnHeatmap rows={monthlyReturnRows} />
 
-      <p className="px-2 text-[12px] text-muted-foreground">
+      <p className="px-2 font-pretendard text-xs text-muted-foreground">
         2010년 8월부터의 blockchain.com 달러 종가 기준
       </p>
     </div>
