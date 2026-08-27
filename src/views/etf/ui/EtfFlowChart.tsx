@@ -159,9 +159,6 @@ export function EtfFlowChart({ dailyFlows }: EtfFlowChartProps) {
         <div className="flex items-start justify-between gap-3">
           <div>
             <h2 className="text-base font-bold">일별 추정 순유입</h2>
-            <p className="mt-1 text-[11px] text-muted-foreground">
-              완전 집계일 기준 · 검증 제외 행 미포함
-            </p>
           </div>
           <KDropdownMenu>
             <KDropdownMenuTrigger
@@ -218,6 +215,11 @@ export function EtfFlowChart({ dailyFlows }: EtfFlowChartProps) {
             </span>
           </div>
         </div>
+
+        <p className="text-[11px] leading-relaxed text-muted-foreground">
+          모든 ETF가 집계된 거래일만 표시합니다. 일부 ETF만 집계된 최근 날짜는 제외하며, 검증 제외
+          행의 순유입액은 합계에 포함하지 않습니다.
+        </p>
       </CardContent>
     </Card>
   );

@@ -5,6 +5,7 @@ const UP_FLOW_COLOR = "#22c55e";
 const DOWN_FLOW_COLOR = "#ef4444";
 const CHART_TICK_AMOUNT = 4;
 const AXIS_PADDING_RATIO = 1.08;
+const X_AXIS_LABEL_PADDING_IN_PIXELS = 28;
 
 export interface EtfFlowChartOptionPoint {
   date: string;
@@ -22,7 +23,44 @@ interface FlowAxisRange {
   max: number;
 }
 
+interface DateAxisRange {
+  min: number | undefined;
+  max: number | undefined;
+}
+
 // region [Privates]
+const formatDateAxisLabel = (timestamp: number, isFullHistory: boolean): string => {
+  const date = new Date(timestamp);
+  const month = date.getMonth() + 1;
+  const day = date.getDate();
+
+  if (!isFullHistory) {
+    return `${month}/${day}`;
+  }
+
+  const year = String(date.getFullYear()).slice(-2);
+  return `${year}.${String(month).padStart(2, "0")}.${String(day).padStart(2, "0")}`;
+};
+
+const formatTooltipDate = (timestamp: number): string => {
+  const date = new Date(timestamp);
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+
+  return `${year}.${month}.${day}`;
+};
+
+const resolveDateAxisRange = (dailyFlows: EtfFlowChartOptionPoint[]): DateAxisRange => {
+  const firstDailyFlow = dailyFlows.at(0);
+  const lastDailyFlow = dailyFlows.at(-1);
+
+  return {
+    min: firstDailyFlow ? new Date(`${firstDailyFlow.date}T00:00:00`).getTime() : undefined,
+    max: lastDailyFlow ? new Date(`${lastDailyFlow.date}T00:00:00`).getTime() : undefined,
+  };
+};
+
 const resolveFlowAxisRange = (dailyFlows: EtfFlowChartOptionPoint[]): FlowAxisRange => {
   const maximumPositiveFlowInUsd = Math.max(
     ...dailyFlows
@@ -66,6 +104,7 @@ export const createEtfFlowChartOptions = ({
   isDark,
   isFullHistory,
 }: CreateEtfFlowChartOptionsParams): ApexOptions => {
+  const dateAxisRange = resolveDateAxisRange(dailyFlows);
   const flowAxisRange = resolveFlowAxisRange(dailyFlows);
 
   return {
@@ -97,19 +136,20 @@ export const createEtfFlowChartOptions = ({
       theme: isDark ? "dark" : "light",
       shared: false,
       intersect: true,
-      x: { format: "yyyy.MM.dd" },
+      x: { formatter: (value: number) => formatTooltipDate(value) },
       y: { formatter: (value: number) => formatSignedEtfFlowInUsd(value) },
       marker: { show: false },
       style: { fontSize: "12px", fontFamily: "Roboto Mono" },
     },
     xaxis: {
-      type: "datetime",
+      type: "numeric",
+      min: dateAxisRange.min,
+      max: dateAxisRange.max,
       tickAmount: CHART_TICK_AMOUNT,
       labels: {
         show: true,
-        datetimeUTC: false,
-        format: isFullHistory ? "yy.MM.dd" : "M/d",
-        hideOverlappingLabels: true,
+        formatter: (value: string) => formatDateAxisLabel(Number(value), isFullHistory),
+        hideOverlappingLabels: false,
         trim: false,
         style: {
           colors: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.45)",
@@ -148,7 +188,12 @@ export const createEtfFlowChartOptions = ({
       strokeDashArray: 3,
       xaxis: { lines: { show: false } },
       yaxis: { lines: { show: false } },
-      padding: { left: 4, right: 4, top: 0, bottom: 0 },
+      padding: {
+        left: X_AXIS_LABEL_PADDING_IN_PIXELS,
+        right: X_AXIS_LABEL_PADDING_IN_PIXELS,
+        top: 0,
+        bottom: 0,
+      },
     },
     legend: { show: false },
   };
