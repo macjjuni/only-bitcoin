@@ -5,7 +5,7 @@ export default function SoloMiningGuideArticle() {
   return (
     <Card className="w-full">
       <CardContent className="flex flex-col gap-4 p-4">
-        <h2 className="text-md font-bold">솔로 마이닝 확률은 어떻게 계산하나요?</h2>
+        <h2 className="text-base font-bold">솔로 마이닝 확률은 어떻게 계산하나요?</h2>
 
         <section className="flex flex-col gap-1.5">
           <h3 className="text-sm font-bold">난이도 기준으로 계산합니다</h3>

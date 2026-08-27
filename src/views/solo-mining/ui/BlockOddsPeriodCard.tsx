@@ -35,7 +35,7 @@ export default function BlockOddsPeriodCard(props: BlockOddsPeriodCardProps) {
   return (
     <Card>
       <CardContent className="flex flex-col gap-3 p-4">
-        <h2 className="text-md font-bold">기간별 블록 발견 확률</h2>
+        <h2 className="text-base font-bold">기간별 블록 발견 확률</h2>
 
         <ul className="flex flex-col gap-2.5">
           {periodOddsRows.map(({ label, percentText, oddsText }) => (
