@@ -85,10 +85,6 @@ const OrangeContent = () => {
     navigateToUtility("/treasury", "기업 비트코인 트레저리");
   }, [navigateToUtility]);
 
-  const onClickEtfUtility = useCallback(() => {
-    navigateToUtility("/etf", "비트코인 현물 ETF 자금 흐름");
-  }, [navigateToUtility]);
-
   const onClickHalvingCountdownUtility = useCallback(() => {
     navigateToUtility("/countdown", "반감기 카운트다운");
   }, [navigateToUtility]);
@@ -229,7 +225,7 @@ const OrangeContent = () => {
               <span className="flex size-12 items-center justify-center rounded-full bg-orange-500/10 dark:bg-orange-400/15">
                 {utilityCard.icon}
               </span>
-              <span className="flex min-h-8 items-center justify-center px-1 text-xs font-medium leading-snug tracking-tight break-keep text-center text-foreground select-none">
+              <span className="flex min-h-8 items-center justify-center px-1 text-xs font-medium leading-snug tracking-tighter break-keep text-center text-foreground select-none">
                 {utilityCard.title}
               </span>
             </button>
@@ -256,7 +252,7 @@ const OrangeContent = () => {
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-300/50 dark:bg-neutral-800">
                 {academyCard.icon}
               </span>
-              <span className="select-none text-xs font-semibold leading-tight break-keep text-foreground">
+              <span className="select-none font-pretendard text-xs font-semibold leading-tight tracking-normal break-keep text-foreground">
                 {academyCard.title}
               </span>
             </button>
@@ -283,7 +279,7 @@ const OrangeContent = () => {
               <span className="flex size-8 shrink-0 items-center justify-center rounded-full bg-neutral-300/50 dark:bg-neutral-800">
                 {communityCard.icon}
               </span>
-              <span className="select-none text-xs font-semibold leading-tight break-keep text-foreground">
+              <span className="select-none font-pretendard text-xs font-semibold leading-tight break-keep text-foreground">
                 {communityCard.title}
               </span>
             </button>
