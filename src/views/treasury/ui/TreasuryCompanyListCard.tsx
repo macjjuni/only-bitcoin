@@ -98,7 +98,7 @@ export default function TreasuryCompanyListCard({ companies }: TreasuryCompanyLi
     <Card>
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-center justify-between gap-2">
-          <h2 className="text-md font-bold">기업별 보유 현황</h2>
+          <h2 className="text-base font-bold">기업별 보유 현황</h2>
           <span className="font-number text-xs text-muted-foreground">
             {filteredCompanies.length.toLocaleString("ko-KR")}곳
           </span>
