@@ -26,7 +26,7 @@ export const EXCHANGE_META: Record<ExchangeId, Omit<ExchangeMeta, "source">> = {
   bithumb: {
     id: "bithumb",
     name: "빗썸",
-    referenceUrl: "https://www.bithumb.com/react/info/fee",
+    referenceUrl: "https://www.bithumb.com/react/info/fee/inout",
   },
   korbit: {
     id: "korbit",
