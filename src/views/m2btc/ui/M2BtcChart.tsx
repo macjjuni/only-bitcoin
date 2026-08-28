@@ -171,6 +171,7 @@ export function M2BtcChart({ chartPoints, currentMonthKey }: M2BtcChartProps) {
         style={{ height: CHART_HEIGHT }}
       >
         <ReactApexChart
+          className="px-12 pt-8"
           height={CHART_HEIGHT}
           options={chartOptions}
           series={chartSeries}
