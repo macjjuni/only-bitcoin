@@ -1,15 +1,10 @@
-import { fetchPublicTreasurySnapshot } from "@/entities/treasury/server";
+import { Suspense } from "react";
 import { createFaqSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
 import { JsonLd } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
-import {
-  TREASURY_FAQ,
-  TreasuryCompanyListCard,
-  TreasuryFetchFailedCard,
-  TreasuryGuideArticle,
-  TreasurySummaryCard,
-} from "@/views/treasury";
+import { TREASURY_FAQ, TreasuryGuideArticle, TreasuryScreen } from "@/views/treasury";
+import TreasuryLoading from "./loading";
 
 export const metadata = createPageMetadata({
   path: "/treasury",
@@ -26,23 +21,13 @@ export const metadata = createPageMetadata({
  */
 export const revalidate = 900;
 
-export default async function TreasuryPage() {
-  const { summary, companies, fetchedAt, hasFetchFailed } = await fetchPublicTreasurySnapshot();
-
-  if (hasFetchFailed) {
-    return (
-      <PageLayout className="gap-2.5 font-pretendard">
-        <TreasuryFetchFailedCard />
-        <TreasuryGuideArticle />
-      </PageLayout>
-    );
-  }
-
+export default function TreasuryPage() {
   return (
     <PageLayout className="gap-2.5 font-pretendard">
       <JsonLd schema={createFaqSchema(TREASURY_FAQ)} />
-      <TreasurySummaryCard summary={summary} fetchedAt={fetchedAt} />
-      <TreasuryCompanyListCard companies={companies} />
+      <Suspense fallback={<TreasuryLoading />}>
+        <TreasuryScreen />
+      </Suspense>
       <TreasuryGuideArticle />
     </PageLayout>
   );
