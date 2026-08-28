@@ -1,6 +1,6 @@
 import { Card, CardContent } from "@/shared/ui";
 
-export function EtfFetchFailedCard() {
+export default function EtfFetchFailedCard() {
   return (
     <Card className="font-pretendard">
       <CardContent className="flex flex-col gap-2 p-4">

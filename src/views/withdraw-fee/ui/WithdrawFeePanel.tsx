@@ -4,7 +4,7 @@ import { useMemo } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import type { ExchangeMeta, WithdrawNetworkRow } from "@/entities/exchange";
 import { buildComparisonRows } from "../lib/calculateWithdrawFee";
-import { ExchangeFeeTable } from "./ExchangeFeeTable";
+import ExchangeFeeTable from "./ExchangeFeeTable";
 
 interface WithdrawFeePanelProps {
   exchanges: ExchangeMeta[];
@@ -20,7 +20,7 @@ interface WithdrawFeePanelProps {
  * BTC·USDT 시세 모두 전역 스토어(`Initializer` 에서 세팅) 값을 씀.
  * 스토어 초기값이 0 이라 시세가 들어오기 전에는 원화 줄을 아예 안 그림.
  */
-export function WithdrawFeePanel({
+export default function WithdrawFeePanel({
   exchanges,
   rows,
   fetchedAt,

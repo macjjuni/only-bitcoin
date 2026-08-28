@@ -5,8 +5,8 @@ import type { ExchangeMeta, WithdrawAsset } from "@/entities/exchange";
 import { Card, CardContent, SegmentedControl, type SegmentedControlOption } from "@/shared/ui";
 import type { WithdrawComparisonRow } from "../lib/calculateWithdrawFee";
 import { ASSET_THEME } from "../model/exchangeFeeTheme";
-import { ExchangeReferenceLinks } from "./ExchangeReferenceLinks";
-import { NetworkFeeCard } from "./NetworkFeeCard";
+import ExchangeReferenceLinks from "./ExchangeReferenceLinks";
+import NetworkFeeCard from "./NetworkFeeCard";
 
 interface ExchangeFeeTableProps {
   exchanges: ExchangeMeta[];
@@ -66,7 +66,7 @@ function NetworkTab({ asset, isSelected, networkName, onSelectNetwork }: Network
  * 기본값은 이 페이지의 핵심인 BTC 온체인이며, 다른 자산과 네트워크는 탭으로 전환.
  * 거래소가 추가되어도 가로 열과 전체 세로 길이가 늘어나지 않음.
  */
-export function ExchangeFeeTable({
+export default function ExchangeFeeTable({
   exchanges,
   rows,
   fetchedAt,

@@ -68,4 +68,3 @@ const MemoizedShareCardQr = memo(ShareCardQr);
 MemoizedShareCardQr.displayName = "ShareCardQr";
 
 export default MemoizedShareCardQr;
-export { MemoizedShareCardQr as ShareCardQr };

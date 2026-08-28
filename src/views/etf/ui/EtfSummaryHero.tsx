@@ -18,7 +18,7 @@ interface EtfSummaryHeroProps {
 
 const PANEL_CLASS_NAME = "rounded-xl border border-border bg-background/55 glass-bg";
 
-export function EtfSummaryHero({
+export default function EtfSummaryHero({
   summary,
   dailyFlows,
   sourceUpdatedAt,

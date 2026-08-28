@@ -78,7 +78,7 @@ function EtfFlowPeriodMenuItem({
   );
 }
 
-export function EtfFlowChart({ dailyFlows }: EtfFlowChartProps) {
+export default function EtfFlowChart({ dailyFlows }: EtfFlowChartProps) {
   // region [Hooks]
   const isDark = useSettingStore((store) => store.theme) === "dark";
   const [selectedPeriod, setSelectedPeriod] = useState<EtfFlowPeriod>("all");

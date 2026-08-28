@@ -1,5 +1,5 @@
-export { EtfFetchFailedCard } from "./ui/EtfFetchFailedCard";
-export { EtfFlowChart } from "./ui/EtfFlowChart";
-export { EtfFundListCard } from "./ui/EtfFundListCard";
-export { EtfGuideArticle } from "./ui/EtfGuideArticle";
-export { EtfSummaryHero } from "./ui/EtfSummaryHero";
+export { default as EtfFetchFailedCard } from "./ui/EtfFetchFailedCard";
+export { default as EtfFlowChart } from "./ui/EtfFlowChart";
+export { default as EtfFundListCard } from "./ui/EtfFundListCard";
+export { default as EtfGuideArticle } from "./ui/EtfGuideArticle";
+export { default as EtfSummaryHero } from "./ui/EtfSummaryHero";

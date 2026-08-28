@@ -1,7 +1,7 @@
 import type { ExchangeMeta } from "@/entities/exchange";
 import type { WithdrawComparisonRow } from "../lib/calculateWithdrawFee";
 import { ASSET_THEME } from "../model/exchangeFeeTheme";
-import { ExchangeFeeRow } from "./ExchangeFeeRow";
+import ExchangeFeeRow from "./ExchangeFeeRow";
 
 interface NetworkFeeCardProps {
   exchanges: ExchangeMeta[];
@@ -9,7 +9,7 @@ interface NetworkFeeCardProps {
 }
 
 // region [Templates]
-export function NetworkFeeCard({ exchanges, row }: NetworkFeeCardProps) {
+export default function NetworkFeeCard({ exchanges, row }: NetworkFeeCardProps) {
   const supportedExchangeCount = Object.keys(row.cells).length;
   const supportedExchangeLabel = `${supportedExchangeCount}/${exchanges.length} 지원`;
 

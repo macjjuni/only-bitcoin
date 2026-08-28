@@ -1,6 +1,6 @@
 import { GuideArticle, GuideParagraph, GuideSection, GuideWarningBox } from "@/shared/ui";
 
-export function EtfGuideArticle() {
+export default function EtfGuideArticle() {
   return (
     <GuideArticle title="ETF 데이터는 어떻게 읽어야 하나요?" className="w-full font-pretendard">
       <GuideSection title="공식 순유입액이 아닌 추정치" defaultOpen>

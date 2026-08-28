@@ -30,9 +30,8 @@ import {
   registerCaptureOverlay,
 } from "@/shared/lib/imageExport";
 import { useApartmentShareStore } from "../model/useApartmentShareStore";
-import {
+import ApartmentShareCard, {
   APARTMENT_CARD_DESIGN_WIDTH,
-  ApartmentShareCard,
   SHARE_QR_CANVAS_ID,
 } from "./ApartmentShareCard";
 
@@ -343,5 +342,4 @@ function ApartmentShareDialog({
 const MemoizedApartmentShareDialog = memo(ApartmentShareDialog);
 MemoizedApartmentShareDialog.displayName = "ApartmentShareDialog";
 
-export { MemoizedApartmentShareDialog as ApartmentShareDialog };
 export default MemoizedApartmentShareDialog;

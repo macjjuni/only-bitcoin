@@ -10,7 +10,7 @@ import { BtcTextLogo, UpdownIcon } from "@/shared/ui";
 import type { ShareCardTimeframe } from "../model/shareCardTimeframe";
 import { useBtcSurgeShareStore } from "../model/useBtcSurgeShareStore";
 import { useShareCardChart } from "../model/useShareCardChart";
-import { BtcSurgeTimeframeSelector } from "./BtcSurgeTimeframeSelector";
+import BtcSurgeTimeframeSelector from "./BtcSurgeTimeframeSelector";
 
 /**
  * SNS 확산( 네트워크 효과 )을 위한 서비스 도메인.
@@ -412,5 +412,4 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
 const MemoizedBtcSurgeShareCard = memo(BtcSurgeShareCard);
 MemoizedBtcSurgeShareCard.displayName = "BtcSurgeShareCard";
 
-export { MemoizedBtcSurgeShareCard as BtcSurgeShareCard };
 export default MemoizedBtcSurgeShareCard;

@@ -14,7 +14,7 @@ interface ExchangeReferenceLinksProps {
  * 표의 값은 12시간마다 갱신되는 스냅샷이라 언제든 실제와 어긋날 수 있음.
  * 그래서 "직접 확인하세요" 문구 바로 밑에 원문으로 가는 길을 같이 둠.
  */
-export function ExchangeReferenceLinks({ exchanges }: ExchangeReferenceLinksProps) {
+export default function ExchangeReferenceLinks({ exchanges }: ExchangeReferenceLinksProps) {
   return (
     <div className="flex flex-col gap-1.5 rounded-xl border border-border bg-muted/15 px-3 py-2.5">
       <strong className="text-[11px] font-bold text-muted-foreground">공식 수수료 안내</strong>

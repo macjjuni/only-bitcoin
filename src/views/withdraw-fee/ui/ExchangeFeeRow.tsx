@@ -43,7 +43,7 @@ const resolveWithdrawFeeClassName = (cell: WithdrawCell, asset: WithdrawAsset) =
 // endregion
 
 // region [Templates]
-export function ExchangeFeeRow({ asset, cell, exchange }: ExchangeFeeRowProps) {
+export default function ExchangeFeeRow({ asset, cell, exchange }: ExchangeFeeRowProps) {
   const isFallbackValue = exchange.source === "fallback";
   const isWithdrawUnavailable = cell?.isWithdrawAvailable === false;
 

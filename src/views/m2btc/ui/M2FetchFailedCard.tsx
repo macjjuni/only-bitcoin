@@ -6,7 +6,7 @@ interface M2FetchFailedCardProps {
 }
 
 /** FRED M2 조회 실패를 차트 위 배너로 안내한다. */
-export function M2FetchFailedCard({ hasBitcoinFallback }: M2FetchFailedCardProps) {
+export default function M2FetchFailedCard({ hasBitcoinFallback }: M2FetchFailedCardProps) {
   return (
     <Card className="font-pretendard">
       <CardContent className="flex flex-col gap-2 p-4">

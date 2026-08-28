@@ -92,7 +92,7 @@ function LegendItem({ color, label }: LegendItemProps) {
 }
 
 /** 미국 M2와 BTC 월별 가격을 이중 축으로 표시. */
-export function M2BtcChart({ chartPoints, currentMonthKey }: M2BtcChartProps) {
+export default function M2BtcChart({ chartPoints, currentMonthKey }: M2BtcChartProps) {
   // region [Hooks]
   const isDark = useSettingStore((store) => store.theme) === "dark";
   const usM2Color = resolveUsM2Color(isDark);

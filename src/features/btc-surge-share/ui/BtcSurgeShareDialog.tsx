@@ -29,9 +29,8 @@ import {
 } from "@/shared/lib/imageExport";
 import { useBtcSurgeShareStore } from "../model/useBtcSurgeShareStore";
 import { useShareCardChart } from "../model/useShareCardChart";
-import {
+import BtcSurgeShareCard, {
   BTC_SURGE_CARD_DESIGN_WIDTH,
-  BtcSurgeShareCard,
   COIN_OVERLAY_BASE,
 } from "./BtcSurgeShareCard";
 
@@ -316,5 +315,4 @@ function BtcSurgeShareDialog() {
 const MemoizedBtcSurgeShareDialog = memo(BtcSurgeShareDialog);
 MemoizedBtcSurgeShareDialog.displayName = "BtcSurgeShareDialog";
 
-export { MemoizedBtcSurgeShareDialog as BtcSurgeShareDialog };
 export default MemoizedBtcSurgeShareDialog;

@@ -1,7 +1,7 @@
 import { GuideArticle, GuideParagraph, GuideSection, GuideWarningBox } from "@/shared/ui";
 
 /** M2 개념과 비교 근거를 차트 아래에서 안내한다. */
-export function M2GuideArticle() {
+export default function M2GuideArticle() {
   return (
     <GuideArticle
       title="M2란 무엇인가요?"

@@ -1,9 +1,9 @@
 import { getBtcMonthlyUsdMap } from "@/entities/bitcoin/server";
 import { getUsM2MonthlyObservations } from "@/entities/money-supply/server";
 import { buildM2BtcSeries } from "../lib/buildM2BtcSeries";
-import { M2BtcChart } from "./M2BtcChart";
-import { M2FetchFailedCard } from "./M2FetchFailedCard";
-import { M2GuideArticle } from "./M2GuideArticle";
+import M2BtcChart from "./M2BtcChart";
+import M2FetchFailedCard from "./M2FetchFailedCard";
+import M2GuideArticle from "./M2GuideArticle";
 
 /**
  * M2BTC 페이지의 서버 데이터 조회와 화면 구성을 담당한다.
@@ -12,7 +12,7 @@ import { M2GuideArticle } from "./M2GuideArticle";
  * M2 하나 때문에 차트를 못 보는 게 손해라 실패는 배너로만 알리고 차트는 그대로 그림.
  * 가이드와 출처는 조회 결과와 무관한 정적 해설이라 어느 경우에나 남김.
  */
-export async function M2BtcScreen() {
+export default async function M2BtcScreen() {
   // region [Transactions]
   const [bitcoinMonthlyUsdMap, usM2MonthlyObservations] = await Promise.all([
     getBtcMonthlyUsdMap(),

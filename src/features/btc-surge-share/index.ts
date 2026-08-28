@@ -1,3 +1,3 @@
 export { useBtcSurgeShareStore } from "./model/useBtcSurgeShareStore";
-export { BtcSurgeShareCard } from "./ui/BtcSurgeShareCard";
-export { BtcSurgeShareDialog } from "./ui/BtcSurgeShareDialog";
+export { default as BtcSurgeShareCard } from "./ui/BtcSurgeShareCard";
+export { default as BtcSurgeShareDialog } from "./ui/BtcSurgeShareDialog";

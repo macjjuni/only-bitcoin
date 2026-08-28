@@ -96,5 +96,4 @@ function BtcSurgeTimeframeSelector(props: BtcSurgeTimeframeSelectorProps) {
 const MemoizedBtcSurgeTimeframeSelector = memo(BtcSurgeTimeframeSelector);
 MemoizedBtcSurgeTimeframeSelector.displayName = "BtcSurgeTimeframeSelector";
 
-export { MemoizedBtcSurgeTimeframeSelector as BtcSurgeTimeframeSelector };
 export default MemoizedBtcSurgeTimeframeSelector;

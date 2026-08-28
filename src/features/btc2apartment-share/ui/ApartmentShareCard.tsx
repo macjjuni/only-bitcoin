@@ -253,5 +253,4 @@ function ApartmentShareCard({
 const MemoizedApartmentShareCard = memo(ApartmentShareCard);
 MemoizedApartmentShareCard.displayName = "ApartmentShareCard";
 
-export { MemoizedApartmentShareCard as ApartmentShareCard };
 export default MemoizedApartmentShareCard;

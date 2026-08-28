@@ -229,5 +229,4 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
 const MemoizedPremiumShareCard = memo(PremiumShareCard);
 MemoizedPremiumShareCard.displayName = "PremiumShareCard";
 
-export { MemoizedPremiumShareCard as PremiumShareCard };
 export default MemoizedPremiumShareCard;

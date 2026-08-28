@@ -80,7 +80,7 @@ function EtfFundMetricMenuItem({
   );
 }
 
-export function EtfFundListCard({ funds }: EtfFundListCardProps) {
+export default function EtfFundListCard({ funds }: EtfFundListCardProps) {
   // region [Hooks]
   const isDark = useSettingStore((store) => store.theme) === "dark";
   const [selectedMetric, setSelectedMetric] = useState<EtfFundMetric>("aum");
