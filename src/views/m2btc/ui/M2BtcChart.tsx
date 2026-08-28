@@ -18,7 +18,7 @@ import {
 } from "./createM2BtcChartOptions";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const CHART_HEIGHT = 360;
+const CHART_HEIGHT = 300;
 
 interface M2BtcChartProps {
   chartPoints: M2BtcChartPoint[];
@@ -106,7 +106,7 @@ export function M2BtcChart({ chartPoints, currentMonthKey }: M2BtcChartProps) {
     isCurrentBitcoinMonth(latestBitcoinPoint.monthKey, currentMonthKey);
   const latestBitcoinPriceLabel = isLatestBitcoinMonthInProgress
     ? "BTC 월간 최신값"
-    : "BTC 월말 종가";
+    : "BTC 월별 마지막 종가";
   const latestBitcoinMonthLabel = latestBitcoinPoint
     ? `${formatMonthKey(latestBitcoinPoint.monthKey)}${isLatestBitcoinMonthInProgress ? " · 진행 중" : ""}`
     : "";
@@ -171,7 +171,6 @@ export function M2BtcChart({ chartPoints, currentMonthKey }: M2BtcChartProps) {
         style={{ height: CHART_HEIGHT }}
       >
         <ReactApexChart
-          className="px-12 pt-8"
           height={CHART_HEIGHT}
           options={chartOptions}
           series={chartSeries}
@@ -186,16 +185,17 @@ export function M2BtcChart({ chartPoints, currentMonthKey }: M2BtcChartProps) {
     if (!hasUsM2Data) {
       return (
         <>
-          BTC는 완료된 달의 월말 USD 종가와 진행 중인 달의 최신 USD 종가를 로그 축으로 표시합니다.
-          현재 비교 가능한 미국 M2 데이터가 없습니다.
+          BTC는 완료된 달의 월별 마지막 USD 종가와 진행 중인 달의 최신 USD 종가를 로그 축으로
+          표시합니다. 현재 비교 가능한 미국 M2 데이터가 없습니다.
         </>
       );
     }
 
     return (
       <>
-        BTC는 완료된 달의 월말 USD 종가와 진행 중인 달의 최신 USD 종가를 로그 축으로 표시합니다. M2
-        미발표 월은 값을 임의로 채우지 않으며 파란 선만 마지막 공식 발표 월에서 끝납니다.
+        BTC는 완료된 달의 월별 마지막 USD 종가와 진행 중인 달의 최신 USD 종가를 로그 축으로
+        표시합니다. M2 미발표 월은 값을 임의로 채우지 않으며 파란 선만 마지막 공식 발표 월에서
+        끝납니다.
       </>
     );
   }, [hasUsM2Data]);

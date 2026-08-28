@@ -36,4 +36,16 @@ describe("createM2BtcChartOptions", () => {
 
     expect(chartOptions.yaxis).toHaveLength(2);
   });
+
+  it("양쪽 Y축 레이블을 차트 바깥 방향으로 벌린다", () => {
+    const chartOptions = createM2BtcChartOptions({
+      bitcoinLogAxisRange: { min: 0, max: 5 },
+      isDark: false,
+      usM2ValuesInBillionsUsd: [23_000],
+    });
+    const yAxisOptions = chartOptions.yaxis;
+
+    expect(Array.isArray(yAxisOptions) ? yAxisOptions[0]?.labels?.offsetX : null).toBe(-16);
+    expect(Array.isArray(yAxisOptions) ? yAxisOptions[1]?.labels?.offsetX : null).toBe(-16);
+  });
 });

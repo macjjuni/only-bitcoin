@@ -8,7 +8,7 @@ import M2BtcLoading from "./loading";
 
 const PAGE_TITLE = "미국 M2와 비트코인";
 const PAGE_DESCRIPTION =
-  "2010년부터 현재까지 미국 M2 통화량과 비트코인 월별 달러 가격을 하나의 차트에서 비교하세요.";
+  "2010년 8월부터 현재까지 미국 M2와 비트코인의 월별 달러 흐름을 하나의 차트에서 비교하세요.";
 
 export const metadata = createPageMetadata({
   description: PAGE_DESCRIPTION,
@@ -30,9 +30,9 @@ export default function M2BtcPage() {
         })}
       />
       <PageTitle
-        description="비트코인 전체 가격 이력과 미국 통화량의 장기 흐름을 월별로 비교합니다."
         label="M2 · BTC"
         title={PAGE_TITLE}
+        description="미국 M2가 늘어날 때 비트코인도 올랐을까요?"
       />
       <Suspense fallback={<M2BtcLoading />}>
         <M2BtcScreen />

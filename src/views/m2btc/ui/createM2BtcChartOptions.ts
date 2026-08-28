@@ -4,6 +4,7 @@ import { BITCOIN_COLOR } from "@/shared/config/color";
 export const US_M2_COLOR = "#2563EB";
 
 const BITCOIN_AXIS_TICK_COUNT = 6;
+const Y_AXIS_LABEL_OFFSET_X = 16;
 const M2_AXIS_PADDING_RATIO = 0.08;
 const LOG_AXIS_PADDING_RATIO = 0.04;
 
@@ -174,7 +175,7 @@ export function createM2BtcChartOptions({
     dataLabels: { enabled: false },
     grid: {
       borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
-      padding: { bottom: 0, left: 4, right: 4, top: 4 },
+      padding: { left: -4, right: -4 },
       strokeDashArray: 3,
       xaxis: { lines: { show: false } },
       yaxis: { lines: { show: true } },
@@ -227,7 +228,9 @@ export function createM2BtcChartOptions({
       labels: {
         datetimeUTC: true,
         formatter: createYearAxisFormatter(lastMonthTimestamp),
-        hideOverlappingLabels: true,
+        hideOverlappingLabels: false,
+        rotate: -45,
+        rotateAlways: true,
         style: {
           colors: axisLabelColor,
           fontFamily: "Roboto Mono",
@@ -246,6 +249,7 @@ export function createM2BtcChartOptions({
         forceNiceScale: false,
         labels: {
           formatter: formatBitcoinAxisPriceInUsd,
+          offsetX: -Y_AXIS_LABEL_OFFSET_X,
           style: {
             colors: BITCOIN_COLOR,
             fontFamily: "Roboto Mono",
@@ -266,6 +270,7 @@ export function createM2BtcChartOptions({
                 formatter: (valueInBillionsUsd: number) => {
                   return `$${(valueInBillionsUsd / 1_000).toFixed(1)}T`;
                 },
+                offsetX: -Y_AXIS_LABEL_OFFSET_X,
                 style: {
                   colors: US_M2_COLOR,
                   fontFamily: "Roboto Mono",
