@@ -79,7 +79,7 @@ useEffect(() => {
 ```
 
 ## 4. Git Commit Rules
-- **Co-Authored-By 금지:** 커밋 메시지에 `Co-Authored-By` 라인을 절대 포함하지 않는다.
+- **Co-Authored-By 금지:** 커밋 메시지에 `Co-Authored-By` 라인을 절대 포함하지 않고 한글로 작성.
 
 ## 5. Communication Protocol
 
