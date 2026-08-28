@@ -41,7 +41,7 @@ const TagList = ({ tags, selected, onChangeTag }: TagListProps) => {
     <div className="-mx-2 px-2.5 py-4 bg-bitcoin  overflow-x-auto scrollbar-hide">
       <div className="flex flex-col gap-2 w-max">
         {tagRows.map((row, rowIndex) => (
-          <div key={`tag-row-${rowIndex}`} className="flex gap-2">
+          <div key={`tag-row-${rowIndex}`} className="flex gap-2 font-pretendard">
             {row.map((tag) => (
               <button
                 key={tag}

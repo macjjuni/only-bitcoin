@@ -160,7 +160,7 @@ function ApartmentShareCard({
     }
 
     return (
-      <p className="text-lg font-bold leading-relaxed text-white/85">
+      <p className="text-lg font-bold leading-relaxed font-pretendard text-white/85">
         같은 집인데 원화로는{" "}
         <span className="text-[#FF6B6B]">
           <span className="font-number">{krwRiseMultiple.toFixed(1)}</span>배 비싸졌고
