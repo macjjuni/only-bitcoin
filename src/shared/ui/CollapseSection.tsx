@@ -36,7 +36,7 @@ const CollapseSection = (props: CollapseSectionTypes) => {
   return (
     <details id={id} open={defaultOpen} className={`group ${className}`.trim()}>
       <summary
-        className={`flex cursor-pointer items-center justify-between gap-2 font-bold list-none [&::-webkit-details-marker]:hidden ${summaryClassName}`.trim()}
+        className={`flex cursor-pointer items-center justify-between gap-2 font-pretendard font-bold list-none [&::-webkit-details-marker]:hidden ${summaryClassName}`.trim()}
       >
         {title}
         <svg
