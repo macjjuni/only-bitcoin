@@ -1,5 +1,6 @@
 "use client";
 
+import { Copy, Download, X } from "lucide-react";
 import { type MouseEvent, memo, useCallback, useEffect } from "react";
 import { copyMemeImageToClipboard, downloadMemeImage } from "@/features/download-meme";
 
@@ -74,20 +75,7 @@ const ImageModal = ({ src, onClose }: ImageModalProps) => {
         className="absolute top-4 right-4 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors duration-200 z-10"
         aria-label="닫기"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M6 18L18 6M6 6l12 12"
-          />
-        </svg>
+        <X className="size-6 p-0.5" aria-hidden="true" />
       </button>
 
       {/* Copy Button */}
@@ -97,20 +85,7 @@ const ImageModal = ({ src, onClose }: ImageModalProps) => {
         className="absolute top-4 right-28 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors duration-200 z-10"
         aria-label="복사"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 002-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"
-          />
-        </svg>
+        <Copy className="size-6 p-0.5" aria-hidden="true" />
       </button>
 
       {/* Download Button */}
@@ -120,20 +95,7 @@ const ImageModal = ({ src, onClose }: ImageModalProps) => {
         className="absolute top-4 right-16 p-2 rounded-full bg-white/10 hover:bg-white/20 text-white transition-colors duration-200 z-10"
         aria-label="다운로드"
       >
-        <svg
-          xmlns="http://www.w3.org/2000/svg"
-          className="h-6 w-6"
-          fill="none"
-          viewBox="0 0 24 24"
-          stroke="currentColor"
-        >
-          <path
-            strokeLinecap="round"
-            strokeLinejoin="round"
-            strokeWidth={2}
-            d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4"
-          />
-        </svg>
+        <Download className="size-6 p-0.5" aria-hidden="true" />
       </button>
 
       {/* Image */}
