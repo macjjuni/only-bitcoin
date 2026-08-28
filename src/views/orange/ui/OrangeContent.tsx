@@ -6,6 +6,7 @@ import { useTransitionRouter } from "next-view-transitions";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { allRouteList } from "@/shared/config/route";
 import {
+  BanknoteIcon,
   BuildingIcon,
   CalendarIcon,
   DiscordIcon,
@@ -89,6 +90,10 @@ const OrangeContent = () => {
     navigateToUtility("/etf", "현물 ETF 현황");
   }, [navigateToUtility]);
 
+  const onClickM2BtcUtility = useCallback(() => {
+    navigateToUtility("/m2btc", "미국 M2와 비트코인");
+  }, [navigateToUtility]);
+
   const onClickHalvingCountdownUtility = useCallback(() => {
     navigateToUtility("/countdown", "반감기 카운트다운");
   }, [navigateToUtility]);
@@ -143,6 +148,11 @@ const OrangeContent = () => {
         onClick: onClickEtfUtility,
       },
       {
+        title: "M2·비트코인",
+        icon: <BanknoteIcon size={28} className={ICON_CLASS} />,
+        onClick: onClickM2BtcUtility,
+      },
+      {
         title: "출금 수수료",
         icon: (
           <HandCoins
@@ -176,6 +186,7 @@ const OrangeContent = () => {
       onClickDcaUtility,
       onClickEtfUtility,
       onClickHalvingCountdownUtility,
+      onClickM2BtcUtility,
       onClickWithdrawFeeUtility,
       onClickMemeUtility,
       onClickTreasuryUtility,
