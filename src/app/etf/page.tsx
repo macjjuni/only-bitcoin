@@ -2,7 +2,7 @@ import { fetchInitialMacro } from "@/entities/bitcoin/server";
 import { fetchBitcoinEtfSnapshot } from "@/entities/etf/server";
 import { createWebApplicationSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
-import { JsonLd } from "@/shared/ui";
+import { JsonLd, PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import {
   EtfFetchFailedCard,
@@ -14,6 +14,8 @@ import {
 
 const ETF_PAGE_DESCRIPTION =
   "미국 비트코인 현물 ETF의 일별 추정 순유입, BTC 보유량, 운용자산과 BTC 현물 ETF별 현황을 확인하세요.";
+const ETF_PAGE_TITLE = "미국 비트코인 현물 ETF 현황";
+const ETF_PAGE_SUBTITLE = "발행사 보유량을 기반으로 계산한 일별 추정 자금 흐름";
 
 export const metadata = createPageMetadata({
   path: "/etf",
@@ -33,6 +35,11 @@ export default async function EtfPage() {
   if (snapshot.hasFetchFailed) {
     return (
       <PageLayout className="gap-2.5">
+        <PageTitle
+          label="Bitcoin ETF Tracker"
+          title={ETF_PAGE_TITLE}
+          description={ETF_PAGE_SUBTITLE}
+        />
         <EtfFetchFailedCard />
         <EtfGuideArticle />
       </PageLayout>
@@ -47,6 +54,11 @@ export default async function EtfPage() {
           description: ETF_PAGE_DESCRIPTION,
           path: "/etf",
         })}
+      />
+      <PageTitle
+        label="Bitcoin ETF Tracker"
+        title={ETF_PAGE_TITLE}
+        description={ETF_PAGE_SUBTITLE}
       />
       <EtfSummaryHero
         summary={snapshot.summary}

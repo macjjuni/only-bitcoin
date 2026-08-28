@@ -38,18 +38,8 @@ export function EtfSummaryHero({
   // endregion
 
   return (
-    <section className="-mx-2 -mt-2.5 select-none font-pretendard">
-      <div className="flex flex-col px-5 pb-5 pt-4">
-        <span className="mb-1.5 font-default text-[11px] font-black uppercase tracking-[0.22em] text-bitcoin">
-          Bitcoin ETF Tracker
-        </span>
-        <h1 className="mb-2 text-[19px] font-bold leading-tight tracking-tight">
-          미국 비트코인 현물 ETF 현황
-        </h1>
-        <p className="mb-4 text-sm leading-relaxed text-muted-foreground">
-          발행사 보유량을 기반으로 계산한 일별 추정 자금 흐름
-        </p>
-
+    <section className="select-none font-pretendard">
+      <div className="flex flex-col">
         <div className={`${PANEL_CLASS_NAME} flex flex-col gap-1 mb-2.5 p-4`}>
           <div className="mb-2 flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
