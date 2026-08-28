@@ -13,7 +13,7 @@ import {
 } from "@/views/etf";
 
 const ETF_PAGE_DESCRIPTION =
-  "미국 비트코인 현물 ETF의 일별 추정 순유입, BTC 보유량, 운용자산과 ETF별 현황을 확인하세요.";
+  "미국 비트코인 현물 ETF의 일별 추정 순유입, BTC 보유량, 운용자산과 BTC 현물 ETF별 현황을 확인하세요.";
 
 export const metadata = createPageMetadata({
   path: "/etf",

@@ -53,7 +53,7 @@ export function EtfSummaryHero({
         <div className={`${PANEL_CLASS_NAME} flex flex-col gap-1 mb-2.5 p-4`}>
           <div className="mb-2 flex items-start justify-between gap-3">
             <div className="flex flex-col gap-1">
-              <span className="text-xs font-bold text-muted-foreground">일일 추정 순유입</span>
+              <span className="text-xs font-bold text-muted-foreground">BTC 현물 ETF 순유입</span>
               <strong className="font-number text-base font-black tracking-tight">
                 {formatEtfDate(summary.referenceDate)} 기준
               </strong>

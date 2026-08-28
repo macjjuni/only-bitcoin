@@ -124,7 +124,7 @@ export function EtfFundListCard({ funds }: EtfFundListCardProps) {
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-center justify-between gap-3">
           <div>
-            <h2 className="text-base font-bold">ETF별 현황</h2>
+            <h2 className="text-base font-bold">BTC 현물 ETF별 현황</h2>
           </div>
           <KDropdownMenu>
             <KDropdownMenuTrigger
