@@ -8,6 +8,7 @@ import {
   ExchangeIcon,
   PillIcon,
   PremiumIcon,
+  TreasuryIcon,
 } from "@/shared/ui/icon";
 
 interface ClientRoute {
@@ -110,7 +111,7 @@ const clientRoutes: ClientRoute[] = [
     path: "/treasury",
     isNav: false,
     isFavorite: false,
-    icon: null,
+    icon: <TreasuryIcon size={24} />,
   },
   {
     title: "Bitcoin ETF",

@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { Building2, HandCoins, TableProperties } from "lucide-react";
+import { HandCoins, TableProperties } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { allRouteList } from "@/shared/config/route";
@@ -17,6 +17,7 @@ import {
   PageIcon,
   PageTitle,
   ShootingStarIcon,
+  TreasuryIcon,
 } from "@/shared/ui";
 import { onRouteToExternalLink } from "@/shared/utils/common";
 
@@ -123,8 +124,28 @@ const OrangeContent = () => {
   const UtilityCardsTemplate: UtilityCard[] = useMemo(
     () => [
       {
+        title: "M2·비트코인",
+        icon: <BanknoteIcon size={28} className={ICON_CLASS} />,
+        onClick: onClickM2BtcUtility,
+      },
+      {
+        title: "현물 ETF 현황",
+        icon: <EagleIcon size={28} className={ICON_CLASS} />,
+        onClick: onClickEtfUtility,
+      },
+      {
+        title: "트레저리",
+        icon: <TreasuryIcon size={28} className={ICON_CLASS} />,
+        onClick: onClickTreasuryUtility,
+      },
+      {
+        title: "월별 등락률",
+        icon: <CalendarIcon size={26} className={ICON_CLASS} />,
+        onClick: onClickCagrUtility,
+      },
+      {
         title: "밈 저장소",
-        icon: <ShootingStarIcon size={30} />,
+        icon: <ShootingStarIcon size={30} className={ICON_CLASS} />,
         onClick: onClickMemeUtility,
       },
       {
@@ -133,24 +154,9 @@ const OrangeContent = () => {
         onClick: onClickBtc2ApartmentUtility,
       },
       {
-        title: "DCA 계산기",
-        icon: <MinerIcon size={32} />,
-        onClick: onClickDcaUtility,
-      },
-      {
-        title: "트레저리",
-        icon: <Building2 size={26} strokeWidth={1.8} />,
-        onClick: onClickTreasuryUtility,
-      },
-      {
-        title: "현물 ETF 현황",
-        icon: <EagleIcon size={28} className={ICON_CLASS} />,
-        onClick: onClickEtfUtility,
-      },
-      {
-        title: "M2·비트코인",
-        icon: <BanknoteIcon size={28} className={ICON_CLASS} />,
-        onClick: onClickM2BtcUtility,
+        title: "반감기 카운트",
+        icon: <HalfCircleIcon size={24} />,
+        onClick: onClickHalvingCountdownUtility,
       },
       {
         title: "출금 수수료",
@@ -164,14 +170,9 @@ const OrangeContent = () => {
         onClick: onClickWithdrawFeeUtility,
       },
       {
-        title: "월별 등락률",
-        icon: <CalendarIcon size={26} className={ICON_CLASS} />,
-        onClick: onClickCagrUtility,
-      },
-      {
-        title: "반감기 카운트",
-        icon: <HalfCircleIcon size={24} />,
-        onClick: onClickHalvingCountdownUtility,
+        title: "DCA 계산기",
+        icon: <MinerIcon size={32} />,
+        onClick: onClickDcaUtility,
       },
       {
         title: "BIP39",
