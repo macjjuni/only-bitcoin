@@ -12,7 +12,7 @@ export default function GuideArticle({ title, subtitle, className, children }: G
   return (
     <Card className={className}>
       <article className="flex flex-col gap-2 p-4">
-        <header className="flex flex-col gap-1">
+        <header className="flex flex-col gap-2">
           <h2 className="text-[18px] font-bold">{title}</h2>
           {subtitle && <p className="text-sm opacity-80 leading-relaxed">{subtitle}</p>}
         </header>
