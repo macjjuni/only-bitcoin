@@ -6,14 +6,13 @@ import { memo, type RefObject, useEffect, useMemo, useState } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { krwMarketOptions, usdMarketOptions } from "@/entities/bitcoin/model/market";
 import { BITCOIN_COLOR } from "@/shared/config/color";
-import { env } from "@/shared/config/env";
+import { env, SERVICE_DOMAIN } from "@/shared/config/env";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
 import useSettingStore from "@/shared/stores/settingStore";
 import { BtcTextLogo, ShareCardQr } from "@/shared/ui";
 import { calcPremiumPercent } from "@/shared/utils/calculate";
 
 export const PREMIUM_SHARE_CARD_DESIGN_WIDTH = 440;
-const SERVICE_DOMAIN = "ONLY-BTC.APP";
 const BG_UP_IMAGE_SRC = "/images/premium/premium-up-bg.webp";
 const BG_DOWN_IMAGE_SRC = "/images/premium/premium-down-bg.webp";
 export const SHARE_QR_CANVAS_ID = "premium-share-qr";
@@ -212,7 +211,7 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
         {/* 푸터 */}
         <div className="mt-6 flex items-center justify-between gap-2 border-t border-white/15 pt-4">
           <span
-            className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-white font-jetbrains"
+            className="flex items-center gap-1.5 font-jetbrains text-sm font-bold uppercase tracking-wider text-white"
             style={{ textShadow: `0 0 14px ${themeColor}80` }}
           >
             <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: themeColor }} />

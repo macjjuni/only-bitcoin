@@ -11,3 +11,5 @@ export const env = {
   NEXT_PUBLIC_FEEDBACK_URL: process.env.NEXT_PUBLIC_FEEDBACK_URL || "https://x.com/a7w2en7z_",
   NEXT_PUBLIC_LOGO: process.env.NEXT_PUBLIC_LOGO || "",
 } as const;
+
+export const SERVICE_DOMAIN = env.NEXT_PUBLIC_URL.replace(/^https?:\/\/(www\.)?/, "");

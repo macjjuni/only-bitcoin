@@ -1,13 +1,11 @@
 import { fetchInitialBlocks } from "@/entities/block/server";
-import { env } from "@/shared/config/env";
+import { SERVICE_DOMAIN } from "@/shared/config/env";
 import { createBreadcrumbSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
 import { JsonLd, PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import { HalvingCountdown } from "@/views/blocks";
 import CosmicBackdrop from "@/views/blocks/ui/halving-countdown/CosmicBackdrop";
-
-const SERVICE_DOMAIN = env.NEXT_PUBLIC_URL.replace(/^https?:\/\/(www\.)?/, "");
 
 export const metadata = createPageMetadata({
   path: "/blocks/countdown",

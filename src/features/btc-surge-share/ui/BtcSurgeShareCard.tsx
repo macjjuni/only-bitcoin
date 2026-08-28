@@ -4,6 +4,7 @@ import { KIcon } from "kku-ui";
 import { memo, type RefObject, useId, useMemo, useState } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { BITCOIN_COLOR } from "@/shared/config/color";
+import { SERVICE_DOMAIN } from "@/shared/config/env";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
 import { BtcTextLogo, UpdownIcon } from "@/shared/ui";
 import type { ShareCardTimeframe } from "../model/shareCardTimeframe";
@@ -17,7 +18,6 @@ import { BtcSurgeTimeframeSelector } from "./BtcSurgeTimeframeSelector";
  * 캡처 시점에만 노출하는 방식은 `html-to-image` 에 클론 훅이 없어 DOM 토글이 필요하고,
  * 그 리렌더 대기 구간이 Safari 클립보드의 user gesture 동기 제약을 깨뜨리므로 상시 노출한다.
  */
-const SERVICE_DOMAIN = "ONLY-BTC.APP";
 export const BTC_SURGE_CARD_DESIGN_WIDTH = 440;
 export const COIN_IMAGE_SRC = "/images/btc-3d-card.png";
 
@@ -394,7 +394,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       {/* 하단 메타 정보 ( 좌측 서비스 도메인은 SNS 확산용 워터마크 ) */}
       <div className="relative z-10 flex justify-between items-center gap-2 text-sm font-medium text-neutral-200 pt-4 border-t border-white/10">
         <span
-          className="flex items-center gap-1.5 font-black tracking-wider text-white text-sm uppercase whitespace-nowrap flex-shrink-0"
+          className="flex items-center gap-1.5 font-jetbrains font-black tracking-wider text-white text-sm uppercase whitespace-nowrap flex-shrink-0"
           style={{ textShadow: `0 0 14px ${themeColor}80` }}
         >
           <span

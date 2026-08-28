@@ -3,7 +3,7 @@
 import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { BITCOIN_COLOR } from "@/shared/config/color";
-import { env } from "@/shared/config/env";
+import { SERVICE_DOMAIN } from "@/shared/config/env";
 import useSettingStore from "@/shared/stores/settingStore";
 import { Card, CardContent } from "@/shared/ui";
 import type { M2BtcChartPoint } from "../lib/buildM2BtcSeries";
@@ -29,9 +29,6 @@ const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false })
  * 길어져 1.8 로 눕힘. 카드 전체를 황금비로 맞추려면 차트가 절반까지 줄어 과함.
  */
 const CHART_ASPECT_RATIO_CLASS = "aspect-[1.8]";
-
-/** 캡처 이미지가 퍼졌을 때 출처가 남도록 범례 맞은편에 두는 도메인. */
-const SERVICE_DOMAIN = env.NEXT_PUBLIC_URL.replace(/^https?:\/\//, "");
 
 interface M2BtcChartProps {
   chartPoints: M2BtcChartPoint[];

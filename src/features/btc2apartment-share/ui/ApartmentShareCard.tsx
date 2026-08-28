@@ -10,7 +10,7 @@ import {
   type LandmarkApartment,
 } from "@/entities/apartment";
 import { BITCOIN_COLOR } from "@/shared/config/color";
-import { env } from "@/shared/config/env";
+import { env, SERVICE_DOMAIN } from "@/shared/config/env";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
 import { BtcTextLogo, ShareCardQr, WonIcon } from "@/shared/ui";
 import {
@@ -20,7 +20,6 @@ import {
   formatMultiple,
 } from "../lib/buildShareStats";
 
-const SERVICE_DOMAIN = "ONLY-BTC.APP";
 export const APARTMENT_CARD_DESIGN_WIDTH = 440;
 const MULTIPLE_BADGE_CLASS = "w-[70px] whitespace-nowrap text-left"; // 배수 뱃지
 const COMPARISON_ROW_CLASS = "text-base font-bold"; // 비교 행의 글자 크기
@@ -236,7 +235,7 @@ function ApartmentShareCard({
         {/* {MethodologyTemplate} */}
         <div className="mt-6 flex items-center justify-between gap-2 border-t border-white/15 pt-4">
           <span
-            className="flex items-center gap-1.5 text-sm font-bold uppercase tracking-wider text-white"
+            className="flex items-center gap-1.5 font-jetbrains text-sm font-bold uppercase tracking-wider text-white"
             style={{ textShadow: `0 0 14px ${BITCOIN_COLOR}80` }}
           >
             <span className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: BITCOIN_COLOR }} />
