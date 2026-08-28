@@ -241,7 +241,7 @@ export function M2BtcChart({ chartPoints, currentMonthKey }: M2BtcChartProps) {
     <Card className="font-pretendard">
       <CardContent className="flex flex-col gap-3 p-4">
         <div>
-          <h2 className="text-base font-bold">월별 M2와 비트코인 가격</h2>
+          <h2 className="text-lg font-bold">월별 M2와 비트코인 가격</h2>
           {chartPeriodLabel && (
             <p className="mt-0.5 text-[11px] text-muted-foreground">{chartPeriodLabel}</p>
           )}
@@ -255,14 +255,14 @@ export function M2BtcChart({ chartPoints, currentMonthKey }: M2BtcChartProps) {
         {ChartTemplate}
 
         <div className="flex items-center justify-between gap-3 -mt-2.5">
+          <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">
+            {SERVICE_DOMAIN}
+          </span>
+
           <div className="flex items-center gap-3">
             <LegendItem color={BITCOIN_COLOR} label="BTC" />
             {hasUsM2Data && <LegendItem color={usM2Color} label="US M2" />}
           </div>
-
-          <span className="shrink-0 text-[10px] font-medium uppercase tracking-wide text-muted-foreground/70">
-            {SERVICE_DOMAIN}
-          </span>
         </div>
       </CardContent>
     </Card>
