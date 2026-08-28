@@ -11,6 +11,10 @@ export { default as CollapseSection } from "./CollapseSection";
 export { default as ConfettiEffect } from "./ConfettiEffect";
 export { default as CountText } from "./CountText";
 export { default as FloatingBannerButton } from "./FloatingBannerButton";
+export { default as GuideArticle } from "./GuideArticle";
+export { default as GuideParagraph } from "./GuideParagraph";
+export { default as GuideSection } from "./GuideSection";
+export { default as GuideWarningBox } from "./GuideWarningBox";
 export { default as HighlightText } from "./HighlightText";
 export {
   default as InputGroup,
