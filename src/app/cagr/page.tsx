@@ -8,7 +8,7 @@ import CagrLoading from "./loading";
 
 const PAGE_TITLE = "월별 등락률";
 const PAGE_DESCRIPTION =
-  "2010년부터 지금까지 비트코인이 매달 얼마나 오르고 내렸는지 연도 × 월 히트맵 한 장으로";
+  "2010년부터 현재까지 비트코인의 월별 등락률을 연도별 히트맵으로 확인하세요.";
 
 export const metadata = createPageMetadata({
   path: "/cagr",
