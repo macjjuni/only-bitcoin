@@ -1,6 +1,6 @@
 ---
 name: fsd-component-convention
-description: React/Next.js/TypeScript component and custom hook writing conventions based on FSD (Feature-Sliced Design) architecture (#region structure, Self-Documenting Code, readability-first naming, layer unidirectional dependency rules, Named Export, Biome formatting, JSX rendering optimization). Use when creating new .tsx/.ts files or hooks, or refactoring existing ones.
+description: React/Next.js/TypeScript component and custom hook writing conventions based on FSD (Feature-Sliced Design) architecture (#region structure, Self-Documenting Code, readability-first naming, layer unidirectional dependency rules, public API exports, Biome formatting, JSX rendering optimization). Use when creating new .tsx/.ts files or hooks, or refactoring existing ones.
 ---
 
 # FSD-based Component & Custom Hook Writing Conventions
@@ -60,7 +60,7 @@ app (top)
 - **switch**: Always include `default:` and throw `new Error(...)` for unreachable cases.
 - **No Variable Shadowing**: Do not create inner scope variables matching outer scope names.
 - **Acronyms**: Uppercase trailing acronyms (`productID`, `httpCode`).
-- **Named Export**: Use **Named Export** (`export function ...` / `export function use...`) for all components/modules except Next.js routing files (`page.tsx`, `layout.tsx`).
+- **Exports & Public API**: Follow the established convention of the slice being edited. Both direct named exports and a local default export re-exposed as a named public API from `index.ts` are valid. For example, `export default GuideArticle` with `export { default as GuideArticle } from './GuideArticle'` is allowed. Keep the public import name stable and avoid introducing a different export style into an existing slice without a slice-wide migration.
 
 ---
 
@@ -221,5 +221,5 @@ const BitcoinPriceCard = ({ exchangeName }) => {
   );
 };
 
-export default BitcoinPriceCard; // BAD: Default export
+export default BitcoinPriceCard; // Follow the existing slice convention and expose it through the slice public API.
 ```
