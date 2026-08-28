@@ -175,7 +175,7 @@ export function createM2BtcChartOptions({
     dataLabels: { enabled: false },
     grid: {
       borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
-      padding: { left: -4, right: -4 },
+      padding: { bottom: -16, left: -4, right: -4, top: -16 },
       strokeDashArray: 3,
       xaxis: { lines: { show: false } },
       yaxis: { lines: { show: true } },
