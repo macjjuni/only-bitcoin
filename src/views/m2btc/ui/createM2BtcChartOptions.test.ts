@@ -37,6 +37,16 @@ describe("createM2BtcChartOptions", () => {
     expect(chartOptions.yaxis).toHaveLength(2);
   });
 
+  it("범례를 차트 밖에서 직접 그리므로 내장 범례는 끈다", () => {
+    const chartOptions = createM2BtcChartOptions({
+      bitcoinLogAxisRange: { min: 0, max: 5 },
+      isDark: false,
+      usM2ValuesInBillionsUsd: [23_000],
+    });
+
+    expect(chartOptions.legend).toEqual({ show: false });
+  });
+
   it("양쪽 Y축 레이블을 차트 바깥 방향으로 벌린다", () => {
     const chartOptions = createM2BtcChartOptions({
       bitcoinLogAxisRange: { min: 0, max: 5 },

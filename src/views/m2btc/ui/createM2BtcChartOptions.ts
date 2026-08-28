@@ -3,6 +3,20 @@ import { BITCOIN_COLOR } from "@/shared/config/color";
 
 export const US_M2_COLOR = "#2563EB";
 
+/**
+ * 다크 모드에서 쓸 US M2 색.
+ *
+ * `US_M2_COLOR` 는 어두운 배경에서 대비를 못 채워 11px 라벨이 안 읽힘.
+ * 글자만 밝히면 같은 카드 안에 파랑이 두 종류로 보여서 선·축·점·글자를
+ * 다 같이 바꿈. 대응이 어긋나면 범례가 거짓말을 함.
+ */
+const US_M2_COLOR_DARK = "#60A5FA";
+
+/** 테마에 맞는 US M2 색을 돌려준다. */
+export function resolveUsM2Color(isDark: boolean): string {
+  return isDark ? US_M2_COLOR_DARK : US_M2_COLOR;
+}
+
 const BITCOIN_AXIS_TICK_COUNT = 6;
 const Y_AXIS_LABEL_OFFSET_X = 16;
 const M2_AXIS_PADDING_RATIO = 0.08;
@@ -159,6 +173,7 @@ export function createM2BtcChartOptions({
   usM2ValuesInBillionsUsd,
 }: CreateM2BtcChartOptionsParams): ApexOptions {
   const hasUsM2Data = usM2ValuesInBillionsUsd.length > 0;
+  const usM2Color = resolveUsM2Color(isDark);
   const m2AxisRange = resolveM2AxisRange(usM2ValuesInBillionsUsd);
   const axisLabelColor = resolveAxisLabelColor(isDark);
 
@@ -171,7 +186,7 @@ export function createM2BtcChartOptions({
       toolbar: { show: false },
       zoom: { enabled: false },
     },
-    colors: [BITCOIN_COLOR, US_M2_COLOR],
+    colors: [BITCOIN_COLOR, usM2Color],
     dataLabels: { enabled: false },
     grid: {
       borderColor: isDark ? "rgba(255,255,255,0.08)" : "rgba(0,0,0,0.07)",
@@ -180,6 +195,7 @@ export function createM2BtcChartOptions({
       xaxis: { lines: { show: false } },
       yaxis: { lines: { show: true } },
     },
+    // 범례는 도메인과 한 줄에 놓으려고 M2BtcChart 에서 직접 그림.
     legend: { show: false },
     markers: {
       hover: { size: 4, sizeOffset: 0 },
@@ -272,7 +288,7 @@ export function createM2BtcChartOptions({
                 },
                 offsetX: -Y_AXIS_LABEL_OFFSET_X,
                 style: {
-                  colors: US_M2_COLOR,
+                  colors: usM2Color,
                   fontFamily: "Roboto Mono",
                   fontSize: "10px",
                 },
