@@ -32,7 +32,15 @@ const LIVE_ROUTES = [
 ] as const;
 
 /** 코드를 고쳐야 내용이 바뀌는 도구·읽을거리 페이지. */
-const STATIC_ROUTES = ["/dca", "/cagr", "/solo-mining", "/orange", "/meme", "/bip39"] as const;
+const STATIC_ROUTES = [
+  "/dca",
+  "/cagr",
+  "/m2btc",
+  "/solo-mining",
+  "/orange",
+  "/meme",
+  "/bip39",
+] as const;
 
 export default function sitemap(): MetadataRoute.Sitemap {
   // #region 1. 실시간 데이터 페이지

@@ -91,6 +91,13 @@ const clientRoutes: ClientRoute[] = [
   { title: "DCA", path: "/dca", isNav: false, isFavorite: false, icon: null },
   { title: "월별 등락률", path: "/cagr", isNav: false, isFavorite: false, icon: null },
   {
+    title: "미국 M2와 비트코인",
+    path: "/m2btc",
+    isNav: false,
+    isFavorite: false,
+    icon: null,
+  },
+  {
     title: "Solo Mining",
     path: "/solo-mining",
     isNav: false,
