@@ -38,11 +38,6 @@ const HalvingProgressBar = ({ className = "", initialBlockHeight }: HalvingProgr
 
   return (
     <div className={`flex flex-col gap-2 ${className}`}>
-      <div className="flex items-center justify-between text-sm">
-        <span className="font-bold">현재 반감기 진행률</span>
-        <span className="font-number font-bold text-bitcoin">{halvingPercent}%</span>
-      </div>
-
       <div
         className="relative h-3.5 w-full overflow-hidden rounded-full bg-black/10 dark:bg-white/15"
         role="progressbar"
