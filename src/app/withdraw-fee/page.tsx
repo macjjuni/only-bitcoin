@@ -1,10 +1,10 @@
-import { WITHDRAW_FEE_VERIFIED_AT } from "@/entities/exchange";
-import { fetchExchangeWithdrawSnapshot } from "@/entities/exchange/server";
+import { Suspense } from "react";
 import { createFaqSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
 import { JsonLd, PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
-import { WITHDRAW_FEE_FAQ, WithdrawFeeGuideArticle, WithdrawFeePanel } from "@/views/withdraw-fee";
+import { WITHDRAW_FEE_FAQ, WithdrawFeeGuideArticle, WithdrawFeeScreen } from "@/views/withdraw-fee";
+import WithdrawFeeLoading from "./loading";
 
 const PAGE_TITLE = "거래소 비트코인 출금 수수료";
 /** 화면에 보이는 제목. 메타 타이틀은 검색어를 더 담아야 해서 따로 둠. */
@@ -26,9 +26,7 @@ export const metadata = createPageMetadata({
   description: PAGE_DESCRIPTION,
 });
 
-export default async function WithdrawFeePage() {
-  const snapshot = await fetchExchangeWithdrawSnapshot();
-
+export default function WithdrawFeePage() {
   return (
     <PageLayout className="gap-2.5">
       <JsonLd schema={createFaqSchema(WITHDRAW_FEE_FAQ)} />
@@ -37,13 +35,9 @@ export default async function WithdrawFeePage() {
         title={HEADING}
         description="출금 수수료와 최소 출금 수량을 한눈에 비교해 보세요."
       />
-      {/* BTC 원화 환산액은 소켓 시세로 클라이언트에서 계산됨. 서버는 수량만 내려줌. */}
-      <WithdrawFeePanel
-        exchanges={snapshot.exchanges}
-        rows={snapshot.rows}
-        fetchedAt={snapshot.fetchedAt}
-        verifiedAt={WITHDRAW_FEE_VERIFIED_AT}
-      />
+      <Suspense fallback={<WithdrawFeeLoading />}>
+        <WithdrawFeeScreen />
+      </Suspense>
       <WithdrawFeeGuideArticle />
     </PageLayout>
   );
