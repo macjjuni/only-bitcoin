@@ -17,6 +17,8 @@ const DATA_SOURCES = [
   "비트코인 시세(과거 BTC/USD): blockchain.com",
   "도미넌스(BTC.D): CoinGecko",
   "공포·탐욕 지수: alternative.me",
+  "비트코인 현물 ETF 자금 흐름: Xoomar(xoomar.com)",
+  "미국 M2 통화량: FRED(미국 세인트루이스 연방준비은행, M2SL 시리즈)",
   "원/달러 환율: Naver(KEB)",
   "블록·트랜잭션 정보: mempool.space",
   "아파트 실거래가: 국토교통부 공공데이터(data.go.kr)",
@@ -70,7 +72,7 @@ const PolicyLink = ({ href, children }: { href: string; children: ReactNode }) =
 
 const PrivacyPolicy = () => {
   return (
-    <Card className="w-full">
+    <Card className="w-full font-pretendard">
       <article className="flex flex-col gap-2 p-4">
         <header className="flex flex-col gap-1">
           <h1 className="text-[18px] font-bold">개인정보처리방침</h1>
@@ -164,8 +166,8 @@ const PrivacyPolicy = () => {
           <PolicySection title="5. 데이터 및 API 활용 안내">
             <PolicyParagraph>
               본 서비스가 제공하는 시세, 거래소 프리미엄(Premium), 도미넌스(BTC.D), 공포·탐욕
-              지수(F&amp;G Index), 블록 정보 등은 공개 API 및 국내외 거래소의 실시간 데이터를
-              기반으로 조회·연동됩니다.
+              지수(F&amp;G Index), 블록 정보, 비트코인 현물 ETF 자금 흐름, 미국 M2 통화량 등은 공개
+              API 및 국내외 거래소·기관의 데이터를 기반으로 조회·연동됩니다.
             </PolicyParagraph>
             <PolicyList items={DATA_SOURCES} />
             <PolicyParagraph>

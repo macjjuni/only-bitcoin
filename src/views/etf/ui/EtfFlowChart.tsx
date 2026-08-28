@@ -158,7 +158,7 @@ export function EtfFlowChart({ dailyFlows }: EtfFlowChartProps) {
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-bold">일별 추정 순유입</h2>
+            <h2 className="text-base font-bold">BTC 현물 ETF 순유입</h2>
           </div>
           <KDropdownMenu>
             <KDropdownMenuTrigger

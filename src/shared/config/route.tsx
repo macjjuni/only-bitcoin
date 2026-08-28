@@ -1,5 +1,6 @@
 import type { ReactNode } from "react";
 import {
+  BanknoteIcon,
   BlockIcon,
   BuildingIcon,
   DashboardIcon,
@@ -95,7 +96,7 @@ const clientRoutes: ClientRoute[] = [
     path: "/m2btc",
     isNav: false,
     isFavorite: false,
-    icon: null,
+    icon: <BanknoteIcon size={24} />,
   },
   {
     title: "Solo Mining",
