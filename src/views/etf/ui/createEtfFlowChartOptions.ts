@@ -5,7 +5,6 @@ const UP_FLOW_COLOR = "#22c55e";
 const DOWN_FLOW_COLOR = "#ef4444";
 const CHART_TICK_AMOUNT = 4;
 const AXIS_PADDING_RATIO = 1.08;
-const X_AXIS_LABEL_PADDING_IN_PIXELS = 28;
 
 export interface EtfFlowChartOptionPoint {
   date: string;
@@ -29,6 +28,17 @@ interface DateAxisRange {
 }
 
 // region [Privates]
+const formatFlowAxisLabel = (valueInUsd: number): string => {
+  const absolute = Math.abs(valueInUsd);
+  const sign = valueInUsd > 0 ? "+" : valueInUsd < 0 ? "−" : "";
+
+  if (absolute >= 1e12) return `${sign}$${Math.round(absolute / 1e12)}T`;
+  if (absolute >= 1e9) return `${sign}$${Math.round(absolute / 1e9)}B`;
+  if (absolute >= 1e6) return `${sign}$${Math.round(absolute / 1e6)}M`;
+  if (absolute >= 1e3) return `${sign}$${Math.round(absolute / 1e3)}K`;
+  return `${sign}$${Math.round(absolute)}`;
+};
+
 const formatDateAxisLabel = (timestamp: number, isFullHistory: boolean): string => {
   const date = new Date(timestamp);
   const month = date.getMonth() + 1;
@@ -148,6 +158,8 @@ export const createEtfFlowChartOptions = ({
       tickAmount: CHART_TICK_AMOUNT,
       labels: {
         show: true,
+        // rotate: -45,
+        // rotateAlways: true,
         formatter: (value: string) => formatDateAxisLabel(Number(value), isFullHistory),
         hideOverlappingLabels: false,
         trim: false,
@@ -155,6 +167,7 @@ export const createEtfFlowChartOptions = ({
           colors: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.45)",
           fontSize: "11px",
           fontFamily: "Roboto Mono",
+          cssClass: "etf-flow-xaxis-label",
         },
       },
       axisBorder: { show: false },
@@ -169,10 +182,20 @@ export const createEtfFlowChartOptions = ({
       tooltip: { enabled: false },
     },
     yaxis: {
-      show: false,
+      show: true,
       min: flowAxisRange.min,
       max: flowAxisRange.max,
       forceNiceScale: false,
+      tickAmount: CHART_TICK_AMOUNT,
+      labels: {
+        formatter: (value: number) => formatFlowAxisLabel(value),
+        style: {
+          colors: isDark ? "rgba(255,255,255,0.5)" : "rgba(0,0,0,0.45)",
+          fontSize: "11px",
+          fontFamily: "Roboto Mono",
+        },
+        offsetX: -16,
+      },
     },
     annotations: {
       yaxis: [
@@ -189,9 +212,9 @@ export const createEtfFlowChartOptions = ({
       xaxis: { lines: { show: false } },
       yaxis: { lines: { show: false } },
       padding: {
-        left: X_AXIS_LABEL_PADDING_IN_PIXELS,
-        right: X_AXIS_LABEL_PADDING_IN_PIXELS,
-        top: 0,
+        left: 0,
+        right: 0,
+        top: -12,
         bottom: 0,
       },
     },

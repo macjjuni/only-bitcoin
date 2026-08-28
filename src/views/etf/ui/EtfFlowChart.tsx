@@ -158,7 +158,7 @@ export function EtfFlowChart({ dailyFlows }: EtfFlowChartProps) {
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-bold">BTC 현물 ETF 순유입</h2>
+            <h2 className="text-lg font-bold">BTC 현물 ETF 순유입</h2>
           </div>
           <KDropdownMenu>
             <KDropdownMenuTrigger
@@ -194,14 +194,14 @@ export function EtfFlowChart({ dailyFlows }: EtfFlowChartProps) {
           </div>
         </div>
 
-        <div className="flex items-end justify-between gap-3 border-t border-border pt-3">
+        <div className="flex items-start justify-between gap-3 border-t border-border pt-3">
           <div aria-live="polite">
-            <p className="text-[11px] text-muted-foreground">{periodSummaryLabel}</p>
-            <strong className={`font-number text-lg font-black ${periodFlowColorClassName}`}>
+            <p className="text-xs text-muted-foreground">{periodSummaryLabel}</p>
+            <strong className={`font-number text-xl font-black ${periodFlowColorClassName}`}>
               {formatSignedEtfFlowInUsd(periodNetFlowInUsd)}
             </strong>
           </div>
-          <div className="flex gap-3 text-[11px] text-muted-foreground">
+          <div className="flex gap-3 text-xs text-muted-foreground">
             <span className="inline-flex items-center gap-1">
               <i className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: UP_FLOW_COLOR }} />
               유입
@@ -216,7 +216,7 @@ export function EtfFlowChart({ dailyFlows }: EtfFlowChartProps) {
           </div>
         </div>
 
-        <p className="text-[11px] leading-relaxed text-muted-foreground">
+        <p className="text-sm leading-relaxed text-muted-foreground">
           모든 ETF가 집계된 거래일만 표시합니다. 일부 ETF만 집계된 최근 날짜는 제외하며, 검증 제외
           행의 순유입액은 합계에 포함하지 않습니다.
         </p>
