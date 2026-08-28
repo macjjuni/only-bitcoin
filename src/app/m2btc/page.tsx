@@ -8,7 +8,7 @@ import M2BtcLoading from "./loading";
 
 const PAGE_TITLE = "미국 M2와 비트코인";
 const PAGE_DESCRIPTION =
-  "2010년부터 현재까지 미국 M2 통화량과 비트코인 월말 달러 가격을 하나의 차트에서 비교하세요.";
+  "2010년부터 현재까지 미국 M2 통화량과 비트코인 월별 달러 가격을 하나의 차트에서 비교하세요.";
 
 export const metadata = createPageMetadata({
   description: PAGE_DESCRIPTION,
@@ -16,12 +16,12 @@ export const metadata = createPageMetadata({
   title: PAGE_TITLE,
 });
 
-/** BTC와 FRED 서버 캐시 주기에 맞춘 6시간 ISR. */
-export const revalidate = 21600;
+/** 가장 짧은 FRED 서버 캐시 주기에 맞춘 4시간 ISR. */
+export const revalidate = 14400;
 
 export default function M2BtcPage() {
   return (
-    <PageLayout className="gap-3">
+    <PageLayout className="gap-3 font-pretendard">
       <JsonLd
         schema={createWebApplicationSchema({
           description: PAGE_DESCRIPTION,

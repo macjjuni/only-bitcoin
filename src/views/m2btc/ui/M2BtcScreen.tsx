@@ -15,6 +15,7 @@ export async function M2BtcScreen() {
 
   // region [Privates]
   const chartPoints = buildM2BtcSeries(bitcoinMonthlyUsdMap, usM2MonthlyObservations);
+  const currentMonthKey = new Date().toISOString().slice(0, 7);
   // endregion
 
   if (usM2MonthlyObservations.length === 0) {
@@ -22,8 +23,8 @@ export async function M2BtcScreen() {
   }
 
   return (
-    <div className="flex flex-col gap-2.5">
-      <M2BtcChart chartPoints={chartPoints} />
+    <div className="flex flex-col gap-2.5 font-pretendard">
+      <M2BtcChart chartPoints={chartPoints} currentMonthKey={currentMonthKey} />
 
       <p className="px-2 text-[11px] leading-relaxed text-muted-foreground">
         출처: Blockchain.com Market Price · Federal Reserve Bank of St. Louis FRED M2SL

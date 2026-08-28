@@ -6,6 +6,7 @@ import { BITCOIN_COLOR } from "@/shared/config/color";
 import useSettingStore from "@/shared/stores/settingStore";
 import { Card, CardContent } from "@/shared/ui";
 import type { M2BtcChartPoint } from "../lib/buildM2BtcSeries";
+import { isCurrentBitcoinMonth } from "../lib/isCurrentBitcoinMonth";
 import {
   createM2BtcChartOptions,
   formatBitcoinPriceInUsd,
@@ -21,6 +22,7 @@ const CHART_HEIGHT = 360;
 
 interface M2BtcChartProps {
   chartPoints: M2BtcChartPoint[];
+  currentMonthKey: string;
 }
 
 // region [Privates]
@@ -29,8 +31,8 @@ function monthKeyToTimestamp(monthKey: string): number {
 }
 // endregion
 
-/** 미국 M2와 BTC 월말 가격을 이중 축으로 표시한다. */
-export function M2BtcChart({ chartPoints }: M2BtcChartProps) {
+/** 미국 M2와 BTC 월별 가격을 이중 축으로 표시한다. */
+export function M2BtcChart({ chartPoints, currentMonthKey }: M2BtcChartProps) {
   // region [Hooks]
   const isDark = useSettingStore((store) => store.theme) === "dark";
   // endregion
@@ -48,6 +50,7 @@ export function M2BtcChart({ chartPoints }: M2BtcChartProps) {
       return usM2InBillionsUsd === null ? [] : [usM2InBillionsUsd];
     });
   }, [chartPoints]);
+  const hasUsM2Data = usM2ValuesInBillionsUsd.length > 0;
   const firstMonthTimestamp = chartPoints[0]
     ? monthKeyToTimestamp(chartPoints[0].monthKey)
     : undefined;
@@ -96,8 +99,17 @@ export function M2BtcChart({ chartPoints }: M2BtcChartProps) {
   }, [chartPoints]);
   const chartAriaLabel =
     chartPoints.length > 0 && latestBitcoinPoint
-      ? `${formatMonthKey(chartPoints[0].monthKey)}부터 ${formatMonthKey(latestBitcoinPoint.monthKey)}까지 미국 M2와 비트코인 월말 가격 비교 차트`
-      : "미국 M2와 비트코인 월말 가격 비교 차트";
+      ? `${formatMonthKey(chartPoints[0].monthKey)}부터 ${formatMonthKey(latestBitcoinPoint.monthKey)}까지 미국 M2와 비트코인 월별 가격 비교 차트`
+      : "미국 M2와 비트코인 월별 가격 비교 차트";
+  const isLatestBitcoinMonthInProgress =
+    latestBitcoinPoint !== null &&
+    isCurrentBitcoinMonth(latestBitcoinPoint.monthKey, currentMonthKey);
+  const latestBitcoinPriceLabel = isLatestBitcoinMonthInProgress
+    ? "BTC 월간 최신값"
+    : "BTC 월말 종가";
+  const latestBitcoinMonthLabel = latestBitcoinPoint
+    ? `${formatMonthKey(latestBitcoinPoint.monthKey)}${isLatestBitcoinMonthInProgress ? " · 진행 중" : ""}`
+    : "";
 
   const LatestBitcoinTemplate = useMemo(() => {
     if (!latestBitcoinPoint) {
@@ -108,17 +120,15 @@ export function M2BtcChart({ chartPoints }: M2BtcChartProps) {
       <div className="min-w-0">
         <span className="flex items-center gap-1.5 text-[11px] text-muted-foreground">
           <i className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: BITCOIN_COLOR }} />
-          BTC 월말 종가
+          {latestBitcoinPriceLabel}
         </span>
         <strong className="mt-0.5 block truncate font-number text-base font-black">
           {formatBitcoinPriceInUsd(latestBitcoinPoint.bitcoinPriceInUsd)}
         </strong>
-        <span className="text-[10px] text-muted-foreground">
-          {formatMonthKey(latestBitcoinPoint.monthKey)}
-        </span>
+        <span className="text-[10px] text-muted-foreground">{latestBitcoinMonthLabel}</span>
       </div>
     );
-  }, [latestBitcoinPoint]);
+  }, [latestBitcoinMonthLabel, latestBitcoinPoint, latestBitcoinPriceLabel]);
 
   const LatestM2Template = useMemo(() => {
     if (!latestM2Point || latestM2Point.usM2InBillionsUsd === null) {
@@ -170,10 +180,28 @@ export function M2BtcChart({ chartPoints }: M2BtcChartProps) {
       </div>
     );
   }, [chartAriaLabel, chartOptions, chartPoints.length, chartSeries]);
+
+  const DataDescriptionTemplate = useMemo(() => {
+    if (!hasUsM2Data) {
+      return (
+        <>
+          BTC는 완료된 달의 월말 USD 종가와 진행 중인 달의 최신 USD 종가를 로그 축으로 표시합니다.
+          현재 비교 가능한 미국 M2 데이터가 없습니다.
+        </>
+      );
+    }
+
+    return (
+      <>
+        BTC는 완료된 달의 월말 USD 종가와 진행 중인 달의 최신 USD 종가를 로그 축으로 표시합니다. M2
+        미발표 월은 값을 임의로 채우지 않으며 파란 선만 마지막 공식 발표 월에서 끝납니다.
+      </>
+    );
+  }, [hasUsM2Data]);
   // endregion
 
   return (
-    <Card>
+    <Card className="font-pretendard">
       <CardContent className="flex flex-col gap-3 p-4 pb-3">
         <div className="flex items-start justify-between gap-4">
           {LatestBitcoinTemplate}
@@ -183,8 +211,7 @@ export function M2BtcChart({ chartPoints }: M2BtcChartProps) {
         {ChartTemplate}
 
         <p className="border-t border-border pt-3 text-[11px] leading-relaxed text-muted-foreground">
-          BTC는 월말 USD 종가를 로그 축으로 표시합니다. M2 미발표 월은 값을 임의로 채우지 않으며
-          파란 선만 마지막 공식 발표 월에서 끝납니다.
+          {DataDescriptionTemplate}
         </p>
       </CardContent>
     </Card>

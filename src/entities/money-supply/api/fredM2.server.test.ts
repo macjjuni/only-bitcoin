@@ -34,4 +34,21 @@ describe("getUsM2MonthlyObservations", () => {
       "[fred] FRED_API_KEY가 없어 미국 M2 데이터를 표시하지 않습니다.",
     );
   });
+
+  it("BTC 시계열의 첫 달부터 M2 관측값을 요청한다", async () => {
+    process.env.FRED_API_KEY = "test-fred-api-key";
+    const fetchSpy = vi.spyOn(globalThis, "fetch").mockResolvedValue(
+      new Response(
+        JSON.stringify({
+          observations: [{ date: "2010-08-01", value: "8800.1" }],
+        }),
+        { status: 200 },
+      ),
+    );
+
+    await getUsM2MonthlyObservations();
+
+    const requestedUrl = new URL(String(fetchSpy.mock.calls[0]?.[0]));
+    expect(requestedUrl.searchParams.get("observation_start")).toBe("2010-08-01");
+  });
 });

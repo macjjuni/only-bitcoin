@@ -157,6 +157,7 @@ export function createM2BtcChartOptions({
   lastMonthTimestamp,
   usM2ValuesInBillionsUsd,
 }: CreateM2BtcChartOptionsParams): ApexOptions {
+  const hasUsM2Data = usM2ValuesInBillionsUsd.length > 0;
   const m2AxisRange = resolveM2AxisRange(usM2ValuesInBillionsUsd);
   const axisLabelColor = resolveAxisLabelColor(isDark);
 
@@ -197,7 +198,7 @@ export function createM2BtcChartOptions({
       intersect: false,
       marker: { show: true },
       shared: true,
-      style: { fontFamily: "Roboto Mono", fontSize: "12px" },
+      style: { fontFamily: "Roboto Mono, Pretendard", fontSize: "12px" },
       theme: isDark ? "dark" : "light",
       x: { formatter: formatTooltipMonth },
       y: [
@@ -256,25 +257,29 @@ export function createM2BtcChartOptions({
         seriesName: "BTC",
         tickAmount: BITCOIN_AXIS_TICK_COUNT,
       },
-      {
-        decimalsInFloat: 1,
-        forceNiceScale: false,
-        labels: {
-          formatter: (valueInBillionsUsd: number) => {
-            return `$${(valueInBillionsUsd / 1_000).toFixed(1)}T`;
-          },
-          style: {
-            colors: US_M2_COLOR,
-            fontFamily: "Roboto Mono",
-            fontSize: "10px",
-          },
-        },
-        max: m2AxisRange.max,
-        min: m2AxisRange.min,
-        opposite: true,
-        seriesName: "US M2",
-        tickAmount: 5,
-      },
+      ...(hasUsM2Data
+        ? [
+            {
+              decimalsInFloat: 1,
+              forceNiceScale: false,
+              labels: {
+                formatter: (valueInBillionsUsd: number) => {
+                  return `$${(valueInBillionsUsd / 1_000).toFixed(1)}T`;
+                },
+                style: {
+                  colors: US_M2_COLOR,
+                  fontFamily: "Roboto Mono",
+                  fontSize: "10px",
+                },
+              },
+              max: m2AxisRange.max,
+              min: m2AxisRange.min,
+              opposite: true,
+              seriesName: "US M2",
+              tickAmount: 5,
+            },
+          ]
+        : []),
     ],
   };
 }

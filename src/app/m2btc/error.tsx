@@ -23,7 +23,7 @@ export default function M2BtcError({ error, reset }: M2BtcErrorProps) {
   // endregion
 
   return (
-    <div className="flex flex-col items-center justify-center gap-3 p-10 text-center">
+    <div className="flex flex-col items-center justify-center gap-3 p-10 text-center font-pretendard">
       <p className="text-sm text-muted-foreground">
         미국 M2 또는 비트코인 데이터를 불러오지 못했어요.
         <br />

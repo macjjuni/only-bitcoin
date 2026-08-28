@@ -4,7 +4,8 @@ import type { UsM2MonthlyObservation } from "../model/types";
 
 const FRED_SERIES_OBSERVATIONS_URL = "https://api.stlouisfed.org/fred/series/observations";
 const US_M2_SERIES_ID = "M2SL";
-const REVALIDATE_SECONDS = 60 * 60 * 6;
+const US_M2_OBSERVATION_START_DATE = "2010-08-01";
+const REVALIDATE_SECONDS = 60 * 60 * 4;
 
 interface FredM2SeriesResponse {
   observations?: FredM2Observation[];
@@ -24,6 +25,7 @@ async function fetchUsM2MonthlyObservations(): Promise<UsM2MonthlyObservation[]>
     const searchParams = new URLSearchParams({
       api_key: fredApiKey,
       file_type: "json",
+      observation_start: US_M2_OBSERVATION_START_DATE,
       series_id: US_M2_SERIES_ID,
       sort_order: "asc",
     });
@@ -60,7 +62,7 @@ async function fetchUsM2MonthlyObservations(): Promise<UsM2MonthlyObservation[]>
   }
 }
 
-/** 6시간 서버 캐시를 적용한 미국 M2 월간 시계열 조회 함수. */
+/** 4시간 서버 캐시를 적용한 미국 M2 월간 시계열 조회 함수. */
 export const getUsM2MonthlyObservations = unstable_cache(
   fetchUsM2MonthlyObservations,
   ["fred-us-m2-monthly"],
