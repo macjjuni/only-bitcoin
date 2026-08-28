@@ -1,16 +1,10 @@
-import { fetchInitialMacro } from "@/entities/bitcoin/server";
-import { fetchBitcoinEtfSnapshot } from "@/entities/etf/server";
+import { Suspense } from "react";
 import { createWebApplicationSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
 import { JsonLd, PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
-import {
-  EtfFetchFailedCard,
-  EtfFlowChart,
-  EtfFundListCard,
-  EtfGuideArticle,
-  EtfSummaryHero,
-} from "@/views/etf";
+import { EtfScreen } from "@/views/etf";
+import EtfLoading from "./loading";
 
 const ETF_PAGE_DESCRIPTION =
   "미국 비트코인 현물 ETF의 일별 추정 순유입, BTC 보유량, 운용자산과 BTC 현물 ETF별 현황을 확인하세요.";
@@ -26,26 +20,7 @@ export const metadata = createPageMetadata({
 /** Xoomar 서버 캐시 주기와 같은 1시간 ISR. */
 export const revalidate = 3600;
 
-export default async function EtfPage() {
-  const [snapshot, initialMacro] = await Promise.all([
-    fetchBitcoinEtfSnapshot(),
-    fetchInitialMacro(),
-  ]);
-
-  if (snapshot.hasFetchFailed) {
-    return (
-      <PageLayout className="gap-2.5">
-        <PageTitle
-          label="Bitcoin ETF Tracker"
-          title={ETF_PAGE_TITLE}
-          description={ETF_PAGE_SUBTITLE}
-        />
-        <EtfFetchFailedCard />
-        <EtfGuideArticle />
-      </PageLayout>
-    );
-  }
-
+export default function EtfPage() {
   return (
     <PageLayout className="gap-2.5">
       <JsonLd
@@ -60,15 +35,9 @@ export default async function EtfPage() {
         title={ETF_PAGE_TITLE}
         description={ETF_PAGE_SUBTITLE}
       />
-      <EtfSummaryHero
-        summary={snapshot.summary}
-        dailyFlows={snapshot.dailyFlows}
-        sourceUpdatedAt={snapshot.sourceUpdatedAt}
-        usdExRate={initialMacro.usdExRate}
-      />
-      <EtfFlowChart dailyFlows={snapshot.dailyFlows} />
-      <EtfFundListCard funds={snapshot.funds} />
-      <EtfGuideArticle />
+      <Suspense fallback={<EtfLoading />}>
+        <EtfScreen />
+      </Suspense>
     </PageLayout>
   );
 }
