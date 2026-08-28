@@ -5,8 +5,6 @@ import { Building2, HandCoins, TableProperties } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { type ReactNode, useCallback, useMemo } from "react";
 import { allRouteList } from "@/shared/config/route";
-import { useMounted } from "@/shared/lib/hooks";
-import useSettingStore from "@/shared/stores/settingStore";
 import {
   BanknoteIcon,
   BuildingIcon,
@@ -45,8 +43,6 @@ interface UtilityCard {
 const OrangeContent = () => {
   // region [Hooks]
   const router = useTransitionRouter();
-  const isMount = useMounted();
-  const isLab = useSettingStore((state) => state.setting.isLab);
   // endregion
 
   // region [Privates]
@@ -151,22 +147,11 @@ const OrangeContent = () => {
         icon: <EagleIcon size={28} className={ICON_CLASS} />,
         onClick: onClickEtfUtility,
       },
-      /**
-       * 실험실 스위치를 켠 사용자에게만 노출함.
-       *
-       * `isMount` 를 같이 보는 이유는 `isLab` 이 localStorage 에서 복원되는 값이라
-       * 서버 HTML 은 항상 꺼진 상태로 그려짐. 마운트 전에 켜면 카드 하나가
-       * 통째로 늘어나 하이드레이션이 어긋남. `CountText` 와 같은 방식.
-       */
-      ...(isMount && isLab
-        ? [
-            {
-              title: "M2·비트코인",
-              icon: <BanknoteIcon size={28} className={ICON_CLASS} />,
-              onClick: onClickM2BtcUtility,
-            },
-          ]
-        : []),
+      {
+        title: "M2·비트코인",
+        icon: <BanknoteIcon size={28} className={ICON_CLASS} />,
+        onClick: onClickM2BtcUtility,
+      },
       {
         title: "출금 수수료",
         icon: (
@@ -200,8 +185,6 @@ const OrangeContent = () => {
       onClickCagrUtility,
       onClickDcaUtility,
       onClickEtfUtility,
-      isLab,
-      isMount,
       onClickHalvingCountdownUtility,
       onClickM2BtcUtility,
       onClickWithdrawFeeUtility,
