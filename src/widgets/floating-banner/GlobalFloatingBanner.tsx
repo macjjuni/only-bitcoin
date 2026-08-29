@@ -11,6 +11,7 @@ import Btc2FiatFloatingBanner from "./ui/Btc2FiatFloatingBanner";
 import BtcSurgeShareFloatingBanner from "./ui/BtcSurgeShareFloatingBanner";
 import CountdownBackFloatingBanner from "./ui/CountdownBackFloatingBanner";
 import DcaAddRecordFloatingBanner from "./ui/DcaAddRecordFloatingBanner";
+import OrangeBackFloatingBanner from "./ui/OrangeBackFloatingBanner";
 import ScrollUpFloatingBanner from "./ui/ScrollUpFloatingBanner";
 
 interface BannerConfig {
@@ -95,6 +96,15 @@ const BANNER_CONFIGS: BannerConfig[] = [
     useIsVisible: () => {
       const pathname = usePathname();
       return pathname.startsWith("/dca");
+    },
+  },
+  {
+    id: "orange-back",
+    Component: OrangeBackFloatingBanner,
+    useIsVisible: () => {
+      const pathname = usePathname();
+      const orangeSubPaths = ["/m2btc", "/etf", "/treasury", "/cagr", "/meme", "/btc2apartment", "/withdraw-fee", "/dca", "/bip39"];
+      return orangeSubPaths.some((sub) => pathname.startsWith(sub));
     },
   },
   {
