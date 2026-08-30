@@ -80,6 +80,9 @@ useEffect(() => {
 
 ## 4. Git Commit Rules
 - **Co-Authored-By 금지:** 커밋 메시지에 `Co-Authored-By` 라인을 절대 포함하지 않고 한글로 작성.
+- **아카이브 데이터 커밋:** `pnpm dev` 실행 시 갱신되는 아카이브 JSON 파일은 `chore: 아카이브 데이터 업데이트(내용)` 형식으로 커밋한다.
+  - 예: `chore: 아카이브 데이터 업데이트(ETF 유입량)`
+  - 대상 파일: `src/entities/etf/model/bitcoinEtfFlowArchive.json`, `src/entities/bitcoin/model/btcMonthlyUsdArchive.json`, `src/entities/apartment/model/archive.json`
 
 ## 5. Communication Protocol
 
