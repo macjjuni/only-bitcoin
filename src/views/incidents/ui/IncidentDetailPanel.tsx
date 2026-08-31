@@ -1,3 +1,4 @@
+import { SquareArrowOutUpRight } from "lucide-react";
 import type { ReactNode } from "react";
 import {
   calculateIncidentAmountRatio,
@@ -57,7 +58,7 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
     <section
       aria-live="polite"
       aria-atomic="true"
-      className="flex min-h-72 flex-col gap-2.5 px-1"
+      className="flex min-h-64 flex-col gap-2.5 px-1"
       style={{ color: "var(--incident-text)" }}
     >
       <div className="flex flex-wrap items-center gap-1.5">
@@ -107,15 +108,19 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
 
       {DamageAmountTemplate}
       {DetailTemplate}
-
       <a
         href={activeIncident.article}
         target="_blank"
         rel="noopener noreferrer"
-        className="mt-auto w-fit text-[13px] font-medium leading-none underline underline-offset-2"
-        style={{ color: activeIncidentTypeColorToken.badgeForeground }}
+        className="inline-flex w-fit items-center gap-1 rounded-full border px-3 py-1.5
+          text-xs font-medium leading-none transition-opacity hover:opacity-75"
+        style={{
+          borderColor: activeIncidentTypeColorToken.badgeForeground,
+          color: activeIncidentTypeColorToken.badgeForeground,
+        }}
       >
         관련 기사
+        <SquareArrowOutUpRight size={12} />
       </a>
     </section>
   );

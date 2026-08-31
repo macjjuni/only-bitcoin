@@ -10,6 +10,7 @@ export const scopedIncidentStyles = `
   --incident-track: #eceef2;
   --incident-border: #dcdfe5;
   --incident-chip-background: #eceef2;
+  --incident-timeline-shadow: inset 0 2px 6px rgb(0 0 0 / 0.06), inset 0 -1px 3px rgb(0 0 0 / 0.03);
 
   --incident-hack-background: #fdeceb;
   --incident-hack-foreground: #8c2f26;
@@ -41,6 +42,7 @@ export const scopedIncidentStyles = `
   --incident-track: #26282c;
   --incident-border: #454951;
   --incident-chip-background: #26282c;
+  --incident-timeline-shadow: inset 0 2px 6px rgb(0 0 0 / 0.25), inset 0 -1px 3px rgb(0 0 0 / 0.15);
 
   --incident-hack-background: rgb(228 87 76 / 0.16);
   --incident-hack-foreground: #ff9a90;

@@ -104,9 +104,19 @@ export function calculateTimelineNodeDiameter(amountInKrw?: number): number {
   );
 }
 
-/** `2025-11`을 타임라인용 `25.11`로 변환한다. */
+/** 두 `YYYY-MM` 날짜 사이의 개월 수를 계산한다. */
+export function calculateMonthsBetween(earlierDate: string, laterDate: string): number {
+  const earlierYear = Number(earlierDate.slice(0, 4));
+  const earlierMonth = Number(earlierDate.slice(5, 7));
+  const laterYear = Number(laterDate.slice(0, 4));
+  const laterMonth = Number(laterDate.slice(5, 7));
+
+  return (laterYear - earlierYear) * 12 + (laterMonth - earlierMonth);
+}
+
+/** `2025-11`을 타임라인용 `2025.11`로 변환한다. */
 export function formatIncidentShortDate(incidentDate: string): string {
-  return `${incidentDate.slice(2, 4)}.${incidentDate.slice(5, 7)}`;
+  return `${incidentDate.slice(0, 4)}.${incidentDate.slice(5, 7)}`;
 }
 
 /** `2025-11`을 상세 정보와 접근성 라벨용 `2025년 11월`로 변환한다. */

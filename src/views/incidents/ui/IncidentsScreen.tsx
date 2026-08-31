@@ -261,8 +261,10 @@ export default function IncidentsScreen(): ReactNode {
           <section
             ref={timelineTrackReference}
             aria-label="거래소 사고 타임라인"
-            className="scrollbar-hide flex h-[120px] -mx-2 snap-x bg-neutral-100 dark:bg-neutral-900
-              py-4 snap-proximity overflow-x-auto overflow-y-hidden overscroll-x-contain"
+            className="scrollbar-hide flex h-[120px] -mx-2 snap-x rounded-lg bg-neutral-100
+              dark:bg-neutral-900 py-4 snap-proximity overflow-x-auto overflow-y-hidden
+              overscroll-x-contain"
+            style={{ boxShadow: "var(--incident-timeline-shadow)" }}
           >
             <span aria-hidden className="shrink-0" style={{ width: timelineEdgeSpacerWidth }} />
 
