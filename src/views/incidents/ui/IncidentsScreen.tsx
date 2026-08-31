@@ -8,6 +8,7 @@ import {
   useRef,
   useState,
 } from "react";
+import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import {
   calculateIncidentAmountRatio,
@@ -124,15 +125,6 @@ const incidentTypeColorTokens: Record<IncidentType, IncidentTypeColorToken> = {
   },
 };
 
-/** 후속 작업에서 쿼리 스트링 동작을 연결할 필터 목록. 이번 범위에서는 UI만 제공한다. */
-const incidentFilters = [
-  { label: "전체", queryString: null },
-  { label: "해킹", queryString: "type=hack" },
-  { label: "출금중지", queryString: "type=halt" },
-  { label: "프로토콜", queryString: "type=protocol" },
-  { label: "국내", queryString: "region=kr" },
-] as const;
-
 const timelineItemWidthInPixels = 76;
 const timelineEdgeSpacerWidth = `calc(50% - ${timelineItemWidthInPixels / 2}px)`;
 const centerDetectionThresholdRatio = 0.4;
@@ -145,9 +137,24 @@ interface YearJumpChipProps {
   yearAnchor: IncidentYearAnchor;
   isActive: boolean;
   onSelectYear: (incidentIndex: number) => void;
+  onRegisterYearJumpChip: (year: string, yearJumpChipElement: HTMLButtonElement | null) => void;
 }
 
-function YearJumpChip({ yearAnchor, isActive, onSelectYear }: YearJumpChipProps): ReactNode {
+function YearJumpChip({
+  yearAnchor,
+  isActive,
+  onSelectYear,
+  onRegisterYearJumpChip,
+}: YearJumpChipProps): ReactNode {
+  //#region [Hooks]
+  const onAssignYearJumpChipReference = useCallback(
+    (yearJumpChipElement: HTMLButtonElement | null): void => {
+      onRegisterYearJumpChip(yearAnchor.year, yearJumpChipElement);
+    },
+    [onRegisterYearJumpChip, yearAnchor.year],
+  );
+  //#endregion
+
   //#region [Events]
   const onClickYearJumpChip = (): void => {
     onSelectYear(yearAnchor.incidentIndex);
@@ -156,6 +163,7 @@ function YearJumpChip({ yearAnchor, isActive, onSelectYear }: YearJumpChipProps)
 
   return (
     <button
+      ref={onAssignYearJumpChipReference}
       type="button"
       onClick={onClickYearJumpChip}
       aria-current={isActive ? "true" : undefined}
@@ -418,6 +426,8 @@ export default function IncidentsScreen(): ReactNode {
   //#region [Hooks]
   const timelineTrackReference = useRef<HTMLElement>(null);
   const timelineNodeReferences = useRef<Array<HTMLButtonElement | null>>([]);
+  const yearJumpNavigationReference = useRef<HTMLElement>(null);
+  const yearJumpChipReferences = useRef<Record<string, HTMLButtonElement | null>>({});
   const detectionAnimationFrameReference = useRef<number | null>(null);
   const activeIncidentIndexReference = useRef(0);
   const [activeIncidentIndex, setActiveIncidentIndex] = useState(0);
@@ -508,6 +518,44 @@ export default function IncidentsScreen(): ReactNode {
     [],
   );
 
+  const registerYearJumpChip = useCallback(
+    (year: string, yearJumpChipElement: HTMLButtonElement | null): void => {
+      yearJumpChipReferences.current[year] = yearJumpChipElement;
+    },
+    [],
+  );
+
+  const scrollActiveYearChipIntoView = useCallback((activeYear: string): void => {
+    const yearJumpNavigationElement = yearJumpNavigationReference.current;
+    const activeYearJumpChipElement = yearJumpChipReferences.current[activeYear];
+
+    if (!yearJumpNavigationElement || !activeYearJumpChipElement) {
+      return;
+    }
+
+    const yearJumpNavigationRectangle = yearJumpNavigationElement.getBoundingClientRect();
+    const activeYearJumpChipRectangle = activeYearJumpChipElement.getBoundingClientRect();
+    const rightOverflowInPixels =
+      activeYearJumpChipRectangle.right - yearJumpNavigationRectangle.right;
+    const leftOverflowInPixels =
+      activeYearJumpChipRectangle.left - yearJumpNavigationRectangle.left;
+
+    if (rightOverflowInPixels > 0) {
+      yearJumpNavigationElement.scrollTo({
+        left: yearJumpNavigationElement.scrollLeft + rightOverflowInPixels + 8,
+        behavior: doesUserPreferReducedMotion() ? "auto" : "smooth",
+      });
+      return;
+    }
+
+    if (leftOverflowInPixels < 0) {
+      yearJumpNavigationElement.scrollTo({
+        left: yearJumpNavigationElement.scrollLeft + leftOverflowInPixels - 8,
+        behavior: doesUserPreferReducedMotion() ? "auto" : "smooth",
+      });
+    }
+  }, []);
+
   const selectTimelineIncident = useCallback(
     (incidentIndex: number): void => {
       scrollIncidentToCenter(incidentIndex);
@@ -562,53 +610,27 @@ export default function IncidentsScreen(): ReactNode {
   const activeIncidentYear = activeIncident.date.slice(0, 4);
   //#endregion
 
+  //#region [Life Cycles]
+  useEffect(() => {
+    scrollActiveYearChipIntoView(activeIncidentYear);
+  }, [activeIncidentYear, scrollActiveYearChipIntoView]);
+  //#endregion
+
   return (
     <PageLayout>
       <div className="incidents flex flex-col gap-4 font-pretendard">
         <style>{scopedIncidentStyles}</style>
 
-        <header className="flex flex-col gap-2 px-1 pt-1">
-          <h1
-            className="text-[22px] font-bold leading-none tracking-[-0.5px]"
-            style={{ color: "var(--incident-text)" }}
-          >
-            거래소 사고 연표
-          </h1>
-          <p className="text-[13px] leading-none" style={{ color: "var(--incident-text-muted)" }}>
-            {firstIncidentYear} – {lastIncidentYear} · {totalIncidentCount}건
-          </p>
-        </header>
-
-        <div className="scrollbar-hide flex gap-1.5 overflow-x-auto px-1">
-          {incidentFilters.map((incidentFilter) => {
-            const isActiveFilter = incidentFilter.queryString === null;
-
-            return (
-              <span
-                key={incidentFilter.label}
-                className="inline-flex shrink-0 items-center rounded-full px-3 py-[7px]
-                  text-[13px] leading-none"
-                style={
-                  isActiveFilter
-                    ? {
-                        backgroundColor: "var(--incident-text)",
-                        color: "hsl(var(--background))",
-                      }
-                    : {
-                        backgroundColor: "var(--incident-chip-background)",
-                        color: "var(--incident-text-secondary)",
-                      }
-                }
-              >
-                {incidentFilter.label}
-              </span>
-            );
-          })}
-        </div>
+        <PageTitle
+          label="Incidents"
+          title="거래소 사고 연표"
+          description="거래소 사건사고를 확인하고, 개인 셀프 커스터디의 중요성과 스스로 자산을 지켜야 한다는 경각심을 되새겨보세요."
+        />
 
         <nav
+          ref={yearJumpNavigationReference}
           aria-label="연도 바로가기"
-          className="scrollbar-hide flex gap-1.5 overflow-x-auto px-1 py-0.5"
+          className="scrollbar-hide flex gap-1.5 overflow-x-auto -mx-2 px-2 py-0.5"
         >
           {incidentYearAnchors.map((yearAnchor) => (
             <YearJumpChip
@@ -616,6 +638,7 @@ export default function IncidentsScreen(): ReactNode {
               yearAnchor={yearAnchor}
               isActive={yearAnchor.year === activeIncidentYear}
               onSelectYear={onSelectYearJumpChip}
+              onRegisterYearJumpChip={registerYearJumpChip}
             />
           ))}
         </nav>
@@ -637,7 +660,7 @@ export default function IncidentsScreen(): ReactNode {
           <section
             ref={timelineTrackReference}
             aria-label="거래소 사고 타임라인"
-            className="scrollbar-hide flex h-[104px] snap-x snap-proximity overflow-x-auto
+            className="scrollbar-hide flex h-[104px] -mx-2 snap-x snap-proximity overflow-x-auto
               overflow-y-hidden overscroll-x-contain"
           >
             <span aria-hidden className="shrink-0" style={{ width: timelineEdgeSpacerWidth }} />
@@ -666,8 +689,15 @@ export default function IncidentsScreen(): ReactNode {
           </section>
         </div>
 
-        <div className="flex items-center justify-between px-1 text-[12px] leading-none">
-          <span style={{ color: "var(--incident-text-muted)" }}>좌우로 밀어 사건 선택</span>
+        <div className="flex items-center justify-between gap-3 px-1 text-[12px] leading-none">
+          <div
+            className="flex min-w-0 items-center gap-2"
+            style={{ color: "var(--incident-text-muted)" }}
+          >
+            <span className="truncate tabular-nums">
+              {firstIncidentYear} – {lastIncidentYear} · {totalIncidentCount}건
+            </span>
+          </div>
           <span
             className="font-number tabular-nums"
             style={{ color: "var(--incident-text-muted)" }}

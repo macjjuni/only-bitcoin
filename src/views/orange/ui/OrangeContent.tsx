@@ -12,6 +12,7 @@ import {
   DiscordIcon,
   EagleIcon,
   HalfCircleIcon,
+  IncidentIcon,
   MinerIcon,
   NaverIcon,
   PageIcon,
@@ -81,6 +82,10 @@ const OrangeContent = () => {
 
   const onClickWithdrawFeeUtility = useCallback(() => {
     navigateToUtility("/withdraw-fee", "거래소 출금 수수료");
+  }, [navigateToUtility]);
+
+  const onClickIncidentsUtility = useCallback(() => {
+    navigateToUtility("/incidents", "거래소 사고 연표");
   }, [navigateToUtility]);
 
   const onClickTreasuryUtility = useCallback(() => {
@@ -170,6 +175,11 @@ const OrangeContent = () => {
         onClick: onClickWithdrawFeeUtility,
       },
       {
+        title: "거래소 사고 연표",
+        icon: <IncidentIcon size={30} className={ICON_CLASS} />,
+        onClick: onClickIncidentsUtility,
+      },
+      {
         title: "DCA 계산기",
         icon: <MinerIcon size={32} />,
         onClick: onClickDcaUtility,
@@ -187,6 +197,7 @@ const OrangeContent = () => {
       onClickDcaUtility,
       onClickEtfUtility,
       onClickHalvingCountdownUtility,
+      onClickIncidentsUtility,
       onClickM2BtcUtility,
       onClickWithdrawFeeUtility,
       onClickMemeUtility,

@@ -127,6 +127,13 @@ const clientRoutes: ClientRoute[] = [
     isFavorite: false,
     icon: null,
   },
+  {
+    title: "거래소 사고 연표",
+    path: "/incidents",
+    isNav: false,
+    isFavorite: false,
+    icon: null,
+  },
   { title: "BIP39", path: "/bip39", isNav: false, isFavorite: false, icon: null },
   { title: "Meme", path: "/meme", isNav: false, isFavorite: false, icon: null },
   { title: "404 - Not Found", path: "/*", isNav: false, isFavorite: false, icon: null },
