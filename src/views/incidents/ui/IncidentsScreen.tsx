@@ -1,426 +1,27 @@
 "use client";
 
-import {
-  type KeyboardEvent,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-  useState,
-} from "react";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import {
-  calculateIncidentAmountRatio,
-  calculateTimelineNodeDiameter,
+  calculateMonthsBetween,
   firstIncidentYear,
-  formatIncidentFullDate,
-  formatIncidentShortDate,
-  type IncidentEvent,
-  type IncidentType,
-  type IncidentYearAnchor,
   incidentEvents,
   incidentsUpdatedAt,
-  incidentTypeLabels,
   incidentYearAnchors,
   lastIncidentYear,
   totalIncidentCount,
 } from "../model/incidents";
-
-const scopedIncidentStyles = `
-.incidents {
-  --incident-text: #17181a;
-  --incident-text-secondary: #5c6066;
-  --incident-text-muted: #666d76;
-  --incident-axis: #d8dce2;
-  --incident-guide: #c8cdd5;
-  --incident-track: #eceef2;
-  --incident-border: #dcdfe5;
-  --incident-chip-background: #eceef2;
-
-  --incident-hack-background: #fdeceb;
-  --incident-hack-foreground: #8c2f26;
-  --incident-hack-accent: #e4574c;
-
-  --incident-halt-background: #efeafa;
-  --incident-halt-foreground: #442a8a;
-  --incident-halt-accent: #7c5cd6;
-
-  --incident-protocol-background: #e2f2f0;
-  --incident-protocol-foreground: #10514c;
-  --incident-protocol-accent: #2b9c92;
-
-  --incident-operational-background: #fbf0dd;
-  --incident-operational-foreground: #6f4708;
-  --incident-operational-accent: #c0821a;
-
-  --incident-bankruptcy-background: #eceef1;
-  --incident-bankruptcy-foreground: #3c434c;
-  --incident-bankruptcy-accent: #78828f;
-}
-
-:where(.dark) .incidents {
-  --incident-text: #f2f3f5;
-  --incident-text-secondary: #b5bac2;
-  --incident-text-muted: #9aa1ab;
-  --incident-axis: #34373d;
-  --incident-guide: #4b5059;
-  --incident-track: #26282c;
-  --incident-border: #454951;
-  --incident-chip-background: #26282c;
-
-  --incident-hack-background: rgb(228 87 76 / 0.16);
-  --incident-hack-foreground: #ff9a90;
-  --incident-hack-accent: #e4574c;
-
-  --incident-halt-background: rgb(124 92 214 / 0.18);
-  --incident-halt-foreground: #bfa8ff;
-  --incident-halt-accent: #8b6ce0;
-
-  --incident-protocol-background: rgb(43 156 146 / 0.18);
-  --incident-protocol-foreground: #6fd8cd;
-  --incident-protocol-accent: #35b3a7;
-
-  --incident-operational-background: rgb(192 130 26 / 0.18);
-  --incident-operational-foreground: #f0c069;
-  --incident-operational-accent: #d1912b;
-
-  --incident-bankruptcy-background: rgb(120 130 143 / 0.2);
-  --incident-bankruptcy-foreground: #c2c9d2;
-  --incident-bankruptcy-accent: #8b95a3;
-}
-`;
-
-interface IncidentTypeColorToken {
-  badgeBackground: string;
-  badgeForeground: string;
-  accent: string;
-}
-
-const incidentTypeColorTokens: Record<IncidentType, IncidentTypeColorToken> = {
-  hack: {
-    badgeBackground: "var(--incident-hack-background)",
-    badgeForeground: "var(--incident-hack-foreground)",
-    accent: "var(--incident-hack-accent)",
-  },
-  halt: {
-    badgeBackground: "var(--incident-halt-background)",
-    badgeForeground: "var(--incident-halt-foreground)",
-    accent: "var(--incident-halt-accent)",
-  },
-  protocol: {
-    badgeBackground: "var(--incident-protocol-background)",
-    badgeForeground: "var(--incident-protocol-foreground)",
-    accent: "var(--incident-protocol-accent)",
-  },
-  operational: {
-    badgeBackground: "var(--incident-operational-background)",
-    badgeForeground: "var(--incident-operational-foreground)",
-    accent: "var(--incident-operational-accent)",
-  },
-  bankruptcy: {
-    badgeBackground: "var(--incident-bankruptcy-background)",
-    badgeForeground: "var(--incident-bankruptcy-foreground)",
-    accent: "var(--incident-bankruptcy-accent)",
-  },
-};
-
-const timelineItemWidthInPixels = 76;
-const timelineEdgeSpacerWidth = `calc(50% - ${timelineItemWidthInPixels / 2}px)`;
-const centerDetectionThresholdRatio = 0.4;
-
-function doesUserPreferReducedMotion(): boolean {
-  return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
-}
-
-interface YearJumpChipProps {
-  yearAnchor: IncidentYearAnchor;
-  isActive: boolean;
-  onSelectYear: (incidentIndex: number) => void;
-  onRegisterYearJumpChip: (year: string, yearJumpChipElement: HTMLButtonElement | null) => void;
-}
-
-function YearJumpChip({
-  yearAnchor,
-  isActive,
-  onSelectYear,
-  onRegisterYearJumpChip,
-}: YearJumpChipProps): ReactNode {
-  //#region [Hooks]
-  const onAssignYearJumpChipReference = useCallback(
-    (yearJumpChipElement: HTMLButtonElement | null): void => {
-      onRegisterYearJumpChip(yearAnchor.year, yearJumpChipElement);
-    },
-    [onRegisterYearJumpChip, yearAnchor.year],
-  );
-  //#endregion
-
-  //#region [Events]
-  const onClickYearJumpChip = (): void => {
-    onSelectYear(yearAnchor.incidentIndex);
-  };
-  //#endregion
-
-  return (
-    <button
-      ref={onAssignYearJumpChipReference}
-      type="button"
-      onClick={onClickYearJumpChip}
-      aria-current={isActive ? "true" : undefined}
-      className="inline-flex shrink-0 items-center rounded-full px-2.5 py-1.5 font-number
-        text-[12px] leading-none tabular-nums transition-colors duration-[160ms] ease-[ease]
-        focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-      style={
-        isActive
-          ? {
-              backgroundColor: "var(--incident-text)",
-              color: "hsl(var(--background))",
-              outlineColor: "var(--incident-text)",
-            }
-          : {
-              backgroundColor: "var(--incident-chip-background)",
-              color: "var(--incident-text-secondary)",
-              outlineColor: "var(--incident-text)",
-            }
-      }
-    >
-      {yearAnchor.year}
-    </button>
-  );
-}
-
-interface TimelineIncidentNodeProps {
-  incident: IncidentEvent;
-  incidentIndex: number;
-  isActive: boolean;
-  isFirstIncidentOfYear: boolean;
-  onRegisterTimelineNode: (
-    incidentIndex: number,
-    timelineNodeElement: HTMLButtonElement | null,
-  ) => void;
-  onSelectIncident: (incidentIndex: number) => void;
-  onNavigateIncident: (incidentIndex: number, direction: -1 | 1) => void;
-}
-
-function TimelineIncidentNode({
-  incident,
-  incidentIndex,
-  isActive,
-  isFirstIncidentOfYear,
-  onRegisterTimelineNode,
-  onSelectIncident,
-  onNavigateIncident,
-}: TimelineIncidentNodeProps): ReactNode {
-  //#region [Hooks]
-  const onAssignTimelineNodeReference = useCallback(
-    (timelineNodeElement: HTMLButtonElement | null): void => {
-      onRegisterTimelineNode(incidentIndex, timelineNodeElement);
-    },
-    [incidentIndex, onRegisterTimelineNode],
-  );
-  //#endregion
-
-  //#region [Events]
-  const onFocusTimelineNode = (): void => {
-    onSelectIncident(incidentIndex);
-  };
-
-  const onClickTimelineNode = (): void => {
-    onSelectIncident(incidentIndex);
-  };
-
-  const onKeyDownTimelineNode = (keyboardEvent: KeyboardEvent<HTMLButtonElement>): void => {
-    if (keyboardEvent.key !== "ArrowLeft" && keyboardEvent.key !== "ArrowRight") {
-      return;
-    }
-
-    keyboardEvent.preventDefault();
-    const navigationDirection = keyboardEvent.key === "ArrowRight" ? 1 : -1;
-    onNavigateIncident(incidentIndex, navigationDirection);
-  };
-  //#endregion
-
-  //#region [Templates]
-  const incidentYear = incident.date.slice(0, 4);
-  const timelineNodeDiameterInPixels = calculateTimelineNodeDiameter(incident.amount);
-  const incidentTypeColorToken = incidentTypeColorTokens[incident.type];
-  //#endregion
-
-  return (
-    <div
-      className="flex h-full shrink-0 snap-center flex-col items-center justify-center gap-2"
-      style={{ width: timelineItemWidthInPixels }}
-    >
-      <span
-        aria-hidden={!isFirstIncidentOfYear}
-        className="h-3 font-number text-[11px] font-medium leading-none tabular-nums"
-        style={{
-          color: isFirstIncidentOfYear ? "var(--incident-text-secondary)" : "transparent",
-        }}
-      >
-        {isFirstIncidentOfYear ? incidentYear : ""}
-      </span>
-
-      <span className="relative flex h-7 w-full items-center justify-center">
-        <span
-          aria-hidden
-          className="absolute inset-x-0 top-1/2 h-px"
-          style={{ backgroundColor: "var(--incident-axis)" }}
-        />
-        <button
-          ref={onAssignTimelineNodeReference}
-          type="button"
-          tabIndex={0}
-          aria-label={`${formatIncidentFullDate(incident.date)} ${incident.name}`}
-          aria-current={isActive ? "true" : undefined}
-          onFocus={onFocusTimelineNode}
-          onClick={onClickTimelineNode}
-          onKeyDown={onKeyDownTimelineNode}
-          className="relative z-[1] flex h-7 w-7 touch-manipulation items-center justify-center
-            rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2"
-          style={{ outlineColor: "var(--incident-text)" }}
-        >
-          <span
-            aria-hidden
-            className="block rounded-full"
-            style={{
-              width: timelineNodeDiameterInPixels,
-              height: timelineNodeDiameterInPixels,
-              backgroundColor: incidentTypeColorToken.accent,
-              opacity: isActive ? 1 : 0.4,
-              transform: isActive ? "scale(1.5)" : "scale(1)",
-              transition: "transform 160ms ease, opacity 160ms ease",
-            }}
-          />
-        </button>
-      </span>
-
-      <span
-        className="font-number text-[11px] leading-none tabular-nums"
-        style={{
-          color: isActive ? "var(--incident-text)" : "var(--incident-text-muted)",
-          transition: "color 160ms ease",
-        }}
-      >
-        {formatIncidentShortDate(incident.date)}
-      </span>
-    </div>
-  );
-}
-
-interface IncidentDetailPanelProps {
-  activeIncident: IncidentEvent;
-}
-
-function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps): ReactNode {
-  //#region [Templates]
-  const activeIncidentTypeColorToken = incidentTypeColorTokens[activeIncident.type];
-  const hasEstimatedAmount = typeof activeIncident.amount === "number";
-
-  const DamageAmountTemplate = hasEstimatedAmount ? (
-    <div className="flex items-center gap-2.5">
-      <div
-        className="h-[5px] min-w-0 flex-1 overflow-hidden rounded-full"
-        style={{ backgroundColor: "var(--incident-track)" }}
-      >
-        <div
-          className="h-full rounded-full"
-          style={{
-            width: `${calculateIncidentAmountRatio(activeIncident.amount) * 100}%`,
-            backgroundColor: activeIncidentTypeColorToken.accent,
-          }}
-        />
-      </div>
-      <span className="shrink-0 text-[12px] font-medium leading-none tabular-nums">
-        {activeIncident.amountText}
-      </span>
-    </div>
-  ) : (
-    <span className="text-[12px] leading-none" style={{ color: "var(--incident-text-muted)" }}>
-      {activeIncident.amountText}
-    </span>
-  );
-
-  const DetailTemplate = activeIncident.detail ? (
-    <p
-      className="border-t pt-3 text-[13px] leading-[1.6]"
-      style={{
-        borderColor: "var(--incident-border)",
-        color: "var(--incident-text-secondary)",
-      }}
-    >
-      {activeIncident.detail}
-    </p>
-  ) : null;
-  //#endregion
-
-  return (
-    <section
-      aria-live="polite"
-      aria-atomic="true"
-      className="flex min-h-72 flex-col gap-2.5 px-1"
-      style={{ color: "var(--incident-text)" }}
-    >
-      <div className="flex flex-wrap items-center gap-1.5">
-        <span
-          className="font-number text-[12px] leading-none tabular-nums"
-          style={{ color: "var(--incident-text-muted)" }}
-        >
-          {formatIncidentFullDate(activeIncident.date)}
-        </span>
-        <span
-          className="inline-flex items-center rounded px-1.5 py-[3px] text-[11px] font-medium
-            leading-none"
-          style={{
-            backgroundColor: activeIncidentTypeColorToken.badgeBackground,
-            color: activeIncidentTypeColorToken.badgeForeground,
-          }}
-        >
-          {incidentTypeLabels[activeIncident.type]}
-        </span>
-        {activeIncident.tags?.map((incidentTag) => (
-          <span
-            key={incidentTag}
-            className="inline-flex items-center rounded border px-1.5 py-[3px] text-[11px]
-              font-medium leading-[1.05]"
-            style={{
-              borderColor: "var(--incident-border)",
-              color: "var(--incident-text-secondary)",
-            }}
-          >
-            {incidentTag}
-          </span>
-        ))}
-      </div>
-
-      <div className="flex flex-wrap items-baseline gap-2">
-        <h2 className="text-[20px] font-bold leading-tight tracking-[-0.3px]">
-          {activeIncident.name}
-        </h2>
-        <span className="text-[13px] leading-none" style={{ color: "var(--incident-text-muted)" }}>
-          {activeIncident.country}
-        </span>
-      </div>
-
-      <p className="text-[13px] leading-[1.5]" style={{ color: "var(--incident-text-secondary)" }}>
-        {activeIncident.summary}
-      </p>
-
-      {DamageAmountTemplate}
-      {DetailTemplate}
-
-      <a
-        href={activeIncident.article}
-        target="_blank"
-        rel="noopener noreferrer"
-        className="mt-auto w-fit text-[13px] font-medium leading-none underline underline-offset-2"
-        style={{ color: activeIncidentTypeColorToken.badgeForeground }}
-      >
-        관련 기사
-      </a>
-    </section>
-  );
-}
+import { IncidentDetailPanel } from "./IncidentDetailPanel";
+import {
+  centerDetectionThresholdRatio,
+  doesUserPreferReducedMotion,
+  scopedIncidentStyles,
+  timelineEdgeSpacerWidth,
+  timelinePixelsPerMonth,
+} from "./incidentConstants";
+import { TimelineIncidentNode } from "./TimelineIncidentNode";
+import { YearJumpChip } from "./YearJumpChip";
 
 export default function IncidentsScreen(): ReactNode {
   //#region [Hooks]
@@ -630,7 +231,7 @@ export default function IncidentsScreen(): ReactNode {
         <nav
           ref={yearJumpNavigationReference}
           aria-label="연도 바로가기"
-          className="scrollbar-hide flex gap-1.5 overflow-x-auto -mx-2 px-2 py-0.5"
+          className="scrollbar-hide flex gap-2 overflow-x-auto -mx-2 px-2 py-0.5"
         >
           {incidentYearAnchors.map((yearAnchor) => (
             <YearJumpChip
@@ -660,16 +261,17 @@ export default function IncidentsScreen(): ReactNode {
           <section
             ref={timelineTrackReference}
             aria-label="거래소 사고 타임라인"
-            className="scrollbar-hide flex h-[104px] -mx-2 snap-x snap-proximity overflow-x-auto
-              overflow-y-hidden overscroll-x-contain"
+            className="scrollbar-hide flex h-[120px] -mx-2 snap-x bg-neutral-100 dark:bg-neutral-900
+              py-4 snap-proximity overflow-x-auto overflow-y-hidden overscroll-x-contain"
           >
             <span aria-hidden className="shrink-0" style={{ width: timelineEdgeSpacerWidth }} />
 
             {incidentEvents.map((incident, incidentIndex) => {
-              const incidentYear = incident.date.slice(0, 4);
               const previousIncident = incidentEvents[incidentIndex - 1];
-              const isFirstIncidentOfYear =
-                !previousIncident || previousIncident.date.slice(0, 4) !== incidentYear;
+              const gapInPixels = previousIncident
+                ? calculateMonthsBetween(previousIncident.date, incident.date) *
+                  timelinePixelsPerMonth
+                : 0;
 
               return (
                 <TimelineIncidentNode
@@ -677,7 +279,7 @@ export default function IncidentsScreen(): ReactNode {
                   incident={incident}
                   incidentIndex={incidentIndex}
                   isActive={incidentIndex === activeIncidentIndex}
-                  isFirstIncidentOfYear={isFirstIncidentOfYear}
+                  gapInPixels={gapInPixels}
                   onRegisterTimelineNode={registerTimelineNode}
                   onSelectIncident={selectTimelineIncident}
                   onNavigateIncident={navigateTimelineIncident}
