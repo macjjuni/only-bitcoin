@@ -10,7 +10,7 @@
       "summary": "85만 BTC 실종 신고 후 파산, 20만 BTC는 뒤늦게 발견",
       "amount": 650000000000,
       "amountText": "당시 약 4억 7,300만 달러 (약 6,500억 원)",
-      "detail": "당시 세계 최대 비트코인 거래소였던 마운트곡스는 고객분 75만 BTC와 회사분 10만 BTC를 잃었다고 신고하고 일본에서 파산보호를 신청했다. 이후 옛 지갑에서 20만 BTC를 찾아 순실종 수량은 약 65만 BTC로 줄었다. 장기간의 해킹뿐 아니라 내부 통제·회계 부실이 함께 지적됐으며, 법정관리인은 2024년부터 보유 자산을 이용한 채권자 변제를 시작했다.",
+      "detail": "당시 세계 최대 비트코인 거래소였던 마운트곡스는 고객 소유 약 75만 BTC와 회사 보유 약 10만 BTC를 잃었다고 신고하고 일본에서 파산보호를 신청했다. 이후 옛 지갑에서 약 20만 BTC를 발견하면서 순실종 수량은 약 65만 BTC로 줄었으며, 장기간의 해킹과 함께 허술한 내부 통제와 회계 관리가 피해를 키운 원인으로 지적됐다. 법정관리인은 2024년 7월부터 비트코인과 비트코인캐시 변제를 시작해 2025년 3월까지 1만 9,500명 이상의 채권자에게 지급했다. 필요한 절차를 정상적으로 마친 채권자에 대한 기본·조기일괄·중간 변제는 대부분 완료됐지만 미지급 사례가 남아 있어 해당 변제 기한은 2026년 10월 31일까지 연장됐다. 2026년 6월에는 관재인 관련 지갑에서 약 1만 422 BTC가 새 주소 등으로 이동했으나 추가 변제나 매각으로 확인되지는 않았으며, 당시 온체인 추적 기준 약 3만 4,504 BTC가 재단 지갑에 남아 있었다.",
       "article": "https://www.theguardian.com/technology/2014/mar/21/mtgox-missing-70m-bitcoin"
     },
     {
@@ -29,7 +29,7 @@
       "id": "2015-01-bitstamp",
       "date": "2015-01",
       "name": "비트스탬프",
-      "country": "영국·룩셈부르크",
+      "country": "영국 등록·슬로베니아 운영",
       "type": "hack",
       "summary": "직원 대상 피싱으로 핫월렛에서 약 1만 9,000 BTC 유출",
       "amount": 7000000000,
@@ -117,7 +117,7 @@
       "type": "hack",
       "summary": "여러 알트코인·ICO 토큰이 핫월렛에서 유출",
       "amount": 55200000000,
-      "amountText": "최대 약 4,000만 달러 (약 552억 원)",
+      "amountText": "외부 추정 약 4,000만 달러 (약 552억 원)",
       "tags": ["국내"],
       "detail": "Pundi X의 NPXS를 비롯한 여러 토큰이 외부 지갑으로 이동했다. 코인레일은 거래를 중단하고 일부 토큰 프로젝트·거래소와 동결 및 회수 작업을 진행했다. 회사가 최종 확정 피해액을 공개하지 않아 약 4,000만 달러는 당시 온체인 분석을 바탕으로 한 추정치다.",
       "article": "https://techcrunch.com/2018/06/10/korean-crypto-exchange-coinrail-loses-over-40m-in-tokens-following-a-hack/"
@@ -168,7 +168,7 @@
       "summary": "대표 사망 뒤 드러난 고객자산 유용과 대규모 결손",
       "amount": 175000000000,
       "amountText": "최소 1억 6,900만 캐나다달러 결손 (약 1,750억 원)",
-      "detail": "처음에는 대표 제럴드 코튼의 사망으로 콜드월렛 키를 잃었다고 알려졌으나, 온타리오증권위원회 조사 결과 핵심 원인은 사기였다. 코튼은 가명 계정에 가짜 잔액을 만들고 고객과 거래하거나 외부 거래소에서 투기해 자산을 소진했다. 약 7만 6,000명에게 2억 1,500만 캐나다달러를 빚졌고 회수·확인된 자산은 4,600만 캐나다달러에 그쳤다.",
+      "detail": "처음에는 대표 제럴드 코튼의 사망으로 콜드월렛 개인키를 잃어 고객 자산에 접근하지 못한 사건으로 알려졌으나, 온타리오증권위원회 조사 결과 대규모 결손의 핵심 원인은 사기였다. 코튼은 가명 계정에 가짜 잔액을 만들고 고객과 거래하거나 고객 자산을 외부 거래소로 옮겨 투기해 소진했다. 약 7만 6,000명에게 2억 1,500만 캐나다달러를 빚졌지만 회수·확인된 자산은 4,600만 캐나다달러에 그쳤다. 별도로 2019년 2월 접근 불가능한 콜드월렛 5개에 실수로 전송된 약 104.34 BTC가 2022년 12월 17일 무단 이동했다. 파산관재인 EY는 해당 거래를 실행하지 않았다고 밝혔으며, 약 69 BTC는 Wasabi 코인조인 흐름으로 들어간 것으로 추정되지만 개인키 보유자와 최종 수취인은 확인되지 않았다.",
       "article": "https://www.osc.gov.on.ca/quadrigacxreport/"
     },
     {
@@ -190,11 +190,11 @@
       "name": "빗썸",
       "country": "한국",
       "type": "hack",
-      "summary": "EOS와 XRP 약 1,900만 달러 유출, 내부자 가능성 제기",
-      "amount": 26200000000,
-      "amountText": "약 1,900만 달러 (약 262억 원)",
+      "summary": "EOS 약 1,300만 달러 유출; XRP 포함 시 약 1,900만 달러 추정",
+      "amount": 17900000000,
+      "amountText": "확인된 EOS 약 1,300만 달러 (약 179억 원); XRP 포함 외부 추정 약 1,920만 달러",
       "tags": ["국내", "내부자 의심"],
-      "detail": "모니터링 시스템이 비정상 출금을 감지한 뒤 약 300만 EOS와 2,000만 XRP의 이동이 확인됐다. 빗썸은 고객 자산이 아니라 회사 보유분이 빠져나갔다고 밝혔고, 당시 외부 침입 흔적이 뚜렷하지 않아 내부자 소행 가능성을 제기했다.",
+      "detail": "빗썸은 비정상 출금을 감지한 뒤 회사 보유분 약 307만 EOS, 당시 약 1,300만 달러가 유출됐다고 밝혔다. 후속 온체인 분석은 약 2,020만 XRP, 당시 약 620만 달러의 추가 이동을 포착해 총손실을 약 1,920만 달러로 추정했지만 연결 기사 작성 시점에 빗썸은 XRP 손실을 확인하지 않았다. 외부 침입 흔적이 뚜렷하지 않아 거래소는 내부자 소행 가능성을 제기했다.",
       "article": "https://www.coindesk.com/markets/2019/03/30/crypto-exchange-bithumb-hacked-for-13-million-in-suspected-insider-job"
     },
     {
@@ -220,7 +220,7 @@
       "amount": 144900000000,
       "amountText": "온체인 추정 약 1억 500만 달러 (약 1,449억 원)",
       "detail": "3월 25일부터 거래소 핫월렛의 109종 ERC-20 토큰이 외부 주소로 이동해 다른 거래소에서 매도됐다. CoinBene는 해킹을 부인하고 지갑 업그레이드·점검이라고 설명했지만, Elementus와 Chainalysis는 거래 형태가 탈취와 일치한다고 판단했다. 다만 거래소가 사고를 공식 인정하거나 고객별 최종 손실·보상 규모를 공개하지 않아 이 항목의 금액은 온체인 추정치다.",
-      "article": "https://cointelegraph.com/interview/over-100-million-missing-coinbene-claims-maintenance-a-month-of-questions-point-toward-a-hack"
+      "article": "https://www.chainalysis.com/blog/cryptocurrency-exchange-hacks-2019/"
     },
     {
       "id": "2019-05-binance",
@@ -233,6 +233,18 @@
       "amountText": "당시 약 4,100만 달러 (약 566억 원)",
       "detail": "공격자는 사용자 API 키와 2단계 인증 정보 등을 확보한 뒤 위험관리 기준을 피하도록 계정을 조작하고 한 번의 거래로 7,000 BTC를 출금했다. 바이낸스는 약 일주일간 입출금을 중단했고, 손실은 이용자보호기금(SAFU)으로 충당해 고객 잔액에는 손실을 배분하지 않았다.",
       "article": "https://www.yahoo.com/news/hackers-steal-41-million-worth-052132839.html"
+    },
+    {
+      "id": "2019-06-bitrue",
+      "date": "2019-06",
+      "name": "Bitrue",
+      "country": "싱가포르",
+      "type": "hack",
+      "summary": "계정 보안 취약점 악용 뒤 핫월렛에서 XRP·ADA 유출",
+      "amount": 5900000000,
+      "amountText": "약 430만 달러 (약 59억 원)",
+      "detail": "공격자는 약 90개 이용자 계정의 보안 취약점을 악용해 거래소 핫월렛에 접근하고 930만 XRP와 250만 ADA를 외부 거래소로 보냈다. Bitrue는 로그인과 거래를 긴급 중단하고 수신 거래소에 자금 동결을 요청했다. 피해 이용자의 손실은 전액 반환하겠다고 밝혔다.",
+      "article": "https://www.coindesk.com/markets/2019/06/27/singapore-exchange-bitrue-hacked-for-over-4-million-in-crypto"
     },
     {
       "id": "2019-07-bitpoint",
@@ -266,7 +278,7 @@
       "country": "중국계·글로벌",
       "type": "bankruptcy",
       "summary": "회계·시스템 오류 누적으로 고객자산 부족분 공개",
-      "amount": 179000000000,
+      "amount": 92500000000,
       "amountText": "7,000~1만 3,000 BTC, 당시 약 6,700만~1억 3,000만 달러",
       "detail": "거래수수료를 자체 토큰으로 돌려주는 '트랜스피 마이닝' 모델과 장기간의 데이터·회계 오류가 겹치면서 실제 자산보다 사용자 잔액이 과대계상됐다. 설립자는 해킹이나 단순 먹튀가 아니라 내부 시스템 문제라고 주장했지만 출금과 거래는 중단됐고 이용자 자금의 상당액이 묶였다.",
       "article": "https://www.coindesk.com/markets/2020/02/17/crypto-exchange-fcoin-insolvent-after-revealing-up-to-130m-bitcoin-shortfall"
@@ -296,6 +308,17 @@
       "tags": ["북한 연계"],
       "detail": "비트코인·이더리움과 여러 ERC-20 토큰이 핫월렛에서 빠져나갔다. 쿠코인은 프로젝트 재발행·토큰 동결과 거래소·수사기관 협조로 약 84%를 회수 또는 무력화했고, 나머지는 보험기금으로 충당했다고 밝혔다. 복수의 분석기관과 미국 정부 자료는 북한 연계 조직을 지목했다.",
       "article": "https://www.coindesk.com/markets/2020/09/26/over-280m-drained-in-kucoin-crypto-exchange-hack"
+    },
+    {
+      "id": "2020-12-livecoin",
+      "date": "2020-12",
+      "name": "Livecoin",
+      "country": "러시아계",
+      "type": "halt",
+      "summary": "서버·백엔드 장악과 시세 조작 공격 뒤 영구 폐업",
+      "amountText": "최종 탈취·고객손실 총액 미공개",
+      "detail": "공격자는 12월 23~24일 거래소 서버·백엔드·노드와 일부 공식 채널을 장악하고 BTC·ETH·XRP의 내부 표시 가격을 비정상적으로 높인 뒤 계정 자산을 현금화했다. Livecoin은 이용자에게 입금과 거래를 즉시 중단하라고 요청했지만 인프라 통제권을 회복하지 못했다. 재정·기술 피해를 이유로 2021년 1월 폐업을 발표하고 같은 해 3월 17일까지 상환 청구를 받았다.",
+      "article": "https://www.coindesk.com/policy/2021/01/18/livecoin-exchange-announces-closure-after-december-hack"
     },
     {
       "id": "2020-12-exmo",
@@ -339,10 +362,10 @@
       "country": "글로벌",
       "type": "hack",
       "summary": "이더리움·BNB체인 핫월렛 키 탈취",
-      "amount": 270000000000,
-      "amountText": "거래소 발표 약 1억 5,000만 달러, 외부 추정 최대 1억 9,600만 달러",
+      "amount": 207000000000,
+      "amountText": "거래소 발표 약 1억 5,000만 달러; 외부 추정 최대 1억 9,600만 달러",
       "detail": "도난된 개인키로 두 개의 핫월렛에서 수십 종 토큰이 인출된 뒤 탈중앙 거래소에서 교환됐다. 비트마트는 자체 추산 1억 5,000만 달러를 발표했고 보안업체 PeckShield는 약 1억 9,600만 달러로 계산했다. 대표는 회사 자금으로 피해 이용자를 보상하겠다고 밝혔지만 일부 이용자는 지급 지연을 호소했다.",
-      "article": "https://time.com/6126268/cryptocurrency-ceos-congress-hearing/"
+      "article": "https://www.theblock.co/news/markets/2021-12-04-crypto-exchange-bitmart-reportedly-hacked-for-100-million-126367"
     },
     {
       "id": "2021-12-ascendex",
@@ -367,18 +390,6 @@
       "amountText": "약 3,400만 달러 (약 469억 원)",
       "detail": "사용자가 2단계 인증 코드를 입력하지 않았는데도 출금이 승인되는 이상 활동이 발생했다. 총 4,836.26 ETH와 443.93 BTC, 기타 통화 약 6만 6,200달러가 인출됐다. 크립토닷컴은 14시간가량 출금을 멈추고 기존 2FA 토큰을 전부 폐기한 뒤 피해 계정을 전액 보상했다.",
       "article": "https://techcrunch.com/2022/01/20/2fa-compromise-led-to-34m-crypto-com-hack/"
-    },
-    {
-      "id": "2022-07-voyager",
-      "date": "2022-07",
-      "name": "보이저 디지털",
-      "country": "미국·캐나다",
-      "type": "bankruptcy",
-      "summary": "3AC 채무불이행 여파로 출금 중단 후 챕터 11 신청",
-      "amount": 897000000000,
-      "amountText": "3AC 관련 채권 약 6억 5,000만 달러 (약 8,970억 원)",
-      "detail": "수탁형 거래·중개 플랫폼 보이저는 헤지펀드 쓰리애로우캐피털(3AC)에 무담보로 빌려준 대규모 BTC·USDC를 회수하지 못했다. 출금·거래·예치를 중단한 뒤 10만 명이 넘는 채권자와 자산·부채 각각 10억~100억 달러를 기재해 미국 법원에 챕터 11을 신청했다. 이후 청산계획에 따라 고객에게 현금과 가상자산을 분배했다.",
-      "article": "https://www.investing.com/news/stock-market-news/crypto-lender-voyager-files-for-bankruptcy-2844313"
     },
     {
       "id": "2022-07-zipmex",
@@ -454,6 +465,18 @@
       "article": "https://www.coindesk.com/tech/2023/04/10/s-korean-crypto-exchange-gdac-hacked-for-nearly-13m/"
     },
     {
+      "id": "2023-04-bitrue",
+      "date": "2023-04",
+      "name": "Bitrue",
+      "country": "싱가포르계·글로벌",
+      "type": "hack",
+      "summary": "핫월렛 한 곳에서 ETH·SHIB 등 2,300만 달러 유출",
+      "amount": 31700000000,
+      "amountText": "약 2,300만 달러 (약 317억 원)",
+      "detail": "4월 14일 핫월렛 한 곳이 침해돼 ETH·SHIB·QNT·GALA·HOT·MATIC 약 2,300만 달러가 빠져나갔다. 영향받은 지갑은 Bitrue 전체 보유자산의 5% 미만이었고 나머지 지갑은 안전하다고 거래소는 밝혔다. 출금은 보안 점검을 위해 일시 중단됐으며 피해 이용자는 전액 보상됐다.",
+      "article": "https://therecord.media/bitrue-23million-stolen-cryptocurrency"
+    },
+    {
       "id": "2023-05-bittrex",
       "date": "2023-05",
       "name": "Bittrex 미국법인",
@@ -463,6 +486,17 @@
       "amountText": "자산·부채 각 5억~10억 달러 (고객 피해액 아님)",
       "detail": "Bittrex Inc.는 미국 영업을 종료한 지 약 1주일, SEC가 미등록 거래소 운영 혐의로 제소한 지 3주 만에 챕터 11을 신청했다. 신고상 자산과 부채는 각각 5억~10억 달러였지만 고객 가상자산이 사라진 지급불능 사건은 아니었다. 회사는 보유 중인 고객 자산을 원물로 전액 반환하는 질서 있는 청산을 추진했으며, 당시 Bittrex Global은 신청 대상이 아니었다.",
       "article": "https://www.investing.com/news/stock-market-news/crypto-exchange-bittrex-inc-files-for-bankruptcy-after-sec-complaint-3076462"
+    },
+    {
+      "id": "2023-05-hotbit",
+      "date": "2023-05",
+      "name": "Hotbit",
+      "country": "홍콩계·글로벌",
+      "type": "halt",
+      "summary": "수사기관 자산 동결과 현금흐름 악화 뒤 CEX 운영 종료",
+      "amountText": "고객손실 총액 미공개",
+      "detail": "Hotbit은 전직 관리직원의 수사와 관련해 2022년 일부 운영자금이 동결되면서 장기간 서비스를 중단했고, 이후 FTX 붕괴·은행위기·지속적인 이용자 자금 유출로 현금흐름이 악화됐다고 설명했다. 2023년 5월 22일 모든 중앙화 거래소 운영을 종료하고 이용자에게 6월 21일까지 잔여 자산을 출금하라고 안내했다. 이는 새 해킹이나 법원 파산이 확인된 사건은 아니므로 halt로 분류했다.",
+      "article": "https://blockworks.co/news/hotbit-crypto-exchange-shuts-down"
     },
     {
       "id": "2023-09-jpex",
@@ -483,8 +517,8 @@
       "country": "홍콩계·글로벌",
       "type": "hack",
       "summary": "핫월렛 개인키 침해로 다중체인 자산 유출",
-      "amount": 96600000000,
-      "amountText": "최대 약 7,000만 달러 (약 966억 원)",
+      "amount": 74500000000,
+      "amountText": "외부 추정 약 5,400만~7,000만 달러",
       "tags": ["북한 연계 의심"],
       "detail": "비정상 대규모 출금이 여러 체인에서 이어졌고 코인엑스는 핫월렛 개인키가 유출됐다고 설명했다. 외부 분석기관의 추정치는 약 5,400만~7,000만 달러로 차이가 있다. Elliptic 등은 이전 라자루스 지갑과 자금 흐름의 유사성을 근거로 북한 연계를 지목했으며, 거래소는 고객 손실을 전액 보상하겠다고 밝혔다.",
       "article": "https://www.investing.com/news/economy/blockchain-analysts-suspect-north-korealinked-hackers-behind-70m-crypto-theft-3175793"
@@ -595,7 +629,7 @@
       "amount": 317000000000,
       "amountText": "약 2억 3,000만 달러 (약 3,170억 원)",
       "tags": ["북한 연계 의심"],
-      "detail": "공격자는 멀티시그 지갑의 제어권을 바꾸고 자산을 한 번에 인출했다. 와지르엑스는 커스터디 인터페이스에 표시된 내용과 실제 서명 내용의 불일치를 원인으로 들었지만 커스터디업체 Liminal은 거래소 측 시스템 문제라며 반박했다. 피해액은 준비금의 약 45%에 달해 출금이 장기간 중단됐고, 싱가포르 법원은 2025년 10월 채권자 승인 구조조정안을 인가했다. 거래소는 같은 달 거래를 단계적으로 재개하고 비례 배분 절차에 들어갔다.",
+      "detail": "공격자는 멀티시그 지갑의 제어권을 바꾸고 자산을 한 번에 인출했다. 와지르엑스는 커스터디 인터페이스에 표시된 내용과 실제 서명 내용의 불일치를 원인으로 들었지만 커스터디업체 Liminal은 거래소 측 시스템 문제라며 반박했다. 피해액은 준비금의 약 45%에 달했다. 2025년 8월 재투표에서 채권자 수 기준 95.7%, 가액 기준 94.6%가 구조조정안에 찬성했고, 싱가포르 고등법원은 10월 13일 이를 인가했다. 거래소는 10월 24일 거래를 재개했다.",
       "article": "https://www.coindesk.com/markets/2025/10/23/wazirx-to-restart-trading-on-friday-after-usd230m-hack-caused-year-long-shutdown"
     },
     {
@@ -618,8 +652,8 @@
       "country": "싱가포르계·글로벌",
       "type": "hack",
       "summary": "핫월렛 군집 침해로 여러 체인의 자산 유출",
-      "amount": 71800000000,
-      "amountText": "약 4,300만~5,200만 달러 (최대 약 718억 원)",
+      "amount": 59300000000,
+      "amountText": "외부 추정 약 4,300만~5,200만 달러",
       "detail": "거래소는 핫월렛 이상을 감지한 뒤 입출금을 중단하고 남은 자산을 옮겼다. BingX가 확정 총액을 공개하지 않아 보안업체 추정은 약 4,300만~5,200만 달러로 갈린다. 거래소는 손실이 회사 준비금으로 감당 가능한 수준이며 고객 자산은 전액 보전된다고 밝혔다.",
       "article": "https://news.bloomberglaw.com/crypto/crypto-exchange-bingx-hit-by-hack-that-drained-at-least-27m-1"
     },
@@ -654,11 +688,11 @@
       "name": "바이비트",
       "country": "아랍에미리트",
       "type": "hack",
-      "summary": "서명 화면 변조로 콜드월렛의 약 40만 ETH 탈취",
+      "summary": "서명 화면 변조로 40만 ETH를 포함한 ETH 계열 약 51만 개 탈취",
       "amount": 2070000000000,
       "amountText": "약 15억 달러 (약 2조 700억 원)",
       "tags": ["북한 연계"],
-      "detail": "공격자는 Safe 지갑 프런트엔드 공급망을 침해해 서명자 화면에는 정상 이체처럼 보이지만 실제로는 지갑 제어권을 바꾸는 거래를 승인하게 했다. 약 40만 ETH 계열 자산이 빠져나가 단일 가상자산 탈취 사건 기준 역대 최대를 기록했다. FBI는 북한 TraderTraitor의 소행으로 공식 지목했으며, 바이비트는 차입과 자체 자산으로 준비금을 복구하고 고객 출금을 계속 처리했다.",
+      "detail": "공격자는 Safe 지갑 프런트엔드 공급망을 침해해 서명자 화면에는 정상 이체처럼 보이지만 실제로는 지갑 제어권을 바꾸는 거래를 승인하게 했다. 탈취 자산은 401,347 ETH, 90,375 stETH, 15,000 cmETH, 8,000 mETH로 토큰 수량 합계 약 51만 5,000개였다. FBI는 북한 TraderTraitor의 소행으로 공식 지목했으며, 바이비트는 차입과 자체 자산으로 준비금을 복구하고 고객 출금을 계속 처리했다.",
       "article": "https://www.fbi.gov/investigate/cyber/alerts/2025/north-korea-responsible-for-1-5-billion-bybit-hack"
     },
     {
@@ -732,7 +766,7 @@
       "amount": 66200000000,
       "amountText": "외부 추정 약 4,800만 달러 (약 662억 원)",
       "detail": "이더리움·아발란체·아비트럼·베이스·옵티미즘·맨틀·폴리곤 관련 주소에서 자금이 빠르게 두 주소로 모였다. BtcTurk는 핫월렛의 비정상 활동을 확인하고 가상자산 입출금을 중단했으며 콜드월렛과 고객 잔액은 안전하다고 밝혔다. 2024년 사고와 유사하게 개인키 침해가 유력하지만 거래소의 전체 기술 보고서는 공개되지 않았다.",
-      "article": "https://www.theregister.com/2025/08/14/btcturk-suspends-operations-amid-claimed-49m-heist/"
+      "article": "https://therecord.media/turkish-crypto-exchange-warns-cyber-incident"
     },
     {
       "id": "2025-11-upbit",
@@ -740,12 +774,12 @@
       "name": "업비트",
       "country": "한국",
       "type": "hack",
-      "summary": "솔라나 계열 자산이 미확인 외부 지갑으로 유출",
+      "summary": "솔라나 계열 24종 자산이 165개 외부 주소로 유출",
       "amount": 44500000000,
       "amountText": "약 445억 원",
       "tags": ["국내", "북한 연계 의심"],
-      "detail": "두나무는 11월 27일 오전 4시 42분 솔라나 계열 자산 약 445억 원이 미확인 지갑으로 전송된 사실을 확인했다. 입출금을 전면 중단하고 보유 자산을 콜드월렛으로 옮겼으며, 피해액은 회사 자산으로 전액 충당한다고 밝혔다. 2019년 업비트 사고와 같은 날짜에 발생했고 공격 주체에 대한 수사는 이어졌다.",
-      "article": "https://en.yna.co.kr/view/AEN20251127007652320"
+      "detail": "두나무는 11월 27일 오전 4시 42분부터 약 54분 동안 솔라나 계열 24종 자산이 165개 외부 주소로 분산 전송된 사실을 확인했다. 처음에는 약 540억 원으로 발표했으나 사고 시점 시세를 적용해 445억 원으로 정정했다. 입출금을 전면 중단하고 보유 자산을 콜드월렛으로 옮겼으며 피해액은 회사 자산으로 충당했다. 정부 당국과 보안업계는 라자루스를 유력 배후로 의심했지만 최종 수사결과가 확정된 것은 아니다.",
+      "article": "https://en.yna.co.kr/view/AEN20251128003951320"
     },
     {
       "id": "2026-04-grinex",
@@ -754,22 +788,10 @@
       "country": "키르기스스탄·러시아계",
       "type": "hack",
       "summary": "지갑 인프라 공격 뒤 거래·출금 전면 중단",
-      "amount": 20700000000,
-      "amountText": "약 1,370만~1,500만 달러 (최대 약 207억 원)",
-      "detail": "제재 대상 러시아 거래소 Garantex의 후속 플랫폼으로 지목된 Grinex에서 54개 지갑의 자산이 빠져나갔다. 거래소는 '적대국 정보기관'이 개입했다고 주장했지만 공개적으로 입증되지는 않았다. 탈취 자산은 TRON에서 교환·통합됐고 Grinex는 거래와 입출금을 모두 중단했다.",
-      "article": "https://www.bleepingcomputer.com/news/security/grinex-exchange-blames-western-intelligence-for-137m-crypto-hack/"
-    },
-    {
-      "id": "2026-08-coinsbuy",
-      "date": "2026-08",
-      "name": "Coinsbuy",
-      "country": "글로벌",
-      "type": "hack",
-      "summary": "TRON·이더리움의 11개 지갑을 한 시간 안에 동시 탈취",
-      "amount": 11100000000,
-      "amountText": "약 807만 달러 (약 111억 원)",
-      "detail": "공격자는 TRON 지갑 8개에서 604만 USDT를, 이더리움 지갑 3개에서 189만 USDT와 77 ETH를 빼냈다. 두 체인의 흐름은 크로스체인 스와퍼를 통해 한 공격자로 연결됐고 약 79%가 FixedFloat의 일회성 주소들로 이동했다. Coinsbuy는 24시간 안에 지갑을 다시 채우고 고객 손실을 전액 회사 준비금으로 보전했으며, 정확한 침투 경로는 아직 공개하지 않았다.",
-      "article": "https://www.coindesk.com/business/2026/08/10/crypto-exchange-coinsbuy-loses-usd8-million-in-coordinated-two-blockchain-attack"
+      "amount": 18900000000,
+      "amountText": "거래소 발표 약 10억 루블·1,370만 달러; Elliptic 추정 약 1,500만 달러",
+      "detail": "미국·영국·EU 제재 대상이며 Garantex의 후속 플랫폼으로 지목된 Grinex는 4월 16일 약 10억 루블의 유출을 발표하고 운영을 중단했다. Elliptic은 실제 유출을 약 1,500만 달러로 추정했으며 스테이블코인은 빠르게 TRX와 ETH로 교환됐다. 거래소는 '서방 정보기관'을 배후로 주장했지만 입증하지 못했다. Chainalysis는 서방 수사기관이라면 동결 가능한 스테이블코인을 즉시 교환한 흐름이 이례적이라며 허위깃발 또는 내부자·출구사기 가능성을 배제할 수 없다고 분석했으나 결론을 내리지는 않았다. TRM은 같은 시기 연계 거래소 TokenSpot에서도 지갑 이상을 포착했다.",
+      "article": "https://www.chainalysis.com/blog/sanctioned-grinex-exchange-suspends-operations/"
     }
   ]
 }
