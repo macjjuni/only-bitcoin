@@ -7,6 +7,7 @@ export const scopedIncidentStyles = `
   --incident-text-muted: #666d76;
   --incident-axis: #d8dce2;
   --incident-guide: #c8cdd5;
+  --incident-year-divider: #b8bec7;
   --incident-track: #eceef2;
   --incident-border: #dcdfe5;
   --incident-chip-background: #eceef2;
@@ -35,6 +36,7 @@ export const scopedIncidentStyles = `
   --incident-text-muted: #9aa1ab;
   --incident-axis: #34373d;
   --incident-guide: #4b5059;
+  --incident-year-divider: #555c66;
   --incident-track: #26282c;
   --incident-border: #454951;
   --incident-chip-background: #26282c;

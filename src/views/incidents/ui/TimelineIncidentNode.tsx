@@ -16,6 +16,7 @@ interface TimelineIncidentNodeProps {
   incident: IncidentEvent;
   incidentIndex: number;
   isActive: boolean;
+  shouldRenderYearDivider: boolean;
   gapInPixels: number;
   onRegisterTimelineNode: (
     incidentIndex: number,
@@ -29,6 +30,7 @@ export function TimelineIncidentNode({
   incident,
   incidentIndex,
   isActive,
+  shouldRenderYearDivider,
   gapInPixels,
   onRegisterTimelineNode,
   onSelectIncident,
@@ -72,12 +74,24 @@ export function TimelineIncidentNode({
 
   return (
     <div
-      className="flex h-full shrink-0 snap-center flex-col items-center justify-center gap-2"
+      className="relative flex h-full shrink-0 snap-center flex-col items-center justify-center
+        gap-2"
       style={{
         width: timelineItemWidthInPixels,
         marginLeft: gapInPixels > 0 ? gapInPixels : undefined,
       }}
     >
+      {shouldRenderYearDivider && (
+        <span
+          aria-hidden
+          className="pointer-events-none absolute -top-4 -bottom-4 w-px"
+          style={{
+            left: -gapInPixels / 2,
+            backgroundColor: "var(--incident-year-divider)",
+          }}
+        />
+      )}
+
       <span
         className="h-3 font-number text-[11px] font-medium leading-none tabular-nums"
         style={{

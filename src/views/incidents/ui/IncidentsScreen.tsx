@@ -1,6 +1,6 @@
 "use client";
 
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import {
@@ -22,6 +22,8 @@ import {
 import { TimelineIncidentNode } from "./TimelineIncidentNode";
 import { YearJumpChip } from "./YearJumpChip";
 
+const latestIncidentIndex = totalIncidentCount - 1;
+
 export default function IncidentsScreen(): ReactNode {
   //#region [Hooks]
   const timelineTrackReference = useRef<HTMLDivElement>(null);
@@ -29,8 +31,8 @@ export default function IncidentsScreen(): ReactNode {
   const yearJumpNavigationReference = useRef<HTMLElement>(null);
   const yearJumpChipReferences = useRef<Record<string, HTMLButtonElement | null>>({});
   const detectionAnimationFrameReference = useRef<number | null>(null);
-  const activeIncidentIndexReference = useRef(0);
-  const [activeIncidentIndex, setActiveIncidentIndex] = useState(0);
+  const activeIncidentIndexReference = useRef(latestIncidentIndex);
+  const [activeIncidentIndex, setActiveIncidentIndex] = useState(latestIncidentIndex);
 
   const detectCenteredIncident = useCallback((): void => {
     const timelineTrackElement = timelineTrackReference.current;
@@ -156,6 +158,17 @@ export default function IncidentsScreen(): ReactNode {
     }
   }, []);
 
+  const scrollTimelinesToLatestIncident = useCallback((): void => {
+    const timelineTrackElement = timelineTrackReference.current;
+    const yearJumpNavigationElement = yearJumpNavigationReference.current;
+
+    timelineTrackElement?.scrollTo({ left: timelineTrackElement.scrollWidth, behavior: "auto" });
+    yearJumpNavigationElement?.scrollTo({
+      left: yearJumpNavigationElement.scrollWidth,
+      behavior: "auto",
+    });
+  }, []);
+
   const selectTimelineIncident = useCallback(
     (incidentIndex: number): void => {
       scrollIncidentToCenter(incidentIndex);
@@ -181,6 +194,8 @@ export default function IncidentsScreen(): ReactNode {
   //#endregion
 
   //#region [Life Cycles]
+  useLayoutEffect(scrollTimelinesToLatestIncident, [scrollTimelinesToLatestIncident]);
+
   useEffect(() => {
     const timelineTrackElement = timelineTrackReference.current;
 
@@ -272,6 +287,9 @@ export default function IncidentsScreen(): ReactNode {
 
             {incidentEvents.map((incident, incidentIndex) => {
               const previousIncident = incidentEvents[incidentIndex - 1];
+              const shouldRenderYearDivider =
+                previousIncident !== undefined &&
+                previousIncident.date.slice(0, 4) !== incident.date.slice(0, 4);
               const gapInPixels = previousIncident
                 ? calculateMonthsBetween(previousIncident.date, incident.date) *
                   timelinePixelsPerMonth
@@ -283,6 +301,7 @@ export default function IncidentsScreen(): ReactNode {
                   incident={incident}
                   incidentIndex={incidentIndex}
                   isActive={incidentIndex === activeIncidentIndex}
+                  shouldRenderYearDivider={shouldRenderYearDivider}
                   gapInPixels={gapInPixels}
                   onRegisterTimelineNode={registerTimelineNode}
                   onSelectIncident={selectTimelineIncident}
