@@ -1,7 +1,5 @@
 {
   "updatedAt": "2026-08-31",
-  "amountNote": "공개 보도로 사실관계를 확인할 수 있는 주요 중앙화 암호화폐 거래소(CEX)와 수탁형 거래 플랫폼의 해킹·지급불능·법원 구조조정·폐업 사례를 수록했습니다. 브리지, DEX, 스마트컨트랙트, 대출 프로토콜, 개인지갑, 결제 인프라 해킹은 제외했습니다. amount는 사건 당시 공표된 현지통화 또는 달러 피해액을 약 1,380원/USD로 환산한 원화 추정치이며, 현지통화 환산과 조사기관별 집계 차이로 오차가 있습니다. 화면에는 amountText를 그대로 노출하고 amount는 정렬과 막대 스케일 계산에만 쓰세요. 피해액이 확정되지 않은 사건은 amount를 생략했습니다.",
-  "types": ["hack", "halt", "bankruptcy"],
   "events": [
     {
       "id": "2014-02-mtgox",
@@ -12,7 +10,6 @@
       "summary": "85만 BTC 실종 신고 후 파산, 20만 BTC는 뒤늦게 발견",
       "amount": 650000000000,
       "amountText": "당시 약 4억 7,300만 달러 (약 6,500억 원)",
-      "featured": true,
       "detail": "당시 세계 최대 비트코인 거래소였던 마운트곡스는 고객분 75만 BTC와 회사분 10만 BTC를 잃었다고 신고하고 일본에서 파산보호를 신청했다. 이후 옛 지갑에서 20만 BTC를 찾아 순실종 수량은 약 65만 BTC로 줄었다. 장기간의 해킹뿐 아니라 내부 통제·회계 부실이 함께 지적됐으며, 법정관리인은 2024년부터 보유 자산을 이용한 채권자 변제를 시작했다.",
       "article": "https://www.theguardian.com/technology/2014/mar/21/mtgox-missing-70m-bitcoin"
     },
@@ -73,7 +70,6 @@
       "summary": "멀티시그 계정에서 11만 9,754 BTC 탈취",
       "amount": 99400000000,
       "amountText": "당시 약 7,200만 달러 (약 994억 원)",
-      "featured": true,
       "detail": "공격자는 비트파이넥스 네트워크에 침입해 2,000건이 넘는 무단 거래를 승인하고 11만 9,754 BTC를 옮겼다. 거래소는 손실을 전 고객에게 약 36%씩 사회화하고 BFX 토큰을 발행해 이후 상환했다. 미국 법무부는 2022년 약 9만 4,000 BTC를 압수했으며, 해커 일리야 리히텐슈타인은 2024년 형을 선고받았다.",
       "article": "https://www.justice.gov/archives/opa/pr/bitfinex-hacker-sentenced-money-laundering-conspiracy-involving-billions-stolen"
     },
@@ -98,7 +94,6 @@
       "summary": "핫월렛에서 5억 2,300만여 NEM 유출",
       "amount": 731000000000,
       "amountText": "약 580억 엔·5억 3,000만 달러 (약 7,310억 원)",
-      "featured": true,
       "detail": "NEM을 다중서명 없이 인터넷에 연결된 단일 핫월렛에 보관한 점이 대규모 피해로 이어졌다. 코인체크는 약 26만 명의 피해 고객에게 회사 자금으로 보상했고, 일본 금융청은 현장검사와 업무개선명령을 실시했다. 사건은 일본의 거래소 등록·보안 감독이 강화되는 직접적인 계기가 됐다.",
       "article": "https://www.investing.com/news/cryptocurrency-news/japan-raps-coincheck-orders-broader-checks-after-530-million-cryptocurrency-theft-1163175"
     },
@@ -173,7 +168,6 @@
       "summary": "대표 사망 뒤 드러난 고객자산 유용과 대규모 결손",
       "amount": 175000000000,
       "amountText": "최소 1억 6,900만 캐나다달러 결손 (약 1,750억 원)",
-      "featured": true,
       "detail": "처음에는 대표 제럴드 코튼의 사망으로 콜드월렛 키를 잃었다고 알려졌으나, 온타리오증권위원회 조사 결과 핵심 원인은 사기였다. 코튼은 가명 계정에 가짜 잔액을 만들고 고객과 거래하거나 외부 거래소에서 투기해 자산을 소진했다. 약 7만 6,000명에게 2억 1,500만 캐나다달러를 빚졌고 회수·확인된 자산은 4,600만 캐나다달러에 그쳤다.",
       "article": "https://www.osc.gov.on.ca/quadrigacxreport/"
     },
@@ -262,7 +256,6 @@
       "amount": 58000000000,
       "amountText": "사고 당시 약 580억 원",
       "tags": ["국내", "북한 연계"],
-      "featured": true,
       "detail": "자산 이전 작업 중 34만 2,000 ETH가 알 수 없는 외부 지갑으로 한 번에 전송됐다. 두나무는 회사 자산으로 전액 충당하고 약 2주간 입출금을 중단했다. 한국 경찰은 네트워크·악성코드·온체인 흐름을 장기간 분석한 뒤 2024년 라자루스와 안다리엘 등 북한 정찰총국 계열 조직의 소행으로 공식 확인했다.",
       "article": "https://en.yna.co.kr/view/AEN20241121005600315"
     },
@@ -420,7 +413,6 @@
       "summary": "고객자산을 알라메다에 유용한 뒤 유동성 위기와 파산",
       "amount": 11040000000000,
       "amountText": "파산 직전 부족액 최대 약 80억 달러 (약 11조 400억 원)",
-      "featured": true,
       "detail": "FTX는 고객 예치금을 관계사 알라메다리서치의 대출·투자·채무상환에 사용했고, FTT 담보의 취약성이 드러난 뒤 대규모 인출 요구를 감당하지 못했다. 2022년 11월 11일 130개가 넘는 계열사와 함께 챕터 11을 신청했다. 새 경영진은 통제와 기록관리의 총체적 실패를 확인했으며, 파산재단은 이후 자산 회수와 처분을 통해 채권자 변제를 진행했다.",
       "article": "https://apnews.com/article/c519d50b9059aa8bff0ce8b6cd26c40e"
     },
@@ -566,7 +558,6 @@
       "amount": 425000000000,
       "amountText": "약 3억 800만 달러·482억 엔 (약 4,250억 원)",
       "tags": ["북한 연계"],
-      "featured": true,
       "detail": "북한 TraderTraitor 조직은 채용 담당자를 사칭해 DMM의 지갑관리 업체 직원에게 악성 Python 과제를 실행하게 했다. 탈취한 세션 정보로 통신 시스템을 조작하고 DMM 직원의 정상 거래 요청을 바꿔 4,502.9 BTC를 공격자 지갑으로 보냈다. DMM은 전액 보전을 위해 그룹 지원을 받았지만 정상화를 포기했고, 고객 계좌와 자산을 2025년 SBI VC트레이드로 이전한 뒤 폐업했다.",
       "article": "https://www.fbi.gov/news/press-releases/fbi-dc3-and-npa-identification-of-north-korean-cyber-actors-tracked-as-tradertraitor-responsible-for-theft-of-308-million-from-bitcoindmmcom"
     },
@@ -604,7 +595,6 @@
       "amount": 317000000000,
       "amountText": "약 2억 3,000만 달러 (약 3,170억 원)",
       "tags": ["북한 연계 의심"],
-      "featured": true,
       "detail": "공격자는 멀티시그 지갑의 제어권을 바꾸고 자산을 한 번에 인출했다. 와지르엑스는 커스터디 인터페이스에 표시된 내용과 실제 서명 내용의 불일치를 원인으로 들었지만 커스터디업체 Liminal은 거래소 측 시스템 문제라며 반박했다. 피해액은 준비금의 약 45%에 달해 출금이 장기간 중단됐고, 싱가포르 법원은 2025년 10월 채권자 승인 구조조정안을 인가했다. 거래소는 같은 달 거래를 단계적으로 재개하고 비례 배분 절차에 들어갔다.",
       "article": "https://www.coindesk.com/markets/2025/10/23/wazirx-to-restart-trading-on-friday-after-usd230m-hack-caused-year-long-shutdown"
     },
@@ -668,7 +658,6 @@
       "amount": 2070000000000,
       "amountText": "약 15억 달러 (약 2조 700억 원)",
       "tags": ["북한 연계"],
-      "featured": true,
       "detail": "공격자는 Safe 지갑 프런트엔드 공급망을 침해해 서명자 화면에는 정상 이체처럼 보이지만 실제로는 지갑 제어권을 바꾸는 거래를 승인하게 했다. 약 40만 ETH 계열 자산이 빠져나가 단일 가상자산 탈취 사건 기준 역대 최대를 기록했다. FBI는 북한 TraderTraitor의 소행으로 공식 지목했으며, 바이비트는 차입과 자체 자산으로 준비금을 복구하고 고객 출금을 계속 처리했다.",
       "article": "https://www.fbi.gov/investigate/cyber/alerts/2025/north-korea-responsible-for-1-5-billion-bybit-hack"
     },
@@ -755,7 +744,6 @@
       "amount": 44500000000,
       "amountText": "약 445억 원",
       "tags": ["국내", "북한 연계 의심"],
-      "featured": true,
       "detail": "두나무는 11월 27일 오전 4시 42분 솔라나 계열 자산 약 445억 원이 미확인 지갑으로 전송된 사실을 확인했다. 입출금을 전면 중단하고 보유 자산을 콜드월렛으로 옮겼으며, 피해액은 회사 자산으로 전액 충당한다고 밝혔다. 2019년 업비트 사고와 같은 날짜에 발생했고 공격 주체에 대한 수사는 이어졌다.",
       "article": "https://en.yna.co.kr/view/AEN20251127007652320"
     },

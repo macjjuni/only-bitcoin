@@ -20,14 +20,6 @@ export const scopedIncidentStyles = `
   --incident-halt-foreground: #442a8a;
   --incident-halt-accent: #7c5cd6;
 
-  --incident-protocol-background: #e2f2f0;
-  --incident-protocol-foreground: #10514c;
-  --incident-protocol-accent: #2b9c92;
-
-  --incident-operational-background: #fbf0dd;
-  --incident-operational-foreground: #6f4708;
-  --incident-operational-accent: #c0821a;
-
   --incident-bankruptcy-background: #eceef1;
   --incident-bankruptcy-foreground: #3c434c;
   --incident-bankruptcy-accent: #78828f;
@@ -52,14 +44,6 @@ export const scopedIncidentStyles = `
   --incident-halt-foreground: #bfa8ff;
   --incident-halt-accent: #8b6ce0;
 
-  --incident-protocol-background: rgb(43 156 146 / 0.18);
-  --incident-protocol-foreground: #6fd8cd;
-  --incident-protocol-accent: #35b3a7;
-
-  --incident-operational-background: rgb(192 130 26 / 0.18);
-  --incident-operational-foreground: #f0c069;
-  --incident-operational-accent: #d1912b;
-
   --incident-bankruptcy-background: rgb(120 130 143 / 0.2);
   --incident-bankruptcy-foreground: #c2c9d2;
   --incident-bankruptcy-accent: #8b95a3;
@@ -82,16 +66,6 @@ export const incidentTypeColorTokens: Record<IncidentType, IncidentTypeColorToke
     badgeBackground: "var(--incident-halt-background)",
     badgeForeground: "var(--incident-halt-foreground)",
     accent: "var(--incident-halt-accent)",
-  },
-  protocol: {
-    badgeBackground: "var(--incident-protocol-background)",
-    badgeForeground: "var(--incident-protocol-foreground)",
-    accent: "var(--incident-protocol-accent)",
-  },
-  operational: {
-    badgeBackground: "var(--incident-operational-background)",
-    badgeForeground: "var(--incident-operational-foreground)",
-    accent: "var(--incident-operational-accent)",
   },
   bankruptcy: {
     badgeBackground: "var(--incident-bankruptcy-background)",

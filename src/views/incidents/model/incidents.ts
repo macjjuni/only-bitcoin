@@ -1,6 +1,6 @@
 import exchangeIncidentsJson from "./exchange-incidents.json";
 
-export type IncidentType = "hack" | "halt" | "bankruptcy" | "operational" | "protocol";
+export type IncidentType = "hack" | "halt" | "bankruptcy";
 
 export interface IncidentEvent {
   /** 상세 페이지 슬러그로도 사용하는 사건 식별자. */
@@ -15,15 +15,12 @@ export interface IncidentEvent {
   amount?: number;
   amountText: string;
   tags?: string[];
-  featured?: boolean;
   detail?: string;
   article: string;
 }
 
 interface ExchangeIncidentsData {
   updatedAt: string;
-  amountNote: string;
-  types: IncidentType[];
   events: IncidentEvent[];
 }
 
@@ -49,8 +46,6 @@ export const incidentsUpdatedAt = exchangeIncidentsData.updatedAt;
 export const incidentTypeLabels: Record<IncidentType, string> = {
   hack: "해킹",
   halt: "출금중지",
-  protocol: "프로토콜",
-  operational: "운영사고",
   bankruptcy: "파산",
 };
 
