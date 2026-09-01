@@ -84,7 +84,7 @@ export function TimelineIncidentNode({
       {shouldRenderYearDivider && (
         <span
           aria-hidden
-          className="pointer-events-none absolute -top-4 -bottom-4 w-px"
+          className="pointer-events-none absolute top-1/2 bottom-1/2 -translate-x-1/2 -translate-y-1/2 w-[0.5px] h-[92%] z-[12]"
           style={{
             left: -gapInPixels / 2,
             backgroundColor: "var(--incident-year-divider)",

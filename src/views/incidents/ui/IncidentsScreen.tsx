@@ -260,19 +260,6 @@ export default function IncidentsScreen(): ReactNode {
         </div>
 
         <div className="relative">
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 left-[10%] z-10 border-l
-              border-dashed"
-            style={{ borderColor: "var(--incident-guide)" }}
-          />
-          <span
-            aria-hidden
-            className="pointer-events-none absolute inset-y-0 right-[10%] z-10 border-r
-              border-dashed"
-            style={{ borderColor: "var(--incident-guide)" }}
-          />
-
           <div
             ref={timelineTrackReference}
             role="tablist"

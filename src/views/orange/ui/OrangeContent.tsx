@@ -252,7 +252,7 @@ const OrangeContent = () => {
             <button
               key={utilityCard.title}
               type="button"
-              className="flex min-h-24 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-3 text-center transition-transform duration-200 active:scale-95"
+              className="flex min-h-20 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2.5 text-center transition-transform duration-200 active:scale-95"
               onClick={utilityCard.onClick}
             >
               <span className="flex size-12 items-center justify-center rounded-full bg-orange-500/10 dark:bg-orange-400/15">
