@@ -23,6 +23,10 @@ export const scopedIncidentStyles = `
   --incident-bankruptcy-background: #eceef1;
   --incident-bankruptcy-foreground: #3c434c;
   --incident-bankruptcy-accent: #78828f;
+
+  --incident-error-background: #fff3dc;
+  --incident-error-foreground: #7a4a00;
+  --incident-error-accent: #d88a12;
 }
 
 :where(.dark) .incidents {
@@ -47,6 +51,10 @@ export const scopedIncidentStyles = `
   --incident-bankruptcy-background: rgb(120 130 143 / 0.2);
   --incident-bankruptcy-foreground: #c2c9d2;
   --incident-bankruptcy-accent: #8b95a3;
+
+  --incident-error-background: rgb(216 138 18 / 0.18);
+  --incident-error-foreground: #ffc56d;
+  --incident-error-accent: #e49a2d;
 }
 `;
 
@@ -71,6 +79,11 @@ export const incidentTypeColorTokens: Record<IncidentType, IncidentTypeColorToke
     badgeBackground: "var(--incident-bankruptcy-background)",
     badgeForeground: "var(--incident-bankruptcy-foreground)",
     accent: "var(--incident-bankruptcy-accent)",
+  },
+  error: {
+    badgeBackground: "var(--incident-error-background)",
+    badgeForeground: "var(--incident-error-foreground)",
+    accent: "var(--incident-error-accent)",
   },
 };
 

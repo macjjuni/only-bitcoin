@@ -1,6 +1,6 @@
 import exchangeIncidentsJson from "./exchange-incidents.json";
 
-export type IncidentType = "hack" | "halt" | "bankruptcy";
+export type IncidentType = "hack" | "halt" | "bankruptcy" | "error";
 
 export interface IncidentEvent {
   /** 상세 페이지 슬러그로도 사용하는 사건 식별자. */
@@ -45,8 +45,9 @@ export const incidentsUpdatedAt = exchangeIncidentsData.updatedAt;
 /** 유형 라벨은 데이터 파일이 아니라 코드에서 관리한다. */
 export const incidentTypeLabels: Record<IncidentType, string> = {
   hack: "해킹",
-  halt: "출금중지",
+  halt: "자금 지급 중단",
   bankruptcy: "파산",
+  error: "운영 오류",
 };
 
 /** 각 연도가 처음 등장하는 사건을 연도 점프 대상으로 만든다. */
