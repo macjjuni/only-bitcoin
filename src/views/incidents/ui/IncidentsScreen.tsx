@@ -227,21 +227,22 @@ export default function IncidentsScreen(): ReactNode {
           description="거래소 사건사고를 확인하고, 개인 셀프 커스터디의 중요성과 스스로 자산을 지켜야 한다는 경각심을 되새겨보세요."
         />
 
-        <nav
-          ref={yearJumpNavigationReference}
-          aria-label="연도 바로가기"
-          className="scrollbar-hide flex gap-2 overflow-x-auto -mx-2 px-2 py-0.5"
-        >
-          {incidentYearAnchors.map((yearAnchor) => (
-            <YearJumpChip
-              key={yearAnchor.year}
-              yearAnchor={yearAnchor}
-              isActive={yearAnchor.year === activeIncidentYear}
-              onSelectYear={onSelectYearJumpChip}
-              onRegisterYearJumpChip={registerYearJumpChip}
-            />
-          ))}
-        </nav>
+        <div className="flex items-center justify-between gap-3 px-1 -mb-2 text-xs leading-none">
+          <div
+            className="flex min-w-0 items-center gap-2"
+            style={{ color: "var(--incident-text-muted)" }}
+          >
+            <span className="truncate tabular-nums">
+              {firstIncidentYear} – {lastIncidentYear} · {totalIncidentCount}건
+            </span>
+          </div>
+          <span
+            className="font-number tabular-nums"
+            style={{ color: "var(--incident-text-muted)" }}
+          >
+            {activeIncidentIndex + 1} / {totalIncidentCount}
+          </span>
+        </div>
 
         <div className="relative">
           <span
@@ -294,22 +295,21 @@ export default function IncidentsScreen(): ReactNode {
           </div>
         </div>
 
-        <div className="flex items-center justify-between gap-3 px-1 text-[12px] leading-none">
-          <div
-            className="flex min-w-0 items-center gap-2"
-            style={{ color: "var(--incident-text-muted)" }}
-          >
-            <span className="truncate tabular-nums">
-              {firstIncidentYear} – {lastIncidentYear} · {totalIncidentCount}건
-            </span>
-          </div>
-          <span
-            className="font-number tabular-nums"
-            style={{ color: "var(--incident-text-muted)" }}
-          >
-            {activeIncidentIndex + 1} / {totalIncidentCount}
-          </span>
-        </div>
+        <nav
+          ref={yearJumpNavigationReference}
+          aria-label="연도 바로가기"
+          className="scrollbar-hide flex gap-2 overflow-x-auto -mx-2 -mt-4 px-2 py-2.5 backdrop-blur-sm"
+        >
+          {incidentYearAnchors.map((yearAnchor) => (
+            <YearJumpChip
+              key={yearAnchor.year}
+              yearAnchor={yearAnchor}
+              isActive={yearAnchor.year === activeIncidentYear}
+              onSelectYear={onSelectYearJumpChip}
+              onRegisterYearJumpChip={registerYearJumpChip}
+            />
+          ))}
+        </nav>
 
         <div aria-live="polite" aria-atomic="true">
           {incidentEvents.map((incident, incidentIndex) => (
@@ -321,13 +321,8 @@ export default function IncidentsScreen(): ReactNode {
           ))}
         </div>
 
-        <ul>
-          <li className="px-1 text-xs leading-4 text-muted-foreground">
-            *사건 설명은 AI가 요약했으므로 관련 기사 원문을 함께 확인하세요.
-          </li>
-          <li className="px-1 text-xs leading-4 text-muted-foreground">
-            * 피해액은 원화 환산 추정치
-          </li>
+        <ul className="font-pretendard pl-1 text-xs leading-4 text-muted-foreground flex flex-col gap-1">
+          <li>*사건 설명은 AI가 요약했으므로 관련 기사 원문을 함께 확인하세요.</li>
         </ul>
       </div>
     </PageLayout>
