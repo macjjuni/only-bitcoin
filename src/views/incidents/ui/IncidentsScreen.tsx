@@ -7,7 +7,6 @@ import {
   calculateMonthsBetween,
   firstIncidentYear,
   incidentEvents,
-  incidentsUpdatedAt,
   incidentYearAnchors,
   lastIncidentYear,
   totalIncidentCount,
@@ -312,12 +311,14 @@ export default function IncidentsScreen(): ReactNode {
 
         <IncidentDetailPanel activeIncident={activeIncident} />
 
-        <p
-          className="px-1 text-[11px] leading-none"
-          style={{ color: "var(--incident-text-muted)" }}
-        >
-          {incidentsUpdatedAt} 기준 · 피해액은 원화 환산 추정치
-        </p>
+        <ul>
+          <li className="px-1 text-xs leading-4 text-muted-foreground">
+            *사건 설명은 AI가 요약했으므로 관련 기사 원문을 함께 확인하세요.
+          </li>
+          <li className="px-1 text-xs leading-4 text-muted-foreground">
+            * 피해액은 원화 환산 추정치
+          </li>
+        </ul>
       </div>
     </PageLayout>
   );

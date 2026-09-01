@@ -1,5 +1,5 @@
-import { SquareArrowOutUpRight } from "lucide-react";
-import type { ReactNode } from "react";
+import { ChevronDown, SquareArrowOutUpRight } from "lucide-react";
+import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   calculateIncidentAmountRatio,
   formatIncidentFullDate,
@@ -13,14 +13,70 @@ interface IncidentDetailPanelProps {
 }
 
 export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps): ReactNode {
+  //#region [Hooks]
+  const detailParagraphReference = useRef<HTMLParagraphElement>(null);
+  const [isDetailExpanded, setIsDetailExpanded] = useState(false);
+  const [isDetailOverflowing, setIsDetailOverflowing] = useState(false);
+  //#endregion
+
+  //#region [Privates]
+  /**
+   * 접힌 문단의 실제 높이와 잘린 높이를 비교해 3줄을 넘겼는지 판별한다.
+   *
+   * 펼친 상태에서는 잘림이 없어 비교가 무의미하므로 직전 결과를 유지한다.
+   */
+  const detectDetailOverflow = useCallback((): void => {
+    const detailParagraphElement = detailParagraphReference.current;
+
+    if (!detailParagraphElement || isDetailExpanded) {
+      return;
+    }
+
+    setIsDetailOverflowing(
+      detailParagraphElement.scrollHeight > detailParagraphElement.clientHeight + 1,
+    );
+  }, [isDetailExpanded]);
+  //#endregion
+
+  //#region [Events]
+  const onClickToggleDetail = (): void => {
+    setIsDetailExpanded((previousDetailExpanded) => !previousDetailExpanded);
+  };
+  //#endregion
+
+  //#region [Life Cycles]
+  /** 다른 사건으로 이동하면 항상 접힌 상태에서 다시 시작한다. */
+  useEffect(() => {
+    setIsDetailExpanded(false);
+  }, [activeIncident.id]);
+
+  /** 글꼴 로딩과 가로폭 변화로 줄 수가 달라지므로 리사이즈까지 관찰한다. */
+  useEffect(() => {
+    const detailParagraphElement = detailParagraphReference.current;
+
+    if (!detailParagraphElement) {
+      return;
+    }
+
+    detectDetailOverflow();
+    const detailResizeObserver = new ResizeObserver(detectDetailOverflow);
+    detailResizeObserver.observe(detailParagraphElement);
+
+    return (): void => {
+      detailResizeObserver.disconnect();
+    };
+  }, [activeIncident.detail, detectDetailOverflow]);
+  //#endregion
+
   //#region [Templates]
   const activeIncidentTypeColorToken = incidentTypeColorTokens[activeIncident.type];
   const hasEstimatedAmount = typeof activeIncident.amount === "number";
+  const detailParagraphId = `incident-detail-${activeIncident.id}`;
 
   const DamageAmountTemplate = hasEstimatedAmount ? (
     <div className="flex items-center gap-2.5">
       <div
-        className="h-[5px] min-w-0 flex-1 overflow-hidden rounded-full"
+        className="h-[5px] min-w-[60px] flex-1 overflow-hidden rounded-full"
         style={{ backgroundColor: "var(--incident-track)" }}
       >
         <div
@@ -31,7 +87,10 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
           }}
         />
       </div>
-      <span className="shrink-0 text-[12px] font-medium leading-none tabular-nums">
+      <span
+        className="min-w-0 break-keep text-right text-[12px] font-medium leading-tight
+          tabular-nums"
+      >
         {activeIncident.amountText}
       </span>
     </div>
@@ -41,16 +100,45 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
     </span>
   );
 
+  /** 넘침 판별이 하이드레이션 이후라 버튼 등장으로 아래 요소가 밀리지 않게 높이를 미리 잡는다. */
+  const DetailToggleTemplate = (
+    <div className="min-h-[13px]">
+      {isDetailOverflowing ? (
+        <button
+          type="button"
+          onClick={onClickToggleDetail}
+          aria-expanded={isDetailExpanded}
+          aria-controls={detailParagraphId}
+          className="inline-flex w-fit items-center gap-0.5 text-[12px] font-medium leading-none
+            transition-opacity hover:opacity-75"
+          style={{ color: activeIncidentTypeColorToken.badgeForeground }}
+        >
+          {isDetailExpanded ? "접기" : "더보기"}
+          <ChevronDown
+            size={13}
+            className={`transition-transform ${isDetailExpanded ? "rotate-180" : ""}`}
+            aria-hidden="true"
+          />
+        </button>
+      ) : null}
+    </div>
+  );
+
   const DetailTemplate = activeIncident.detail ? (
-    <p
-      className="border-t pt-3 text-[13px] leading-[1.6]"
-      style={{
-        borderColor: "var(--incident-border)",
-        color: "var(--incident-text-secondary)",
-      }}
+    <div
+      className="flex flex-col items-start gap-1.5 border-t pt-3"
+      style={{ borderColor: "var(--incident-border)" }}
     >
-      {activeIncident.detail}
-    </p>
+      <p
+        id={detailParagraphId}
+        ref={detailParagraphReference}
+        className={`text-[13px] leading-[1.6] ${isDetailExpanded ? "" : "line-clamp-3"}`}
+        style={{ color: "var(--incident-text-secondary)" }}
+      >
+        {activeIncident.detail}
+      </p>
+      {DetailToggleTemplate}
+    </div>
   ) : null;
   //#endregion
 
