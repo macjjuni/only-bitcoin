@@ -2,6 +2,7 @@ import type { MetadataRoute } from "next";
 import { ARCHIVE_GENERATED_AT } from "@/entities/apartment/server";
 import { env } from "@/shared/config/env";
 import { PRIVACY_EFFECTIVE_DATE } from "@/shared/constants/policy";
+import { incidentsUpdatedAt } from "@/views/incidents/server";
 
 const BASE_URL = env.NEXT_PUBLIC_URL;
 
@@ -71,6 +72,12 @@ export default function sitemap(): MetadataRoute.Sitemap {
       lastModified: new Date(ARCHIVE_GENERATED_AT),
       changeFrequency: "monthly" as const,
       priority: 0.8,
+    },
+    {
+      url: `${BASE_URL}/incidents`,
+      lastModified: new Date(incidentsUpdatedAt),
+      changeFrequency: "monthly" as const,
+      priority: 0.7,
     },
   ];
 
