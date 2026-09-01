@@ -5,7 +5,12 @@ import {
   formatIncidentShortDate,
   type IncidentEvent,
 } from "../model/incidents";
-import { incidentTypeColorTokens, timelineItemWidthInPixels } from "./incidentConstants";
+import {
+  createIncidentDetailPanelId,
+  createIncidentTimelineTabId,
+  incidentTypeColorTokens,
+  timelineItemWidthInPixels,
+} from "./incidentConstants";
 
 interface TimelineIncidentNodeProps {
   incident: IncidentEvent;
@@ -61,6 +66,8 @@ export function TimelineIncidentNode({
   //#region [Templates]
   const timelineNodeDiameterInPixels = calculateTimelineNodeDiameter(incident.amount);
   const incidentTypeColorToken = incidentTypeColorTokens[incident.type];
+  const timelineTabId = createIncidentTimelineTabId(incident.id);
+  const detailPanelId = createIncidentDetailPanelId(incident.id);
   //#endregion
 
   return (
@@ -91,11 +98,14 @@ export function TimelineIncidentNode({
           }}
         />
         <button
+          id={timelineTabId}
           ref={onAssignTimelineNodeReference}
           type="button"
-          tabIndex={0}
+          role="tab"
+          tabIndex={isActive ? 0 : -1}
           aria-label={`${formatIncidentFullDate(incident.date)} ${incident.name}`}
-          aria-current={isActive ? "true" : undefined}
+          aria-controls={detailPanelId}
+          aria-selected={isActive}
           onFocus={onFocusTimelineNode}
           onClick={onClickTimelineNode}
           onKeyDown={onKeyDownTimelineNode}

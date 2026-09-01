@@ -1,18 +1,26 @@
 import { ChevronDown, SquareArrowOutUpRight } from "lucide-react";
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { memo, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import {
   calculateIncidentAmountRatio,
   formatIncidentFullDate,
   type IncidentEvent,
   incidentTypeLabels,
 } from "../model/incidents";
-import { incidentTypeColorTokens } from "./incidentConstants";
+import {
+  createIncidentDetailPanelId,
+  createIncidentTimelineTabId,
+  incidentTypeColorTokens,
+} from "./incidentConstants";
 
 interface IncidentDetailPanelProps {
-  activeIncident: IncidentEvent;
+  incident: IncidentEvent;
+  isActive: boolean;
 }
 
-export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps): ReactNode {
+export const IncidentDetailPanel = memo(function IncidentDetailPanel({
+  incident,
+  isActive,
+}: IncidentDetailPanelProps): ReactNode {
   //#region [Hooks]
   const detailParagraphReference = useRef<HTMLParagraphElement>(null);
   const [isDetailExpanded, setIsDetailExpanded] = useState(false);
@@ -36,6 +44,11 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
       detailParagraphElement.scrollHeight > detailParagraphElement.clientHeight + 1,
     );
   }, [isDetailExpanded]);
+
+  const resetInactiveDetailPanel = useCallback((): void => {
+    setIsDetailExpanded(false);
+    setIsDetailOverflowing(false);
+  }, []);
   //#endregion
 
   //#region [Events]
@@ -45,13 +58,21 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
   //#endregion
 
   //#region [Life Cycles]
-  /** 다른 사건으로 이동하면 항상 접힌 상태에서 다시 시작한다. */
+  /** 다시 활성화될 때 항상 접힌 상태에서 시작하도록 비활성화 시 상태를 초기화한다. */
   useEffect(() => {
-    setIsDetailExpanded(false);
-  }, [activeIncident.id]);
+    if (isActive) {
+      return;
+    }
 
-  /** 글꼴 로딩과 가로폭 변화로 줄 수가 달라지므로 리사이즈까지 관찰한다. */
+    resetInactiveDetailPanel();
+  }, [isActive, resetInactiveDetailPanel]);
+
+  /** 활성 패널 하나만 관찰해 글꼴 로딩과 가로폭 변화로 달라지는 줄 수를 판별한다. */
   useEffect(() => {
+    if (!isActive) {
+      return;
+    }
+
     const detailParagraphElement = detailParagraphReference.current;
 
     if (!detailParagraphElement) {
@@ -65,13 +86,16 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
     return (): void => {
       detailResizeObserver.disconnect();
     };
-  }, [activeIncident.detail, detectDetailOverflow]);
+  }, [isActive, detectDetailOverflow]);
   //#endregion
 
   //#region [Templates]
-  const activeIncidentTypeColorToken = incidentTypeColorTokens[activeIncident.type];
-  const hasEstimatedAmount = typeof activeIncident.amount === "number";
-  const detailParagraphId = `incident-detail-${activeIncident.id}`;
+  const incidentTypeColorToken = incidentTypeColorTokens[incident.type];
+  const hasEstimatedAmount = typeof incident.amount === "number";
+  const timelineTabId = createIncidentTimelineTabId(incident.id);
+  const detailPanelId = createIncidentDetailPanelId(incident.id);
+  const detailParagraphId = `incident-detail-text-${incident.id}`;
+  const detailPanelDisplayClassName = isActive ? "flex" : "";
 
   const DamageAmountTemplate = hasEstimatedAmount ? (
     <div className="flex items-center gap-2.5">
@@ -82,8 +106,8 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
         <div
           className="h-full rounded-full"
           style={{
-            width: `${calculateIncidentAmountRatio(activeIncident.amount) * 100}%`,
-            backgroundColor: activeIncidentTypeColorToken.accent,
+            width: `${calculateIncidentAmountRatio(incident.amount) * 100}%`,
+            backgroundColor: incidentTypeColorToken.accent,
           }}
         />
       </div>
@@ -91,12 +115,12 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
         className="min-w-0 break-keep text-right text-[12px] font-medium leading-tight
           tabular-nums"
       >
-        {activeIncident.amountText}
+        {incident.amountText}
       </span>
     </div>
   ) : (
     <span className="text-[12px] leading-none" style={{ color: "var(--incident-text-muted)" }}>
-      {activeIncident.amountText}
+      {incident.amountText}
     </span>
   );
 
@@ -111,7 +135,7 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
           aria-controls={detailParagraphId}
           className="inline-flex w-fit items-center gap-0.5 text-[12px] font-medium leading-none
             transition-opacity hover:opacity-75"
-          style={{ color: activeIncidentTypeColorToken.badgeForeground }}
+          style={{ color: incidentTypeColorToken.badgeForeground }}
         >
           {isDetailExpanded ? "접기" : "더보기"}
           <ChevronDown
@@ -124,7 +148,7 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
     </div>
   );
 
-  const DetailTemplate = activeIncident.detail ? (
+  const DetailTemplate = incident.detail ? (
     <div
       className="flex flex-col items-start gap-1.5 border-t pt-3"
       style={{ borderColor: "var(--incident-border)" }}
@@ -135,7 +159,7 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
         className={`text-[13px] leading-[1.6] ${isDetailExpanded ? "" : "line-clamp-3"}`}
         style={{ color: "var(--incident-text-secondary)" }}
       >
-        {activeIncident.detail}
+        {incident.detail}
       </p>
       {DetailToggleTemplate}
     </div>
@@ -144,9 +168,11 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
 
   return (
     <section
-      aria-live="polite"
-      aria-atomic="true"
-      className="flex min-h-64 flex-col gap-2.5 px-1"
+      id={detailPanelId}
+      role="tabpanel"
+      aria-labelledby={timelineTabId}
+      hidden={!isActive}
+      className={`${detailPanelDisplayClassName} min-h-64 flex-col gap-2.5 px-1`}
       style={{ color: "var(--incident-text)" }}
     >
       <div className="flex flex-wrap items-center gap-1.5">
@@ -154,19 +180,19 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
           className="font-number text-[12px] leading-none tabular-nums"
           style={{ color: "var(--incident-text-muted)" }}
         >
-          {formatIncidentFullDate(activeIncident.date)}
+          {formatIncidentFullDate(incident.date)}
         </span>
         <span
           className="inline-flex items-center rounded px-1.5 py-[3px] text-[11px] font-medium
             leading-none"
           style={{
-            backgroundColor: activeIncidentTypeColorToken.badgeBackground,
-            color: activeIncidentTypeColorToken.badgeForeground,
+            backgroundColor: incidentTypeColorToken.badgeBackground,
+            color: incidentTypeColorToken.badgeForeground,
           }}
         >
-          {incidentTypeLabels[activeIncident.type]}
+          {incidentTypeLabels[incident.type]}
         </span>
-        {activeIncident.tags?.map((incidentTag) => (
+        {incident.tags?.map((incidentTag) => (
           <span
             key={incidentTag}
             className="inline-flex items-center rounded border px-1.5 py-[3px] text-[11px]
@@ -182,29 +208,27 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
       </div>
 
       <div className="flex flex-wrap items-baseline gap-2">
-        <h2 className="text-[20px] font-bold leading-tight tracking-[-0.3px]">
-          {activeIncident.name}
-        </h2>
+        <h2 className="text-[20px] font-bold leading-tight tracking-[-0.3px]">{incident.name}</h2>
         <span className="text-[13px] leading-none" style={{ color: "var(--incident-text-muted)" }}>
-          {activeIncident.country}
+          {incident.country}
         </span>
       </div>
 
       <p className="text-[13px] leading-[1.5]" style={{ color: "var(--incident-text-secondary)" }}>
-        {activeIncident.summary}
+        {incident.summary}
       </p>
 
       {DamageAmountTemplate}
       {DetailTemplate}
       <a
-        href={activeIncident.article}
+        href={incident.article}
         target="_blank"
         rel="noopener noreferrer"
         className="inline-flex w-fit items-center gap-1 rounded-full border px-3 py-1.5
           text-xs font-medium leading-none transition-opacity hover:opacity-75"
         style={{
-          borderColor: activeIncidentTypeColorToken.badgeForeground,
-          color: activeIncidentTypeColorToken.badgeForeground,
+          borderColor: incidentTypeColorToken.badgeForeground,
+          color: incidentTypeColorToken.badgeForeground,
         }}
       >
         관련 기사
@@ -212,4 +236,4 @@ export function IncidentDetailPanel({ activeIncident }: IncidentDetailPanelProps
       </a>
     </section>
   );
-}
+});

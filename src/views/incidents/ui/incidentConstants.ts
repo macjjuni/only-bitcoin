@@ -79,6 +79,14 @@ export const timelinePixelsPerMonth = 6;
 export const timelineEdgeSpacerWidth = `calc(50% - ${timelineItemWidthInPixels / 2}px)`;
 export const centerDetectionThresholdRatio = 0.4;
 
+export function createIncidentTimelineTabId(incidentId: string): string {
+  return `incident-timeline-tab-${incidentId}`;
+}
+
+export function createIncidentDetailPanelId(incidentId: string): string {
+  return `incident-detail-panel-${incidentId}`;
+}
+
 export function doesUserPreferReducedMotion(): boolean {
   return window.matchMedia("(prefers-reduced-motion: reduce)").matches;
 }

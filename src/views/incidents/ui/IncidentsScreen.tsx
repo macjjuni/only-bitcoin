@@ -24,7 +24,7 @@ import { YearJumpChip } from "./YearJumpChip";
 
 export default function IncidentsScreen(): ReactNode {
   //#region [Hooks]
-  const timelineTrackReference = useRef<HTMLElement>(null);
+  const timelineTrackReference = useRef<HTMLDivElement>(null);
   const timelineNodeReferences = useRef<Array<HTMLButtonElement | null>>([]);
   const yearJumpNavigationReference = useRef<HTMLElement>(null);
   const yearJumpChipReferences = useRef<Record<string, HTMLButtonElement | null>>({});
@@ -257,10 +257,12 @@ export default function IncidentsScreen(): ReactNode {
             style={{ borderColor: "var(--incident-guide)" }}
           />
 
-          <section
+          <div
             ref={timelineTrackReference}
+            role="tablist"
             aria-label="거래소 사고 타임라인"
-            className="scrollbar-hide flex h-[120px] -mx-2 snap-x rounded-lg bg-neutral-100
+            aria-orientation="horizontal"
+            className="scrollbar-hide flex h-[120px] -mx-2 snap-x bg-neutral-100
               dark:bg-neutral-900 py-4 snap-proximity overflow-x-auto overflow-y-hidden
               overscroll-x-contain"
             style={{ boxShadow: "var(--incident-timeline-shadow)" }}
@@ -289,7 +291,7 @@ export default function IncidentsScreen(): ReactNode {
             })}
 
             <span aria-hidden className="shrink-0" style={{ width: timelineEdgeSpacerWidth }} />
-          </section>
+          </div>
         </div>
 
         <div className="flex items-center justify-between gap-3 px-1 text-[12px] leading-none">
@@ -309,7 +311,15 @@ export default function IncidentsScreen(): ReactNode {
           </span>
         </div>
 
-        <IncidentDetailPanel activeIncident={activeIncident} />
+        <div aria-live="polite" aria-atomic="true">
+          {incidentEvents.map((incident, incidentIndex) => (
+            <IncidentDetailPanel
+              key={incident.id}
+              incident={incident}
+              isActive={incidentIndex === activeIncidentIndex}
+            />
+          ))}
+        </div>
 
         <ul>
           <li className="px-1 text-xs leading-4 text-muted-foreground">
