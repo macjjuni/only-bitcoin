@@ -103,7 +103,17 @@ const BANNER_CONFIGS: BannerConfig[] = [
     Component: OrangeBackFloatingBanner,
     useIsVisible: () => {
       const pathname = usePathname();
-      const orangeSubPaths = ["/m2btc", "/etf", "/treasury", "/cagr", "/meme", "/btc2apartment", "/withdraw-fee", "/dca", "/bip39"];
+      const orangeSubPaths = [
+        "/m2btc",
+        "/etf",
+        "/treasury",
+        "/cagr",
+        "/meme",
+        "/btc2apartment",
+        "/withdraw-fee",
+        "/dca",
+        "/bip39",
+      ];
       return orangeSubPaths.some((sub) => pathname.startsWith(sub));
     },
   },
