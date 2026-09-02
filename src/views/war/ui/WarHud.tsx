@@ -2,17 +2,14 @@
 
 import { type ReactNode, useMemo } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
-import { type OrderFlowSnapshot, VENUE_IDS, VENUE_LABELS } from "@/entities/order-flow";
+import type { OrderFlowSnapshot } from "@/entities/order-flow";
 import { calculateAveragePrice } from "../lib/calculateAveragePrice";
 import {
   formatExchangeRate,
   formatPressurePercent,
-  STATUS_BADGE_CLASSES,
-  STATUS_TEXTS,
   toBuySharePercent,
 } from "../lib/formatWarValues";
 import { useThrottledAveragePrice } from "../lib/hooks/useThrottledAveragePrice";
-import { VENUE_ACCENT_RGB } from "../model/warViewModel";
 import { AveragePriceLine } from "./AveragePriceLine";
 import { KimchiPremiumBadge } from "./KimchiPremiumBadge";
 import { PressureGauge } from "./PressureGauge";
@@ -25,11 +22,11 @@ import { PressureGauge } from "./PressureGauge";
  */
 const AVERAGE_PRICE_TICK_INTERVAL_IN_MS = 1000;
 
-/** 구획을 나누는 가로선. 카드 안에서 세 덩이가 각자 읽히게 한다. */
+/** 구획을 나누는 가로선. 카드 안에서 압력과 평균가가 각자 읽히게 한다. */
 const SECTION_DIVIDER_CLASS =
   "mt-3 border-t-[0.75px] border-neutral-300 pt-3 dark:border-neutral-600";
 
-/** 구획 제목. 세 덩이가 같은 크기로 서야 나란한 항목으로 읽힌다. */
+/** 구획 제목. 두 구획이 같은 크기로 서야 나란한 항목으로 읽힌다. */
 const SECTION_LABEL_CLASS =
   "text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground";
 
@@ -41,8 +38,9 @@ interface WarHudProps {
  * 통합 텍스트 HUD.
  *
  * 전장이 세 거래소를 합친 하나의 화면이므로 HUD 도 통합 압력과 평균가만 보여 준다.
- * 거래소는 평균에 참여하고 있는지( 연결 상태 )만 한 줄로 압축하고, 거래소별 원본 가격과
- * 지연 같은 원자료는 진단 패널에서 본다.
+ * 거래소별 연결 상태는 캔버스 상단 배지가 이미 같은 색으로 말하고 있어 여기서 되풀이하지
+ * 않는다. 몇 곳이 평균에 들어갔는지는 평균가 캡션이 밝히고, 원본 가격과 지연 같은
+ * 원자료는 진단 패널에서 본다.
  */
 export function WarHud({ snapshot }: WarHudProps): ReactNode {
   //#region [Hooks]
@@ -152,33 +150,6 @@ export function WarHud({ snapshot }: WarHudProps): ReactNode {
 
         <p className="mt-1.5 text-[11px] text-muted-foreground">{averagePriceCaption}</p>
       </div>
-
-      <ul className={`flex flex-wrap gap-1.5 ${SECTION_DIVIDER_CLASS}`}>
-        {VENUE_IDS.map((venue) => {
-          const venueStatus = snapshot.venues[venue].status;
-          const isIncluded = averagePrice.includedVenues.includes(venue);
-
-          return (
-            <li
-              key={venue}
-              className={`flex items-center gap-1.5 rounded-md bg-neutral-200/70 py-1 pl-2 pr-1 text-[11px] dark:bg-neutral-800/60 ${
-                isIncluded ? "" : "opacity-45"
-              }`}
-            >
-              <span
-                className="inline-block h-2 w-2 shrink-0 rounded-full"
-                style={{ backgroundColor: `rgb(${VENUE_ACCENT_RGB[venue]})` }}
-              />
-              <span className="font-bold">{VENUE_LABELS[venue].name}</span>
-              <span
-                className={`rounded px-1.5 py-0.5 font-bold ${STATUS_BADGE_CLASSES[venueStatus]}`}
-              >
-                {STATUS_TEXTS[venueStatus]}
-              </span>
-            </li>
-          );
-        })}
-      </ul>
     </section>
   );
 }
