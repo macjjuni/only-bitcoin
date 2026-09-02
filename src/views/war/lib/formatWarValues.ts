@@ -10,15 +10,6 @@ export const STATUS_TEXTS: Record<ConnectionStatus, string> = {
   error: "오류",
 };
 
-/** 상태별 배지 색. */
-export const STATUS_BADGE_CLASSES: Record<ConnectionStatus, string> = {
-  connecting: "bg-neutral-400/15 text-muted-foreground",
-  syncing: "bg-bitcoin/15 text-bitcoin",
-  live: "bg-up/15 text-up",
-  stale: "bg-bitcoin/15 text-bitcoin",
-  error: "bg-down/15 text-down",
-};
-
 /** 달러 가격 표기. 값이 없으면 `-`. */
 export function formatUsdPrice(priceInUsd: number): string {
   if (priceInUsd <= 0) {
