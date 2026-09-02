@@ -1,17 +1,19 @@
 "use client";
 
-import { type ReactNode, useCallback, useState } from "react";
+import { type ReactNode, useCallback, useMemo, useState } from "react";
 import { useOrderFlowStore } from "@/entities/order-flow";
 import { useOrderFlow } from "@/entities/order-flow/client";
 import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import {
+  type BattleRendererMode,
   DEFAULT_WAR_CONTROL_STATE,
   DENSITY_PROFILES,
   type EffectDensity,
   type WarControlState,
 } from "../model/warViewModel";
 import { BattleCanvas } from "./BattleCanvas";
+import { SpaceBattleCanvas } from "./SpaceBattleCanvas";
 import { WarControls } from "./WarControls";
 import { WarDiagnosticsSection } from "./WarDiagnosticsSection";
 import { WarDisclaimer } from "./WarDisclaimer";
@@ -62,21 +64,53 @@ export default function WarScreen(): ReactNode {
     }));
   }, []);
 
+  const onChangeRendererMode = useCallback(
+    (rendererMode: BattleRendererMode): void => {
+      updateControlState({ rendererMode });
+    },
+    [updateControlState],
+  );
+
   const onChangeActiveObjectCount = useCallback((nextActiveObjectCount: number): void => {
     setActiveObjectCount(nextActiveObjectCount);
   }, []);
+  //#endregion
+
+  //#region [Templates]
+  /**
+   * 두 렌더러는 같은 자리를 차지하지만 각자 엔진과 프레임 루프를 들고 있다. 전환할 때
+   * 컴포넌트가 통째로 갈리면서 이전 루프가 정리되고 전투도 새로 시작된다.
+   */
+  const BattleCanvasTemplate = useMemo(() => {
+    if (controlState.rendererMode === "classic") {
+      return (
+        <BattleCanvas
+          controlState={controlState}
+          onChangeActiveObjectCount={onChangeActiveObjectCount}
+        />
+      );
+    }
+
+    return (
+      <SpaceBattleCanvas
+        controlState={controlState}
+        onChangeActiveObjectCount={onChangeActiveObjectCount}
+      />
+    );
+  }, [controlState, onChangeActiveObjectCount]);
   //#endregion
 
   return (
     <PageLayout className="gap-3">
       <PageTitle label="BTC WAR" title="War" description="실시간 호가와 체결 전쟁" />
 
-      <BattleCanvas
-        controlState={controlState}
-        onChangeActiveObjectCount={onChangeActiveObjectCount}
-      />
+      {BattleCanvasTemplate}
 
-      <WarControls controlState={controlState} onChangeEffectDensity={onChangeEffectDensity} />
+      <WarControls
+        controlState={controlState}
+        onChangeEffectDensity={onChangeEffectDensity}
+        onChangeRendererMode={onChangeRendererMode}
+      />
 
       <WarHud snapshot={snapshot} />
 
