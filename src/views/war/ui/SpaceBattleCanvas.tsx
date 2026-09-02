@@ -4,6 +4,7 @@ import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { useOrderFlowStore, VENUE_IDS } from "@/entities/order-flow";
 import { orderFlowController } from "@/entities/order-flow/client";
 import { BattleEngine } from "../lib/battleEngine";
+import { type CommanderSpriteAtlas, loadCommanderSpriteAtlas } from "../lib/commanderSpriteAtlas";
 import { renderSpaceBattle } from "../lib/renderSpaceBattle";
 import { loadShipSpriteAtlas, type ShipSpriteAtlas } from "../lib/shipSpriteAtlas";
 import { StarField } from "../lib/starField";
@@ -63,6 +64,7 @@ export function SpaceBattleCanvas({
   const engineReference = useRef<BattleEngine>(new BattleEngine());
   const starFieldReference = useRef<StarField>(new StarField());
   const shipSpriteAtlasReference = useRef<ShipSpriteAtlas | null>(null);
+  const commanderSpriteAtlasReference = useRef<CommanderSpriteAtlas | null>(null);
   const animationFrameIDReference = useRef<number | null>(null);
   const lastFrameTimeInMsReference = useRef(0);
   const lastTradeBatchAtInMsReference = useRef(0);
@@ -228,6 +230,7 @@ export function SpaceBattleCanvas({
         engine: engineReference.current,
         starField: starFieldReference.current,
         shipSpriteAtlas: shipSpriteAtlasReference.current,
+        commanderSpriteAtlas: commanderSpriteAtlasReference.current,
         orderWalls: orderWallsReference.current,
         venueBadges: buildVenueBadges(),
         isReducedMotion: isReducedMotionReference.current,
@@ -277,6 +280,14 @@ export function SpaceBattleCanvas({
       shipSpriteAtlasReference.current = null;
     }
   }, []);
+
+  const fetchCommanderSpriteAtlas = useCallback(async (): Promise<void> => {
+    try {
+      commanderSpriteAtlasReference.current = await loadCommanderSpriteAtlas();
+    } catch {
+      commanderSpriteAtlasReference.current = null;
+    }
+  }, []);
   //#endregion
 
   //#region [Life Cycles]
@@ -291,6 +302,10 @@ export function SpaceBattleCanvas({
   useEffect(() => {
     fetchShipSpriteAtlas();
   }, [fetchShipSpriteAtlas]);
+
+  useEffect(() => {
+    fetchCommanderSpriteAtlas();
+  }, [fetchCommanderSpriteAtlas]);
 
   useEffect(() => {
     const reducedMotionQuery = window.matchMedia("(prefers-reduced-motion: reduce)");

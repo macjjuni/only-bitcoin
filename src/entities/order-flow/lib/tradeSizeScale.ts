@@ -4,7 +4,7 @@ import type { TradeMagnitude } from "../model/types";
 /** 등급 경계 백분위. */
 const MEDIUM_PERCENTILE = 0.5;
 const LARGE_PERCENTILE = 0.9;
-const HUGE_PERCENTILE = 0.97;
+const HUGE_PERCENTILE = 0.99;
 
 /** 표본이 이보다 적으면 분포를 믿을 수 없어 전부 작은 효과로 둔다. */
 const MINIMUM_SAMPLE_COUNT = 20;

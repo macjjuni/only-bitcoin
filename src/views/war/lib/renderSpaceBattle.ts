@@ -7,6 +7,7 @@ import {
 } from "../model/battleRenderTypes";
 import { BUY_SIDE_RGB, SELL_SIDE_RGB, toRgbaColor, VENUE_ACCENT_RGB } from "../model/warViewModel";
 import { BattleEngine } from "./battleEngine";
+import type { CommanderSpriteAtlas } from "./commanderSpriteAtlas";
 import type { ShipSpriteAtlas } from "./shipSpriteAtlas";
 import type { StarField } from "./starField";
 
@@ -18,6 +19,7 @@ export interface RenderSpaceBattleInput {
   starField: StarField;
   /** 아직 받는 중이면 null. 그동안은 단순 도형으로 대신 그린다. */
   shipSpriteAtlas: ShipSpriteAtlas | null;
+  commanderSpriteAtlas: CommanderSpriteAtlas | null;
   orderWalls: OrderWallSnapshot[];
   venueBadges: VenueBadgeInfo[];
   isReducedMotion: boolean;
@@ -208,7 +210,15 @@ function drawFallbackWedge(
  * 부르지 않는 것이 수백 대를 그릴 때 가장 크게 아끼는 부분이다.
  */
 function drawShips(input: RenderSpaceBattleInput): void {
-  const { context, widthInPx, heightInPx, engine, shipSpriteAtlas, isReducedMotion } = input;
+  const {
+    context,
+    widthInPx,
+    heightInPx,
+    engine,
+    shipSpriteAtlas,
+    commanderSpriteAtlas,
+    isReducedMotion,
+  } = input;
 
   engine.unitPool.forEachActive((unit) => {
     const wobbleOffsetInPx = isReducedMotion
@@ -232,6 +242,37 @@ function drawShips(input: RenderSpaceBattleInput): void {
     const drawHeightInPx = drawWidthInPx * sprite.heightPerWidthRatio;
 
     context.globalAlpha = bodyAlpha;
+
+    if (unit.commanderId !== null && commanderSpriteAtlas !== null) {
+      const commanderFrame = commanderSpriteAtlas.getSprite(unit.commanderId);
+      const portraitSizeInPx = drawWidthInPx * 0.98;
+      const portraitRadiusInPx = portraitSizeInPx * 0.48;
+
+      context.save();
+      context.beginPath();
+      context.arc(centerXInPx, centerYInPx, portraitRadiusInPx, 0, Math.PI * 2);
+      context.clip();
+      context.drawImage(
+        commanderSpriteAtlas.image,
+        commanderFrame.xInPx,
+        commanderFrame.yInPx,
+        commanderFrame.widthInPx,
+        commanderFrame.heightInPx,
+        centerXInPx - portraitSizeInPx / 2,
+        centerYInPx - portraitSizeInPx / 2,
+        portraitSizeInPx,
+        portraitSizeInPx,
+      );
+      context.restore();
+
+      context.strokeStyle = toRgbaColor(isBuySide ? BUY_SIDE_RGB : SELL_SIDE_RGB, bodyAlpha);
+      context.lineWidth = 2;
+      context.beginPath();
+      context.arc(centerXInPx, centerYInPx, portraitRadiusInPx, 0, Math.PI * 2);
+      context.stroke();
+      context.globalAlpha = 1;
+      return;
+    }
 
     drawEngineTrail(
       context,

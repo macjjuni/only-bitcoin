@@ -1,4 +1,5 @@
 import type { TradeMagnitude, TradeSide, TradeTick, VenueId } from "@/entities/order-flow";
+import { type CommanderId, getCommanderForTrade } from "../model/commanderSprites";
 import { DENSITY_PROFILES, type EffectDensity, MOBILE_BUDGET_RATIO } from "../model/warViewModel";
 import { ObjectPool, type PoolableObject } from "./objectPool";
 
@@ -59,6 +60,7 @@ export interface BattleUnit extends PoolableObject {
   /** 상하 흔들림 위상. 유닛마다 달라야 행진이 기계적으로 보이지 않는다. */
   wobblePhase: number;
   isWeakened: boolean;
+  commanderId: CommanderId | null;
 }
 
 export interface BattleProjectile extends PoolableObject {
@@ -102,6 +104,7 @@ function createUnit(): BattleUnit {
     ageInMs: 0,
     wobblePhase: 0,
     isWeakened: false,
+    commanderId: null,
   };
 }
 
@@ -152,6 +155,7 @@ export class BattleEngine {
   private frontLineRatio = 0.5;
   private targetFrontLineRatio = 0.5;
   private shakeIntensityInPx = 0;
+  private commanderSpawnSequenceBySide: Record<TradeSide, number> = { buy: 0, sell: 0 };
 
   readonly unitPool = new ObjectPool<BattleUnit>(
     createUnit,
@@ -207,6 +211,7 @@ export class BattleEngine {
     this.projectilePool.clear();
     this.explosionPool.clear();
     this.shakeIntensityInPx = 0;
+    this.commanderSpawnSequenceBySide = { buy: 0, sell: 0 };
   }
 
   private spawnProjectiles(trade: TradeTick, originYRatio: number, options: SpawnOptions): void {
@@ -283,6 +288,14 @@ export class BattleEngine {
     unit.ageInMs = 0;
     unit.wobblePhase = Math.random() * Math.PI * 2;
     unit.isWeakened = options.isWeakened;
+    const shouldSpawnCommander = trade.magnitude === "huge";
+
+    unit.commanderId = shouldSpawnCommander
+      ? getCommanderForTrade(
+          trade.aggressorSide,
+          this.commanderSpawnSequenceBySide[trade.aggressorSide]++,
+        )
+      : null;
 
     this.spawnProjectiles(trade, spawnYRatio, options);
 
