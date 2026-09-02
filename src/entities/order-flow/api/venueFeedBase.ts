@@ -75,8 +75,8 @@ export abstract class VenueFeedBase {
   /** 연결 직후 보내야 하는 구독 메시지 처리. 구독이 필요 없으면 비워 둔다. */
   protected abstract subscribe(socket: ReconnectingWebSocket): void;
 
-  /** JSON 으로 해석된 메시지 한 건을 처리한다. */
-  protected abstract handleParsedMessage(message: unknown): void;
+  /** JSON 으로 해석된 메시지와 정밀도 손실 전 원문을 함께 처리한다. */
+  protected abstract handleParsedMessage(message: unknown, rawText: string): void;
 
   /** 재연결이나 재동기화 시 거래소별 시퀀스 상태를 초기화한다. */
   protected abstract resetSyncState(): void;
@@ -220,7 +220,7 @@ export abstract class VenueFeedBase {
     }
 
     try {
-      this.handleParsedMessage(parsedMessage);
+      this.handleParsedMessage(parsedMessage, rawText);
     } catch {
       // 거래소 스키마가 바뀌어도 다른 거래소와 렌더 루프는 계속 살아 있어야 한다.
       this.diagnostics.parseErrorCount += 1;

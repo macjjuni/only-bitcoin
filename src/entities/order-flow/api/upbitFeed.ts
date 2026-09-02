@@ -1,13 +1,15 @@
 import type ReconnectingWebSocket from "reconnecting-websocket";
 import { generateUUID } from "@/shared/lib/uuid";
-import {
-  isPlainObject,
-  parseFiniteNumber,
-  parseIdentifier,
-  parsePositiveNumber,
-} from "../lib/guards";
+import { isPlainObject, parseFiniteNumber, parsePositiveNumber } from "../lib/guards";
 import { UPBIT_MARKET_CODE, UPBIT_ORDERBOOK_DEPTH, UPBIT_STREAM_URL } from "../model/constants";
 import { VenueFeedBase } from "./venueFeedBase";
+
+/** JavaScript 안전 정수 범위를 넘는 `sequential_id`를 JSON 원문에서 손실 없이 읽는다. */
+function extractSequentialID(rawText: string): string | null {
+  const sequentialIDMatch = /"sequential_id"\s*:\s*(?:"(\d+)"|(\d+))/.exec(rawText);
+
+  return sequentialIDMatch?.[1] ?? sequentialIDMatch?.[2] ?? null;
+}
 
 /**
  * Upbit KRW-BTC 커넥터.
@@ -98,8 +100,8 @@ export class UpbitFeed extends VenueFeedBase {
   }
 
   /** `ask_bid` 가 `BID` 면 매수 체결, `ASK` 면 매도 체결이다. */
-  private handleTradeMessage(message: Record<string, unknown>): void {
-    const tradeID = parseIdentifier(message.sequential_id);
+  private handleTradeMessage(message: Record<string, unknown>, rawText: string): void {
+    const tradeID = extractSequentialID(rawText);
     const priceInQuote = parsePositiveNumber(message.trade_price);
     const sizeInBtc = parsePositiveNumber(message.trade_volume);
     const tradeTimestampInMs = parseFiniteNumber(message.trade_timestamp);
@@ -125,7 +127,7 @@ export class UpbitFeed extends VenueFeedBase {
     });
   }
 
-  protected handleParsedMessage(message: unknown): void {
+  protected handleParsedMessage(message: unknown, rawText: string): void {
     if (!isPlainObject(message) || message.code !== UPBIT_MARKET_CODE) {
       return;
     }
@@ -136,7 +138,7 @@ export class UpbitFeed extends VenueFeedBase {
     }
 
     if (message.type === "trade") {
-      this.handleTradeMessage(message);
+      this.handleTradeMessage(message, rawText);
     }
   }
   //#endregion

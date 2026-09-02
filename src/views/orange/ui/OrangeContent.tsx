@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { HandCoins, TableProperties } from "lucide-react";
+import { HandCoins, Swords, TableProperties } from "lucide-react";
 import type { ReactNode } from "react";
 import {
   BanknoteIcon,
@@ -98,6 +98,11 @@ const UTILITY_LINKS: OrangeLink[] = [
     title: "BIP39",
     icon: <TableProperties size={26} strokeWidth={1.8} />,
     href: "/bip39",
+  },
+  {
+    title: "매수 vs 매도 전장",
+    icon: <Swords size={28} strokeWidth={1.8} className={ICON_CLASS} />,
+    href: "/war",
   },
 ];
 

@@ -160,7 +160,8 @@ export class CoinbaseFeed extends VenueFeedBase {
    * 메이커가 `SELL` 이면 테이커가 사 간 것이므로 공격 방향은 매수다.
    */
   private handleMarketTradesEvent(event: Record<string, unknown>): void {
-    if (!Array.isArray(event.trades)) {
+    // 최초 snapshot은 과거 체결 100건이므로 실시간 압력과 애니메이션에 포함하지 않는다.
+    if (event.type !== "update" || !Array.isArray(event.trades)) {
       return;
     }
 
