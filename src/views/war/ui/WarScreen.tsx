@@ -68,7 +68,11 @@ export default function WarScreen(): ReactNode {
 
   return (
     <PageLayout className="gap-3">
-      <PageTitle label="BTC WAR" title="War" description="실시간 호가와 체결 전쟁" />
+      <PageTitle
+        label="Bitcoin Buy·Sell War"
+        title="BTC War"
+        description="실시간 체결과 호가를 우주 전투로 그리는 비주얼라이저"
+      />
 
       <SpaceBattleCanvas
         controlState={controlState}

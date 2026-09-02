@@ -85,6 +85,11 @@ const UTILITY_LINKS: OrangeLink[] = [
     href: "/withdraw-fee",
   },
   {
+    title: "BTC War",
+    icon: <Swords size={28} strokeWidth={1.8} className={ICON_CLASS} />,
+    href: "/war",
+  },
+  {
     title: "반감기 카운트",
     icon: <HalfCircleIcon size={24} />,
     href: "/blocks/countdown",
@@ -98,11 +103,6 @@ const UTILITY_LINKS: OrangeLink[] = [
     title: "BIP39",
     icon: <TableProperties size={26} strokeWidth={1.8} />,
     href: "/bip39",
-  },
-  {
-    title: "매수 vs 매도 전장",
-    icon: <Swords size={28} strokeWidth={1.8} className={ICON_CLASS} />,
-    href: "/war",
   },
 ];
 
