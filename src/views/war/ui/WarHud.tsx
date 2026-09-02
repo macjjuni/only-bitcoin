@@ -7,6 +7,7 @@ import { calculateAveragePrice } from "../lib/calculateAveragePrice";
 import {
   formatExchangeRate,
   formatPressurePercent,
+  STATUS_BADGE_CLASSES,
   STATUS_TEXTS,
   toBuySharePercent,
 } from "../lib/formatWarValues";
@@ -14,6 +15,7 @@ import { useThrottledAveragePrice } from "../lib/hooks/useThrottledAveragePrice"
 import { VENUE_ACCENT_RGB } from "../model/warViewModel";
 import { AveragePriceLine } from "./AveragePriceLine";
 import { KimchiPremiumBadge } from "./KimchiPremiumBadge";
+import { PressureGauge } from "./PressureGauge";
 
 /**
  * 평균가 표시 갱신 간격.
@@ -22,6 +24,14 @@ import { KimchiPremiumBadge } from "./KimchiPremiumBadge";
  * 다음 값으로 넘어간다.
  */
 const AVERAGE_PRICE_TICK_INTERVAL_IN_MS = 1000;
+
+/** 구획을 나누는 가로선. 카드 안에서 세 덩이가 각자 읽히게 한다. */
+const SECTION_DIVIDER_CLASS =
+  "mt-3 border-t-[0.75px] border-neutral-300 pt-3 dark:border-neutral-600";
+
+/** 구획 제목. 세 덩이가 같은 크기로 서야 나란한 항목으로 읽힌다. */
+const SECTION_LABEL_CLASS =
+  "text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground";
 
 interface WarHudProps {
   snapshot: OrderFlowSnapshot;
@@ -90,56 +100,60 @@ export function WarHud({ snapshot }: WarHudProps): ReactNode {
 
   return (
     <section
-      className="rounded-xl border-[0.75px] border-neutral-300 p-4 dark:border-neutral-600"
+      className="overflow-hidden rounded-xl border-[0.75px] border-neutral-300 bg-gradient-to-r from-up/[0.06] via-transparent to-down/[0.06] p-4 backdrop-blur-sm dark:border-neutral-600"
       aria-label="통합 압력과 거래소 평균가"
     >
-      <div className="mb-2 flex items-baseline justify-between">
-        <span className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-          Total Pressure
-        </span>
+      <div className="mb-2.5 flex items-baseline justify-between gap-2">
+        <span className={SECTION_LABEL_CLASS}>Total Pressure</span>
         <span className={`font-number text-2xl font-bold ${pressureColorClass}`}>
           {isBuyDominant ? "BUY " : "SELL "}
           {formatPressurePercent(snapshot.aggregatePressure)}
         </span>
       </div>
 
-      {/* 값은 위 숫자로 이미 읽히므로 막대는 장식으로 둔다. */}
-      <div
-        className="relative mb-3 h-3 w-full overflow-hidden rounded-full bg-down/25"
-        aria-hidden="true"
-      >
-        <div
-          className="h-full rounded-full bg-up/70 transition-[width] duration-300"
-          style={{ width: `${buySharePercent}%` }}
-        />
-        <div className="absolute inset-y-0 left-1/2 w-px bg-neutral-500/50" />
+      <PressureGauge pressure={snapshot.aggregatePressure} />
+
+      {/*
+        게이지 양 끝 점유율.
+        우세한 쪽만 진영 색으로 세워, 막대를 보지 않고 숫자만 훑어도 방향이 읽히게 한다.
+      */}
+      <div className="mt-1.5 flex items-baseline justify-between font-number text-[11px] font-bold">
+        <span className={isBuyDominant ? "text-up" : "text-muted-foreground"}>
+          매수 {buySharePercent.toFixed(0)}%
+        </span>
+        <span className={isBuyDominant ? "text-muted-foreground" : "text-down"}>
+          매도 {(100 - buySharePercent).toFixed(0)}%
+        </span>
       </div>
 
-      <div className="mb-3 border-t-[0.75px] border-neutral-300 pt-3 dark:border-neutral-600">
-        <span className="text-[11px] font-black uppercase tracking-[0.18em] text-muted-foreground">
-          Average Price
-        </span>
-        <dl className="mt-1.5 flex flex-col gap-0.5">
+      <div className={SECTION_DIVIDER_CLASS}>
+        <span className={SECTION_LABEL_CLASS}>Average Price</span>
+
+        {/* 이름 열과 값 열이 줄마다 맞아떨어지도록 격자로 둔다. */}
+        <dl className="mt-2 grid grid-cols-[auto_1fr] items-baseline gap-x-3 gap-y-1.5">
           <AveragePriceLine
-            label="원화 평균가"
+            label="원화"
             currencySymbol="₩"
             price={averagePrice.averagePriceInKrw}
             colorClass={pressureColorClass}
+            emphasis="primary"
             suffixTemplate={
               <KimchiPremiumBadge premiumPercent={averagePrice.kimchiPremiumPercent} />
             }
           />
           <AveragePriceLine
-            label="달러 평균가"
+            label="달러"
             currencySymbol="$"
             price={averagePrice.averagePriceInUsd}
             colorClass={pressureColorClass}
+            emphasis="secondary"
           />
         </dl>
-        <p className="mt-1 text-[11px] text-muted-foreground">{averagePriceCaption}</p>
+
+        <p className="mt-1.5 text-[11px] text-muted-foreground">{averagePriceCaption}</p>
       </div>
 
-      <ul className="flex flex-wrap gap-x-3 gap-y-1.5">
+      <ul className={`flex flex-wrap gap-1.5 ${SECTION_DIVIDER_CLASS}`}>
         {VENUE_IDS.map((venue) => {
           const venueStatus = snapshot.venues[venue].status;
           const isIncluded = averagePrice.includedVenues.includes(venue);
@@ -147,14 +161,20 @@ export function WarHud({ snapshot }: WarHudProps): ReactNode {
           return (
             <li
               key={venue}
-              className={`flex items-center gap-1.5 text-[11px] ${isIncluded ? "" : "opacity-50"}`}
+              className={`flex items-center gap-1.5 rounded-md bg-neutral-200/70 py-1 pl-2 pr-1 text-[11px] dark:bg-neutral-800/60 ${
+                isIncluded ? "" : "opacity-45"
+              }`}
             >
               <span
                 className="inline-block h-2 w-2 shrink-0 rounded-full"
                 style={{ backgroundColor: `rgb(${VENUE_ACCENT_RGB[venue]})` }}
               />
               <span className="font-bold">{VENUE_LABELS[venue].name}</span>
-              <span className="text-muted-foreground">{STATUS_TEXTS[venueStatus]}</span>
+              <span
+                className={`rounded px-1.5 py-0.5 font-bold ${STATUS_BADGE_CLASSES[venueStatus]}`}
+              >
+                {STATUS_TEXTS[venueStatus]}
+              </span>
             </li>
           );
         })}
