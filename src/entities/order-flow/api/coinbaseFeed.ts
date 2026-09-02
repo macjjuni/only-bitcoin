@@ -23,6 +23,11 @@ function parseIsoTimestampInMs(value: unknown): number | null {
   return Number.isFinite(timestampInMs) ? timestampInMs : null;
 }
 
+interface ParsedLevelUpdates {
+  bidLevels: Array<[number, number]>;
+  askLevels: Array<[number, number]>;
+}
+
 /**
  * Coinbase Advanced Trade BTC-USD 커넥터.
  *
@@ -36,7 +41,6 @@ function parseIsoTimestampInMs(value: unknown): number | null {
 export class CoinbaseFeed extends VenueFeedBase {
   private expectedSequenceNumber: number | null = null;
   private hasReceivedSnapshot = false;
-  private lastHeartbeatAtInMs = 0;
 
   constructor() {
     super("coinbase");
@@ -62,16 +66,10 @@ export class CoinbaseFeed extends VenueFeedBase {
   protected resetSyncState(): void {
     this.expectedSequenceNumber = null;
     this.hasReceivedSnapshot = false;
-    this.lastHeartbeatAtInMs = 0;
   }
   //#endregion
 
   //#region [Privates]
-  /** 마지막 하트비트 수신 시각. 진단 패널에서 연결이 살아 있는지 확인하는 데 쓴다. */
-  getLastHeartbeatAtInMs(): number {
-    return this.lastHeartbeatAtInMs;
-  }
-
   /**
    * 연결 단위 시퀀스 검사.
    *
@@ -85,7 +83,11 @@ export class CoinbaseFeed extends VenueFeedBase {
       return true;
     }
 
-    if (this.expectedSequenceNumber !== null && sequenceNumber !== this.expectedSequenceNumber) {
+    if (this.expectedSequenceNumber !== null && sequenceNumber < this.expectedSequenceNumber) {
+      return false;
+    }
+
+    if (this.expectedSequenceNumber !== null && sequenceNumber > this.expectedSequenceNumber) {
       this.diagnostics.sequenceGapCount += 1;
       this.expectedSequenceNumber = null;
       this.hasReceivedSnapshot = false;
@@ -99,44 +101,73 @@ export class CoinbaseFeed extends VenueFeedBase {
   }
 
   /** `bid` 는 매수, `offer` 는 매도. 수량 0 은 해당 가격 레벨 제거다. */
-  private applyLevelUpdates(updates: unknown): void {
+  private parseLevelUpdates(updates: unknown): ParsedLevelUpdates | null {
     if (!Array.isArray(updates)) {
-      return;
+      this.diagnostics.parseErrorCount += 1;
+      return null;
     }
+
+    const bidLevels: Array<[number, number]> = [];
+    const askLevels: Array<[number, number]> = [];
 
     for (const update of updates) {
       if (!isPlainObject(update)) {
+        this.diagnostics.parseErrorCount += 1;
         continue;
       }
 
       const priceInQuote = parsePositiveNumber(update.price_level);
       const sizeInBtc = parseNonNegativeNumber(update.new_quantity);
 
-      if (priceInQuote === null || sizeInBtc === null) {
+      if (
+        priceInQuote === null ||
+        sizeInBtc === null ||
+        (update.side !== "bid" && update.side !== "offer")
+      ) {
         this.diagnostics.parseErrorCount += 1;
         continue;
       }
 
       if (update.side === "bid") {
-        this.orderBook.bids.applyLevel(priceInQuote, sizeInBtc);
+        bidLevels.push([priceInQuote, sizeInBtc]);
         continue;
       }
 
-      if (update.side === "offer") {
-        this.orderBook.asks.applyLevel(priceInQuote, sizeInBtc);
-      }
+      askLevels.push([priceInQuote, sizeInBtc]);
     }
+
+    return { bidLevels, askLevels };
   }
 
-  private handleLevel2Event(event: Record<string, unknown>): void {
+  private handleLevel2Event(
+    event: Record<string, unknown>,
+    messageTimestampInMs: number | null,
+  ): void {
     if (event.product_id !== COINBASE_PRODUCT_ID) {
       return;
     }
 
+    const parsedLevelUpdates = this.parseLevelUpdates(event.updates);
+
+    if (parsedLevelUpdates === null) {
+      return;
+    }
+
+    const { bidLevels, askLevels } = parsedLevelUpdates;
+
     if (event.type === "snapshot") {
-      this.orderBook.clear();
-      this.applyLevelUpdates(event.updates);
+      const hasBidLevels = bidLevels.some(([, sizeInBtc]) => sizeInBtc > 0);
+      const hasAskLevels = askLevels.some(([, sizeInBtc]) => sizeInBtc > 0);
+
+      if (!hasBidLevels || !hasAskLevels) {
+        this.diagnostics.parseErrorCount += 1;
+        return;
+      }
+
+      this.orderBook.bids.replaceAll(bidLevels);
+      this.orderBook.asks.replaceAll(askLevels);
       this.hasReceivedSnapshot = true;
+      this.markOrderBookReceived(messageTimestampInMs ?? undefined);
       this.markSynchronized();
       return;
     }
@@ -151,7 +182,20 @@ export class CoinbaseFeed extends VenueFeedBase {
       return;
     }
 
-    this.applyLevelUpdates(event.updates);
+    if (bidLevels.length === 0 && askLevels.length === 0) {
+      this.diagnostics.parseErrorCount += 1;
+      return;
+    }
+
+    for (const [priceInQuote, sizeInBtc] of bidLevels) {
+      this.orderBook.bids.applyLevel(priceInQuote, sizeInBtc);
+    }
+
+    for (const [priceInQuote, sizeInBtc] of askLevels) {
+      this.orderBook.asks.applyLevel(priceInQuote, sizeInBtc);
+    }
+
+    this.markOrderBookReceived(messageTimestampInMs ?? undefined);
     this.markSynchronized();
   }
 
@@ -173,20 +217,27 @@ export class CoinbaseFeed extends VenueFeedBase {
       const tradeID = parseIdentifier(trade.trade_id);
       const priceInQuote = parsePositiveNumber(trade.price);
       const sizeInBtc = parsePositiveNumber(trade.size);
+      const makerSide = trade.side;
 
-      if (tradeID === null || priceInQuote === null || sizeInBtc === null) {
+      if (
+        tradeID === null ||
+        priceInQuote === null ||
+        sizeInBtc === null ||
+        (makerSide !== "BUY" && makerSide !== "SELL")
+      ) {
         this.diagnostics.parseErrorCount += 1;
         continue;
       }
 
       const tradeTimestampInMs = parseIsoTimestampInMs(trade.time) ?? Date.now();
+      this.markTradeReceived(tradeTimestampInMs);
 
       this.recordTrade({
         tradeID: `coinbase-${tradeID}`,
-        timestampInMs: tradeTimestampInMs,
+        sourceTimestampInMs: tradeTimestampInMs,
         priceInQuote,
         sizeInBtc,
-        aggressorSide: trade.side === "SELL" ? "buy" : "sell",
+        aggressorSide: makerSide === "SELL" ? "buy" : "sell",
       });
     }
   }
@@ -206,10 +257,9 @@ export class CoinbaseFeed extends VenueFeedBase {
     }
 
     const messageTimestampInMs = parseIsoTimestampInMs(message.timestamp);
-    this.markMessageReceived(messageTimestampInMs ?? undefined);
 
     if (message.channel === "heartbeats") {
-      this.lastHeartbeatAtInMs = Date.now();
+      this.markHeartbeatReceived(messageTimestampInMs ?? undefined);
       return;
     }
 
@@ -223,7 +273,7 @@ export class CoinbaseFeed extends VenueFeedBase {
       }
 
       if (message.channel === "l2_data") {
-        this.handleLevel2Event(event);
+        this.handleLevel2Event(event, messageTimestampInMs);
         continue;
       }
 

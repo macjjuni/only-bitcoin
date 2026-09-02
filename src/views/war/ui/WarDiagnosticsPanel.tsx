@@ -5,6 +5,7 @@ import { type OrderFlowSnapshot, VENUE_IDS, VENUE_LABELS } from "@/entities/orde
 import {
   formatBtcAmount,
   formatElapsedSince,
+  formatLatency,
   formatPriceInQuote,
   formatSpreadInQuote,
   STATUS_TEXTS,
@@ -32,7 +33,11 @@ export function WarDiagnosticsPanel({
     >
       <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
         <span className="font-bold">Diagnostics</span>
-        <span className="font-number">objects {activeObjectCount.toLocaleString()}</span>
+        <span className="font-number">
+          objects {activeObjectCount.toLocaleString()} · trades{" "}
+          {snapshot.tradesPerSecond.toFixed(1)}
+          /s
+        </span>
       </div>
 
       <div className="flex flex-col gap-2">
@@ -68,10 +73,20 @@ export function WarDiagnosticsPanel({
                 <dd className="text-right">{formatBtcAmount(venueMetrics.buyVolumeInBtc)} BTC</dd>
                 <dt>5초 매도</dt>
                 <dd className="text-right">{formatBtcAmount(venueMetrics.sellVolumeInBtc)} BTC</dd>
-                <dt>마지막 수신</dt>
+                <dt>오더북 수신</dt>
+                <dd className="text-right">
+                  {formatElapsedSince(venueMetrics.lastOrderBookAtInMs, snapshot.updatedAtInMs)}
+                </dd>
+                <dt>체결 수신</dt>
+                <dd className="text-right">
+                  {formatElapsedSince(venueMetrics.lastTradeAtInMs, snapshot.updatedAtInMs)}
+                </dd>
+                <dt>소켓 수신</dt>
                 <dd className="text-right">
                   {formatElapsedSince(venueMetrics.lastMessageAtInMs, snapshot.updatedAtInMs)}
                 </dd>
+                <dt>수신 지연</dt>
+                <dd className="text-right">{formatLatency(venueMetrics.latencyInMs)}</dd>
                 <dt>재연결 / 재동기화</dt>
                 <dd className="text-right">
                   {venueDiagnostics.reconnectCount} / {venueDiagnostics.resyncCount}

@@ -77,12 +77,12 @@ class OrderFlowController {
     });
   }
 
-  /** 사용자 한 명 제거. 아무도 남지 않으면 유예 뒤 연결을 닫는다. */
-  release(): void {
+  /** 사용자 한 명 제거. 마지막 사용자였다면 유예 뒤 연결을 닫고 `true`를 반환한다. */
+  release(): boolean {
     this.referenceCount = Math.max(0, this.referenceCount - 1);
 
     if (this.referenceCount > 0) {
-      return;
+      return false;
     }
 
     this.cancelDeferredStop();
@@ -98,6 +98,8 @@ class OrderFlowController {
         feed.stop();
       });
     }, DEFERRED_STOP_DELAY_IN_MS);
+
+    return true;
   }
   //#endregion
 

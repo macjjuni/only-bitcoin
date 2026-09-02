@@ -48,7 +48,12 @@ export interface VenueMetrics {
   latencyInMs: number;
   buyVolumeInBtc: number;
   sellVolumeInBtc: number;
+  /** 종류와 무관하게 가장 최근에 받은 소켓 메시지 시각. */
   lastMessageAtInMs: number;
+  /** 가장 최근에 유효한 오더북을 반영한 로컬 수신 시각. */
+  lastOrderBookAtInMs: number;
+  /** 가장 최근에 유효한 실시간 체결을 반영한 로컬 수신 시각. */
+  lastTradeAtInMs: number;
 }
 
 /** 진단 패널에 노출하는 거래소별 누적 카운터. */

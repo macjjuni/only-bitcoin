@@ -180,7 +180,6 @@ export function SpaceBattleCanvas({
     return VENUE_IDS.map((venue) => ({
       venue,
       status: snapshot.venues[venue].status,
-      isIncludedInAggregate: snapshot.includedVenues.includes(venue),
     }));
   }, []);
 

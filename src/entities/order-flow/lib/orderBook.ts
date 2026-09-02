@@ -1,7 +1,5 @@
-import { EPSILON, IMBALANCE_BAND_IN_BPS } from "../model/constants";
+import { EPSILON, IMBALANCE_LEVEL_COUNT } from "../model/constants";
 import type { OrderBookLevel } from "../model/types";
-
-const BASIS_POINT_DIVISOR = 10_000;
 
 /**
  * 오더북 한쪽(매수 또는 매도).
@@ -85,17 +83,11 @@ export class OrderBookSide {
     return sortedLevels.length > 0 ? sortedLevels[0].priceInQuote : 0;
   }
 
-  /** 지정 가격 구간에 쌓인 BTC 수량 합. */
-  sumSizeInBtcWithinRange(lowerPriceInQuote: number, upperPriceInQuote: number): number {
-    let totalSizeInBtc = 0;
-
-    this.levels.forEach((sizeInBtc, priceInQuote) => {
-      if (priceInQuote >= lowerPriceInQuote && priceInQuote <= upperPriceInQuote) {
-        totalSizeInBtc += sizeInBtc;
-      }
-    });
-
-    return totalSizeInBtc;
+  /** 최우선 호가부터 지정한 단계까지의 BTC 수량 합. */
+  sumTopSizeInBtc(levelCount: number): number {
+    return this.getSortedLevels()
+      .slice(0, Math.max(0, levelCount))
+      .reduce((totalSizeInBtc, level) => totalSizeInBtc + level.sizeInBtc, 0);
   }
 }
 
@@ -135,25 +127,11 @@ export class OrderBook {
     return bestAskPriceInQuote - bestBidPriceInQuote;
   }
 
-  /** mid 기준 ±25bps 안의 매수·매도 BTC 수량. 거래소 통화가 달라도 비교 가능한 값이다. */
-  getBandSizesInBtc(): { bidSizeInBtc: number; askSizeInBtc: number } {
-    const midPriceInQuote = this.getMidPriceInQuote();
-
-    if (midPriceInQuote <= 0) {
-      return { bidSizeInBtc: 0, askSizeInBtc: 0 };
-    }
-
-    const bandWidthInQuote = (midPriceInQuote * IMBALANCE_BAND_IN_BPS) / BASIS_POINT_DIVISOR;
-
+  /** 모든 거래소에서 동일한 상위 호가 단계의 매수·매도 BTC 수량을 구한다. */
+  getComparableDepthSizesInBtc(): { bidSizeInBtc: number; askSizeInBtc: number } {
     return {
-      bidSizeInBtc: this.bids.sumSizeInBtcWithinRange(
-        midPriceInQuote - bandWidthInQuote,
-        midPriceInQuote,
-      ),
-      askSizeInBtc: this.asks.sumSizeInBtcWithinRange(
-        midPriceInQuote,
-        midPriceInQuote + bandWidthInQuote,
-      ),
+      bidSizeInBtc: this.bids.sumTopSizeInBtc(IMBALANCE_LEVEL_COUNT),
+      askSizeInBtc: this.asks.sumTopSizeInBtc(IMBALANCE_LEVEL_COUNT),
     };
   }
 
@@ -164,7 +142,7 @@ export class OrderBook {
    * BTC 수량만 쓰므로 USDT·USD·KRW 를 섞어 비교하는 문제가 생기지 않는다.
    */
   getBookImbalance(): number {
-    const { bidSizeInBtc, askSizeInBtc } = this.getBandSizesInBtc();
+    const { bidSizeInBtc, askSizeInBtc } = this.getComparableDepthSizesInBtc();
 
     return (bidSizeInBtc - askSizeInBtc) / (bidSizeInBtc + askSizeInBtc + EPSILON);
   }

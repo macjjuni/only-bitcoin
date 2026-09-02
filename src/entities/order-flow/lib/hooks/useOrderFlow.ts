@@ -27,8 +27,11 @@ export function useOrderFlow(commitIntervalInMs: number) {
     orderFlowController.acquire();
 
     return () => {
-      orderFlowController.release();
-      useOrderFlowStore.getState().resetSnapshot();
+      const hasNoRemainingConsumers = orderFlowController.release();
+
+      if (hasNoRemainingConsumers) {
+        useOrderFlowStore.getState().resetSnapshot();
+      }
     };
   }, []);
 

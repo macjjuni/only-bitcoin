@@ -24,5 +24,4 @@ export interface OrderWallSnapshot {
 export interface VenueBadgeInfo {
   venue: VenueId;
   status: ConnectionStatus;
-  isIncludedInAggregate: boolean;
 }

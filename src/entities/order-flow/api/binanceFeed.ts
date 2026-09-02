@@ -6,7 +6,11 @@ import {
   parseLevelPairs,
   parsePositiveNumber,
 } from "../lib/guards";
-import { BINANCE_DEPTH_SNAPSHOT_URL, BINANCE_STREAM_URL } from "../model/constants";
+import {
+  BINANCE_DEPTH_SNAPSHOT_URL,
+  BINANCE_STREAM_URL,
+  STALE_THRESHOLD_IN_MS,
+} from "../model/constants";
 import { VenueFeedBase } from "./venueFeedBase";
 
 /** 버퍼가 이보다 커지면 스냅샷이 따라잡지 못한 것으로 보고 처음부터 다시 맞춘다. */
@@ -25,7 +29,7 @@ interface DepthDiff {
 }
 
 /** 오더북 diff 를 적용할 수 있는 상태인지 나타낸다. */
-type SyncState = "buffering" | "synced";
+type SyncState = "buffering" | "awaitingDiff" | "synced";
 
 /**
  * Binance 현물 BTCUSDT 커넥터.
@@ -57,6 +61,7 @@ export class BinanceFeed extends VenueFeedBase {
   private snapshotRetryDelayInMs = SNAPSHOT_RETRY_MIN_DELAY_IN_MS;
   private snapshotRetryTimerID: ReturnType<typeof setTimeout> | null = null;
   private snapshotAbortController: AbortController | null = null;
+  private awaitingDiffSinceInMs = 0;
 
   constructor() {
     super("binance");
@@ -76,6 +81,7 @@ export class BinanceFeed extends VenueFeedBase {
     this.syncState = "buffering";
     this.bufferedDiffs = [];
     this.lastAppliedUpdateID = 0;
+    this.awaitingDiffSinceInMs = 0;
     this.snapshotGeneration += 1;
     this.cancelPendingSnapshot();
   }
@@ -101,6 +107,16 @@ export class BinanceFeed extends VenueFeedBase {
       this.snapshotAbortController === null &&
       this.snapshotRetryTimerID === null;
 
+    const hasAwaitingDiffTimedOut =
+      this.syncState === "awaitingDiff" &&
+      nowInMs - this.awaitingDiffSinceInMs > STALE_THRESHOLD_IN_MS;
+
+    if (hasAwaitingDiffTimedOut) {
+      this.diagnostics.resyncCount += 1;
+      this.forceReconnect();
+      return;
+    }
+
     if (isSnapshotStalled && this.hasOpenSocket) {
       this.requestDepthSnapshot();
     }
@@ -125,6 +141,7 @@ export class BinanceFeed extends VenueFeedBase {
     this.syncState = "buffering";
     this.bufferedDiffs = [];
     this.lastAppliedUpdateID = 0;
+    this.awaitingDiffSinceInMs = 0;
     this.snapshotGeneration += 1;
     this.markSyncing();
     this.cancelPendingSnapshot();
@@ -157,6 +174,12 @@ export class BinanceFeed extends VenueFeedBase {
     bidLevels: Array<[number, number]>,
     askLevels: Array<[number, number]>,
   ): void {
+    if (bidLevels.length === 0 || askLevels.length === 0) {
+      this.diagnostics.parseErrorCount += 1;
+      this.scheduleSnapshotRetry();
+      return;
+    }
+
     const pendingDiffs = this.bufferedDiffs.filter((diff) => diff.finalUpdateID > lastUpdateID);
     const firstDiff = pendingDiffs[0];
 
@@ -165,7 +188,6 @@ export class BinanceFeed extends VenueFeedBase {
       !(firstDiff.firstUpdateID <= lastUpdateID + 1 && lastUpdateID + 1 <= firstDiff.finalUpdateID)
     ) {
       this.diagnostics.sequenceGapCount += 1;
-      this.bufferedDiffs = [];
       this.scheduleSnapshotRetry();
       return;
     }
@@ -173,8 +195,18 @@ export class BinanceFeed extends VenueFeedBase {
     this.orderBook.bids.replaceAll(bidLevels);
     this.orderBook.asks.replaceAll(askLevels);
     this.lastAppliedUpdateID = lastUpdateID;
-    this.syncState = "synced";
     this.bufferedDiffs = [];
+
+    if (firstDiff === undefined) {
+      this.syncState = "awaitingDiff";
+      this.awaitingDiffSinceInMs = Date.now();
+      this.snapshotRetryDelayInMs = SNAPSHOT_RETRY_MIN_DELAY_IN_MS;
+      this.markOrderBookReceived();
+      this.markSyncing();
+      return;
+    }
+
+    this.syncState = "synced";
 
     for (const diff of pendingDiffs) {
       if (!this.applyDiff(diff)) {
@@ -182,14 +214,17 @@ export class BinanceFeed extends VenueFeedBase {
       }
     }
 
+    this.awaitingDiffSinceInMs = 0;
     this.snapshotRetryDelayInMs = SNAPSHOT_RETRY_MIN_DELAY_IN_MS;
     this.markSynchronized();
   }
 
   /** diff 한 건 적용. 시퀀스가 끊기면 `false` 를 돌려주고 재동기화를 건다. */
   private applyDiff(diff: DepthDiff): boolean {
+    const nextExpectedUpdateID = this.lastAppliedUpdateID + 1;
     const isContinuous =
-      this.lastAppliedUpdateID === 0 || diff.firstUpdateID <= this.lastAppliedUpdateID + 1;
+      this.lastAppliedUpdateID === 0 ||
+      (diff.firstUpdateID <= nextExpectedUpdateID && nextExpectedUpdateID <= diff.finalUpdateID);
 
     if (!isContinuous) {
       this.diagnostics.sequenceGapCount += 1;
@@ -206,15 +241,21 @@ export class BinanceFeed extends VenueFeedBase {
     }
 
     this.lastAppliedUpdateID = diff.finalUpdateID;
+    this.markOrderBookReceived(diff.eventTimestampInMs || undefined);
 
     return true;
   }
 
-  private handleDepthUpdate(data: Record<string, unknown>): void {
-    const firstUpdateID = parseFiniteNumber(data.U);
-    const finalUpdateID = parseFiniteNumber(data.u);
+  private handleDepthUpdate(eventPayload: Record<string, unknown>): void {
+    const firstUpdateID = parseFiniteNumber(eventPayload.U);
+    const finalUpdateID = parseFiniteNumber(eventPayload.u);
 
     if (firstUpdateID === null || finalUpdateID === null) {
+      this.diagnostics.parseErrorCount += 1;
+      return;
+    }
+
+    if (!Array.isArray(eventPayload.b) || !Array.isArray(eventPayload.a)) {
       this.diagnostics.parseErrorCount += 1;
       return;
     }
@@ -222,12 +263,10 @@ export class BinanceFeed extends VenueFeedBase {
     const diff: DepthDiff = {
       firstUpdateID,
       finalUpdateID,
-      bidLevels: parseLevelPairs(data.b),
-      askLevels: parseLevelPairs(data.a),
-      eventTimestampInMs: parseFiniteNumber(data.E) ?? 0,
+      bidLevels: parseLevelPairs(eventPayload.b),
+      askLevels: parseLevelPairs(eventPayload.a),
+      eventTimestampInMs: parseFiniteNumber(eventPayload.E) ?? 0,
     };
-
-    this.markMessageReceived(diff.eventTimestampInMs);
 
     if (this.syncState === "buffering") {
       this.bufferedDiffs.push(diff);
@@ -246,6 +285,8 @@ export class BinanceFeed extends VenueFeedBase {
     }
 
     if (this.applyDiff(diff)) {
+      this.syncState = "synced";
+      this.awaitingDiffSinceInMs = 0;
       this.markSynchronized();
     }
   }
@@ -254,25 +295,31 @@ export class BinanceFeed extends VenueFeedBase {
    * `aggTrade` 의 `m` 은 매수자가 메이커였는지를 뜻한다.
    * `true` 면 테이커가 매도, `false` 면 테이커가 매수다.
    */
-  private handleAggregateTrade(data: Record<string, unknown>): void {
-    const tradeID = parseIdentifier(data.a);
-    const priceInQuote = parsePositiveNumber(data.p);
-    const sizeInBtc = parsePositiveNumber(data.q);
-    const tradeTimestampInMs = parseFiniteNumber(data.T);
+  private handleAggregateTrade(eventPayload: Record<string, unknown>): void {
+    const tradeID = parseIdentifier(eventPayload.a);
+    const priceInQuote = parsePositiveNumber(eventPayload.p);
+    const sizeInBtc = parsePositiveNumber(eventPayload.q);
+    const tradeTimestampInMs = parseFiniteNumber(eventPayload.T);
+    const isBuyerMarketMaker = eventPayload.m;
 
-    if (tradeID === null || priceInQuote === null || sizeInBtc === null) {
+    if (
+      tradeID === null ||
+      priceInQuote === null ||
+      sizeInBtc === null ||
+      typeof isBuyerMarketMaker !== "boolean"
+    ) {
       this.diagnostics.parseErrorCount += 1;
       return;
     }
 
-    this.markMessageReceived(tradeTimestampInMs ?? undefined);
+    this.markTradeReceived(tradeTimestampInMs ?? undefined);
 
     this.recordTrade({
       tradeID: `binance-${tradeID}`,
-      timestampInMs: tradeTimestampInMs ?? Date.now(),
+      sourceTimestampInMs: tradeTimestampInMs ?? Date.now(),
       priceInQuote,
       sizeInBtc,
-      aggressorSide: data.m === true ? "sell" : "buy",
+      aggressorSide: isBuyerMarketMaker ? "sell" : "buy",
     });
   }
 

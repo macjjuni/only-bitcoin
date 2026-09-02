@@ -95,7 +95,7 @@ export class UpbitFeed extends VenueFeedBase {
     this.orderBook.bids.replaceAll(bidLevels);
     this.orderBook.asks.replaceAll(askLevels);
     this.lastOrderBookTimestampInMs = orderBookTimestampInMs;
-    this.markMessageReceived(orderBookTimestampInMs);
+    this.markOrderBookReceived(orderBookTimestampInMs);
     this.markSynchronized();
   }
 
@@ -116,11 +116,11 @@ export class UpbitFeed extends VenueFeedBase {
       return;
     }
 
-    this.markMessageReceived(tradeTimestampInMs ?? undefined);
+    this.markTradeReceived(tradeTimestampInMs ?? undefined);
 
     this.recordTrade({
       tradeID: `upbit-${tradeID}`,
-      timestampInMs: tradeTimestampInMs ?? Date.now(),
+      sourceTimestampInMs: tradeTimestampInMs ?? Date.now(),
       priceInQuote,
       sizeInBtc,
       aggressorSide: message.ask_bid === "BID" ? "buy" : "sell",

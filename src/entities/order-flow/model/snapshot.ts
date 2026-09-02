@@ -18,6 +18,8 @@ export function createEmptyVenueMetrics(venue: VenueId): VenueMetrics {
     buyVolumeInBtc: 0,
     sellVolumeInBtc: 0,
     lastMessageAtInMs: 0,
+    lastOrderBookAtInMs: 0,
+    lastTradeAtInMs: 0,
   };
 }
 

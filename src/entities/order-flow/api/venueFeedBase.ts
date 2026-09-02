@@ -29,7 +29,7 @@ const MAX_REPORTED_LATENCY_IN_MS = 60_000;
 
 interface RecordTradeInput {
   tradeID: string;
-  timestampInMs: number;
+  sourceTimestampInMs: number;
   priceInQuote: number;
   sizeInBtc: number;
   aggressorSide: TradeSide;
@@ -61,6 +61,8 @@ export abstract class VenueFeedBase {
   private socket: ReconnectingWebSocket | null = null;
   private status: ConnectionStatus = "connecting";
   private lastMessageAtInMs = 0;
+  private lastOrderBookAtInMs = 0;
+  private lastTradeAtInMs = 0;
   private latencyInMs = UNKNOWN_LATENCY_IN_MS;
   private hasOpenedOnce = false;
 
@@ -133,6 +135,7 @@ export abstract class VenueFeedBase {
 
       this.hasOpenedOnce = true;
       this.orderBook.clear();
+      this.resetMessageFreshness();
       this.resetSyncState();
       this.status = "syncing";
       this.subscribe(socket);
@@ -160,6 +163,7 @@ export abstract class VenueFeedBase {
       }
 
       this.orderBook.clear();
+      this.resetMessageFreshness();
       this.resetSyncState();
 
       if (this.status !== "error") {
@@ -177,8 +181,7 @@ export abstract class VenueFeedBase {
     closingSocket?.close(1000);
     this.status = "connecting";
     this.hasOpenedOnce = false;
-    this.lastMessageAtInMs = 0;
-    this.latencyInMs = UNKNOWN_LATENCY_IN_MS;
+    this.resetMessageFreshness();
     this.orderBook.clear();
     this.tradeWindow.clear();
     this.tradeSizeScale.clear();
@@ -232,11 +235,36 @@ export abstract class VenueFeedBase {
       return this.status;
     }
 
-    if (this.lastMessageAtInMs > 0 && nowInMs - this.lastMessageAtInMs > STALE_THRESHOLD_IN_MS) {
+    if (this.status === "syncing" || this.lastOrderBookAtInMs === 0) {
+      return "syncing";
+    }
+
+    if (nowInMs - this.lastOrderBookAtInMs > STALE_THRESHOLD_IN_MS) {
       return "stale";
     }
 
     return this.status;
+  }
+
+  private resetMessageFreshness(): void {
+    this.lastMessageAtInMs = 0;
+    this.lastOrderBookAtInMs = 0;
+    this.lastTradeAtInMs = 0;
+    this.latencyInMs = UNKNOWN_LATENCY_IN_MS;
+  }
+
+  private markMessageReceived(sourceTimestampInMs?: number): number {
+    const receivedAtInMs = Date.now();
+    this.lastMessageAtInMs = receivedAtInMs;
+
+    if (sourceTimestampInMs !== undefined && sourceTimestampInMs > 0) {
+      this.latencyInMs = Math.min(
+        MAX_REPORTED_LATENCY_IN_MS,
+        Math.max(0, receivedAtInMs - sourceTimestampInMs),
+      );
+    }
+
+    return receivedAtInMs;
   }
 
   /**
@@ -245,23 +273,25 @@ export abstract class VenueFeedBase {
    * 지연은 거래소 시각과 로컬 시각의 차이라 브라우저 시계가 조금만 앞서 있어도 음수가 된다.
    * 그런 값은 0 으로 눌러 두되, "아직 한 번도 못 쟀음"(`UNKNOWN_LATENCY_IN_MS`)과는 구분한다.
    */
-  protected markMessageReceived(sourceTimestampInMs?: number): void {
-    const nowInMs = Date.now();
-    this.lastMessageAtInMs = nowInMs;
+  protected markOrderBookReceived(sourceTimestampInMs?: number): void {
+    this.lastOrderBookAtInMs = this.markMessageReceived(sourceTimestampInMs);
+  }
 
-    if (sourceTimestampInMs !== undefined && sourceTimestampInMs > 0) {
-      this.latencyInMs = Math.min(
-        MAX_REPORTED_LATENCY_IN_MS,
-        Math.max(0, nowInMs - sourceTimestampInMs),
-      );
-    }
+  protected markTradeReceived(sourceTimestampInMs?: number): void {
+    this.lastTradeAtInMs = this.markMessageReceived(sourceTimestampInMs);
+  }
+
+  protected markHeartbeatReceived(sourceTimestampInMs?: number): void {
+    this.markMessageReceived(sourceTimestampInMs);
   }
 
   /** 오더북 기준점이 만들어져 지표를 신뢰할 수 있게 되면 호출한다. */
   protected markSynchronized(): void {
-    if (this.status !== "error") {
-      this.status = "live";
+    if (this.status === "error") {
+      return;
     }
+
+    this.status = this.orderBook.hasBothSides ? "live" : "syncing";
   }
 
   protected markSyncing(): void {
@@ -278,12 +308,12 @@ export abstract class VenueFeedBase {
     }
 
     this.tradeSizeScale.addSample(input.sizeInBtc);
-    this.tradeWindow.add(input.timestampInMs, input.sizeInBtc, input.aggressorSide);
+    this.tradeWindow.add(Date.now(), input.sizeInBtc, input.aggressorSide);
 
     this.tradeEventQueue.push({
       tradeID: input.tradeID,
       venue: this.venue,
-      timestampInMs: input.timestampInMs,
+      timestampInMs: input.sourceTimestampInMs,
       priceInQuote: input.priceInQuote,
       sizeInBtc: input.sizeInBtc,
       aggressorSide: input.aggressorSide,
@@ -349,6 +379,8 @@ export abstract class VenueFeedBase {
       buyVolumeInBtc: this.tradeWindow.getBuyVolumeInBtc(),
       sellVolumeInBtc: this.tradeWindow.getSellVolumeInBtc(),
       lastMessageAtInMs: this.lastMessageAtInMs,
+      lastOrderBookAtInMs: this.lastOrderBookAtInMs,
+      lastTradeAtInMs: this.lastTradeAtInMs,
     };
   }
 

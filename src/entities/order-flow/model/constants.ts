@@ -30,8 +30,8 @@ export const BINANCE_DEPTH_SNAPSHOT_URL = `https://api.binance.com/api/v3/depth?
 export const COINBASE_STREAM_URL = "wss://advanced-trade-ws.coinbase.com";
 export const UPBIT_STREAM_URL = "wss://api.upbit.com/websocket/v1";
 
-/** 호가 불균형을 계산할 mid 기준 대역(베이시스 포인트). */
-export const IMBALANCE_BAND_IN_BPS = 25;
+/** 거래소별 호가 불균형 계산에 공통으로 사용할 최우선 호가 단계 수. */
+export const IMBALANCE_LEVEL_COUNT = UPBIT_ORDERBOOK_DEPTH;
 
 /** 체결 압력 집계 창. */
 export const TRADE_WINDOW_IN_MS = 5000;
