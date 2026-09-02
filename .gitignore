@@ -42,3 +42,6 @@ next-env.d.ts
 
 # 3D 원본 에셋(빌드 입력). 구운 스프라이트만 public/ 에 커밋함.
 /assets
+
+# python
+__pycache__/
