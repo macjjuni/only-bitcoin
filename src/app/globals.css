@@ -52,6 +52,13 @@
   border-radius: 9999px;
 }
 
+/* iOS WebKit에서 full-bleed 자식보다 스크롤 인디케이터가 앞에 합성되도록 한다. */
+@supports (-webkit-touch-callout: none) {
+  .only-btc__content {
+    will-change: z-index;
+  }
+}
+
 /* 딥 스페이스 배경 위에 올라가는 글래스 카드 (테마와 무관하게 어두운 배경 전용) */
 .glass-card {
   background: rgba(255, 255, 255, 0.045);
