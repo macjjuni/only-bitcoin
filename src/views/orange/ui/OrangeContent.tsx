@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { HandCoins, TableProperties } from "lucide-react";
+import { HandCoins, Swords, TableProperties } from "lucide-react";
 import type { ReactNode } from "react";
 import {
   BanknoteIcon,
@@ -83,6 +83,11 @@ const UTILITY_LINKS: OrangeLink[] = [
       />
     ),
     href: "/withdraw-fee",
+  },
+  {
+    title: "BTC War",
+    icon: <Swords size={28} strokeWidth={1.8} className={ICON_CLASS} />,
+    href: "/war",
   },
   {
     title: "반감기 카운트",
