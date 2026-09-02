@@ -27,14 +27,12 @@ export function WarDiagnosticsPanel({
 }: WarDiagnosticsPanelProps): ReactNode {
   return (
     <section
-      className="rounded-xl border-[0.75px] border-neutral-300 p-3 dark:border-neutral-600"
+      className="border-t border-dashed border-neutral-400/50 pt-2.5 dark:border-neutral-600"
       aria-label="진단 정보"
     >
-      <div className="mb-2 flex items-center justify-between text-[11px]">
-        <span className="font-bold">진단</span>
-        <span className="text-muted-foreground">
-          캔버스 활성 객체 {activeObjectCount.toLocaleString()}개
-        </span>
+      <div className="mb-2 flex items-center justify-between text-[10px] uppercase tracking-[0.12em] text-muted-foreground">
+        <span className="font-bold">Diagnostics</span>
+        <span className="font-number">objects {activeObjectCount.toLocaleString()}</span>
       </div>
 
       <div className="flex flex-col gap-2">

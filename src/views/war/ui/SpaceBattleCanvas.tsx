@@ -4,14 +4,14 @@ import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import { useOrderFlowStore, VENUE_IDS } from "@/entities/order-flow";
 import { orderFlowController } from "@/entities/order-flow/client";
 import { BattleEngine } from "../lib/battleEngine";
+import { renderSpaceBattle } from "../lib/renderSpaceBattle";
+import { loadShipSpriteAtlas, type ShipSpriteAtlas } from "../lib/shipSpriteAtlas";
+import { StarField } from "../lib/starField";
 import {
   ORDER_WALL_LEVEL_COUNT,
   type OrderWallSnapshot,
   type VenueBadgeInfo,
-} from "../lib/renderBattle";
-import { renderSpaceBattle } from "../lib/renderSpaceBattle";
-import { loadShipSpriteAtlas, type ShipSpriteAtlas } from "../lib/shipSpriteAtlas";
-import { StarField } from "../lib/starField";
+} from "../model/battleRenderTypes";
 import {
   DENSITY_PROFILES,
   MOBILE_WIDTH_THRESHOLD_IN_PX,
@@ -47,8 +47,8 @@ interface SpaceBattleCanvasProps {
 /**
  * 우주 전장 캔버스.
  *
- * `BattleCanvas` 의 도형 렌더링을 우주선 스프라이트로 바꾼 판이다. 시뮬레이션은 같은
- * `BattleEngine` 을 쓰고 그리기 방식만 다르다.
+ * 체결과 호가를 우주선 스프라이트로 그린다. 시뮬레이션은 `BattleEngine` 이 맡고 이
+ * 컴포넌트는 커넥터에서 자료를 읽어 프레임 루프를 돌리는 일만 한다.
  *
  * 사이트 테마를 따르지 않고 항상 어둡게 그린다. 별과 성운을 밝은 배경에 올리면 우주로
  * 읽히지 않아서, 이 캔버스만 라이트 모드에서도 어두운 채로 둔다.

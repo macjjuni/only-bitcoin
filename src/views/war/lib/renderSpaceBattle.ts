@@ -1,12 +1,12 @@
 import type { ConnectionStatus, VenueId } from "@/entities/order-flow";
 import { VENUE_LABELS } from "@/entities/order-flow";
-import { BUY_SIDE_RGB, SELL_SIDE_RGB, toRgbaColor, VENUE_ACCENT_RGB } from "../model/warViewModel";
-import { BattleEngine } from "./battleEngine";
 import {
   ORDER_WALL_LEVEL_COUNT,
   type OrderWallSnapshot,
   type VenueBadgeInfo,
-} from "./renderBattle";
+} from "../model/battleRenderTypes";
+import { BUY_SIDE_RGB, SELL_SIDE_RGB, toRgbaColor, VENUE_ACCENT_RGB } from "../model/warViewModel";
+import { BattleEngine } from "./battleEngine";
 import type { ShipSpriteAtlas } from "./shipSpriteAtlas";
 import type { StarField } from "./starField";
 

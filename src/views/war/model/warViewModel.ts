@@ -4,32 +4,22 @@ import type { VenueId } from "@/entities/order-flow";
 export type EffectDensity = "low" | "medium" | "high";
 
 /**
- * 전장을 그리는 방식.
- *
- * `classic` 은 캔버스 도형만 쓰던 기존 표현이고 `space` 는 우주선 스프라이트 판이다.
- * 시뮬레이션은 둘 다 같은 `BattleEngine` 을 쓰고 그리기 계층만 갈린다. 스프라이트 쪽이
- * 자리를 잡을 때까지 둘을 나란히 두고 눈으로 비교할 수 있게 남겨 둔다.
- */
-export type BattleRendererMode = "classic" | "space";
-
-/**
  * 화면 조작 상태 한 벌.
  *
  * 전장은 항상 세 거래소를 합친 통합 뷰다. 거래소 하나만 떼어 보는 모드는 두지 않는다.
  * 호가벽과 체결 효과는 이 화면의 본체라 끄고 켜는 대상이 아니어서 상태로 두지 않는다.
- * `isPaused` 와 `isDiagnosticsOpen` 은 개발용 조작이라 개발 환경에서만 바뀐다.
+ * `effectDensity` · `isPaused` · `isDiagnosticsOpen` 은 개발용 조작이라 `WarDevControls`
+ * 에서만 바뀐다. 운영 빌드에는 그 블록이 없으므로 각각 기본값에 머문다.
  */
 export interface WarControlState {
   isPaused: boolean;
   effectDensity: EffectDensity;
-  rendererMode: BattleRendererMode;
   isDiagnosticsOpen: boolean;
 }
 
 export const DEFAULT_WAR_CONTROL_STATE: WarControlState = {
   isPaused: false,
   effectDensity: "medium",
-  rendererMode: "space",
   isDiagnosticsOpen: false,
 };
 
