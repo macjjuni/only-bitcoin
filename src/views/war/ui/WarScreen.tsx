@@ -71,7 +71,7 @@ export default function WarScreen(): ReactNode {
       <PageTitle
         label="Bitcoin Buy·Sell War"
         title="BTC War"
-        description="실시간 체결과 호가를 우주 전투로 그리는 비주얼라이저"
+        description="실시간 체결과 매수·매도 전쟁 시뮬레이션"
       />
 
       <SpaceBattleCanvas
