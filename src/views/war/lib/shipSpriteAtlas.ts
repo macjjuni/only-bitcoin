@@ -5,6 +5,23 @@ import {
   type ShipAtlasFrameKey,
 } from "../model/shipAtlasFrames";
 
+/**
+ * 등급별로 구워 둘 스프라이트 가로 폭(px).
+ *
+ * 화면에 그리는 폭은 `renderSpaceBattle` 에서 유닛 크기 × 2.6 으로 등급마다 고정이다.
+ * 거기에 DPR 상한 2 와 여유 배수 2 를 곱한 값이라 어떤 기기에서도 확대되는 일은 없다.
+ *
+ * 원본 프레임은 224~241px 인데 small 은 화면에서 13px 안팎으로 그려진다. 그대로 두면
+ * 매 프레임 12배 가까이 줄여야 해서 텍셀이 듬성듬성 잡히고, 배가 움직일 때마다 다른
+ * 텍셀이 걸려 지글거린다. 미리 줄여 구워 두면 그 축소가 사라지고 GPU 업로드량도 준다.
+ */
+const SPRITE_BAKE_WIDTH_IN_PX: Record<TradeMagnitude, number> = {
+  small: 56,
+  medium: 96,
+  large: 148,
+  huge: 208,
+};
+
 /** 캔버스가 `drawImage` 9-인자 형태로 바로 넘길 수 있는 스프라이트 한 장. */
 export interface ShipSprite {
   source: CanvasImageSource;
@@ -23,9 +40,9 @@ export interface ShipSpriteAtlas {
 /**
  * 아틀라스 이미지를 받아 프레임별로 잘라 둔다.
  *
- * `createImageBitmap` 은 잘라내기와 디코딩을 한 번에 끝내 준다. 매 프레임 원본 한 장에서
- * 부분 영역을 읽는 것보다 GPU 업로드가 안정적이라 유닛이 수백 개일 때 차이가 난다.
- * 지원하지 않는 브라우저에서는 원본 이미지에 프레임 좌표를 그대로 물려 돌려준다.
+ * `createImageBitmap` 이 잘라내기와 디코딩과 축소를 한 번에 끝내 준다. 매 프레임 원본
+ * 한 장에서 부분 영역을 읽는 것보다 GPU 업로드가 안정적이라 유닛이 수백 개일 때 차이가
+ * 난다. 지원하지 않는 브라우저에서는 원본 이미지에 프레임 좌표를 그대로 물려 돌려준다.
  */
 async function createSpriteTable(
   atlasImage: HTMLImageElement,
@@ -49,20 +66,32 @@ async function createSpriteTable(
         };
       }
 
+      const [magnitude] = frameKey.split("_") as [TradeMagnitude, TradeSide];
+      const bakeWidthInPx = Math.min(frame.widthInPx, SPRITE_BAKE_WIDTH_IN_PX[magnitude]);
+
       const frameBitmap = await createImageBitmap(
         atlasImage,
         frame.xInPx,
         frame.yInPx,
         frame.widthInPx,
         frame.heightInPx,
+        {
+          resizeWidth: bakeWidthInPx,
+          resizeHeight: Math.round(bakeWidthInPx * heightPerWidthRatio),
+          resizeQuality: "high",
+        },
       );
 
+      /*
+        `resize*` 옵션을 무시하는 브라우저가 있어 실제로 나온 크기를 그대로 읽는다.
+        굽기가 먹지 않아도 원본 크기로 잘려 나올 뿐이라 그리기는 어긋나지 않는다.
+      */
       return {
         source: frameBitmap,
         sourceXInPx: 0,
         sourceYInPx: 0,
-        sourceWidthInPx: frame.widthInPx,
-        sourceHeightInPx: frame.heightInPx,
+        sourceWidthInPx: frameBitmap.width,
+        sourceHeightInPx: frameBitmap.height,
         heightPerWidthRatio,
       };
     }),

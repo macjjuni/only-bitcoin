@@ -99,8 +99,19 @@ export function SpaceBattleCanvas({
     canvasElement.style.width = `${widthInPx}px`;
     canvasElement.style.height = `${heightInPx}px`;
 
+    /**
+     * 버퍼 크기를 바꾸면 컨텍스트 상태가 초기화되므로 변환과 스무딩을 여기서 다시 건다.
+     *
+     * 스프라이트를 줄여 그리는 화면이라 기본값 `low` 로는 축소면이 거칠다. 품질을 올리는
+     * 비용은 스프라이트를 미리 줄여 구워 둔 지금 구조에서는 무시할 만하다.
+     */
     const context = canvasElement.getContext("2d");
-    context?.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+
+    if (context !== null) {
+      context.setTransform(devicePixelRatio, 0, 0, devicePixelRatio, 0, 0);
+      context.imageSmoothingEnabled = true;
+      context.imageSmoothingQuality = "high";
+    }
 
     canvasSizeReference.current = { widthInPx, heightInPx };
     starFieldReference.current.resize(widthInPx, heightInPx);
