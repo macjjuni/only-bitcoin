@@ -28,6 +28,55 @@ export function isIOSPWA(): boolean {
   return isPWAInstalled();
 }
 
+export type DisplayMode =
+  | "twa"
+  | "ios_standalone"
+  | "fullscreen"
+  | "standalone"
+  | "minimal-ui"
+  | "window-controls-overlay"
+  | "browser";
+
+export type BrowserContext =
+  | "inapp_kakao"
+  | "inapp_naver"
+  | "inapp_daum"
+  | "inapp_meta"
+  | "inapp_line"
+  | "ios_browser"
+  | "browser";
+
+/**
+ * 현재 세션이 설치된 앱(홈 화면 아이콘)에서 실행 중인지 판별함.
+ * iOS 16.4 미만은 `navigator.standalone` 만 동작하므로 `ios_standalone` 으로 따로 분리해 집계함.
+ */
+export function detectDisplayMode(): DisplayMode {
+  if (document.referrer.startsWith("android-app://")) return "twa";
+  if ((window.navigator as NavigatorWithStandalone).standalone === true) return "ios_standalone";
+
+  const modes = ["fullscreen", "standalone", "minimal-ui", "window-controls-overlay"] as const;
+  const matched = modes.find((mode) => window.matchMedia(`(display-mode: ${mode})`).matches);
+
+  return matched ?? "browser";
+}
+
+/**
+ * 인앱 브라우저 여부를 판별함. 카카오·네이버 인앱은 PWA 설치 자체가 불가능해서
+ * standalone 비율과 겹쳐 봐야 설치 게이트의 실제 손실폭이 나옴.
+ */
+export function detectBrowserContext(): BrowserContext {
+  const ua = navigator.userAgent;
+
+  if (/KAKAOTALK/i.test(ua)) return "inapp_kakao";
+  if (/NAVER[(]inapp/i.test(ua)) return "inapp_naver";
+  if (/DaumApps/i.test(ua)) return "inapp_daum";
+  if (/Instagram|FBAN|FBAV/i.test(ua)) return "inapp_meta";
+  if (/Line[/]/i.test(ua)) return "inapp_line";
+  if (/iPhone|iPad|iPod/.test(ua)) return "ios_browser";
+
+  return "browser";
+}
+
 let iosHapticLabel: HTMLLabelElement | null = null;
 
 /**

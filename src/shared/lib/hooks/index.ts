@@ -1,5 +1,6 @@
 "use client";
 
+export { default as useAppContextProbe } from "./useAppContextProbe";
 export { default as useCopyOnClick } from "./useCopyOnClick";
 export { default as useFadeInByPath } from "./useFadeInByPath";
 export { default as useInitializeBackground } from "./useInitializeBackground";
