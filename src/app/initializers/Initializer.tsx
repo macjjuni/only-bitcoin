@@ -13,6 +13,7 @@ import {
 import { useMempoolSocket } from "@/entities/block";
 import { getToastProps } from "@/shared/config/toast";
 import {
+  useAppContextProbe,
   useInitializeBackground,
   useInitializeDisabledZoom,
   useInitializePage,
@@ -40,6 +41,7 @@ function BaseInitializer() {
   // 앱 설정 및 환경 초기화
   useTheme();
   useInitializePWA();
+  useAppContextProbe();
   useUsdExchangeRate();
   useInitializeDisabledZoom();
   useInitializeBackground();
