@@ -1,0 +1,10 @@
+CHAT_ALLOWED_ORIGINS=http://localhost:3000
+ACTOR_SECRET=replace-with-at-least-32-random-bytes
+ENFORCEMENT_SECRET=replace-with-at-least-32-random-bytes
+IP_GUARD_SECRET=replace-with-at-least-32-random-bytes
+PASS_SIGNING_SECRET=replace-with-at-least-32-random-bytes
+PASS_SIGNING_SECRET_PREVIOUS=
+TURNSTILE_SECRET_KEY=1x0000000000000000000000000000000AA
+TURNSTILE_EXPECTED_HOSTNAME=localhost
+CF_ACCESS_AUD=replace-with-access-audience
+ADMIN_EMAIL_ALLOWLIST=admin@example.com

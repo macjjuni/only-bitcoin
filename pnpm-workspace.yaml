@@ -1,6 +1,8 @@
 allowBuilds:
   '@parcel/watcher': true
+  esbuild: true
   ngrok: true
   secp256k1: true
   sharp: true
   unrs-resolver: true
+  workerd: true
