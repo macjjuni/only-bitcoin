@@ -33,6 +33,10 @@ export interface ChatMe {
   verifiedUntil?: number;
 }
 
+export const formatChatAnonId = (anonId: string): string => {
+  return anonId.slice(0, 4);
+};
+
 export const CHAT_REACTION_LABELS: Record<ChatReactionKey, string> = {
   rocket: "🚀",
   fear: "😱",

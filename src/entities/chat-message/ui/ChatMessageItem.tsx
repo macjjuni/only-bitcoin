@@ -9,6 +9,7 @@ import {
   CHAT_REACTION_LABELS,
   type ChatMessage,
   type ChatReactionKey,
+  formatChatAnonId,
 } from "../model/chatMessage";
 
 interface ChatMessageItemProps {
@@ -147,9 +148,9 @@ function ChatMessageItem({
 
   return (
     <article className={`flex flex-col gap-1.5 ${isMyMessage ? "items-end" : "items-start"}`}>
-      <div className="flex items-baseline gap-2 px-1 text-[11px] text-neutral-500 dark:text-neutral-400">
+      <div className="flex items-baseline gap-2 px-1 text-xs text-neutral-500 dark:text-neutral-400">
         <strong className="font-medium text-neutral-700 dark:text-neutral-200">
-          {message.nickname}#{message.anonId}
+          {message.nickname}#{formatChatAnonId(message.anonId)}
         </strong>
         <time dateTime={new Date(message.createdAt).toISOString()}>
           {messageTimeFormatter.format(message.createdAt)}
@@ -167,7 +168,7 @@ function ChatMessageItem({
         {message.parent && (
           <blockquote className="mb-2 border-l-2 border-bitcoin/60 pl-2 text-[11px] leading-4 text-neutral-500 dark:text-neutral-400">
             <strong>
-              {message.parent.nickname}#{message.parent.anonId}
+              {message.parent.nickname}#{formatChatAnonId(message.parent.anonId)}
             </strong>
             <span className="mt-0.5 block break-words">
               {message.parent.snippet || "삭제된 메시지"}
