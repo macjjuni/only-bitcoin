@@ -5,7 +5,6 @@ import { useEffect, useState } from "react";
 import { BtcSurgeShareDialog } from "@/features/btc-surge-share";
 import { PremiumShareDialog, PremiumShareFloatingBanner } from "@/features/premium-share";
 import { hideBottomNavPathList } from "@/shared/config/route";
-import useSettingStore from "@/shared/stores/settingStore";
 import ApartmentShareFloatingBanner from "./ui/ApartmentShareFloatingBanner";
 import BlocksCountdownFloatingBanner from "./ui/BlocksCountdownFloatingBanner";
 import BtcSurgeShareFloatingBanner from "./ui/BtcSurgeShareFloatingBanner";
@@ -46,12 +45,8 @@ const CHAT_BANNER_VISIBLE_PATHS = ["/", "/overview", "/blocks", "/btc2fiat", "/o
 
 function useChatBannerVisibility(): boolean {
   const pathname = usePathname();
-  const isLab = useSettingStore((state) => state.setting.isLab);
-  const isAllowedChatPath = CHAT_BANNER_VISIBLE_PATHS.some(
-    (visiblePath) => visiblePath === pathname,
-  );
 
-  return isLab && isAllowedChatPath;
+  return CHAT_BANNER_VISIBLE_PATHS.some((visiblePath) => visiblePath === pathname);
 }
 
 const BANNER_CONFIGS: BannerConfig[] = [
