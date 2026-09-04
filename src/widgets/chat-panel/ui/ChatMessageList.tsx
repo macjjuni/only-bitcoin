@@ -29,7 +29,6 @@ interface ConnectedChatMessageItemProps {
 }
 
 const BOTTOM_PROXIMITY_IN_PIXELS = 80;
-
 function ConnectedChatMessageItem({
   messageId,
   currentAnonId,

@@ -3,7 +3,7 @@
 import { KTextarea } from "kku-ui";
 import { Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
-import type { ChatMessage } from "@/entities/chat-message";
+import { type ChatMessage, formatChatAnonId } from "@/entities/chat-message";
 import type { ChatPendingRequest } from "@/features/chat-session";
 import { CHAT_MAX_MESSAGE_GRAPHEMES } from "@/shared/config/chat";
 import { countGraphemes, truncateGraphemes } from "@/shared/lib/text/countGraphemes";
@@ -33,10 +33,19 @@ export default function ChatComposer({
 }: ChatComposerProps) {
   // region [Hooks]
   const isComposingReference = useRef(false);
+  const messageTextareaReference = useRef<HTMLTextAreaElement | null>(null);
   const [validationMessage, setValidationMessage] = useState("");
   // endregion
 
   // region [Privates]
+  const resizeMessageTextarea = (textareaElement: HTMLTextAreaElement): void => {
+    const maximumTextareaHeightInPixels = 64;
+
+    textareaElement.style.height = "auto";
+    textareaElement.style.height = `${Math.min(textareaElement.scrollHeight, maximumTextareaHeightInPixels)}px`;
+    textareaElement.style.overflowY = "hidden";
+  };
+
   const submitDraft = (): void => {
     if (!draft.trim() || isMutationDisabled || pendingSayRequest?.status === "pending") {
       return;
@@ -60,6 +69,7 @@ export default function ChatComposer({
       ? event.target.value
       : truncateGraphemes(event.target.value, CHAT_MAX_MESSAGE_GRAPHEMES);
     onChangeDraft(nextDraft);
+    resizeMessageTextarea(event.currentTarget);
   };
 
   const onCompositionStartMessageTextarea = (): void => {
@@ -71,6 +81,7 @@ export default function ChatComposer({
   ): void => {
     isComposingReference.current = false;
     onChangeDraft(truncateGraphemes(event.currentTarget.value, CHAT_MAX_MESSAGE_GRAPHEMES));
+    resizeMessageTextarea(event.currentTarget);
   };
 
   const onKeyDownMessageTextarea = (event: React.KeyboardEvent<HTMLTextAreaElement>): void => {
@@ -98,6 +109,12 @@ export default function ChatComposer({
       onChangePendingSayRid(null);
     }
   }, [onAcknowledgeSentMessage, onChangePendingSayRid, pendingSayRequest]);
+
+  useEffect(() => {
+    if (messageTextareaReference.current) {
+      resizeMessageTextarea(messageTextareaReference.current);
+    }
+  }, [draft]);
   // endregion
 
   const graphemeCount = countGraphemes(draft);
@@ -113,7 +130,7 @@ export default function ChatComposer({
         <div className="mb-2 flex items-start justify-between gap-2 rounded-xl bg-neutral-100 px-3 py-2 text-xs dark:bg-neutral-800">
           <div className="min-w-0">
             <strong>
-              {selectedReply.nickname}#{selectedReply.anonId}에게 답글
+              {selectedReply.nickname}#{formatChatAnonId(selectedReply.anonId)}에게 답글
             </strong>
             <p className="mt-1 truncate text-neutral-500">{selectedReply.body}</p>
           </div>
@@ -128,13 +145,14 @@ export default function ChatComposer({
         </div>
       )}
 
-      <div className="flex items-end gap-2">
+      <div className="flex items-start gap-2">
         <div className="min-w-0 flex-1">
           <label htmlFor="chat-message-composer" className="sr-only">
             메시지 작성
           </label>
           <KTextarea
             id="chat-message-composer"
+            ref={messageTextareaReference}
             value={draft}
             rows={1}
             disabled={isMutationDisabled}
@@ -143,23 +161,25 @@ export default function ChatComposer({
             onCompositionEnd={onCompositionEndMessageTextarea}
             onKeyDown={onKeyDownMessageTextarea}
             placeholder={isMutationDisabled ? "연결되면 메시지를 작성할 수 있어요" : "메시지 입력"}
-            className="max-h-28 min-h-11 w-full resize-none rounded-3xl border border-neutral-300 bg-neutral-50 px-3 py-2.5 text-sm leading-5 outline-none focus:border-bitcoin dark:border-neutral-700 dark:bg-neutral-900"
+            className="max-h-16 min-h-10 w-full resize-none overflow-hidden rounded-[20px] border border-neutral-300 bg-neutral-50 px-3 py-2 text-sm leading-5 outline-none focus:border-bitcoin dark:border-neutral-700 dark:bg-neutral-900"
           />
+        </div>
+        <div className="flex shrink-0 flex-col items-center gap-1">
+          <button
+            type="button"
+            aria-label="메시지 전송"
+            disabled={isMutationDisabled || isSending || !draft.trim()}
+            onClick={onClickSendButton}
+            className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-bitcoin text-white disabled:cursor-not-allowed disabled:opacity-40"
+          >
+            <Send size={18} />
+          </button>
           {shouldShowCharacterCount && (
-            <p className="mt-1 px-1 text-right font-number text-[10px] leading-4 text-neutral-500">
+            <p className="font-number text-[10px] leading-4 text-neutral-500">
               {graphemeCount}/{CHAT_MAX_MESSAGE_GRAPHEMES}
             </p>
           )}
         </div>
-        <button
-          type="button"
-          aria-label="메시지 전송"
-          disabled={isMutationDisabled || isSending || !draft.trim()}
-          onClick={onClickSendButton}
-          className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-bitcoin text-white disabled:cursor-not-allowed disabled:opacity-40 ${shouldShowCharacterCount ? "mb-5" : ""}`}
-        >
-          <Send size={18} />
-        </button>
       </div>
 
       {(validationMessage || errorMessage || isUncertain || isSending) && (

@@ -53,7 +53,7 @@ export default function ChatMarketContextCard({
         className="flex w-full items-center justify-between gap-3 px-3 py-2.5 text-left"
       >
         <span>
-          <span className="block text-xs font-bold text-bitcoin">지금 시장 · 시스템 정보</span>
+          <span className="block text-xs font-bold text-bitcoin">지금 시장 정보</span>
           {!isExpanded && (
             <span className="mt-1 block text-xs text-neutral-500">시장 지표 보기</span>
           )}
@@ -64,7 +64,7 @@ export default function ChatMarketContextCard({
       {isExpanded && (
         <div className="border-t border-bitcoin/15 px-3 py-3">
           {marketContext && (
-            <dl className="mb-3 grid grid-cols-3 gap-2 text-center">
+            <dl className="grid grid-cols-3 gap-2 text-center">
               <div>
                 <dt className="text-[10px] text-neutral-500">BTC/KRW</dt>
                 <dd className="mt-1 text-xs font-number font-bold">

@@ -1,8 +1,9 @@
 "use client";
 
+import { KTextField } from "kku-ui";
 import { Check, Maximize2, Minimize2, Pencil, RotateCw, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { ChatMessage } from "@/entities/chat-message";
+import { type ChatMessage, formatChatAnonId } from "@/entities/chat-message";
 import {
   type ChatIdentity,
   ChatTurnstile,
@@ -355,13 +356,13 @@ export default function ChatPanel({
               <button
                 type="button"
                 aria-label="닉네임 변경"
+                className="flex items-center gap-1"
                 onClick={onClickNicknameEditButton}
-                className="inline-flex max-w-40 items-center gap-1 rounded-full bg-neutral-100 px-2.5 py-1.5 text-[11px] dark:bg-neutral-800"
               >
-                <span className="truncate">
-                  {me.nickname}#{me.anonId}
+                <span className="text-xs truncate">
+                  {me.nickname}#{formatChatAnonId(me.anonId)}
                 </span>
-                <Pencil size={11} />
+                <Pencil size={12} />
               </button>
             )}
             <button
@@ -390,17 +391,18 @@ export default function ChatPanel({
             <label htmlFor="chat-nickname" className="sr-only">
               닉네임
             </label>
-            <input
+            <KTextField
               id="chat-nickname"
               value={nicknameDraft}
               onChange={onChangeNicknameInput}
               maxLength={40}
-              className="h-9 min-w-0 flex-1 rounded-xl border border-neutral-300 bg-transparent px-3 text-xs outline-none focus:border-bitcoin dark:border-neutral-700"
+              size="sm"
+              className="min-w-0 flex-1"
             />
             <button
               type="button"
               onClick={onClickNicknameSaveButton}
-              className="h-9 rounded-xl bg-bitcoin px-3 text-xs font-bold text-white"
+              className="h-8 rounded-md bg-bitcoin px-3 text-xs font-bold text-white"
             >
               저장
             </button>
