@@ -8,7 +8,6 @@ import { hideBottomNavPathList } from "@/shared/config/route";
 import useSettingStore from "@/shared/stores/settingStore";
 import ApartmentShareFloatingBanner from "./ui/ApartmentShareFloatingBanner";
 import BlocksCountdownFloatingBanner from "./ui/BlocksCountdownFloatingBanner";
-import Btc2FiatFloatingBanner from "./ui/Btc2FiatFloatingBanner";
 import BtcSurgeShareFloatingBanner from "./ui/BtcSurgeShareFloatingBanner";
 import ChatFloatingBanner from "./ui/ChatFloatingBanner";
 import CountdownBackFloatingBanner from "./ui/CountdownBackFloatingBanner";
@@ -101,14 +100,6 @@ const BANNER_CONFIGS: BannerConfig[] = [
     useIsVisible: () => {
       const pathname = usePathname();
       return pathname === "/blocks/countdown";
-    },
-  },
-  {
-    id: "btc2fiat",
-    Component: Btc2FiatFloatingBanner,
-    useIsVisible: () => {
-      const pathname = usePathname();
-      return pathname.startsWith("/btc2fiat");
     },
   },
   {

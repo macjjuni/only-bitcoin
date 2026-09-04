@@ -340,7 +340,7 @@ export default function ChatPanel({
         aria-modal={isFullscreen || undefined}
         onKeyDown={onKeyDownPanel}
         style={panelStyle}
-        className={panelClassName}
+        className={`${panelClassName} only-btc__chat-panel`}
       >
         <header className="flex min-h-14 items-center justify-between gap-3 border-b border-neutral-200 px-4 dark:border-neutral-700">
           <div className="flex flex-col gap-0.5 min-w-0">

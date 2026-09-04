@@ -130,6 +130,22 @@
 .only-btc__header { view-transition-name: main-header; }
 .only-btc__bottom-nav { view-transition-name: bottom-nav; }
 .only-btc__floating-banner { view-transition-name: floating-banner; }
+.only-btc__chat-panel { view-transition-name: chat-panel; }
+
+::view-transition-group(chat-panel),
+::view-transition-image-pair(chat-panel) {
+  animation: none;
+}
+
+::view-transition-old(chat-panel) {
+  animation: none;
+  opacity: 0;
+}
+
+::view-transition-new(chat-panel) {
+  animation: none;
+  opacity: 1;
+}
 
 ::view-transition-old(root),
 ::view-transition-new(root) {

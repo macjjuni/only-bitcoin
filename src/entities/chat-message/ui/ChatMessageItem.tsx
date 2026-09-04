@@ -135,31 +135,46 @@ function ChatMessageItem({
     </button>
   );
 
+  const ReactionAddButtonTemplate = (
+    <button
+      type="button"
+      aria-label="반응 추가"
+      aria-expanded={isReactionPickerOpen}
+      onClick={onClickReactionPickerButton}
+      className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+    >
+      <Plus size={14} />
+    </button>
+  );
+
+  const ReactionPickerTemplate = isReactionPickerOpen ? (
+    <div className="flex items-center gap-1">
+      {CHAT_REACTION_KEYS.map((reactionKey) => (
+        <ReactionButton
+          key={reactionKey}
+          messageId={message.id}
+          reactionKey={reactionKey}
+          count={message.reactions[reactionKey]}
+          isActive={hasSelectedReaction(reactionKey)}
+          onToggleReaction={onToggleReaction}
+        />
+      ))}
+    </div>
+  ) : null;
+
   const ReactionActionsTemplate = (
     <>
       {VisibleReactionButtonsTemplate}
-      <button
-        type="button"
-        aria-label="반응 추가"
-        aria-expanded={isReactionPickerOpen}
-        onClick={onClickReactionPickerButton}
-        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
-      >
-        <Plus size={14} />
-      </button>
-      {isReactionPickerOpen && (
-        <div className="flex items-center gap-1">
-          {CHAT_REACTION_KEYS.map((reactionKey) => (
-            <ReactionButton
-              key={reactionKey}
-              messageId={message.id}
-              reactionKey={reactionKey}
-              count={message.reactions[reactionKey]}
-              isActive={hasSelectedReaction(reactionKey)}
-              onToggleReaction={onToggleReaction}
-            />
-          ))}
-        </div>
+      {isMyMessage ? (
+        <>
+          {ReactionPickerTemplate}
+          {ReactionAddButtonTemplate}
+        </>
+      ) : (
+        <>
+          {ReactionAddButtonTemplate}
+          {ReactionPickerTemplate}
+        </>
       )}
     </>
   );
