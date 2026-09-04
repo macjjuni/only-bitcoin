@@ -973,6 +973,10 @@ export class ChatRoom extends DurableObject<ChatWorkerEnv> {
     if (!attachment?.stableActorKey || !attachment.dailyActorKey || !attachment.anonId) {
       return;
     }
+    if (!this.hasValidWritePass(attachment)) {
+      this.sendError(socket, "TURNSTILE_REQUIRED", frame.rid);
+      return;
+    }
 
     const nickname = normalizeNickname(frame.nickname);
     const currentTime = Date.now();

@@ -356,7 +356,7 @@ export default function ChatPanel({
           </div>
 
           <div className="flex items-center gap-1">
-            {me && !isNicknameEditorOpen && (
+            {me && !isNicknameEditorOpen && !isTurnstileRequired && (
               <button
                 type="button"
                 aria-label="닉네임 변경"
