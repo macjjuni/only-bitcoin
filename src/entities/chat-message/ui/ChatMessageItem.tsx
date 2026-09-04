@@ -63,8 +63,8 @@ function ReactionButton({
       className={[
         "inline-flex min-h-7 items-center gap-1 rounded-full border px-2 text-xs transition-colors",
         isActive
-          ? "border-bitcoin bg-bitcoin/15 text-bitcoin"
-          : "border-neutral-200 bg-white/80 text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900/70 dark:text-neutral-300",
+          ? "border-bitcoin bg-orange-50 text-bitcoin dark:bg-neutral-800"
+          : "border-neutral-200 bg-white text-neutral-600 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300",
       ].join(" ")}
     >
       <span aria-hidden>{CHAT_REACTION_LABELS[reactionKey]}</span>
@@ -182,7 +182,7 @@ function ChatMessageItem({
         align={isMyMessage ? "end" : "start"}
         sideOffset={6}
         collisionPadding={12}
-        className="!z-[110] !w-auto !max-w-[calc(100vw-1.5rem)] !rounded-xl !border-neutral-200 !bg-white/95 !p-1 !shadow-lg !backdrop-blur-sm dark:!border-neutral-700 dark:!bg-neutral-900/95"
+        className="!z-[110] !w-auto !max-w-[calc(100vw-1.5rem)] !border-transparent !bg-transparent !p-1 !shadow-none !backdrop-blur-none"
       >
         <fieldset
           aria-label="메시지 반응 선택"
@@ -203,11 +203,10 @@ function ChatMessageItem({
     </KPopover>
   );
 
-  const ReactionActionsTemplate = (
-    <>
+  const ConfirmedReactionsTemplate = VisibleReactionButtonsTemplate.length > 0 && (
+    <div className="flex max-w-[88%] flex-wrap items-center gap-1 px-1">
       {VisibleReactionButtonsTemplate}
-      {ReactionPickerTemplate}
-    </>
+    </div>
   );
 
   // endregion
@@ -283,17 +282,19 @@ function ChatMessageItem({
         <div className="flex shrink-0 items-center gap-1 pb-0.5">
           {isMyMessage ? (
             <>
-              {ReactionActionsTemplate}
+              {ReactionPickerTemplate}
               {ReplyButtonTemplate}
             </>
           ) : (
             <>
               {ReplyButtonTemplate}
-              {ReactionActionsTemplate}
+              {ReactionPickerTemplate}
             </>
           )}
         </div>
       </div>
+
+      {ConfirmedReactionsTemplate}
     </article>
   );
 }
