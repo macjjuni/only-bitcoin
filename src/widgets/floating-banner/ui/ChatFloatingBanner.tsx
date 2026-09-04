@@ -1,6 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
+import { MessagesSquare } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ChatMessage } from "@/entities/chat-message";
@@ -8,7 +9,7 @@ import type { ChatIdentity } from "@/features/chat-session";
 import { loadOrCreateChatIdentity, useChatStore } from "@/features/chat-session";
 import { CHAT_NOTICE_VERSION, CHAT_STORAGE_KEYS, chatConfig } from "@/shared/config/chat";
 import { isStandaloneRuntime } from "@/shared/lib/pwa/isStandaloneRuntime";
-import { FloatingBannerButton, MessageIcon } from "@/shared/ui";
+import { FloatingBannerButton } from "@/shared/ui";
 import { ChatPanel } from "@/widgets/chat-panel";
 import ChatInstallGuide from "./ChatInstallGuide";
 
@@ -78,7 +79,7 @@ export default function ChatFloatingBanner() {
     queryFn: fetchOnlineCount,
     enabled: shouldPollOnlineCount,
     staleTime: 15_000,
-    refetchInterval: shouldPollOnlineCount ? 60_000 : false,
+    refetchInterval: shouldPollOnlineCount ? 90_000 : false,
     refetchOnWindowFocus: false,
     retry: 1,
   });
@@ -98,6 +99,7 @@ export default function ChatFloatingBanner() {
     setIdentity(nextIdentity);
     setHasOpenedChat(true);
     setHasAcceptedNotice(storedNoticeVersion === CHAT_NOTICE_VERSION);
+    setSavedScrollTop(null);
     setIsPanelOpen(true);
   };
 
@@ -272,7 +274,7 @@ export default function ChatFloatingBanner() {
         onClick={onClickChatLauncher}
         className="relative"
       >
-        <MessageIcon size={25} />
+        <MessagesSquare size={25} />
         {shouldShowOnlineBadge && (
           <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-green-500 px-1.5 py-0.5 font-number text-[10px] font-bold leading-4 text-white shadow-sm">
             {onlineCount > 99 ? "99+" : onlineCount}
