@@ -6,6 +6,19 @@ import type { NextConfig } from "next";
 const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));
 const APP_VERSION = `${packageJson.version}`;
 
+const CHAT_CONNECT_SOURCES = [
+  process.env.NEXT_PUBLIC_CHAT_API_URL,
+  process.env.NEXT_PUBLIC_CHAT_WS_URL,
+]
+  .filter((source): source is string => Boolean(source))
+  .map((source) => new URL(source).origin)
+  .join(" ");
+const CONTENT_SECURITY_POLICY = [
+  `connect-src 'self' https: wss: ${CHAT_CONNECT_SOURCES}`.trim(),
+  "script-src 'self' 'unsafe-inline' 'unsafe-eval' https://challenges.cloudflare.com https://www.googletagmanager.com https://pagead2.googlesyndication.com",
+  "frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net",
+].join("; ");
+
 const nextConfig: NextConfig = {
   env: { NEXT_PUBLIC_APP_VERSION: APP_VERSION },
   compiler: {
@@ -62,6 +75,15 @@ const nextConfig: NextConfig = {
   },
   async headers() {
     return [
+      {
+        source: "/:path*",
+        headers: [
+          {
+            key: "Content-Security-Policy",
+            value: CONTENT_SECURITY_POLICY,
+          },
+        ],
+      },
       {
         // public 폴더 내 정적 리소스 (이미지, 파비콘, 폰트, 매니페스트 등)
         source: "/:all*(svg|png|jpg|jpeg|gif|webp|ico|woff|woff2|ttf|otf|eot|manifest.json)",

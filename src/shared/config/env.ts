@@ -10,6 +10,9 @@ export const env = {
   NEXT_PUBLIC_DONATION_ADDRESS: process.env.NEXT_PUBLIC_DONATION_ADDRESS || "",
   NEXT_PUBLIC_FEEDBACK_URL: process.env.NEXT_PUBLIC_FEEDBACK_URL || "https://x.com/a7w2en7z_",
   NEXT_PUBLIC_LOGO: process.env.NEXT_PUBLIC_LOGO || "",
+  NEXT_PUBLIC_CHAT_API_URL: process.env.NEXT_PUBLIC_CHAT_API_URL || "",
+  NEXT_PUBLIC_CHAT_WS_URL: process.env.NEXT_PUBLIC_CHAT_WS_URL || "",
+  NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "",
 } as const;
 
 export const SERVICE_DOMAIN = env.NEXT_PUBLIC_URL.replace(/^https?:\/\/(www\.)?/, "");

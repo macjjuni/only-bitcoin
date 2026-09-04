@@ -30,7 +30,16 @@ export default function QueryProviders({ children }: { children: React.ReactNode
   );
 
   return (
-    <PersistQueryClientProvider client={queryClient} persistOptions={{ persister }}>
+    <PersistQueryClientProvider
+      client={queryClient}
+      persistOptions={{
+        persister,
+        dehydrateOptions: {
+          // 채팅 메시지는 Zustand 메모리에만 두고 온라인 배지도 디스크에 남기지 않는다.
+          shouldDehydrateQuery: (query) => query.queryKey[0] !== "chat",
+        },
+      }}
+    >
       {children}
       {/*<ReactQueryDevtools initialIsOpen={false} />*/}
     </PersistQueryClientProvider>

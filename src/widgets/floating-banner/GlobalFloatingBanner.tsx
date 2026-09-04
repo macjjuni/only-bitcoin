@@ -9,6 +9,7 @@ import ApartmentShareFloatingBanner from "./ui/ApartmentShareFloatingBanner";
 import BlocksCountdownFloatingBanner from "./ui/BlocksCountdownFloatingBanner";
 import Btc2FiatFloatingBanner from "./ui/Btc2FiatFloatingBanner";
 import BtcSurgeShareFloatingBanner from "./ui/BtcSurgeShareFloatingBanner";
+import ChatFloatingBanner from "./ui/ChatFloatingBanner";
 import CountdownBackFloatingBanner from "./ui/CountdownBackFloatingBanner";
 import DcaAddRecordFloatingBanner from "./ui/DcaAddRecordFloatingBanner";
 import OrangeBackFloatingBanner from "./ui/OrangeBackFloatingBanner";
@@ -121,6 +122,11 @@ const BANNER_CONFIGS: BannerConfig[] = [
     id: "scroll-up",
     Component: ScrollUpFloatingBanner,
     useIsVisible: () => useScrollVisibility(800),
+  },
+  {
+    id: "chat",
+    Component: ChatFloatingBanner,
+    useIsVisible: () => true,
   },
 ];
 
