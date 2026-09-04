@@ -52,7 +52,7 @@ export default function ChatInstallGuide({ onClose }: ChatInstallGuideProps) {
       aria-modal="true"
       aria-label="채팅 앱 설치 안내"
       onKeyDown={onKeyDownDialog}
-      className="fixed inset-0 z-[110] flex items-end justify-center bg-black/45 p-0 backdrop-blur-[2px] sm:items-center sm:p-5"
+      className="fixed inset-0 z-[110] flex items-end justify-center bg-black/45 p-0 font-pretendard backdrop-blur-[2px] sm:items-center sm:p-5"
     >
       <section className="w-full rounded-t-3xl bg-white p-5 pb-[max(1.25rem,env(safe-area-inset-bottom))] shadow-2xl dark:bg-neutral-950 sm:max-w-sm sm:rounded-3xl sm:border sm:border-neutral-200 dark:sm:border-neutral-700">
         <div className="flex items-center justify-between gap-3">
