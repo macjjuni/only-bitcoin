@@ -1,17 +1,18 @@
 import { ChatRoom } from "./ChatRoom";
 import { deriveIpGuardKey } from "./lib/crypto";
+import { authorizeGoogleAdministrator } from "./lib/googleAdministrator";
 import type { ChatWorkerEnv } from "./types";
 
 export { ChatRoom };
 
 // region [Privates]
 const jsonResponse = (payload: unknown, status: number, headers?: HeadersInit): Response => {
+  const responseHeaders = new Headers(headers);
+  responseHeaders.set("Content-Type", "application/json; charset=utf-8");
+
   return new Response(JSON.stringify(payload), {
     status,
-    headers: {
-      "Content-Type": "application/json; charset=utf-8",
-      ...headers,
-    },
+    headers: responseHeaders,
   });
 };
 
@@ -28,7 +29,7 @@ const createCorsHeaders = (allowedOrigin: string): Headers => {
   return new Headers({
     "Access-Control-Allow-Origin": allowedOrigin,
     "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Content-Type, Cf-Access-Jwt-Assertion",
+    "Access-Control-Allow-Headers": "Authorization, Content-Type",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
   });
@@ -151,35 +152,29 @@ const handleWebSocketUpgrade = async (
   return getChatRoomStub(workerEnv).fetch(forwardedRequest);
 };
 
-const isAuthorizedAdministrator = async (
-  executionContext: ExecutionContext,
-  workerEnv: ChatWorkerEnv,
-): Promise<boolean> => {
-  const accessContext = executionContext.access;
-
-  if (!accessContext || accessContext.aud !== workerEnv.CF_ACCESS_AUD) {
-    return false;
-  }
-
-  const accessIdentity = await accessContext.getIdentity();
-  const administratorEmailAllowlist = workerEnv.ADMIN_EMAIL_ALLOWLIST.split(",")
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean);
-
-  return Boolean(
-    accessIdentity?.email &&
-      administratorEmailAllowlist.includes(accessIdentity.email.toLowerCase()),
-  );
-};
-
 const handleAdminRequest = async (
   request: Request,
   workerEnv: ChatWorkerEnv,
-  executionContext: ExecutionContext,
   allowedOrigin: string,
 ): Promise<Response> => {
-  if (!(await isAuthorizedAdministrator(executionContext, workerEnv))) {
+  const authorizationStatus = await authorizeGoogleAdministrator(
+    request,
+    workerEnv.GOOGLE_OAUTH_CLIENT_ID,
+    workerEnv.ADMIN_EMAIL_ALLOWLIST,
+  );
+
+  if (authorizationStatus === "unauthenticated") {
+    return jsonResponse({ error: "UNAUTHORIZED" }, 401, createCorsHeaders(allowedOrigin));
+  }
+  if (authorizationStatus === "forbidden") {
     return jsonResponse({ error: "FORBIDDEN" }, 403, createCorsHeaders(allowedOrigin));
+  }
+
+  const requestUrl = new URL(request.url);
+  if (requestUrl.pathname === "/v1/admin/chat/session" && request.method === "POST") {
+    const responseHeaders = createCorsHeaders(allowedOrigin);
+    responseHeaders.set("Cache-Control", "no-store");
+    return jsonResponse({ isAdministrator: true }, 200, responseHeaders);
   }
   if (
     request.method === "POST" &&
@@ -192,7 +187,10 @@ const handleAdminRequest = async (
     );
   }
 
-  return forwardHttpRequest(request, workerEnv, allowedOrigin);
+  const forwardedHeaders = new Headers(request.headers);
+  forwardedHeaders.delete("Authorization");
+  const forwardedRequest = new Request(request, { headers: forwardedHeaders });
+  return forwardHttpRequest(forwardedRequest, workerEnv, allowedOrigin);
 };
 // endregion
 
@@ -222,7 +220,7 @@ export default {
       return forwardHttpRequest(request, workerEnv, allowedOrigin);
     }
     if (requestUrl.pathname.startsWith("/v1/admin/chat/")) {
-      return handleAdminRequest(request, workerEnv, executionContext, allowedOrigin);
+      return handleAdminRequest(request, workerEnv, allowedOrigin);
     }
 
     return jsonResponse({ error: "NOT_FOUND" }, 404, createCorsHeaders(allowedOrigin));

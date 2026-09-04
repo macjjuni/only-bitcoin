@@ -2,7 +2,7 @@
 
 import { KPopover, KPopoverContent, KPopoverTrigger } from "kku-ui";
 import { MessageCircleReply, SmilePlus } from "lucide-react";
-import { type KeyboardEvent, memo } from "react";
+import { type KeyboardEvent, memo, type ReactNode } from "react";
 import { CHAT_COLLAPSED_MESSAGE_GRAPHEMES } from "@/shared/config/chat";
 import { countGraphemes, truncateGraphemes } from "@/shared/lib/text/countGraphemes";
 import {
@@ -19,6 +19,7 @@ interface ChatMessageItemProps {
   currentAnonId?: string;
   isExpanded: boolean;
   isReactionPickerOpen: boolean;
+  additionalActions?: ReactNode;
   onToggleExpanded: (messageId: string) => void;
   onSelectReply: (message: ChatMessage) => void;
   onToggleReaction: (messageId: string, reactionKey: ChatReactionKey) => void;
@@ -78,6 +79,7 @@ function ChatMessageItem({
   currentAnonId,
   isExpanded,
   isReactionPickerOpen,
+  additionalActions,
   onToggleExpanded,
   onSelectReply,
   onToggleReaction,
@@ -280,6 +282,7 @@ function ChatMessageItem({
         </div>
 
         <div className="flex shrink-0 items-center gap-1 pb-0.5">
+          {additionalActions}
           {isMyMessage ? (
             <>
               {ReactionPickerTemplate}

@@ -14,7 +14,7 @@ export interface ChatWorkerEnv {
   PASS_SIGNING_SECRET_PREVIOUS?: string;
   TURNSTILE_SECRET_KEY: string;
   TURNSTILE_EXPECTED_HOSTNAME: string;
-  CF_ACCESS_AUD: string;
+  GOOGLE_OAUTH_CLIENT_ID: string;
   ADMIN_EMAIL_ALLOWLIST: string;
 }
 

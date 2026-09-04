@@ -42,6 +42,7 @@ const CONTENT_SECURITY_POLICY = [
   [
     "script-src 'self' 'unsafe-inline' 'unsafe-eval'",
     "https://challenges.cloudflare.com",
+    "https://accounts.google.com/gsi/client",
     "https://www.googletagmanager.com",
     "https://pagead2.googlesyndication.com",
     "https://tpc.googlesyndication.com",
@@ -49,7 +50,7 @@ const CONTENT_SECURITY_POLICY = [
     "https://ep1.adtrafficquality.google",
     "https://ep2.adtrafficquality.google",
   ].join(" "),
-  "style-src 'self' 'unsafe-inline'",
+  "style-src 'self' 'unsafe-inline' https://accounts.google.com/gsi/style",
   [
     `img-src 'self' data: blob: ${MEME_IMAGE_SOURCE}`,
     "https://raw.githubusercontent.com",
@@ -66,6 +67,7 @@ const CONTENT_SECURITY_POLICY = [
     // <track> 이라 media-src 로 착각하기 쉽지만 실제 요청은 connect-src 를 탐.
     `connect-src 'self' blob: ${CHAT_CONNECT_SOURCES} ${MEME_IMAGE_SOURCE}`,
     "https://challenges.cloudflare.com",
+    "https://accounts.google.com/gsi/",
     // 제네시스 영상 자막(.srt)을 fetch 로 받아 VTT 로 변환함.
     "https://image-store-one.vercel.app",
     // html-to-image 가 공유 카드의 단지 사진을 인라인하려고 직접 받아옴.
@@ -95,7 +97,7 @@ const CONTENT_SECURITY_POLICY = [
     "wss://advanced-trade-ws.coinbase.com",
     "wss://mempool.space",
   ].join(" "),
-  "frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
+  "frame-src 'self' https://challenges.cloudflare.com https://accounts.google.com/gsi/ https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
   // blob: 은 SRT 를 VTT 로 변환해 만든 자막 트랙 URL 에 필요.
   "media-src 'self' blob: https://image-store-one.vercel.app",
   "manifest-src 'self'",

@@ -13,6 +13,7 @@ export const env = {
   NEXT_PUBLIC_CHAT_API_URL: process.env.NEXT_PUBLIC_CHAT_API_URL || "",
   NEXT_PUBLIC_CHAT_WS_URL: process.env.NEXT_PUBLIC_CHAT_WS_URL || "",
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "",
+  NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID || "",
 } as const;
 
 export const SERVICE_DOMAIN = env.NEXT_PUBLIC_URL.replace(/^https?:\/\/(www\.)?/, "");

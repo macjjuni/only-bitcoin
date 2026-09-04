@@ -5,6 +5,11 @@ import { Check, Info, Maximize2, Minimize2, Pencil, RotateCw, X } from "lucide-r
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type ChatMessage, formatChatAnonId } from "@/entities/chat-message";
 import {
+  ChatAdministratorControl,
+  ChatDeleteMessageDialog,
+  useChatModeration,
+} from "@/features/chat-moderation";
+import {
   type ChatIdentity,
   ChatTurnstile,
   useChatConnection,
@@ -75,6 +80,7 @@ export default function ChatPanel({
   const [mobileViewportOffsetTopInPixels, setMobileViewportOffsetTopInPixels] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
+  const [messagePendingDeletion, setMessagePendingDeletion] = useState<ChatMessage | null>(null);
   const [nicknameDraft, setNicknameDraft] = useState(identity?.nickname ?? "익명");
   const [pendingNicknameRequestId, setPendingNicknameRequestId] = useState<string | null>(null);
   const [nicknameValidationMessage, setNicknameValidationMessage] = useState("");
@@ -96,6 +102,14 @@ export default function ChatPanel({
     verifyTurnstileToken,
     retryConnection,
   } = useChatConnection({ isEnabled: isConnectionEnabled, identity });
+  const {
+    isAdministrator,
+    isAuthenticatingAdministrator,
+    deletingMessageId,
+    authenticateAdministrator,
+    signOutAdministrator,
+    deleteMessage: deleteMessageAsAdministrator,
+  } = useChatModeration();
   verifyTurnstileReference.current = verifyTurnstileToken;
   // endregion
 
@@ -218,6 +232,40 @@ export default function ChatPanel({
   const onVerifyTurnstileToken = useCallback((turnstileToken: string): void => {
     verifyTurnstileReference.current(turnstileToken);
   }, []);
+
+  const onAuthenticateAdministrator = useCallback(
+    async (googleIdToken: string): Promise<boolean> => {
+      return authenticateAdministrator(googleIdToken);
+    },
+    [authenticateAdministrator],
+  );
+
+  const onSignOutAdministrator = useCallback((): void => {
+    setMessagePendingDeletion(null);
+    signOutAdministrator();
+  }, [signOutAdministrator]);
+
+  const onRequestDeleteMessage = useCallback((message: ChatMessage): void => {
+    setMessagePendingDeletion(message);
+  }, []);
+
+  const onCancelDeleteMessage = useCallback((): void => {
+    setMessagePendingDeletion(null);
+  }, []);
+
+  const onConfirmDeleteMessage = useCallback(
+    async (messageId: string): Promise<void> => {
+      const wasMessageDeleted = await deleteMessageAsAdministrator(messageId);
+
+      if (!wasMessageDeleted) {
+        return;
+      }
+
+      useChatStore.getState().applyServerFrame({ v: 1, t: "delete", id: messageId });
+      setMessagePendingDeletion(null);
+    },
+    [deleteMessageAsAdministrator],
+  );
   // endregion
 
   // region [Life Cycles]
@@ -281,6 +329,12 @@ export default function ChatPanel({
       onChangeSelectedReply(null);
     }
   }, [messagesById, onChangeSelectedReply, selectedReply]);
+
+  useEffect(() => {
+    if (messagePendingDeletion && !messagesById[messagePendingDeletion.id]) {
+      setMessagePendingDeletion(null);
+    }
+  }, [messagePendingDeletion, messagesById]);
   // endregion
 
   // region [Templates]
@@ -361,6 +415,12 @@ export default function ChatPanel({
           <li>개인정보·연락처·링크는 남기지 마세요.</li>
           <li>닉네임은 5분에 한 번 바꿀 수 있습니다.</li>
         </ul>
+        <ChatAdministratorControl
+          isAdministrator={isAdministrator}
+          isAuthenticating={isAuthenticatingAdministrator}
+          onAuthenticate={onAuthenticateAdministrator}
+          onSignOut={onSignOutAdministrator}
+        />
       </KPopoverContent>
     </KPopover>
   );
@@ -434,13 +494,13 @@ export default function ChatPanel({
                 onClick={onClickNicknameEditButton}
               >
                 {/* 헤더 폭이 좁아 닉네임과 익명 ID 를 두 줄로 나눠 씀. */}
-                <span className="flex min-w-0 flex-col items-end leading-tight">
-                  <span className="max-w-full truncate text-xs">{me.nickname}</span>
-                  <span className="text-[10px] text-neutral-500">
+                <span className="flex min-w-0 flex-col items-end gap-0.5 leading-tight">
+                  <span className="max-w-full truncate text-sm">{me.nickname}</span>
+                  <span className="text-[11px] text-neutral-500">
                     #{formatChatAnonId(me.anonId)}
                   </span>
                 </span>
-                <Pencil size={12} className="shrink-0" />
+                <Pencil size={14} className="shrink-0" />
               </button>
             )}
             {ChatInformationPopoverTemplate}
@@ -536,11 +596,13 @@ export default function ChatPanel({
               online={online}
               expandedMessageIds={expandedMessageIds}
               savedScrollTop={savedScrollTop}
+              isAdministrator={isAdministrator}
               onChangeSavedScrollTop={onChangeSavedScrollTop}
               onToggleMessageExpanded={onToggleMessageExpanded}
               onSelectReply={onSelectReplyMessage}
               onToggleReaction={toggleReaction}
               onRequestMoreMessages={requestMoreMessages}
+              onRequestDeleteMessage={onRequestDeleteMessage}
             />
             <ChatComposer
               draft={draft}
@@ -560,6 +622,13 @@ export default function ChatPanel({
           {announcement}
         </span>
       </aside>
+
+      <ChatDeleteMessageDialog
+        message={messagePendingDeletion}
+        isDeleting={deletingMessageId === messagePendingDeletion?.id}
+        onCancel={onCancelDeleteMessage}
+        onConfirm={onConfirmDeleteMessage}
+      />
     </div>
   );
 }

@@ -45,6 +45,8 @@ export const chatConfig = {
   apiUrl: chatApiUrl?.toString().replace(/\/$/, "") ?? "",
   webSocketUrl: chatWebSocketUrl?.toString() ?? "",
   turnstileSiteKey: env.NEXT_PUBLIC_TURNSTILE_SITE_KEY,
+  googleOAuthClientId: env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID,
   isConnectionConfigured: chatApiUrl !== null && chatWebSocketUrl !== null,
   isTurnstileConfigured: env.NEXT_PUBLIC_TURNSTILE_SITE_KEY.length > 0,
+  isAdministratorAuthenticationConfigured: env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID.length > 0,
 } as const;

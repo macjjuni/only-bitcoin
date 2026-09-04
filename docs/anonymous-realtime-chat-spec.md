@@ -325,16 +325,17 @@ Turnstile token은 5분 유효, 1회용으로 취급하며 Siteverify는 5초 ti
 
 ## 9. 관리자 인증과 운영 API
 
-관리자 경로는 Cloudflare Access 애플리케이션 뒤에 두고 Access JWT의 서명, `aud`, `exp`, 허용 이메일을 Worker에서 다시 검증한다. 고정 bearer token 하나만으로 보호하지 않는다. 변경 요청은 허용된 HTTP method와 Origin을 검사하고, body가 있는 요청은 JSON content type을 요구한다.
+관리자는 Google Identity Services의 공식 로그인 버튼으로 ID 토큰을 발급받고 `Authorization: Bearer <Google ID Token>` 헤더로 Worker에 전달한다. Worker는 Google JWKS로 서명, `iss`, `aud`, `exp`, `email_verified`를 검증한 뒤 `ADMIN_EMAIL_ALLOWLIST`에 등록된 이메일만 허용한다. 토큰은 브라우저 메모리에만 두고 영구 저장하지 않는다. 변경 요청은 허용된 HTTP method와 Origin을 검사하고, body가 있는 요청은 JSON content type을 요구한다.
 
 | 메서드 | 경로 | 역할 |
 | --- | --- | --- |
+| POST | `/v1/admin/chat/session` | Google ID 토큰과 관리자 권한 확인 |
 | POST | `/v1/admin/chat/kill-switch` | 킬스위치 on/off |
 | DELETE | `/v1/admin/chat/messages/:id` | 메시지 1개 영구 삭제 |
 
 메시지 삭제는 대상 행을 hard delete하고 SQLite의 최대 300개를 순회해 `parent.id`가 대상과 같은 답글의 snippet을 빈 문자열로 바꾼다. 삭제와 답글 수정은 하나의 동기 트랜잭션으로 확정하고, 성공한 뒤 메모리 cache를 같은 결과로 갱신해 연결된 클라이언트에 `delete` 프레임을 보낸다. 트랜잭션이 실패하면 cache와 broadcast를 변경하지 않는다. 이미 없어진 ID도 `204`로 응답해 재시도를 멱등하게 만든다.
 
-공개 채팅에는 삭제 버튼을 노출하지 않는다. 관리자 전용 삭제 외에 인앱 신고, 자동 숨김, 수동 숨김, 복구·unhide API는 만들지 않는다. 별도 `admin_audit` 테이블도 만들지 않고 Cloudflare Access 인증 로그만 사용한다. `ADMIN_EMAIL_ALLOWLIST`와 `CF_ACCESS_AUD`는 배포 필수값이다.
+Google 관리자 인증이 완료된 클라이언트에만 삭제 버튼을 노출한다. 관리자 전용 삭제 외에 인앱 신고, 자동 숨김, 수동 숨김, 복구·unhide API는 만들지 않는다. 별도 `admin_audit` 테이블은 만들지 않는다. `ADMIN_EMAIL_ALLOWLIST`와 `GOOGLE_OAUTH_CLIENT_ID`는 Worker 배포 필수값이다.
 
 ## 10. WebSocket 프로토콜 v1
 
@@ -558,9 +559,10 @@ Next.js에는 공개값만 주입한다.
 NEXT_PUBLIC_CHAT_API_URL=https://chat.example.com
 NEXT_PUBLIC_CHAT_WS_URL=wss://chat.example.com/v1/chat/ws
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=
+NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID=
 ```
 
-이 값은 `src/shared/config/env.ts`에서 읽고 `src/shared/config/chat.ts`에서 URL 형식과 운영 HTTPS/WSS 여부를 검증한다. `ACTOR_SECRET`, `ENFORCEMENT_SECRET`, `PASS_SIGNING_SECRET`, `TURNSTILE_SECRET_KEY`, Cloudflare Access 값은 Worker에만 둔다.
+이 값은 `src/shared/config/env.ts`에서 읽고 `src/shared/config/chat.ts`에서 URL 형식과 운영 HTTPS/WSS 여부를 검증한다. `ACTOR_SECRET`, `ENFORCEMENT_SECRET`, `PASS_SIGNING_SECRET`, `TURNSTILE_SECRET_KEY`는 Worker에만 둔다. Google OAuth client ID는 공개 식별자이며 프론트와 Worker에 같은 값을 설정한다.
 
 - 별도 채팅 route가 없으므로 sitemap과 `robots.txt`를 변경하지 않는다. 채팅 메시지는 클라이언트 상태로만 렌더링하고 metadata나 구조화 데이터에 넣지 않는다.
 - CSP의 `connect-src`에는 Worker HTTPS/WSS origin, Turnstile의 script와 frame에는 Cloudflare 공식 origin만 허용한다.
@@ -594,7 +596,7 @@ NEXT_PUBLIC_TURNSTILE_SITE_KEY=
 
 개인정보 문의 연락처는 채팅 설정값이 아니라 사이트 개인정보처리방침에서 관리한다. 이용규칙에는 개인정보 노출, 사칭, 명예훼손, 불법정보, 투자 권유·리딩방, 링크·연락처 공유와 도배 금지를 명시한다.
 
-운영상 또는 법령상 삭제가 필요한 경우에는 Cloudflare Access로 보호한 관리자 전용 삭제 API로 원문 행을 hard delete하고, 해당 원문을 인용한 답글 snippet도 비운다. 공개 신고·숨김·복구 기능은 제공하지 않는다. hard delete 뒤에도 공급자 PITR 복구 이력에는 위에 고지한 범위로 과거 상태가 남을 수 있다.
+운영상 또는 법령상 삭제가 필요한 경우에는 Google ID 토큰과 관리자 이메일 허용 목록으로 보호한 삭제 API에서 원문 행을 hard delete하고, 해당 원문을 인용한 답글 snippet도 비운다. 공개 신고·숨김·복구 기능은 제공하지 않는다. hard delete 뒤에도 공급자 PITR 복구 이력에는 위에 고지한 범위로 과거 상태가 남을 수 있다.
 
 ## 15. 비용과 용량 계획
 
@@ -654,7 +656,7 @@ secondary index와 별도 voter 행의 만료 DELETE도 없으므로 정상 규�
 - 한도 초과 시 조용히 데이터 유실시키지 않고 읽기 전용 상태와 장애 안내 표시
 - Workers Paid는 계정당 월 최소 USD 5이며 포함량 이후 종량 과금이 있으므로 비용 상한과 알림을 설정
 
-별도 관측성 저장소나 사용자 정의 지표 시스템은 v1에서 만들지 않는다. Cloudflare 내장 대시보드의 requests, duration, SQLite rows read/write, 오류율과 Access 로그로 시작한다. Worker 로그에는 메시지 본문, 닉네임, IP, UA, 식별 키, Turnstile token을 남기지 않는다.
+별도 관측성 저장소나 사용자 정의 지표 시스템은 v1에서 만들지 않는다. Cloudflare 내장 대시보드의 requests, duration, SQLite rows read/write와 오류율로 시작한다. Worker 로그에는 메시지 본문, 닉네임, IP, UA, 식별 키, Google ID token, Turnstile token을 남기지 않는다.
 
 장애 모드는 다음처럼 고정한다.
 
@@ -694,7 +696,7 @@ secondary index와 별도 voter 행의 만료 DELETE도 없으므로 정상 규�
 - 선정성 사전의 직접 입력·구분자 우회·중첩 일치가 치환되고 정상 한국어 예외 단어는 오탐되지 않는 회귀 테스트를 통과한다.
 - Turnstile 성공·실패·만료·재사용·timeout 시나리오를 공식 test key로 검증한다.
 - 킬스위치를 재배포 없이 켜고 끄며 발언만 차단되는지 확인한다.
-- Cloudflare Access 미인증 사용자가 모든 관리자 API에서 거부된다.
+- Google 토큰이 없거나 위조·만료됐거나 관리자 허용 목록에 없는 사용자가 모든 관리자 API에서 거부된다.
 - 관리자 삭제가 대상 메시지를 제거하고 모든 답글 snippet과 연결된 클라이언트 상태를 함께 갱신하며, 같은 요청의 재시도가 멱등인지 확인한다.
 - 개인정보처리방침, 이용규칙, 개인정보 문의 연락처와 국외 처리 검토가 완료된다.
 
@@ -718,6 +720,7 @@ secondary index와 별도 voter 행의 만료 DELETE도 없으므로 정상 규�
 NEXT_PUBLIC_CHAT_API_URL=
 NEXT_PUBLIC_CHAT_WS_URL=
 NEXT_PUBLIC_TURNSTILE_SITE_KEY=
+NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID=
 ```
 
 ### Cloudflare Worker 비공개 환경값
@@ -730,7 +733,7 @@ IP_GUARD_SECRET=
 PASS_SIGNING_SECRET=
 TURNSTILE_SECRET_KEY=
 TURNSTILE_EXPECTED_HOSTNAME=
-CF_ACCESS_AUD=
+GOOGLE_OAUTH_CLIENT_ID=
 ADMIN_EMAIL_ALLOWLIST=
 ```
 
@@ -750,5 +753,6 @@ Wrangler에는 `CHAT_UPGRADE_RATE_LIMITER` Rate Limiting binding을 별도로 �
 - [Cloudflare Workers Cache API](https://developers.cloudflare.com/workers/runtime-apis/cache/)
 - [Cloudflare Workers Rate Limiting binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/)
 - [Turnstile server-side validation](https://developers.cloudflare.com/turnstile/get-started/server-side-validation/)
+- [Google ID 토큰 서버 검증](https://developers.google.com/identity/gsi/web/guides/verify-google-id-token)
 - [헌법재판소 2010헌마47등](https://isearch.ccourt.go.kr/view.do?eventNo=2010%ED%97%8C%EB%A7%8847&idx=00)
 - [정보통신망법 제44조·제44조의2](https://www.law.go.kr/LSW/lsInfoP.do?lsiSeq=242879)

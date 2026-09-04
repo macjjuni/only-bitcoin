@@ -50,6 +50,9 @@ importers:
       html-to-image:
         specifier: ^1.11.13
         version: 1.11.13
+      jose:
+        specifier: ^6.2.11
+        version: 6.2.11
       kku-ui:
         specifier: ^0.9.9981
         version: 0.9.9981(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(tailwindcss@3.4.19(yaml@2.8.2))
@@ -2066,6 +2069,9 @@ packages:
   jiti@1.21.7:
     resolution: {integrity: sha512-/imKNG4EbWNrVjoNC/1H5/9GFy+tqjGBHCaSsN+P2RnPqjsLmv6UD3Ej+Kj8nBWaRAwyk7kK5ZUc+OEatnTR3A==}
     hasBin: true
+
+  jose@6.2.11:
+    resolution: {integrity: sha512-A5NPn7g8EAzGU3IzRs+Yiq8K5n3ypYS75M5+KKiVHdUexfpWK1kP4ZMq7QnTGDoMj6TJ1dtcEJjW60yZDXS4hg==}
 
   js-tokens@4.0.0:
     resolution: {integrity: sha512-RdJUflcE3cUzKiMqQgsCu06FPu9UdIJO0beYbPhHN4k6apgJtifcoCtT9bcxOpYBtpD2kCM6Sbzg4CausW/PKQ==}
@@ -4623,6 +4629,8 @@ snapshots:
   isarray@2.0.5: {}
 
   jiti@1.21.7: {}
+
+  jose@6.2.11: {}
 
   js-tokens@4.0.0: {}
 

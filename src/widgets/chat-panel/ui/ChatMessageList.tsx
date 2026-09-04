@@ -9,6 +9,7 @@ import {
   type ChatReactionKey,
   createChatMessageElementId,
 } from "@/entities/chat-message";
+import { ChatDeleteMessageButton } from "@/features/chat-moderation";
 import { useChatStore } from "@/features/chat-session";
 
 interface ChatMessageListProps {
@@ -16,11 +17,13 @@ interface ChatMessageListProps {
   online: number;
   expandedMessageIds: ReadonlySet<string>;
   savedScrollTop: number | null;
+  isAdministrator: boolean;
   onChangeSavedScrollTop: (scrollTop: number) => void;
   onToggleMessageExpanded: (messageId: string) => void;
   onSelectReply: (message: ChatMessage) => void;
   onToggleReaction: (messageId: string, reactionKey: ChatReactionKey) => void;
   onRequestMoreMessages: (beforeId: string) => string | null;
+  onRequestDeleteMessage: (message: ChatMessage) => void;
 }
 
 interface ConnectedChatMessageItemProps {
@@ -28,11 +31,13 @@ interface ConnectedChatMessageItemProps {
   currentAnonId?: string;
   isExpanded: boolean;
   isReactionPickerOpen: boolean;
+  isAdministrator: boolean;
   onToggleMessageExpanded: (messageId: string) => void;
   onSelectReply: (message: ChatMessage) => void;
   onToggleReaction: (messageId: string, reactionKey: ChatReactionKey) => void;
   onNavigateToMessage: (messageId: string) => void;
   onChangeReactionPicker: (messageId: string, isOpen: boolean) => void;
+  onRequestDeleteMessage: (message: ChatMessage) => void;
 }
 
 const BOTTOM_PROXIMITY_IN_PIXELS = 80;
@@ -44,11 +49,13 @@ const ConnectedChatMessageItem = memo(function ConnectedChatMessageItem({
   currentAnonId,
   isExpanded,
   isReactionPickerOpen,
+  isAdministrator,
   onToggleMessageExpanded,
   onSelectReply,
   onToggleReaction,
   onNavigateToMessage,
   onChangeReactionPicker,
+  onRequestDeleteMessage,
 }: ConnectedChatMessageItemProps) {
   const message = useChatStore((chatState) => chatState.messagesById[messageId]);
 
@@ -56,12 +63,17 @@ const ConnectedChatMessageItem = memo(function ConnectedChatMessageItem({
     return null;
   }
 
+  const AdministratorActionTemplate = isAdministrator ? (
+    <ChatDeleteMessageButton message={message} onRequestDelete={onRequestDeleteMessage} />
+  ) : null;
+
   return (
     <ChatMessageItem
       message={message}
       currentAnonId={currentAnonId}
       isExpanded={isExpanded}
       isReactionPickerOpen={isReactionPickerOpen}
+      additionalActions={AdministratorActionTemplate}
       onToggleExpanded={onToggleMessageExpanded}
       onSelectReply={onSelectReply}
       onToggleReaction={onToggleReaction}
@@ -76,11 +88,13 @@ export default function ChatMessageList({
   online,
   expandedMessageIds,
   savedScrollTop,
+  isAdministrator,
   onChangeSavedScrollTop,
   onToggleMessageExpanded,
   onSelectReply,
   onToggleReaction,
   onRequestMoreMessages,
+  onRequestDeleteMessage,
 }: ChatMessageListProps) {
   // region [Hooks]
   const messageIds = useChatStore((chatState) => chatState.messageIds);
@@ -420,11 +434,13 @@ export default function ChatMessageList({
               currentAnonId={currentAnonId}
               isExpanded={expandedMessageIds.has(messageId)}
               isReactionPickerOpen={openReactionPickerMessageId === messageId}
+              isAdministrator={isAdministrator}
               onToggleMessageExpanded={onToggleMessageExpanded}
               onSelectReply={onSelectReply}
               onToggleReaction={onToggleReaction}
               onNavigateToMessage={onNavigateToMessage}
               onChangeReactionPicker={onChangeReactionPicker}
+              onRequestDeleteMessage={onRequestDeleteMessage}
             />
           ))}
         </div>
