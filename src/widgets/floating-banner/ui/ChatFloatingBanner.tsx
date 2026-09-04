@@ -235,10 +235,11 @@ export default function ChatFloatingBanner() {
         )
       : null;
 
-  const InstallGuidePortal =
-    isClientMounted && !isStandalone && isInstallGuideOpen
-      ? createPortal(<ChatInstallGuide onClose={onCloseInstallGuide} />, document.body)
-      : null;
+  // KBottomSheet 가 자체 포탈을 쓰므로 createPortal 로 감싸지 않음.
+  const InstallGuideSheet =
+    isClientMounted && !isStandalone && isInstallGuideOpen ? (
+      <ChatInstallGuide onClose={onCloseInstallGuide} />
+    ) : null;
   // endregion
 
   const launcherAccessibleName = !isRuntimeChecked
@@ -268,7 +269,7 @@ export default function ChatFloatingBanner() {
         )}
       </FloatingBannerButton>
       {ChatPanelPortal}
-      {InstallGuidePortal}
+      {InstallGuideSheet}
     </>
   );
 }
