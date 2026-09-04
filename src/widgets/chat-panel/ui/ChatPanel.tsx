@@ -196,6 +196,13 @@ export default function ChatPanel({
     setPendingNicknameRequestId(requestId);
   };
 
+  const onClickNicknameCancelButton = (): void => {
+    setNicknameDraft(me?.nickname ?? identity?.nickname ?? "익명");
+    setNicknameValidationMessage("");
+    setPendingNicknameRequestId(null);
+    setIsNicknameEditorOpen(false);
+  };
+
   const onClickRetryConnectionButton = (): void => {
     retryConnection();
   };
@@ -405,7 +412,9 @@ export default function ChatPanel({
       >
         <header className="flex min-h-14 items-center justify-between gap-3 border-b border-neutral-200 px-4 dark:border-neutral-700">
           <div className="flex flex-col gap-0.5 min-w-0">
-            <h2 className="text-sm font-bold">비트맥시 비밀기지</h2>
+            <h2 className="animate-[pulse_1.2s_ease-in-out_infinite] text-sm font-bold text-bitcoin drop-shadow-[0_0_6px_rgba(247,147,26,0.65)] motion-reduce:animate-none">
+              비트맥시 비밀기지
+            </h2>
             <div className="flex items-center gap-2 text-[11px] text-neutral-500">
               <span className="inline-flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
@@ -480,6 +489,14 @@ export default function ChatPanel({
                 className="h-8 shrink-0 rounded-md bg-bitcoin px-3 text-xs font-bold text-white disabled:opacity-50"
               >
                 {isNicknameSaving ? "저장 중" : "저장"}
+              </button>
+              <button
+                type="button"
+                onClick={onClickNicknameCancelButton}
+                disabled={isNicknameSaving}
+                className="h-8 shrink-0 rounded-md border border-neutral-300 bg-white px-3 text-xs font-bold text-neutral-600 hover:bg-neutral-50 disabled:opacity-50 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300 dark:hover:bg-neutral-800"
+              >
+                취소
               </button>
             </div>
             {nicknameErrorMessage && (
