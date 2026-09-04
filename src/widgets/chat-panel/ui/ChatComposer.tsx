@@ -85,7 +85,10 @@ export default function ChatComposer({
   };
 
   const onKeyDownMessageTextarea = (event: React.KeyboardEvent<HTMLTextAreaElement>): void => {
-    if (event.key !== "Enter" || event.shiftKey || isComposingReference.current) {
+    const isImeComposing =
+      isComposingReference.current || event.nativeEvent.isComposing || event.keyCode === 229;
+
+    if (event.key !== "Enter" || event.shiftKey || isImeComposing) {
       return;
     }
 
