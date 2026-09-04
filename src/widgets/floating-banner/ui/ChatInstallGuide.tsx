@@ -1,6 +1,5 @@
 "use client";
 
-import { KButton } from "kku-ui";
 import { Download, Share, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import useSettingStore from "@/shared/stores/settingStore";
@@ -61,7 +60,7 @@ export default function ChatInstallGuide({ onClose }: ChatInstallGuideProps) {
             <p className="text-sm font-bold">앱에서 채팅을 이용해 보세요</p>
             <p className="mt-1 text-xs text-neutral-500">회원가입 없는 공개 채팅입니다.</p>
           </div>
-          <KButton
+          <button
             ref={closeButtonReference}
             type="button"
             aria-label="설치 안내 닫기"
@@ -69,7 +68,7 @@ export default function ChatInstallGuide({ onClose }: ChatInstallGuideProps) {
             className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800"
           >
             <X size={18} />
-          </KButton>
+          </button>
         </div>
 
         <div className="mt-5 rounded-2xl bg-neutral-100 p-4 text-sm leading-6 dark:bg-neutral-900">
@@ -91,13 +90,13 @@ export default function ChatInstallGuide({ onClose }: ChatInstallGuideProps) {
         </div>
 
         {deferredPrompt && !isIosBrowser && !hasRequestedInstall && (
-          <KButton
+          <button
             type="button"
             onClick={onClickInstallButton}
             className="mt-4 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-bitcoin text-sm font-bold text-white"
           >
             <Download size={17} />앱 설치하기
-          </KButton>
+          </button>
         )}
         {hasRequestedInstall && (
           <p className="mt-4 text-center text-xs leading-5 text-neutral-500">

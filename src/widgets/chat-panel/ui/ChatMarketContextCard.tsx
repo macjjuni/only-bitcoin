@@ -1,6 +1,5 @@
 "use client";
 
-import { KButton } from "kku-ui";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useMemo } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
@@ -47,7 +46,7 @@ export default function ChatMarketContextCard({
 
   return (
     <section className="mx-3 mt-3 overflow-hidden rounded-2xl border border-bitcoin/25 bg-gradient-to-br from-bitcoin/10 to-transparent">
-      <KButton
+      <button
         type="button"
         aria-expanded={isExpanded}
         onClick={onClickContextCard}
@@ -60,7 +59,7 @@ export default function ChatMarketContextCard({
           )}
         </span>
         {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-      </KButton>
+      </button>
 
       {isExpanded && (
         <div className="border-t border-bitcoin/15 px-3 py-3">

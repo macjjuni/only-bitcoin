@@ -1,6 +1,6 @@
 "use client";
 
-import { KButton, KTextarea } from "kku-ui";
+import { KTextarea } from "kku-ui";
 import { Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@/entities/chat-message";
@@ -101,7 +101,8 @@ export default function ChatComposer({
   // endregion
 
   const graphemeCount = countGraphemes(draft);
-  const shouldShowCharacterCount = graphemeCount >= 240;
+  const remainingGraphemeCount = CHAT_MAX_MESSAGE_GRAPHEMES - graphemeCount;
+  const shouldShowCharacterCount = remainingGraphemeCount <= 30;
   const isSending = pendingSayRequest?.status === "pending";
   const isUncertain = pendingSayRequest?.status === "uncertain";
   const errorMessage = pendingSayRequest?.status === "failed" ? pendingSayRequest.errorMessage : "";
@@ -116,19 +117,19 @@ export default function ChatComposer({
             </strong>
             <p className="mt-1 truncate text-neutral-500">{selectedReply.body}</p>
           </div>
-          <KButton
+          <button
             type="button"
             aria-label="답글 취소"
             onClick={onClickCancelReplyButton}
             className="shrink-0 rounded-full p-1 text-neutral-500"
           >
             <X size={15} />
-          </KButton>
+          </button>
         </div>
       )}
 
       <div className="flex items-end gap-2">
-        <div className="relative min-w-0 flex-1">
+        <div className="min-w-0 flex-1">
           <label htmlFor="chat-message-composer" className="sr-only">
             메시지 작성
           </label>
@@ -142,23 +143,23 @@ export default function ChatComposer({
             onCompositionEnd={onCompositionEndMessageTextarea}
             onKeyDown={onKeyDownMessageTextarea}
             placeholder={isMutationDisabled ? "연결되면 메시지를 작성할 수 있어요" : "메시지 입력"}
-            className="max-h-28 min-h-11 w-full resize-none rounded-2xl border border-neutral-300 bg-neutral-50 px-3 py-2.5 pr-12 text-sm leading-5 outline-none focus:border-bitcoin dark:border-neutral-700 dark:bg-neutral-900"
+            className="max-h-28 min-h-11 w-full resize-none rounded-3xl border border-neutral-300 bg-neutral-50 px-3 py-2.5 text-sm leading-5 outline-none focus:border-bitcoin dark:border-neutral-700 dark:bg-neutral-900"
           />
           {shouldShowCharacterCount && (
-            <span className="absolute bottom-1.5 right-3 font-number text-[10px] text-neutral-500">
+            <p className="mt-1 px-1 text-right font-number text-[10px] leading-4 text-neutral-500">
               {graphemeCount}/{CHAT_MAX_MESSAGE_GRAPHEMES}
-            </span>
+            </p>
           )}
         </div>
-        <KButton
+        <button
           type="button"
           aria-label="메시지 전송"
           disabled={isMutationDisabled || isSending || !draft.trim()}
           onClick={onClickSendButton}
-          className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-bitcoin text-white disabled:cursor-not-allowed disabled:opacity-40"
+          className={`inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-bitcoin text-white disabled:cursor-not-allowed disabled:opacity-40 ${shouldShowCharacterCount ? "mb-5" : ""}`}
         >
           <Send size={18} />
-        </KButton>
+        </button>
       </div>
 
       {(validationMessage || errorMessage || isUncertain || isSending) && (
