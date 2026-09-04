@@ -1,7 +1,7 @@
 "use client";
 
 import { ArrowDown } from "lucide-react";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
 import { type ChatMessage, ChatMessageItem, type ChatReactionKey } from "@/entities/chat-message";
 import { useChatStore } from "@/features/chat-session";
 
@@ -28,7 +28,7 @@ interface ConnectedChatMessageItemProps {
 
 const BOTTOM_PROXIMITY_IN_PIXELS = 80;
 const SCROLL_TO_LATEST_BUTTON_THRESHOLD_IN_PIXELS = 360;
-function ConnectedChatMessageItem({
+const ConnectedChatMessageItem = memo(function ConnectedChatMessageItem({
   messageId,
   currentAnonId,
   isExpanded,
@@ -52,7 +52,7 @@ function ConnectedChatMessageItem({
       onToggleReaction={onToggleReaction}
     />
   );
-}
+});
 
 export default function ChatMessageList({
   currentAnonId,
@@ -70,6 +70,8 @@ export default function ChatMessageList({
   const hasMore = useChatStore((chatState) => chatState.hasMore);
   const pendingRequests = useChatStore((chatState) => chatState.pendingRequests);
   const scrollContainerReference = useRef<HTMLDivElement | null>(null);
+  const savedScrollTopReference = useRef<number>(savedScrollTop ?? 0);
+  const hasInitializedScrollReference = useRef(false);
   const topSentinelReference = useRef<HTMLDivElement | null>(null);
   const previousNewestMessageIdReference = useRef<string | null>(null);
   const prependScrollHeightReference = useRef<number | null>(null);
@@ -132,7 +134,7 @@ export default function ChatMessageList({
     setIsScrollToLatestButtonVisible(
       remainingScrollDistance > SCROLL_TO_LATEST_BUTTON_THRESHOLD_IN_PIXELS,
     );
-    onChangeSavedScrollTop(scrollContainer.scrollTop);
+    savedScrollTopReference.current = scrollContainer.scrollTop;
 
     if (isNearBottomReference.current) {
       setNewMessageCount(0);
@@ -163,8 +165,10 @@ export default function ChatMessageList({
       return;
     }
 
-    if (previousNewestMessageIdReference.current === null) {
+    if (previousNewestMessageIdReference.current === null && messageIds.length > 0) {
       scrollContainer.scrollTop = savedScrollTop ?? scrollContainer.scrollHeight;
+      savedScrollTopReference.current = scrollContainer.scrollTop;
+      hasInitializedScrollReference.current = true;
       const isInitialScrollNearBottom = isScrollNearBottom(scrollContainer);
       const initialRemainingScrollDistance =
         scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight;
@@ -227,6 +231,14 @@ export default function ChatMessageList({
     };
   }, [hasMore, messageIds]);
   // endregion
+
+  useEffect(() => {
+    return () => {
+      if (hasInitializedScrollReference.current) {
+        onChangeSavedScrollTop(savedScrollTopReference.current);
+      }
+    };
+  }, [onChangeSavedScrollTop]);
 
   return (
     <div className="relative min-h-0 flex-1">

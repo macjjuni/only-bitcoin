@@ -2,7 +2,7 @@
 
 import { useQuery } from "@tanstack/react-query";
 import { MessagesSquare } from "lucide-react";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ChatMessage } from "@/entities/chat-message";
 import type { ChatIdentity } from "@/features/chat-session";
@@ -130,28 +130,28 @@ export default function ChatFloatingBanner() {
     }
   };
 
-  const onCloseChatPanel = (): void => {
+  const onCloseChatPanel = useCallback((): void => {
     closeChatPanel();
-  };
+  }, []);
 
-  const onCloseInstallGuide = (): void => {
+  const onCloseInstallGuide = useCallback((): void => {
     closeInstallGuide();
-  };
+  }, []);
 
-  const onAcceptChatNotice = (): void => {
+  const onAcceptChatNotice = useCallback((): void => {
     window.localStorage.setItem(CHAT_STORAGE_KEYS.noticeVersion, CHAT_NOTICE_VERSION);
     setHasAcceptedNotice(true);
-  };
+  }, []);
 
-  const onChangeDraft = (nextDraft: string): void => {
+  const onChangeDraft = useCallback((nextDraft: string): void => {
     setDraft(nextDraft);
-  };
+  }, []);
 
-  const onChangeSelectedReply = (message: ChatMessage | null): void => {
+  const onChangeSelectedReply = useCallback((message: ChatMessage | null): void => {
     setSelectedReply(message);
-  };
+  }, []);
 
-  const onToggleMessageExpanded = (messageId: string): void => {
+  const onToggleMessageExpanded = useCallback((messageId: string): void => {
     setExpandedMessageIds((currentExpandedMessageIds) => {
       const nextExpandedMessageIds = new Set(currentExpandedMessageIds);
 
@@ -163,15 +163,15 @@ export default function ChatFloatingBanner() {
 
       return nextExpandedMessageIds;
     });
-  };
+  }, []);
 
-  const onChangeSavedScrollTop = (scrollTop: number): void => {
+  const onChangeSavedScrollTop = useCallback((scrollTop: number): void => {
     setSavedScrollTop(scrollTop);
-  };
+  }, []);
 
-  const onChangePendingSayRequestId = (requestId: string | null): void => {
+  const onChangePendingSayRequestId = useCallback((requestId: string | null): void => {
     setPendingSayRequestId(requestId);
-  };
+  }, []);
   // endregion
 
   // region [Life Cycles]

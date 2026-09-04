@@ -162,46 +162,64 @@ export const useChatConnection = ({
 
   connectChatReference.current = connectChat;
 
-  const sendMutationFrame = (frame: ChatClientFrame, action: ChatMutationAction): string | null => {
-    if (!("rid" in frame) || !chatSocketReference.current.send(frame)) {
-      return null;
-    }
+  const sendMutationFrame = useCallback(
+    (frame: ChatClientFrame, action: ChatMutationAction): string | null => {
+      if (!("rid" in frame) || !chatSocketReference.current.send(frame)) {
+        return null;
+      }
 
-    useChatStore.getState().addPendingRequest(frame.rid, action);
-    return frame.rid;
-  };
+      useChatStore.getState().addPendingRequest(frame.rid, action);
+      return frame.rid;
+    },
+    [],
+  );
   // endregion
 
   // region [Transactions]
-  const sendMessage = (body: string, parentId?: string): string | null => {
-    const rid = window.crypto.randomUUID();
-    return sendMutationFrame({ v: 1, t: "say", rid, body, parentId }, "say");
-  };
+  const sendMessage = useCallback(
+    (body: string, parentId?: string): string | null => {
+      const rid = window.crypto.randomUUID();
+      return sendMutationFrame({ v: 1, t: "say", rid, body, parentId }, "say");
+    },
+    [sendMutationFrame],
+  );
 
-  const toggleReaction = (messageId: string, reactionKey: ChatReactionKey): string | null => {
-    const rid = window.crypto.randomUUID();
-    return sendMutationFrame({ v: 1, t: "react", rid, id: messageId, key: reactionKey }, "react");
-  };
+  const toggleReaction = useCallback(
+    (messageId: string, reactionKey: ChatReactionKey): string | null => {
+      const rid = window.crypto.randomUUID();
+      return sendMutationFrame({ v: 1, t: "react", rid, id: messageId, key: reactionKey }, "react");
+    },
+    [sendMutationFrame],
+  );
 
-  const changeNickname = (nickname: string): string | null => {
-    const rid = window.crypto.randomUUID();
-    return sendMutationFrame({ v: 1, t: "nick", rid, nickname }, "nick");
-  };
+  const changeNickname = useCallback(
+    (nickname: string): string | null => {
+      const rid = window.crypto.randomUUID();
+      return sendMutationFrame({ v: 1, t: "nick", rid, nickname }, "nick");
+    },
+    [sendMutationFrame],
+  );
 
-  const requestMoreMessages = (beforeId: string): string | null => {
-    const rid = window.crypto.randomUUID();
-    return sendMutationFrame({ v: 1, t: "more", rid, beforeId }, "more");
-  };
+  const requestMoreMessages = useCallback(
+    (beforeId: string): string | null => {
+      const rid = window.crypto.randomUUID();
+      return sendMutationFrame({ v: 1, t: "more", rid, beforeId }, "more");
+    },
+    [sendMutationFrame],
+  );
 
-  const verifyTurnstileToken = (turnstileToken: string): string | null => {
-    const rid = window.crypto.randomUUID();
-    return sendMutationFrame({ v: 1, t: "verify", rid, token: turnstileToken }, "verify");
-  };
+  const verifyTurnstileToken = useCallback(
+    (turnstileToken: string): string | null => {
+      const rid = window.crypto.randomUUID();
+      return sendMutationFrame({ v: 1, t: "verify", rid, token: turnstileToken }, "verify");
+    },
+    [sendMutationFrame],
+  );
 
-  const retryConnection = (): void => {
+  const retryConnection = useCallback((): void => {
     retryAttemptReference.current = 0;
     connectChat();
-  };
+  }, [connectChat]);
   // endregion
 
   // region [Life Cycles]
