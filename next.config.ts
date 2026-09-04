@@ -7,10 +7,10 @@ const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));
 const APP_VERSION = `${packageJson.version}`;
 
 /**
- * 환경변수로 받은 URL 에서 CSP 소스로 쓸 origin 만 뽑는다.
+ * 환경변수 URL 에서 CSP 소스로 쓸 origin 만 뽑음.
  *
- * 잘못된 값이 들어와도 빌드를 세우지 않고 건너뛴다. CSP 한 줄 때문에
- * 배포 전체가 막히는 것보다 해당 호스트만 차단되는 편이 낫다.
+ * 잘못된 값은 빌드를 세우지 않고 건너뜀. CSP 한 줄 때문에 배포 전체가
+ * 막히는 것보다 해당 호스트만 차단되는 편이 나음.
  */
 const toCspOrigins = (...urlValues: Array<string | undefined>): string => {
   return urlValues
@@ -31,7 +31,7 @@ const CHAT_CONNECT_SOURCES = toCspOrigins(
   process.env.NEXT_PUBLIC_CHAT_API_URL,
   process.env.NEXT_PUBLIC_CHAT_WS_URL,
 );
-/** 밈 이미지 호스트. 갤러리는 <img> 로, 저장·복사는 fetch 로 쓰므로 img-src 와 connect-src 양쪽에 필요하다. */
+/** 밈 이미지 호스트. 갤러리는 <img>, 저장·복사는 fetch 라 img-src 와 connect-src 양쪽에 필요. */
 const MEME_IMAGE_SOURCE = toCspOrigins(process.env.NEXT_PUBLIC_MEME_IMAGE_URL);
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
@@ -62,11 +62,13 @@ const CONTENT_SECURITY_POLICY = [
   ].join(" "),
   "font-src 'self' data:",
   [
-    `connect-src 'self' ${CHAT_CONNECT_SOURCES} ${MEME_IMAGE_SOURCE}`,
+    // blob: 은 vidstack 이 자막 트랙을 fetch() 로 읽어서 필요.
+    // <track> 이라 media-src 로 착각하기 쉽지만 실제 요청은 connect-src 를 탐.
+    `connect-src 'self' blob: ${CHAT_CONNECT_SOURCES} ${MEME_IMAGE_SOURCE}`,
     "https://challenges.cloudflare.com",
-    // 제네시스 영상 자막(.srt)을 fetch 로 받아 VTT 로 변환한다.
+    // 제네시스 영상 자막(.srt)을 fetch 로 받아 VTT 로 변환함.
     "https://image-store-one.vercel.app",
-    // html-to-image 가 공유 카드에 박힌 단지 사진을 인라인하려고 직접 받아온다.
+    // html-to-image 가 공유 카드의 단지 사진을 인라인하려고 직접 받아옴.
     "https://raw.githubusercontent.com",
     // 애널리틱스·광고 비콘
     "https://www.googletagmanager.com",
@@ -85,7 +87,7 @@ const CONTENT_SECURITY_POLICY = [
     "https://api.alternative.me",
     "https://mempool.space",
     "https://m.search.naver.com",
-    // 실시간 스트림. 포트를 생략하면 CSP 가 기본 포트(443)만 허용하므로 9443 을 명시한다.
+    // 실시간 스트림. 포트를 생략하면 CSP 가 기본 포트(443)만 허용해서 9443 을 명시함.
     "wss://stream.binance.com:9443",
     "wss://api.upbit.com",
     "wss://ws-api.bithumb.com",
@@ -94,7 +96,7 @@ const CONTENT_SECURITY_POLICY = [
     "wss://mempool.space",
   ].join(" "),
   "frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
-  // blob: 은 SRT 를 VTT 로 변환해 만든 자막 트랙 URL 에 필요하다.
+  // blob: 은 SRT 를 VTT 로 변환해 만든 자막 트랙 URL 에 필요.
   "media-src 'self' blob: https://image-store-one.vercel.app",
   "manifest-src 'self'",
   "worker-src 'self' blob:",
@@ -111,13 +113,13 @@ const nextConfig: NextConfig = {
     /**
      * 최적화 이미지 캐시 수명 7일.
      *
-     * GitHub raw 는 `max-age=300` 만 내려주는데 그 헤더는 우리가 못 고친다.
-     * 최적화기가 `max(minimumCacheTTL, 업스트림 max-age)` 로 만료를 정하므로
-     * 이 값이 실질적인 캐시 수명이 된다. ( 응답은 `public, max-age=604800, must-revalidate` )
-     * 건물 사진은 바뀌지 않으니 300 초마다 다시 받을 이유가 없다.
+     * GitHub raw 는 `max-age=300` 만 내려주고 그 헤더는 못 고침. 최적화기가
+     * `max(minimumCacheTTL, 업스트림 max-age)` 로 만료를 정해서 이 값이 실질적인
+     * 캐시 수명이 됨. ( 응답은 `public, max-age=604800, must-revalidate` )
+     * 건물 사진은 안 바뀌니 300 초마다 다시 받을 이유 없음.
      */
     minimumCacheTTL: 60 * 60 * 24 * 7,
-    // 단지 사진은 저장소에 두고 GitHub raw 로 받는다. ( 배포본 용량에서 제외 )
+    // 단지 사진은 저장소에 두고 GitHub raw 로 받아옴. ( 배포본 용량에서 제외 )
     remotePatterns: [
       {
         protocol: "https",
@@ -129,10 +131,10 @@ const nextConfig: NextConfig = {
   /**
    * `/orange-pill` 경로를 `/orange` 로 옮기면서 남긴 리다이렉트.
    *
-   * 기존 링크·북마크·검색엔진 색인이 살아 있으니 308 로 영구 이전을 알린다.
+   * 기존 링크·북마크·검색엔진 색인이 살아 있어서 308 로 영구 이전을 알림.
    * ( `permanent: true` = 308, 메서드와 본문을 보존하면서 색인도 새 URL 로 넘김 )
-   * 밈·BIP39 는 `/orange` 하위가 아니라 최상위로 빠졌으므로
-   * 더 넓은 `:path*` 규칙보다 먼저 둬야 한다. ( 위에서부터 순서대로 매칭됨 )
+   * 밈·BIP39 는 `/orange` 하위가 아니라 최상위로 빠져서
+   * 더 넓은 `:path*` 규칙보다 먼저 둬야 함. ( 위에서부터 순서대로 매칭됨 )
    */
   async redirects() {
     return [
@@ -147,7 +149,7 @@ const nextConfig: NextConfig = {
         permanent: true,
       },
       {
-        // `:path*` 는 0개 세그먼트도 매칭하므로 `/orange-pill` 자체도 함께 처리된다.
+        // `:path*` 는 0개 세그먼트도 매칭해서 `/orange-pill` 자체도 같이 처리됨.
         source: "/orange-pill/:path*",
         destination: "/orange/:path*",
         permanent: true,
