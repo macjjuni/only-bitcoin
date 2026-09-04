@@ -15,6 +15,27 @@ export function isIOSSafari() {
   );
 }
 
+/** iPhone, iPad, iPod 및 데스크톱 모드로 요청하는 iPad인지 확인한다. */
+export function isIOSDevice(): boolean {
+  if (typeof navigator === "undefined") {
+    return false;
+  }
+
+  return (
+    /iPhone|iPad|iPod/.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1)
+  );
+}
+
+/** 현재 기기가 Android 운영체제를 사용하는지 확인한다. */
+export function isAndroidDevice(): boolean {
+  if (typeof navigator === "undefined") {
+    return false;
+  }
+
+  return /Android/i.test(navigator.userAgent);
+}
+
 interface NavigatorWithStandalone extends Navigator {
   standalone?: boolean;
 }
