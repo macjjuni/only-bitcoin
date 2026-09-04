@@ -218,7 +218,7 @@ function ChatMessageItem({
       className={`flex flex-col gap-1.5 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bitcoin ${isMyMessage ? "items-end" : "items-start"}`}
     >
       <div className="flex items-baseline gap-2 px-1 text-xs text-neutral-500 dark:text-neutral-400">
-        <strong className="font-medium text-neutral-700 dark:text-neutral-200">
+        <strong className="font-medium text-[13px] text-neutral-700 dark:text-neutral-200">
           {message.nickname}#{formatChatAnonId(message.anonId)}
         </strong>
         <time dateTime={new Date(message.createdAt).toISOString()}>
@@ -235,7 +235,7 @@ function ChatMessageItem({
         <div
           data-chat-message-bubble
           className={[
-            "min-w-0 max-w-[88%] rounded-2xl border px-2.5 py-2 text-[13px] leading-5 shadow-sm",
+            "min-w-0 max-w-[88%] rounded-2xl border px-2.5 py-2 text-sm leading-5 shadow-sm",
             isMyMessage
               ? "rounded-tr-md border-bitcoin/30 bg-bitcoin/10"
               : "rounded-tl-md border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900",
