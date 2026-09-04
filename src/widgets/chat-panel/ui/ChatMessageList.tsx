@@ -1,19 +1,17 @@
 "use client";
 
+import { ArrowDown } from "lucide-react";
 import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import { type ChatMessage, ChatMessageItem, type ChatReactionKey } from "@/entities/chat-message";
 import { useChatStore } from "@/features/chat-session";
-import ChatMarketContextCard from "./ChatMarketContextCard";
 
 interface ChatMessageListProps {
   currentAnonId?: string;
   online: number;
   expandedMessageIds: ReadonlySet<string>;
-  isMarketContextExpanded: boolean;
   savedScrollTop: number | null;
   onChangeSavedScrollTop: (scrollTop: number) => void;
   onToggleMessageExpanded: (messageId: string) => void;
-  onToggleMarketContext: () => void;
   onSelectReply: (message: ChatMessage) => void;
   onToggleReaction: (messageId: string, reactionKey: ChatReactionKey) => void;
   onRequestMoreMessages: (beforeId: string) => string | null;
@@ -29,6 +27,7 @@ interface ConnectedChatMessageItemProps {
 }
 
 const BOTTOM_PROXIMITY_IN_PIXELS = 80;
+const SCROLL_TO_LATEST_BUTTON_THRESHOLD_IN_PIXELS = 360;
 function ConnectedChatMessageItem({
   messageId,
   currentAnonId,
@@ -59,11 +58,9 @@ export default function ChatMessageList({
   currentAnonId,
   online,
   expandedMessageIds,
-  isMarketContextExpanded,
   savedScrollTop,
   onChangeSavedScrollTop,
   onToggleMessageExpanded,
-  onToggleMarketContext,
   onSelectReply,
   onToggleReaction,
   onRequestMoreMessages,
@@ -78,6 +75,7 @@ export default function ChatMessageList({
   const prependScrollHeightReference = useRef<number | null>(null);
   const pendingMoreRequestIdReference = useRef<string | null>(null);
   const isNearBottomReference = useRef(true);
+  const [isScrollToLatestButtonVisible, setIsScrollToLatestButtonVisible] = useState(false);
   const [newMessageCount, setNewMessageCount] = useState(0);
   // endregion
 
@@ -97,6 +95,7 @@ export default function ChatMessageList({
 
     scrollContainer.scrollTo({ top: scrollContainer.scrollHeight, behavior: "smooth" });
     isNearBottomReference.current = true;
+    setIsScrollToLatestButtonVisible(false);
     setNewMessageCount(0);
   };
 
@@ -127,7 +126,12 @@ export default function ChatMessageList({
       return;
     }
 
+    const remainingScrollDistance =
+      scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight;
     isNearBottomReference.current = isScrollNearBottom(scrollContainer);
+    setIsScrollToLatestButtonVisible(
+      remainingScrollDistance > SCROLL_TO_LATEST_BUTTON_THRESHOLD_IN_PIXELS,
+    );
     onChangeSavedScrollTop(scrollContainer.scrollTop);
 
     if (isNearBottomReference.current) {
@@ -161,6 +165,13 @@ export default function ChatMessageList({
 
     if (previousNewestMessageIdReference.current === null) {
       scrollContainer.scrollTop = savedScrollTop ?? scrollContainer.scrollHeight;
+      const isInitialScrollNearBottom = isScrollNearBottom(scrollContainer);
+      const initialRemainingScrollDistance =
+        scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight;
+      isNearBottomReference.current = isInitialScrollNearBottom;
+      setIsScrollToLatestButtonVisible(
+        initialRemainingScrollDistance > SCROLL_TO_LATEST_BUTTON_THRESHOLD_IN_PIXELS,
+      );
     }
   }, [messageIds, savedScrollTop]);
 
@@ -224,11 +235,6 @@ export default function ChatMessageList({
         onScroll={onScrollMessageList}
         className="h-full overflow-y-auto overscroll-contain pb-4"
       >
-        <ChatMarketContextCard
-          isExpanded={isMarketContextExpanded}
-          onToggleExpanded={onToggleMarketContext}
-        />
-
         <div ref={topSentinelReference} aria-hidden className="h-px" />
         {hasMore && messageIds.length > 0 && (
           <div className="flex justify-center py-2">
@@ -263,13 +269,15 @@ export default function ChatMessageList({
         </div>
       </div>
 
-      {newMessageCount > 0 && (
+      {isScrollToLatestButtonVisible && (
         <button
           type="button"
           onClick={onClickNewMessagesButton}
-          className="absolute bottom-3 left-1/2 -translate-x-1/2 rounded-full bg-neutral-900 px-3 py-2 text-xs font-semibold text-white shadow-lg dark:bg-white dark:text-neutral-900"
+          aria-label="최신 메시지로 이동"
+          className="absolute bottom-3 right-3 inline-flex items-center gap-1 rounded-full bg-neutral-900 px-3 py-2 text-xs font-semibold text-white shadow-lg dark:bg-white dark:text-neutral-900"
         >
-          새 메시지 {newMessageCount}개
+          <ArrowDown size={14} />
+          {newMessageCount > 0 ? `새 메시지 ${newMessageCount}개` : "최신 메시지"}
         </button>
       )}
     </div>

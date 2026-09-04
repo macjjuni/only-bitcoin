@@ -21,7 +21,6 @@ interface ChatPanelProps {
   draft: string;
   selectedReply: ChatMessage | null;
   expandedMessageIds: ReadonlySet<string>;
-  isMarketContextExpanded: boolean;
   savedScrollTop: number | null;
   pendingSayRequestId: string | null;
   onClose: () => void;
@@ -29,7 +28,6 @@ interface ChatPanelProps {
   onChangeDraft: (draft: string) => void;
   onChangeSelectedReply: (message: ChatMessage | null) => void;
   onToggleMessageExpanded: (messageId: string) => void;
-  onToggleMarketContext: () => void;
   onChangeSavedScrollTop: (scrollTop: number) => void;
   onChangePendingSayRequestId: (requestId: string | null) => void;
 }
@@ -48,7 +46,6 @@ export default function ChatPanel({
   draft,
   selectedReply,
   expandedMessageIds,
-  isMarketContextExpanded,
   savedScrollTop,
   pendingSayRequestId,
   onClose,
@@ -56,7 +53,6 @@ export default function ChatPanel({
   onChangeDraft,
   onChangeSelectedReply,
   onToggleMessageExpanded,
-  onToggleMarketContext,
   onChangeSavedScrollTop,
   onChangePendingSayRequestId,
 }: ChatPanelProps) {
@@ -347,15 +343,16 @@ export default function ChatPanel({
         className={panelClassName}
       >
         <header className="flex min-h-14 items-center justify-between gap-3 border-b border-neutral-200 px-4 dark:border-neutral-700">
-          <div className="min-w-0">
-            <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold">비밀기지</h2>
-              <span className="inline-flex items-center gap-1 text-[11px] text-neutral-500">
+          <div className="flex flex-col gap-0.5 min-w-0">
+            <h2 className="text-sm font-bold">비트맥시 비밀기지</h2>
+            <div className="flex items-center gap-2 text-[11px] text-neutral-500">
+              <span className="inline-flex items-center gap-1">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
-                {online}명
+                {connectionStatusLabel}
               </span>
+              <span aria-hidden>·</span>
+              <span>{online}명</span>
             </div>
-            <p className="mt-1 text-[10px] text-neutral-500">{connectionStatusLabel}</p>
           </div>
 
           <div className="flex items-center gap-1">
@@ -441,11 +438,9 @@ export default function ChatPanel({
               currentAnonId={me?.anonId}
               online={online}
               expandedMessageIds={expandedMessageIds}
-              isMarketContextExpanded={isMarketContextExpanded}
               savedScrollTop={savedScrollTop}
               onChangeSavedScrollTop={onChangeSavedScrollTop}
               onToggleMessageExpanded={onToggleMessageExpanded}
-              onToggleMarketContext={onToggleMarketContext}
               onSelectReply={onSelectReplyMessage}
               onToggleReaction={toggleReaction}
               onRequestMoreMessages={requestMoreMessages}

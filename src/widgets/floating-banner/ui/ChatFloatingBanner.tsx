@@ -6,7 +6,7 @@ import { useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ChatMessage } from "@/entities/chat-message";
 import type { ChatIdentity } from "@/features/chat-session";
-import { loadOrCreateChatIdentity, useChatStore } from "@/features/chat-session";
+import { loadOrCreateChatIdentity } from "@/features/chat-session";
 import { CHAT_NOTICE_VERSION, CHAT_STORAGE_KEYS, chatConfig } from "@/shared/config/chat";
 import { isStandaloneRuntime } from "@/shared/lib/pwa/isStandaloneRuntime";
 import { FloatingBannerButton } from "@/shared/ui";
@@ -48,7 +48,6 @@ const fetchOnlineCount = async (): Promise<OnlineResponse> => {
 
 export default function ChatFloatingBanner() {
   // region [Hooks]
-  const messageCount = useChatStore((chatState) => chatState.messageIds.length);
   const launcherButtonReference = useRef<HTMLButtonElement | null>(null);
   const [isClientMounted, setIsClientMounted] = useState(false);
   const [isRuntimeChecked, setIsRuntimeChecked] = useState(false);
@@ -63,7 +62,6 @@ export default function ChatFloatingBanner() {
   const [draft, setDraft] = useState("");
   const [selectedReply, setSelectedReply] = useState<ChatMessage | null>(null);
   const [expandedMessageIds, setExpandedMessageIds] = useState<ReadonlySet<string>>(new Set());
-  const [isMarketContextExpanded, setIsMarketContextExpanded] = useState(true);
   const [savedScrollTop, setSavedScrollTop] = useState<number | null>(null);
   const [pendingSayRequestId, setPendingSayRequestId] = useState<string | null>(null);
   const shouldPollOnlineCount =
@@ -167,10 +165,6 @@ export default function ChatFloatingBanner() {
     });
   };
 
-  const onToggleMarketContext = (): void => {
-    setIsMarketContextExpanded((currentExpandedState) => !currentExpandedState);
-  };
-
   const onChangeSavedScrollTop = (scrollTop: number): void => {
     setSavedScrollTop(scrollTop);
   };
@@ -216,11 +210,6 @@ export default function ChatFloatingBanner() {
     };
   }, []);
 
-  useEffect(() => {
-    if (messageCount > 0) {
-      setIsMarketContextExpanded(false);
-    }
-  }, [messageCount]);
   // endregion
 
   // region [Templates]
@@ -233,7 +222,6 @@ export default function ChatFloatingBanner() {
             draft={draft}
             selectedReply={selectedReply}
             expandedMessageIds={expandedMessageIds}
-            isMarketContextExpanded={isMarketContextExpanded}
             savedScrollTop={savedScrollTop}
             pendingSayRequestId={pendingSayRequestId}
             onClose={onCloseChatPanel}
@@ -241,7 +229,6 @@ export default function ChatFloatingBanner() {
             onChangeDraft={onChangeDraft}
             onChangeSelectedReply={onChangeSelectedReply}
             onToggleMessageExpanded={onToggleMessageExpanded}
-            onToggleMarketContext={onToggleMarketContext}
             onChangeSavedScrollTop={onChangeSavedScrollTop}
             onChangePendingSayRequestId={onChangePendingSayRequestId}
           />,

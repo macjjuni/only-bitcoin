@@ -71,19 +71,19 @@ export default function ChatMarketContextCard({
             <dl className="grid grid-cols-3 gap-2 text-center">
               <div>
                 <dt className="text-[10px] text-neutral-500">BTC/KRW</dt>
-                <dd className="mt-1 text-xs font-number font-bold">
+                <dd className="mt-1 text-sm font-number font-bold">
                   {formatKrwPrice(bitcoinPrice.krw)}
                 </dd>
               </div>
               <div>
                 <dt className="text-[10px] text-neutral-500">24시간</dt>
-                <dd className="mt-1 text-xs font-number font-bold">
+                <dd className="mt-1 text-sm font-number font-bold">
                   {marketContext.krwChangePercentage.toFixed(2)}%
                 </dd>
               </div>
               <div>
                 <dt className="text-[10px] text-neutral-500">김프</dt>
-                <dd className="mt-1 text-xs font-number font-bold">
+                <dd className="mt-1 text-sm font-number font-bold">
                   {marketContext.premiumPercentage.toFixed(2)}%
                 </dd>
               </div>
