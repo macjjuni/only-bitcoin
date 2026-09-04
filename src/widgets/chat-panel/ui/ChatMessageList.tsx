@@ -27,10 +27,12 @@ interface ConnectedChatMessageItemProps {
   messageId: string;
   currentAnonId?: string;
   isExpanded: boolean;
+  isReactionPickerOpen: boolean;
   onToggleMessageExpanded: (messageId: string) => void;
   onSelectReply: (message: ChatMessage) => void;
   onToggleReaction: (messageId: string, reactionKey: ChatReactionKey) => void;
   onNavigateToMessage: (messageId: string) => void;
+  onChangeReactionPicker: (messageId: string, isOpen: boolean) => void;
 }
 
 const BOTTOM_PROXIMITY_IN_PIXELS = 80;
@@ -41,10 +43,12 @@ const ConnectedChatMessageItem = memo(function ConnectedChatMessageItem({
   messageId,
   currentAnonId,
   isExpanded,
+  isReactionPickerOpen,
   onToggleMessageExpanded,
   onSelectReply,
   onToggleReaction,
   onNavigateToMessage,
+  onChangeReactionPicker,
 }: ConnectedChatMessageItemProps) {
   const message = useChatStore((chatState) => chatState.messagesById[messageId]);
 
@@ -57,10 +61,12 @@ const ConnectedChatMessageItem = memo(function ConnectedChatMessageItem({
       message={message}
       currentAnonId={currentAnonId}
       isExpanded={isExpanded}
+      isReactionPickerOpen={isReactionPickerOpen}
       onToggleExpanded={onToggleMessageExpanded}
       onSelectReply={onSelectReply}
       onToggleReaction={onToggleReaction}
       onNavigateToMessage={onNavigateToMessage}
+      onChangeReactionPicker={onChangeReactionPicker}
     />
   );
 });
@@ -93,6 +99,9 @@ export default function ChatMessageList({
   const isNearBottomReference = useRef(true);
   const [isScrollToLatestButtonVisible, setIsScrollToLatestButtonVisible] = useState(false);
   const [newMessageCount, setNewMessageCount] = useState(0);
+  const [openReactionPickerMessageId, setOpenReactionPickerMessageId] = useState<string | null>(
+    null,
+  );
   // endregion
 
   // region [Privates]
@@ -228,6 +237,10 @@ export default function ChatMessageList({
       return;
     }
 
+    if (openReactionPickerMessageId !== null) {
+      setOpenReactionPickerMessageId(null);
+    }
+
     const remainingScrollDistance =
       scrollContainer.scrollHeight - scrollContainer.scrollTop - scrollContainer.clientHeight;
     isNearBottomReference.current = isScrollNearBottom(scrollContainer);
@@ -256,6 +269,10 @@ export default function ChatMessageList({
 
     pendingNavigationMessageIdReference.current = messageId;
     continuePendingMessageNavigation();
+  };
+
+  const onChangeReactionPicker = (messageId: string, isOpen: boolean): void => {
+    setOpenReactionPickerMessageId(isOpen ? messageId : null);
   };
   // endregion
 
@@ -402,10 +419,12 @@ export default function ChatMessageList({
               messageId={messageId}
               currentAnonId={currentAnonId}
               isExpanded={expandedMessageIds.has(messageId)}
+              isReactionPickerOpen={openReactionPickerMessageId === messageId}
               onToggleMessageExpanded={onToggleMessageExpanded}
               onSelectReply={onSelectReply}
               onToggleReaction={onToggleReaction}
               onNavigateToMessage={onNavigateToMessage}
+              onChangeReactionPicker={onChangeReactionPicker}
             />
           ))}
         </div>

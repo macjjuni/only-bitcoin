@@ -1,7 +1,8 @@
 "use client";
 
-import { MessageCircleReply, Plus } from "lucide-react";
-import { type KeyboardEvent, memo, useState } from "react";
+import { KPopover, KPopoverContent, KPopoverTrigger } from "kku-ui";
+import { MessageCircleReply, SmilePlus } from "lucide-react";
+import { type KeyboardEvent, memo } from "react";
 import { CHAT_COLLAPSED_MESSAGE_GRAPHEMES } from "@/shared/config/chat";
 import { countGraphemes, truncateGraphemes } from "@/shared/lib/text/countGraphemes";
 import {
@@ -17,10 +18,12 @@ interface ChatMessageItemProps {
   message: ChatMessage;
   currentAnonId?: string;
   isExpanded: boolean;
+  isReactionPickerOpen: boolean;
   onToggleExpanded: (messageId: string) => void;
   onSelectReply: (message: ChatMessage) => void;
   onToggleReaction: (messageId: string, reactionKey: ChatReactionKey) => void;
   onNavigateToMessage: (messageId: string) => void;
+  onChangeReactionPicker: (messageId: string, isOpen: boolean) => void;
 }
 
 interface ReactionButtonProps {
@@ -74,15 +77,13 @@ function ChatMessageItem({
   message,
   currentAnonId,
   isExpanded,
+  isReactionPickerOpen,
   onToggleExpanded,
   onSelectReply,
   onToggleReaction,
   onNavigateToMessage,
+  onChangeReactionPicker,
 }: ChatMessageItemProps) {
-  // region [Hooks]
-  const [isReactionPickerOpen, setIsReactionPickerOpen] = useState(false);
-  // endregion
-
   // region [Privates]
   const isMyMessage = currentAnonId === message.anonId;
   const messageGraphemeCount = countGraphemes(message.body);
@@ -100,6 +101,7 @@ function ChatMessageItem({
 
   // region [Events]
   const onClickReplyButton = (): void => {
+    onChangeReactionPicker(message.id, false);
     onSelectReply(message);
   };
 
@@ -107,8 +109,13 @@ function ChatMessageItem({
     onToggleExpanded(message.id);
   };
 
-  const onClickReactionPickerButton = (): void => {
-    setIsReactionPickerOpen((currentOpenState) => !currentOpenState);
+  const onChangeReactionPopover = (isOpen: boolean): void => {
+    onChangeReactionPicker(message.id, isOpen);
+  };
+
+  const onSelectReaction = (messageId: string, reactionKey: ChatReactionKey): void => {
+    onToggleReaction(messageId, reactionKey);
+    onChangeReactionPicker(message.id, false);
   };
 
   const onClickParentMessageBlockquote = (): void => {
@@ -151,10 +158,9 @@ function ChatMessageItem({
       type="button"
       aria-label="답글 작성"
       onClick={onClickReplyButton}
-      className="inline-flex h-7 items-center gap-1 rounded-full px-2 text-[11px] text-neutral-500 hover:text-bitcoin dark:text-neutral-400"
+      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-bitcoin dark:text-neutral-400 dark:hover:bg-neutral-800"
     >
-      <MessageCircleReply size={14} />
-      답글
+      <MessageCircleReply size={15} />
     </button>
   );
 
@@ -162,43 +168,45 @@ function ChatMessageItem({
     <button
       type="button"
       aria-label="반응 추가"
-      aria-expanded={isReactionPickerOpen}
-      onClick={onClickReactionPickerButton}
-      className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+      className="inline-flex h-7 w-7 shrink-0 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-bitcoin dark:text-neutral-400 dark:hover:bg-neutral-800"
     >
-      <Plus size={14} />
+      <SmilePlus size={15} />
     </button>
   );
 
-  const ReactionPickerTemplate = isReactionPickerOpen ? (
-    <div className="flex items-center gap-1">
-      {CHAT_REACTION_KEYS.map((reactionKey) => (
-        <ReactionButton
-          key={reactionKey}
-          messageId={message.id}
-          reactionKey={reactionKey}
-          count={message.reactions[reactionKey]}
-          isActive={hasSelectedReaction(reactionKey)}
-          onToggleReaction={onToggleReaction}
-        />
-      ))}
-    </div>
-  ) : null;
+  const ReactionPickerTemplate = (
+    <KPopover open={isReactionPickerOpen} onOpenChange={onChangeReactionPopover}>
+      <KPopoverTrigger asChild>{ReactionAddButtonTemplate}</KPopoverTrigger>
+      <KPopoverContent
+        side="top"
+        align={isMyMessage ? "end" : "start"}
+        sideOffset={6}
+        collisionPadding={12}
+        className="!z-[110] !w-auto !max-w-[calc(100vw-1.5rem)] !rounded-xl !border-neutral-200 !bg-white/95 !p-1 !shadow-lg !backdrop-blur-sm dark:!border-neutral-700 dark:!bg-neutral-900/95"
+      >
+        <fieldset
+          aria-label="메시지 반응 선택"
+          className="flex w-max max-w-full items-center gap-1"
+        >
+          {CHAT_REACTION_KEYS.map((reactionKey) => (
+            <ReactionButton
+              key={reactionKey}
+              messageId={message.id}
+              reactionKey={reactionKey}
+              count={message.reactions[reactionKey]}
+              isActive={hasSelectedReaction(reactionKey)}
+              onToggleReaction={onSelectReaction}
+            />
+          ))}
+        </fieldset>
+      </KPopoverContent>
+    </KPopover>
+  );
 
   const ReactionActionsTemplate = (
     <>
       {VisibleReactionButtonsTemplate}
-      {isMyMessage ? (
-        <>
-          {ReactionPickerTemplate}
-          {ReactionAddButtonTemplate}
-        </>
-      ) : (
-        <>
-          {ReactionAddButtonTemplate}
-          {ReactionPickerTemplate}
-        </>
-      )}
+      {ReactionPickerTemplate}
     </>
   );
 
@@ -220,64 +228,71 @@ function ChatMessageItem({
       </div>
 
       <div
-        data-chat-message-bubble
         className={[
-          "max-w-[88%] rounded-2xl border px-2.5 py-2 text-[13px] leading-5 shadow-sm",
-          isMyMessage
-            ? "rounded-tr-md border-bitcoin/30 bg-bitcoin/10"
-            : "rounded-tl-md border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900",
+          "flex w-full items-end gap-1",
+          isMyMessage ? "flex-row-reverse" : "flex-row",
         ].join(" ")}
       >
-        {message.parent && (
-          <blockquote
-            role={isParentMessageNavigable ? "button" : undefined}
-            tabIndex={isParentMessageNavigable ? 0 : undefined}
-            aria-label={
-              isParentMessageNavigable
-                ? `${message.parent.nickname}님의 원본 메시지로 이동`
-                : undefined
-            }
-            onClick={onClickParentMessageBlockquote}
-            onKeyDown={onKeyDownParentMessageBlockquote}
-            className={[
-              "mb-1.5 border-l-2 border-bitcoin/60 pl-2 text-[11px] leading-4 text-neutral-500 dark:text-neutral-400",
-              isParentMessageNavigable
-                ? "cursor-pointer rounded-r-md transition-colors hover:bg-bitcoin/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bitcoin"
-                : "cursor-default",
-            ].join(" ")}
-          >
-            <strong>
-              {message.parent.nickname}#{formatChatAnonId(message.parent.anonId)}
-            </strong>
-            <span className="mt-0.5 block truncate">
-              {message.parent.snippet || "삭제된 메시지"}
-            </span>
-          </blockquote>
-        )}
-        <p className="whitespace-pre-wrap break-words">{visibleMessageBody}</p>
-        {shouldCollapseMessage && (
-          <button
-            type="button"
-            onClick={onClickExpandButton}
-            className="mt-1 text-xs font-semibold text-bitcoin"
-          >
-            {isExpanded ? "접기" : "더 보기"}
-          </button>
-        )}
-      </div>
+        <div
+          data-chat-message-bubble
+          className={[
+            "min-w-0 max-w-[88%] rounded-2xl border px-2.5 py-2 text-[13px] leading-5 shadow-sm",
+            isMyMessage
+              ? "rounded-tr-md border-bitcoin/30 bg-bitcoin/10"
+              : "rounded-tl-md border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900",
+          ].join(" ")}
+        >
+          {message.parent && (
+            <blockquote
+              role={isParentMessageNavigable ? "button" : undefined}
+              tabIndex={isParentMessageNavigable ? 0 : undefined}
+              aria-label={
+                isParentMessageNavigable
+                  ? `${message.parent.nickname}님의 원본 메시지로 이동`
+                  : undefined
+              }
+              onClick={onClickParentMessageBlockquote}
+              onKeyDown={onKeyDownParentMessageBlockquote}
+              className={[
+                "mb-1.5 border-l-2 border-bitcoin/60 pl-2 text-[11px] leading-4 text-neutral-500 dark:text-neutral-400",
+                isParentMessageNavigable
+                  ? "cursor-pointer rounded-r-md transition-colors hover:bg-bitcoin/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bitcoin"
+                  : "cursor-default",
+              ].join(" ")}
+            >
+              <strong>
+                {message.parent.nickname}#{formatChatAnonId(message.parent.anonId)}
+              </strong>
+              <span className="mt-0.5 block truncate">
+                {message.parent.snippet || "삭제된 메시지"}
+              </span>
+            </blockquote>
+          )}
+          <p className="whitespace-pre-wrap break-words">{visibleMessageBody}</p>
+          {shouldCollapseMessage && (
+            <button
+              type="button"
+              onClick={onClickExpandButton}
+              className="mt-1 text-xs font-semibold text-bitcoin"
+            >
+              {isExpanded ? "접기" : "더 보기"}
+            </button>
+          )}
+        </div>
 
-      <div className="flex max-w-[92%] flex-wrap items-center gap-1 px-1">
-        {isMyMessage ? (
-          <>
-            {ReactionActionsTemplate}
-            {ReplyButtonTemplate}
-          </>
-        ) : (
-          <>
-            {ReplyButtonTemplate}
-            {ReactionActionsTemplate}
-          </>
-        )}
+        <div className="flex shrink-0 items-center gap-1 pb-0.5">
+          {isMyMessage ? (
+            <>
+              {ReactionActionsTemplate}
+              {ReplyButtonTemplate}
+            </>
+          ) : (
+            <>
+              {ReplyButtonTemplate}
+              {ReactionActionsTemplate}
+            </>
+          )}
+        </div>
       </div>
     </article>
   );
