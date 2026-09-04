@@ -1,8 +1,35 @@
 {
-  "generatedAt": "2026-09-02T04:05:10.731Z",
-  "latestSourceDate": "2026-09-01",
-  "sourceUpdatedAt": "2026-09-02T04:05:11.220Z",
+  "generatedAt": "2026-09-03T23:53:38.787Z",
+  "latestSourceDate": "2026-09-03",
+  "sourceUpdatedAt": "2026-09-03T23:53:39.193Z",
   "rows": [
+    {
+      "date": "2026-09-03",
+      "ticker": "BITB",
+      "issuer": "Bitwise",
+      "asset": "btc",
+      "holdings": "37866.41475780",
+      "flowUsd": "4403881.26",
+      "aumUsd": "3073061923.67"
+    },
+    {
+      "date": "2026-09-02",
+      "ticker": "BITB",
+      "issuer": "Bitwise",
+      "asset": "btc",
+      "holdings": "37812.14992410",
+      "flowUsd": "8355202.27",
+      "aumUsd": "2910968361.91"
+    },
+    {
+      "date": "2026-09-02",
+      "ticker": "IBIT",
+      "issuer": "iShares (BlackRock)",
+      "asset": "btc",
+      "holdings": "778729.91370000",
+      "flowUsd": "121214969.06",
+      "aumUsd": "63150727325.33"
+    },
     {
       "date": "2026-09-01",
       "ticker": "BITB",
@@ -11,6 +38,15 @@
       "holdings": "37703.61966150",
       "flowUsd": "3755483.69",
       "aumUsd": "2906981491.18"
+    },
+    {
+      "date": "2026-09-01",
+      "ticker": "IBIT",
+      "issuer": "iShares (BlackRock)",
+      "asset": "btc",
+      "holdings": "777235.17680000",
+      "flowUsd": "-200512371.58",
+      "aumUsd": "59837296194.09"
     },
     {
       "date": "2026-08-31",
