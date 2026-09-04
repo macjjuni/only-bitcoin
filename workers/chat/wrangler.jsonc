@@ -35,8 +35,8 @@
     }
   },
   "vars": {
-    "CHAT_ALLOWED_ORIGINS": "https://only-btc.app,http://localhost:3002",
-    "TURNSTILE_EXPECTED_HOSTNAME": "only-btc.app",
+    "CHAT_ALLOWED_ORIGINS": "https://www.only-btc.app,http://localhost:3002",
+    "TURNSTILE_EXPECTED_HOSTNAME": "www.only-btc.app",
     "ADMIN_EMAIL_ALLOWLIST": "macjjuni@gmail.com"
   }
 }
