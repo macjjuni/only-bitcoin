@@ -16,6 +16,7 @@ export { default as HalfCircleIcon } from "./HalfCircleIcon";
 export { default as HalfIcon } from "./HalfIcon";
 export { default as IncidentIcon } from "./IncidentIcon";
 export { default as IosShareIcon } from "./IosShareIcon";
+export { default as MessageIcon } from "./MessageIcon";
 export { default as MinerIcon } from "./MinerIcon";
 export { default as NaverIcon } from "./NaverIcon";
 export { default as PageIcon } from "./PageIcon";

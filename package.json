@@ -5,6 +5,11 @@
   "scripts": {
     "dev": "pnpm archive:ensure && next dev",
     "build": "next build",
+    "build:chat": "wrangler deploy --dry-run --config workers/chat/wrangler.jsonc",
+    "chat:dev": "wrangler dev --config workers/chat/wrangler.jsonc",
+    "chat:deploy": "wrangler deploy --config workers/chat/wrangler.jsonc",
+    "chat:types": "wrangler types workers/chat/worker-configuration.d.ts --config workers/chat/wrangler.jsonc",
+    "chat:typecheck": "tsc --noEmit -p workers/chat/tsconfig.json",
     "start": "next start -p 4004",
     "lint": "biome lint .",
     "format": "biome format --write .",
@@ -50,6 +55,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "2.5.2",
+    "@cloudflare/workers-types": "^5.20260902.1",
     "@tanstack/react-query-devtools": "^5.91.2",
     "@types/node": "^20",
     "@types/react": "^19",
@@ -61,7 +67,8 @@
     "sass": "^1.97.1",
     "tailwindcss": "3",
     "typescript": "^5.9.3",
-    "vitest": "^4.1.10"
+    "vitest": "^4.1.10",
+    "wrangler": "^4.128.0"
   },
   "pnpm": {
     "onlyBuiltDependencies": [

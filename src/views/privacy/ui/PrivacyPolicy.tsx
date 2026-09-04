@@ -76,9 +76,9 @@ const PrivacyPolicy = () => {
         <header className="flex flex-col gap-1">
           <h1 className="text-[18px] font-bold">개인정보처리방침</h1>
           <p className="text-sm opacity-80 leading-relaxed">
-            온리 비트코인({SERVICE_DOMAIN})은 회원가입 없이 이용할 수 있으며, 이용자의 개인정보를
-            서버에 수집·저장하지 않습니다. 아래는 서비스가 사용하는 쿠키, 광고, 외부 데이터에 대한
-            안내입니다.
+            온리 비트코인({SERVICE_DOMAIN})은 회원가입 없이 이용할 수 있습니다. 서비스 제공에 필요한
+            브라우저 저장 정보, 온라인 식별 정보, 채팅 데이터와 제3자 처리 내용을 아래와 같이
+            안내합니다.
           </p>
           <p className="text-xs opacity-60">시행일: {PRIVACY_EFFECTIVE_DATE_LABEL}</p>
         </header>
@@ -86,36 +86,39 @@ const PrivacyPolicy = () => {
         <div className="flex flex-col">
           <PolicySection title="1. 개인정보 보호 개요" defaultOpen>
             <PolicyParagraph>
-              본 서비스는 이용자의 별도 회원가입 절차가 없으며, 이름·이메일·연락처·자산 정보 등
-              어떠한 <HighlightText>개인정보도 서버에 수집하거나 저장하지 않는 것</HighlightText>을
-              원칙으로 합니다.
+              본 서비스는 별도 회원가입 절차가 없으며 이름·이메일·비밀번호·거래소 계정 정보나 자산
+              정보를 요구하지 않습니다. 다만 익명 실시간 채팅을 제공하고 도배·사칭을 방지하기 위해
+              브라우저 임의 키에서 파생된 온라인 식별 정보와 이용자가 작성한 공개 채팅 내용을
+              처리합니다.
             </PolicyParagraph>
             <PolicyParagraph>
-              따라서 서비스 이용을 위해 별도의 개인정보 수집 동의를 받지 않으며, 이용자를 식별할 수
-              있는 계정이나 프로필도 생성하지 않습니다.
+              채팅의 표시용 8자리 해시는 보안상 완전한 익명을 보장하는 식별자가 아니며, 브라우저
+              임의 키와 서버 파생 키는 가명·온라인 식별 정보에 준해 최소한으로 처리합니다.
             </PolicyParagraph>
             <PolicyParagraph>
-              다만 서비스 제공 과정에서 아래와 같이 브라우저에 저장되는 정보와, 광고·분석 목적으로
-              제3자가 수집하는 정보가 있을 수 있으므로 이를 투명하게 고지합니다.
+              광고·분석 도구와 배포·보안 인프라가 별도의 정보를 처리할 수 있으며, 구체적인 항목과
+              보관 범위는 아래에서 설명합니다.
             </PolicyParagraph>
           </PolicySection>
 
           <PolicySection title="2. 브라우저에 저장되는 정보 (쿠키·로컬 저장소)">
             <PolicyParagraph>
-              본 서비스는 이용 편의를 위해 다음 정보를 이용자{" "}
-              <HighlightText>기기의 브라우저에만</HighlightText> 저장하며, 이 정보는 서버로 전송되지
-              않습니다.
+              본 서비스는 이용 편의와 채팅 세션 유지를 위해 다음 정보를 이용자 기기의 브라우저에
+              저장합니다. 아래 정보 중 채팅 임의 키·닉네임·pass token은 채팅 연결과 검증 과정에서
+              Cloudflare Worker로 전송됩니다.
             </PolicyParagraph>
             <PolicyList
               items={[
                 "로컬 저장소(localStorage): 테마(라이트/다크), 표시 통화 단위 등 사용자 설정과 시세·블록 데이터 캐시",
                 "DCA 매매 기록: 이용자가 DCA 페이지에 직접 입력한 매수·매도 수량·단가·날짜·메모 및 목표 수량 (로컬 저장소에만 저장)",
                 "쿠키(Cookie): 앱 설치(PWA) 안내 노출 여부, 공지 확인 여부",
+                "채팅 로컬 저장소: 128-bit 이상의 임의 client key, 닉네임, 고지 버전, 최대 24시간의 Turnstile pass token, 채팅을 한 번 열었는지 나타내는 플래그",
               ]}
             />
             <PolicyParagraph>
-              위 정보는 이용자를 식별하는 용도로 사용되지 않으며, 브라우저 설정에서 쿠키와 사이트
-              데이터를 삭제하면 언제든지 함께 제거됩니다.
+              브라우저 설정에서 쿠키와 사이트 데이터를 삭제하면 위 로컬 정보도 제거되며 새로운 채팅
+              표시 신원으로 참여하게 됩니다. 채팅 메시지와 리액션은 브라우저 로컬 저장소에 보관하지
+              않습니다.
             </PolicyParagraph>
           </PolicySection>
 
@@ -162,7 +165,34 @@ const PrivacyPolicy = () => {
             </PolicyParagraph>
           </PolicySection>
 
-          <PolicySection title="5. 데이터 및 API 활용 안내">
+          <PolicySection title="5. 익명 실시간 채팅 데이터 처리">
+            <PolicyParagraph>
+              설치한 PWA에서 익명 공개 채팅을 이용하면 임의 client key의 HMAC 파생 키, 일일 표시용
+              해시, 5분 단위 발언 tag, 치환 후 닉네임·메시지·답글 스니펫·리액션, Turnstile 검증
+              결과를 채팅 제공과 도배·사칭 방지 및 보안을 위해 처리합니다. 연결 시 IP 주소와 사용자
+              에이전트는 Cloudflare 보안 경계에서 일시 처리하며 원문 IP를 채팅 신원이나 메시지에
+              저장하지 않습니다.
+            </PolicyParagraph>
+            <PolicyParagraph>
+              공개·운영 데이터는 Cloudflare Durable Object SQLite에 기간 제한 없이 최신 300개
+              메시지만 보관하며, 301번째 메시지부터 오래된 순서로 삭제합니다. 삭제된 이전 상태는
+              공급자 재해 복구 기능(PITR)에 최대 30일 남을 수 있습니다. Turnstile pass는 최대 24시간
+              유지하며 actor 상태는 마지막 활동 후 24시간이 지나면 정리합니다.
+            </PolicyParagraph>
+            <PolicyParagraph>
+              리액션에는 메시지별 actor token을 사용해 데이터베이스 스냅샷만으로 서로 다른 메시지의
+              선택을 바로 연결하기 어렵게 합니다. 다만 서버는 안정 식별 키로 현재 300개 메시지 안의
+              중복 반응과 선택 상태를 확인할 수 있습니다. 운영상 또는 법령상 필요한 경우 Cloudflare
+              Access로 보호된 관리자 기능으로 메시지를 영구 삭제하며, 해당 메시지를 인용한 답글의
+              스니펫도 비웁니다.
+            </PolicyParagraph>
+            <PolicyParagraph>
+              채팅 데이터는 Cloudflare와 Vercel의 실제 계약·리전·로그 설정에 따라 국외에서 처리될 수
+              있으므로 공개 전 관련 수탁·국외 처리 사항을 별도로 검토하고 고지합니다.
+            </PolicyParagraph>
+          </PolicySection>
+
+          <PolicySection title="6. 데이터 및 API 활용 안내">
             <PolicyParagraph>
               본 서비스가 제공하는 시세, 거래소 프리미엄(Premium), 도미넌스(BTC.D), 공포·탐욕
               지수(F&amp;G Index), 블록 정보, 비트코인 현물 ETF 자금 흐름, 미국 M2 통화량 등은 공개
@@ -183,7 +213,7 @@ const PrivacyPolicy = () => {
             </PolicyParagraph>
           </PolicySection>
 
-          <PolicySection title="6. 만 14세 미만 아동의 개인정보">
+          <PolicySection title="7. 만 14세 미만 아동의 개인정보">
             <PolicyParagraph>
               본 서비스는 만 14세 미만 아동을 대상으로 하지 않으며, 아동의 개인정보를 의도적으로
               수집하지 않습니다. 서비스 특성상 별도의 회원가입이나 개인정보 입력 절차가 존재하지
@@ -191,7 +221,7 @@ const PrivacyPolicy = () => {
             </PolicyParagraph>
           </PolicySection>
 
-          <PolicySection title="7. 투자 면책 조항 (Disclaimer)">
+          <PolicySection title="8. 투자 면책 조항 (Disclaimer)">
             <PolicyParagraph>
               본 서비스가 제공하는 모든 비트코인 관련 시세 정보 및 온체인 지표는{" "}
               <HighlightText>투자 참고용 데이터</HighlightText>일 뿐이며, 어떠한 경우에도 투자
@@ -204,7 +234,7 @@ const PrivacyPolicy = () => {
             </PolicyParagraph>
           </PolicySection>
 
-          <PolicySection title="8. 방침 변경 및 문의">
+          <PolicySection title="9. 방침 변경 및 문의">
             <PolicyParagraph>
               본 개인정보처리방침의 내용이 추가·삭제 또는 수정될 경우, 변경 사항을 본 페이지를 통해
               고지합니다. 변경된 방침은 게시한 시점부터 적용됩니다.

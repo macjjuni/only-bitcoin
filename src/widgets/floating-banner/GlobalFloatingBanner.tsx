@@ -5,10 +5,12 @@ import { useEffect, useState } from "react";
 import { BtcSurgeShareDialog } from "@/features/btc-surge-share";
 import { PremiumShareDialog, PremiumShareFloatingBanner } from "@/features/premium-share";
 import { hideBottomNavPathList } from "@/shared/config/route";
+import useSettingStore from "@/shared/stores/settingStore";
 import ApartmentShareFloatingBanner from "./ui/ApartmentShareFloatingBanner";
 import BlocksCountdownFloatingBanner from "./ui/BlocksCountdownFloatingBanner";
 import Btc2FiatFloatingBanner from "./ui/Btc2FiatFloatingBanner";
 import BtcSurgeShareFloatingBanner from "./ui/BtcSurgeShareFloatingBanner";
+import ChatFloatingBanner from "./ui/ChatFloatingBanner";
 import CountdownBackFloatingBanner from "./ui/CountdownBackFloatingBanner";
 import DcaAddRecordFloatingBanner from "./ui/DcaAddRecordFloatingBanner";
 import OrangeBackFloatingBanner from "./ui/OrangeBackFloatingBanner";
@@ -39,6 +41,25 @@ function useScrollVisibility(threshold = 100) {
   }, [threshold, pathname]);
 
   return isVisible;
+}
+
+const CHAT_BANNER_VISIBLE_PATHS = [
+  "/",
+  "/overview",
+  "/blocks",
+  "/btc2fiat",
+  "/premium",
+  "/orange",
+] as const;
+
+function useChatBannerVisibility(): boolean {
+  const pathname = usePathname();
+  const isLab = useSettingStore((state) => state.setting.isLab);
+  const isAllowedChatPath = CHAT_BANNER_VISIBLE_PATHS.some(
+    (visiblePath) => visiblePath === pathname,
+  );
+
+  return isLab && isAllowedChatPath;
 }
 
 const BANNER_CONFIGS: BannerConfig[] = [
@@ -121,6 +142,11 @@ const BANNER_CONFIGS: BannerConfig[] = [
     id: "scroll-up",
     Component: ScrollUpFloatingBanner,
     useIsVisible: () => useScrollVisibility(800),
+  },
+  {
+    id: "chat",
+    Component: ChatFloatingBanner,
+    useIsVisible: useChatBannerVisibility,
   },
 ];
 

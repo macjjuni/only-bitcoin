@@ -1,0 +1,42 @@
+{
+  "$schema": "../../node_modules/wrangler/config-schema.json",
+  "name": "only-bitcoin-chat",
+  "main": "src/index.ts",
+  "compatibility_date": "2026-09-03",
+  "durable_objects": {
+    "bindings": [
+      {
+        "name": "CHAT_ROOM",
+        "class_name": "ChatRoom"
+      }
+    ]
+  },
+  "migrations": [
+    {
+      "tag": "v1",
+      "new_sqlite_classes": ["ChatRoom"]
+    }
+  ],
+  "ratelimits": [
+    {
+      "name": "CHAT_UPGRADE_RATE_LIMITER",
+      "namespace_id": "1001",
+      "simple": {
+        "limit": 30,
+        "period": 60
+      }
+    }
+  ],
+  "observability": {
+    "enabled": true,
+    "logs": {
+      "enabled": true,
+      "invocation_logs": true
+    }
+  },
+  "vars": {
+    "CHAT_ALLOWED_ORIGINS": "https://only-btc.app,http://localhost:3002",
+    "TURNSTILE_EXPECTED_HOSTNAME": "only-btc.app",
+    "ADMIN_EMAIL_ALLOWLIST": "macjjuni@gmail.com"
+  }
+}

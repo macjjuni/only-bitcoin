@@ -1,4 +1,4 @@
-import type { ButtonHTMLAttributes, MouseEvent, ReactNode } from "react";
+import type { ButtonHTMLAttributes, MouseEvent, ReactNode, Ref } from "react";
 import TransitionLink from "./TransitionLink";
 
 interface FloatingBannerButtonProps
@@ -6,6 +6,7 @@ interface FloatingBannerButtonProps
   children: ReactNode;
   href?: string;
   onClick?: (e: MouseEvent<HTMLAnchorElement | HTMLButtonElement>) => void;
+  buttonRef?: Ref<HTMLButtonElement>;
 }
 
 export default function FloatingBannerButton({
@@ -13,6 +14,7 @@ export default function FloatingBannerButton({
   className,
   href,
   onClick,
+  buttonRef,
   ...props
 }: FloatingBannerButtonProps) {
   const commonClassName = [
@@ -36,6 +38,7 @@ export default function FloatingBannerButton({
 
   return (
     <button
+      ref={buttonRef}
       type="button"
       className={`${commonClassName} tap-highlight-transparent select-none`}
       onClick={handleButtonClick}
