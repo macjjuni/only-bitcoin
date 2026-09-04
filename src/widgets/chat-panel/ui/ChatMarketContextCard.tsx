@@ -3,6 +3,7 @@
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useMemo } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
+import { calcPremiumPercent } from "@/shared/utils/calculate";
 
 interface ChatMarketContextCardProps {
   isExpanded: boolean;
@@ -27,8 +28,11 @@ export default function ChatMarketContextCard({
       return null;
     }
 
-    const premiumRatio = bitcoinPrice.krw / (bitcoinPrice.usd * usdExchangeRate) - 1;
-    const premiumPercentage = premiumRatio * 100;
+    const premiumPercentage = calcPremiumPercent(
+      bitcoinPrice.krw,
+      bitcoinPrice.usd,
+      usdExchangeRate,
+    );
     const krwChangePercentage = Number(bitcoinPrice.krwChange24h);
 
     return {
