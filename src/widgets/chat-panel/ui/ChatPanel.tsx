@@ -320,17 +320,13 @@ export default function ChatPanel({
         align="end"
         sideOffset={6}
         collisionPadding={12}
-        className="!z-[110] !w-[min(18rem,calc(100vw-1.5rem))] !rounded-xl !border-neutral-200 !bg-white !p-3 !text-neutral-700 !shadow-lg dark:!border-neutral-700 dark:!bg-neutral-900 dark:!text-neutral-200"
+        className="!z-[110] !w-[min(18rem,calc(100vw-1.5rem))] !rounded-xl !border-neutral-200 !bg-white !p-3 !text-neutral-700 !shadow-lg font-pretendard dark:!border-neutral-700 dark:!bg-neutral-900 dark:!text-neutral-200"
       >
         <p className="text-sm font-bold">채팅 이용 안내</p>
         <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-4 text-xs leading-5 text-neutral-600 dark:text-neutral-300">
-          <li>
-            익명 공개 채팅이며 닉네임·메시지·답글·리액션이 서버에 저장됩니다. 개인정보, 연락처,
-            링크를 작성하지 마세요.
-          </li>
-          <li>
-            메시지는 최신 300개만 보관되며, 301번째부터 가장 오래된 메시지가 자동으로 삭제됩니다.
-          </li>
+          <li>익명 공개 채팅으로 최신 메시지 300개만 보관되고 이후 자동 삭제됩니다.</li>
+          <li>개인정보·연락처·링크는 남기지 마세요.</li>
+          <li>닉네임은 5분에 한 번 바꿀 수 있습니다.</li>
         </ul>
       </KPopoverContent>
     </KPopover>
@@ -392,13 +388,17 @@ export default function ChatPanel({
               <button
                 type="button"
                 aria-label="닉네임 변경"
-                className="flex items-center gap-1"
+                className="flex min-w-0 items-center gap-1"
                 onClick={onClickNicknameEditButton}
               >
-                <span className="text-xs truncate">
-                  {me.nickname}#{formatChatAnonId(me.anonId)}
+                {/* 헤더 폭이 좁아 닉네임과 익명 ID 를 두 줄로 나눠 씀. */}
+                <span className="flex min-w-0 flex-col items-end leading-tight">
+                  <span className="max-w-full truncate text-xs">{me.nickname}</span>
+                  <span className="text-[10px] text-neutral-500">
+                    #{formatChatAnonId(me.anonId)}
+                  </span>
                 </span>
-                <Pencil size={12} />
+                <Pencil size={12} className="shrink-0" />
               </button>
             )}
             {ChatInformationPopoverTemplate}
