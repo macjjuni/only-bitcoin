@@ -340,7 +340,7 @@ export default function ChatPanel({
         id="only-bitcoin-chat-panel"
         ref={panelReference}
         role="dialog"
-        aria-label="익명 실시간 채팅"
+        aria-label="비밀기지"
         aria-modal={isFullscreen || undefined}
         onKeyDown={onKeyDownPanel}
         style={panelStyle}
@@ -349,7 +349,7 @@ export default function ChatPanel({
         <header className="flex min-h-14 items-center justify-between gap-3 border-b border-neutral-200 px-4 dark:border-neutral-700">
           <div className="min-w-0">
             <div className="flex items-center gap-2">
-              <h2 className="text-sm font-bold">익명 채팅</h2>
+              <h2 className="text-sm font-bold">비밀기지</h2>
               <span className="inline-flex items-center gap-1 text-[11px] text-neutral-500">
                 <span className="h-1.5 w-1.5 rounded-full bg-green-500" />
                 {online}명
