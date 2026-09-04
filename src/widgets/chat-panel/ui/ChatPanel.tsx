@@ -76,6 +76,7 @@ export default function ChatPanel({
   const [mobileViewportHeightInPixels, setMobileViewportHeightInPixels] = useState<number | null>(
     null,
   );
+  const [mobileViewportOffsetTopInPixels, setMobileViewportOffsetTopInPixels] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
   const [nicknameDraft, setNicknameDraft] = useState(identity?.nickname ?? "익명");
@@ -231,15 +232,18 @@ export default function ChatPanel({
 
   useEffect(() => {
     const visualViewport = window.visualViewport;
-    const updateVisualViewportHeight = (): void => {
+    const updateVisualViewportMetrics = (): void => {
       setMobileViewportHeightInPixels(visualViewport?.height ?? window.innerHeight);
+      setMobileViewportOffsetTopInPixels(visualViewport?.offsetTop ?? 0);
     };
 
-    updateVisualViewportHeight();
-    visualViewport?.addEventListener("resize", updateVisualViewportHeight);
+    updateVisualViewportMetrics();
+    visualViewport?.addEventListener("resize", updateVisualViewportMetrics);
+    visualViewport?.addEventListener("scroll", updateVisualViewportMetrics);
 
     return () => {
-      visualViewport?.removeEventListener("resize", updateVisualViewportHeight);
+      visualViewport?.removeEventListener("resize", updateVisualViewportMetrics);
+      visualViewport?.removeEventListener("scroll", updateVisualViewportMetrics);
     };
   }, []);
 
@@ -310,12 +314,15 @@ export default function ChatPanel({
     hasAcceptedNotice && chatConfig.isConnectionConfigured && connectionStatus === "idle";
   const panelStyle =
     isFullscreen && isMobilePanel && mobileViewportHeightInPixels
-      ? { height: `${mobileViewportHeightInPixels}px` }
+      ? {
+          height: `${mobileViewportHeightInPixels}px`,
+          top: `${mobileViewportOffsetTopInPixels}px`,
+        }
       : undefined;
   const panelClassName = [
     "pointer-events-auto fixed flex flex-col overflow-hidden bg-white font-pretendard shadow-2xl dark:bg-neutral-950",
     isFullscreen
-      ? "inset-0 h-[100dvh] w-full rounded-none"
+      ? "inset-x-0 top-0 h-[100dvh] w-full rounded-none"
       : "bottom-[calc(84px+4.5rem)] left-3 right-3 h-[min(50dvh,560px)] rounded-3xl border border-neutral-200 dark:border-neutral-700 sm:bottom-[calc(84px+5rem)] sm:left-auto sm:right-4 sm:h-[min(50dvh,560px)] sm:w-[min(420px,calc(100vw-2rem))] layout-max:right-[calc((100vw-524px)/2+1rem)]",
   ].join(" ");
 

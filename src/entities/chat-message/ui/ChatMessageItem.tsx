@@ -1,8 +1,7 @@
 "use client";
 
-import { KPopover, KPopoverContent, KPopoverTrigger } from "kku-ui";
 import { MessageCircleReply, Plus } from "lucide-react";
-import { memo } from "react";
+import { memo, useState } from "react";
 import { CHAT_COLLAPSED_MESSAGE_GRAPHEMES } from "@/shared/config/chat";
 import { countGraphemes, truncateGraphemes } from "@/shared/lib/text/countGraphemes";
 import {
@@ -77,6 +76,10 @@ function ChatMessageItem({
   onSelectReply,
   onToggleReaction,
 }: ChatMessageItemProps) {
+  // region [Hooks]
+  const [isReactionPickerOpen, setIsReactionPickerOpen] = useState(false);
+  // endregion
+
   // region [Privates]
   const isMyMessage = currentAnonId === message.anonId;
   const messageGraphemeCount = countGraphemes(message.body);
@@ -100,6 +103,10 @@ function ChatMessageItem({
     onToggleExpanded(message.id);
   };
 
+  const onClickReactionPickerButton = (): void => {
+    setIsReactionPickerOpen((currentOpenState) => !currentOpenState);
+  };
+
   // endregion
 
   // region [Templates]
@@ -116,6 +123,47 @@ function ChatMessageItem({
     />
   ));
 
+  const ReplyButtonTemplate = (
+    <button
+      type="button"
+      aria-label="답글 작성"
+      onClick={onClickReplyButton}
+      className="inline-flex h-7 items-center gap-1 rounded-full px-2 text-[11px] text-neutral-500 hover:text-bitcoin dark:text-neutral-400"
+    >
+      <MessageCircleReply size={14} />
+      답글
+    </button>
+  );
+
+  const ReactionActionsTemplate = (
+    <>
+      {VisibleReactionButtonsTemplate}
+      <button
+        type="button"
+        aria-label="반응 추가"
+        aria-expanded={isReactionPickerOpen}
+        onClick={onClickReactionPickerButton}
+        className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+      >
+        <Plus size={14} />
+      </button>
+      {isReactionPickerOpen && (
+        <div className="flex items-center gap-1">
+          {CHAT_REACTION_KEYS.map((reactionKey) => (
+            <ReactionButton
+              key={reactionKey}
+              messageId={message.id}
+              reactionKey={reactionKey}
+              count={message.reactions[reactionKey]}
+              isActive={hasSelectedReaction(reactionKey)}
+              onToggleReaction={onToggleReaction}
+            />
+          ))}
+        </div>
+      )}
+    </>
+  );
+
   // endregion
 
   return (
@@ -131,18 +179,18 @@ function ChatMessageItem({
 
       <div
         className={[
-          "max-w-[88%] rounded-2xl border px-3 py-2.5 text-[13px] leading-5 shadow-sm",
+          "max-w-[88%] rounded-2xl border px-2.5 py-2 text-[13px] leading-5 shadow-sm",
           isMyMessage
             ? "rounded-tr-md border-bitcoin/30 bg-bitcoin/10"
             : "rounded-tl-md border-neutral-200 bg-white dark:border-neutral-700 dark:bg-neutral-900",
         ].join(" ")}
       >
         {message.parent && (
-          <blockquote className="mb-2 border-l-2 border-bitcoin/60 pl-2 text-[11px] leading-4 text-neutral-500 dark:text-neutral-400">
+          <blockquote className="mb-1.5 border-l-2 border-bitcoin/60 pl-2 text-[11px] leading-4 text-neutral-500 dark:text-neutral-400">
             <strong>
               {message.parent.nickname}#{formatChatAnonId(message.parent.anonId)}
             </strong>
-            <span className="mt-0.5 block break-words">
+            <span className="mt-0.5 block truncate">
               {message.parent.snippet || "삭제된 메시지"}
             </span>
           </blockquote>
@@ -160,46 +208,17 @@ function ChatMessageItem({
       </div>
 
       <div className="flex max-w-[92%] flex-wrap items-center gap-1 px-1">
-        <button
-          type="button"
-          aria-label="답글 작성"
-          onClick={onClickReplyButton}
-          className="inline-flex h-7 items-center gap-1 rounded-full px-2 text-[11px] text-neutral-500 hover:text-bitcoin dark:text-neutral-400"
-        >
-          <MessageCircleReply size={14} />
-          답글
-        </button>
-        {VisibleReactionButtonsTemplate}
-        <KPopover>
-          <KPopoverTrigger asChild>
-            <button
-              type="button"
-              aria-label="반응 추가"
-              className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
-            >
-              <Plus size={14} />
-            </button>
-          </KPopoverTrigger>
-          <KPopoverContent
-            side={isMyMessage ? "left" : "right"}
-            align="center"
-            sideOffset={6}
-            className="!z-[110] w-auto p-1"
-          >
-            <div className="flex items-center gap-1">
-              {CHAT_REACTION_KEYS.map((reactionKey) => (
-                <ReactionButton
-                  key={reactionKey}
-                  messageId={message.id}
-                  reactionKey={reactionKey}
-                  count={message.reactions[reactionKey]}
-                  isActive={hasSelectedReaction(reactionKey)}
-                  onToggleReaction={onToggleReaction}
-                />
-              ))}
-            </div>
-          </KPopoverContent>
-        </KPopover>
+        {isMyMessage ? (
+          <>
+            {ReactionActionsTemplate}
+            {ReplyButtonTemplate}
+          </>
+        ) : (
+          <>
+            {ReplyButtonTemplate}
+            {ReactionActionsTemplate}
+          </>
+        )}
       </div>
     </article>
   );
