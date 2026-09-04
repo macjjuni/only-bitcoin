@@ -1,7 +1,7 @@
 "use client";
 
-import { KTextField } from "kku-ui";
-import { Check, Maximize2, Minimize2, Pencil, RotateCw, X } from "lucide-react";
+import { KPopover, KPopoverContent, KPopoverTrigger, KTextField } from "kku-ui";
+import { Check, Info, Maximize2, Minimize2, Pencil, RotateCw, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type ChatMessage, formatChatAnonId } from "@/entities/chat-message";
 import {
@@ -303,6 +303,38 @@ export default function ChatPanel({
         </div>
       </div>
     ) : null;
+
+  const ChatInformationPopoverTemplate = (
+    <KPopover>
+      <KPopoverTrigger asChild>
+        <button
+          type="button"
+          aria-label="채팅 이용 안내"
+          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-bitcoin dark:text-neutral-400 dark:hover:bg-neutral-800"
+        >
+          <Info size={17} />
+        </button>
+      </KPopoverTrigger>
+      <KPopoverContent
+        side="bottom"
+        align="end"
+        sideOffset={6}
+        collisionPadding={12}
+        className="!z-[110] !w-[min(18rem,calc(100vw-1.5rem))] !rounded-xl !border-neutral-200 !bg-white !p-3 !text-neutral-700 !shadow-lg dark:!border-neutral-700 dark:!bg-neutral-900 dark:!text-neutral-200"
+      >
+        <p className="text-sm font-bold">채팅 이용 안내</p>
+        <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-4 text-xs leading-5 text-neutral-600 dark:text-neutral-300">
+          <li>
+            익명 공개 채팅이며 닉네임·메시지·답글·리액션이 서버에 저장됩니다. 개인정보, 연락처,
+            링크를 작성하지 마세요.
+          </li>
+          <li>
+            메시지는 최신 300개만 보관되며, 301번째부터 가장 오래된 메시지가 자동으로 삭제됩니다.
+          </li>
+        </ul>
+      </KPopoverContent>
+    </KPopover>
+  );
   // endregion
 
   const isMutationDisabled = connectionStatus !== "open" || readOnly || isTurnstileRequired;
@@ -369,6 +401,7 @@ export default function ChatPanel({
                 <Pencil size={12} />
               </button>
             )}
+            {ChatInformationPopoverTemplate}
             <button
               type="button"
               aria-label={isFullscreen ? "채팅 말풍선 크기로 축소" : "채팅 전체 화면으로 확대"}
