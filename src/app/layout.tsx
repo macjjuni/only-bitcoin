@@ -40,7 +40,6 @@ export const metadata: Metadata = {
   verification: {
     google: "nEjgqK7F-A9Ldgevt4Jjz1ekaTutFoUx8FEkUcaTfPE", // 서치 콘솔
   },
-  manifest: "/manifest.webmanifest",
   appleWebApp: {
     capable: true,
     title: "온리 비트코인",
