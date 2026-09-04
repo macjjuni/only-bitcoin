@@ -5,7 +5,7 @@
  * 내용이 실질적으로 바뀔 때만 갱신한다. (배포 시각으로 대체하면 방침이
  * 바뀌지 않았는데도 크롤러에 '수정됨'으로 보고된다.)
  */
-export const PRIVACY_EFFECTIVE_DATE = "2026-08-22" as const;
+export const PRIVACY_EFFECTIVE_DATE = "2026-09-03" as const;
 
 /** 방침 본문에 노출되는 한글 표기. */
-export const PRIVACY_EFFECTIVE_DATE_LABEL = "2026년 8월 22일" as const;
+export const PRIVACY_EFFECTIVE_DATE_LABEL = "2026년 9월 3일" as const;
