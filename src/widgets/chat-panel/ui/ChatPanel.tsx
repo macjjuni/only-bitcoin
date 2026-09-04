@@ -44,6 +44,7 @@ const focusableElementSelector = [
   "[href]",
   '[tabindex]:not([tabindex="-1"])',
 ].join(",");
+const ADMINISTRATOR_LOGIN_LONG_PRESS_DURATION_IN_MILLISECONDS = 7_000;
 
 export default function ChatPanel({
   identity,
@@ -80,6 +81,7 @@ export default function ChatPanel({
   const [mobileViewportOffsetTopInPixels, setMobileViewportOffsetTopInPixels] = useState(0);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
+  const [isAdministratorLoginVisible, setIsAdministratorLoginVisible] = useState(false);
   const [messagePendingDeletion, setMessagePendingDeletion] = useState<ChatMessage | null>(null);
   const [nicknameDraft, setNicknameDraft] = useState(identity?.nickname ?? "익명");
   const [pendingNicknameRequestId, setPendingNicknameRequestId] = useState<string | null>(null);
@@ -91,6 +93,7 @@ export default function ChatPanel({
   });
   const panelReference = useRef<HTMLElement | null>(null);
   const closeButtonReference = useRef<HTMLButtonElement | null>(null);
+  const administratorLoginLongPressTimerReference = useRef<number | null>(null);
   const verifyTurnstileReference = useRef<(turnstileToken: string) => string | null>(() => null);
   const isConnectionEnabled =
     hasAcceptedNotice && identity !== null && chatConfig.isConnectionConfigured;
@@ -148,6 +151,38 @@ export default function ChatPanel({
     onChangeDraft("");
     onChangeSelectedReply(null);
   };
+
+  const cancelAdministratorLoginLongPress = useCallback((): void => {
+    if (administratorLoginLongPressTimerReference.current === null) {
+      return;
+    }
+
+    window.clearTimeout(administratorLoginLongPressTimerReference.current);
+    administratorLoginLongPressTimerReference.current = null;
+  }, []);
+
+  const revealAdministratorLogin = useCallback((): void => {
+    administratorLoginLongPressTimerReference.current = null;
+    setIsAdministratorLoginVisible(true);
+    navigator.vibrate?.(30);
+  }, []);
+
+  const startAdministratorLoginLongPress = useCallback((): void => {
+    if (isAdministrator || isAdministratorLoginVisible) {
+      return;
+    }
+
+    cancelAdministratorLoginLongPress();
+    administratorLoginLongPressTimerReference.current = window.setTimeout(
+      revealAdministratorLogin,
+      ADMINISTRATOR_LOGIN_LONG_PRESS_DURATION_IN_MILLISECONDS,
+    );
+  }, [
+    cancelAdministratorLoginLongPress,
+    isAdministrator,
+    isAdministratorLoginVisible,
+    revealAdministratorLogin,
+  ]);
   // endregion
 
   // region [Events]
@@ -221,6 +256,26 @@ export default function ChatPanel({
     retryConnection();
   };
 
+  const onPointerDownChatInformationButton = (
+    pointerEvent: React.PointerEvent<HTMLButtonElement>,
+  ): void => {
+    if (pointerEvent.pointerType === "mouse" && pointerEvent.button !== 0) {
+      return;
+    }
+
+    startAdministratorLoginLongPress();
+  };
+
+  const onPointerEndChatInformationButton = (): void => {
+    cancelAdministratorLoginLongPress();
+  };
+
+  const onContextMenuChatInformationButton = (
+    mouseEvent: React.MouseEvent<HTMLButtonElement>,
+  ): void => {
+    mouseEvent.preventDefault();
+  };
+
   const onSelectReplyMessage = (message: ChatMessage): void => {
     onChangeSelectedReply(message);
   };
@@ -242,6 +297,7 @@ export default function ChatPanel({
 
   const onSignOutAdministrator = useCallback((): void => {
     setMessagePendingDeletion(null);
+    setIsAdministratorLoginVisible(false);
     signOutAdministrator();
   }, [signOutAdministrator]);
 
@@ -271,7 +327,11 @@ export default function ChatPanel({
   // region [Life Cycles]
   useEffect(() => {
     closeButtonReference.current?.focus();
-  }, []);
+
+    return () => {
+      cancelAdministratorLoginLongPress();
+    };
+  }, [cancelAdministratorLoginLongPress]);
 
   useEffect(() => {
     if (pendingNicknameRequest?.status === "acknowledged") {
@@ -397,7 +457,12 @@ export default function ChatPanel({
         <button
           type="button"
           aria-label="채팅 이용 안내"
-          className="inline-flex h-9 w-9 items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-bitcoin dark:text-neutral-400 dark:hover:bg-neutral-800"
+          onPointerDown={onPointerDownChatInformationButton}
+          onPointerUp={onPointerEndChatInformationButton}
+          onPointerLeave={onPointerEndChatInformationButton}
+          onPointerCancel={onPointerEndChatInformationButton}
+          onContextMenu={onContextMenuChatInformationButton}
+          className="inline-flex h-9 w-9 touch-manipulation select-none items-center justify-center rounded-full text-neutral-500 transition-colors hover:bg-neutral-100 hover:text-bitcoin dark:text-neutral-400 dark:hover:bg-neutral-800"
         >
           <Info size={17} />
         </button>
@@ -415,12 +480,14 @@ export default function ChatPanel({
           <li>개인정보·연락처·링크는 남기지 마세요.</li>
           <li>닉네임은 5분에 한 번 바꿀 수 있습니다.</li>
         </ul>
-        <ChatAdministratorControl
-          isAdministrator={isAdministrator}
-          isAuthenticating={isAuthenticatingAdministrator}
-          onAuthenticate={onAuthenticateAdministrator}
-          onSignOut={onSignOutAdministrator}
-        />
+        {(isAdministratorLoginVisible || isAdministrator) && (
+          <ChatAdministratorControl
+            isAdministrator={isAdministrator}
+            isAuthenticating={isAuthenticatingAdministrator}
+            onAuthenticate={onAuthenticateAdministrator}
+            onSignOut={onSignOutAdministrator}
+          />
+        )}
       </KPopoverContent>
     </KPopover>
   );
