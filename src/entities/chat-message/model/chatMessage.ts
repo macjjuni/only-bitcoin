@@ -37,6 +37,10 @@ export const formatChatAnonId = (anonId: string): string => {
   return anonId.slice(0, 4);
 };
 
+export const createChatMessageElementId = (messageId: string): string => {
+  return `chat-message-${messageId}`;
+};
+
 export const CHAT_REACTION_LABELS: Record<ChatReactionKey, string> = {
   rocket: "🚀",
   fear: "😱",

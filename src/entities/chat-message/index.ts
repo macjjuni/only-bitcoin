@@ -6,6 +6,7 @@ export {
   type ChatMessageParent,
   type ChatReactionCounts,
   type ChatReactionKey,
+  createChatMessageElementId,
   formatChatAnonId,
 } from "./model/chatMessage";
 export {

@@ -1,7 +1,7 @@
 "use client";
 
 import { MessageCircleReply, Plus } from "lucide-react";
-import { memo, useState } from "react";
+import { type KeyboardEvent, memo, useState } from "react";
 import { CHAT_COLLAPSED_MESSAGE_GRAPHEMES } from "@/shared/config/chat";
 import { countGraphemes, truncateGraphemes } from "@/shared/lib/text/countGraphemes";
 import {
@@ -9,6 +9,7 @@ import {
   CHAT_REACTION_LABELS,
   type ChatMessage,
   type ChatReactionKey,
+  createChatMessageElementId,
   formatChatAnonId,
 } from "../model/chatMessage";
 
@@ -19,6 +20,7 @@ interface ChatMessageItemProps {
   onToggleExpanded: (messageId: string) => void;
   onSelectReply: (message: ChatMessage) => void;
   onToggleReaction: (messageId: string, reactionKey: ChatReactionKey) => void;
+  onNavigateToMessage: (messageId: string) => void;
 }
 
 interface ReactionButtonProps {
@@ -75,6 +77,7 @@ function ChatMessageItem({
   onToggleExpanded,
   onSelectReply,
   onToggleReaction,
+  onNavigateToMessage,
 }: ChatMessageItemProps) {
   // region [Hooks]
   const [isReactionPickerOpen, setIsReactionPickerOpen] = useState(false);
@@ -84,6 +87,7 @@ function ChatMessageItem({
   const isMyMessage = currentAnonId === message.anonId;
   const messageGraphemeCount = countGraphemes(message.body);
   const shouldCollapseMessage = messageGraphemeCount > CHAT_COLLAPSED_MESSAGE_GRAPHEMES;
+  const isParentMessageNavigable = Boolean(message.parent?.snippet);
   const visibleMessageBody =
     shouldCollapseMessage && !isExpanded
       ? `${truncateGraphemes(message.body, CHAT_COLLAPSED_MESSAGE_GRAPHEMES)}…`
@@ -105,6 +109,25 @@ function ChatMessageItem({
 
   const onClickReactionPickerButton = (): void => {
     setIsReactionPickerOpen((currentOpenState) => !currentOpenState);
+  };
+
+  const onClickParentMessageBlockquote = (): void => {
+    if (!message.parent || !isParentMessageNavigable) {
+      return;
+    }
+
+    onNavigateToMessage(message.parent.id);
+  };
+
+  const onKeyDownParentMessageBlockquote = (
+    keyboardEvent: KeyboardEvent<HTMLQuoteElement>,
+  ): void => {
+    if (keyboardEvent.key !== "Enter" && keyboardEvent.key !== " ") {
+      return;
+    }
+
+    keyboardEvent.preventDefault();
+    onClickParentMessageBlockquote();
   };
 
   // endregion
@@ -182,7 +205,11 @@ function ChatMessageItem({
   // endregion
 
   return (
-    <article className={`flex flex-col gap-1.5 ${isMyMessage ? "items-end" : "items-start"}`}>
+    <article
+      id={createChatMessageElementId(message.id)}
+      tabIndex={-1}
+      className={`flex flex-col gap-1.5 rounded-xl focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bitcoin ${isMyMessage ? "items-end" : "items-start"}`}
+    >
       <div className="flex items-baseline gap-2 px-1 text-xs text-neutral-500 dark:text-neutral-400">
         <strong className="font-medium text-neutral-700 dark:text-neutral-200">
           {message.nickname}#{formatChatAnonId(message.anonId)}
@@ -193,6 +220,7 @@ function ChatMessageItem({
       </div>
 
       <div
+        data-chat-message-bubble
         className={[
           "max-w-[88%] rounded-2xl border px-2.5 py-2 text-[13px] leading-5 shadow-sm",
           isMyMessage
@@ -201,7 +229,23 @@ function ChatMessageItem({
         ].join(" ")}
       >
         {message.parent && (
-          <blockquote className="mb-1.5 border-l-2 border-bitcoin/60 pl-2 text-[11px] leading-4 text-neutral-500 dark:text-neutral-400">
+          <blockquote
+            role={isParentMessageNavigable ? "button" : undefined}
+            tabIndex={isParentMessageNavigable ? 0 : undefined}
+            aria-label={
+              isParentMessageNavigable
+                ? `${message.parent.nickname}님의 원본 메시지로 이동`
+                : undefined
+            }
+            onClick={onClickParentMessageBlockquote}
+            onKeyDown={onKeyDownParentMessageBlockquote}
+            className={[
+              "mb-1.5 border-l-2 border-bitcoin/60 pl-2 text-[11px] leading-4 text-neutral-500 dark:text-neutral-400",
+              isParentMessageNavigable
+                ? "cursor-pointer rounded-r-md transition-colors hover:bg-bitcoin/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-bitcoin"
+                : "cursor-default",
+            ].join(" ")}
+          >
             <strong>
               {message.parent.nickname}#{formatChatAnonId(message.parent.anonId)}
             </strong>

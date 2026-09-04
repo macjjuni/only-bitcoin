@@ -1,8 +1,14 @@
 "use client";
 
+import { kToast } from "kku-ui";
 import { ArrowDown } from "lucide-react";
 import { memo, useEffect, useLayoutEffect, useRef, useState } from "react";
-import { type ChatMessage, ChatMessageItem, type ChatReactionKey } from "@/entities/chat-message";
+import {
+  type ChatMessage,
+  ChatMessageItem,
+  type ChatReactionKey,
+  createChatMessageElementId,
+} from "@/entities/chat-message";
 import { useChatStore } from "@/features/chat-session";
 
 interface ChatMessageListProps {
@@ -24,10 +30,13 @@ interface ConnectedChatMessageItemProps {
   onToggleMessageExpanded: (messageId: string) => void;
   onSelectReply: (message: ChatMessage) => void;
   onToggleReaction: (messageId: string, reactionKey: ChatReactionKey) => void;
+  onNavigateToMessage: (messageId: string) => void;
 }
 
 const BOTTOM_PROXIMITY_IN_PIXELS = 80;
 const SCROLL_TO_LATEST_BUTTON_THRESHOLD_IN_PIXELS = 360;
+const MORE_REQUEST_INTERVAL_IN_MILLISECONDS = 1_050;
+const MESSAGE_HIGHLIGHT_DURATION_IN_MILLISECONDS = 1_400;
 const ConnectedChatMessageItem = memo(function ConnectedChatMessageItem({
   messageId,
   currentAnonId,
@@ -35,6 +44,7 @@ const ConnectedChatMessageItem = memo(function ConnectedChatMessageItem({
   onToggleMessageExpanded,
   onSelectReply,
   onToggleReaction,
+  onNavigateToMessage,
 }: ConnectedChatMessageItemProps) {
   const message = useChatStore((chatState) => chatState.messagesById[messageId]);
 
@@ -50,6 +60,7 @@ const ConnectedChatMessageItem = memo(function ConnectedChatMessageItem({
       onToggleExpanded={onToggleMessageExpanded}
       onSelectReply={onSelectReply}
       onToggleReaction={onToggleReaction}
+      onNavigateToMessage={onNavigateToMessage}
     />
   );
 });
@@ -76,6 +87,9 @@ export default function ChatMessageList({
   const previousNewestMessageIdReference = useRef<string | null>(null);
   const prependScrollHeightReference = useRef<number | null>(null);
   const pendingMoreRequestIdReference = useRef<string | null>(null);
+  const moreRequestStartedAtInMillisecondsReference = useRef<number | null>(null);
+  const pendingNavigationMessageIdReference = useRef<string | null>(null);
+  const pendingNavigationTimeoutReference = useRef<ReturnType<typeof setTimeout> | null>(null);
   const isNearBottomReference = useRef(true);
   const [isScrollToLatestButtonVisible, setIsScrollToLatestButtonVisible] = useState(false);
   const [newMessageCount, setNewMessageCount] = useState(0);
@@ -101,22 +115,108 @@ export default function ChatMessageList({
     setNewMessageCount(0);
   };
 
-  const loadMoreMessages = (): void => {
+  const scrollToMessage = (messageId: string): boolean => {
+    const scrollContainer = scrollContainerReference.current;
+    const messageElement = document.getElementById(createChatMessageElementId(messageId));
+
+    if (!scrollContainer || !messageElement || !scrollContainer.contains(messageElement)) {
+      return false;
+    }
+
+    const messageBubbleElement = messageElement.querySelector<HTMLElement>(
+      "[data-chat-message-bubble]",
+    );
+    const shouldReduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+    pendingNavigationMessageIdReference.current = null;
+
+    if (pendingNavigationTimeoutReference.current) {
+      clearTimeout(pendingNavigationTimeoutReference.current);
+      pendingNavigationTimeoutReference.current = null;
+    }
+
+    messageElement.scrollIntoView({
+      behavior: shouldReduceMotion ? "auto" : "smooth",
+      block: "center",
+    });
+    messageElement.focus({ preventScroll: true });
+
+    if (!shouldReduceMotion && messageBubbleElement) {
+      messageBubbleElement.animate(
+        [
+          { backgroundColor: "rgb(var(--bitcoin-rgb) / 0)" },
+          { backgroundColor: "rgb(var(--bitcoin-rgb) / 0.12)" },
+          { backgroundColor: "rgb(var(--bitcoin-rgb) / 0)" },
+        ],
+        {
+          duration: MESSAGE_HIGHLIGHT_DURATION_IN_MILLISECONDS,
+          easing: "ease-out",
+        },
+      );
+    }
+
+    return true;
+  };
+
+  const loadMoreMessages = (): boolean => {
     const scrollContainer = scrollContainerReference.current;
     const oldestMessageId = messageIds[0];
 
     if (!scrollContainer || !oldestMessageId || !hasMore || pendingMoreRequestIdReference.current) {
-      return;
+      return false;
     }
 
     const requestId = onRequestMoreMessages(oldestMessageId);
 
     if (!requestId) {
-      return;
+      return false;
     }
 
     prependScrollHeightReference.current = scrollContainer.scrollHeight;
     pendingMoreRequestIdReference.current = requestId;
+    moreRequestStartedAtInMillisecondsReference.current = Date.now();
+    return true;
+  };
+
+  const notifyMissingOriginalMessage = (): void => {
+    kToast.info("원본 메시지는 보관 한도를 초과해 삭제됐어요.");
+  };
+
+  const continuePendingMessageNavigation = (): void => {
+    const pendingNavigationMessageId = pendingNavigationMessageIdReference.current;
+
+    if (!pendingNavigationMessageId || scrollToMessage(pendingNavigationMessageId)) {
+      return;
+    }
+
+    if (!hasMore) {
+      pendingNavigationMessageIdReference.current = null;
+      notifyMissingOriginalMessage();
+      return;
+    }
+
+    const moreRequestStartedAtInMilliseconds =
+      moreRequestStartedAtInMillisecondsReference.current ?? 0;
+    const elapsedTimeInMilliseconds = Date.now() - moreRequestStartedAtInMilliseconds;
+    const remainingWaitTimeInMilliseconds = Math.max(
+      0,
+      MORE_REQUEST_INTERVAL_IN_MILLISECONDS - elapsedTimeInMilliseconds,
+    );
+
+    if (pendingNavigationTimeoutReference.current) {
+      clearTimeout(pendingNavigationTimeoutReference.current);
+    }
+
+    pendingNavigationTimeoutReference.current = setTimeout(() => {
+      pendingNavigationTimeoutReference.current = null;
+
+      if (!pendingNavigationMessageIdReference.current) {
+        return;
+      }
+
+      if (!loadMoreMessages() && !pendingMoreRequestIdReference.current) {
+        pendingNavigationMessageIdReference.current = null;
+      }
+    }, remainingWaitTimeInMilliseconds);
   };
   // endregion
 
@@ -148,6 +248,15 @@ export default function ChatMessageList({
   const onClickLoadMoreButton = (): void => {
     loadMoreMessages();
   };
+
+  const onNavigateToMessage = (messageId: string): void => {
+    if (scrollToMessage(messageId)) {
+      return;
+    }
+
+    pendingNavigationMessageIdReference.current = messageId;
+    continuePendingMessageNavigation();
+  };
   // endregion
 
   // region [Life Cycles]
@@ -162,6 +271,13 @@ export default function ChatMessageList({
       const addedScrollHeight = scrollContainer.scrollHeight - prependScrollHeightReference.current;
       scrollContainer.scrollTop += addedScrollHeight;
       prependScrollHeightReference.current = null;
+
+      const pendingNavigationMessageId = pendingNavigationMessageIdReference.current;
+
+      if (pendingNavigationMessageId) {
+        scrollToMessage(pendingNavigationMessageId);
+      }
+
       return;
     }
 
@@ -205,6 +321,15 @@ export default function ChatMessageList({
 
     if (pendingMoreRequest && pendingMoreRequest.status !== "pending") {
       pendingMoreRequestIdReference.current = null;
+
+      if (
+        pendingMoreRequest.status === "acknowledged" ||
+        pendingMoreRequest.errorCode === "RATE_MORE"
+      ) {
+        continuePendingMessageNavigation();
+      } else {
+        pendingNavigationMessageIdReference.current = null;
+      }
     }
   }, [pendingRequests]);
 
@@ -234,6 +359,10 @@ export default function ChatMessageList({
 
   useEffect(() => {
     return () => {
+      if (pendingNavigationTimeoutReference.current) {
+        clearTimeout(pendingNavigationTimeoutReference.current);
+      }
+
       if (hasInitializedScrollReference.current) {
         onChangeSavedScrollTop(savedScrollTopReference.current);
       }
@@ -276,6 +405,7 @@ export default function ChatMessageList({
               onToggleMessageExpanded={onToggleMessageExpanded}
               onSelectReply={onSelectReply}
               onToggleReaction={onToggleReaction}
+              onNavigateToMessage={onNavigateToMessage}
             />
           ))}
         </div>
