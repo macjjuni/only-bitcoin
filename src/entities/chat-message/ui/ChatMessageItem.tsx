@@ -1,5 +1,6 @@
 "use client";
 
+import { KButton } from "kku-ui";
 import { MessageCircleReply, Plus, X } from "lucide-react";
 import { memo, useState } from "react";
 import { CHAT_COLLAPSED_MESSAGE_GRAPHEMES } from "@/shared/config/chat";
@@ -49,7 +50,7 @@ function ReactionButton({
   // endregion
 
   return (
-    <button
+    <KButton
       type="button"
       aria-label={`${CHAT_REACTION_LABELS[reactionKey]} 반응 ${isActive ? "취소" : "추가"}`}
       aria-pressed={isActive}
@@ -63,7 +64,7 @@ function ReactionButton({
     >
       <span aria-hidden>{CHAT_REACTION_LABELS[reactionKey]}</span>
       {count > 0 && <span className="font-number">{count}</span>}
-    </button>
+    </KButton>
   );
 }
 
@@ -133,14 +134,14 @@ function ChatMessageItem({
           onToggleReaction={onToggleReaction}
         />
       ))}
-      <button
+      <KButton
         type="button"
         aria-label="반응 선택기 닫기"
         onClick={onClickReactionPickerButton}
         className="inline-flex h-7 w-7 items-center justify-center rounded-full text-neutral-500"
       >
         <X size={14} />
-      </button>
+      </KButton>
     </div>
   ) : null;
   // endregion
@@ -176,29 +177,29 @@ function ChatMessageItem({
         )}
         <p className="whitespace-pre-wrap break-words">{visibleMessageBody}</p>
         {shouldCollapseMessage && (
-          <button
+          <KButton
             type="button"
             onClick={onClickExpandButton}
             className="mt-1 text-xs font-semibold text-bitcoin"
           >
             {isExpanded ? "접기" : "더 보기"}
-          </button>
+          </KButton>
         )}
       </div>
 
       <div className="flex max-w-[92%] flex-wrap items-center gap-1 px-1">
         {VisibleReactionButtonsTemplate}
         {!isReactionPickerOpen && (
-          <button
+          <KButton
             type="button"
             aria-label="반응 추가"
             onClick={onClickReactionPickerButton}
             className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
           >
             <Plus size={14} />
-          </button>
+          </KButton>
         )}
-        <button
+        <KButton
           type="button"
           aria-label="답글 작성"
           onClick={onClickReplyButton}
@@ -206,7 +207,7 @@ function ChatMessageItem({
         >
           <MessageCircleReply size={14} />
           답글
-        </button>
+        </KButton>
       </div>
 
       {ReactionPickerTemplate}

@@ -1,5 +1,6 @@
 "use client";
 
+import { KButton, KTextarea } from "kku-ui";
 import { Send, X } from "lucide-react";
 import { useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@/entities/chat-message";
@@ -115,14 +116,14 @@ export default function ChatComposer({
             </strong>
             <p className="mt-1 truncate text-neutral-500">{selectedReply.body}</p>
           </div>
-          <button
+          <KButton
             type="button"
             aria-label="답글 취소"
             onClick={onClickCancelReplyButton}
             className="shrink-0 rounded-full p-1 text-neutral-500"
           >
             <X size={15} />
-          </button>
+          </KButton>
         </div>
       )}
 
@@ -131,7 +132,7 @@ export default function ChatComposer({
           <label htmlFor="chat-message-composer" className="sr-only">
             메시지 작성
           </label>
-          <textarea
+          <KTextarea
             id="chat-message-composer"
             value={draft}
             rows={1}
@@ -149,7 +150,7 @@ export default function ChatComposer({
             </span>
           )}
         </div>
-        <button
+        <KButton
           type="button"
           aria-label="메시지 전송"
           disabled={isMutationDisabled || isSending || !draft.trim()}
@@ -157,7 +158,7 @@ export default function ChatComposer({
           className="inline-flex h-11 w-11 shrink-0 items-center justify-center rounded-full bg-bitcoin text-white disabled:cursor-not-allowed disabled:opacity-40"
         >
           <Send size={18} />
-        </button>
+        </KButton>
       </div>
 
       {(validationMessage || errorMessage || isUncertain || isSending) && (

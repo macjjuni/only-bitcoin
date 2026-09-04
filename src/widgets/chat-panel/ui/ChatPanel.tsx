@@ -1,5 +1,6 @@
 "use client";
 
+import { KButton, KTextField } from "kku-ui";
 import { Check, Maximize2, Minimize2, Pencil, RotateCw, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@/entities/chat-message";
@@ -279,14 +280,14 @@ export default function ChatPanel({
           <li>투자 권유, 리딩방 홍보, 사칭과 도배를 금지합니다.</li>
           <li>메시지는 Cloudflare 인프라에서 처리되며 운영상 삭제될 수 있습니다.</li>
         </ul>
-        <button
+        <KButton
           type="button"
           onClick={onClickAcceptNoticeButton}
           className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-bitcoin px-4 text-sm font-bold text-white"
         >
           <Check size={17} />
           확인하고 참여하기
-        </button>
+        </KButton>
       </section>
     </div>
   ) : null;
@@ -321,7 +322,7 @@ export default function ChatPanel({
   return (
     <div className="fixed inset-0 z-[100] pointer-events-none">
       {isFullscreen && (
-        <button
+        <KButton
           type="button"
           aria-label="채팅 닫기"
           onClick={onClickBackdrop}
@@ -352,7 +353,7 @@ export default function ChatPanel({
 
           <div className="flex items-center gap-1">
             {me && !isNicknameEditorOpen && (
-              <button
+              <KButton
                 type="button"
                 aria-label="닉네임 변경"
                 onClick={onClickNicknameEditButton}
@@ -362,9 +363,9 @@ export default function ChatPanel({
                   {me.nickname}#{me.anonId}
                 </span>
                 <Pencil size={11} />
-              </button>
+              </KButton>
             )}
-            <button
+            <KButton
               type="button"
               aria-label={isFullscreen ? "채팅 말풍선 크기로 축소" : "채팅 전체 화면으로 확대"}
               aria-pressed={isFullscreen}
@@ -372,8 +373,8 @@ export default function ChatPanel({
               className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
               {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
-            </button>
-            <button
+            </KButton>
+            <KButton
               ref={closeButtonReference}
               type="button"
               aria-label="채팅 닫기"
@@ -381,7 +382,7 @@ export default function ChatPanel({
               className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800"
             >
               <X size={19} />
-            </button>
+            </KButton>
           </div>
         </header>
 
@@ -390,20 +391,20 @@ export default function ChatPanel({
             <label htmlFor="chat-nickname" className="sr-only">
               닉네임
             </label>
-            <input
+            <KTextField
               id="chat-nickname"
               value={nicknameDraft}
               onChange={onChangeNicknameInput}
               maxLength={40}
               className="h-9 min-w-0 flex-1 rounded-xl border border-neutral-300 bg-transparent px-3 text-xs outline-none focus:border-bitcoin dark:border-neutral-700"
             />
-            <button
+            <KButton
               type="button"
               onClick={onClickNicknameSaveButton}
               className="h-9 rounded-xl bg-bitcoin px-3 text-xs font-bold text-white"
             >
               저장
-            </button>
+            </KButton>
           </div>
         )}
 
@@ -414,14 +415,14 @@ export default function ChatPanel({
         )}
         {isTurnstileRequired && <ChatTurnstile onVerifyToken={onVerifyTurnstileToken} />}
         {shouldShowRetryButton && (
-          <button
+          <KButton
             type="button"
             onClick={onClickRetryConnectionButton}
             className="m-3 inline-flex items-center justify-center gap-2 rounded-xl border border-neutral-300 px-3 py-2 text-xs dark:border-neutral-700"
           >
             <RotateCw size={14} />
             다시 연결
-          </button>
+          </KButton>
         )}
 
         {NoticeTemplate}

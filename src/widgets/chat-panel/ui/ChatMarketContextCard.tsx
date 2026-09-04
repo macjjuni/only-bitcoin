@@ -1,5 +1,6 @@
 "use client";
 
+import { KButton } from "kku-ui";
 import { ChevronDown, ChevronUp } from "lucide-react";
 import { useMemo } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
@@ -46,7 +47,7 @@ export default function ChatMarketContextCard({
 
   return (
     <section className="mx-3 mt-3 overflow-hidden rounded-2xl border border-bitcoin/25 bg-gradient-to-br from-bitcoin/10 to-transparent">
-      <button
+      <KButton
         type="button"
         aria-expanded={isExpanded}
         onClick={onClickContextCard}
@@ -55,11 +56,11 @@ export default function ChatMarketContextCard({
         <span>
           <span className="block text-xs font-bold text-bitcoin">지금 시장 · 시스템 정보</span>
           {!isExpanded && (
-            <span className="mt-1 block text-[11px] text-neutral-500">시장 지표 보기</span>
+            <span className="mt-1 block text-xs text-neutral-500">시장 지표 보기</span>
           )}
         </span>
         {isExpanded ? <ChevronUp size={16} /> : <ChevronDown size={16} />}
-      </button>
+      </KButton>
 
       {isExpanded && (
         <div className="border-t border-bitcoin/15 px-3 py-3">
@@ -67,17 +68,19 @@ export default function ChatMarketContextCard({
             <dl className="mb-3 grid grid-cols-3 gap-2 text-center">
               <div>
                 <dt className="text-[10px] text-neutral-500">BTC/KRW</dt>
-                <dd className="mt-1 text-[11px] font-bold">{formatKrwPrice(bitcoinPrice.krw)}</dd>
+                <dd className="mt-1 text-xs font-number font-bold">
+                  {formatKrwPrice(bitcoinPrice.krw)}
+                </dd>
               </div>
               <div>
                 <dt className="text-[10px] text-neutral-500">24시간</dt>
-                <dd className="mt-1 text-[11px] font-bold">
+                <dd className="mt-1 text-xs font-number font-bold">
                   {marketContext.krwChangePercentage.toFixed(2)}%
                 </dd>
               </div>
               <div>
                 <dt className="text-[10px] text-neutral-500">김프</dt>
-                <dd className="mt-1 text-[11px] font-bold">
+                <dd className="mt-1 text-xs font-number font-bold">
                   {marketContext.premiumPercentage.toFixed(2)}%
                 </dd>
               </div>
