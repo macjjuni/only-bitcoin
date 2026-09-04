@@ -387,7 +387,7 @@ export default function ChatPanel({
     "pointer-events-auto fixed flex flex-col overflow-hidden bg-white font-pretendard shadow-2xl dark:bg-neutral-950",
     isFullscreen
       ? "inset-x-0 top-0 h-[100dvh] w-full rounded-none"
-      : "bottom-[calc(84px+4.5rem)] left-3 right-3 h-[min(calc(50dvh_+_24px),584px)] rounded-3xl border border-neutral-200 dark:border-neutral-700 sm:bottom-[calc(84px+5rem)] sm:left-auto sm:right-4 sm:h-[min(calc(50dvh_+_24px),584px)] sm:w-[min(420px,calc(100vw-2rem))] layout-max:right-[calc((100vw-524px)/2+1rem)]",
+      : "bottom-[calc(86px+4.5rem)] left-[9px] right-[9px] h-[min(calc(50dvh_+_64px),624px)] rounded-3xl border border-neutral-200 dark:border-neutral-700 sm:bottom-[calc(86px+5rem)] sm:left-auto sm:right-4 sm:h-[min(calc(50dvh_+_64px),624px)] sm:w-[min(426px,calc(100vw-26px))] layout-max:right-[calc((100vw-524px)/2+1rem)]",
   ].join(" ");
 
   return (
