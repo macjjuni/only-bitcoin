@@ -1,7 +1,6 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import { MessagesSquare } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ChatMessage } from "@/entities/chat-message";
@@ -9,7 +8,7 @@ import type { ChatIdentity } from "@/features/chat-session";
 import { loadOrCreateChatIdentity } from "@/features/chat-session";
 import { CHAT_NOTICE_VERSION, CHAT_STORAGE_KEYS, chatConfig } from "@/shared/config/chat";
 import { isStandaloneRuntime } from "@/shared/lib/pwa/isStandaloneRuntime";
-import { FloatingBannerButton } from "@/shared/ui";
+import { CrowdFundingIcon, FloatingBannerButton } from "@/shared/ui";
 import { ChatPanel } from "@/widgets/chat-panel";
 import ChatInstallGuide from "./ChatInstallGuide";
 
@@ -261,7 +260,7 @@ export default function ChatFloatingBanner() {
         onClick={onClickChatLauncher}
         className="relative"
       >
-        <MessagesSquare size={25} />
+        <CrowdFundingIcon size={30} />
         {shouldShowOnlineBadge && (
           <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-green-500 px-1.5 py-0.5 font-number text-[10px] font-bold leading-4 text-white shadow-sm">
             {onlineCount > 99 ? "99+" : onlineCount}
