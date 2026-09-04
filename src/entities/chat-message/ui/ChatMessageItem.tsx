@@ -1,7 +1,8 @@
 "use client";
 
-import { MessageCircleReply, Plus, X } from "lucide-react";
-import { memo, useState } from "react";
+import { KPopover, KPopoverContent, KPopoverTrigger } from "kku-ui";
+import { MessageCircleReply, Plus } from "lucide-react";
+import { memo } from "react";
 import { CHAT_COLLAPSED_MESSAGE_GRAPHEMES } from "@/shared/config/chat";
 import { countGraphemes, truncateGraphemes } from "@/shared/lib/text/countGraphemes";
 import {
@@ -76,10 +77,6 @@ function ChatMessageItem({
   onSelectReply,
   onToggleReaction,
 }: ChatMessageItemProps) {
-  // region [Hooks]
-  const [isReactionPickerOpen, setIsReactionPickerOpen] = useState(false);
-  // endregion
-
   // region [Privates]
   const isMyMessage = currentAnonId === message.anonId;
   const messageGraphemeCount = countGraphemes(message.body);
@@ -103,9 +100,6 @@ function ChatMessageItem({
     onToggleExpanded(message.id);
   };
 
-  const onClickReactionPickerButton = (): void => {
-    setIsReactionPickerOpen((currentOpenState) => !currentOpenState);
-  };
   // endregion
 
   // region [Templates]
@@ -122,28 +116,6 @@ function ChatMessageItem({
     />
   ));
 
-  const ReactionPickerTemplate = isReactionPickerOpen ? (
-    <div className="flex items-center gap-1 rounded-full border border-neutral-200 bg-white p-1 shadow-sm dark:border-neutral-700 dark:bg-neutral-900">
-      {CHAT_REACTION_KEYS.map((reactionKey) => (
-        <ReactionButton
-          key={reactionKey}
-          messageId={message.id}
-          reactionKey={reactionKey}
-          count={message.reactions[reactionKey]}
-          isActive={hasSelectedReaction(reactionKey)}
-          onToggleReaction={onToggleReaction}
-        />
-      ))}
-      <button
-        type="button"
-        aria-label="반응 선택기 닫기"
-        onClick={onClickReactionPickerButton}
-        className="inline-flex h-7 w-7 items-center justify-center rounded-full text-neutral-500"
-      >
-        <X size={14} />
-      </button>
-    </div>
-  ) : null;
   // endregion
 
   return (
@@ -188,17 +160,6 @@ function ChatMessageItem({
       </div>
 
       <div className="flex max-w-[92%] flex-wrap items-center gap-1 px-1">
-        {VisibleReactionButtonsTemplate}
-        {!isReactionPickerOpen && (
-          <button
-            type="button"
-            aria-label="반응 추가"
-            onClick={onClickReactionPickerButton}
-            className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
-          >
-            <Plus size={14} />
-          </button>
-        )}
         <button
           type="button"
           aria-label="답글 작성"
@@ -208,9 +169,38 @@ function ChatMessageItem({
           <MessageCircleReply size={14} />
           답글
         </button>
+        {VisibleReactionButtonsTemplate}
+        <KPopover>
+          <KPopoverTrigger asChild>
+            <button
+              type="button"
+              aria-label="반응 추가"
+              className="inline-flex h-7 w-7 items-center justify-center rounded-full border border-neutral-200 bg-white text-neutral-500 dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-300"
+            >
+              <Plus size={14} />
+            </button>
+          </KPopoverTrigger>
+          <KPopoverContent
+            side={isMyMessage ? "left" : "right"}
+            align="center"
+            sideOffset={6}
+            className="!z-[110] w-auto p-1"
+          >
+            <div className="flex items-center gap-1">
+              {CHAT_REACTION_KEYS.map((reactionKey) => (
+                <ReactionButton
+                  key={reactionKey}
+                  messageId={message.id}
+                  reactionKey={reactionKey}
+                  count={message.reactions[reactionKey]}
+                  isActive={hasSelectedReaction(reactionKey)}
+                  onToggleReaction={onToggleReaction}
+                />
+              ))}
+            </div>
+          </KPopoverContent>
+        </KPopover>
       </div>
-
-      {ReactionPickerTemplate}
     </article>
   );
 }
