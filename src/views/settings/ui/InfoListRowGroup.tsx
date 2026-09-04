@@ -5,14 +5,22 @@ import { clipboardUtil } from "kku-util";
 import { FlaskConical, QrCode as QrCodeIcon, ShieldCheck } from "lucide-react";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, useCallback } from "react";
-import { QRCode } from "react-qrcode-logo";
 import { env } from "@/shared/config/env";
 import useSettingStore from "@/shared/stores/settingStore";
-import { ListGroup, ListRow, ListRowAccordion } from "@/shared/ui";
+import { ListGroup, ListRow, ListRowAccordion, ShareCardQr } from "@/shared/ui";
 
 const LIGHTNING_ADDRESS = env.NEXT_PUBLIC_DONATION_ADDRESS;
 const FEEDBACK_URL = env.NEXT_PUBLIC_FEEDBACK_URL;
 const DONATE_VALUE = "donation" as const;
+
+const DONATION_QR_ID = "donation-qr";
+// 105자 LNURL 은 ecLevel Q 에서 49x49 모듈. 200px 면 모듈당 4.08px 로 화면 스캔 권장선을 넘긴다.
+// 이모지가 비우는 영역은 6% 뿐이라 Q(25%) 로 충분하다.
+const DONATION_QR_SIZE = 200;
+// QR 규격이 요구하는 4모듈(4 x 4.08px) 여백.
+const DONATION_QR_PADDING = 16;
+const DONATION_QR_LOGO_EMOJI = "⚡";
+const DONATION_QR_LOGO_PADDING = 6;
 
 /**
  * 후원 행을 찾기 위한 클래스 훅.
@@ -79,11 +87,14 @@ const InfoListRowGroup = () => {
         onValueChange={onChangeDonationRow}
       >
         <div className="flex flex-col justify-center items-center gap-4 pb-4">
-          <QRCode
+          <ShareCardQr
+            id={DONATION_QR_ID}
             value={LIGHTNING_ADDRESS}
-            size={264}
-            logoImage="https://www.walletofsatoshi.com/assets/images/icon.png"
-            logoPadding={2}
+            size={DONATION_QR_SIZE}
+            padding={DONATION_QR_PADDING}
+            ecLevel="Q"
+            logoEmoji={DONATION_QR_LOGO_EMOJI}
+            logoPadding={DONATION_QR_LOGO_PADDING}
           />
           <KButton variant="primary" onClick={onClickCopyAddress}>
             라이트닝 주소 복사

@@ -105,7 +105,7 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
             <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={38} />
             <BtcTextLogo color="#fff" height={36} width={156} />
           </div>
-          <ShareCardQr id={SHARE_QR_CANVAS_ID} value={shareUrl} />
+          <ShareCardQr className="ml-auto" id={SHARE_QR_CANVAS_ID} value={shareUrl} />
         </div>
 
         {/* 타이틀 */}
