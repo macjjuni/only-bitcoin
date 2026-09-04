@@ -4,7 +4,7 @@ export const CHAT_PROTOCOL_VERSION = 1 as const;
 export const CHAT_NOTICE_VERSION = "1" as const;
 export const CHAT_MAX_MESSAGE_GRAPHEMES = 300;
 export const CHAT_COLLAPSED_MESSAGE_GRAPHEMES = 120;
-export const CHAT_MAX_NICKNAME_GRAPHEMES = 10;
+export const CHAT_MAX_NICKNAME_GRAPHEMES = 8;
 
 export const CHAT_STORAGE_KEYS = {
   clientKey: "only-bitcoin:chat:client-key:v1",

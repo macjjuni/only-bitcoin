@@ -1,5 +1,7 @@
 import { ADULT_TERM_RULES, type AdultTermRule } from "../adultTerms.ko";
 
+/** 클라이언트의 `CHAT_MAX_NICKNAME_GRAPHEMES` 와 같은 값을 유지해야 함. */
+const MAX_NICKNAME_GRAPHEMES = 8;
 const graphemeSegmenter = new Intl.Segmenter("ko", { granularity: "grapheme" });
 const textEncoder = new TextEncoder();
 const extendedPictographicPattern = /\p{Extended_Pictographic}/u;
@@ -250,7 +252,7 @@ export const normalizeNickname = (rawNickname: string): string => {
   if (
     !normalizedNickname ||
     normalizedNickname.includes("#") ||
-    countGraphemes(normalizedNickname) > 10
+    countGraphemes(normalizedNickname) > MAX_NICKNAME_GRAPHEMES
   ) {
     throw new ChatValidationError("INVALID_NICKNAME", "닉네임 형식을 확인해 주세요.");
   }
@@ -268,7 +270,7 @@ export const normalizeNickname = (rawNickname: string): string => {
   }
 
   normalizedNickname = filterAdultTerms(normalizedNickname);
-  if (!normalizedNickname || countGraphemes(normalizedNickname) > 10) {
+  if (!normalizedNickname || countGraphemes(normalizedNickname) > MAX_NICKNAME_GRAPHEMES) {
     throw new ChatValidationError("INVALID_NICKNAME", "닉네임 형식을 확인해 주세요.");
   }
 
