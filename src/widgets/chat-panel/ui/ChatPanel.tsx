@@ -76,6 +76,13 @@ export default function ChatPanel({
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
   const [nicknameDraft, setNicknameDraft] = useState(identity?.nickname ?? "익명");
+  const [pendingNicknameRequestId, setPendingNicknameRequestId] = useState<string | null>(null);
+  const [nicknameValidationMessage, setNicknameValidationMessage] = useState("");
+  const pendingNicknameRequest = useChatStore((chatState) => {
+    return pendingNicknameRequestId
+      ? chatState.pendingRequests[pendingNicknameRequestId]
+      : undefined;
+  });
   const panelReference = useRef<HTMLElement | null>(null);
   const closeButtonReference = useRef<HTMLButtonElement | null>(null);
   const verifyTurnstileReference = useRef<(turnstileToken: string) => string | null>(() => null);
@@ -158,6 +165,8 @@ export default function ChatPanel({
 
   const onClickNicknameEditButton = (): void => {
     setNicknameDraft(me?.nickname ?? identity?.nickname ?? "익명");
+    setNicknameValidationMessage("");
+    setPendingNicknameRequestId(null);
     setIsNicknameEditorOpen(true);
   };
 
@@ -165,16 +174,26 @@ export default function ChatPanel({
     setNicknameDraft(truncateGraphemes(event.target.value, CHAT_MAX_NICKNAME_GRAPHEMES));
   };
 
+  /**
+   * 서버 `ack` 를 받기 전에는 편집기를 닫지 않는다.
+   *
+   * 5분 제한( `RATE_NICK` )이나 금지 닉네임은 전송 자체는 성공하고 뒤늦게
+   * `err` 로 돌아와서, 낙관적으로 닫으면 실패를 알릴 자리가 사라짐.
+   */
   const onClickNicknameSaveButton = (): void => {
-    if (!nicknameDraft.trim()) {
+    if (!nicknameDraft.trim() || pendingNicknameRequest?.status === "pending") {
       return;
     }
 
     const requestId = changeNickname(nicknameDraft);
 
-    if (requestId) {
-      setIsNicknameEditorOpen(false);
+    if (!requestId) {
+      setNicknameValidationMessage("연결이 준비되지 않았어요. 잠시 후 다시 시도해 주세요.");
+      return;
     }
+
+    setNicknameValidationMessage("");
+    setPendingNicknameRequestId(requestId);
   };
 
   const onClickRetryConnectionButton = (): void => {
@@ -198,6 +217,13 @@ export default function ChatPanel({
   useEffect(() => {
     closeButtonReference.current?.focus();
   }, []);
+
+  useEffect(() => {
+    if (pendingNicknameRequest?.status === "acknowledged") {
+      setIsNicknameEditorOpen(false);
+      setPendingNicknameRequestId(null);
+    }
+  }, [pendingNicknameRequest]);
 
   useEffect(() => {
     const mobileMediaQuery = window.matchMedia("(max-width: 639px)");
@@ -334,6 +360,13 @@ export default function ChatPanel({
   // endregion
 
   const isMutationDisabled = connectionStatus !== "open" || readOnly || isTurnstileRequired;
+  const isNicknameSaving = pendingNicknameRequest?.status === "pending";
+  const nicknameErrorMessage =
+    (pendingNicknameRequest?.status === "failed" ? pendingNicknameRequest.errorMessage : "") ||
+    (pendingNicknameRequest?.status === "uncertain"
+      ? "연결이 끊겨 변경 여부를 확인하지 못했어요. 다시 시도해 주세요."
+      : "") ||
+    nicknameValidationMessage;
   const shouldShowRetryButton =
     hasAcceptedNotice && chatConfig.isConnectionConfigured && connectionStatus === "idle";
   const panelStyle =
@@ -424,25 +457,39 @@ export default function ChatPanel({
         </header>
 
         {isNicknameEditorOpen && (
-          <div className="flex items-center gap-2 border-b border-neutral-200 px-3 py-2 dark:border-neutral-700">
-            <label htmlFor="chat-nickname" className="sr-only">
-              닉네임
-            </label>
-            <KTextField
-              id="chat-nickname"
-              value={nicknameDraft}
-              onChange={onChangeNicknameInput}
-              maxLength={40}
-              size="sm"
-              className="min-w-0 flex-1"
-            />
-            <button
-              type="button"
-              onClick={onClickNicknameSaveButton}
-              className="h-8 rounded-md bg-bitcoin px-3 text-xs font-bold text-white"
-            >
-              저장
-            </button>
+          <div className="border-b border-neutral-200 px-3 py-2 dark:border-neutral-700">
+            <div className="flex items-center gap-2">
+              <label htmlFor="chat-nickname" className="sr-only">
+                닉네임
+              </label>
+              <KTextField
+                id="chat-nickname"
+                value={nicknameDraft}
+                onChange={onChangeNicknameInput}
+                disabled={isNicknameSaving}
+                maxLength={40}
+                size="sm"
+                className="min-w-0 flex-1"
+                aria-describedby={nicknameErrorMessage ? "chat-nickname-error" : undefined}
+                aria-invalid={Boolean(nicknameErrorMessage)}
+              />
+              <button
+                type="button"
+                onClick={onClickNicknameSaveButton}
+                disabled={isNicknameSaving}
+                className="h-8 shrink-0 rounded-md bg-bitcoin px-3 text-xs font-bold text-white disabled:opacity-50"
+              >
+                {isNicknameSaving ? "저장 중" : "저장"}
+              </button>
+            </div>
+            {nicknameErrorMessage && (
+              <p
+                id="chat-nickname-error"
+                className="mt-1.5 text-xs leading-5 text-red-600 dark:text-red-300"
+              >
+                {nicknameErrorMessage}
+              </p>
+            )}
           </div>
         )}
 
