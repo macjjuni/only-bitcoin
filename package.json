@@ -3,7 +3,7 @@
   "version": "v4.1.0",
   "private": true,
   "scripts": {
-    "dev": "pnpm archive:ensure && next dev",
+    "dev": "pnpm archive:ensure && next dev -p 3002",
     "build": "next build",
     "build:chat": "wrangler deploy --dry-run --config workers/chat/wrangler.jsonc",
     "chat:dev": "wrangler dev --config workers/chat/wrangler.jsonc",
