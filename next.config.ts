@@ -6,13 +6,33 @@ import type { NextConfig } from "next";
 const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));
 const APP_VERSION = `${packageJson.version}`;
 
-const CHAT_CONNECT_SOURCES = [
+/**
+ * 환경변수로 받은 URL 에서 CSP 소스로 쓸 origin 만 뽑는다.
+ *
+ * 잘못된 값이 들어와도 빌드를 세우지 않고 건너뛴다. CSP 한 줄 때문에
+ * 배포 전체가 막히는 것보다 해당 호스트만 차단되는 편이 낫다.
+ */
+const toCspOrigins = (...urlValues: Array<string | undefined>): string => {
+  return urlValues
+    .filter((urlValue): urlValue is string => Boolean(urlValue))
+    .map((urlValue) => {
+      try {
+        return new URL(urlValue).origin;
+      } catch {
+        console.warn(`[CSP] origin 을 해석하지 못해 건너뜁니다: ${urlValue}`);
+        return "";
+      }
+    })
+    .filter(Boolean)
+    .join(" ");
+};
+
+const CHAT_CONNECT_SOURCES = toCspOrigins(
   process.env.NEXT_PUBLIC_CHAT_API_URL,
   process.env.NEXT_PUBLIC_CHAT_WS_URL,
-]
-  .filter((source): source is string => Boolean(source))
-  .map((source) => new URL(source).origin)
-  .join(" ");
+);
+/** 밈 이미지 호스트. 갤러리는 <img> 로, 저장·복사는 fetch 로 쓰므로 img-src 와 connect-src 양쪽에 필요하다. */
+const MEME_IMAGE_SOURCE = toCspOrigins(process.env.NEXT_PUBLIC_MEME_IMAGE_URL);
 const CONTENT_SECURITY_POLICY = [
   "default-src 'self'",
   "base-uri 'self'",
@@ -31,7 +51,7 @@ const CONTENT_SECURITY_POLICY = [
   ].join(" "),
   "style-src 'self' 'unsafe-inline'",
   [
-    "img-src 'self' data: blob:",
+    `img-src 'self' data: blob: ${MEME_IMAGE_SOURCE}`,
     "https://raw.githubusercontent.com",
     "https://bitcoin.org",
     "https://image-store-one.vercel.app",
@@ -42,8 +62,12 @@ const CONTENT_SECURITY_POLICY = [
   ].join(" "),
   "font-src 'self' data:",
   [
-    `connect-src 'self' ${CHAT_CONNECT_SOURCES}`,
+    `connect-src 'self' ${CHAT_CONNECT_SOURCES} ${MEME_IMAGE_SOURCE}`,
     "https://challenges.cloudflare.com",
+    // 제네시스 영상 자막(.srt)을 fetch 로 받아 VTT 로 변환한다.
+    "https://image-store-one.vercel.app",
+    // html-to-image 가 공유 카드에 박힌 단지 사진을 인라인하려고 직접 받아온다.
+    "https://raw.githubusercontent.com",
     // 애널리틱스·광고 비콘
     "https://www.googletagmanager.com",
     "https://www.google-analytics.com",
@@ -70,7 +94,8 @@ const CONTENT_SECURITY_POLICY = [
     "wss://mempool.space",
   ].join(" "),
   "frame-src 'self' https://challenges.cloudflare.com https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
-  "media-src 'self' https://image-store-one.vercel.app",
+  // blob: 은 SRT 를 VTT 로 변환해 만든 자막 트랙 URL 에 필요하다.
+  "media-src 'self' blob: https://image-store-one.vercel.app",
   "manifest-src 'self'",
   "worker-src 'self' blob:",
 ].join("; ");
