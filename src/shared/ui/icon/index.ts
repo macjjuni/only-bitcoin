@@ -5,6 +5,7 @@ export { default as BtcTextLogo } from "./BtcTextLogo";
 export { default as BuildingIcon } from "./BuildingIcon";
 export { default as CalendarIcon } from "./CalendarIcon";
 export { default as ChartColumnIcon } from "./ChartColumnIcon";
+export { default as CrowdFundingIcon } from "./CrowdFundingIcon";
 export { default as CurrencyIcon } from "./CurrencyIcon";
 // Navigation Icon
 export { default as DashboardIcon } from "./DashboardIcon";
