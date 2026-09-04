@@ -5,6 +5,7 @@ import { useEffect, useState } from "react";
 import { BtcSurgeShareDialog } from "@/features/btc-surge-share";
 import { PremiumShareDialog, PremiumShareFloatingBanner } from "@/features/premium-share";
 import { hideBottomNavPathList } from "@/shared/config/route";
+import useSettingStore from "@/shared/stores/settingStore";
 import ApartmentShareFloatingBanner from "./ui/ApartmentShareFloatingBanner";
 import BlocksCountdownFloatingBanner from "./ui/BlocksCountdownFloatingBanner";
 import Btc2FiatFloatingBanner from "./ui/Btc2FiatFloatingBanner";
@@ -126,7 +127,7 @@ const BANNER_CONFIGS: BannerConfig[] = [
   {
     id: "chat",
     Component: ChatFloatingBanner,
-    useIsVisible: () => true,
+    useIsVisible: () => useSettingStore((state) => state.setting.isLab),
   },
 ];
 
