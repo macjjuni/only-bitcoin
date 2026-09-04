@@ -28,7 +28,7 @@ describe("chat text validation", () => {
     expect(() => normalizeNickname("사토시🚀")).toThrow(ChatValidationError);
   });
 
-  it("답글 snippet을 한 줄 40 grapheme으로 제한한다", () => {
-    expect(createReplySnippet(`${"가".repeat(45)}\n나`)).toBe("가".repeat(40));
+  it("답글 snippet을 한 줄 36 grapheme으로 제한한다", () => {
+    expect(createReplySnippet(`${"가".repeat(45)}\n나`)).toBe("가".repeat(36));
   });
 });
