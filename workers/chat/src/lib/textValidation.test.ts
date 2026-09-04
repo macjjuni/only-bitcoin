@@ -17,6 +17,9 @@ describe("chat text validation", () => {
   it("링크와 연락처를 거부한다", () => {
     expect(() => normalizeChatMessage("example[.]com에서 봐요")).toThrow(ChatValidationError);
     expect(() => normalizeChatMessage("010-1234-5678")).toThrow(ChatValidationError);
+    expect(normalizeChatMessage("문의는 hello@example.com으로 보내주세요")).toBe(
+      "문의는 hello@example.com으로 보내주세요",
+    );
   });
 
   it("선정성 표현과 구분자 우회를 저장 전에 치환한다", () => {
