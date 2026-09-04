@@ -1,6 +1,6 @@
 "use client";
 
-import { Check, Pencil, RotateCw, X } from "lucide-react";
+import { Check, Maximize2, Minimize2, Pencil, RotateCw, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import type { ChatMessage } from "@/entities/chat-message";
 import {
@@ -75,6 +75,7 @@ export default function ChatPanel({
   const [mobileViewportHeightInPixels, setMobileViewportHeightInPixels] = useState<number | null>(
     null,
   );
+  const [isFullscreen, setIsFullscreen] = useState(false);
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
   const [nicknameDraft, setNicknameDraft] = useState(identity?.nickname ?? "익명");
   const panelReference = useRef<HTMLElement | null>(null);
@@ -98,8 +99,10 @@ export default function ChatPanel({
     onClose();
   };
 
-  const trapFocusInsideMobilePanel = (keyboardEvent: React.KeyboardEvent<HTMLElement>): void => {
-    if (!isMobilePanel || keyboardEvent.key !== "Tab" || !panelReference.current) {
+  const trapFocusInsideFullscreenPanel = (
+    keyboardEvent: React.KeyboardEvent<HTMLElement>,
+  ): void => {
+    if (!isFullscreen || keyboardEvent.key !== "Tab" || !panelReference.current) {
       return;
     }
 
@@ -137,6 +140,10 @@ export default function ChatPanel({
     closePanel();
   };
 
+  const onClickToggleFullscreenButton = (): void => {
+    setIsFullscreen((currentFullscreenState) => !currentFullscreenState);
+  };
+
   const onKeyDownPanel = (keyboardEvent: React.KeyboardEvent<HTMLElement>): void => {
     if (keyboardEvent.key === "Escape") {
       keyboardEvent.preventDefault();
@@ -144,7 +151,7 @@ export default function ChatPanel({
       return;
     }
 
-    trapFocusInsideMobilePanel(keyboardEvent);
+    trapFocusInsideFullscreenPanel(keyboardEvent);
   };
 
   const onClickAcceptNoticeButton = (): void => {
@@ -209,19 +216,17 @@ export default function ChatPanel({
   }, []);
 
   useEffect(() => {
-    const contentElement = document.querySelector<HTMLElement>(".only-btc__content");
-
-    if (!isMobilePanel || !contentElement) {
+    if (!isFullscreen) {
       return;
     }
 
-    const previousOverflowValue = contentElement.style.overflow;
-    contentElement.style.overflow = "hidden";
+    const previousOverflowValue = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
 
     return () => {
-      contentElement.style.overflow = previousOverflowValue;
+      document.body.style.overflow = previousOverflowValue;
     };
-  }, [isMobilePanel]);
+  }, [isFullscreen]);
 
   useEffect(() => {
     const visualViewport = window.visualViewport;
@@ -303,27 +308,35 @@ export default function ChatPanel({
   const shouldShowRetryButton =
     hasAcceptedNotice && chatConfig.isConnectionConfigured && connectionStatus === "idle";
   const panelStyle =
-    isMobilePanel && mobileViewportHeightInPixels
+    isFullscreen && isMobilePanel && mobileViewportHeightInPixels
       ? { height: `${mobileViewportHeightInPixels}px` }
       : undefined;
+  const panelClassName = [
+    "pointer-events-auto fixed flex flex-col overflow-hidden bg-white shadow-2xl dark:bg-neutral-950",
+    isFullscreen
+      ? "inset-0 h-[100dvh] w-full rounded-none"
+      : "bottom-[calc(84px+4.5rem)] left-3 right-3 h-[min(50dvh,560px)] rounded-3xl border border-neutral-200 dark:border-neutral-700 sm:bottom-[calc(84px+5rem)] sm:left-auto sm:right-4 sm:h-[min(50dvh,560px)] sm:w-[min(420px,calc(100vw-2rem))] layout-max:right-[calc((100vw-524px)/2+1rem)]",
+  ].join(" ");
 
   return (
-    <div className="fixed inset-0 z-[100] pointer-events-none sm:inset-auto">
-      <button
-        type="button"
-        aria-label="채팅 닫기"
-        onClick={onClickBackdrop}
-        className="pointer-events-auto absolute inset-0 bg-black/45 backdrop-blur-[2px] sm:hidden"
-      />
+    <div className="fixed inset-0 z-[100] pointer-events-none">
+      {isFullscreen && (
+        <button
+          type="button"
+          aria-label="채팅 닫기"
+          onClick={onClickBackdrop}
+          className="pointer-events-auto absolute inset-0 bg-black/45 backdrop-blur-[2px]"
+        />
+      )}
       <aside
         id="only-bitcoin-chat-panel"
         ref={panelReference}
         role="dialog"
         aria-label="익명 실시간 채팅"
-        aria-modal={isMobilePanel || undefined}
+        aria-modal={isFullscreen || undefined}
         onKeyDown={onKeyDownPanel}
         style={panelStyle}
-        className="pointer-events-auto fixed inset-0 flex h-[100dvh] w-full flex-col overflow-hidden bg-white shadow-2xl dark:bg-neutral-950 sm:inset-auto sm:bottom-[calc(84px+5rem)] sm:right-4 sm:h-[min(720px,calc(100dvh-7rem))] sm:w-[min(420px,calc(100vw-2rem))] sm:rounded-3xl sm:border sm:border-neutral-200 dark:sm:border-neutral-700 layout-max:right-[calc((100vw-524px)/2+1rem)]"
+        className={panelClassName}
       >
         <header className="flex min-h-14 items-center justify-between gap-3 border-b border-neutral-200 px-4 dark:border-neutral-700">
           <div className="min-w-0">
@@ -351,6 +364,15 @@ export default function ChatPanel({
                 <Pencil size={11} />
               </button>
             )}
+            <button
+              type="button"
+              aria-label={isFullscreen ? "채팅 말풍선 크기로 축소" : "채팅 전체 화면으로 확대"}
+              aria-pressed={isFullscreen}
+              onClick={onClickToggleFullscreenButton}
+              className="inline-flex h-9 w-9 items-center justify-center rounded-full hover:bg-neutral-100 dark:hover:bg-neutral-800"
+            >
+              {isFullscreen ? <Minimize2 size={18} /> : <Maximize2 size={18} />}
+            </button>
             <button
               ref={closeButtonReference}
               type="button"
