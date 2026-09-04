@@ -18,16 +18,24 @@ const loadTurnstileScript = (): Promise<void> => {
     return turnstileScriptPromise;
   }
 
-  turnstileScriptPromise = new Promise((resolve, reject) => {
+  turnstileScriptPromise = new Promise<void>((resolve, reject) => {
     const scriptElement = document.createElement("script");
     scriptElement.src = "https://challenges.cloudflare.com/turnstile/v0/api.js?render=explicit";
     scriptElement.async = true;
     scriptElement.defer = true;
     scriptElement.addEventListener("load", () => resolve(), { once: true });
-    scriptElement.addEventListener("error", () => reject(new Error("Turnstile load failed")), {
-      once: true,
-    });
+    scriptElement.addEventListener(
+      "error",
+      () => {
+        scriptElement.remove();
+        reject(new Error("Turnstile load failed"));
+      },
+      { once: true },
+    );
     document.head.append(scriptElement);
+  }).catch((error: unknown) => {
+    turnstileScriptPromise = null;
+    throw error;
   });
 
   return turnstileScriptPromise;
