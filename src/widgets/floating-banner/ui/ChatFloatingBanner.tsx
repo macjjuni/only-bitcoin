@@ -1,7 +1,7 @@
 "use client";
 
 import { useQuery } from "@tanstack/react-query";
-import Image from "next/image";
+import { Send } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 import type { ChatMessage } from "@/entities/chat-message";
@@ -262,17 +262,7 @@ export default function ChatFloatingBanner() {
         onClick={onClickChatLauncher}
         className="relative"
       >
-        {/* 버튼보다 크게 깔고 원형 밖으로 삐져나온 부분은 잘라 냄. 배지까지 잘리지 않도록 클리핑은 이 래퍼가 맡음. */}
-        <span className="pointer-events-none absolute inset-0 overflow-hidden rounded-full">
-          <Image
-            src="/images/chat-icon.webp"
-            alt=""
-            width={74}
-            height={74}
-            className="absolute left-1/2 top-1/2 h-[74px] w-[74px] max-w-none -translate-x-1/2 -translate-y-1/2 object-contain"
-            priority
-          />
-        </span>
+        <Send size={24} className="pointer-events-none text-neutral-900 dark:text-white" />
         {shouldShowOnlineBadge && (
           <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-green-500 px-1.5 py-0.5 font-number text-[10px] font-bold leading-4 text-white shadow-sm">
             {onlineCount > 99 ? "99+" : onlineCount}

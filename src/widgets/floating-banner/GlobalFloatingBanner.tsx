@@ -42,14 +42,7 @@ function useScrollVisibility(threshold = 100) {
   return isVisible;
 }
 
-const CHAT_BANNER_VISIBLE_PATHS = [
-  "/",
-  "/overview",
-  "/blocks",
-  "/btc2fiat",
-  "/premium",
-  "/orange",
-] as const;
+const CHAT_BANNER_VISIBLE_PATHS = ["/", "/overview", "/blocks", "/btc2fiat", "/orange"] as const;
 
 function useChatBannerVisibility(): boolean {
   const pathname = usePathname();

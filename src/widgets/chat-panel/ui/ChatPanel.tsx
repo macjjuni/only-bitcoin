@@ -413,7 +413,7 @@ export default function ChatPanel({
         <header className="flex min-h-14 items-center justify-between gap-3 border-b border-neutral-200 px-4 dark:border-neutral-700">
           <div className="flex flex-col gap-0.5 min-w-0">
             <h2 className="animate-[pulse_1.2s_ease-in-out_infinite] text-sm font-bold text-bitcoin drop-shadow-[0_0_6px_rgba(247,147,26,0.65)] motion-reduce:animate-none">
-              비트맥시 비밀기지
+              비트맥시 아지트
             </h2>
             <div className="flex items-center gap-2 text-[11px] text-neutral-500">
               <span className="inline-flex items-center gap-1">
