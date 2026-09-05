@@ -12,7 +12,7 @@ import {
   KButton,
 } from "kku-ui";
 import { useState } from "react";
-import useSettingStore from "@/shared/stores/settingStore";
+import { useInitializePWA } from "@/shared/lib/hooks";
 import { IosShareIcon } from "@/shared/ui";
 import { isAndroidDevice, isIOSDevice } from "@/shared/utils/device";
 
@@ -22,7 +22,7 @@ interface ChatInstallGuideProps {
 
 export default function ChatInstallGuide({ onClose }: ChatInstallGuideProps) {
   // region [Hooks]
-  const deferredPrompt = useSettingStore((store) => store.setting.deferredPrompt);
+  const { deferredPrompt, onClickInstall: installPWA } = useInitializePWA();
   // 부모가 열릴 때만 마운트하므로 기본값 true
   const [isSheetOpen, setIsSheetOpen] = useState(true);
   const [hasRequestedInstall, setHasRequestedInstall] = useState(false);
@@ -44,13 +44,11 @@ export default function ChatInstallGuide({ onClose }: ChatInstallGuideProps) {
   };
 
   const onClickInstall = async (): Promise<void> => {
-    if (!deferredPrompt) {
-      return;
-    }
+    const installChoice = await installPWA();
 
-    await deferredPrompt.prompt();
-    await deferredPrompt.userChoice;
-    setHasRequestedInstall(true);
+    if (installChoice) {
+      setHasRequestedInstall(true);
+    }
   };
   // endregion
 

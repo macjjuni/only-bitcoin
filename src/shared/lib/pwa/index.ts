@@ -1,0 +1,1 @@
+export { isStandaloneRuntime } from "./isStandaloneRuntime";

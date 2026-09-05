@@ -17,7 +17,6 @@ import {
   useInitializeBackground,
   useInitializeDisabledZoom,
   useInitializePage,
-  useInitializePWA,
   useTheme,
 } from "@/shared/lib/hooks";
 import PwaRegister from "./PwaRegister";
@@ -40,7 +39,6 @@ function BaseInitializer() {
 
   // 앱 설정 및 환경 초기화
   useTheme();
-  useInitializePWA();
   useAppContextProbe();
   useUsdExchangeRate();
   useInitializeDisabledZoom();

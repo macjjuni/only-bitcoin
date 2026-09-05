@@ -40,15 +40,6 @@ interface NavigatorWithStandalone extends Navigator {
   standalone?: boolean;
 }
 
-export function isPWAInstalled(): boolean {
-  const navigatorStandalone = (window.navigator as NavigatorWithStandalone).standalone;
-  return window.matchMedia("(display-mode: standalone)").matches || navigatorStandalone === true;
-}
-
-export function isIOSPWA(): boolean {
-  return isPWAInstalled();
-}
-
 export type DisplayMode =
   | "twa"
   | "ios_standalone"

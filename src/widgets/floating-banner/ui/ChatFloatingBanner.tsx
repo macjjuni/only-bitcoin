@@ -8,7 +8,7 @@ import type { ChatMessage } from "@/entities/chat-message";
 import type { ChatIdentity } from "@/features/chat-session";
 import { loadOrCreateChatIdentity } from "@/features/chat-session";
 import { CHAT_NOTICE_VERSION, CHAT_STORAGE_KEYS, chatConfig } from "@/shared/config/chat";
-import { isStandaloneRuntime } from "@/shared/lib/pwa/isStandaloneRuntime";
+import { useStandaloneRuntime } from "@/shared/lib/pwa/client";
 import { FloatingBannerButton } from "@/shared/ui";
 import { ChatPanel } from "@/widgets/chat-panel";
 import ChatInstallGuide from "./ChatInstallGuide";
@@ -49,9 +49,7 @@ const fetchOnlineCount = async (): Promise<OnlineResponse> => {
 export default function ChatFloatingBanner() {
   // region [Hooks]
   const launcherButtonReference = useRef<HTMLButtonElement | null>(null);
-  const [isClientMounted, setIsClientMounted] = useState(false);
-  const [isRuntimeChecked, setIsRuntimeChecked] = useState(false);
-  const [isStandalone, setIsStandalone] = useState(false);
+  const { isRuntimeChecked, isStandalone, refreshStandaloneRuntime } = useStandaloneRuntime();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isInstallGuideOpen, setIsInstallGuideOpen] = useState(false);
   const [hasOpenedChat, setHasOpenedChat] = useState(false);
@@ -64,6 +62,15 @@ export default function ChatFloatingBanner() {
   const [expandedMessageIds, setExpandedMessageIds] = useState<ReadonlySet<string>>(new Set());
   const [savedScrollTop, setSavedScrollTop] = useState<number | null>(null);
   const [pendingSayRequestId, setPendingSayRequestId] = useState<string | null>(null);
+  const synchronizeChatWithStandaloneRuntime = useCallback((): void => {
+    if (isStandalone) {
+      setIsInstallGuideOpen(false);
+      setHasOpenedChat(window.localStorage.getItem(CHAT_STORAGE_KEYS.opened) === "1");
+      return;
+    }
+
+    setIsPanelOpen(false);
+  }, [isStandalone]);
   const shouldPollOnlineCount =
     isRuntimeChecked &&
     isStandalone &&
@@ -114,14 +121,14 @@ export default function ChatFloatingBanner() {
 
   // region [Events]
   const onClickChatLauncher = (): void => {
-    if (!isRuntimeChecked) {
-      return;
-    }
+    const currentIsStandalone = refreshStandaloneRuntime();
 
-    if (!isStandalone) {
+    if (!currentIsStandalone) {
       setIsInstallGuideOpen(true);
       return;
     }
+
+    setIsInstallGuideOpen(false);
 
     if (isPanelOpen) {
       closeChatPanel();
@@ -176,17 +183,17 @@ export default function ChatFloatingBanner() {
 
   // region [Life Cycles]
   useEffect(() => {
-    const standaloneRuntime = isStandaloneRuntime();
-    setIsClientMounted(true);
-    setIsStandalone(standaloneRuntime);
-    setIsRuntimeChecked(true);
     setIsDocumentVisible(document.visibilityState === "visible");
     setIsNetworkOnline(navigator.onLine);
-
-    if (standaloneRuntime) {
-      setHasOpenedChat(window.localStorage.getItem(CHAT_STORAGE_KEYS.opened) === "1");
-    }
   }, []);
+
+  useEffect(() => {
+    if (!isRuntimeChecked) {
+      return;
+    }
+
+    synchronizeChatWithStandaloneRuntime();
+  }, [isRuntimeChecked, synchronizeChatWithStandaloneRuntime]);
 
   useEffect(() => {
     const onVisibilityChangeDocument = (): void => {
@@ -214,7 +221,7 @@ export default function ChatFloatingBanner() {
 
   // region [Templates]
   const ChatPanelPortal =
-    isClientMounted && isStandalone && isPanelOpen
+    isRuntimeChecked && isStandalone && isPanelOpen
       ? createPortal(
           <ChatPanel
             identity={identity}
@@ -238,7 +245,7 @@ export default function ChatFloatingBanner() {
 
   // KBottomSheet 가 자체 포탈을 쓰므로 createPortal 로 감싸지 않음.
   const InstallGuideSheet =
-    isClientMounted && !isStandalone && isInstallGuideOpen ? (
+    isRuntimeChecked && !isStandalone && isInstallGuideOpen ? (
       <ChatInstallGuide onClose={onCloseInstallGuide} />
     ) : null;
   // endregion

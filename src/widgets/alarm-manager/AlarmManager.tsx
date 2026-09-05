@@ -3,8 +3,9 @@
 import { memo, useCallback, useEffect, useState } from "react";
 import { NOTICE_COOKIE_KEY, PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import { useInitializePWA } from "@/shared/lib/hooks";
+import { isStandaloneRuntime } from "@/shared/lib/pwa";
 import { getCookie } from "@/shared/utils/cookie";
-import { isIOSPWA, isIOSSafari, isPWAInstalled, isSafari } from "@/shared/utils/device";
+import { isIOSSafari, isSafari } from "@/shared/utils/device";
 import DomainNoticeDialog from "./components/DomainNoticeDialog";
 import PWAInstallAlertBottomSheet from "./components/PWAInstallAlertBottomSheet";
 import PWAInstallAlertIOSBottomSheet from "./components/PWAInstallAlertIOSBottomSheet";
@@ -32,10 +33,10 @@ const AlarmManager = () => {
     if (getCookie(PWA_COOKIE_KEY)) return "NONE";
 
     // 3. IOS PWA (Safari)
-    if (isIOSSafari() && !isIOSPWA()) return "IOS_PWA";
+    if (isIOSSafari() && !isStandaloneRuntime()) return "IOS_PWA";
 
     // 4. Android/Desktop PWA (deferredPrompt 존재 + standalone 모드가 아닌 경우만 체크)
-    if (!isSafari() && deferredPrompt && !isPWAInstalled()) {
+    if (!isSafari() && deferredPrompt && !isStandaloneRuntime()) {
       return "OTHER_PWA";
     }
 

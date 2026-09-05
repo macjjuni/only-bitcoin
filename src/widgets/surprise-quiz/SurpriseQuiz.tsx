@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import { QRCode } from "react-qrcode-logo";
 import { QUIZ_COOKIE_KEY, QUIZ_MIN_COUNT } from "@/entities/quiz";
 import { useCopyOnClick } from "@/shared/lib/hooks";
+import { isStandaloneRuntime } from "@/shared/lib/pwa";
 import useConfettiStore from "@/shared/stores/confettiStore";
 import { isDev } from "@/shared/utils/common";
 import { deleteCookie, getCookie, setCookie } from "@/shared/utils/cookie";
@@ -31,10 +32,7 @@ const checkPwaEnv = (): boolean => {
   const isMobile =
     /Mobi|Android|iPhone/i.test(window.navigator.userAgent) || window.innerWidth <= 768;
 
-  // PWA 여부 확인 (iOS standalone 속성 대응을 위한 타입 단언)
-  const isStandaloneMode = window.matchMedia("(display-mode: standalone)").matches;
-  const isIOSStandalone = (window.navigator as Navigator & { standalone?: boolean }).standalone;
-  const isPWA = isStandaloneMode || !!isIOSStandalone;
+  const isPWA = isStandaloneRuntime();
 
   return isDev ? true : isMobile && isPWA;
 };
