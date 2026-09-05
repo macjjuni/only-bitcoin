@@ -11,6 +11,8 @@ import {
 } from "@/entities/chat-message";
 import { ChatDeleteMessageButton } from "@/features/chat-moderation";
 import { useChatStore } from "@/features/chat-session";
+import { shouldRenderChatDateSeparator } from "../lib/chatDate";
+import ChatDateSeparator from "./ChatDateSeparator";
 
 interface ChatMessageListProps {
   currentAnonId?: string;
@@ -28,6 +30,7 @@ interface ChatMessageListProps {
 
 interface ConnectedChatMessageItemProps {
   messageId: string;
+  previousMessageId?: string;
   currentAnonId?: string;
   isExpanded: boolean;
   isReactionPickerOpen: boolean;
@@ -46,6 +49,7 @@ const MORE_REQUEST_INTERVAL_IN_MILLISECONDS = 1_050;
 const MESSAGE_HIGHLIGHT_DURATION_IN_MILLISECONDS = 1_400;
 const ConnectedChatMessageItem = memo(function ConnectedChatMessageItem({
   messageId,
+  previousMessageId,
   currentAnonId,
   isExpanded,
   isReactionPickerOpen,
@@ -57,29 +61,52 @@ const ConnectedChatMessageItem = memo(function ConnectedChatMessageItem({
   onChangeReactionPicker,
   onRequestDeleteMessage,
 }: ConnectedChatMessageItemProps) {
+  // region [Hooks]
   const message = useChatStore((chatState) => chatState.messagesById[messageId]);
+  const previousMessageTimestampInMilliseconds = useChatStore((chatState) => {
+    if (!previousMessageId) {
+      return undefined;
+    }
+
+    return chatState.messagesById[previousMessageId]?.createdAt;
+  });
+  // endregion
 
   if (!message) {
     return null;
   }
 
+  // region [Templates]
+  const shouldRenderDateSeparator = shouldRenderChatDateSeparator(
+    message.createdAt,
+    previousMessageTimestampInMilliseconds,
+  );
+
+  const ChatDateSeparatorTemplate = shouldRenderDateSeparator ? (
+    <ChatDateSeparator timestampInMilliseconds={message.createdAt} />
+  ) : null;
+
   const AdministratorActionTemplate = isAdministrator ? (
     <ChatDeleteMessageButton message={message} onRequestDelete={onRequestDeleteMessage} />
   ) : null;
+  // endregion
 
   return (
-    <ChatMessageItem
-      message={message}
-      currentAnonId={currentAnonId}
-      isExpanded={isExpanded}
-      isReactionPickerOpen={isReactionPickerOpen}
-      additionalActions={AdministratorActionTemplate}
-      onToggleExpanded={onToggleMessageExpanded}
-      onSelectReply={onSelectReply}
-      onToggleReaction={onToggleReaction}
-      onNavigateToMessage={onNavigateToMessage}
-      onChangeReactionPicker={onChangeReactionPicker}
-    />
+    <>
+      {ChatDateSeparatorTemplate}
+      <ChatMessageItem
+        message={message}
+        currentAnonId={currentAnonId}
+        isExpanded={isExpanded}
+        isReactionPickerOpen={isReactionPickerOpen}
+        additionalActions={AdministratorActionTemplate}
+        onToggleExpanded={onToggleMessageExpanded}
+        onSelectReply={onSelectReply}
+        onToggleReaction={onToggleReaction}
+        onNavigateToMessage={onNavigateToMessage}
+        onChangeReactionPicker={onChangeReactionPicker}
+      />
+    </>
   );
 });
 
@@ -427,22 +454,27 @@ export default function ChatMessageList({
         )}
 
         <div className="flex flex-col gap-4 px-3 pt-4">
-          {messageIds.map((messageId) => (
-            <ConnectedChatMessageItem
-              key={messageId}
-              messageId={messageId}
-              currentAnonId={currentAnonId}
-              isExpanded={expandedMessageIds.has(messageId)}
-              isReactionPickerOpen={openReactionPickerMessageId === messageId}
-              isAdministrator={isAdministrator}
-              onToggleMessageExpanded={onToggleMessageExpanded}
-              onSelectReply={onSelectReply}
-              onToggleReaction={onToggleReaction}
-              onNavigateToMessage={onNavigateToMessage}
-              onChangeReactionPicker={onChangeReactionPicker}
-              onRequestDeleteMessage={onRequestDeleteMessage}
-            />
-          ))}
+          {messageIds.map((messageId, messageIndex) => {
+            const previousMessageId = messageIds[messageIndex - 1];
+
+            return (
+              <ConnectedChatMessageItem
+                key={messageId}
+                messageId={messageId}
+                previousMessageId={previousMessageId}
+                currentAnonId={currentAnonId}
+                isExpanded={expandedMessageIds.has(messageId)}
+                isReactionPickerOpen={openReactionPickerMessageId === messageId}
+                isAdministrator={isAdministrator}
+                onToggleMessageExpanded={onToggleMessageExpanded}
+                onSelectReply={onSelectReply}
+                onToggleReaction={onToggleReaction}
+                onNavigateToMessage={onNavigateToMessage}
+                onChangeReactionPicker={onChangeReactionPicker}
+                onRequestDeleteMessage={onRequestDeleteMessage}
+              />
+            );
+          })}
         </div>
       </div>
 
