@@ -157,7 +157,7 @@ export default function ChatLauncher({
       aria-expanded={isStandalone ? isPanelOpen : undefined}
       aria-controls={isStandalone ? "only-bitcoin-chat-panel" : undefined}
       onClick={onClickLauncher}
-      className="relative"
+      className="pointer-events-auto relative"
     >
       <Send size={24} className="pointer-events-none text-neutral-900 dark:text-white" />
       {shouldShowOnlineBadge && (

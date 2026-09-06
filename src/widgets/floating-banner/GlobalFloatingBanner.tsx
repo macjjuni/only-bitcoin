@@ -156,7 +156,7 @@ export default function GlobalFloatingBanner({ children }: GlobalFloatingBannerP
         {BANNER_CONFIGS.map((config) => (
           <BannerItem key={config.id} config={config} />
         ))}
-        <div className="pointer-events-auto">{children}</div>
+        {children}
       </div>
       <BtcSurgeShareDialog />
       <PremiumShareDialog />
