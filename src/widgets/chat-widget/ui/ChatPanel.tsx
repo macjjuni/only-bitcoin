@@ -20,7 +20,7 @@ import { truncateGraphemes } from "@/shared/lib/text/countGraphemes";
 import ChatComposer from "./ChatComposer";
 import ChatMessageList from "./ChatMessageList";
 
-interface ChatPanelProps {
+export interface ChatPanelProps {
   identity: ChatIdentity | null;
   hasAcceptedNotice: boolean;
   draft: string;

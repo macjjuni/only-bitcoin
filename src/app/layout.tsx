@@ -11,6 +11,7 @@ import { THEME_INITIALIZATION_SCRIPT } from "@/shared/config/theme";
 import { ConfettiEffect, JsonLd } from "@/shared/ui";
 import { Content, DefaultLayout } from "@/shared/ui/layout";
 import { BottomNavigation } from "@/widgets/bottom-navigation";
+import { ChatWidget } from "@/widgets/chat-widget";
 import { GlobalFloatingBanner } from "@/widgets/floating-banner";
 import { Header } from "@/widgets/header";
 import "./globals.css";
@@ -121,7 +122,9 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
               <Header />
               <Content>{children}</Content>
               <BottomNavigation />
-              <GlobalFloatingBanner />
+              <GlobalFloatingBanner>
+                <ChatWidget />
+              </GlobalFloatingBanner>
             </DefaultLayout>
             <ConfettiEffect />
           </QueryProvider>

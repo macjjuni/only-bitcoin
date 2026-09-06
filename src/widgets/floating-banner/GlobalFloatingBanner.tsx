@@ -1,14 +1,13 @@
 "use client";
 
 import { usePathname } from "next/navigation";
-import { useEffect, useState } from "react";
+import { type ComponentType, type ReactNode, useEffect, useState } from "react";
 import { BtcSurgeShareDialog } from "@/features/btc-surge-share";
 import { PremiumShareDialog, PremiumShareFloatingBanner } from "@/features/premium-share";
 import { hideBottomNavPathList } from "@/shared/config/route";
 import ApartmentShareFloatingBanner from "./ui/ApartmentShareFloatingBanner";
 import BlocksCountdownFloatingBanner from "./ui/BlocksCountdownFloatingBanner";
 import BtcSurgeShareFloatingBanner from "./ui/BtcSurgeShareFloatingBanner";
-import ChatFloatingBanner from "./ui/ChatFloatingBanner";
 import CountdownBackFloatingBanner from "./ui/CountdownBackFloatingBanner";
 import DcaAddRecordFloatingBanner from "./ui/DcaAddRecordFloatingBanner";
 import OrangeBackFloatingBanner from "./ui/OrangeBackFloatingBanner";
@@ -16,8 +15,12 @@ import ScrollUpFloatingBanner from "./ui/ScrollUpFloatingBanner";
 
 interface BannerConfig {
   id: string;
-  Component: React.ComponentType;
+  Component: ComponentType;
   useIsVisible: () => boolean;
+}
+
+interface GlobalFloatingBannerProps {
+  children: ReactNode;
 }
 
 function useScrollVisibility(threshold = 100) {
@@ -39,14 +42,6 @@ function useScrollVisibility(threshold = 100) {
   }, [threshold, pathname]);
 
   return isVisible;
-}
-
-const CHAT_BANNER_VISIBLE_PATHS = ["/", "/overview", "/blocks", "/btc2fiat", "/orange"] as const;
-
-function useChatBannerVisibility(): boolean {
-  const pathname = usePathname();
-
-  return CHAT_BANNER_VISIBLE_PATHS.some((visiblePath) => visiblePath === pathname);
 }
 
 const BANNER_CONFIGS: BannerConfig[] = [
@@ -122,11 +117,6 @@ const BANNER_CONFIGS: BannerConfig[] = [
     Component: ScrollUpFloatingBanner,
     useIsVisible: () => useScrollVisibility(800),
   },
-  {
-    id: "chat",
-    Component: ChatFloatingBanner,
-    useIsVisible: useChatBannerVisibility,
-  },
 ];
 
 function BannerItem({ config }: { config: BannerConfig }) {
@@ -143,17 +133,17 @@ function BannerItem({ config }: { config: BannerConfig }) {
   );
 }
 
-export default function GlobalFloatingBanner() {
+export default function GlobalFloatingBanner({ children }: GlobalFloatingBannerProps) {
   const pathname = usePathname();
 
-  // 하단 네비가 없는 페이지는 그 높이만큼 띄울 이유가 없으므로 바닥에 붙인다.
+  // 하단 네비가 없는 페이지는 그 높이만큼 띄울 이유가 없으므로 바닥에 붙임.
   const hasBottomNav = !hideBottomNavPathList.includes(pathname);
 
   return (
     <>
       <div
         className={[
-          // 헤더·바텀 네비와 동일하게 페이지 전환 시 함께 밀리지 않는 고정 UI 로 취급한다.
+          // 헤더·바텀 네비와 동일하게 페이지 전환 시 함께 밀리지 않는 고정 UI 로 취급.
           "only-btc__floating-banner",
           "fixed right-0 z-[10] pr-4 pb-3.5 pointer-events-none",
           hasBottomNav ? "bottom-bottom-nav" : "bottom-0",
@@ -166,6 +156,7 @@ export default function GlobalFloatingBanner() {
         {BANNER_CONFIGS.map((config) => (
           <BannerItem key={config.id} config={config} />
         ))}
+        <div className="pointer-events-auto">{children}</div>
       </div>
       <BtcSurgeShareDialog />
       <PremiumShareDialog />
