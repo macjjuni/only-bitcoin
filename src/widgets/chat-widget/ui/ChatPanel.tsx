@@ -422,18 +422,30 @@ export default function ChatPanel({
       <section className="rounded-3xl border border-bitcoin/25 bg-bitcoin/5 p-5">
         <p className="text-base font-bold">채팅 이용 전 확인해 주세요</p>
         <ul className="mt-3 flex list-disc flex-col gap-2 pl-5 text-xs leading-5 text-neutral-600 dark:text-neutral-300">
+          <li>만 14세 이상인 이용자만 채팅에 참여할 수 있습니다.</li>
           <li>공개 글은 기간 제한 없이 최근 300개까지 보관됩니다.</li>
-          <li>개인정보, 연락처, 링크를 작성하지 마세요.</li>
+          <li>비공개 기능이 없으므로 개인정보, 연락처, 민감정보, 링크를 작성하지 마세요.</li>
           <li>투자 권유, 리딩방 홍보, 사칭과 도배를 금지합니다.</li>
-          <li>메시지는 Cloudflare 인프라에서 처리되며 운영상 삭제될 수 있습니다.</li>
+          <li>메시지는 직접 수정·삭제·복구할 수 없으며 운영 판단에 따라 삭제될 수 있습니다.</li>
+          <li>채팅 데이터는 Cloudflare 인프라에서 처리됩니다.</li>
         </ul>
+        <p className="mt-4 text-center text-xs leading-5 text-neutral-600 dark:text-neutral-300">
+          <a
+            href="/privacy"
+            target="_blank"
+            rel="noopener noreferrer"
+            className="font-semibold underline underline-offset-2"
+          >
+            개인정보처리방침
+          </a>
+          을 확인하고 위 이용 조건에 동의한 경우에만 참여해 주세요.
+        </p>
         <button
           type="button"
           onClick={onClickAcceptNoticeButton}
           className="mt-5 inline-flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-bitcoin px-4 text-sm font-bold text-white"
         >
-          <Check size={17} />
-          확인하고 참여하기
+          <Check size={17} />만 14세 이상이며 동의합니다
         </button>
       </section>
     </div>
@@ -476,7 +488,8 @@ export default function ChatPanel({
       >
         <p className="text-sm font-bold">채팅 이용 안내</p>
         <ul className="mt-2 flex list-disc flex-col gap-1.5 pl-4 text-xs leading-5 text-neutral-600 dark:text-neutral-300">
-          <li>익명 공개 채팅으로 최신 메시지 300개만 보관되고 이후 자동 삭제됩니다.</li>
+          <li>만 14세 이상인 이용자만 참여할 수 있습니다.</li>
+          <li>공개 채팅으로 최신 메시지 300개만 보관되고 이후 자동 삭제됩니다.</li>
           <li>개인정보·연락처·링크는 남기지 마세요.</li>
           <li>닉네임은 5분에 한 번 바꿀 수 있습니다.</li>
         </ul>

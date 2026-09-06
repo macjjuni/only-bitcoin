@@ -1,7 +1,7 @@
 import { env } from "./env";
 
 export const CHAT_PROTOCOL_VERSION = 1 as const;
-export const CHAT_NOTICE_VERSION = "1" as const;
+export const CHAT_NOTICE_VERSION = "2" as const;
 export const CHAT_MAX_MESSAGE_GRAPHEMES = 300;
 export const CHAT_COLLAPSED_MESSAGE_GRAPHEMES = 120;
 export const CHAT_MAX_NICKNAME_GRAPHEMES = 8;

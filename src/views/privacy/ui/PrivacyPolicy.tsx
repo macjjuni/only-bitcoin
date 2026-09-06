@@ -9,6 +9,9 @@ const FEEDBACK_URL = env.NEXT_PUBLIC_FEEDBACK_URL;
 const GOOGLE_AD_SETTINGS_URL = "https://myadcenter.google.com/";
 const GOOGLE_AD_POLICY_URL = "https://policies.google.com/technologies/ads";
 const GOOGLE_ANALYTICS_OPT_OUT_URL = "https://tools.google.com/dlpage/gaoptout";
+const GOOGLE_PRIVACY_POLICY_URL = "https://policies.google.com/privacy";
+const CLOUDFLARE_PRIVACY_POLICY_URL = "https://www.cloudflare.com/privacypolicy/";
+const VERCEL_PRIVACY_POLICY_URL = "https://vercel.com/legal/privacy-notice";
 
 /** 서비스가 시세·지표를 조회하는 외부 데이터 출처. */
 const DATA_SOURCES = [
@@ -81,19 +84,21 @@ const PrivacyPolicy = () => {
             안내합니다.
           </p>
           <p className="text-xs opacity-60">시행일: {PRIVACY_EFFECTIVE_DATE_LABEL}</p>
+          <aside className="mt-2 rounded-xl border border-bitcoin/25 bg-bitcoin/5 p-3">
+            <p className="text-xs font-bold">주요 변경 사항</p>
+            <p className="mt-1 text-xs leading-5 opacity-80">
+              2026년 9월 6일: 실시간 공개 채팅의 처리 항목, 메시지 보관·삭제·복구 기준, 외부 서비스
+              및 국외 처리, 만 14세 미만 채팅 이용 제한 내용을 추가했습니다.
+            </p>
+          </aside>
         </header>
 
         <div className="flex flex-col">
           <PolicySection title="1. 개인정보 보호 개요" defaultOpen>
             <PolicyParagraph>
-              본 서비스는 별도 회원가입 절차가 없으며 이름·이메일·비밀번호·거래소 계정 정보나 자산
-              정보를 요구하지 않습니다. 다만 익명 실시간 채팅을 제공하고 도배·사칭을 방지하기 위해
-              브라우저 임의 키에서 파생된 온라인 식별 정보와 이용자가 작성한 공개 채팅 내용을
-              처리합니다.
-            </PolicyParagraph>
-            <PolicyParagraph>
-              채팅의 표시용 8자리 해시는 보안상 완전한 익명을 보장하는 식별자가 아니며, 브라우저
-              임의 키와 서버 파생 키는 가명·온라인 식별 정보에 준해 최소한으로 처리합니다.
+              본 서비스는 별도 회원가입 절차가 없으며 일반 이용자에게 이름·이메일·비밀번호·거래소
+              계정 정보나 자산 정보를 요구하지 않습니다. 다만 공개 채팅 제공과 부정이용 방지를 위해
+              채팅 식별 정보와 이용자가 작성한 내용을 처리합니다.
             </PolicyParagraph>
             <PolicyParagraph>
               광고·분석 도구와 배포·보안 인프라가 별도의 정보를 처리할 수 있으며, 구체적인 항목과
@@ -104,21 +109,26 @@ const PrivacyPolicy = () => {
           <PolicySection title="2. 브라우저에 저장되는 정보 (쿠키·로컬 저장소)">
             <PolicyParagraph>
               본 서비스는 이용 편의와 채팅 세션 유지를 위해 다음 정보를 이용자 기기의 브라우저에
-              저장합니다. 아래 정보 중 채팅 임의 키·닉네임·pass token은 채팅 연결과 검증 과정에서
-              Cloudflare Worker로 전송됩니다.
+              저장합니다. 채팅 식별 정보와 닉네임, 보안 토큰은 채팅 연결과 검증 과정에서 서버로
+              전송됩니다.
             </PolicyParagraph>
             <PolicyList
               items={[
                 "로컬 저장소(localStorage): 테마(라이트/다크), 표시 통화 단위 등 사용자 설정과 시세·블록 데이터 캐시",
                 "DCA 매매 기록: 이용자가 DCA 페이지에 직접 입력한 매수·매도 수량·단가·날짜·메모 및 목표 수량 (로컬 저장소에만 저장)",
-                "쿠키(Cookie): 앱 설치(PWA) 안내 노출 여부, 공지 확인 여부",
-                "채팅 로컬 저장소: 128-bit 이상의 임의 client key, 닉네임, 고지 버전, 최대 24시간의 Turnstile pass token, 채팅을 한 번 열었는지 나타내는 플래그",
+                "쿠키(Cookie): 앱 설치(PWA) 안내 노출 여부, 공지 확인 여부, 시작 화면으로 지정한 페이지 경로 (최대 400일, 만료 또는 삭제 후 브라우저 설정에 따라 다시 생성될 수 있음)",
+                "채팅 로컬 저장소: 채팅 식별용 임의 키, 닉네임, 안내 확인 및 이용 상태, 부정이용 방지용 보안 토큰",
               ]}
             />
             <PolicyParagraph>
-              브라우저 설정에서 쿠키와 사이트 데이터를 삭제하면 위 로컬 정보도 제거되며 새로운 채팅
-              표시 신원으로 참여하게 됩니다. 채팅 메시지와 리액션은 브라우저 로컬 저장소에 보관하지
-              않습니다.
+              위 정보는 갱신되거나 이용자가 브라우저의 쿠키와 사이트 데이터를 삭제할 때까지 유지될
+              수 있습니다. 채팅 식별 정보가 삭제되면 새로운 표시 신원으로 참여하게 되며, 채팅
+              메시지와 반응 목록은 브라우저 로컬 저장소에 영구 보관하지 않습니다.
+            </PolicyParagraph>
+            <PolicyParagraph>
+              채팅 쓰기 권한은 발급 후 최대 24시간 유효합니다. 부정이용 방지용 보안 토큰은
+              유효기간이 지나더라도 갱신되거나 이용자가 브라우저의 사이트 데이터를 삭제할 때까지
+              기기에 남을 수 있습니다.
             </PolicyParagraph>
           </PolicySection>
 
@@ -139,7 +149,7 @@ const PrivacyPolicy = () => {
               이용자는 맞춤형 광고 표시를 원치 않을 경우{" "}
               <PolicyLink href={GOOGLE_AD_SETTINGS_URL}>구글 광고 설정 페이지</PolicyLink>에서
               맞춤형 광고를 차단하거나, 웹 브라우저의 옵션 설정을 통해 쿠키 수집을 거부할 수
-              있습니다. 쿠키 수집을 거부하더라도 서비스의 기본 기능은 정상적으로 이용할 수 있습니다.
+              있습니다. 이 경우 맞춤형 광고 등 일부 기능이 제한될 수 있습니다.
             </PolicyParagraph>
           </PolicySection>
 
@@ -147,12 +157,12 @@ const PrivacyPolicy = () => {
             <PolicyParagraph>
               본 서비스는 방문 통계 파악과 서비스 개선을 위해{" "}
               <HighlightText>구글 애널리틱스(Google Analytics)</HighlightText>를 사용합니다. 이
-              과정에서 페이지 조회 기록, 접속 기기 및 브라우저 종류 등 개인을 식별할 수 없는 형태의
-              이용 행태 정보가 수집될 수 있습니다.
+              과정에서 페이지 조회 기록, 접속 기기와 브라우저 종류, 접속 정보 등의 이용 행태 정보가
+              처리될 수 있습니다.
             </PolicyParagraph>
             <PolicyParagraph>
-              수집된 정보는 통계 목적으로만 활용되며, 이를 통해 특정 개인을 식별하거나 별도의
-              개인정보와 결합하지 않습니다. 분석 도구의 수집을 원치 않는 경우{" "}
+              수집된 정보는 방문 통계와 서비스 개선 목적으로 이용합니다. 분석 도구의 수집을 원치
+              않는 경우{" "}
               <PolicyLink href={GOOGLE_ANALYTICS_OPT_OUT_URL}>
                 구글 애널리틱스 차단 브라우저 부가기능
               </PolicyLink>
@@ -160,39 +170,85 @@ const PrivacyPolicy = () => {
             </PolicyParagraph>
             <PolicyParagraph>
               또한 서비스가 배포된 호스팅 환경에서는 안정적인 운영과 장애 대응을 위해 접속 기록(IP
-              주소, 접속 시각 등)이 일시적으로 기록될 수 있으며, 이는 서비스 운영 목적 외로 이용되지
-              않습니다.
+              주소, 접속 시각 등)이 일시적으로 기록될 수 있습니다. 해당 정보는 서비스 운영, 보안,
+              부정이용 방지, 장애 대응 및 법령상 의무 이행을 위해 처리될 수 있습니다.
             </PolicyParagraph>
           </PolicySection>
 
-          <PolicySection title="5. 익명 실시간 채팅 데이터 처리">
+          <PolicySection title="5. 실시간 공개 채팅 데이터 처리">
             <PolicyParagraph>
-              설치한 PWA에서 익명 공개 채팅을 이용하면 임의 client key의 HMAC 파생 키, 일일 표시용
-              해시, 5분 단위 발언 tag, 치환 후 닉네임·메시지·답글 스니펫·리액션, Turnstile 검증
-              결과를 채팅 제공과 도배·사칭 방지 및 보안을 위해 처리합니다. 연결 시 IP 주소와 사용자
-              에이전트는 Cloudflare 보안 경계에서 일시 처리하며 원문 IP를 채팅 신원이나 메시지에
-              저장하지 않습니다.
+              설치한 PWA에서 공개 채팅을 이용하면 채팅 제공과 부정이용 방지를 위해 닉네임,
+              메시지·답글·반응, 채팅 식별 정보 및 접속·보안 정보를 처리합니다.
             </PolicyParagraph>
             <PolicyParagraph>
-              공개·운영 데이터는 Cloudflare Durable Object SQLite에 기간 제한 없이 최신 300개
-              메시지만 보관하며, 301번째 메시지부터 오래된 순서로 삭제합니다. 삭제된 이전 상태는
-              공급자 재해 복구 기능(PITR)에 최대 30일 남을 수 있습니다. Turnstile pass는 최대 24시간
-              유지하며 actor 상태는 마지막 활동 후 24시간이 지나면 정리합니다.
+              닉네임, 채팅 표시 ID, 메시지, 답글, 반응 및 작성 시각은 채팅에 참여한 다른 이용자에게
+              공개됩니다. 공개를 원하지 않는 개인정보, 연락처 또는 민감한 정보는 입력하지 않아야
+              하며, 채팅에는 비공개 게시 기능이 없습니다.
             </PolicyParagraph>
             <PolicyParagraph>
-              리액션에는 메시지별 actor token을 사용해 데이터베이스 스냅샷만으로 서로 다른 메시지의
-              선택을 바로 연결하기 어렵게 합니다. 다만 서버는 안정 식별 키로 현재 300개 메시지 안의
-              중복 반응과 선택 상태를 확인할 수 있습니다. 운영상 또는 법령상 필요한 경우 Cloudflare
-              Access로 보호된 관리자 기능으로 메시지를 영구 삭제하며, 해당 메시지를 인용한 답글의
-              스니펫도 비웁니다.
+              채팅 메시지는 일정한 기간이 아니라 최신 300개까지만 보관합니다. 새 메시지 등록으로
+              300개를 초과하면 가장 오래된 메시지부터 자동으로 삭제됩니다. 일반 이용자는 작성한
+              메시지를 직접 수정하거나 삭제할 수 없으며, 관리자는 운영정책 준수, 서비스 보호 또는
+              법령상 의무 이행을 위해 필요하다고 판단하는 경우 사전 통지 없이 삭제할 수 있습니다.
             </PolicyParagraph>
             <PolicyParagraph>
-              채팅 데이터는 Cloudflare와 Vercel의 실제 계약·리전·로그 설정에 따라 국외에서 처리될 수
-              있으므로 공개 전 관련 수탁·국외 처리 사항을 별도로 검토하고 고지합니다.
+              원문 메시지가 300개 제한으로 자동 삭제되더라도, 해당 메시지를 인용한 답글에는 작성
+              당시 닉네임, 채팅 표시 ID와 원문 일부(최대 36자)가 남으며 해당 답글이 삭제될 때 함께
+              삭제됩니다. 관리자가 원문을 삭제한 경우 인용 본문은 즉시 제거되지만, 당시 닉네임과
+              채팅 표시 ID는 해당 답글이 삭제될 때까지 남을 수 있습니다.
+            </PolicyParagraph>
+            <PolicyParagraph>
+              삭제된 메시지는 복구 기능을 제공하지 않으며 개별 복구 요청도 지원하지 않습니다. 다만
+              삭제된 정보는 Cloudflare의 재해 복구 기록에 최대 30일간 남을 수 있습니다. 운영자는
+              해당 기록을 이용자 요청에 따른 개별 메시지 복구에 사용하지 않으며, 서비스 복구, 보안
+              대응 및 법령상 의무 이행 등 필요한 범위에서 처리할 수 있습니다.
+            </PolicyParagraph>
+            <PolicyParagraph>
+              채팅 연결 과정에서 IP 주소와 브라우저·기기 관련 정보가 보안 및 부정이용 방지를 위해
+              처리될 수 있으나, 서비스의 채팅 데이터베이스에는 원본 IP 주소를 저장하지 않습니다.
+            </PolicyParagraph>
+            <PolicyParagraph>
+              서버의 연결 상태는 채팅에 연결된 동안 유지됩니다. 별도로 저장된 단기 이용 상태는
+              마지막 연결 또는 닉네임 변경 이후 정기 정리 일정에 따라 최대 약 48시간 남을 수 있으며,
+              메시지와 답글에 포함된 닉네임·채팅 표시 ID 및 반응 정보는 해당 메시지 또는 답글의 보관
+              기준을 따릅니다.
             </PolicyParagraph>
           </PolicySection>
 
-          <PolicySection title="6. 데이터 및 API 활용 안내">
+          <PolicySection title="6. 외부 서비스 및 국외 처리">
+            <PolicyParagraph>
+              서비스 제공을 위해 다음 외부 업체가 필요한 정보를 처리할 수 있습니다.
+            </PolicyParagraph>
+            <PolicyList
+              items={[
+                "Cloudflare, Inc.(미국): 실시간 채팅 전송·저장, 보안 및 봇 방지 / 채팅 데이터, 채팅 식별 정보, 접속·보안 정보",
+                "Vercel, Inc.(미국): 웹사이트 호스팅·전송, 보안 및 장애 대응 / IP 주소, 접속 시각, 브라우저·기기 및 요청 정보",
+                "Google LLC(미국): 광고 제공 및 이용 통계 분석 / 쿠키, 페이지 이용 기록, 브라우저·기기 및 접속 정보",
+              ]}
+            />
+            <PolicyParagraph>
+              위 정보는 서비스 이용 시 인터넷을 통해 실시간 또는 자동으로 전송되며, 미국 및 각
+              업체가 인프라를 운영하는 국가에서 목적 달성에 필요한 기간 동안 처리될 수 있습니다.
+              채팅 메시지는 제5항의 기준을 따르며, 그 밖의 정보는 각 업체의 서비스 운영·보안 및 로그
+              정책에 따라 보관됩니다.
+            </PolicyParagraph>
+            <PolicyParagraph>
+              국외 처리를 원하지 않는 이용자는 채팅을 이용하지 않거나 브라우저 및 광고 설정에서
+              쿠키·분석 처리를 제한할 수 있습니다. Cloudflare 처리를 거부하면 채팅 이용이, Vercel
+              처리를 거부하면 웹사이트 이용이 제한될 수 있습니다.
+            </PolicyParagraph>
+            <PolicyParagraph>
+              자세한 내용은{" "}
+              <PolicyLink href={CLOUDFLARE_PRIVACY_POLICY_URL}>
+                Cloudflare 개인정보처리방침
+              </PolicyLink>
+              , <PolicyLink href={VERCEL_PRIVACY_POLICY_URL}>Vercel 개인정보처리방침</PolicyLink>,{" "}
+              <PolicyLink href={GOOGLE_PRIVACY_POLICY_URL}>Google 개인정보처리방침</PolicyLink>에서
+              확인할 수 있습니다.
+            </PolicyParagraph>
+          </PolicySection>
+
+          <PolicySection title="7. 데이터 및 API 활용 안내">
             <PolicyParagraph>
               본 서비스가 제공하는 시세, 거래소 프리미엄(Premium), 도미넌스(BTC.D), 공포·탐욕
               지수(F&amp;G Index), 블록 정보, 비트코인 현물 ETF 자금 흐름, 미국 M2 통화량 등은 공개
@@ -213,15 +269,15 @@ const PrivacyPolicy = () => {
             </PolicyParagraph>
           </PolicySection>
 
-          <PolicySection title="7. 만 14세 미만 아동의 개인정보">
+          <PolicySection title="8. 만 14세 미만 아동의 개인정보">
             <PolicyParagraph>
               본 서비스는 만 14세 미만 아동을 대상으로 하지 않으며, 아동의 개인정보를 의도적으로
-              수집하지 않습니다. 서비스 특성상 별도의 회원가입이나 개인정보 입력 절차가 존재하지
-              않습니다.
+              수집하지 않습니다. 만 14세 미만 이용자는 채팅 기능을 이용할 수 없으며, 채팅 참여 전
+              본인이 만 14세 이상임을 확인해야 합니다.
             </PolicyParagraph>
           </PolicySection>
 
-          <PolicySection title="8. 투자 면책 조항 (Disclaimer)">
+          <PolicySection title="9. 투자 면책 조항 (Disclaimer)">
             <PolicyParagraph>
               본 서비스가 제공하는 모든 비트코인 관련 시세 정보 및 온체인 지표는{" "}
               <HighlightText>투자 참고용 데이터</HighlightText>일 뿐이며, 어떠한 경우에도 투자
@@ -229,20 +285,29 @@ const PrivacyPolicy = () => {
             </PolicyParagraph>
             <PolicyParagraph>
               실시간 API 연동 과정에서 데이터 지연이나 미세한 오차가 발생할 수 있으며, 본 서비스는
-              제공된 정보의 정확성이나 이를 바탕으로 행해진 투자 결과(손실 등)에 대해 어떠한 법적
-              책임도 지지 않습니다. 투자에 대한 최종 판단과 책임은 이용자 본인에게 있습니다.
+              관계 법령이 허용하는 범위에서 제공된 정보의 정확성이나 이를 바탕으로 행해진 투자
+              결과(손실 등)에 대해 책임을 지지 않습니다. 투자에 대한 최종 판단과 책임은 이용자
+              본인에게 있습니다.
             </PolicyParagraph>
           </PolicySection>
 
-          <PolicySection title="9. 방침 변경 및 문의">
+          <PolicySection title="10. 이용자 권리, 방침 변경 및 문의">
             <PolicyParagraph>
-              본 개인정보처리방침의 내용이 추가·삭제 또는 수정될 경우, 변경 사항을 본 페이지를 통해
-              고지합니다. 변경된 방침은 게시한 시점부터 적용됩니다.
+              이용자는 관계 법령에 따라 개인정보의 열람, 정정·삭제 및 처리정지를 요청할 수 있습니다.
+              권리 행사는 아래 운영자 채널을 통해 접수할 수 있습니다. 요청 처리를 위해 본인과 대상
+              정보를 확인할 수 있으며, 구체적인 처리 여부와 방법은 관계 법령에서 정한 범위와 절차를
+              따릅니다. 채팅에는 이용자가 메시지를 직접 수정하거나 삭제하는 기능이 제공되지
+              않습니다.
             </PolicyParagraph>
             <PolicyParagraph>
-              개인정보 처리 및 서비스에 대한 문의 사항은{" "}
-              <PolicyLink href={FEEDBACK_URL}>운영자 채널</PolicyLink>을 통해 접수해 주시기
-              바랍니다.
+              개인정보 보호 및 고충처리 담당은 온리 비트코인 운영자이며, 개인정보 처리와 관련한
+              문의와 권리 요청은 <PolicyLink href={FEEDBACK_URL}>운영자 채널</PolicyLink>을 통해
+              접수할 수 있습니다.
+            </PolicyParagraph>
+            <PolicyParagraph>
+              본 개인정보처리방침의 내용이 추가·삭제 또는 수정될 경우, 변경 사항을 본 페이지를 통해
+              고지하고 시행일을 표시합니다. 법령상 사전 고지가 필요한 변경은 정해진 기간 전에
+              알립니다.
             </PolicyParagraph>
           </PolicySection>
         </div>
