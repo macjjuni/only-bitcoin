@@ -16,7 +16,7 @@ export default function ChatWidget() {
   const { isRuntimeChecked, isStandalone, refreshStandaloneRuntime } = useStandaloneRuntime();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
   const [isInstallGuideOpen, setIsInstallGuideOpen] = useState(false);
-  const [hasOpenedChat, setHasOpenedChat] = useState(false);
+  const [hasOpenedChat, setHasOpenedChat] = useState<boolean | null>(null);
   const [hasAcceptedNotice, setHasAcceptedNotice] = useState(false);
   const [identity, setIdentity] = useState<ChatIdentity | null>(null);
   const [draft, setDraft] = useState("");
@@ -25,9 +25,14 @@ export default function ChatWidget() {
   const [savedScrollTop, setSavedScrollTop] = useState<number | null>(null);
   const [pendingSayRequestId, setPendingSayRequestId] = useState<string | null>(null);
   const synchronizeChatWithStandaloneRuntime = useCallback((): void => {
+    const hasPreviouslyOpenedChat = window.localStorage.getItem(CHAT_STORAGE_KEYS.opened) === "1";
+    const hasAcceptedCurrentNotice =
+      window.localStorage.getItem(CHAT_STORAGE_KEYS.noticeVersion) === CHAT_NOTICE_VERSION;
+    setHasOpenedChat(hasPreviouslyOpenedChat);
+    setHasAcceptedNotice(hasAcceptedCurrentNotice);
+
     if (isStandalone) {
       setIsInstallGuideOpen(false);
-      setHasOpenedChat(window.localStorage.getItem(CHAT_STORAGE_KEYS.opened) === "1");
       return;
     }
 
@@ -155,6 +160,7 @@ export default function ChatWidget() {
         isStandalone={isStandalone}
         isPanelOpen={isPanelOpen}
         hasOpenedChat={hasOpenedChat}
+        hasAcceptedNotice={hasAcceptedNotice}
         onClickLauncher={onClickChatLauncher}
       />
       <ChatPanelPortal

@@ -15,7 +15,8 @@ interface ChatLauncherProps {
   isRuntimeChecked: boolean;
   isStandalone: boolean;
   isPanelOpen: boolean;
-  hasOpenedChat: boolean;
+  hasOpenedChat: boolean | null;
+  hasAcceptedNotice: boolean;
   onClickLauncher: () => void;
 }
 
@@ -74,6 +75,7 @@ export default function ChatLauncher({
   isStandalone,
   isPanelOpen,
   hasOpenedChat,
+  hasAcceptedNotice,
   onClickLauncher,
 }: ChatLauncherProps) {
   // region [Hooks]
@@ -87,7 +89,8 @@ export default function ChatLauncher({
     isLauncherVisible &&
     isRuntimeChecked &&
     isStandalone &&
-    hasOpenedChat &&
+    hasOpenedChat === true &&
+    hasAcceptedNotice &&
     !isPanelOpen &&
     isDocumentVisible &&
     isNetworkOnline &&
@@ -141,8 +144,25 @@ export default function ChatLauncher({
     isPanelOpen,
   );
   const onlineCount = onlineCountQuery.data?.online;
+  const onlineCountLabel = onlineCount !== undefined && onlineCount > 99 ? "99+" : onlineCount;
+  const hasLoadedChatHistory = hasOpenedChat !== null;
+  const shouldShowNewBadge = isRuntimeChecked && hasLoadedChatHistory && !hasAcceptedNotice;
   const shouldShowOnlineBadge =
-    isStandalone && !isPanelOpen && hasOpenedChat && onlineCount !== undefined;
+    isStandalone &&
+    !isPanelOpen &&
+    hasOpenedChat === true &&
+    hasAcceptedNotice &&
+    onlineCount !== undefined;
+  const NewBadgeTemplate = shouldShowNewBadge ? (
+    <span className="absolute -right-2.5 -top-1 rounded-full bg-red-500 px-1.5 py-0.5 font-pretendard text-[10px] font-bold leading-4 text-white shadow-sm">
+      NEW
+    </span>
+  ) : null;
+  const OnlineCountBadgeTemplate = shouldShowOnlineBadge ? (
+    <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-green-500 px-1.5 py-0.5 font-number text-[10px] font-bold leading-4 text-white shadow-sm">
+      {onlineCountLabel}
+    </span>
+  ) : null;
   // endregion
 
   if (!isLauncherVisible) {
@@ -159,11 +179,8 @@ export default function ChatLauncher({
       className="pointer-events-auto relative"
     >
       <GroupIcon size={28} className="pointer-events-none text-neutral-900 dark:text-white" />
-      {shouldShowOnlineBadge && (
-        <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-green-500 px-1.5 py-0.5 font-number text-[10px] font-bold leading-4 text-white shadow-sm">
-          {onlineCount > 99 ? "99+" : onlineCount}
-        </span>
-      )}
+      {NewBadgeTemplate}
+      {OnlineCountBadgeTemplate}
     </FloatingBannerButton>
   );
 }

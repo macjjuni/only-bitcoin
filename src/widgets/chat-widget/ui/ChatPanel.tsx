@@ -420,7 +420,7 @@ export default function ChatPanel({
   const NoticeTemplate = !hasAcceptedNotice ? (
     <div className="flex min-h-0 flex-1 items-center justify-center p-5">
       <section className="rounded-3xl border border-bitcoin/25 bg-bitcoin/5 p-5">
-        <p className="text-sm font-bold">채팅 이용 전 확인해 주세요</p>
+        <p className="text-base font-bold">채팅 이용 전 확인해 주세요</p>
         <ul className="mt-3 flex list-disc flex-col gap-2 pl-5 text-xs leading-5 text-neutral-600 dark:text-neutral-300">
           <li>공개 글은 기간 제한 없이 최근 300개까지 보관됩니다.</li>
           <li>개인정보, 연락처, 링크를 작성하지 마세요.</li>
@@ -514,7 +514,7 @@ export default function ChatPanel({
     "pointer-events-auto fixed flex flex-col overflow-hidden bg-white font-pretendard shadow-2xl dark:bg-neutral-950",
     isFullscreen
       ? "inset-x-0 top-0 h-[100dvh] w-full rounded-none"
-      : "bottom-[calc(86px+4.5rem)] left-[9px] right-[9px] h-[min(calc(50dvh_+_64px),624px)] rounded-3xl border border-neutral-200 dark:border-neutral-700 sm:bottom-[calc(86px+5rem)] sm:left-auto sm:right-4 sm:h-[min(calc(50dvh_+_64px),624px)] sm:w-[min(426px,calc(100vw-26px))] layout-max:right-[calc((100vw-524px)/2+1rem)]",
+      : "bottom-[calc(86px+4.5rem)] left-[16px] right-[16px] h-[min(calc(50dvh_+_64px),624px)] rounded-3xl border border-neutral-200 dark:border-neutral-700 sm:bottom-[calc(86px+5rem)] sm:left-auto sm:right-4 sm:h-[min(calc(50dvh_+_64px),624px)] sm:w-[min(420px,calc(100vw-32px))] layout-max:right-[calc((100vw-524px)/2+1rem)]",
   ].join(" ");
 
   return (
