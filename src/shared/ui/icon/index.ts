@@ -12,6 +12,7 @@ export { default as DiscordIcon } from "./DiscordIcon";
 export { default as EagleIcon } from "./EagleIcon";
 export { default as EditIcon } from "./EditIcon";
 export { default as ExchangeIcon } from "./ExchangeIcon";
+export { default as GroupIcon } from "./GroupIcon";
 export { default as HalfCircleIcon } from "./HalfCircleIcon";
 export { default as HalfIcon } from "./HalfIcon";
 export { default as IncidentIcon } from "./IncidentIcon";
