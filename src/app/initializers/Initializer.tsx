@@ -59,7 +59,6 @@ const Initializer = () => {
       <Suspense fallback={null}>
         <PwaRegister />
         <BaseInitializer />
-        {/* <SurpriseQuiz /> */}
       </Suspense>
     </>
   );

@@ -106,6 +106,11 @@ export interface OverlayImageInfo {
   shadowBlur?: number;
 }
 
+export interface ImageCaptureOptions {
+  backgroundSrc?: string;
+  overlays?: readonly OverlayImageInfo[];
+}
+
 /**
  * 합성용 이미지를 로드한다.
  *
@@ -205,48 +210,48 @@ function canvasToBlob(canvas: HTMLCanvasElement): Promise<Blob> {
 
 // endregion
 
-/** 오버레이 이미지 목록. 캡처 시 합성할 이미지가 없으면 빈 배열. */
-let registeredOverlays: OverlayImageInfo[] = [];
-
-/** 캡처 결과 아래에 깔 배경 이미지. 없으면 `null`. */
-let registeredBackgroundSrc: string | null = null;
-
 /**
- * 캡처 후 합성할 오버레이 이미지를 등록한다.
+ * 축소 표시된 카드 안의 canvas 위치를 원본 디자인 좌표계의 오버레이 정보로 변환한다.
  */
-export function registerCaptureOverlay(overlay: OverlayImageInfo): void {
-  registeredOverlays = [overlay];
-}
+export function createCanvasCaptureOverlay(
+  cardElement: HTMLElement,
+  overlayCanvas: HTMLCanvasElement,
+  cardDesignWidthInPixels: number,
+): OverlayImageInfo {
+  const cardRectangle = cardElement.getBoundingClientRect();
+  const overlayRectangle = overlayCanvas.getBoundingClientRect();
 
-/**
- * 캡처 결과 아래에 깔 배경 이미지를 등록한다.
- */
-export function registerCaptureBackground(src: string): void {
-  registeredBackgroundSrc = src;
-}
+  if (cardDesignWidthInPixels <= 0 || cardRectangle.width <= 0) {
+    throw new Error("카드 캡처 좌표를 계산할 수 없습니다.");
+  }
 
-/**
- * 등록된 오버레이와 배경을 해제한다.
- */
-export function clearCaptureOverlays(): void {
-  registeredOverlays = [];
-  registeredBackgroundSrc = null;
+  const displayScale = cardRectangle.width / cardDesignWidthInPixels;
+
+  return {
+    src: overlayCanvas.toDataURL(),
+    size: overlayRectangle.width / displayScale,
+    top: (overlayRectangle.top - cardRectangle.top) / displayScale,
+    left: (overlayRectangle.left - cardRectangle.left) / displayScale,
+  };
 }
 
 /**
  * DOM → canvas → (오버레이·배경 합성) → Blob 파이프라인.
  */
-async function captureToCanvas(element: HTMLElement): Promise<HTMLCanvasElement> {
+async function captureToCanvas(
+  element: HTMLElement,
+  { backgroundSrc, overlays = [] }: ImageCaptureOptions = {},
+): Promise<HTMLCanvasElement> {
   const canvas = await toCanvas(element, CAPTURE_OPTIONS);
 
-  for (const overlay of registeredOverlays) {
+  for (const overlay of overlays) {
     await compositeOverlay(canvas, overlay);
   }
 
   // 배경은 항상 마지막이다. 오버레이보다 먼저 깔면 destination-over 가 오버레이의
   // 투명 영역까지 덮어 그림자가 사라진다.
-  if (registeredBackgroundSrc) {
-    await compositeBackground(canvas, registeredBackgroundSrc);
+  if (backgroundSrc) {
+    await compositeBackground(canvas, backgroundSrc);
   }
 
   return canvas;
@@ -255,16 +260,22 @@ async function captureToCanvas(element: HTMLElement): Promise<HTMLCanvasElement>
 /**
  * DOM 엘리먼트를 PNG Data URL 로 캡처한다.
  */
-export async function captureElementToPngDataUrl(element: HTMLElement): Promise<string> {
-  const canvas = await captureToCanvas(element);
+export async function captureElementToPngDataUrl(
+  element: HTMLElement,
+  captureOptions?: ImageCaptureOptions,
+): Promise<string> {
+  const canvas = await captureToCanvas(element, captureOptions);
   return canvas.toDataURL(PNG_MIME_TYPE);
 }
 
 /**
  * DOM 엘리먼트를 PNG Blob 으로 캡처한다.
  */
-export async function captureElementToPngBlob(element: HTMLElement): Promise<Blob> {
-  const canvas = await captureToCanvas(element);
+export async function captureElementToPngBlob(
+  element: HTMLElement,
+  captureOptions?: ImageCaptureOptions,
+): Promise<Blob> {
+  const canvas = await captureToCanvas(element, captureOptions);
   return canvasToBlob(canvas);
 }
 

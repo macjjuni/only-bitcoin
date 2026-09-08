@@ -31,7 +31,7 @@ src/
 ├── views/      # FSD 의 pages 레이어 - 라우트별 화면 조립
 ├── widgets/    # 독립적으로 동작하는 UI 블록 (header, bottom-navigation ...)
 ├── features/   # 사용자 액션 단위 기능 (download-meme ...)
-├── entities/   # 도메인 데이터와 상태 (bitcoin, block, quiz ...)
+├── entities/   # 도메인 데이터와 상태 (bitcoin, block, apartment ...)
 └── shared/     # 도메인 비의존 공통 코드 (ui, lib, stores, config ...)
 ```
 
@@ -131,7 +131,6 @@ pnpm check:cycles  # 모듈 순환 참조 검사
 - UI 전면 개편 및 Next.js App Router 기반으로 마이그레이션
 - BIP39 니모닉 단어 검색 페이지 추가
 - 밈(Meme) 페이지 이미지 다운로드 기능 추가
-- 비트코인 퀴즈(SurpriseQuiz) 기능 추가
 - 차트 라이브러리 마이그레이션 및 해시레이트/난이도 차트 개선
 - 페이지별 SEO 메타데이터 및 동적 사이트맵 적용
   </div>

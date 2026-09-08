@@ -42,6 +42,10 @@ export {
   type SegmentedControlProps,
 } from "./SegmentedControl";
 export {
+  default as ShareCardExportDialog,
+  type ShareCardExportDialogProps,
+} from "./ShareCardExportDialog";
+export {
   default as ShareCardQr,
   type ShareCardQrProps,
 } from "./ShareCardQr";

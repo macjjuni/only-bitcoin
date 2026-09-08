@@ -54,7 +54,6 @@ const CONTENT_SECURITY_POLICY = [
   [
     `img-src 'self' data: blob: ${MEME_IMAGE_SOURCE}`,
     "https://raw.githubusercontent.com",
-    "https://bitcoin.org",
     "https://image-store-one.vercel.app",
     "https://alternative.me",
     "https://*.googlesyndication.com",
