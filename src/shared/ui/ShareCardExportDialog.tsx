@@ -282,7 +282,9 @@ export default function ShareCardExportDialog({
           </div>
 
           <div ref={setCardScaleAreaReference} className="flex w-full justify-center">
-            <div className="overflow-hidden rounded-[32px]" style={cardViewportStyle}>
+            {/* 카드가 스스로 라운드를 클리핑하므로 여기서 같은 반경을 또 주면 안 됨.
+                클립 경계가 카드 1px 보더 바깥선과 겹쳐 곡선 구간 보더가 깎여 나감. */}
+            <div className="overflow-hidden" style={cardViewportStyle}>
               <div style={cardTransformStyle}>{CardTemplate}</div>
             </div>
           </div>
