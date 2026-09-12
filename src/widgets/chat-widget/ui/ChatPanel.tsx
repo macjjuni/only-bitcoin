@@ -3,6 +3,7 @@
 import { KPopover, KPopoverContent, KPopoverTrigger, KTextField } from "kku-ui";
 import { Check, Info, Maximize2, Minimize2, Pencil, RotateCw, X } from "lucide-react";
 import { useCallback, useEffect, useRef, useState } from "react";
+import { flushSync } from "react-dom";
 import { type ChatMessage, formatChatAnonId } from "@/entities/chat-message";
 import {
   ChatAdministratorControl,
@@ -17,10 +18,12 @@ import {
 } from "@/features/chat-session";
 import { CHAT_MAX_NICKNAME_GRAPHEMES, chatConfig } from "@/shared/config/chat";
 import { truncateGraphemes } from "@/shared/lib/text/countGraphemes";
+import { runChatPanelResizeTransition } from "@/shared/lib/transition";
 import ChatComposer from "./ChatComposer";
 import ChatMessageList from "./ChatMessageList";
 
 export interface ChatPanelProps {
+  isClosing: boolean;
   identity: ChatIdentity | null;
   hasAcceptedNotice: boolean;
   draft: string;
@@ -47,6 +50,7 @@ const focusableElementSelector = [
 const ADMINISTRATOR_LOGIN_LONG_PRESS_DURATION_IN_MILLISECONDS = 7_000;
 
 export default function ChatPanel({
+  isClosing,
   identity,
   hasAcceptedNotice,
   draft,
@@ -147,6 +151,15 @@ export default function ChatPanel({
     }
   };
 
+  /** View Transition 이 새 레이아웃을 캡처하려면 상태가 콜백 안에서 동기 커밋돼야 함. */
+  const toggleFullscreenWithMorph = (): void => {
+    runChatPanelResizeTransition(() => {
+      flushSync(() => {
+        setIsFullscreen((currentFullscreenState) => !currentFullscreenState);
+      });
+    });
+  };
+
   const acknowledgeSentMessage = (): void => {
     onChangeDraft("");
     onChangeSelectedReply(null);
@@ -195,7 +208,7 @@ export default function ChatPanel({
   };
 
   const onClickToggleFullscreenButton = (): void => {
-    setIsFullscreen((currentFullscreenState) => !currentFullscreenState);
+    toggleFullscreenWithMorph();
   };
 
   const onKeyDownPanel = (keyboardEvent: React.KeyboardEvent<HTMLElement>): void => {
@@ -525,6 +538,12 @@ export default function ChatPanel({
       : undefined;
   const panelClassName = [
     "pointer-events-auto fixed flex flex-col overflow-hidden bg-white font-pretendard shadow-2xl dark:bg-neutral-950",
+    // 런처(우하단)를 기준으로 부풀어 오르고 다시 접히게 함.
+    // 두 애니메이션이 같은 `animation` 속성을 쓰므로 한 번에 하나만 붙인다.
+    "origin-bottom-right",
+    isClosing
+      ? "animate-chat-panel-out motion-reduce:animate-none motion-reduce:opacity-0"
+      : "animate-chat-panel-in motion-reduce:animate-none",
     isFullscreen
       ? "inset-x-0 top-0 h-[100dvh] w-full rounded-none"
       : "bottom-[calc(86px+4.5rem)] left-[16px] right-[16px] h-[min(calc(50dvh_+_64px),624px)] rounded-3xl border border-neutral-200 dark:border-neutral-700 sm:bottom-[calc(86px+5rem)] sm:left-auto sm:right-4 sm:h-[min(calc(50dvh_+_64px),624px)] sm:w-[min(420px,calc(100vw-32px))] layout-max:right-[calc((100vw-524px)/2+1rem)]",
@@ -537,7 +556,9 @@ export default function ChatPanel({
           type="button"
           aria-label="채팅 닫기"
           onClick={onClickBackdrop}
-          className="pointer-events-auto absolute inset-0 bg-black/45 backdrop-blur-[2px]"
+          className={`only-btc__chat-backdrop pointer-events-auto absolute inset-0 bg-black/45 backdrop-blur-[2px] ${
+            isClosing ? "animate-chat-backdrop-out motion-reduce:animate-none" : ""
+          }`}
         />
       )}
       <aside

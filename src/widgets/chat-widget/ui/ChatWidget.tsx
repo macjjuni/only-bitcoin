@@ -10,11 +10,16 @@ import ChatInstallGuide from "./ChatInstallGuide";
 import ChatLauncher from "./ChatLauncher";
 import ChatPanelPortal from "./ChatPanelPortal";
 
+/** `chat-panel-out` 재생 시간과 맞춤. 이 시간이 지난 뒤 패널을 언마운트한다. */
+const CHAT_PANEL_CLOSE_ANIMATION_DURATION_IN_MILLISECONDS = 200;
+
 export default function ChatWidget() {
   // region [Hooks]
   const launcherButtonReference = useRef<HTMLButtonElement | null>(null);
+  const closePanelTimerReference = useRef<number | null>(null);
   const { isRuntimeChecked, isStandalone, refreshStandaloneRuntime } = useStandaloneRuntime();
   const [isPanelOpen, setIsPanelOpen] = useState(false);
+  const [isPanelClosing, setIsPanelClosing] = useState(false);
   const [isInstallGuideOpen, setIsInstallGuideOpen] = useState(false);
   const [hasOpenedChat, setHasOpenedChat] = useState<boolean | null>(null);
   const [hasAcceptedNotice, setHasAcceptedNotice] = useState(false);
@@ -47,10 +52,21 @@ export default function ChatWidget() {
     });
   };
 
+  const clearClosePanelTimer = (): void => {
+    if (closePanelTimerReference.current === null) {
+      return;
+    }
+
+    window.clearTimeout(closePanelTimerReference.current);
+    closePanelTimerReference.current = null;
+  };
+
   const openStandaloneChat = (): void => {
     const nextIdentity = loadOrCreateChatIdentity();
     const storedNoticeVersion = window.localStorage.getItem(CHAT_STORAGE_KEYS.noticeVersion);
     window.localStorage.setItem(CHAT_STORAGE_KEYS.opened, "1");
+    clearClosePanelTimer();
+    setIsPanelClosing(false);
     setIdentity(nextIdentity);
     setHasOpenedChat(true);
     setHasAcceptedNotice(storedNoticeVersion === CHAT_NOTICE_VERSION);
@@ -58,8 +74,20 @@ export default function ChatWidget() {
     setIsPanelOpen(true);
   };
 
+  /**
+   * 닫힘 애니메이션이 끝날 때까지 패널을 살려 둔다.
+   *
+   * `isPanelOpen` 은 즉시 내려서 런처의 `aria-expanded` 와 온라인 수 폴링이 바로
+   * 닫힌 상태를 따르게 하고, 언마운트만 `isPanelClosing` 으로 미룬다.
+   */
   const closeChatPanel = (): void => {
+    clearClosePanelTimer();
     setIsPanelOpen(false);
+    setIsPanelClosing(true);
+    closePanelTimerReference.current = window.setTimeout(() => {
+      closePanelTimerReference.current = null;
+      setIsPanelClosing(false);
+    }, CHAT_PANEL_CLOSE_ANIMATION_DURATION_IN_MILLISECONDS);
     restoreLauncherFocus();
   };
 
@@ -140,10 +168,18 @@ export default function ChatWidget() {
 
     synchronizeChatWithStandaloneRuntime();
   }, [isRuntimeChecked, synchronizeChatWithStandaloneRuntime]);
+
+  useEffect(() => {
+    return () => {
+      if (closePanelTimerReference.current !== null) {
+        window.clearTimeout(closePanelTimerReference.current);
+      }
+    };
+  }, []);
   // endregion
 
   // region [Templates]
-  const shouldRenderChatPanel = isRuntimeChecked && isStandalone && isPanelOpen;
+  const shouldRenderChatPanel = isRuntimeChecked && isStandalone && (isPanelOpen || isPanelClosing);
 
   // KBottomSheet가 자체 포털을 사용하므로 createPortal로 감싸지 않음.
   const InstallGuideSheet =
@@ -165,6 +201,7 @@ export default function ChatWidget() {
       />
       <ChatPanelPortal
         shouldRenderPanel={shouldRenderChatPanel}
+        isClosing={isPanelClosing}
         identity={identity}
         hasAcceptedNotice={hasAcceptedNotice}
         draft={draft}

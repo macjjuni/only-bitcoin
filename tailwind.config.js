@@ -110,6 +110,15 @@ export default {
           "0%, 100%": { opacity: "0" },
           "50%": { opacity: "1" },
         },
+        chatPanelIn: {
+          "0%": { opacity: "0", transform: "translateY(10px) scale(0.92)" },
+          "60%": { opacity: "1" },
+          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
+        },
+        chatPanelOut: {
+          "0%": { opacity: "1", transform: "translateY(0) scale(1)" },
+          "100%": { opacity: "0", transform: "translateY(8px) scale(0.96)" },
+        },
       },
       animation: {
         wiggle: "wiggle 0.36s ease-in-out infinite",
@@ -127,6 +136,9 @@ export default {
         "blob-drift-a": "blobDriftA 20s ease-in-out infinite",
         "blob-drift-b": "blobDriftB 24s ease-in-out infinite",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        "chat-panel-in": "chatPanelIn 0.28s cubic-bezier(0.16, 1, 0.3, 1)",
+        "chat-panel-out": "chatPanelOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards",
+        "chat-backdrop-out": "fadeOut 0.2s ease-in-out forwards",
       },
     },
   },

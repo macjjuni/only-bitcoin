@@ -9,6 +9,7 @@ interface ChatPanelPortalProps extends ChatPanelProps {
 
 export default function ChatPanelPortal({
   shouldRenderPanel,
+  isClosing,
   identity,
   hasAcceptedNotice,
   draft,
@@ -30,6 +31,7 @@ export default function ChatPanelPortal({
 
   return createPortal(
     <ChatPanel
+      isClosing={isClosing}
       identity={identity}
       hasAcceptedNotice={hasAcceptedNotice}
       draft={draft}
