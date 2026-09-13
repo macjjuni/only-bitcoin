@@ -41,7 +41,7 @@ export const isEstimatedFlowOutlier = (
   }
 
   if (estimatedAumInUsd === null || estimatedAumInUsd <= 0) {
-    return estimatedFlowInUsd !== 0;
+    return false;
   }
 
   return Math.abs(estimatedFlowInUsd) / estimatedAumInUsd >= MAX_DAILY_FLOW_TO_AUM_RATIO;
@@ -100,6 +100,7 @@ const resolveReferenceGroup = (
 };
 
 const buildDailyFlow = (group: DateFundGroup): BitcoinEtfDailyFlow => {
+  const reportedFlowFunds = group.funds.filter((fund) => fund.estimatedFlowInUsd !== null);
   const validFlowFunds = group.funds.filter((fund) => {
     return fund.estimatedFlowInUsd !== null && !fund.isEstimatedFlowExcluded;
   });
@@ -113,7 +114,7 @@ const buildDailyFlow = (group: DateFundGroup): BitcoinEtfDailyFlow => {
   return {
     date: group.date,
     estimatedNetFlowInUsd,
-    reportedFundCount: group.funds.length,
+    reportedFundCount: reportedFlowFunds.length,
     validFlowFundCount: validFlowFunds.length,
     excludedFlowCount,
   };
@@ -125,7 +126,7 @@ const buildChartDailyFlows = (
   fallbackFundCount: number,
 ): BitcoinEtfDailyFlow[] => {
   const fullyCoveredGroups = dateFundGroups.filter(
-    ({ funds }) => funds.length === trackedFundCount,
+    (group) => buildDailyFlow(group).reportedFundCount === trackedFundCount,
   );
   const chartSourceGroups = fullyCoveredGroups.length
     ? fullyCoveredGroups
@@ -191,13 +192,13 @@ export const normalizeBitcoinEtfResponse = (
       referenceDate: referenceGroup.date,
       latestSourceDate: dateFundGroups[0]?.date ?? referenceGroup.date,
       trackedFundCount,
-      reportedFundCount: referenceGroup.funds.length,
+      reportedFundCount: referenceDailyFlow.reportedFundCount,
       validFlowFundCount: referenceDailyFlow.validFlowFundCount,
       excludedFlowCount: referenceDailyFlow.excludedFlowCount,
       estimatedNetFlowInUsd: referenceDailyFlow.estimatedNetFlowInUsd,
       totalHoldingsInBtc,
       estimatedAumInUsd,
-      isFullCoverage: referenceGroup.funds.length === trackedFundCount,
+      isFullCoverage: referenceDailyFlow.reportedFundCount === trackedFundCount,
     },
     dailyFlows: buildChartDailyFlows(dateFundGroups, trackedFundCount, referenceGroup.funds.length),
     funds: sortedReferenceFunds,

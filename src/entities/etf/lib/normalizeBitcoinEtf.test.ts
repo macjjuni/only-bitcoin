@@ -47,6 +47,11 @@ describe("isEstimatedFlowOutlier", () => {
   it("흐름 값이 없으면 이상치로 분류하지 않는다", () => {
     expect(isEstimatedFlowOutlier(null, 1000)).toBe(false);
   });
+
+  it("AUM이 없어도 보고된 흐름 값은 이상치로 분류하지 않는다", () => {
+    expect(isEstimatedFlowOutlier(100, null)).toBe(false);
+    expect(isEstimatedFlowOutlier(-100, null)).toBe(false);
+  });
 });
 
 describe("normalizeBitcoinEtfResponse", () => {
@@ -69,5 +74,32 @@ describe("normalizeBitcoinEtfResponse", () => {
     expect(snapshot.funds.find(({ ticker }) => ticker === "BBB")?.isEstimatedFlowExcluded).toBe(
       true,
     );
+  });
+
+  it("일부 ETF의 흐름만 보고된 최신 날짜는 현재까지의 합계로 표시한다", () => {
+    const partialResponse: XoomarEtfFlowResponse = {
+      ...TEST_RESPONSE,
+      data: [
+        ...TEST_RESPONSE.data,
+        {
+          date: "2026-08-22",
+          ticker: "BBB",
+          issuer: "Beta",
+          asset: "btc",
+          holdings: null,
+          flowUsd: null,
+          aumUsd: null,
+        },
+      ],
+    };
+
+    const snapshot = normalizeBitcoinEtfResponse(partialResponse);
+
+    expect(snapshot.summary.referenceDate).toBe("2026-08-22");
+    expect(snapshot.summary.estimatedNetFlowInUsd).toBe(100);
+    expect(snapshot.summary.reportedFundCount).toBe(1);
+    expect(snapshot.summary.validFlowFundCount).toBe(1);
+    expect(snapshot.summary.isFullCoverage).toBe(false);
+    expect(snapshot.dailyFlows.at(-1)?.date).toBe("2026-08-21");
   });
 });

@@ -33,8 +33,16 @@ export default function EtfSummaryHero({
   const dailyFlowColorClassName = summary.estimatedNetFlowInUsd >= 0 ? "text-up" : "text-down";
   const sevenDayFlowColorClassName = sevenTradingDayNetFlowInUsd >= 0 ? "text-up" : "text-down";
   const isLatestSourceDatePartiallyReported = summary.latestSourceDate !== summary.referenceDate;
+  const isReferenceDatePartiallyReported = !summary.isFullCoverage;
   const hasExcludedFlow = summary.excludedFlowCount > 0;
   const formattedUpdatedAt = formatEtfUpdatedAt(sourceUpdatedAt);
+  const updateStatusLabel = isReferenceDatePartiallyReported ? "집계 중" : "최신 업데이트";
+  const updateStatusClassName = isReferenceDatePartiallyReported
+    ? "bg-bitcoin/10 text-bitcoin"
+    : "bg-up/10 text-up";
+  const aggregationStatusMessage = isLatestSourceDatePartiallyReported
+    ? `최신 원천일은 ${formatEtfDate(summary.latestSourceDate)}이며, 모든 ETF가 있는 ${formatEtfDate(summary.referenceDate)} 데이터를 사용했습니다.`
+    : `${summary.trackedFundCount}개 ETF 중 ${summary.reportedFundCount}개의 흐름이 보고되어 현재까지의 합계를 표시합니다.`;
   // endregion
 
   return (
@@ -48,8 +56,10 @@ export default function EtfSummaryHero({
                 {formatEtfDate(summary.referenceDate)} 기준
               </strong>
             </div>
-            <span className="shrink-0 rounded-full bg-up/10 px-2.5 py-2 text-[10px] font-bold text-up">
-              최신 업데이트
+            <span
+              className={`shrink-0 rounded-full px-2.5 py-2 text-[10px] font-bold ${updateStatusClassName}`}
+            >
+              {updateStatusLabel}
             </span>
           </div>
           <strong
@@ -97,12 +107,13 @@ export default function EtfSummaryHero({
           </div>
         </dl>
 
-        {(isLatestSourceDatePartiallyReported || hasExcludedFlow) && (
+        {(isLatestSourceDatePartiallyReported ||
+          isReferenceDatePartiallyReported ||
+          hasExcludedFlow) && (
           <div className="mt-3 rounded-lg bg-bitcoin/10 px-3 py-2.5 text-sm leading-relaxed text-foreground">
             <strong className="font-bold text-bitcoin">집계 상태</strong>
             <span className="ml-1.5">
-              최신 원천일은 {formatEtfDate(summary.latestSourceDate)}이며, 모든 ETF가 있는 기준일을
-              사용했습니다.
+              {aggregationStatusMessage}
               {hasExcludedFlow
                 ? ` 비정상 흐름 ${summary.excludedFlowCount}건은 합계에서 제외했습니다.`
                 : ""}

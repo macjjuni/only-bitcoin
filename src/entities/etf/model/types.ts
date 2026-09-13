@@ -38,7 +38,7 @@ export interface BitcoinEtfFundSnapshot {
   isEstimatedFlowExcluded: boolean;
 }
 
-/** 차트에서 사용하는 완전 집계일별 합산 흐름. */
+/** 차트에서 사용하는 일별 합산 흐름. */
 export interface BitcoinEtfDailyFlow {
   date: string;
   estimatedNetFlowInUsd: number;
