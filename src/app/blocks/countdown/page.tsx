@@ -1,4 +1,4 @@
-import { fetchInitialBlocks } from "@/entities/block/server";
+import { BLOCK_HEIGHT_REVALIDATE_SECONDS, fetchInitialBlocks } from "@/entities/block/server";
 import { SERVICE_DOMAIN } from "@/shared/config/env";
 import { createBreadcrumbSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
@@ -14,8 +14,9 @@ export const metadata = createPageMetadata({
     "비트코인 다음 반감기까지 남은 시간을 실시간으로 확인하세요. 현재 블록 높이와 남은 블록 수, 예상 반감기 날짜를 함께 제공합니다.",
 });
 
+/** ISR 주기는 `BLOCK_HEIGHT_REVALIDATE_SECONDS`( 1시간 )가 정함. 여기 따로 적지 않음. */
 export default async function Page() {
-  const { blocks } = await fetchInitialBlocks();
+  const { blocks } = await fetchInitialBlocks(BLOCK_HEIGHT_REVALIDATE_SECONDS);
   const currentBlockHeight = blocks[0]?.height ?? 0;
 
   return (

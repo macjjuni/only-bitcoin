@@ -6,4 +6,8 @@
  * 타입은 `model/types` 에 있으므로 클라이언트 컴포넌트는 `@/entities/block` 에서 가져간다.
  * (`client.ts` 로 클라이언트 전용 훅을 나누는 것과 대칭 구조)
  */
-export { fetchInitialBlocks } from "./api/blocks.server";
+export {
+  BLOCK_HEIGHT_REVALIDATE_SECONDS,
+  DIFFICULTY_REVALIDATE_SECONDS,
+  fetchInitialBlocks,
+} from "./api/blocks.server";

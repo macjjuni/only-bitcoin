@@ -8,6 +8,7 @@ import {
 import type {
   CoinGeckoGlobalResponse,
   FearGreedIndexResponseTypes,
+  InitialExchangeRate,
   InitialMacro,
 } from "../model/types";
 
@@ -46,26 +47,45 @@ const fetchMacro = async <T>(url: string, revalidate: number): Promise<T | null>
 
 // region [Transactions]
 /**
+ * SSR 초기 환율만 조회.
+ *
+ * 매크로 묶음에서 굳이 떼어 둔 이유는 ISR 주기 때문임. Next 는 라우트 revalidate 를
+ * 렌더에 쓰인 캐시들의 TTL 중 **최솟값**으로 잡으므로, 환율만 필요한 화면이 묶음을
+ * 통째로 부르면 도미넌스/공포탐욕의 10분이 페이지까지 끌어내림.
+ * ( `/etf` 가 1시간을 적어 두고도 10분마다 재생성되던 원인 )
+ */
+export const fetchInitialExchangeRate = async (): Promise<InitialExchangeRate> => {
+  const exRate = await fetchMacro<NaverExchangeRateResponse>(
+    NAVER_EXCHANGE_RATE_URL,
+    EX_RATE_REVALIDATE_SECONDS,
+  );
+
+  const usdExRate = (exRate && parseUsdExchangeRate(exRate)) || EMPTY_MACRO.usdExRate;
+
+  return {
+    usdExRate,
+    usdExRateDate: usdExRate ? getCurrentDateKST() : EMPTY_MACRO.usdExRateDate,
+  };
+};
+
+/**
  * SSR 초기 매크로 지표 조회(도미넌스 / 공포탐욕지수 / 환율).
  * 크롤러용 HTML에 값 채우려고 서버에서 미리 읽음.
  * 일부 실패해도 나머지 값은 그대로 씀.
  */
 export const fetchInitialMacro = async (): Promise<InitialMacro> => {
-  const [global, fearGreed, exRate] = await Promise.all([
+  const [global, fearGreed, exchangeRate] = await Promise.all([
     fetchMacro<CoinGeckoGlobalResponse>(BTC_DOMINANCE_API_URL, SLOW_REVALIDATE_SECONDS),
     fetchMacro<FearGreedIndexResponseTypes>(FEAR_GREED_INDEX_API_URL, SLOW_REVALIDATE_SECONDS),
-    fetchMacro<NaverExchangeRateResponse>(NAVER_EXCHANGE_RATE_URL, EX_RATE_REVALIDATE_SECONDS),
+    fetchInitialExchangeRate(),
   ]);
-
-  const usdExRate = (exRate && parseUsdExchangeRate(exRate)) || EMPTY_MACRO.usdExRate;
 
   return {
     dominance: global
       ? floorToDecimal(global.data.market_cap_percentage.btc, 2)
       : EMPTY_MACRO.dominance,
     fearGreedIndex: fearGreed ? Number(fearGreed.data[0].value) : EMPTY_MACRO.fearGreedIndex,
-    usdExRate,
-    usdExRateDate: usdExRate ? getCurrentDateKST() : EMPTY_MACRO.usdExRateDate,
+    ...exchangeRate,
   };
 };
 // endregion

@@ -41,6 +41,14 @@ export interface InitialPrice {
 }
 
 /** SSR 초기 매크로 지표 (macro.server) */
+/** 환율만 필요한 화면용. `InitialMacro` 에서 환율 부분만 떼어낸 것. */
+export interface InitialExchangeRate {
+  /** USD -> KRW 환율 */
+  usdExRate: number;
+  /** 환율 조회 일자(YYYY-MM-DD). 조회 실패 시 빈 문자열 */
+  usdExRateDate: string;
+}
+
 export interface InitialMacro {
   /** 비트코인 도미넌스(%) */
   dominance: number;

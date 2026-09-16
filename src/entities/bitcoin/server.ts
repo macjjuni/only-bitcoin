@@ -8,5 +8,5 @@
  */
 export { type BtcDailyKrwMap, getBtcDailyKrwMap } from "./api/btcDailyKrw.server";
 export { type BtcMonthlyUsdMap, getBtcMonthlyUsdMap } from "./api/btcMonthlyUsd.server";
-export { fetchInitialMacro } from "./api/macro.server";
+export { fetchInitialExchangeRate, fetchInitialMacro } from "./api/macro.server";
 export { fetchInitialPrice } from "./api/price.server";

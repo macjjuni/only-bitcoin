@@ -1,4 +1,4 @@
-import { fetchInitialBlocks } from "@/entities/block/server";
+import { DIFFICULTY_REVALIDATE_SECONDS, fetchInitialBlocks } from "@/entities/block/server";
 import { createFaqSchema, createWebApplicationSchema } from "@/shared/config/jsonLd";
 import { createPageMetadata } from "@/shared/config/metadata";
 import { JsonLd, PageTitle } from "@/shared/ui";
@@ -12,8 +12,9 @@ export const metadata = createPageMetadata({
     "실시간 채굴 난이도를 기준으로 내 해시레이트의 비트코인 블록 채굴 확률과 기대 소요 시간을 계산해 보세요. NerdMiner, Bitaxe 등 소형 채굴기도 지원합니다.",
 });
 
+/** ISR 주기는 `DIFFICULTY_REVALIDATE_SECONDS`( 6시간 )가 정함. 여기 따로 적지 않음. */
 export default async function SoloMiningPage() {
-  const { blocks } = await fetchInitialBlocks();
+  const { blocks } = await fetchInitialBlocks(DIFFICULTY_REVALIDATE_SECONDS);
   const initialDifficulty = blocks[0]?.difficulty ?? 0;
 
   return (
