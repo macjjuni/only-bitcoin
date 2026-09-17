@@ -13,16 +13,16 @@ const PUBLIC_TREASURY_API_URL =
   "https://api.coingecko.com/api/v3/companies/public_treasury/bitcoin";
 
 /**
- * 서버 캐시 주기(초). 15분.
+ * 서버 캐시 주기(초). 1시간.
  *
  * 기업 트레저리는 공시 기반이라 자주 바뀌지 않으나,
- * CoinGecko 무료 티어 제한(Public)을 고려해 페이지 단위 ISR 로 15분마다 갱신한다.
+ * CoinGecko 무료 티어 제한(Public)을 고려해 페이지 단위 ISR 로 1시간마다 갱신한다.
  *
  * **이 값이 `/treasury` 의 실제 재생성 주기를 정함.** Next 는 라우트 revalidate 를
  * `page.tsx` 값과 렌더에 쓰인 캐시 TTL 중 최솟값으로 잡으므로, 여기가 `page.tsx` 의
- * 900 보다 작으면 페이지 선언이 조용히 무시됨. 둘은 항상 같이 바꿔야 함.
+ * 3600 보다 작으면 페이지 선언이 조용히 무시됨. 둘은 항상 같이 바꿔야 함.
  */
-export const PUBLIC_TREASURY_REVALIDATE_SECONDS = 60 * 15;
+export const PUBLIC_TREASURY_REVALIDATE_SECONDS = 60 * 60;
 
 const EMPTY_SNAPSHOT: Omit<PublicTreasurySnapshot, "fetchedAt"> = {
   summary: {
@@ -107,7 +107,7 @@ const sortByHoldingsDescending = (
 /**
  * 상장기업 비트코인 트레저리 스냅샷 조회.
  *
- * 6시간 ISR 로 캐싱되므로 사용자 요청마다 CoinGecko 를 때리지 않는다.
+ * 1시간 ISR 로 캐싱되므로 사용자 요청마다 CoinGecko 를 때리지 않는다.
  * 조회에 실패하면 `hasFetchFailed` 가 켜진 빈 스냅샷을 돌려주고, 화면에서 안내 문구로 대체한다.
  */
 export const fetchPublicTreasurySnapshot = async (): Promise<PublicTreasurySnapshot> => {

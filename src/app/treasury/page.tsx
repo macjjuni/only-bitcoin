@@ -14,12 +14,12 @@ export const metadata = createPageMetadata({
 });
 
 /**
- * ISR 주기(초) = 15분.
+ * ISR 주기(초) = 1시간.
  *
  * Next.js 는 이 값을 빌드 타임에 정적 분석하므로 상수 import 가 아닌 리터럴이어야 한다.
  * `PUBLIC_TREASURY_REVALIDATE_SECONDS`(entities/treasury) 와 같은 값으로 유지한다.
  */
-export const revalidate = 900;
+export const revalidate = 3600;
 
 export default function TreasuryPage() {
   return (

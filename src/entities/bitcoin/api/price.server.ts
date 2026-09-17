@@ -20,7 +20,7 @@ const BITHUMB_TICKER_URL = "https://api.bithumb.com/public/ticker/BTC_KRW";
 const BINANCE_TICKER_URL = "https://api.binance.com/api/v3/ticker/24hr?symbol=BTCUSDT";
 
 /** 서버 렌더링용 캐시 주기(초). 봇에게 보여줄 값이므로 실시간성보다 캐시 적중이 중요하다. */
-const REVALIDATE_SECONDS = 300;
+const REVALIDATE_SECONDS = 60 * 60;
 
 const EMPTY_PRICE: InitialPrice = {
   krw: 0,

@@ -18,10 +18,10 @@ const FEAR_GREED_INDEX_API_URL = "https://api.alternative.me/fng/";
 
 /**
  * 서버 캐시 주기(초).
- * 도미넌스/공포탐욕지수 10분, 환율 1시간.
- * 클라이언트도 10분 주기로 갱신하므로 서버 캐시 맞춤.
+ * 도미넌스/공포탐욕지수·환율 모두 1시간.
+ * 클라이언트는 별도 주기로 갱신하므로 서버 캐시는 초기 SSR 값에만 사용한다.
  */
-const SLOW_REVALIDATE_SECONDS = 60 * 10;
+const SLOW_REVALIDATE_SECONDS = 60 * 60;
 const EX_RATE_REVALIDATE_SECONDS = 60 * 60;
 
 const EMPTY_MACRO: InitialMacro = {
