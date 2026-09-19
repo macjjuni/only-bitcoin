@@ -63,9 +63,6 @@ export default function OverviewChartShell<T extends string | number>({
     return maxPointIndex / (seriesData.length - 1);
   }, [maxPointIndex, seriesData.length]);
 
-  /** 종점 펄스 마커가 찍힐 마지막 지점 */
-  const lastPoint = useMemo(() => seriesData[seriesData.length - 1] ?? null, [seriesData]);
-
   const chartOptions = useMemo(
     () =>
       createChartOptions({
@@ -73,9 +70,8 @@ export default function OverviewChartShell<T extends string | number>({
         formatter,
         maxPoint,
         maxPointRatio,
-        lastPoint,
       }),
-    [isDark, formatter, maxPoint, maxPointRatio, lastPoint],
+    [isDark, formatter, maxPoint, maxPointRatio],
   );
 
   const currentText = useMemo(
