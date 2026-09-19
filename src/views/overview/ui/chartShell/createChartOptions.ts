@@ -50,7 +50,12 @@ export const createChartOptions = ({
   },
   theme: { mode: isDark ? "dark" : "light" },
   colors: [BITCOIN_COLOR],
-  stroke: { curve: "smooth", width: CARD_CHART_STYLE.strokeWidth, lineCap: "round" },
+  /*
+    `lineCap: "round"` 는 쓰지 않는다. ApexCharts 가 `stroke.lineCap` 을 마커 패스에도
+    물려 주는데, 대기 상태의 호버 마커는 반지름 0 짜리 빈 경로라 round 캡이 붙는 순간
+    플롯 좌상단( 0,0 )에 흰 점으로 찍힌다. 곡선은 차트 폭을 꽉 채워 캡이 보이지도 않는다.
+  */
+  stroke: { curve: "smooth", width: CARD_CHART_STYLE.strokeWidth },
   fill: {
     type: "gradient",
     colors: [BITCOIN_COLOR],
