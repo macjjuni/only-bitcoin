@@ -90,9 +90,6 @@ export default function MiningMetricChart() {
       intervalOptions={miningMetricChartIntervalOptions}
       currentInterval={miningMetricChartInterval}
       onChangeInterval={setHashrateChartInterval}
-      strokeWidth={1.8}
-      fillOpacityTo={{ light: 0.9, dark: 0.06 }}
-      fillStops={[0, 80]}
       chartHeight={188}
       loadingClassName="flex justify-center items-center aspect-[2/1]"
       title={allTimeHighValue}

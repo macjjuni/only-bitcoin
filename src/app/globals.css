@@ -127,6 +127,41 @@
 
 .etf-flow-xaxis-label { letter-spacing: -0.5px; }
 
+/*
+  Overview 차트를 공유 카드( `BtcSurgeShareCard` ) 차트와 같은 결로 맞추는 스타일.
+
+  ApexCharts 옵션으로는 곡선 번짐과 종점 확산 애니메이션을 줄 수 없어
+  실제로 그려진 SVG 노드( 곡선 패스 · 포인트 어노테이션 마커 )에 직접 건다.
+*/
+.overview-chart .apexcharts-area-series .apexcharts-line {
+  filter: drop-shadow(0 0 6px rgb(var(--bitcoin-rgb) / 0.55));
+}
+
+.overview-chart-pulse {
+  transform-box: fill-box;
+  transform-origin: center;
+  animation: overview-chart-pulse 1.6s cubic-bezier(0, 0, 0.2, 1) infinite;
+}
+
+@keyframes overview-chart-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.75;
+  }
+  75%,
+  100% {
+    transform: scale(2.4);
+    opacity: 0;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .overview-chart-pulse {
+    animation: none;
+    opacity: 0.4;
+  }
+}
+
 .only-btc__header { view-transition-name: main-header; }
 .only-btc__bottom-nav { view-transition-name: bottom-nav; }
 .only-btc__floating-banner { view-transition-name: floating-banner; }

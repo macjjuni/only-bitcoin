@@ -45,9 +45,6 @@ export default function MarketChart() {
       intervalOptions={marketChartIntervalOptions}
       currentInterval={marketChartInterval}
       onChangeInterval={setMarketChartInterval}
-      strokeWidth={1.48}
-      fillOpacityTo={{ light: 0.6, dark: 0.06 }}
-      fillStops={[0, 90]}
       chartHeight={188}
     />
   );

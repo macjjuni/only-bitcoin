@@ -16,9 +16,6 @@ export interface OverviewChartShellProps<T extends string | number> {
   intervalOptions: ChartIntervalOption<T>[];
   currentInterval: T;
   onChangeInterval: (value: T) => void;
-  strokeWidth: number;
-  fillOpacityTo: { light: number; dark: number };
-  fillStops: [number, number];
   chartHeight: number;
   title?: string;
   percentage?: number;

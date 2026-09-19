@@ -35,9 +35,6 @@ export default function OverviewChartShell<T extends string | number>({
   intervalOptions,
   currentInterval,
   onChangeInterval,
-  strokeWidth,
-  fillOpacityTo,
-  fillStops,
   chartHeight,
   title,
   percentage,
@@ -66,6 +63,9 @@ export default function OverviewChartShell<T extends string | number>({
     return maxPointIndex / (seriesData.length - 1);
   }, [maxPointIndex, seriesData.length]);
 
+  /** 종점 펄스 마커가 찍힐 마지막 지점 */
+  const lastPoint = useMemo(() => seriesData[seriesData.length - 1] ?? null, [seriesData]);
+
   const chartOptions = useMemo(
     () =>
       createChartOptions({
@@ -73,11 +73,9 @@ export default function OverviewChartShell<T extends string | number>({
         formatter,
         maxPoint,
         maxPointRatio,
-        strokeWidth,
-        fillOpacityTo,
-        fillStops,
+        lastPoint,
       }),
-    [isDark, formatter, maxPoint, maxPointRatio, strokeWidth, fillOpacityTo, fillStops],
+    [isDark, formatter, maxPoint, maxPointRatio, lastPoint],
   );
 
   const currentText = useMemo(
@@ -172,7 +170,7 @@ export default function OverviewChartShell<T extends string | number>({
         </div>
       </div>
 
-      <div className="relative w-full" style={{ height: chartHeight }}>
+      <div className="overview-chart relative w-full" style={{ height: chartHeight }}>
         {isLoading ? (
           <div className={loadingClassName ?? "flex justify-center items-center w-full h-full"}>
             <KSpinner color={BITCOIN_COLOR} />
