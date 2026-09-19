@@ -115,7 +115,6 @@ export const createChartOptions = ({
               fillColor: BITCOIN_COLOR,
               strokeColor: "#fff",
               strokeWidth: 2,
-              cssClass: "",
             },
             label: {
               text: formatter(maxPoint.y),
