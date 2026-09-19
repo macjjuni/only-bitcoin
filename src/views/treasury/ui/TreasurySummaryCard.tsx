@@ -136,8 +136,20 @@ export default function TreasurySummaryCard({ summary, fetchedAt }: TreasurySumm
           </div>
         </dl>
 
-        <p className="mt-3 text-xs text-muted-foreground">
-          업데이트 <span className="font-number">{formatKstDateTime(fetchedAt)}</span>
+        {/*
+          스냅샷 시각. 흐린 한 줄로 흘려 두면 히어로 그라데이션에 묻혀 안 읽힘.
+          위 지표들과 같은 패널로 묶고 시각만 본문색으로 올려 눈에 걸리게 했음.
+        */}
+        <p
+          className={`${PANEL_CLASS_NAME} mt-3 flex w-full items-center justify-between gap-2 px-3.5 py-2.5 text-[11px] font-bold text-muted-foreground`}
+        >
+          <span className="flex items-center gap-1.5">
+            <span className="size-1.5 shrink-0 rounded-full bg-up" />
+            업데이트
+          </span>
+          <span className="font-number text-xs font-black text-foreground">
+            {formatKstDateTime(fetchedAt)}
+          </span>
         </p>
       </div>
     </section>
