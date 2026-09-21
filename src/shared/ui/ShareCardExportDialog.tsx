@@ -37,6 +37,8 @@ export interface ShareCardExportDialogProps {
   onClose: () => void;
   createCaptureOptions?: (cardElement: HTMLDivElement) => ImageCaptureOptions;
   isExportReady?: boolean;
+  /** 다이얼로그 콘텐츠 폭. 카드 디자인 폭이 기본값보다 넓을 때 함께 넓힌다. */
+  contentWidthClassName?: string;
   contentTopClassName?: string;
   closeButtonRowClassName?: string;
   actionButtonClassName?: string;
@@ -54,6 +56,7 @@ export default function ShareCardExportDialog({
   onClose,
   createCaptureOptions,
   isExportReady = true,
+  contentWidthClassName = "w-[92vw] max-w-[460px]",
   contentTopClassName = "!top-[45%]",
   closeButtonRowClassName = "mb-3",
   actionButtonClassName,
@@ -227,7 +230,8 @@ export default function ShareCardExportDialog({
   const isExportDisabled = isExporting || !isExportReady;
   const CardTemplate = renderCard(cardReference);
   const dialogContentClassName = [
-    "fixed left-1/2 z-50 w-[92vw] max-w-[460px] -translate-x-1/2 -translate-y-1/2 border-none bg-transparent p-0 shadow-none outline-none [&>button]:hidden",
+    "fixed left-1/2 z-50 -translate-x-1/2 -translate-y-1/2 border-none bg-transparent p-0 shadow-none outline-none [&>button]:hidden",
+    contentWidthClassName,
     contentTopClassName,
   ].join(" ");
   const closeButtonContainerClassName = ["flex w-full justify-end", closeButtonRowClassName].join(
@@ -245,10 +249,21 @@ export default function ShareCardExportDialog({
   ]
     .filter(Boolean)
     .join(" ");
+  /**
+   * 축소된 카드가 차지할 자리. `transform` 은 레이아웃 크기에 반영되지 않아 직접 잡아 준다.
+   *
+   * 폭은 `컨테이너 폭 ÷ 디자인 폭` 으로 구한 배율을 되돌린 값이라 컨테이너 폭과 같다.
+   * 여기에 올림을 걸면 오히려 스케일 영역을 1px 넘겨 버리므로 그대로 쓴다.
+   * 높이만 올림한다. 모자라면 그만큼 아래 액션 버튼 줄이 카드에 붙어 보인다.
+   */
+  const scaledCardWidthInPixels = cardDesignWidthInPixels * cardScale;
   const cardViewportStyle = {
-    width: cardDesignWidthInPixels * cardScale,
-    height: scaledCardHeightInPixels,
+    width: scaledCardWidthInPixels,
+    height:
+      scaledCardHeightInPixels === undefined ? undefined : Math.ceil(scaledCardHeightInPixels),
   };
+  // 액션 버튼 줄은 화면에 보이는 카드 폭에 맞춘다. ( 카드마다 디자인 폭이 다르다 )
+  const actionRowStyle = { maxWidth: scaledCardWidthInPixels };
   const cardTransformStyle = {
     width: cardDesignWidthInPixels,
     transform: `scale(${cardScale})`,
@@ -282,14 +297,16 @@ export default function ShareCardExportDialog({
           </div>
 
           <div ref={setCardScaleAreaReference} className="flex w-full justify-center">
-            {/* 카드가 스스로 라운드를 클리핑하므로 여기서 같은 반경을 또 주면 안 됨.
-                클립 경계가 카드 1px 보더 바깥선과 겹쳐 곡선 구간 보더가 깎여 나감. */}
-            <div className="overflow-hidden" style={cardViewportStyle}>
+            {/* 이 박스는 클리핑용이 아니라 자리 확보용이다. ( transform 은 레이아웃에 반영되지 않음 )
+                `overflow-hidden` 을 주면 축소 배율의 부동소수 오차만큼 경계가 카드 1px 보더와
+                겹쳐 우측 · 하단 테두리가 깎여 나간다. 배율이 항상 1 이하라 넘칠 일이 없으므로
+                클리핑 없이 둔다. 라운드 클리핑도 카드가 스스로 하므로 여기서 주면 안 된다. */}
+            <div style={cardViewportStyle}>
               <div style={cardTransformStyle}>{CardTemplate}</div>
             </div>
           </div>
 
-          <div className="mt-4 flex w-full max-w-[440px] items-center gap-2">
+          <div className="mt-4 flex w-full items-center gap-2" style={actionRowStyle}>
             <KButton
               width="full"
               size="lg"

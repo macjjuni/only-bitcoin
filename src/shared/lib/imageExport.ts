@@ -4,8 +4,13 @@ import { toCanvas } from "html-to-image";
 
 const PNG_MIME_TYPE = "image/png";
 
-/** SNS 업로드 시 선명도를 확보하기 위한 캡처 해상도 배율 */
-const CAPTURE_PIXEL_RATIO = 3;
+/**
+ * SNS 업로드 시 선명도를 확보하기 위한 기본 캡처 해상도 배율.
+ *
+ * 디자인 폭이 440px 인 카드 기준이다. 더 넓게 설계된 카드는 이 배율을 그대로 쓰면
+ * 결과 이미지가 불필요하게 커지므로 `ImageCaptureOptions.pixelRatio` 로 낮춘다.
+ */
+const DEFAULT_CAPTURE_PIXEL_RATIO = 3;
 
 /**
  * 캡처 복제본의 루트에 강제로 덮어쓰는 스타일.
@@ -33,7 +38,6 @@ function captureFilter(node: Element): boolean {
 
 const CAPTURE_OPTIONS = {
   cacheBust: true,
-  pixelRatio: CAPTURE_PIXEL_RATIO,
   style: CAPTURE_ROOT_STYLE,
   filter: captureFilter,
 } as const;
@@ -109,6 +113,8 @@ export interface OverlayImageInfo {
 export interface ImageCaptureOptions {
   backgroundSrc?: string;
   overlays?: readonly OverlayImageInfo[];
+  /** 캡처 배율. 기본 3배. 디자인 폭이 넓은 카드는 낮춰 결과 이미지 크기를 줄인다. */
+  pixelRatio?: number;
 }
 
 /**
@@ -135,21 +141,22 @@ function loadImage(src: string): Promise<HTMLImageElement> {
 async function compositeOverlay(
   canvas: HTMLCanvasElement,
   overlay: OverlayImageInfo,
+  pixelRatio: number,
 ): Promise<void> {
   const ctx = canvas.getContext("2d");
   if (!ctx) return;
 
   const overlayImg = await loadImage(overlay.src);
-  const scaledSize = overlay.size * CAPTURE_PIXEL_RATIO;
+  const scaledSize = overlay.size * pixelRatio;
   const x =
     overlay.left === undefined
-      ? canvas.width - (overlay.right ?? 0) * CAPTURE_PIXEL_RATIO - scaledSize
-      : overlay.left * CAPTURE_PIXEL_RATIO;
-  const y = overlay.top * CAPTURE_PIXEL_RATIO;
+      ? canvas.width - (overlay.right ?? 0) * pixelRatio - scaledSize
+      : overlay.left * pixelRatio;
+  const y = overlay.top * pixelRatio;
 
   if (overlay.shadowColor) {
     ctx.shadowColor = overlay.shadowColor;
-    ctx.shadowBlur = (overlay.shadowBlur ?? 20) * CAPTURE_PIXEL_RATIO;
+    ctx.shadowBlur = (overlay.shadowBlur ?? 20) * pixelRatio;
     ctx.shadowOffsetX = 0;
     ctx.shadowOffsetY = 0;
   }
@@ -240,12 +247,16 @@ export function createCanvasCaptureOverlay(
  */
 async function captureToCanvas(
   element: HTMLElement,
-  { backgroundSrc, overlays = [] }: ImageCaptureOptions = {},
+  {
+    backgroundSrc,
+    overlays = [],
+    pixelRatio = DEFAULT_CAPTURE_PIXEL_RATIO,
+  }: ImageCaptureOptions = {},
 ): Promise<HTMLCanvasElement> {
-  const canvas = await toCanvas(element, CAPTURE_OPTIONS);
+  const canvas = await toCanvas(element, { ...CAPTURE_OPTIONS, pixelRatio });
 
   for (const overlay of overlays) {
-    await compositeOverlay(canvas, overlay);
+    await compositeOverlay(canvas, overlay, pixelRatio);
   }
 
   // 배경은 항상 마지막이다. 오버레이보다 먼저 깔면 destination-over 가 오버레이의

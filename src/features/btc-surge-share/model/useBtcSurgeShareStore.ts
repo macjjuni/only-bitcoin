@@ -6,11 +6,16 @@ import { SHARE_CARD_TIMEFRAME_LIST, type ShareCardTimeframe } from "./shareCardT
 const DEFAULT_TIMEFRAME: ShareCardTimeframe = "1D";
 
 interface BtcSurgeShareStore {
+  /** 정사각 카드 다이얼로그 */
   isOpen: boolean;
+  /** 가로형( 16:9 ) 카드 다이얼로그 */
+  isWideOpen: boolean;
   timeframe: ShareCardTimeframe;
   openModal: () => void;
   closeModal: () => void;
   toggleModal: () => void;
+  openWideModal: () => void;
+  closeWideModal: () => void;
   setTimeframe: (timeframe: ShareCardTimeframe) => void;
 }
 
@@ -30,10 +35,14 @@ export const useBtcSurgeShareStore = create<BtcSurgeShareStore>()(
   persist(
     (set) => ({
       isOpen: false,
+      isWideOpen: false,
       timeframe: DEFAULT_TIMEFRAME,
-      openModal: () => set({ isOpen: true }),
+      // 두 레이아웃은 별도 다이얼로그라 동시에 뜨지 않도록 서로를 닫는다.
+      openModal: () => set({ isOpen: true, isWideOpen: false }),
       closeModal: () => set({ isOpen: false }),
-      toggleModal: () => set((state) => ({ isOpen: !state.isOpen })),
+      toggleModal: () => set((state) => ({ isOpen: !state.isOpen, isWideOpen: false })),
+      openWideModal: () => set({ isWideOpen: true, isOpen: false }),
+      closeWideModal: () => set({ isWideOpen: false }),
       setTimeframe: (timeframe) => set({ timeframe }),
     }),
     {
@@ -41,7 +50,7 @@ export const useBtcSurgeShareStore = create<BtcSurgeShareStore>()(
       /**
        * 마지막으로 고른 기간만 저장한다.
        *
-       * `isOpen` 까지 저장하면 다이얼로그가 열린 채로 새로고침했을 때 다음 방문에서
+       * `isOpen` · `isWideOpen` 까지 저장하면 다이얼로그가 열린 채로 새로고침했을 때 다음 방문에서
        * 사용자 조작 없이 모달이 떠버린다.
        */
       partialize: (state) => ({ timeframe: state.timeframe }),

@@ -1,15 +1,14 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { memo, type RefObject, useId, useMemo, useState } from "react";
-import { useBitcoinStore } from "@/entities/bitcoin";
+import { memo, type RefObject, useId, useMemo } from "react";
 import { BITCOIN_COLOR } from "@/shared/config/color";
 import { SERVICE_DOMAIN } from "@/shared/config/env";
-import { getCurrentDateTimeKST } from "@/shared/lib/date";
 import { BtcTextLogo, UpdownIcon } from "@/shared/ui";
+import { generateSvgCurvePath } from "../model/shareCardCurve";
 import type { ShareCardTimeframe } from "../model/shareCardTimeframe";
 import { useBtcSurgeShareStore } from "../model/useBtcSurgeShareStore";
-import { useShareCardChart } from "../model/useShareCardChart";
+import { useShareCardMetrics } from "../model/useShareCardMetrics";
 import BtcSurgeTimeframeSelector from "./BtcSurgeTimeframeSelector";
 
 /**
@@ -20,6 +19,10 @@ import BtcSurgeTimeframeSelector from "./BtcSurgeTimeframeSelector";
  */
 export const BTC_SURGE_CARD_DESIGN_WIDTH = 440;
 export const COIN_IMAGE_SRC = "/images/btc-3d-card.png";
+
+/** 차트 곡선 뷰박스 ( 정사각 카드 ) */
+const CHART_VIEWBOX_WIDTH = 360;
+const CHART_VIEWBOX_HEIGHT = 140;
 
 /** html-to-image 캡처 후 canvas에 직접 합성할 코인 이미지 기본 정보 */
 export const COIN_OVERLAY_BASE = {
@@ -34,123 +37,38 @@ export interface BtcSurgeShareCardProps {
   cardRef?: RefObject<HTMLDivElement | null>;
 }
 
-/**
- * 2개 이상의 포인트 배열에서 매끄러운 곡선 SVG Path 생성
- */
-function generateSvgCurvePath(data: number[], width: number, height: number) {
-  if (!data || data.length < 2) {
-    return { linePath: "", areaPath: "", lastX: width, lastY: height / 2 };
-  }
-
-  const minPrice = Math.min(...data);
-  const maxPrice = Math.max(...data);
-  const priceRange = maxPrice - minPrice || 1;
-
-  const points = data.map((price, pointIndex) => {
-    const x = (pointIndex / (data.length - 1)) * width;
-    // 하단 및 상단 12px 패딩 고려
-    const y = height - ((price - minPrice) / priceRange) * (height - 24) - 12;
-    return { x, y };
-  });
-
-  let linePath = `M ${points[0].x.toFixed(2)},${points[0].y.toFixed(2)}`;
-  for (let pointIndex = 0; pointIndex < points.length - 1; pointIndex++) {
-    const startPoint = points[pointIndex];
-    const endPoint = points[pointIndex + 1];
-    const controlPointX = ((startPoint.x + endPoint.x) / 2).toFixed(2);
-    linePath += ` C ${controlPointX},${startPoint.y.toFixed(2)} ${controlPointX},${endPoint.y.toFixed(2)} ${endPoint.x.toFixed(2)},${endPoint.y.toFixed(2)}`;
-  }
-
-  const lastPoint = points[points.length - 1];
-  const areaPath = `${linePath} L ${lastPoint.x.toFixed(2)},${height} L ${points[0].x.toFixed(2)},${height} Z`;
-
-  return { linePath, areaPath, lastX: lastPoint.x, lastY: lastPoint.y };
-}
-
-/**
- * 현재가와 변동률로부터 해당 통화의 변동액을 역산.
- *
- * 차트는 바이낸스 BTCUSDT( 달러 ) 기준이라 원화 시계열이 없으므로, 변동률을 각 통화의
- * 현재가에 적용해 변동액을 구한다. ( 기간 내 환율 변동은 반영되지 않는 근사값 )
- */
-function calculateChangeAmount(currentPrice: number, changeRatePercent: number): number {
-  const changeRate = changeRatePercent / 100;
-
-  if (currentPrice <= 0 || changeRate <= -1) {
-    return 0;
-  }
-
-  return Math.round(currentPrice - currentPrice / (1 + changeRate));
-}
-
 function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   // region [Hooks]
   const setTimeframe = useBtcSurgeShareStore((state) => state.setTimeframe);
-  const { timeframe, usdPrices, isChartDataReady, isChartDataLoading } = useShareCardChart();
+  const {
+    timeframe,
+    usdPrices,
+    isChartDataReady,
+    isChangePercentReady,
+    isUp,
+    themeColor,
+    currentPriceKrw,
+    currentPriceUsd,
+    changeAmountKrw,
+    changeAmountUsd,
+    changeSign,
+    changePercentText,
+    currentPriceKrwText,
+    currentPriceUsdText,
+    changeAmountKrwText,
+    changeAmountUsdText,
+    chartPlaceholderMessage,
+    capturedAtKst,
+  } = useShareCardMetrics();
+
   const rawId = useId();
   const glowFilterId = `surgeGlow-${rawId.replace(/:/g, "")}`;
   const gradientId = `surgeGrad-${rawId.replace(/:/g, "")}`;
 
-  const bitcoinPrice = useBitcoinStore((state) => state.bitcoinPrice);
-
-  // 카드가 열린 시각을 고정한다. 다이얼로그가 닫히면 언마운트되므로 열 때마다 다시 계산.
-  const [capturedAtKst] = useState<string>(getCurrentDateTimeKST);
-
-  /**
-   * 24시간 변동률은 `1D` 라벨에서만 의미가 있으므로 그 외 기간의 폴백으로 쓰지 않는다.
-   *
-   * 시계열이 없을 때 24시간 값으로 대체하면 `7D` 라벨에 24시간 수치가 붙은 카드가 만들어진다.
-   * ( 바이낸스 요청이 실패하면 빈 시계열이 정상 응답으로 돌아오므로 이 상태가 계속 유지된다 )
-   */
-  const changePercent = useMemo(() => {
-    if (timeframe === "1D" && bitcoinPrice?.usdChange24h) {
-      return Number.parseFloat(bitcoinPrice.usdChange24h);
-    }
-
-    if (isChartDataReady) {
-      const startPrice = usdPrices[0];
-      const endPrice = usdPrices[usdPrices.length - 1];
-      if (startPrice > 0) return ((endPrice - startPrice) / startPrice) * 100;
-    }
-
-    return 0;
-  }, [timeframe, usdPrices, bitcoinPrice, isChartDataReady]);
-
-  /** 시계열이 없어도 `1D` 는 24시간 변동률로 즉시 표기할 수 있다. */
-  const isChangePercentReady = useMemo(
-    () => isChartDataReady || (timeframe === "1D" && Boolean(bitcoinPrice?.usdChange24h)),
-    [isChartDataReady, timeframe, bitcoinPrice],
-  );
-
-  const isUp = changePercent >= 0;
-
-  const currentPriceKrw = useMemo(() => {
-    if (bitcoinPrice?.krw && bitcoinPrice.krw > 0) return bitcoinPrice.krw;
-    return 0;
-  }, [bitcoinPrice]);
-
-  const currentPriceUsd = useMemo(() => {
-    if (bitcoinPrice?.usd && bitcoinPrice.usd > 0) return bitcoinPrice.usd;
-    if (isChartDataReady) return usdPrices[usdPrices.length - 1];
-    return 0;
-  }, [bitcoinPrice, usdPrices, isChartDataReady]);
-
-  const changeAmountKrw = useMemo(
-    () => calculateChangeAmount(currentPriceKrw, changePercent),
-    [currentPriceKrw, changePercent],
-  );
-
-  const changeAmountUsd = useMemo(
-    () => calculateChangeAmount(currentPriceUsd, changePercent),
-    [currentPriceUsd, changePercent],
-  );
-
   const { linePath, areaPath, lastX, lastY } = useMemo(
-    () => generateSvgCurvePath(usdPrices, 360, 140),
+    () => generateSvgCurvePath(usdPrices, CHART_VIEWBOX_WIDTH, CHART_VIEWBOX_HEIGHT),
     [usdPrices],
   );
-
-  const themeColor = isUp ? "#00E676" : "#FF5252";
   // endregion
 
   // region [Events]
@@ -160,34 +78,6 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
   // endregion
 
   // region [Templates]
-  const changeSign = isUp ? "+" : "-";
-
-  /**
-   * 변동률 표기. 정수부가 세 자리 이상( 100% 이상 )이면 소수점을 버린다.
-   *
-   * 5Y · 10Y 처럼 변동률이 커지면 48px 폰트에서 텍스트가 카드 폭을 넘기므로 자릿수를 줄인다.
-   */
-  const changePercentText = useMemo(() => {
-    const hasThreeDigitIntegerPart = Math.abs(changePercent) >= 100;
-
-    return changePercent.toFixed(hasThreeDigitIntegerPart ? 0 : 2);
-  }, [changePercent]);
-
-  const currentPriceUsdText = useMemo(
-    () => currentPriceUsd.toLocaleString("en-US", { maximumFractionDigits: 0 }),
-    [currentPriceUsd],
-  );
-
-  const changeAmountKrwText = useMemo(
-    () => Math.abs(changeAmountKrw).toLocaleString(),
-    [changeAmountKrw],
-  );
-
-  const changeAmountUsdText = useMemo(
-    () => Math.abs(changeAmountUsd).toLocaleString("en-US"),
-    [changeAmountUsd],
-  );
-
   /** 변동률 자리. 시계열도 24시간 값도 없으면 수치 대신 자리표시자를 둔다. */
   const ChangePercentTemplate = useMemo(() => {
     if (!isChangePercentReady) {
@@ -214,16 +104,6 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       </span>
     );
   }, [isChangePercentReady, isUp, themeColor, changePercentText]);
-
-  /**
-   * 차트 자리. 시계열이 없으면 곡선 대신 상태 문구를 같은 높이로 채운다.
-   *
-   * 곡선 영역과 동일한 종횡비를 유지해야 축소 배율 계산( `scaledCardHeight` )과
-   * 캡처 결과 높이가 로딩 전후로 흔들리지 않는다.
-   */
-  const chartPlaceholderMessage = isChartDataLoading
-    ? "차트 데이터를 불러오는 중"
-    : "차트 데이터를 불러오지 못했어요";
   // endregion
 
   return (
@@ -292,7 +172,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
         <div className="flex flex-col">
           <div className="flex items-baseline justify-start gap-2">
             <span className="text-2xl font-black text-white tracking-tight font-number">
-              {currentPriceKrw > 0 ? `₩${currentPriceKrw.toLocaleString()}` : "-"}
+              {currentPriceKrw > 0 ? `₩${currentPriceKrwText}` : "-"}
             </span>
             <span
               className="text-sm font-bold tracking-tight font-number"
@@ -343,7 +223,11 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
         )}
 
         {isChartDataReady && (
-          <svg viewBox="0 0 360 140" className="w-full h-auto overflow-visible" aria-hidden="true">
+          <svg
+            viewBox={`0 0 ${CHART_VIEWBOX_WIDTH} ${CHART_VIEWBOX_HEIGHT}`}
+            className="w-full h-auto overflow-visible"
+            aria-hidden="true"
+          >
             <defs>
               <linearGradient id={gradientId} x1="0" y1="0" x2="0" y2="1">
                 <stop offset="0%" stopColor={themeColor} stopOpacity="0.4" />

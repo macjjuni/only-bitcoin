@@ -2,12 +2,13 @@
 
 import { usePathname } from "next/navigation";
 import { type ComponentType, type ReactNode, useEffect, useState } from "react";
-import { BtcSurgeShareDialog } from "@/features/btc-surge-share";
+import { BtcSurgeShareDialog, BtcSurgeWideShareDialog } from "@/features/btc-surge-share";
 import { PremiumShareDialog, PremiumShareFloatingBanner } from "@/features/premium-share";
 import { hideBottomNavPathList } from "@/shared/config/route";
 import ApartmentShareFloatingBanner from "./ui/ApartmentShareFloatingBanner";
 import BlocksCountdownFloatingBanner from "./ui/BlocksCountdownFloatingBanner";
 import BtcSurgeShareFloatingBanner from "./ui/BtcSurgeShareFloatingBanner";
+import BtcSurgeWideShareFloatingBanner from "./ui/BtcSurgeWideShareFloatingBanner";
 import CountdownBackFloatingBanner from "./ui/CountdownBackFloatingBanner";
 import DcaAddRecordFloatingBanner from "./ui/DcaAddRecordFloatingBanner";
 import OrangeBackFloatingBanner from "./ui/OrangeBackFloatingBanner";
@@ -48,6 +49,14 @@ const BANNER_CONFIGS: BannerConfig[] = [
   {
     id: "btc-surge-share",
     Component: BtcSurgeShareFloatingBanner,
+    useIsVisible: () => {
+      const pathname = usePathname();
+      return pathname === "/" || pathname === "/overview";
+    },
+  },
+  {
+    id: "btc-surge-wide-share",
+    Component: BtcSurgeWideShareFloatingBanner,
     useIsVisible: () => {
       const pathname = usePathname();
       return pathname === "/" || pathname === "/overview";
@@ -159,6 +168,7 @@ export default function GlobalFloatingBanner({ children }: GlobalFloatingBannerP
         {children}
       </div>
       <BtcSurgeShareDialog />
+      <BtcSurgeWideShareDialog />
       <PremiumShareDialog />
     </>
   );
