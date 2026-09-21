@@ -34,6 +34,8 @@ export interface ShareCardExportDialogProps {
   imageFileName: string;
   shareTitle: string;
   renderCard: (cardReference: RefObject<HTMLDivElement | null>) => ReactNode;
+  /** 닫기 버튼 줄 왼쪽에 놓을 컨트롤. ( 레이아웃 전환 같은 카드별 조작 ) */
+  headerActions?: ReactNode;
   onClose: () => void;
   createCaptureOptions?: (cardElement: HTMLDivElement) => ImageCaptureOptions;
   isExportReady?: boolean;
@@ -53,6 +55,7 @@ export default function ShareCardExportDialog({
   imageFileName,
   shareTitle,
   renderCard,
+  headerActions,
   onClose,
   createCaptureOptions,
   isExportReady = true,
@@ -234,9 +237,10 @@ export default function ShareCardExportDialog({
     contentWidthClassName,
     contentTopClassName,
   ].join(" ");
-  const closeButtonContainerClassName = ["flex w-full justify-end", closeButtonRowClassName].join(
-    " ",
-  );
+  const closeButtonContainerClassName = [
+    "flex w-full items-center justify-between gap-2",
+    closeButtonRowClassName,
+  ].join(" ");
   const copyButtonClassName = [
     "h-[44px] gap-2 rounded-3xl bg-bitcoin !text-white",
     actionButtonClassName,
@@ -286,6 +290,8 @@ export default function ShareCardExportDialog({
 
         <div className="flex w-full min-w-0 flex-col items-center">
           <div className={closeButtonContainerClassName}>
+            {/* 왼쪽 컨트롤이 없어도 자리를 채워야 닫기 버튼이 오른쪽에 남는다. */}
+            {headerActions ?? <span />}
             <button
               type="button"
               onClick={onClickCloseButton}

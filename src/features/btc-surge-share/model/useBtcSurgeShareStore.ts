@@ -1,22 +1,25 @@
 import { create } from "zustand";
 import { persist } from "zustand/middleware";
 import { BTC_SURGE_SHARE_PERSIST_KEY } from "@/shared/stores/persistKeys";
+import {
+  DEFAULT_SHARE_CARD_LAYOUT,
+  normalizeShareCardLayout,
+  type ShareCardLayout,
+} from "./shareCardLayout";
 import { SHARE_CARD_TIMEFRAME_LIST, type ShareCardTimeframe } from "./shareCardTimeframe";
 
 const DEFAULT_TIMEFRAME: ShareCardTimeframe = "1D";
 
 interface BtcSurgeShareStore {
-  /** 정사각 카드 다이얼로그 */
   isOpen: boolean;
-  /** 가로형( 16:9 ) 카드 다이얼로그 */
-  isWideOpen: boolean;
   timeframe: ShareCardTimeframe;
+  /** 다이얼로그가 열린 채로 전환할 수 있는 카드 레이아웃 */
+  layout: ShareCardLayout;
   openModal: () => void;
   closeModal: () => void;
   toggleModal: () => void;
-  openWideModal: () => void;
-  closeWideModal: () => void;
   setTimeframe: (timeframe: ShareCardTimeframe) => void;
+  setLayout: (layout: ShareCardLayout) => void;
 }
 
 /**
@@ -35,28 +38,27 @@ export const useBtcSurgeShareStore = create<BtcSurgeShareStore>()(
   persist(
     (set) => ({
       isOpen: false,
-      isWideOpen: false,
       timeframe: DEFAULT_TIMEFRAME,
-      // 두 레이아웃은 별도 다이얼로그라 동시에 뜨지 않도록 서로를 닫는다.
-      openModal: () => set({ isOpen: true, isWideOpen: false }),
+      layout: DEFAULT_SHARE_CARD_LAYOUT,
+      openModal: () => set({ isOpen: true }),
       closeModal: () => set({ isOpen: false }),
-      toggleModal: () => set((state) => ({ isOpen: !state.isOpen, isWideOpen: false })),
-      openWideModal: () => set({ isWideOpen: true, isOpen: false }),
-      closeWideModal: () => set({ isWideOpen: false }),
+      toggleModal: () => set((state) => ({ isOpen: !state.isOpen })),
       setTimeframe: (timeframe) => set({ timeframe }),
+      setLayout: (layout) => set({ layout }),
     }),
     {
       name: BTC_SURGE_SHARE_PERSIST_KEY,
       /**
-       * 마지막으로 고른 기간만 저장한다.
+       * 마지막으로 고른 기간과 레이아웃만 저장한다.
        *
-       * `isOpen` · `isWideOpen` 까지 저장하면 다이얼로그가 열린 채로 새로고침했을 때 다음 방문에서
+       * `isOpen` 까지 저장하면 다이얼로그가 열린 채로 새로고침했을 때 다음 방문에서
        * 사용자 조작 없이 모달이 떠버린다.
        */
-      partialize: (state) => ({ timeframe: state.timeframe }),
+      partialize: (state) => ({ timeframe: state.timeframe, layout: state.layout }),
       merge: (persistedState, currentState) => ({
         ...currentState,
         timeframe: normalizeTimeframe((persistedState as Partial<BtcSurgeShareStore>)?.timeframe),
+        layout: normalizeShareCardLayout((persistedState as Partial<BtcSurgeShareStore>)?.layout),
       }),
     },
   ),
