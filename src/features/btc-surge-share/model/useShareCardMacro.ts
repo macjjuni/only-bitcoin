@@ -20,11 +20,12 @@ export interface ShareCardMacroItem {
 /**
  * 오버뷰 매크로 위젯과 같은 지표를 공유 카드용 문자열로 만든다.
  *
- * 값이 0 인 상태는 "소켓·쿼리가 아직 안 채움" 과 구분되지 않으므로 그대로 `-` 로 본다.
- * ( 도미넌스 0% · 환율 0원 · 수수료 0 sat/vB 는 실제로는 나올 수 없는 값이다 )
+ * 값이 없는 상태는 호출부가 `null` 로 넘긴다. 0 을 "아직 안 채워짐" 으로 보면
+ * 프리미엄이 정확히 0.00% 일 때( 역프리미엄 ↔ 프리미엄 전환 구간 ) 실제 값을 `-` 로
+ * 덮어써 버린다.
  */
-function formatMacroValue(value: number, decimals: number): string {
-  if (!Number.isFinite(value) || value === 0) {
+function formatMacroValue(value: number | null, decimals: number): string {
+  if (value === null || !Number.isFinite(value)) {
     return EMPTY_VALUE_TEXT;
   }
 
@@ -57,7 +58,7 @@ export function useShareCardMacro(): ShareCardMacroItem[] {
   /** 환율이 없으면 프리미엄이 100% 로 튀므로 세 값이 모두 채워진 뒤에만 계산한다. */
   const premium = useMemo(() => {
     if (!krw || !usd || !usdExRate) {
-      return 0;
+      return null;
     }
 
     return calcPremiumPercent(krw, usd, usdExRate);
@@ -66,18 +67,23 @@ export function useShareCardMacro(): ShareCardMacroItem[] {
 
   return useMemo(
     () => [
-      { id: "dominance", label: "BTC.D", valueText: formatMacroValue(dominance, 1), sign: "%" },
+      {
+        id: "dominance",
+        label: "BTC.D",
+        valueText: formatMacroValue(dominance || null, 1),
+        sign: "%",
+      },
       {
         id: "usd-ex-rate",
         label: "KRW/USD",
-        valueText: formatMacroValue(usdExRate, 1),
+        valueText: formatMacroValue(usdExRate || null, 1),
         sign: null,
       },
       { id: "premium", label: "Premium", valueText: formatMacroValue(premium, 2), sign: "%" },
       {
         id: "fear-greed",
         label: "F&G Index",
-        valueText: formatMacroValue(fearGreedIndex, 0),
+        valueText: formatMacroValue(fearGreedIndex || null, 0),
         sign: null,
       },
     ],

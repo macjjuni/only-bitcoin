@@ -290,8 +290,12 @@ export default function ShareCardExportDialog({
 
         <div className="flex w-full min-w-0 flex-col items-center">
           <div className={closeButtonContainerClassName}>
-            {/* 왼쪽 컨트롤이 없어도 자리를 채워야 닫기 버튼이 오른쪽에 남는다. */}
-            {headerActions ?? <span />}
+            {/* 왼쪽 컨트롤이 없어도 자리를 채워야 닫기 버튼이 오른쪽에 남는다.
+                캡처 중에는 조작을 막는다. 캡처는 시작 시점의 카드 엘리먼트를 붙잡고 있어서,
+                도중에 카드가 교체되면 이미 분리된 노드를 그리게 된다. */}
+            <div className={isExporting ? "pointer-events-none opacity-60" : undefined}>
+              {headerActions}
+            </div>
             <button
               type="button"
               onClick={onClickCloseButton}
