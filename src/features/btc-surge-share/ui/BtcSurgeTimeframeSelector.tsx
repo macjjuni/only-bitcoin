@@ -7,12 +7,14 @@ import { SHARE_CARD_TIMEFRAME_LIST, type ShareCardTimeframe } from "../model/sha
 export interface BtcSurgeTimeframeSelectorProps {
   selectedTimeframe: ShareCardTimeframe;
   isUp: boolean;
+  /** 트리거 글자 크기. 카드마다 헤더가 달라 옆에 붙는 LIVE 뱃지 크기에 맞춘다. */
+  triggerTextClassName?: string;
   onChangeTimeframe: (timeframe: ShareCardTimeframe) => void;
 }
 
 function BtcSurgeTimeframeSelector(props: BtcSurgeTimeframeSelectorProps) {
   // region [Hooks]
-  const { selectedTimeframe, isUp, onChangeTimeframe } = props;
+  const { selectedTimeframe, isUp, triggerTextClassName = "text-sm", onChangeTimeframe } = props;
   const [isOpen, setIsOpen] = useState(false);
 
   const themeColor = isUp ? "#00E676" : "#FF5252";
@@ -58,7 +60,7 @@ function BtcSurgeTimeframeSelector(props: BtcSurgeTimeframeSelectorProps) {
         <button
           type="button"
           aria-label="차트 기간 선택"
-          className="flex items-center gap-1.5 px-2.5 py-1 text-sm font-bold rounded-full cursor-pointer transition-colors"
+          className={`flex items-center gap-1.5 px-2.5 py-1 font-bold rounded-full cursor-pointer transition-colors ${triggerTextClassName}`}
           style={{ color: themeColor }}
         >
           {selectedTimeframe}

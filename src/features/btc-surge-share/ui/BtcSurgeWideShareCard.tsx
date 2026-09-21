@@ -233,7 +233,7 @@ function BtcSurgeWideShareCard({ cardRef }: BtcSurgeWideShareCardProps) {
 
         <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md p-1.5 rounded-full border border-white/10">
           <span
-            className={`flex items-center gap-1.5 pl-2.5 pr-3 py-1 text-base font-bold rounded-full ${
+            className={`flex items-center gap-1.5 pl-2.5 pr-3 py-1 text-lg font-bold rounded-full ${
               isUp ? "text-[#00E676] bg-emerald-500/20" : "text-[#FF5252] bg-rose-500/20"
             }`}
           >
@@ -246,6 +246,7 @@ function BtcSurgeWideShareCard({ cardRef }: BtcSurgeWideShareCardProps) {
           <BtcSurgeTimeframeSelector
             selectedTimeframe={timeframe}
             isUp={isUp}
+            triggerTextClassName="text-lg"
             onChangeTimeframe={onChangeTimeframe}
           />
         </div>
