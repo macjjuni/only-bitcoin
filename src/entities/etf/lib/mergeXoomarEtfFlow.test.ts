@@ -46,4 +46,29 @@ describe("mergeXoomarEtfFlowResponses", () => {
     expect(mergedResponse.data[1].holdings).toBe("110");
     expect(mergedResponse.updatedAt).toBe("2026-08-26T23:00:00.000Z");
   });
+
+  it("최근 응답의 측정값이 비어 있으면 아카이브 값을 유지한다", () => {
+    const recentResponse: XoomarEtfFlowResponse = {
+      ...ARCHIVED_RESPONSE,
+      data: [{ ...ARCHIVED_RESPONSE.data[0], flowUsd: null, aumUsd: "1100" }],
+      updatedAt: "2026-08-26T23:00:00.000Z",
+    };
+
+    const mergedResponse = mergeXoomarEtfFlowResponses(ARCHIVED_RESPONSE, recentResponse);
+    const mergedRow = mergedResponse.data.find(({ date }) => date === "2026-08-25");
+
+    expect(mergedRow?.flowUsd).toBe("10");
+    expect(mergedRow?.aumUsd).toBe("1100");
+  });
+
+  it("아카이브에 없던 날짜는 비어 있는 측정값을 그대로 둔다", () => {
+    const recentResponse: XoomarEtfFlowResponse = {
+      ...ARCHIVED_RESPONSE,
+      data: [{ ...ARCHIVED_RESPONSE.data[0], date: "2026-08-26", flowUsd: null }],
+    };
+
+    const mergedResponse = mergeXoomarEtfFlowResponses(ARCHIVED_RESPONSE, recentResponse);
+
+    expect(mergedResponse.data.find(({ date }) => date === "2026-08-26")?.flowUsd).toBeNull();
+  });
 });
