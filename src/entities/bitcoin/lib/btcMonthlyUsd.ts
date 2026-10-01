@@ -57,12 +57,13 @@ export function resolveMonthlyUsdYears(now = new Date()): number[] {
 /**
  * 그 해에 값이 있어야 할 달 수.
  *
- * 첫 해는 8월부터, 진행 중인 해는 이번 달까지만 셈.
- * 이번 달은 아직 안 끝났어도 그날까지의 마지막 값이 있으므로 세는 게 맞음.
+ * 첫 해는 8월부터, 진행 중인 해는 지난달까지만 셈.
+ * blockchain.com 일봉은 이틀가량 늦게 올라와서 월초엔 이번 달 값이 아예 없음.
+ * 이번 달까지 세면 매달 1~2일 빌드가 깨지므로 이번 달은 있으면 쓰고 없어도 통과시킴.
  */
 function countExpectedMonths(year: number, now: Date): number {
   const firstMonth = year === FIRST_TRADING_YEAR ? FIRST_TRADING_MONTH : 1;
-  const lastMonth = year === now.getUTCFullYear() ? now.getUTCMonth() + 1 : 12;
+  const lastMonth = year === now.getUTCFullYear() ? now.getUTCMonth() : 12;
 
   return Math.max(0, lastMonth - firstMonth + 1);
 }

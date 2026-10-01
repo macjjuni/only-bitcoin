@@ -152,6 +152,22 @@ describe("fetchBtcMonthlyUsdMap", () => {
     expect(map.get("2026-08")).toBe(priceOf("2026-08-21"));
   });
 
+  it("월초에 이번 달 값이 아직 없어도 통과한다", async () => {
+    mockChart(makeChart(2026, { skipDays: makeDayRange("2026-09-30", "2026-12-31") }));
+
+    const map = await fetchBtcMonthlyUsdMap(2026, new Date("2026-10-01T08:00:00Z"));
+
+    expect(map.size).toBe(9);
+    expect(map.has("2026-10")).toBe(false);
+    expect(map.get("2026-09")).toBe(priceOf("2026-09-29"));
+  });
+
+  it("진행 중인 연도에 지난달이 비면 던진다", async () => {
+    mockChart(makeChart(2026, { skipDays: makeDayRange("2026-07-01", "2026-12-31") }));
+
+    await expect(fetchBtcMonthlyUsdMap(2026, SETTLED_NOW)).rejects.toThrow("커버리지 부족");
+  });
+
   it("확정된 연도에 달이 비면 던진다", async () => {
     mockChart(makeChart(2023, { skipDays: makeDayRange("2023-06-01", "2023-06-30") }));
 
