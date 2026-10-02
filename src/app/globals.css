@@ -250,8 +250,15 @@ html.chat-panel-resizing::view-transition-new(root) {
     color-scheme: dark;
     --background: 0 0% 7.1%;
   }
+  /*
+    `background-color` 를 html 에도 박아 두는 이유:
+    iOS 26 Safari 는 페이지 상단/하단 가장자리에서 평평한 색을 샘플링해 시스템 바를 틴트하고,
+    샘플링에 실패하면 그 자리를 Liquid Glass 블러로 덮는다. 루트가 투명하면 샘플링이 실패하거나
+    흰색으로 폴백되므로 html·body 둘 다 명시한다. (`theme-color` 메타는 Safari 26 에서 무시됨)
+  */
   html,
   body {
+    background-color: hsl(var(--background));
     scrollbar-width: none;
     overscroll-behavior: none;
   }
