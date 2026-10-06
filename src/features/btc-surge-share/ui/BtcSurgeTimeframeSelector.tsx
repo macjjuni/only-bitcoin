@@ -3,10 +3,11 @@
 import { KPopover, KPopoverContent, KPopoverTrigger } from "kku-ui";
 import { memo, useMemo, useState } from "react";
 import { SHARE_CARD_TIMEFRAME_LIST, type ShareCardTimeframe } from "../model/shareCardTimeframe";
+import { SHARE_CARD_TONE_STYLE, type ShareCardTone } from "../model/shareCardTone";
 
 export interface BtcSurgeTimeframeSelectorProps {
   selectedTimeframe: ShareCardTimeframe;
-  isUp: boolean;
+  tone: ShareCardTone;
   /** 트리거 글자 크기. 카드마다 헤더가 달라 옆에 붙는 LIVE 뱃지 크기에 맞춘다. */
   triggerTextClassName?: string;
   onChangeTimeframe: (timeframe: ShareCardTimeframe) => void;
@@ -14,10 +15,10 @@ export interface BtcSurgeTimeframeSelectorProps {
 
 function BtcSurgeTimeframeSelector(props: BtcSurgeTimeframeSelectorProps) {
   // region [Hooks]
-  const { selectedTimeframe, isUp, triggerTextClassName = "text-sm", onChangeTimeframe } = props;
+  const { selectedTimeframe, tone, triggerTextClassName = "text-sm", onChangeTimeframe } = props;
   const [isOpen, setIsOpen] = useState(false);
 
-  const themeColor = isUp ? "#00E676" : "#FF5252";
+  const toneStyle = SHARE_CARD_TONE_STYLE[tone];
   // endregion
 
   // region [Events]
@@ -40,9 +41,7 @@ function BtcSurgeTimeframeSelector(props: BtcSurgeTimeframeSelectorProps) {
             onClick={() => onClickTimeframeItem(timeframe)}
             className={`p-2 text-xs font-bold rounded-md transition-all duration-200 cursor-pointer whitespace-nowrap ${
               isSelected
-                ? isUp
-                  ? "bg-[#00E676] text-black shadow-[0_0_12px_rgba(0,230,118,0.4)]"
-                  : "bg-[#FF5252] text-white shadow-[0_0_12px_rgba(255,82,82,0.4)]"
+                ? toneStyle.selectedTimeframeClassName
                 : "text-neutral-400 hover:text-white hover:bg-white/10"
             }`}
           >
@@ -50,7 +49,7 @@ function BtcSurgeTimeframeSelector(props: BtcSurgeTimeframeSelectorProps) {
           </button>
         );
       }),
-    [selectedTimeframe, isUp],
+    [selectedTimeframe, toneStyle],
   );
   // endregion
 
@@ -61,7 +60,7 @@ function BtcSurgeTimeframeSelector(props: BtcSurgeTimeframeSelectorProps) {
           type="button"
           aria-label="차트 기간 선택"
           className={`flex items-center gap-1.5 px-2.5 py-1 font-bold rounded-full cursor-pointer transition-colors ${triggerTextClassName}`}
-          style={{ color: themeColor }}
+          style={{ color: toneStyle.color }}
         >
           {selectedTimeframe}
           <svg

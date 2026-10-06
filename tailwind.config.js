@@ -115,6 +115,51 @@ export default {
           "60%": { opacity: "1" },
           "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
         },
+        surgeFlameRise: {
+          "0%, 100%": { transform: "translateY(0) scaleX(1) scaleY(1)", opacity: "0.88" },
+          "25%": { transform: "translateY(-7%) scaleX(0.9) scaleY(1.2)", opacity: "1" },
+          "50%": { transform: "translateY(-2%) scaleX(1.08) scaleY(0.9)", opacity: "0.68" },
+          "75%": { transform: "translateY(-9%) scaleX(0.94) scaleY(1.14)", opacity: "0.96" },
+        },
+        surgeFlameSway: {
+          "0%, 100%": { transform: "translateY(0) scaleY(1) skewX(0deg)", opacity: "0.82" },
+          "30%": { transform: "translateY(-6%) scaleY(1.24) skewX(-6deg)", opacity: "1" },
+          "60%": { transform: "translateY(-1%) scaleY(0.94) skewX(5deg)", opacity: "0.62" },
+        },
+        surgeFlameLean: {
+          "0%, 100%": {
+            transform: "translateY(-2%) scaleX(1.04) scaleY(0.96) skewX(3deg)",
+            opacity: "0.72",
+          },
+          "20%": {
+            transform: "translateY(-11%) scaleX(0.86) scaleY(1.28) skewX(-5deg)",
+            opacity: "1",
+          },
+          "55%": {
+            transform: "translateY(-4%) scaleX(1.12) scaleY(0.86) skewX(7deg)",
+            opacity: "0.56",
+          },
+          "80%": {
+            transform: "translateY(-8%) scaleX(0.92) scaleY(1.16) skewX(-2deg)",
+            opacity: "0.9",
+          },
+        },
+        surgeEmberRise: {
+          "0%": { transform: "translateY(0) scale(1)", opacity: "0" },
+          "18%": { opacity: "0.95" },
+          "100%": { transform: "translateY(-240%) scale(0.35)", opacity: "0" },
+        },
+        surgeTextFlicker: {
+          "0%, 100%": {
+            filter: "drop-shadow(0 0 22px rgba(var(--surge-glow-rgb), 0.5))",
+          },
+          "35%": {
+            filter: "drop-shadow(0 0 36px rgba(var(--surge-glow-rgb), 0.95))",
+          },
+          "65%": {
+            filter: "drop-shadow(0 0 26px rgba(var(--surge-glow-rgb), 0.65))",
+          },
+        },
         chatPanelOut: {
           "0%": { opacity: "1", transform: "translateY(0) scale(1)" },
           "100%": { opacity: "0", transform: "translateY(8px) scale(0.96)" },
@@ -136,6 +181,11 @@ export default {
         "blob-drift-a": "blobDriftA 20s ease-in-out infinite",
         "blob-drift-b": "blobDriftB 24s ease-in-out infinite",
         "glow-pulse": "glow-pulse 2s ease-in-out infinite",
+        "surge-flame": "surgeFlameRise 1.7s ease-in-out infinite",
+        "surge-flame-sway": "surgeFlameSway 2s ease-in-out infinite",
+        "surge-flame-lean": "surgeFlameLean 2.1s ease-in-out infinite",
+        "surge-ember": "surgeEmberRise 2.8s ease-in infinite",
+        "surge-text-flicker": "surgeTextFlicker 2.2s ease-in-out infinite",
         "chat-panel-in": "chatPanelIn 0.28s cubic-bezier(0.16, 1, 0.3, 1)",
         "chat-panel-out": "chatPanelOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards",
         "chat-backdrop-out": "fadeOut 0.2s ease-in-out forwards",

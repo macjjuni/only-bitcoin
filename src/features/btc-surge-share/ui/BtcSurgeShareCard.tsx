@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { memo, type RefObject, useId, useMemo } from "react";
+import { type CSSProperties, memo, type RefObject, useId, useMemo } from "react";
 import { BITCOIN_COLOR } from "@/shared/config/color";
 import { SERVICE_DOMAIN } from "@/shared/config/env";
 import { BtcTextLogo, UpdownIcon } from "@/shared/ui";
@@ -9,6 +9,7 @@ import { generateSvgCurvePath } from "../model/shareCardCurve";
 import type { ShareCardTimeframe } from "../model/shareCardTimeframe";
 import { useBtcSurgeShareStore } from "../model/useBtcSurgeShareStore";
 import { useShareCardMetrics } from "../model/useShareCardMetrics";
+import BtcSurgeFlameOverlay from "./BtcSurgeFlameOverlay";
 import BtcSurgeTimeframeSelector from "./BtcSurgeTimeframeSelector";
 
 /**
@@ -19,6 +20,14 @@ import BtcSurgeTimeframeSelector from "./BtcSurgeTimeframeSelector";
  */
 export const BTC_SURGE_CARD_DESIGN_WIDTH = 440;
 export const COIN_IMAGE_SRC = "/images/btc-3d-card.png";
+
+/**
+ * 불꽃 레이어 높이. 차트 아래부터 타오르도록 카드 하단 약 3분의 1 을 덮는다.
+ *
+ * 불꽃은 정사각 카드에만 둔다. 가로형은 하단에 매크로 지표 줄이 깔려 있어 불빛이 그 위로
+ * 올라오면 수치 가독성을 깎는다.
+ */
+const FLAME_OVERLAY_HEIGHT_CLASS_NAME = "h-[30%]";
 
 /** 차트 곡선 뷰박스 ( 정사각 카드 ) */
 const CHART_VIEWBOX_WIDTH = 360;
@@ -46,6 +55,8 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
     isChartDataReady,
     isChangePercentReady,
     isUp,
+    tone,
+    toneStyle,
     themeColor,
     currentPriceKrw,
     currentPriceUsd,
@@ -60,6 +71,8 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
     chartPlaceholderMessage,
     capturedAtKst,
   } = useShareCardMetrics();
+
+  const isSurge = tone === "surge";
 
   const rawId = useId();
   const glowFilterId = `surgeGlow-${rawId.replace(/:/g, "")}`;
@@ -90,38 +103,34 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
 
     return (
       <span
-        className="flex items-center text-5xl font-black tracking-tight font-number"
-        style={{
-          color: themeColor,
-          filter: isUp
-            ? "drop-shadow(0 0 25px rgba(0,230,118,0.45))"
-            : "drop-shadow(0 0 25px rgba(255,82,82,0.45))",
-        }}
+        className={`flex items-center text-5xl font-black tracking-tight font-number ${
+          isSurge ? "animate-surge-text-flicker motion-reduce:animate-none" : ""
+        }`}
+        style={
+          {
+            color: themeColor,
+            filter: `drop-shadow(0 0 25px rgba(${toneStyle.rgbChannel},0.45))`,
+            "--surge-glow-rgb": toneStyle.rgbChannel,
+          } as CSSProperties
+        }
       >
-        <UpdownIcon isUp={isUp} size={36} className="mr-1" />
+        <UpdownIcon isUp={isUp} color={toneStyle.iconColor} size={36} className="mr-1" />
         {isUp ? "+" : ""}
         {changePercentText}%
       </span>
     );
-  }, [isChangePercentReady, isUp, themeColor, changePercentText]);
+  }, [isChangePercentReady, isUp, isSurge, themeColor, toneStyle, changePercentText]);
   // endregion
 
   return (
     <div
       ref={cardRef}
       data-theme-color={themeColor}
-      className={`relative w-[440px] rounded-[32px] p-6 text-white select-none overflow-hidden border transition-all duration-300 ${
-        isUp ? "border-emerald-500/30 bg-[#0a0d14]" : "border-rose-500/30 bg-[#0f0a0d]"
-      }`}
+      className={`relative w-[440px] rounded-[32px] p-6 text-white select-none overflow-hidden border transition-all duration-300 ${toneStyle.frameClassName}`}
       style={{
-        backgroundImage: isUp
-          ? `
-              radial-gradient(circle at 50% 100%, rgba(0,230,118,0.18) 0%, rgba(10,13,20,0.98) 75%),
-              linear-gradient(to bottom, rgba(16,24,38,0.95), rgba(10,13,20,0.98))
-            `
-          : `
-              radial-gradient(circle at 50% 100%, rgba(255,82,82,0.18) 0%, rgba(15,10,13,0.98) 75%),
-              linear-gradient(to bottom, rgba(38,16,20,0.95), rgba(15,10,13,0.98))
+        backgroundImage: `
+              radial-gradient(circle at 50% 100%, rgba(${toneStyle.rgbChannel},0.18) 0%, ${toneStyle.backgroundBaseColor} 75%),
+              linear-gradient(to bottom, ${toneStyle.backgroundTopColor}, ${toneStyle.backgroundBaseColor})
             `,
       }}
     >
@@ -137,6 +146,14 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
         }}
       />
 
+      {/* 급등 톤에서만 카드 하단이 타오른다. */}
+      {isSurge && (
+        <BtcSurgeFlameOverlay
+          rgbChannel={toneStyle.rgbChannel}
+          heightClassName={FLAME_OVERLAY_HEIGHT_CLASS_NAME}
+        />
+      )}
+
       {/* 상단 헤더: 브랜드 로고 + 상태 뱃지 */}
       <div className="relative z-10 flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
@@ -146,9 +163,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
 
         <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/10">
           <span
-            className={`flex items-center gap-1 pl-2 pr-2.5 py-1 text-sm font-bold rounded-full ${
-              isUp ? "text-[#00E676] bg-emerald-500/20" : "text-[#FF5252] bg-rose-500/20"
-            }`}
+            className={`flex items-center gap-1 pl-2 pr-2.5 py-1 text-sm font-bold rounded-full ${toneStyle.badgeClassName}`}
           >
             <span
               className="w-1.5 h-1.5 rounded-full animate-pulse"
@@ -158,7 +173,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
           </span>
           <BtcSurgeTimeframeSelector
             selectedTimeframe={timeframe}
-            isUp={isUp}
+            tone={tone}
             onChangeTimeframe={onChangeTimeframe}
           />
         </div>

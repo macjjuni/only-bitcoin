@@ -6,7 +6,7 @@ export const SHARE_CARD_LAYOUT_LIST: readonly ShareCardLayout[] = ["square", "wi
 export const DEFAULT_SHARE_CARD_LAYOUT: ShareCardLayout = "square";
 
 export const SHARE_CARD_LAYOUT_LABEL: Record<ShareCardLayout, string> = {
-  square: "정사각",
+  square: "정사각형",
   wide: "가로형",
 };
 

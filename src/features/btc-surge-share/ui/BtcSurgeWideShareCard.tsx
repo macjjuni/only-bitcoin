@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { memo, type RefObject, useId, useMemo } from "react";
+import { type CSSProperties, memo, type RefObject, useId, useMemo } from "react";
 import { BITCOIN_COLOR } from "@/shared/config/color";
 import { SERVICE_DOMAIN } from "@/shared/config/env";
 import { BtcTextLogo, UpdownIcon } from "@/shared/ui";
@@ -41,6 +41,8 @@ function BtcSurgeWideShareCard({ cardRef }: BtcSurgeWideShareCardProps) {
     isChartDataReady,
     isChangePercentReady,
     isUp,
+    tone,
+    toneStyle,
     themeColor,
     currentPriceKrw,
     currentPriceUsd,
@@ -56,6 +58,8 @@ function BtcSurgeWideShareCard({ cardRef }: BtcSurgeWideShareCardProps) {
     capturedAtKst,
   } = useShareCardMetrics();
   const macroItemList = useShareCardMacro();
+
+  const isSurge = tone === "surge";
 
   const rawId = useId();
   const glowFilterId = `surgeWideGlow-${rawId.replace(/:/g, "")}`;
@@ -86,20 +90,23 @@ function BtcSurgeWideShareCard({ cardRef }: BtcSurgeWideShareCardProps) {
 
     return (
       <span
-        className="flex items-center text-[56px] leading-none font-black tracking-tight font-number"
-        style={{
-          color: themeColor,
-          filter: isUp
-            ? "drop-shadow(0 0 30px rgba(0,230,118,0.45))"
-            : "drop-shadow(0 0 30px rgba(255,82,82,0.45))",
-        }}
+        className={`flex items-center text-[56px] leading-none font-black tracking-tight font-number ${
+          isSurge ? "animate-surge-text-flicker motion-reduce:animate-none" : ""
+        }`}
+        style={
+          {
+            color: themeColor,
+            filter: `drop-shadow(0 0 30px rgba(${toneStyle.rgbChannel},0.45))`,
+            "--surge-glow-rgb": toneStyle.rgbChannel,
+          } as CSSProperties
+        }
       >
-        <UpdownIcon isUp={isUp} size={42} className="mr-1.5" />
+        <UpdownIcon isUp={isUp} color={toneStyle.iconColor} size={42} className="mr-1.5" />
         {isUp ? "+" : ""}
         {changePercentText}%
       </span>
     );
-  }, [isChangePercentReady, isUp, themeColor, changePercentText]);
+  }, [isChangePercentReady, isUp, isSurge, themeColor, toneStyle, changePercentText]);
 
   /**
    * 원화 · 달러 현재가 두 줄.
@@ -197,18 +204,11 @@ function BtcSurgeWideShareCard({ cardRef }: BtcSurgeWideShareCardProps) {
     <div
       ref={cardRef}
       data-theme-color={themeColor}
-      className={`relative flex flex-col w-[880px] h-[462px] rounded-[40px] p-8 text-white select-none overflow-hidden border transition-all duration-300 ${
-        isUp ? "border-emerald-500/30 bg-[#0a0d14]" : "border-rose-500/30 bg-[#0f0a0d]"
-      }`}
+      className={`relative flex flex-col w-[880px] h-[462px] rounded-[40px] p-8 text-white select-none overflow-hidden border transition-all duration-300 ${toneStyle.frameClassName}`}
       style={{
-        backgroundImage: isUp
-          ? `
-              radial-gradient(ellipse 70% 90% at 68% 115%, rgba(0,230,118,0.20) 0%, rgba(10,13,20,0.98) 72%),
-              linear-gradient(to bottom, rgba(16,24,38,0.95), rgba(10,13,20,0.98))
-            `
-          : `
-              radial-gradient(ellipse 70% 90% at 68% 115%, rgba(255,82,82,0.20) 0%, rgba(15,10,13,0.98) 72%),
-              linear-gradient(to bottom, rgba(38,16,20,0.95), rgba(15,10,13,0.98))
+        backgroundImage: `
+              radial-gradient(ellipse 70% 90% at 68% 115%, rgba(${toneStyle.rgbChannel},0.20) 0%, ${toneStyle.backgroundBaseColor} 72%),
+              linear-gradient(to bottom, ${toneStyle.backgroundTopColor}, ${toneStyle.backgroundBaseColor})
             `,
       }}
     >
@@ -233,9 +233,7 @@ function BtcSurgeWideShareCard({ cardRef }: BtcSurgeWideShareCardProps) {
 
         <div className="flex items-center gap-1.5 bg-black/40 backdrop-blur-md p-1.5 rounded-full border border-white/10">
           <span
-            className={`flex items-center gap-1.5 pl-2.5 pr-3 py-1 text-lg font-bold rounded-full ${
-              isUp ? "text-[#00E676] bg-emerald-500/20" : "text-[#FF5252] bg-rose-500/20"
-            }`}
+            className={`flex items-center gap-1.5 pl-2.5 pr-3 py-1 text-lg font-bold rounded-full ${toneStyle.badgeClassName}`}
           >
             <span
               className="w-2 h-2 rounded-full animate-pulse"
@@ -245,7 +243,7 @@ function BtcSurgeWideShareCard({ cardRef }: BtcSurgeWideShareCardProps) {
           </span>
           <BtcSurgeTimeframeSelector
             selectedTimeframe={timeframe}
-            isUp={isUp}
+            tone={tone}
             triggerTextClassName="text-lg"
             onChangeTimeframe={onChangeTimeframe}
           />

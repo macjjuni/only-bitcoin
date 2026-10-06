@@ -4,11 +4,13 @@ import { useMemo, useState } from "react";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import { getCurrentDateTimeKST } from "@/shared/lib/date";
 import type { ShareCardTimeframe } from "./shareCardTimeframe";
+import {
+  resolveShareCardTone,
+  SHARE_CARD_TONE_STYLE,
+  type ShareCardTone,
+  type ShareCardToneStyle,
+} from "./shareCardTone";
 import { useShareCardChart } from "./useShareCardChart";
-
-/** 상승 · 하락 테마 색상 ( 카드 레이아웃과 무관하게 동일 ) */
-export const SURGE_UP_COLOR = "#00E676";
-export const SURGE_DOWN_COLOR = "#FF5252";
 
 /** 변동률 정수부가 이 값 이상이면 소수점을 버린다. ( 5Y · 10Y 대응 ) */
 const THREE_DIGIT_CHANGE_PERCENT = 100;
@@ -22,6 +24,10 @@ export interface ShareCardMetrics {
   changePercent: number;
   isChangePercentReady: boolean;
   isUp: boolean;
+  /** 변동률 구간이 결정한 색상 톤 ( 상승 · 하락 · 급등 ) */
+  tone: ShareCardTone;
+  /** 톤별 색상과 클래스 모음 */
+  toneStyle: ShareCardToneStyle;
   themeColor: string;
   currentPriceKrw: number;
   currentPriceUsd: number;
@@ -98,6 +104,11 @@ export function useShareCardMetrics(): ShareCardMetrics {
   );
 
   const isUp = changePercent >= 0;
+  const tone = useMemo(
+    () => resolveShareCardTone(timeframe, changePercent),
+    [timeframe, changePercent],
+  );
+  const toneStyle = SHARE_CARD_TONE_STYLE[tone];
 
   const currentPriceKrw = useMemo(() => {
     if (bitcoinPrice?.krw && bitcoinPrice.krw > 0) return bitcoinPrice.krw;
@@ -157,7 +168,9 @@ export function useShareCardMetrics(): ShareCardMetrics {
     changePercent,
     isChangePercentReady,
     isUp,
-    themeColor: isUp ? SURGE_UP_COLOR : SURGE_DOWN_COLOR,
+    tone,
+    toneStyle,
+    themeColor: toneStyle.color,
     currentPriceKrw,
     currentPriceUsd,
     changeAmountKrw,
