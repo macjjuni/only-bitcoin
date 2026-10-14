@@ -45,8 +45,8 @@ importers:
         specifier: ^6.2.11
         version: 6.2.11
       kku-ui:
-        specifier: ^0.9.9981
-        version: 0.9.9981(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(tailwindcss@3.4.19(yaml@2.8.2))
+        specifier: ^0.9.9983
+        version: 0.9.9983(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(lucide-react@1.27.0(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       kku-util:
         specifier: ^0.0.157
         version: 0.0.157
@@ -1903,8 +1903,12 @@ packages:
   keyv@4.5.4:
     resolution: {integrity: sha512-oxVHkHR/EJf2CNXnWxRLW6mg7JyCCUcG0DtEGmL2ctUo1PNTin1PUil+r/+4r5MpVgC/fn1kjsx7mjSujKqIpw==}
 
-  kku-ui@0.9.9981:
-    resolution: {integrity: sha512-VEdA9SDwMx88vuVuIZTom1c2R3vDNS4vltGpWLBohXRaoACIog/RUJ3y0nU73M0LMt6gjc+Q/9Fiygl3m8bC7w==}
+  kku-ui@0.9.9983:
+    resolution: {integrity: sha512-AOTZVo+8U8OFKSrIJ1uyxj4npeGUtnmF6TTDCd+6+yhMhYtEdUp4dF9FooZT8EADoETliR2D2BX0rA4KEO/hig==}
+    peerDependencies:
+      lucide-react: '>=0.400.0'
+      react: ^19.0.0
+      react-dom: ^19.0.0
 
   kku-util@0.0.157:
     resolution: {integrity: sha512-hNMOzj9oAdANnUzzvZekL63v6DCw6mA0cojJv6VKjGCwNHdDs6ma7BxTA2Ac3kRMd4DiThTffe+zETMrQMbe4Q==}
@@ -2016,11 +2020,6 @@ packages:
   lowercase-keys@2.0.0:
     resolution: {integrity: sha512-tqNXrS78oMOE73NMxK4EMLQsQowWf8jKooH9g7xPavRT706R6bkQJ6DY2Te7QukaZsulxa30wQ7bk0pm4XiHmA==}
     engines: {node: '>=8'}
-
-  lucide-react@0.562.0:
-    resolution: {integrity: sha512-82hOAu7y0dbVuFfmO4bYF1XEwYk/mEbM5E+b1jgci/udUBEE/R7LF5Ip0CCEmXe8AybRM8L+04eP+LGZeDvkiw==}
-    peerDependencies:
-      react: ^16.5.1 || ^17.0.0 || ^18.0.0 || ^19.0.0
 
   lucide-react@1.27.0:
     resolution: {integrity: sha512-rJicGl/3Fly/E0rOH1YmPZ6e49JCnKknh1ox1vpHnkfjujAkKA6sqUZvH3MTAaXXjgexyUwgNwTJzTtYuAFYJw==}
@@ -2425,11 +2424,6 @@ packages:
 
   tailwind-merge@3.4.0:
     resolution: {integrity: sha512-uSaO4gnW+b3Y2aWoWfFpX62vn2sR3skfhbjsEnaBI81WD1wBLlHZe5sWf0AqjksNdYTbGBEd0UasQMT3SNV15g==}
-
-  tailwindcss-animate@1.0.7:
-    resolution: {integrity: sha512-bl6mpH3T7I3UFxuvDEXLxy/VuFxBk5bbzplh7tXI68mwMokNYd1t9qPBHlnyTwfa4JGC4zP516I1hYYtQ/vspA==}
-    peerDependencies:
-      tailwindcss: '>=3.0.0 || insiders'
 
   tailwindcss@3.4.19:
     resolution: {integrity: sha512-3ofp+LL8E+pK/JuPLPggVAIaEuhvIz4qNcf3nA1Xn2o/7fb7s/TYpHhwGDv1ZU3PkBluUVaF8PyCHcm48cKLWQ==}
@@ -4155,7 +4149,7 @@ snapshots:
     dependencies:
       json-buffer: 3.0.1
 
-  kku-ui@0.9.9981(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(tailwindcss@3.4.19(yaml@2.8.2)):
+  kku-ui@0.9.9983(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(lucide-react@1.27.0(react@19.2.6))(react-dom@19.2.6(react@19.2.6))(react@19.2.6):
     dependencies:
       '@radix-ui/react-accordion': 1.2.12(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       '@radix-ui/react-dialog': 1.1.15(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
@@ -4167,17 +4161,15 @@ snapshots:
       '@radix-ui/react-switch': 1.2.6(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       class-variance-authority: 0.7.1
       clsx: 2.1.1
-      lucide-react: 0.562.0(react@19.2.6)
+      lucide-react: 1.27.0(react@19.2.6)
       react: 19.2.6
       react-dom: 19.2.6(react@19.2.6)
       sonner: 2.0.7(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
       tailwind-merge: 3.4.0
-      tailwindcss-animate: 1.0.7(tailwindcss@3.4.19(yaml@2.8.2))
       vaul: 1.1.2(@types/react-dom@19.2.3(@types/react@19.2.8))(@types/react@19.2.8)(react-dom@19.2.6(react@19.2.6))(react@19.2.6)
     transitivePeerDependencies:
       - '@types/react'
       - '@types/react-dom'
-      - tailwindcss
 
   kku-util@0.0.157:
     dependencies:
@@ -4257,10 +4249,6 @@ snapshots:
   lottie-web@5.13.0: {}
 
   lowercase-keys@2.0.0: {}
-
-  lucide-react@0.562.0(react@19.2.6):
-    dependencies:
-      react: 19.2.6
 
   lucide-react@1.27.0(react@19.2.6):
     dependencies:
@@ -4684,10 +4672,6 @@ snapshots:
   swiper@12.0.3: {}
 
   tailwind-merge@3.4.0: {}
-
-  tailwindcss-animate@1.0.7(tailwindcss@3.4.19(yaml@2.8.2)):
-    dependencies:
-      tailwindcss: 3.4.19(yaml@2.8.2)
 
   tailwindcss@3.4.19(yaml@2.8.2):
     dependencies:

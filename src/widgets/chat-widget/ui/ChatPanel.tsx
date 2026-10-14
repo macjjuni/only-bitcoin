@@ -639,6 +639,7 @@ export default function ChatPanel({
                 disabled={isNicknameSaving}
                 maxLength={40}
                 size="sm"
+                width="full"
                 className="min-w-0 flex-1"
                 aria-describedby={nicknameErrorMessage ? "chat-nickname-error" : undefined}
                 aria-invalid={Boolean(nicknameErrorMessage)}

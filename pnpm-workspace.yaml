@@ -6,3 +6,5 @@ allowBuilds:
   sharp: true
   unrs-resolver: true
   workerd: true
+minimumReleaseAgeExclude:
+  - kku-ui@0.9.9983

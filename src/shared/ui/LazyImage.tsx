@@ -93,7 +93,7 @@ const LazyImage = ({ src, alt = "", className = "" }: LazyImageProps) => {
       {/* 3. Error State (Developer Look) */}
       {isError && (
         <div className="absolute inset-0 flex flex-col items-center justify-center bg-black font-mono">
-          <div className="text-danger text-sm mb-1 font-bold">✖ LOAD_FAILED</div>
+          <div className="text-destructive text-sm mb-1 font-bold">✖ LOAD_FAILED</div>
           <span className="text-[10px] text-neutral-500 uppercase tracking-widest italic">
             {alt || "Not Found"}
           </span>
