@@ -114,7 +114,7 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
         </div>
 
         {/* 상태 뱃지 */}
-        <div className="mb-4">
+        <div className="mb-2">
           <span
             className="inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-extrabold border"
             style={{
@@ -137,16 +137,31 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
           </span>
         </div>
 
-        {/* 히어로: 프리미엄 % */}
-        <div
-          className="mb-6 flex items-baseline gap-1"
-          style={{ color: themeColor, filter: `drop-shadow(0 0 25px ${themeColor}60)` }}
-        >
-          <span className="text-4xl font-black">{isPositive ? "+" : ""}</span>
-          <span className="text-[56px] font-black font-number tracking-tight">
+        {/*
+          히어로: 프리미엄 %
+          iOS Safari 는 filter 가 걸린 요소의 자식 글리프를 요소 박스로 잘라내서,
+          body 의 `line-height: 1` 로 line box 가 폰트 ascent 보다 작아지면 숫자 위쪽이 짤린다.
+          그래서 glow 는 text-shadow(클리핑 없음)로 바꾸고 line box 에 여유를 줬음.
+        */}
+        <div className="mb-3 flex items-baseline gap-1" style={{ color: themeColor }}>
+          <span
+            className="text-4xl font-black leading-[1.35]"
+            style={{ textShadow: `0 0 25px ${themeColor}60` }}
+          >
+            {isPositive ? "+" : ""}
+          </span>
+          <span
+            className="text-[56px] font-black font-number tracking-tight leading-[1.35]"
+            style={{ textShadow: `0 0 25px ${themeColor}60` }}
+          >
             {PremiumPercent.toFixed(2)}
           </span>
-          <span className="text-4xl font-black ml-0.5">%</span>
+          <span
+            className="text-4xl font-black ml-0.5 leading-[1.35]"
+            style={{ textShadow: `0 0 25px ${themeColor}60` }}
+          >
+            %
+          </span>
         </div>
 
         {/* 비교 블록 */}
