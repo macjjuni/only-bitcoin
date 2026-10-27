@@ -5,18 +5,34 @@ import { usePathname } from "next/navigation";
 import { env } from "@/shared/config/env";
 import { hideHeaderPathList } from "@/shared/config/route";
 import { useScrollDirection } from "@/shared/lib/hooks";
+import { GLITCH_PRESETS } from "@/shared/lib/wordmark-canvas";
 import useSettingStore from "@/shared/stores/settingStore";
-import { BtcTextLogo, TransitionLink } from "@/shared/ui";
+import { GlitchWordmark, TransitionLink } from "@/shared/ui";
 import ConnectionDot from "./components/connection-dot/ConnectionDot";
 import SettingButton from "./components/setting-button/SettingButton";
 
 const TRANSITION_DURATION = 420;
+
+/** 헤더 워드마크에 쓰는 글리치 프리셋. 모든 페이지에 상주하는 자리라 가장 약한 Whisper 를 쓴다. */
+const HEADER_GLITCH_PRESET = GLITCH_PRESETS[0];
+
+const HEADER_LOGO_WIDTH_IN_CSS_PX = 132;
+const HEADER_LOGO_HEIGHT_IN_CSS_PX = 32;
 
 export default function Header() {
   // region [Hooks]
   const pathname = usePathname();
   const initialPath = useSettingStore((state) => state.setting.initialPath);
   const isHeaderHidden = useScrollDirection();
+  const theme = useSettingStore((state) => state.theme);
+  // endregion
+
+  // region [Privates]
+  /*
+   * 캔버스는 `currentColor` 를 못 받는다. 기존 `BtcTextLogo` 가 `currentColor` 로 테마를 따라가던
+   * 동작을 유지하려면 색을 직접 넘겨야 하고, 테마가 바뀌면 이 값이 바뀌면서 워드마크가 다시 구워진다.
+   */
+  const wordmarkColor = theme === "dark" ? "#FFFFFF" : "#000000";
   // endregion
 
   // 몰입형 페이지는 헤더를 안 그림.
@@ -56,7 +72,13 @@ export default function Header() {
               text-3xl font-bold"
         >
           <KIcon id="bitcoin" icon="bitcoin" size={30} />
-          <BtcTextLogo height={32} width={132} />
+          <GlitchWordmark
+            preset={HEADER_GLITCH_PRESET}
+            playbackMode="continuous"
+            widthInCssPx={HEADER_LOGO_WIDTH_IN_CSS_PX}
+            heightInCssPx={HEADER_LOGO_HEIGHT_IN_CSS_PX}
+            fillColor={wordmarkColor}
+          />
         </TransitionLink>
       </h2>
 
