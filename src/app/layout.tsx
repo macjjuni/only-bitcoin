@@ -8,7 +8,7 @@ import QueryProvider from "@/app/providers/QueryProvider";
 import { env } from "@/shared/config/env";
 import { organizationSchema, webSiteSchema } from "@/shared/config/jsonLd";
 import { THEME_INITIALIZATION_SCRIPT } from "@/shared/config/theme";
-import { ConfettiEffect, JsonLd } from "@/shared/ui";
+import { ConfettiEffect, DitherBackground, JsonLd } from "@/shared/ui";
 import { Content, DefaultLayout } from "@/shared/ui/layout";
 import { BottomNavigation } from "@/widgets/bottom-navigation";
 import { ChatWidget } from "@/widgets/chat-widget";
@@ -118,6 +118,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
           )}
           <QueryProvider>
             <Initializer />
+            <DitherBackground />
             <DefaultLayout>
               <Header />
               <Content>{children}</Content>

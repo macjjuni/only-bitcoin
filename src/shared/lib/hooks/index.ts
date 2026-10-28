@@ -3,7 +3,6 @@
 export { default as useAppContextProbe } from "./useAppContextProbe";
 export { default as useCopyOnClick } from "./useCopyOnClick";
 export { default as useFadeInByPath } from "./useFadeInByPath";
-export { default as useInitializeBackground } from "./useInitializeBackground";
 export { default as useInitializeDisabledZoom } from "./useInitializeDisabledZoom";
 export { default as useInitializePage } from "./useInitializePage";
 export { default as useInitializePWA } from "./useInitializePWA";

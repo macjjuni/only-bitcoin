@@ -82,7 +82,7 @@
 /*
   월별 등락률 히트맵의 셀 색 5단계.
 
-  `bg-up/40` 같은 알파 변형을 쓰면 안 됨. `body.show-bg` 의 매트릭스 배경이
+  `bg-up/40` 같은 알파 변형을 쓰면 안 됨. `DitherBackground` 디더 배경이
   셀을 통해 그대로 비쳐서 낮은 단계일수록 숫자가 안 읽힘. 카드로 감쌌을 때는
   `glass-surface` 가 가려 줬지만 이 페이지는 카드를 안 씀.
   그래서 페이지 배경색과 미리 섞어 **불투명색**으로 만들어 둠.
@@ -268,6 +268,10 @@ html.chat-panel-resizing::view-transition-new(root) {
     line-height: 1;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
+    overflow-x: hidden;
+    overflow-y: auto;
+    /* 쌓임 맥락을 body 에 가둠. `.dither-background` 가 z -1 로 body 배경색 위·본문 뒤에 깔리게 함. */
+    isolation: isolate;
   }
 
   html.dark body::before,
@@ -299,24 +303,27 @@ html.chat-panel-resizing::view-transition-new(root) {
     }
   }
 
-  body.show-bg {
-    @apply bg-no-repeat bg-fixed bg-center;
-    overflow-x: hidden;
-    overflow-y: auto;
-    background-image: url("https://raw.githubusercontent.com/macjjuni/only-bitcoin/refs/heads/main/public/images/btc-cover.avif");
-    background-size: 420px;
-    background-repeat: no-repeat;
-    background-attachment: fixed;
-    background-position: center calc(50% - (theme(height.navigation) / 2) - 12px);
-    z-index: 1;
-
-    &::after {
-      content: "";
-      position: fixed;
-      inset: 0;
-      z-index: -2;
-      opacity: 0.8;
-      background-color: hsl(var(--background));
-    }
+  /*
+    `DitherBackground` 자리. 헤더와 하단 내비 사이 보이는 영역의 정중앙에 고정.
+    body 가 `isolation` 으로 쌓임 맥락을 만들어서 z -1 이면 본문 뒤·body 배경색 위에 깔림.
+    폭은 화면 폭 72%. 데스크톱에선 본문 폭( 524px )의 72% 에서 멈춤. dvw·dvh 미지원 브라우저는 vw·vh 로 받음.
+  */
+  .dither-background {
+    position: fixed;
+    left: 50%;
+    top: calc(
+      theme(height.header) +
+        (100vh - theme(height.header) - theme(height.navigation)) / 2
+    );
+    top: calc(
+      theme(height.header) +
+        (100dvh - theme(height.header) - theme(height.navigation)) / 2
+    );
+    z-index: -1;
+    width: min(72vw, calc(theme(maxWidth.layout) * 0.72));
+    width: min(72dvw, calc(theme(maxWidth.layout) * 0.72));
+    aspect-ratio: 1;
+    transform: translate(-50%, -50%);
+    pointer-events: none;
   }
 }

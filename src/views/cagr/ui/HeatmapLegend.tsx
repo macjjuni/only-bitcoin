@@ -9,7 +9,7 @@ import { HEAT_DOMAIN_PERCENT } from "../lib/heatLevel";
  */
 /**
  * 가운데를 알파가 아니라 배경색과 섞어서 만듦. 셀과 같은 이유임 — 이 페이지는
- * 카드가 없어서 알파를 쓰면 `body.show-bg` 의 매트릭스 배경이 띠를 통해 비침.
+ * 카드가 없어서 알파를 쓰면 `DitherBackground` 디더 배경이 띠를 통해 비침.
  */
 const HEAT_GRADIENT = [
   "linear-gradient(to right,",

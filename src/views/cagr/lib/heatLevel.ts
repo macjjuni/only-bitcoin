@@ -35,8 +35,8 @@ export function resolveHeatLevel(returnRate: number | null): number {
  * 단계별 배경 클래스.
  *
  * Tailwind 의 `bg-up/40` 같은 알파 변형이 아니라 `globals.css` 에 직접 정의한
- * **불투명색** 유틸임. 이 페이지는 카드로 감싸지 않아 알파를 쓰면 `body.show-bg` 의
- * 매트릭스 배경이 셀을 통해 비쳐 낮은 단계의 숫자가 안 읽힘.
+ * **불투명색** 유틸임. 이 페이지는 카드로 감싸지 않아 알파를 쓰면 `DitherBackground` 의
+ * 디더 배경이 셀을 통해 비쳐 낮은 단계의 숫자가 안 읽힘.
  *
  * **템플릿 문자열로 조립하면 안 됨.** 지금은 직접 정의한 클래스라 Tailwind 수집
  * 대상이 아니지만, 알파 변형으로 되돌릴 일이 생기면 조립한 이름은 못 잡아내

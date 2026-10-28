@@ -14,7 +14,6 @@ import { useMempoolSocket } from "@/entities/block";
 import { getToastProps } from "@/shared/config/toast";
 import {
   useAppContextProbe,
-  useInitializeBackground,
   useInitializeDisabledZoom,
   useInitializePage,
   useTheme,
@@ -42,7 +41,6 @@ function BaseInitializer() {
   useAppContextProbe();
   useUsdExchangeRate();
   useInitializeDisabledZoom();
-  useInitializeBackground();
   useInitializePage();
   // endregion
 
