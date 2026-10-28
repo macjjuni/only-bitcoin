@@ -1,40 +1,38 @@
-import type { BakedWordmark } from "@/shared/lib/wordmark-canvas";
-import { prefersReducedMotion } from "@/shared/lib/wordmark-canvas";
-import type { HashStreamPreset } from "../model/hashStreamPreset";
+import type { BakedWordmark } from "./bakeWordmarkCanvas";
+import { prefersReducedMotion } from "./createGlitchLogoController";
+import type { HashStreamPreset } from "./hashStreamPreset";
 
 /**
- * 해시 스트림의 재생 엔진.
+ * 해시 스트림 재생 엔진.
  *
  * ## 열마다 미리 그려 둔 스트립을 쓰는 이유
- * 매 프레임 모든 칸에 `fillText` 를 하면 264×64 시안 하나가 프레임당 500회쯤 텍스트를 그린다.
- * 시안이 9개 올라가는 랩에서는 그대로 프레임이 무너진다. 그래서 **열마다 세로 스트립 캔버스를
- * 한 번 그려 두고**, 프레임에서는 그 스트립을 세로로 밀어 두 번 `drawImage` 하는 것으로 끝낸다.
- * 문자가 바뀌어야 할 때만 해당 스트립을 다시 그린다.
+ * 매 프레임 모든 칸에 `fillText` 하면 264×64 시안 하나가 프레임당 500회쯤 텍스트를 그림.
+ * 시안이 여러 개 뜨면 프레임이 무너짐. 그래서 **열마다 세로 스트립 캔버스를 한 번 그려 두고**,
+ * 프레임에선 스트립을 세로로 밀어 `drawImage` 두 번으로 끝냄. 문자를 갈 때만 해당 스트립을 다시 그림.
  *
  * ## 폰트
- * 여기서 쓰는 `fillText` 는 보이는 캔버스에 직접 그리므로 **문서에 로드된 웹폰트를 그대로 쓴다.**
- * `<foreignObject>` 와 달리 인라인이 필요 없다. ( 격리된 문서가 아니기 때문 )
+ * 보이는 캔버스에 직접 `fillText` 하므로 **문서에 로드된 웹폰트를 그대로 씀.**
+ * `<foreignObject>` 와 달리 인라인 불필요. ( 격리된 문서가 아님 )
  */
 
-/** 흐르는 문자에 쓸 등폭 폰트. 문서에 이미 로드돼 있어 `fillText` 가 바로 쓴다. */
+/** 흐르는 문자용 등폭 폰트. 문서에 이미 로드돼 있어 `fillText` 가 바로 씀. */
 const STREAM_FONT_FAMILY_NAME = "JetBrains Mono";
 
 /**
  * 프레임 간격(ms).
  *
- * 60fps 로 돌릴 이유가 없다. 데이터가 흐르는 연출은 오히려 살짝 끊겨야 터미널 같고,
- * 14fps 면 `drawImage` 횟수가 1/4 로 줄어 시안을 여러 개 띄워도 버틴다.
+ * 60fps 불필요. 살짝 끊겨야 터미널 같고, 14fps 면 `drawImage` 횟수가 1/4 로 줆.
  */
 const FRAME_INTERVAL_IN_MS = 70;
 
-/** 한 프레임에 문자를 갈아 끼울 열의 비율. */
+/** 한 프레임에 문자를 갈아 끼울 열 비율. */
 const COLUMN_CHURN_RATIO = 0.12;
 
 interface StreamColumn {
-  /** 이 열의 문자들을 세로로 그려 둔 스트립. 높이는 캔버스보다 한 칸 이상 길다. */
+  /** 이 열의 문자를 세로로 그려 둔 스트립. 높이는 캔버스보다 한 칸 이상 긺. */
   stripCanvas: HTMLCanvasElement;
   speedInDevicePxPerSec: number;
-  /** 스트립을 위로 밀어 올린 거리. `stripHeight` 로 나눈 나머지를 유지한다. */
+  /** 스트립을 위로 민 거리. `stripHeight` 로 나눈 나머지만 유지함. */
   scrollOffsetInDevicePx: number;
 }
 
@@ -81,11 +79,11 @@ export function createHashStreamController({
   const cellWidthInDevicePx = Math.max(1, Math.round(preset.cellWidthInCssPx * pixelRatio));
   const cellHeightInDevicePx = Math.max(1, Math.round(preset.cellHeightInCssPx * pixelRatio));
   const columnCount = Math.ceil(widthInDevicePx / cellWidthInDevicePx);
-  // 스트립은 캔버스보다 길어야 밀었을 때 아래쪽이 비지 않는다.
+  // 스트립이 캔버스보다 길어야 밀었을 때 아래가 안 빔.
   const stripRowCount = Math.ceil(heightInDevicePx / cellHeightInDevicePx) + 2;
   const stripHeightInDevicePx = stripRowCount * cellHeightInDevicePx;
 
-  /** 한 열의 스트립을 처음부터 다시 그린다. */
+  /** 한 열의 스트립을 처음부터 다시 그림. */
   function renderColumnStrip(column: StreamColumn): void {
     const stripContext = column.stripCanvas.getContext("2d");
 
@@ -94,7 +92,7 @@ export function createHashStreamController({
     }
 
     stripContext.clearRect(0, 0, cellWidthInDevicePx, stripHeightInDevicePx);
-    // 칸 높이에 맞춰 글자가 칸을 거의 채우게 한다.
+    // 글자가 칸을 거의 채우게 칸 높이에 맞춤.
     stripContext.font = `700 ${cellHeightInDevicePx * 0.92}px '${STREAM_FONT_FAMILY_NAME}', monospace`;
     stripContext.textAlign = "center";
     stripContext.textBaseline = "middle";
@@ -132,7 +130,7 @@ export function createHashStreamController({
   let isRunning = false;
   let isDestroyed = false;
 
-  /** 글리프 모양으로 잘라낸 스트림 한 장을 대상 캔버스에 그린다. */
+  /** 글리프 모양으로 잘라낸 스트림 한 장을 대상 캔버스에 그림. */
   function drawStreamFrame(): void {
     if (targetContext === null || scratchContext === null) {
       return;
@@ -145,7 +143,7 @@ export function createHashStreamController({
       const leftInDevicePx = columnIndex * cellWidthInDevicePx;
       const topInDevicePx = -column.scrollOffsetInDevicePx;
 
-      // 두 번 그려 위아래로 이어 붙인다. 한 장만 그리면 민 만큼 아래가 빈다.
+      // 두 번 그려 위아래로 이어 붙임. 한 장이면 민 만큼 아래가 빔.
       scratchContext.drawImage(column.stripCanvas, leftInDevicePx, topInDevicePx);
       scratchContext.drawImage(
         column.stripCanvas,
@@ -154,7 +152,7 @@ export function createHashStreamController({
       );
     });
 
-    // 글리프 알파로 잘라낸다. 이 한 줄이 "글자 안쪽에서만 흐른다" 를 만든다.
+    // 글리프 알파로 잘라냄. 이 한 줄이 "글자 안쪽에서만 흐름" 을 만듦.
     scratchContext.globalCompositeOperation = "destination-in";
     scratchContext.drawImage(baseCanvas, 0, 0);
 
@@ -166,7 +164,7 @@ export function createHashStreamController({
     targetContext.drawImage(scratchCanvas, 0, 0);
   }
 
-  /** 글리치 없는 기본 상태 — 본체만 그린다. 모션을 끈 사용자가 보게 될 화면. */
+  /** 본체만 그린 기본 상태. 모션 끈 사용자가 보는 화면. */
   function drawRestFrame(): void {
     if (targetContext === null) {
       return;
@@ -223,7 +221,7 @@ export function createHashStreamController({
         window.cancelAnimationFrame(animationFrameID);
         animationFrameID = null;
       }
-      // 멈출 때는 흐르던 한 장을 그대로 남긴다. 본체만 남기면 스크롤할 때마다 깜빡인다.
+      // 멈출 땐 흐르던 한 장을 그대로 둠. 본체만 남기면 스크롤마다 깜빡임.
     },
 
     destroy(): void {

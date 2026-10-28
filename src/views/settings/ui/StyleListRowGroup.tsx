@@ -30,7 +30,7 @@ const StyleListRowGroup = () => {
       <ListRow
         className="dark:text-gray-700"
         icon={<KIcon icon="bitcoin_square" size={24} color="currentColor" />}
-        label="배경 이미지"
+        label="배경 효과"
         rightElement={<KSwitch checked={isBackgroundImg} onCheckedChange={setIsBackgroundImg} />}
       />
       <ListRow

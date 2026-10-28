@@ -1,17 +1,15 @@
 "use client";
 
 import { memo, useEffect, useRef, useState } from "react";
+import type { HashStreamPreset } from "@/shared/lib/wordmark-canvas";
 import {
   BAKE_PADDING_IN_CSS_PX,
   bakeWordmarkCanvas,
+  createHashStreamController,
+  type HashStreamController,
   WORDMARK_FONTS,
   type WordmarkFontId,
 } from "@/shared/lib/wordmark-canvas";
-import {
-  createHashStreamController,
-  type HashStreamController,
-} from "../lib/createHashStreamController";
-import type { HashStreamPreset } from "../model/hashStreamPreset";
 
 interface HashStreamWordmarkProps {
   preset: HashStreamPreset;
