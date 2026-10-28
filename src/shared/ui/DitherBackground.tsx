@@ -13,7 +13,7 @@ const BACKGROUND_CYCLE_IN_MS = 12000;
 const BACKGROUND_FRAME_INTERVAL_IN_MS = 83;
 
 /** 예전 배경( 이미지 위 80% 덮개 )과 비슷한 진하기. 라이트는 검은 점이 더 세게 보여서 낮춤. */
-const BACKGROUND_OPACITY_BY_THEME = { dark: 0.2, light: 0.12 };
+const BACKGROUND_OPACITY_BY_THEME = { dark: 0.1, light: 0.1 };
 
 /** 폭이 이만큼 바뀔 때만 다시 구움. 주소창 접힘 같은 미세한 변화마다 굽지 않게 함. */
 const SIZE_STEP_IN_CSS_PX = 8;
