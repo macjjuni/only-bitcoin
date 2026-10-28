@@ -1,6 +1,5 @@
 export {
   bakeBitcoinIconCanvas,
-  bakeBitcoinIconGlyphCanvas,
   createTintedCanvas,
 } from "./bakeBitcoinIconCanvas";
 export {

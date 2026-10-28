@@ -89,30 +89,4 @@ export function bakeBitcoinIconCanvas(sizeInCssPx: number, fillColor: string): B
     pixelRatio,
   };
 }
-
-/**
- * 원 안의 뚫린 `B` 자리만 칠한 캔버스를 구움. 박스·좌표는 `bakeBitcoinIconCanvas` 와 같음.
- * 원보다 작은 원을 칠한 뒤 아이콘 본체(evenodd)를 지워 `B` 만 남김. 링 가장자리 안티앨리어싱이 안 남게 반지름을 줄였음.
- */
-export function bakeBitcoinIconGlyphCanvas(
-  sizeInCssPx: number,
-  glyphColor: string,
-): HTMLCanvasElement {
-  const { canvas, context } = createIconCanvas(sizeInCssPx);
-
-  context.fillStyle = glyphColor;
-  context.beginPath();
-  context.arc(
-    BITCOIN_ICON_CENTER_X,
-    BITCOIN_ICON_CENTER_Y,
-    BITCOIN_ICON_RADIUS * 0.85,
-    0,
-    Math.PI * 2,
-  );
-  context.fill();
-  context.globalCompositeOperation = "destination-out";
-  context.fill(new Path2D(BITCOIN_ICON_PATH), "evenodd");
-
-  return canvas;
-}
 // endregion
