@@ -306,7 +306,7 @@ html.chat-panel-resizing::view-transition-new(root) {
   /*
     `DitherBackground` 자리. 헤더와 하단 내비 사이 보이는 영역의 정중앙에 고정.
     body 가 `isolation` 으로 쌓임 맥락을 만들어서 z -1 이면 본문 뒤·body 배경색 위에 깔림.
-    폭은 화면 폭 80%. 데스크톱에선 본문 폭( 524px )의 80% 에서 멈춤. dvw·dvh 미지원 브라우저는 vw·vh 로 받음.
+    폭은 화면 폭 72%. 데스크톱에선 본문 폭( 524px )의 72% 에서 멈춤. dvw·dvh 미지원 브라우저는 vw·vh 로 받음.
   */
   .dither-background {
     position: fixed;
@@ -320,8 +320,8 @@ html.chat-panel-resizing::view-transition-new(root) {
         (100dvh - theme(height.header) - theme(height.navigation)) / 2
     );
     z-index: -1;
-    width: min(80vw, calc(theme(maxWidth.layout) * 0.8));
-    width: min(80dvw, calc(theme(maxWidth.layout) * 0.8));
+    width: min(72vw, calc(theme(maxWidth.layout) * 0.72));
+    width: min(72dvw, calc(theme(maxWidth.layout) * 0.72));
     aspect-ratio: 1;
     transform: translate(-50%, -50%);
     pointer-events: none;
