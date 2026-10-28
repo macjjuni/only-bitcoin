@@ -12,7 +12,10 @@ const BACKGROUND_CELL_SIZE_IN_CSS_PX = 3;
 const BACKGROUND_CYCLE_IN_MS = 12000;
 const BACKGROUND_FRAME_INTERVAL_IN_MS = 83;
 
-/** 예전 배경( 이미지 위 80% 덮개 )과 비슷한 진하기. 라이트는 검은 점이 더 세게 보여서 낮춤. */
+/**
+ * 배경 진하기. 본문 읽기를 안 건드리는 선까지 낮춰 둠.
+ * 지금은 두 테마가 같지만 흰 점과 검은 점은 눈에 들어오는 세기가 달라, 따로 조정할 수 있게 테마별로 둠.
+ */
 const BACKGROUND_OPACITY_BY_THEME = { dark: 0.1, light: 0.1 };
 
 /** 폭이 이만큼 바뀔 때만 다시 구움. 주소창 접힘 같은 미세한 변화마다 굽지 않게 함. */
