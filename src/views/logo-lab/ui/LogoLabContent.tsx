@@ -10,6 +10,18 @@ import {
   type WordmarkFontId,
 } from "@/shared/lib/wordmark-canvas";
 import { BtcTextLogo, GlitchWordmark, PageTitle } from "@/shared/ui";
+import {
+  formatHashStreamPresetSpec,
+  HASH_STREAM_PRESETS,
+  type HashStreamPreset,
+} from "../model/hashStreamPreset";
+import {
+  formatPgpArmorPresetSpec,
+  PGP_ARMOR_PRESETS,
+  type PgpArmorPreset,
+} from "../model/pgpArmorPreset";
+import HashStreamWordmark from "./HashStreamWordmark";
+import PgpArmorBlock from "./PgpArmorBlock";
 
 // region [Types]
 interface WordmarkSampleSize {
@@ -72,6 +84,8 @@ const SAMPLE_LABEL_CLASS = "text-[11px] font-medium uppercase tracking-[0.18em] 
 
 /** 폰트 선택지. 캔버스에 인라인해 구울 수 있는 폰트만 올린다. */
 const WORDMARK_FONT_OPTIONS: WordmarkFontId[] = ["pretendard", "jetbrains"];
+
+const SECTION_HEADING_CLASS = "font-jetbrains text-[15px] font-bold tracking-tight text-bitcoin";
 
 const SPEC_CLASS = "font-jetbrains text-[11px] leading-relaxed tracking-tight text-neutral-500";
 // endregion
@@ -176,13 +190,53 @@ export default function LogoLabContent() {
     </div>
   );
 
+  const renderHashStreamCard = (preset: HashStreamPreset) => {
+    return (
+      <section key={preset.id} className="flex flex-col gap-2.5">
+        <header className="flex flex-col gap-1 px-1">
+          <h3 className={SECTION_HEADING_CLASS}>{preset.name}</h3>
+          <p className={SPEC_CLASS}>{formatHashStreamPresetSpec(preset)}</p>
+          <p className="text-[13px] leading-relaxed text-muted-foreground">{preset.description}</p>
+        </header>
+
+        <div className={SAMPLE_PANEL_CLASS}>
+          {WORDMARK_SAMPLE_SIZES.map((sampleSize) => (
+            <div key={sampleSize.id} className="flex flex-col gap-2">
+              <span className={SAMPLE_LABEL_CLASS}>{sampleSize.label}</span>
+              <HashStreamWordmark
+                preset={preset}
+                fontId={fontId}
+                widthInCssPx={sampleSize.widthInCssPx}
+                heightInCssPx={sampleSize.heightInCssPx}
+              />
+            </div>
+          ))}
+        </div>
+      </section>
+    );
+  };
+
+  const renderPgpArmorCard = (preset: PgpArmorPreset) => {
+    return (
+      <section key={preset.id} className="flex flex-col gap-2.5">
+        <header className="flex flex-col gap-1 px-1">
+          <h3 className={SECTION_HEADING_CLASS}>{preset.name}</h3>
+          <p className={SPEC_CLASS}>{formatPgpArmorPresetSpec(preset)}</p>
+          <p className="text-[13px] leading-relaxed text-muted-foreground">{preset.description}</p>
+        </header>
+
+        <div className={SAMPLE_PANEL_CLASS}>
+          <PgpArmorBlock preset={preset} fontId={fontId} />
+        </div>
+      </section>
+    );
+  };
+
   const renderPresetCard = (preset: GlitchPreset) => {
     return (
       <section key={preset.id} className="flex flex-col gap-2.5">
         <header className="flex flex-col gap-1 px-1">
-          <h2 className="font-jetbrains text-[15px] font-bold tracking-tight text-bitcoin">
-            {preset.name}
-          </h2>
+          <h3 className={SECTION_HEADING_CLASS}>{preset.name}</h3>
           <p className={SPEC_CLASS}>{formatGlitchPresetSpec(preset)}</p>
           <p className="text-[13px] leading-relaxed text-muted-foreground">{preset.description}</p>
         </header>
@@ -243,7 +297,24 @@ export default function LogoLabContent() {
         </div>
       </section>
 
+      <h2 className="px-1 pt-2 text-[17px] font-bold tracking-tight">
+        1. 글리치 / RGB 채널 스플릿
+      </h2>
       {GLITCH_PRESETS.map(renderPresetCard)}
+
+      <h2 className="px-1 pt-2 text-[17px] font-bold tracking-tight">2. 해시 스트림</h2>
+      <p className="px-1 text-[13px] leading-relaxed text-muted-foreground">
+        글리프 안쪽에서만 문자가 아래로 흐릅니다. 재생 모드 토글은 글리치 시안에만 적용되고, 이
+        시안은 항상 흐릅니다.
+      </p>
+      {HASH_STREAM_PRESETS.map(renderHashStreamCard)}
+
+      <h2 className="px-1 pt-2 text-[17px] font-bold tracking-tight">3. PGP 아스키 아머</h2>
+      <p className="px-1 text-[13px] leading-relaxed text-muted-foreground">
+        로고가 아니라 레터헤드에 가깝습니다. 32px 헤더에는 들어갈 수 없고 공유 카드·랜딩 상단용
+        입니다. 아머 본문은 줄이 맞아야 해서 폰트 토글과 무관하게 항상 등폭으로 그립니다.
+      </p>
+      {PGP_ARMOR_PRESETS.map(renderPgpArmorCard)}
 
       <p className="px-1 pb-2 text-[12px] leading-relaxed text-muted-foreground">
         모션 줄이기(prefers-reduced-motion)를 켜면 연속 재생·실제 동작은 정지 프레임만 그려집니다.
