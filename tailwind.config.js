@@ -164,6 +164,11 @@ export default {
           "0%": { opacity: "1", transform: "translateY(0) scale(1)" },
           "100%": { opacity: "0", transform: "translateY(8px) scale(0.96)" },
         },
+        priceLivePulse: {
+          "0%": { transform: "scale(0.5)", opacity: "0.5" },
+          "70%": { opacity: "0" },
+          "100%": { transform: "scale(3)", opacity: "0" },
+        },
       },
       animation: {
         wiggle: "wiggle 0.36s ease-in-out infinite",
@@ -189,6 +194,7 @@ export default {
         "chat-panel-in": "chatPanelIn 0.28s cubic-bezier(0.16, 1, 0.3, 1)",
         "chat-panel-out": "chatPanelOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards",
         "chat-backdrop-out": "fadeOut 0.2s ease-in-out forwards",
+        "price-live-pulse": "priceLivePulse 1.9s ease-out infinite",
       },
     },
   },

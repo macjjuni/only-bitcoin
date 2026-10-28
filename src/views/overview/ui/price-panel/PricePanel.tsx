@@ -74,7 +74,7 @@ export default function PricePanel({ initialPrice }: PricePanelTypes) {
       </div>
 
       <div className="flex-shrink-0">
-        <PriceMiniChart barCount={10} width={140} height={60} />
+        <PriceMiniChart width={140} height={60} />
       </div>
     </div>
   );
