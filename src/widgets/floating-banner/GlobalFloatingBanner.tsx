@@ -45,6 +45,36 @@ function useScrollVisibility(threshold = 100) {
 }
 
 const BANNER_CONFIGS: BannerConfig[] = [
+  // 뒤로가기는 맨 위, 페이지 기능은 엄지 닿는 아래쪽, 위로가기는 맨 아래 순으로 둠.
+  {
+    id: "orange-back",
+    Component: OrangeBackFloatingBanner,
+    useIsVisible: () => {
+      const pathname = usePathname();
+      const orangeSubPaths = [
+        "/m2btc",
+        "/etf",
+        "/treasury",
+        "/cagr",
+        "/meme",
+        "/btc2apartment",
+        "/incidents",
+        "/withdraw-fee",
+        "/war",
+        "/dca",
+        "/bip39",
+      ];
+      return orangeSubPaths.some((sub) => pathname.startsWith(sub));
+    },
+  },
+  {
+    id: "countdown-back",
+    Component: CountdownBackFloatingBanner,
+    useIsVisible: () => {
+      const pathname = usePathname();
+      return pathname === "/blocks/countdown";
+    },
+  },
   {
     id: "btc-surge-share",
     Component: BtcSurgeShareFloatingBanner,
@@ -78,38 +108,11 @@ const BANNER_CONFIGS: BannerConfig[] = [
     },
   },
   {
-    id: "countdown-back",
-    Component: CountdownBackFloatingBanner,
-    useIsVisible: () => {
-      const pathname = usePathname();
-      return pathname === "/blocks/countdown";
-    },
-  },
-  {
     id: "dca-add-record",
     Component: DcaAddRecordFloatingBanner,
     useIsVisible: () => {
       const pathname = usePathname();
       return pathname.startsWith("/dca");
-    },
-  },
-  {
-    id: "orange-back",
-    Component: OrangeBackFloatingBanner,
-    useIsVisible: () => {
-      const pathname = usePathname();
-      const orangeSubPaths = [
-        "/m2btc",
-        "/etf",
-        "/treasury",
-        "/cagr",
-        "/meme",
-        "/btc2apartment",
-        "/withdraw-fee",
-        "/dca",
-        "/bip39",
-      ];
-      return orangeSubPaths.some((sub) => pathname.startsWith(sub));
     },
   },
   {
