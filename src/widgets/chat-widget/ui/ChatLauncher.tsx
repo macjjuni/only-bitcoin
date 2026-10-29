@@ -4,7 +4,7 @@ import { useQuery } from "@tanstack/react-query";
 import { usePathname } from "next/navigation";
 import { type RefObject, useCallback, useEffect, useState } from "react";
 import { chatConfig } from "@/shared/config/chat";
-import { FloatingBannerButton, GroupIcon } from "@/shared/ui";
+import { FloatingBannerButton, GroupIcon, NewBadge } from "@/shared/ui";
 
 interface OnlineResponse {
   online: number;
@@ -154,9 +154,7 @@ export default function ChatLauncher({
     hasAcceptedNotice &&
     onlineCount !== undefined;
   const NewBadgeTemplate = shouldShowNewBadge ? (
-    <span className="absolute -right-2.5 -top-1 rounded-full bg-red-500 px-1.5 py-0.5 font-pretendard text-[10px] font-bold leading-4 text-white shadow-sm">
-      NEW
-    </span>
+    <NewBadge className="absolute -right-2.5 -top-1" />
   ) : null;
   const OnlineCountBadgeTemplate = shouldShowOnlineBadge ? (
     <span className="absolute -right-1 -top-1 min-w-5 rounded-full bg-green-500 px-1.5 py-0.5 font-number text-[10px] font-bold leading-4 text-white shadow-sm">

@@ -1,6 +1,7 @@
 "use client";
 
 import { type ReactNode, useCallback, useEffect, useLayoutEffect, useRef, useState } from "react";
+import { incidentIDs, useIncidentSeenStore } from "@/entities/incident";
 import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import {
@@ -33,6 +34,12 @@ export default function IncidentsScreen(): ReactNode {
   const detectionAnimationFrameReference = useRef<number | null>(null);
   const activeIncidentIndexReference = useRef(latestIncidentIndex);
   const [activeIncidentIndex, setActiveIncidentIndex] = useState(latestIncidentIndex);
+  const markIncidentsSeen = useIncidentSeenStore((state) => state.markIncidentsSeen);
+
+  /** 연표에 들어온 시점의 사건 전체를 확인한 것으로 기록함. `/orange` NEW 배지가 이걸 봄. */
+  const markCurrentIncidentsSeen = useCallback((): void => {
+    markIncidentsSeen(incidentIDs);
+  }, [markIncidentsSeen]);
 
   const detectCenteredIncident = useCallback((): void => {
     const timelineTrackElement = timelineTrackReference.current;
@@ -195,6 +202,8 @@ export default function IncidentsScreen(): ReactNode {
 
   //#region [Life Cycles]
   useLayoutEffect(scrollTimelinesToLatestIncident, [scrollTimelinesToLatestIncident]);
+
+  useEffect(markCurrentIncidentsSeen, [markCurrentIncidentsSeen]);
 
   useEffect(() => {
     const timelineTrackElement = timelineTrackReference.current;

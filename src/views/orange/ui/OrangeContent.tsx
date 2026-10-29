@@ -3,6 +3,7 @@
 import { KIcon } from "kku-ui";
 import { HandCoins, Swords, TableProperties } from "lucide-react";
 import type { ReactNode } from "react";
+import { useHasUnseenIncident } from "@/entities/incident";
 import {
   BanknoteIcon,
   BuildingIcon,
@@ -13,6 +14,7 @@ import {
   IncidentIcon,
   MinerIcon,
   NaverIcon,
+  NewBadge,
   PageIcon,
   PageTitle,
   ShootingStarIcon,
@@ -25,6 +27,13 @@ interface OrangeLink {
   title: string;
   icon: ReactNode;
   href: string;
+  /** 아이콘 우측 상단에 NEW 배지를 띄울 조건. */
+  badge?: "unseenIncident";
+}
+
+interface UtilityLinkItemProps {
+  link: OrangeLink;
+  isNewBadgeVisible: boolean;
 }
 
 interface ExternalLinkSectionData {
@@ -72,6 +81,7 @@ const UTILITY_LINKS: OrangeLink[] = [
     title: "거래소 사고 연표",
     icon: <IncidentIcon size={30} className={ICON_CLASS} />,
     href: "/incidents",
+    badge: "unseenIncident",
   },
   {
     title: "출금 수수료",
@@ -174,7 +184,42 @@ function ExternalLinkSection({ headingID, title, links }: ExternalLinkSectionDat
   );
 }
 
+function UtilityLinkItem({ link, isNewBadgeVisible }: UtilityLinkItemProps): ReactNode {
+  // region [Templates]
+  const NewBadgeTemplate = isNewBadgeVisible ? (
+    <NewBadge className="absolute -right-4 -top-1" />
+  ) : null;
+  const linkAccessibleName = isNewBadgeVisible ? `${link.title}, 새 소식` : undefined;
+  // endregion
+
+  return (
+    <TransitionLink
+      href={link.href}
+      aria-label={linkAccessibleName}
+      className="flex min-h-20 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2.5 text-center transition-transform duration-200 active:scale-95"
+    >
+      <span className="relative flex size-12 items-center justify-center rounded-full bg-orange-500/10 dark:bg-orange-400/15">
+        {link.icon}
+        {NewBadgeTemplate}
+      </span>
+      <span className="flex min-h-8 items-center justify-center px-1 text-xs font-semibold leading-snug tracking-tighter break-keep text-center text-foreground select-none">
+        {link.title}
+      </span>
+    </TransitionLink>
+  );
+}
+
 const OrangeContent = () => {
+  // region [Hooks]
+  const hasUnseenIncident = useHasUnseenIncident();
+  // endregion
+
+  // region [Privates]
+  const isNewBadgeVisible = (link: OrangeLink): boolean => {
+    return link.badge === "unseenIncident" && hasUnseenIncident;
+  };
+  // endregion
+
   return (
     <>
       <section aria-label="서비스">
@@ -186,18 +231,11 @@ const OrangeContent = () => {
 
         <div className="grid grid-cols-4 overflow-hidden rounded-2xl">
           {UTILITY_LINKS.map((link) => (
-            <TransitionLink
+            <UtilityLinkItem
               key={link.title}
-              href={link.href}
-              className="flex min-h-20 flex-col items-center justify-center gap-0.5 rounded-xl px-1 py-2.5 text-center transition-transform duration-200 active:scale-95"
-            >
-              <span className="flex size-12 items-center justify-center rounded-full bg-orange-500/10 dark:bg-orange-400/15">
-                {link.icon}
-              </span>
-              <span className="flex min-h-8 items-center justify-center px-1 text-xs font-semibold leading-snug tracking-tighter break-keep text-center text-foreground select-none">
-                {link.title}
-              </span>
-            </TransitionLink>
+              link={link}
+              isNewBadgeVisible={isNewBadgeVisible(link)}
+            />
           ))}
         </div>
       </section>

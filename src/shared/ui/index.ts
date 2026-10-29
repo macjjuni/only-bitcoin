@@ -37,6 +37,7 @@ export {
   type ListRowProps,
 } from "./ListGroup";
 export { default as Lottie } from "./lottie/Lottie";
+export { default as NewBadge } from "./NewBadge";
 export { default as NotKeyNotYourBitcoin } from "./NotKeyNotYourBitcoin";
 export { default as PageTitle } from "./PageTitle";
 export {
