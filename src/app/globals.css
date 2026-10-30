@@ -143,6 +143,7 @@
 .only-btc__header { view-transition-name: main-header; }
 .only-btc__bottom-nav { view-transition-name: bottom-nav; }
 .only-btc__floating-banner { view-transition-name: floating-banner; }
+.only-btc__floating-banner-left { view-transition-name: floating-banner-left; }
 .only-btc__chat-panel { view-transition-name: chat-panel; }
 .only-btc__chat-backdrop { view-transition-name: chat-backdrop; }
 
