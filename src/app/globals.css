@@ -140,6 +140,74 @@
   filter: drop-shadow(0 0 6px rgb(var(--bitcoin-rgb) / 0.55));
 }
 
+/*
+  하단 격언 전환용 글리치. 평소엔 그냥 글자고, `.is-glitching` 붙는 순간에만 색 분리·가로 찢김을 줌.
+  잔상 두 겹은 `data-text` 를 그대로 복제해서 씀.
+*/
+.glitch-text {
+  position: relative;
+  display: inline-block;
+}
+.glitch-text::before,
+.glitch-text::after {
+  content: attr(data-text);
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+.glitch-text.is-glitching {
+  animation: glitch-jitter 420ms steps(1, end) both;
+}
+.glitch-text.is-glitching::before {
+  opacity: 0.85;
+  color: rgb(var(--bitcoin-rgb));
+  animation: glitch-slice-top 420ms steps(1, end) both;
+}
+.glitch-text.is-glitching::after {
+  opacity: 0.85;
+  color: #22d3ee;
+  animation: glitch-slice-bottom 420ms steps(1, end) both;
+}
+
+@keyframes glitch-jitter {
+  0% { transform: translate(0); opacity: 1; }
+  15% { transform: translate(-1px, 1px); opacity: 0.7; }
+  30% { transform: translate(2px, 0); opacity: 1; }
+  45% { transform: translate(-2px, -1px); opacity: 0.4; }
+  60% { transform: translate(1px, 1px); opacity: 1; }
+  80% { transform: translate(-1px, 0); opacity: 0.85; }
+  100% { transform: translate(0); opacity: 1; }
+}
+@keyframes glitch-slice-top {
+  0% { clip-path: inset(0 0 70% 0); transform: translate(-3px, 0); }
+  20% { clip-path: inset(10% 0 55% 0); transform: translate(3px, 0); }
+  40% { clip-path: inset(40% 0 35% 0); transform: translate(-4px, 0); }
+  60% { clip-path: inset(5% 0 80% 0); transform: translate(2px, 0); }
+  80% { clip-path: inset(25% 0 50% 0); transform: translate(-2px, 0); }
+  100% { clip-path: inset(0 0 100% 0); transform: translate(0); }
+}
+@keyframes glitch-slice-bottom {
+  0% { clip-path: inset(65% 0 0 0); transform: translate(3px, 0); }
+  20% { clip-path: inset(50% 0 15% 0); transform: translate(-3px, 0); }
+  40% { clip-path: inset(70% 0 5% 0); transform: translate(4px, 0); }
+  60% { clip-path: inset(45% 0 30% 0); transform: translate(-2px, 0); }
+  80% { clip-path: inset(80% 0 0 0); transform: translate(2px, 0); }
+  100% { clip-path: inset(100% 0 0 0); transform: translate(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .glitch-text.is-glitching,
+  .glitch-text.is-glitching::before,
+  .glitch-text.is-glitching::after {
+    animation: none;
+  }
+  .glitch-text.is-glitching::before,
+  .glitch-text.is-glitching::after {
+    opacity: 0;
+  }
+}
+
 .only-btc__header { view-transition-name: main-header; }
 .only-btc__bottom-nav { view-transition-name: bottom-nav; }
 .only-btc__floating-banner { view-transition-name: floating-banner; }
