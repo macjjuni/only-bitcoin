@@ -17,7 +17,7 @@ export default function PageLayout({ children, className, hasBottomNav = true }:
       className={[
         // Safari 는 flex 스크롤 컨테이너의 padding-bottom 을 scrollHeight 에 포함 X.
         "relative w-full max-w-layout mx-auto flex flex-col flex-auto gap-2 p-2 pt-2.5",
-        hasBottomNav ? "pb-[calc(theme(height.bottom-nav)_+_theme(spacing.2))]" : null,
+        hasBottomNav ? "pb-[calc(theme(height.bottom-nav)_+_theme(spacing.3))]" : null,
         className,
       ]
         .filter(Boolean)
