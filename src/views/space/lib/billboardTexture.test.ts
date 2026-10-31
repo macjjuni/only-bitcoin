@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { SPACE_BILLBOARD } from "@/entities/space";
 import {
   BILLBOARD_COLORS,
   BILLBOARD_COLUMNS,
@@ -169,7 +170,23 @@ describe("resolveFittedFontSize", () => {
 });
 
 describe("패널 비율", () => {
-  it("텍스처는 16:9 다. 패널 geometry 와 어긋나면 글자가 늘어난다", () => {
+  it("텍스처는 16:9 다", () => {
     expect(BILLBOARD_TEXTURE.width / BILLBOARD_TEXTURE.height).toBeCloseTo(16 / 9, 6);
+  });
+
+  /**
+   * 텍스처와 geometry 의 비율이 어긋나면 글자와 차트가 늘어나거나 눌린다.
+   * 둘이 다른 파일(entities / views)에 있어 한쪽만 바꾸기 쉬우므로 묶어 둔다.
+   */
+  it("패널 geometry 비율이 텍스처 비율과 같다", () => {
+    expect(SPACE_BILLBOARD.width / SPACE_BILLBOARD.height).toBeCloseTo(
+      BILLBOARD_TEXTURE.width / BILLBOARD_TEXTURE.height,
+      6,
+    );
+  });
+
+  it("프레임이 패널보다 크다", () => {
+    expect(SPACE_BILLBOARD.frameWidth).toBeGreaterThan(SPACE_BILLBOARD.width);
+    expect(SPACE_BILLBOARD.frameHeight).toBeGreaterThan(SPACE_BILLBOARD.height);
   });
 });
