@@ -30,6 +30,7 @@ export {
   resolveMergedMovementInput,
   type SpaceInputSource,
 } from "./model/spaceInputSource";
+export { default as useCoarsePointer } from "./model/useCoarsePointer";
 export { default as useKeyboardInput } from "./model/useKeyboardInput";
 export { default as usePointerDrag } from "./model/usePointerDrag";
 export { default as usePrefersReducedMotion } from "./model/usePrefersReducedMotion";

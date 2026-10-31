@@ -1,10 +1,16 @@
 "use client";
 
+import { PerformanceMonitor, type PerformanceMonitorApi } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import { createOfflinePresence } from "@/entities/space";
 import { createSpaceInputSource, SPACE_CAMERA, useKeyboardInput } from "@/features/space-controls";
 import { isAndroidDevice, isIOSDevice } from "@/shared/utils/device";
+import {
+  resolveDprFromPerformanceFactor,
+  SPACE_INITIAL_DPR,
+  SPACE_MIN_DPR,
+} from "@/views/space/lib/renderQuality";
 import SpaceHud from "./hud/SpaceHud";
 import SpaceFallback, { type SpaceFallbackReason } from "./SpaceFallback";
 import SpaceScene from "./scene/SpaceScene";
@@ -45,6 +51,7 @@ function SpaceCanvas({ clientKey, dummyCount }: SpaceCanvasProps): ReactNode {
   const [isSupportProbed, setIsSupportProbed] = useState<boolean>(false);
   const [hasRealtimeShadows, setHasRealtimeShadows] = useState<boolean>(false);
   const [frameloop, setFrameloop] = useState<"always" | "never">("always");
+  const [renderDpr, setRenderDpr] = useState<number>(SPACE_INITIAL_DPR);
 
   useKeyboardInput(inputSource);
   // endregion
@@ -78,6 +85,20 @@ function SpaceCanvas({ clientKey, dummyCount }: SpaceCanvasProps): ReactNode {
   // endregion
 
   // region [Events]
+  /**
+   * 프레임 측정값에 따라 렌더 해상도를 올리고 내린다.
+   *
+   * 기기 dpr 이 3 인 폰에서 1.5 로 그리면 같은 화면의 DOM HUD 보다 눈에 띄게
+   * 흐리다. 여유가 있으면 2 까지 올리고, 모자라면 다시 내린다.
+   */
+  const onChangePerformance = useCallback(({ factor }: PerformanceMonitorApi): void => {
+    setRenderDpr(resolveDprFromPerformanceFactor(factor));
+  }, []);
+
+  const onFallbackPerformance = useCallback((): void => {
+    setRenderDpr(SPACE_MIN_DPR);
+  }, []);
+
   const onClickRetryFallback = useCallback((): void => {
     window.location.reload();
   }, []);
@@ -125,13 +146,19 @@ function SpaceCanvas({ clientKey, dummyCount }: SpaceCanvasProps): ReactNode {
   return (
     <div className="relative h-full w-full overflow-hidden bg-[#06080e]">
       <Canvas
-        dpr={[1, 1.5]}
+        dpr={renderDpr}
         frameloop={frameloop}
         shadows={hasRealtimeShadows}
         camera={{ fov: SPACE_CAMERA.fov, near: CAMERA_NEAR, far: CAMERA_FAR }}
         gl={{ antialias: true, powerPreference: "high-performance" }}
         onCreated={onCreatedCanvas}
       >
+        <PerformanceMonitor
+          onChange={onChangePerformance}
+          onFallback={onFallbackPerformance}
+          flipflops={3}
+        />
+
         <SpaceScene
           inputSource={inputSource}
           clientKey={clientKey}

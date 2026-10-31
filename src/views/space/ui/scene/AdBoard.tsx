@@ -1,5 +1,6 @@
 "use client";
 
+import { useThree } from "@react-three/fiber";
 import { memo, type ReactNode, useEffect, useMemo } from "react";
 import { CanvasTexture, SRGBColorSpace, type Texture } from "three";
 import type { SpaceAdBoardId, SpaceAdBoardPlacement } from "@/entities/space";
@@ -68,15 +69,19 @@ const createPlaceholderTexture = (): Texture => {
 
 function AdBoard({ placement }: AdBoardProps): ReactNode {
   // region [Hooks]
+  const renderer = useThree((rootState) => rootState.gl);
   const placeholderTexture = useMemo(() => createPlaceholderTexture(), []);
   // endregion
 
   // region [Life Cycles]
   useEffect(() => {
+    placeholderTexture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    placeholderTexture.needsUpdate = true;
+
     return () => {
       placeholderTexture.dispose();
     };
-  }, [placeholderTexture]);
+  }, [placeholderTexture, renderer]);
   // endregion
 
   return (

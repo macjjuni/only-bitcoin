@@ -5,7 +5,11 @@ import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, type ReactNode, useCallback, useMemo, useState } from "react";
 import type { SpacePresence } from "@/entities/space";
-import { type SpaceInputSource, VirtualJoystick } from "@/features/space-controls";
+import {
+  type SpaceInputSource,
+  useCoarsePointer,
+  VirtualJoystick,
+} from "@/features/space-controls";
 import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
 import SpaceControlGuide from "./SpaceControlGuide";
 import SpacePresenceBadge from "./SpacePresenceBadge";
@@ -37,6 +41,7 @@ function SpaceHud({ inputSource, presence }: SpaceHudProps): ReactNode {
   const router = useTransitionRouter();
   const pathname = usePathname();
   const { isFullscreen, isFullscreenSupported, toggleFullscreen } = useFullscreen();
+  const isCoarsePointer = useCoarsePointer();
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   // endregion
 
@@ -104,6 +109,16 @@ function SpaceHud({ inputSource, presence }: SpaceHudProps): ReactNode {
       <SpaceControlGuide />
     </div>
   ) : null;
+
+  /**
+   * 조이스틱은 손가락 기기에만 띄운다. 화면 왼쪽 절반을 덮으므로 마우스
+   * 환경에 띄우면 시야 회전 드래그를 먹는다.
+   */
+  const JoystickTemplate = isCoarsePointer ? (
+    <div className="pointer-events-auto">
+      <VirtualJoystick inputSource={inputSource} />
+    </div>
+  ) : null;
   // endregion
 
   // 경로가 바뀌는 동안에도 HUD 가 남지 않도록 현재 경로를 키로 쓴다.
@@ -127,9 +142,7 @@ function SpaceHud({ inputSource, presence }: SpaceHudProps): ReactNode {
         {GuidePanelTemplate}
       </div>
 
-      <div className="pointer-events-auto sm:hidden">
-        <VirtualJoystick inputSource={inputSource} />
-      </div>
+      {JoystickTemplate}
     </div>
   );
 }

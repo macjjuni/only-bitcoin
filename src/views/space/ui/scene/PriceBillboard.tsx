@@ -1,6 +1,6 @@
 "use client";
 
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { memo, type ReactNode, useEffect, useMemo, useRef } from "react";
 import { CanvasTexture, SRGBColorSpace } from "three";
 import { useBitcoinStore } from "@/entities/bitcoin";
@@ -76,6 +76,7 @@ const EMPTY_SERIES: readonly number[] = [];
  */
 function PriceBillboard(): ReactNode {
   // region [Hooks]
+  const renderer = useThree((rootState) => rootState.gl);
   const surface = useMemo(() => createBillboardSurface(), []);
   const { priceMiniChartData } = usePriceMiniChartData();
   const lastDrawnAtRef = useRef<number>(0);
@@ -99,12 +100,17 @@ function PriceBillboard(): ReactNode {
 
   // region [Life Cycles]
   useEffect(() => {
+    // 패널이 화면보다 훨씬 큰 텍스처라 항상 축소되어 그려진다. 이방성 필터를
+    // 올리지 않으면(기본 1) 비스듬히 볼 때 글자가 뭉개진다.
+    surface.texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
+    surface.texture.needsUpdate = true;
+
     redrawBillboard(readBillboardState(usdSeriesRef.current));
 
     return () => {
       surface.texture.dispose();
     };
-  }, [surface]);
+  }, [renderer, surface]);
 
   useFrame(({ clock }) => {
     const nowMs = clock.elapsedTime * 1000;
