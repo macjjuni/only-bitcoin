@@ -24,8 +24,10 @@ import {
   resolveCameraPosition,
   resolveFollowDamping,
   resolveMergedMovementInput,
+  SPACE_CAMERA,
   type SpaceInputSource,
   stepMovement,
+  useCoarsePointer,
   usePointerDrag,
   usePrefersReducedMotion,
   type Vector3Like,
@@ -66,23 +68,34 @@ function SpaceScene({
   const camera = useThree((rootState) => rootState.camera);
   const viewportSize = useThree((rootState) => rootState.size);
   const prefersReducedMotion = usePrefersReducedMotion();
+  const isCoarsePointer = useCoarsePointer();
+
+  /**
+   * 손가락 기기는 가장 가까이 붙여 시작한다. 세로로 긴 화면은 가로 시야가 좁아
+   * 기본 거리에서 전광판이 작게 보인다. 시작값일 뿐이라 핀치로 물러날 수 있다.
+   */
+  const initialCameraDistance = isCoarsePointer
+    ? SPACE_CAMERA.touchInitialDistance
+    : SPACE_CAMERA.defaultDistance;
 
   const spawnTransform = useMemo(() => createSpawnPoint(clientKey), [clientKey]);
   const colorIndex = useMemo(() => resolveColorIndexFromClientKey(clientKey), [clientKey]);
   const dummies = useMemo(() => createStressDummies(dummyCount), [dummyCount]);
   /** 세로로 긴 화면에서 전광판 벽면을 줄인다. 리사이즈·회전에 따라 다시 계산된다. */
   const wallDisplayScale = useMemo(() => {
-    return resolveWallDisplayScale(viewportSize.width / viewportSize.height);
-  }, [viewportSize]);
+    return resolveWallDisplayScale(viewportSize.width / viewportSize.height, initialCameraDistance);
+  }, [initialCameraDistance, viewportSize]);
   /** 줄여도 프레임 아랫변이 제자리에 남도록 기준점을 내린다. */
   const wallAnchor = useMemo((): [number, number, number] => {
     return [SPACE_WALL_ANCHOR[0], resolveWallAnchorY(wallDisplayScale), SPACE_WALL_ANCHOR[2]];
   }, [wallDisplayScale]);
 
   const playerStateRef = useRef<LocalPlayerState>(createLocalPlayerState(spawnTransform));
-  const cameraOrbitRef = useRef<CameraOrbit>(createDefaultCameraOrbit(spawnTransform.yaw));
+  const cameraOrbitRef = useRef<CameraOrbit>(
+    createDefaultCameraOrbit(spawnTransform.yaw, initialCameraDistance),
+  );
   const smoothedCameraRef = useRef<Vector3Like>(
-    resolveCameraPosition(spawnTransform, createDefaultCameraOrbit(spawnTransform.yaw)),
+    resolveCameraPosition(spawnTransform, cameraOrbitRef.current),
   );
   const accumulatedSecondsRef = useRef<number>(0);
   const playerGroupRef = useRef<Group>(null);

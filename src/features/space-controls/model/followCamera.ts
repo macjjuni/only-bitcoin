@@ -8,6 +8,14 @@ export const SPACE_CAMERA = {
   defaultDistance: 11,
   minDistance: 5,
   maxDistance: 18,
+  /**
+   * 손가락 기기의 시작 거리.
+   *
+   * 세로로 긴 화면은 가로 시야가 좁아 기본 거리에서는 전광판이 화면 폭의
+   * 74% 에 그친다. 가장 가까이 붙여 시작하면 93% 까지 차오른다.
+   * 시작값일 뿐이라 핀치로 자유롭게 물러날 수 있다.
+   */
+  touchInitialDistance: 5,
   /** 휠 deltaY 1 단위당 거리 변화(m). 한 노치(100)에 약 1.2 m. */
   wheelZoomSensitivity: 0.012,
   /** 핀치 1 px 당 거리 변화(m). 200 px 벌리면 약 6 m. */
@@ -45,12 +53,6 @@ export interface Vector3Like {
   z: number;
 }
 
-export const createDefaultCameraOrbit = (playerYaw: number): CameraOrbit => ({
-  yaw: playerYaw,
-  pitch: SPACE_CAMERA.defaultPitch,
-  distance: SPACE_CAMERA.defaultDistance,
-});
-
 // region [Privates]
 const clamp = (value: number, min: number, max: number): number => {
   return Math.min(Math.max(value, min), max);
@@ -64,6 +66,15 @@ export const clampCameraPitch = (pitch: number): number => {
 export const clampCameraDistance = (distance: number): number => {
   return clamp(distance, SPACE_CAMERA.minDistance, SPACE_CAMERA.maxDistance);
 };
+
+export const createDefaultCameraOrbit = (
+  playerYaw: number,
+  initialDistance: number = SPACE_CAMERA.defaultDistance,
+): CameraOrbit => ({
+  yaw: playerYaw,
+  pitch: SPACE_CAMERA.defaultPitch,
+  distance: clampCameraDistance(initialDistance),
+});
 
 /** 누적된 줌 입력(m)을 거리에 반영한다. 양수면 멀어진다. */
 export const applyCameraZoom = (orbit: CameraOrbit, distanceDelta: number): CameraOrbit => ({

@@ -12,7 +12,10 @@ const COARSE_POINTER_QUERY = "(pointer: coarse)";
  */
 const useCoarsePointer = (): boolean => {
   // region [Hooks]
-  const [isCoarsePointer, setIsCoarsePointer] = useState<boolean>(false);
+  // 첫 렌더에서 바로 읽는다. 뒤늦게 바뀌면 카메라 시작 거리가 한 박자 튄다.
+  const [isCoarsePointer, setIsCoarsePointer] = useState<boolean>(() => {
+    return typeof window === "undefined" ? false : window.matchMedia(COARSE_POINTER_QUERY).matches;
+  });
   // endregion
 
   // region [Life Cycles]

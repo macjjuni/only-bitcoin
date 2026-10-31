@@ -211,6 +211,21 @@ describe("createDefaultCameraOrbit", () => {
     expect(createDefaultCameraOrbit(0).distance).toBe(SPACE_CAMERA.defaultDistance);
     expect(SPACE_CAMERA.defaultDistance).toBe(11);
   });
+
+  it("시작 거리를 지정할 수 있다", () => {
+    expect(createDefaultCameraOrbit(0, SPACE_CAMERA.touchInitialDistance).distance).toBe(
+      SPACE_CAMERA.touchInitialDistance,
+    );
+  });
+
+  it("지정한 시작 거리도 줌 범위로 자른다", () => {
+    expect(createDefaultCameraOrbit(0, 999).distance).toBe(SPACE_CAMERA.maxDistance);
+    expect(createDefaultCameraOrbit(0, 0).distance).toBe(SPACE_CAMERA.minDistance);
+  });
+
+  it("손가락 기기 시작 거리는 가장 가까운 값이다", () => {
+    expect(SPACE_CAMERA.touchInitialDistance).toBe(SPACE_CAMERA.minDistance);
+  });
 });
 
 describe("clampCameraDistance", () => {
