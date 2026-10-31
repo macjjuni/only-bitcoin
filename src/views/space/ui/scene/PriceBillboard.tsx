@@ -206,6 +206,9 @@ function PriceBillboard(): ReactNode {
     surface.texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
     surface.texture.needsUpdate = true;
 
+    // 텍스처가 새로 만들어지면 값이 같아도 새 표면에 반드시 다시 그린다.
+    lastSignatureRef.current = "";
+    lastPriceTextsRef.current = { krw: "", usd: "" };
     sampleBillboard(0, true);
     redrawPrices(0);
 

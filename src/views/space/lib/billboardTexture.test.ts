@@ -93,7 +93,7 @@ describe("resolveChangeTone", () => {
 
 describe("resolveFittedFontSize", () => {
   const PRICE_WIDTH = BILLBOARD_COLUMNS.priceMaxWidth;
-  const PRICE_FONT_SIZE = 73;
+  const PRICE_FONT_SIZE = 108;
 
   it("가용 폭에 들어가는 문자열은 최대 크기를 유지한다", () => {
     const measuredWidth = measureMonospaceWidth("$108,433", PRICE_FONT_SIZE);
@@ -135,10 +135,10 @@ describe("resolveFittedFontSize", () => {
 
   it("변동률도 자기 칸을 넘지 않는다", () => {
     const changeText = formatBillboardChange("-12.34");
-    const measuredWidth = measureMonospaceWidth(changeText, 48);
+    const measuredWidth = measureMonospaceWidth(changeText, 68);
     const fittedFontSize = resolveFittedFontSize(measuredWidth, {
       maxWidth: BILLBOARD_COLUMNS.changeMaxWidth,
-      maxFontSizePx: 48,
+      maxFontSizePx: 68,
     });
 
     expect(measureMonospaceWidth(changeText, fittedFontSize)).toBeLessThanOrEqual(

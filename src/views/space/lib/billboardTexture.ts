@@ -34,8 +34,8 @@ export const BILLBOARD_CHART_MARKER = {
 
 /** 가격·변동률 컬럼의 가용 폭. 이 폭을 넘으면 글자를 줄인다. */
 export const BILLBOARD_COLUMNS = {
-  priceMaxWidth: 560,
-  changeMaxWidth: 240,
+  priceMaxWidth: 800,
+  changeMaxWidth: 300,
 } as const;
 
 /**
@@ -53,6 +53,12 @@ export const BILLBOARD_COLORS = {
   divider: "#1b2635",
   label: "#e6ecf5",
   labelMuted: "#7d8ba1",
+  rowSurfaceTop: "#111d2b",
+  rowSurfaceBottom: "#0e1722",
+  rowBorder: "#223143",
+  rowDivider: "#203044",
+  tickerSurface: "#182738",
+  tickerText: "#c6d5e6",
   price: "#ffffff",
   brand: BITCOIN_COLOR,
   up: "#2ee6a8",
@@ -177,28 +183,31 @@ const SANS_FONT_STACK =
 /** 숫자용 등폭. 자리수마다 폭이 달라지면 4 Hz 갱신 때 글자가 떤다. */
 const NUMERIC_FONT_STACK = "ui-monospace, SFMono-Regular, Menlo, monospace";
 
-/** 1600 × 900 기준 레이아웃. 시안(1672 × 941)을 같은 비율로 옮긴 값이다. */
+/** 1600 × 900 기준 원거리 시인성 레이아웃. 가격 행의 높이와 칸 폭을 함께 확보한다. */
 const LAYOUT = {
-  logo: { centerX: 93, centerY: 86, radius: 30 },
-  title: { x: 150, y: 89, fontSize: 46 },
-  ticker: { x: 378, y: 92, fontSize: 31 },
+  logo: { centerX: 106, centerY: 80, radius: 44 },
+  title: { x: 176, y: 82, fontSize: 64 },
+  ticker: { x: 546, y: 82, fontSize: 42 },
+  tickerBadge: { x: 488, y: 52, width: 116, height: 60, radius: 12 },
+  marketLabel: { x: 1514, y: 82, fontSize: 28 },
   rows: {
-    krw: { centerY: 185, label: "원화", unit: "KRW" },
-    usd: { centerY: 304, label: "달러", unit: "USD" },
+    krw: { centerY: 220, label: "원화", unit: "KRW" },
+    usd: { centerY: 368, label: "달러", unit: "USD" },
   },
-  rowLabel: { x: 60, fontSize: 36 },
-  rowUnit: { x: 145, fontSize: 29 },
-  rowPrice: { x: 273, fontSize: 73, maxWidth: BILLBOARD_COLUMNS.priceMaxWidth, height: 104 },
-  rowChange: { x: 880, fontSize: 48, maxWidth: BILLBOARD_COLUMNS.changeMaxWidth },
-  rowChangeSuffix: { x: 1160, fontSize: 29 },
-  dividers: [237, 367] as const,
-  chartTitle: { x: 60, y: 423, fontSize: 38 },
-  chartSubtitle: { x: 300, y: 426, fontSize: 29 },
-  chart: { left: 60, top: 470, width: 1320, height: 300 } satisfies ChartRect,
+  rowPanel: { x: 56, width: 1488, height: 132, radius: 16, dividerXs: [252, 1104] },
+  rowLabel: { x: 84, fontSize: 52, offsetY: -18 },
+  rowUnit: { x: 84, fontSize: 30, offsetY: 30 },
+  rowPrice: { x: 288, fontSize: 108, maxWidth: BILLBOARD_COLUMNS.priceMaxWidth, height: 128 },
+  rowChange: { x: 1140, fontSize: 68, maxWidth: BILLBOARD_COLUMNS.changeMaxWidth, offsetY: 16 },
+  rowChangeSuffix: { x: 1180, fontSize: 24, offsetY: -36 },
+  dividers: [132] as const,
+  chartTitle: { x: 60, y: 470, fontSize: 38 },
+  chartSubtitle: { x: 300, y: 473, fontSize: 29 },
+  chart: { left: 60, top: 520, width: 1320, height: 250 } satisfies ChartRect,
   axisLabel: { x: 1452, fontSize: 26 },
   timeLabel: { y: 859, fontSize: 27 },
   footer: { y: 866, fontSize: 24 },
-  statusDot: { radius: 9, gap: 26 },
+  statusDot: { radius: 7, gap: 26, offsetY: -36 },
 } as const;
 
 export interface BillboardPriceRegion {
@@ -388,7 +397,38 @@ const drawConnectionDot = (
   context.fill();
 };
 
-/** 통화 한 줄. 라벨 · 단위 · 가격 · 변동률을 고정 컬럼에 그린다. */
+/** 통화·가격·등락을 분리하는 정적 표면. 숫자 레이어는 이 위에 투명하게 겹친다. */
+const drawPriceRowSurface = (context: CanvasRenderingContext2D, centerY: number): void => {
+  const rowTop = centerY - LAYOUT.rowPanel.height / 2;
+  const gradient = context.createLinearGradient(0, rowTop, 0, rowTop + LAYOUT.rowPanel.height);
+  gradient.addColorStop(0, BILLBOARD_COLORS.rowSurfaceTop);
+  gradient.addColorStop(1, BILLBOARD_COLORS.rowSurfaceBottom);
+
+  context.beginPath();
+  context.roundRect(
+    LAYOUT.rowPanel.x,
+    rowTop,
+    LAYOUT.rowPanel.width,
+    LAYOUT.rowPanel.height,
+    LAYOUT.rowPanel.radius,
+  );
+  context.fillStyle = gradient;
+  context.fill();
+  context.strokeStyle = BILLBOARD_COLORS.rowBorder;
+  context.lineWidth = 1.5;
+  context.stroke();
+
+  context.strokeStyle = BILLBOARD_COLORS.rowDivider;
+  context.lineWidth = 1;
+  for (const dividerX of LAYOUT.rowPanel.dividerXs) {
+    context.beginPath();
+    context.moveTo(dividerX, centerY - 36);
+    context.lineTo(dividerX, centerY + 36);
+    context.stroke();
+  }
+};
+
+/** 통화명·단위는 두 줄, 가격은 주 정보, 등락률·24h는 독립된 우측 블록으로 그린다. */
 const drawPriceRow = (
   context: CanvasRenderingContext2D,
   options: {
@@ -408,16 +448,17 @@ const drawPriceRow = (
   const tone = hasPrice ? options.tone : "flat";
   const changeText = hasPrice ? options.changeText : BILLBOARD_PLACEHOLDER;
 
+  drawPriceRowSurface(context, centerY);
   context.textAlign = "left";
   context.textBaseline = "middle";
 
   context.fillStyle = BILLBOARD_COLORS.label;
   context.font = resolveFontSpec(700, LAYOUT.rowLabel.fontSize, SANS_FONT_STACK);
-  context.fillText(label, LAYOUT.rowLabel.x, centerY);
+  context.fillText(label, LAYOUT.rowLabel.x, centerY + LAYOUT.rowLabel.offsetY);
 
   context.fillStyle = BILLBOARD_COLORS.labelMuted;
   context.font = resolveFontSpec(500, LAYOUT.rowUnit.fontSize, SANS_FONT_STACK);
-  context.fillText(unit, LAYOUT.rowUnit.x, centerY);
+  context.fillText(unit, LAYOUT.rowUnit.x, centerY + LAYOUT.rowUnit.offsetY);
 
   if (options.shouldDrawPrice) {
     drawPriceText(context, priceText, LAYOUT.rowPrice.x, centerY);
@@ -426,13 +467,19 @@ const drawPriceRow = (
   const triangleSize = LAYOUT.rowChange.fontSize * 0.56;
 
   if (hasPrice) {
-    drawToneTriangle(context, LAYOUT.rowChange.x, centerY, triangleSize, tone);
+    drawToneTriangle(
+      context,
+      LAYOUT.rowChange.x,
+      centerY + LAYOUT.rowChange.offsetY,
+      triangleSize,
+      tone,
+    );
   }
 
   context.fillStyle = resolveToneColor(tone);
   drawFittedText(context, changeText, {
     x: LAYOUT.rowChange.x + triangleSize,
-    y: centerY,
+    y: centerY + LAYOUT.rowChange.offsetY,
     fontWeight: 700,
     maxFontSizePx: LAYOUT.rowChange.fontSize,
     maxWidth: LAYOUT.rowChange.maxWidth,
@@ -441,12 +488,12 @@ const drawPriceRow = (
 
   context.fillStyle = BILLBOARD_COLORS.labelMuted;
   context.font = resolveFontSpec(500, LAYOUT.rowChangeSuffix.fontSize, SANS_FONT_STACK);
-  context.fillText("24h", LAYOUT.rowChangeSuffix.x, centerY);
+  context.fillText("24h", LAYOUT.rowChangeSuffix.x, centerY + LAYOUT.rowChangeSuffix.offsetY);
 
   drawConnectionDot(
     context,
     BILLBOARD_TEXTURE.width - BILLBOARD_TEXTURE.paddingX - LAYOUT.statusDot.gap,
-    centerY,
+    centerY + LAYOUT.statusDot.offsetY,
     isConnected,
   );
 };
@@ -642,9 +689,25 @@ export const drawBillboard = (
   context.font = resolveFontSpec(800, LAYOUT.title.fontSize, SANS_FONT_STACK);
   context.fillText("BITCOIN", LAYOUT.title.x, LAYOUT.title.y);
 
-  context.fillStyle = BILLBOARD_COLORS.labelMuted;
+  context.beginPath();
+  context.roundRect(
+    LAYOUT.tickerBadge.x,
+    LAYOUT.tickerBadge.y,
+    LAYOUT.tickerBadge.width,
+    LAYOUT.tickerBadge.height,
+    LAYOUT.tickerBadge.radius,
+  );
+  context.fillStyle = BILLBOARD_COLORS.tickerSurface;
+  context.fill();
+  context.textAlign = "center";
+  context.fillStyle = BILLBOARD_COLORS.tickerText;
   context.font = resolveFontSpec(600, LAYOUT.ticker.fontSize, SANS_FONT_STACK);
   context.fillText("BTC", LAYOUT.ticker.x, LAYOUT.ticker.y);
+
+  context.textAlign = "right";
+  context.fillStyle = BILLBOARD_COLORS.labelMuted;
+  context.font = resolveFontSpec(500, LAYOUT.marketLabel.fontSize, SANS_FONT_STACK);
+  context.fillText("실시간 시세", LAYOUT.marketLabel.x, LAYOUT.marketLabel.y);
 
   drawPriceRow(context, {
     centerY: LAYOUT.rows.krw.centerY,
