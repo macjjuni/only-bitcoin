@@ -46,7 +46,6 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
   const isCoarsePointer = useCoarsePointer();
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
-  const [isChatFocused, setIsChatFocused] = useState(false);
   const [lastReadMessageID, setLastReadMessageID] = useState<string | null>(null);
   // endregion
 
@@ -64,22 +63,10 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
   const onClickToggleGuide = useCallback((): void => {
     setIsGuideOpen((previousOpen) => !previousOpen);
   }, []);
-  const onChangeChatFocus = useCallback(
-    (isFocused: boolean): void => {
-      setIsChatFocused(isFocused);
-      if (isFocused) {
-        inputSource.joystick.forward = 0;
-        inputSource.joystick.strafe = 0;
-        inputSource.joystick.isRunning = false;
-      }
-    },
-    [inputSource],
-  );
 
   const onClickCloseChat = useCallback((): void => {
     setLastReadMessageID(session.messages.at(-1)?.id ?? null);
     setIsChatOpen(false);
-    setIsChatFocused(false);
     document.getElementById("space-chat-toggle")?.focus();
   }, [session.messages]);
 
@@ -152,9 +139,14 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
     </div>
   ) : null;
 
-  /** 조이스틱은 손가락 기기에만 띄운다. 마우스 환경에는 WASD 가 있다. */
+  /**
+   * 조이스틱은 손가락 기기에만 띄운다. 마우스 환경에는 WASD 가 있다.
+   *
+   * 채팅 시트가 하단을 덮는 동안에는 손가락이 조이스틱에 닿지 않으므로 내린다.
+   * 언마운트 정리가 눌려 있던 입력까지 0 으로 비운다.
+   */
   const JoystickTemplate =
-    isCoarsePointer && !isChatFocused ? (
+    isCoarsePointer && !isChatOpen ? (
       <div className="pointer-events-auto">
         <VirtualJoystick inputSource={inputSource} />
       </div>
@@ -227,7 +219,7 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
           sendMessage={session.sendMessage}
           onClose={onClickCloseChat}
           onRetry={session.retry}
-          onFocusChange={onChangeChatFocus}
+          isBottomSheet={isCoarsePointer}
         />
       )}
     </div>

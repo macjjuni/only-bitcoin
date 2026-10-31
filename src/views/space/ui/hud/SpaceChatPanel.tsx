@@ -3,7 +3,6 @@
 import { Send, WifiOff, X } from "lucide-react";
 import {
   type ChangeEvent,
-  type FocusEvent,
   type FormEvent,
   memo,
   type ReactNode,
@@ -28,11 +27,12 @@ interface SpaceChatPanelProps {
   sendMessage: (body: string) => Promise<boolean>;
   onClose: () => void;
   onRetry: () => void;
-  onFocusChange: (isFocused: boolean) => void;
+  /** 손가락 기기는 입력칸을 화면 하단에 붙인 시트로 띄운다. */
+  isBottomSheet: boolean;
 }
 
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending, sendMessage, onClose, onRetry, onFocusChange }: SpaceChatPanelProps): ReactNode {
+function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending, sendMessage, onClose, onRetry, isBottomSheet }: SpaceChatPanelProps): ReactNode {
   // region [Hooks]
   const [draft, setDraft] = useState("");
   const [cooldownEndsAt, setCooldownEndsAt] = useState(0);
@@ -76,9 +76,8 @@ function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending,
     isMountedRef.current = true;
     return () => {
       isMountedRef.current = false;
-      onFocusChange(false);
     };
-  }, [onFocusChange]);
+  }, []);
 
   const startCooldownCountdown = useCallback((): (() => void) | undefined => {
     if (cooldownEndsAt === 0) {
@@ -112,16 +111,6 @@ function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending,
       shouldFollowLogRef.current = logElement.scrollHeight - logElement.scrollTop - logElement.clientHeight < 48;
     }
   }, []);
-
-  const onFocusChatPanel = useCallback((): void => {
-    onFocusChange(true);
-  }, [onFocusChange]);
-
-  const onBlurChatPanel = useCallback((event: FocusEvent<HTMLElement>): void => {
-    if (!event.currentTarget.contains(event.relatedTarget)) {
-      onFocusChange(false);
-    }
-  }, [onFocusChange]);
 
   const onKeyDownChatInput = useCallback((event: React.KeyboardEvent<HTMLInputElement>): void => {
     if (event.key === "Escape") {
@@ -169,24 +158,35 @@ function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending,
   const characterCount = countGraphemes(draft);
   const isOnline = presence.status === "online";
   const canSend = isOnline && !isMessagePending && remainingSeconds === 0 && characterCount > 0 && characterCount <= 300;
-  const panelStyle = {
-    left: "calc(1rem + env(safe-area-inset-left))",
-    maxWidth: "calc(100% - 2rem - env(safe-area-inset-left) - env(safe-area-inset-right))",
-    bottom: `calc(1rem + env(safe-area-inset-bottom) + ${viewport.bottomInset}px)`,
-    maxHeight: Math.max(140, Math.min(360, viewport.height - 96)),
-  };
+  /**
+   * 하단 시트는 화면 아래 모서리에 붙여 입력칸을 엄지 범위에 둔다.
+   *
+   * `absolute` 기준은 safe-area 패딩을 가진 HUD 루트의 패딩 박스라 `0` 이 이미
+   * 안전 영역 안쪽이다. 키보드가 올라오면 그만큼 띄우되, 키보드가 safe-area 까지
+   * 덮으므로 그 몫을 빼서 자판 위에 딱 붙인다.
+   */
+  const panelStyle = isBottomSheet
+    ? {
+        left: 0,
+        right: 0,
+        bottom: `max(0px, calc(${viewport.bottomInset}px - env(safe-area-inset-bottom)))`,
+        maxHeight: Math.max(160, Math.min(420, viewport.height - 88)),
+      }
+    : {
+        left: "calc(1rem + env(safe-area-inset-left))",
+        maxWidth: "calc(100% - 2rem - env(safe-area-inset-left) - env(safe-area-inset-right))",
+        bottom: `calc(1rem + env(safe-area-inset-bottom) + ${viewport.bottomInset}px)`,
+        maxHeight: Math.max(140, Math.min(360, viewport.height - 96)),
+      };
+  const panelClassName = isBottomSheet
+    ? "pointer-events-auto absolute z-30 flex flex-col overflow-hidden rounded-t-2xl border-t border-white/15 bg-[#10151f]/95 text-white shadow-2xl backdrop-blur-xl"
+    : "pointer-events-auto absolute z-30 flex w-[340px] max-w-[calc(100%-2rem)] flex-col overflow-hidden rounded-2xl border border-white/15 bg-[#10151f]/95 text-white shadow-2xl backdrop-blur-xl";
   const sendLabel = isMessagePending ? "전송 중" : remainingSeconds > 0 ? `${remainingSeconds}초` : "보내기";
   const connectionLabel = isOnline ? `현재 공간 · ${presence.occupantCount}명` : "연결 대기 중";
   // endregion
 
   return (
-    <section
-      aria-label="공간 채팅"
-      className="pointer-events-auto absolute left-4 z-30 flex w-[340px] max-w-[calc(100%-2rem)] flex-col overflow-hidden rounded-2xl border border-white/15 bg-[#10151f]/95 text-white shadow-2xl backdrop-blur-xl"
-      style={panelStyle}
-      onFocus={onFocusChatPanel}
-      onBlur={onBlurChatPanel}
-    >
+    <section aria-label="공간 채팅" className={panelClassName} style={panelStyle}>
       <div className="flex items-center justify-between border-b border-white/10 px-4 py-2.5">
         <div>
           <h2 className="text-sm font-semibold">공간 채팅</h2>
