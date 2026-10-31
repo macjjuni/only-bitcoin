@@ -1,16 +1,17 @@
 "use client";
 
-import { ArrowLeft, CircleHelp, Maximize, Minimize } from "lucide-react";
+import { ArrowLeft, CircleHelp, Maximize, MessageCircle, Minimize } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, type ReactNode, useCallback, useMemo, useState } from "react";
-import type { SpacePresence } from "@/entities/space";
 import {
   type SpaceInputSource,
   useCoarsePointer,
   VirtualJoystick,
 } from "@/features/space-controls";
+import type { SpaceSession } from "@/features/space-session";
 import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
+import SpaceChatPanel from "./SpaceChatPanel";
 import SpaceControlGuide from "./SpaceControlGuide";
 import SpacePresenceBadge from "./SpacePresenceBadge";
 import { useFullscreen } from "./useFullscreen";
@@ -23,7 +24,8 @@ const ICON_STROKE_WIDTH = 2;
 
 interface SpaceHudProps {
   inputSource: SpaceInputSource;
-  presence: SpacePresence;
+  session: SpaceSession;
+  nickname: string;
 }
 
 /**
@@ -36,13 +38,16 @@ interface SpaceHudProps {
  * 노치와 둥근 모서리를 피하려고 `safe-area-inset` 만큼 안쪽으로 들인다.
  * 전체 화면 3D 페이지라 브라우저가 대신 비켜주지 않는다.
  */
-function SpaceHud({ inputSource, presence }: SpaceHudProps): ReactNode {
+function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode {
   // region [Hooks]
   const router = useTransitionRouter();
   const pathname = usePathname();
   const { isFullscreen, isFullscreenSupported, toggleFullscreen } = useFullscreen();
   const isCoarsePointer = useCoarsePointer();
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
+  const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isChatFocused, setIsChatFocused] = useState(false);
+  const [lastReadMessageID, setLastReadMessageID] = useState<string | null>(null);
   // endregion
 
   // region [Events]
@@ -59,9 +64,34 @@ function SpaceHud({ inputSource, presence }: SpaceHudProps): ReactNode {
   const onClickToggleGuide = useCallback((): void => {
     setIsGuideOpen((previousOpen) => !previousOpen);
   }, []);
+  const onChangeChatFocus = useCallback(
+    (isFocused: boolean): void => {
+      setIsChatFocused(isFocused);
+      if (isFocused) {
+        inputSource.joystick.forward = 0;
+        inputSource.joystick.strafe = 0;
+        inputSource.joystick.isRunning = false;
+      }
+    },
+    [inputSource],
+  );
+
+  const onClickCloseChat = useCallback((): void => {
+    setLastReadMessageID(session.messages.at(-1)?.id ?? null);
+    setIsChatOpen(false);
+    setIsChatFocused(false);
+    document.getElementById("space-chat-toggle")?.focus();
+  }, [session.messages]);
+
+  const onClickToggleChat = useCallback((): void => {
+    setLastReadMessageID(session.messages.at(-1)?.id ?? null);
+    setIsChatOpen((previous) => !previous);
+  }, [session.messages]);
   // endregion
 
   // region [Templates]
+  const lastReadIndex = session.messages.findIndex(({ id }) => id === lastReadMessageID);
+  const unreadCount = isChatOpen ? 0 : session.messages.length - lastReadIndex - 1;
   const hudActions = useMemo((): SpaceHudAction[] => {
     const actions: SpaceHudAction[] = [
       {
@@ -87,6 +117,15 @@ function SpaceHud({ inputSource, presence }: SpaceHudProps): ReactNode {
     }
 
     actions.push({
+      id: "space-chat-toggle",
+      label: isChatOpen ? "공간 채팅 닫기" : "공간 채팅 열기",
+      icon: <MessageCircle size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+      isActive: isChatOpen,
+      badgeCount: unreadCount,
+      onClick: onClickToggleChat,
+    });
+
+    actions.push({
       id: "guide",
       label: "조작 안내",
       icon: <CircleHelp size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
@@ -96,6 +135,9 @@ function SpaceHud({ inputSource, presence }: SpaceHudProps): ReactNode {
 
     return actions;
   }, [
+    isChatOpen,
+    unreadCount,
+    onClickToggleChat,
     isFullscreen,
     isFullscreenSupported,
     isGuideOpen,
@@ -111,11 +153,12 @@ function SpaceHud({ inputSource, presence }: SpaceHudProps): ReactNode {
   ) : null;
 
   /** 조이스틱은 손가락 기기에만 띄운다. 마우스 환경에는 WASD 가 있다. */
-  const JoystickTemplate = isCoarsePointer ? (
-    <div className="pointer-events-auto">
-      <VirtualJoystick inputSource={inputSource} />
-    </div>
-  ) : null;
+  const JoystickTemplate =
+    isCoarsePointer && !isChatFocused ? (
+      <div className="pointer-events-auto">
+        <VirtualJoystick inputSource={inputSource} />
+      </div>
+    ) : null;
   // endregion
 
   // 경로가 바뀌는 동안에도 HUD 가 남지 않도록 현재 경로를 키로 쓴다.
@@ -130,11 +173,40 @@ function SpaceHud({ inputSource, presence }: SpaceHudProps): ReactNode {
         paddingLeft: "env(safe-area-inset-left)",
       }}
     >
-      <div className="absolute left-4 top-4">
-        <SpacePresenceBadge presence={presence} />
+      <div
+        className="absolute left-4 top-4"
+        style={{
+          left: "calc(1rem + env(safe-area-inset-left))",
+          top: "calc(1rem + env(safe-area-inset-top))",
+        }}
+      >
+        <SpacePresenceBadge presence={session.presence} />
+        {session.error && !isChatOpen && (
+          <div
+            role="status"
+            className="pointer-events-auto mt-2 max-w-[min(280px,calc(100vw-6rem))] rounded-xl border border-white/15 bg-[#10151f]/95 px-3 py-2 text-xs leading-relaxed text-white/75 shadow-lg backdrop-blur-xl"
+          >
+            <p>{session.error}</p>
+            {session.presence.status === "offline" && session.isConnectionConfigured && (
+              <button
+                type="button"
+                onClick={session.retry}
+                className="mt-1.5 rounded py-1 text-bitcoin focus-visible:outline focus-visible:outline-2 focus-visible:outline-bitcoin"
+              >
+                다시 접속
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
-      <div className="absolute right-4 top-4 flex flex-col items-end">
+      <div
+        className="absolute right-4 top-4 flex flex-col items-end"
+        style={{
+          right: "calc(1rem + env(safe-area-inset-right))",
+          top: "calc(1rem + env(safe-area-inset-top))",
+        }}
+      >
         <div className="pointer-events-auto">
           <SpaceActionBar actions={hudActions} />
         </div>
@@ -144,6 +216,20 @@ function SpaceHud({ inputSource, presence }: SpaceHudProps): ReactNode {
       </div>
 
       {JoystickTemplate}
+
+      {isChatOpen && (
+        <SpaceChatPanel
+          messages={session.messages}
+          presence={session.presence}
+          nickname={nickname}
+          error={session.error}
+          isMessagePending={session.isMessagePending}
+          sendMessage={session.sendMessage}
+          onClose={onClickCloseChat}
+          onRetry={session.retry}
+          onFocusChange={onChangeChatFocus}
+        />
+      )}
     </div>
   );
 }

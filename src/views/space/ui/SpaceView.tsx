@@ -1,8 +1,8 @@
 "use client";
 
 import dynamic from "next/dynamic";
-import { memo, type ReactNode, useEffect, useState } from "react";
-import { loadOrCreateChatIdentity } from "@/features/chat-session";
+import { memo, type ReactNode, useCallback, useEffect, useState } from "react";
+import { type ChatIdentity, loadOrCreateChatIdentity } from "@/features/chat-session";
 import { resolveSpaceAvatarCount } from "../lib/avatarCapacity";
 
 /**
@@ -41,26 +41,30 @@ const resolveDummyCountFromLocation = (): number => {
 
 function SpaceView(): ReactNode {
   // region [Hooks]
-  const [clientKey, setClientKey] = useState<string>("");
+  const [identity, setIdentity] = useState<ChatIdentity | null>(null);
   const [dummyCount, setDummyCount] = useState<number>(0);
   // endregion
 
-  // region [Life Cycles]
-  useEffect(() => {
+  // region [Privates]
+  const initializeSpace = useCallback((): void => {
     // localStorage 접근이라 클라이언트에서만 읽는다. 채팅과 같은 키를 써서
     // 같은 사용자가 두 기능에서 같은 정체성을 갖게 한다.
-    setClientKey(loadOrCreateChatIdentity().clientKey);
+    setIdentity(loadOrCreateChatIdentity());
     setDummyCount(resolveDummyCountFromLocation());
   }, []);
   // endregion
 
+  // region [Life Cycles]
+  useEffect(initializeSpace, [initializeSpace]);
+  // endregion
+
   // region [Templates]
-  if (!clientKey) {
+  if (!identity) {
     return <div className="h-full w-full bg-[#06080e]" />;
   }
   // endregion
 
-  return <SpaceCanvas clientKey={clientKey} dummyCount={dummyCount} />;
+  return <SpaceCanvas identity={identity} dummyCount={dummyCount} />;
 }
 
 const MemoizedSpaceView = memo(SpaceView);

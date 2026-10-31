@@ -5,6 +5,7 @@ export type ChatReactionKey = (typeof CHAT_REACTION_KEYS)[number];
 
 export interface ChatWorkerEnv {
   CHAT_ROOM: DurableObjectNamespace;
+  SPACE_ROOM: DurableObjectNamespace;
   CHAT_UPGRADE_RATE_LIMITER: RateLimit;
   CHAT_ALLOWED_ORIGINS: string;
   ACTOR_SECRET: string;

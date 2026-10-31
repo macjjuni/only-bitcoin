@@ -1,14 +1,14 @@
 # BTC 스페이스 3D 규격서
 
-> 버전: v0.24
+> 버전: v0.25
 > 기준일: 2026-10-31
 > 제공 방식: `/space` 라우트의 전체 화면 3D 공간
-> 상태: 1단계 구현·핀치 회귀 보완 완료, 성능 실측 대기(실행 환경 차단)
-> 수용 규모: 2단계 동시 접속 50명 목표
+> 상태: 2단계 위치 동기화·공간 채팅 구현, 로컬 검증 완료·Cloudflare 배포 및 실기기 실측 대기
+> 수용 규모: 방 하나당 동시 접속 50명
 
 Three.js 기반 3D 공간에 비트코인 실시간 가격 전광판을 세우고, 사용자가 3인칭 캐릭터로 돌아다니며 다른 접속자와 대화하는 기능이다. 전광판 좌우에는 라이트닝 결제로 판매하는 광고판을 둔다.
 
-구현은 3단계로 나눈다. **1단계는 싱글 씬**(공간 접속·위치 동기화 없음)이며 이 문서의 구현 기준은 1단계다. 다만 월드 크기·렌더 구조·성능 예산은 모두 **동시 접속 50명**을 전제로 잡는다. 1단계에서 단일 플레이어용으로 짜놓고 2단계에서 50명을 얹으면 아바타 렌더 경로를 전부 다시 써야 하기 때문이다. 2단계 멀티플레이와 3단계 라이트닝 광고는 §11, §12에 사전 설계만 둔다. 실시간 가격 소켓과 차트 조회는 1단계에서도 기존 데이터 계층을 이용한다.
+구현은 3단계로 나눈다. 1단계에서 싱글 씬·전광판·50명 렌더 구조를 만들었고, 2단계에서는 `SpaceRoom` 한 연결에 위치 동기화와 공간 채팅을 함께 구현했다(§11). 실시간 가격 소켓과 차트는 기존 데이터 계층을 계속 이용한다. 3단계 라이트닝 광고는 §12의 사전 설계 상태다. 2단계 코드는 서버 배포 전까지 운영 접속에 사용할 수 없으며, 실제 다중 브라우저·모바일 검증은 별도로 남는다.
 
 이 문서에서 좌표 1 유닛은 1 m, 각도는 도(°), 시간은 초(s)를 뜻한다.
 
@@ -22,7 +22,7 @@ Three.js 기반 3D 공간에 비트코인 실시간 가격 전광판을 세우�
 | 접근 조건 | 모든 브라우저 | 채팅과 달리 PWA standalone 게이트를 두지 않음 |
 | 라우트 | `/space` | 헤더·하단 내비 숨김, 전체 화면 |
 | 번들 | 라우트 단위 `dynamic` + `ssr: false` | 다른 페이지 번들에 three 를 넣지 않음 |
-| **동시 접속 상한 (2단계)** | **50명** | 초과 접속은 `full` 로 거절하는 설계. 1단계는 접속 서버 없음 |
+| **동시 접속 상한** | **50명** | 초과 입장에 `full` 응답 후 연결 종료, 대기열·자동 방 분할 없음 |
 | 월드 | 바닥 64 × 48, 가용 52 × 32 | 50명 기준 33.3 m²/인 |
 | 스폰 | 중심 `(0, 0, 0)` 반지름 5~14 산포 | `clientKey` 해시로 결정적 분산 |
 | 아바타 간 충돌 | 없음 (겹침 허용) | 경계 클램프만 적용 |
@@ -31,10 +31,10 @@ Three.js 기반 3D 공간에 비트코인 실시간 가격 전광판을 세우�
 | 가격 소스 | `useBitcoinStore` | 전역 `Initializer` 의 거래소 소켓을 그대로 구독 |
 | 아바타 렌더 | `InstancedMesh` 50 슬롯 | 50명 전체가 드로우 콜 3개 |
 | 명찰 표시 상한 | 25 m 이내 & 가장 가까운 16명 | DOM 노드 폭발 방지 |
-| 말풍선 표시 상한 (2단계) | 동시 12개, TTL 5 s | 가장 가까운 순. 현재는 상수만 정의 |
+| 말풍선 표시 상한 | 동시 12개, TTL 5 s | 25 m 이내 가까운 순, 좌석당 최신 발화만 표시 |
 | 성능 목표 | 데스크톱 60 fps, 중급 모바일 30 fps 이상 | 아바타 50명 상태 기준 |
-| 서버 틱 (2단계) | 10 Hz, 전원 공유 버퍼 브로드캐스트 | §11 |
-| 멀티플레이 | 1단계 범위 밖 | 2단계에서 `SpaceRoom` Durable Object 추가 |
+| 위치 배치 | 이동 수신 시 최대 10 Hz, 전원 공유 버퍼 | 유휴 상태의 상시 틱 없음(§11) |
+| 멀티플레이 | `SpaceRoom` Durable Object | 위치·입퇴장·공간 채팅, 배포 대기 |
 
 전광판 가격 표시는 `drei` 의 `<Text>`(troika SDF) 가 아니라 `CanvasTexture` 로 그린다. 숫자용 폰트 아틀라스를 추가로 받지 않아도 되고, LED 도트 매트릭스 질감을 셰이더 없이 낼 수 있다. 한글이 들어가는 닉네임 명찰은 `drei` 의 `<Html>` 로 DOM 을 띄운다. 한글 글리프를 SDF 아틀라스로 만들면 용량이 수 MB 가 되므로 3D 텍스트로 만들지 않는다. 대신 DOM 명찰은 개수가 곧 레이아웃 비용이므로 위 표의 표시 상한을 둔다.
 
@@ -49,28 +49,28 @@ Next.js (/space)
   └─ SpaceView ──dynamic, ssr: false──> SpaceCanvas
        ├─ SpaceScene ─ Ground · SceneLighting · PlayerAvatar
        │                  ├─ RemoteAvatars (InstancedMesh, 최대 50)
-       │                  ├─ Nameplates (DOM, 거리·개수 컬링)
+       │                  ├─ Nameplates · ChatBubbles (DOM, 거리·개수 컬링)
        │                  ├─ PriceBillboard ──> useBitcoinStore (전역 거래소 소켓)
        │                  ├─ TextAdBanner ──> 1단계: 빈 텍스트 슬롯
        │                  └─ AdBoard × 2 ────> 1단계: 정적 플레이스홀더
-       └─ SpaceHud (DOM 오버레이) ─ VirtualJoystick · 조작 안내 · 접속자 수
+       └─ SpaceHud (DOM 오버레이) ─ VirtualJoystick · 조작 안내 · 접속자 수 · SpaceChatPanel
 
-[2단계 추가분]
+[공간 세션]
   SpaceCanvas ──WebSocket──> Cloudflare Worker(/v1/space/ws)
-                                 └─> SpaceRoom Durable Object (메모리 전용, 영속 없음)
+                                 └─> SpaceRoom Durable Object (SQLite 등록, 좌석·위치는 socket attachment)
 ```
 
 | 구성 | 역할 |
 | --- | --- |
 | Vercel | `/space` 페이지, 3D 자산 정적 서빙 |
 | `useBitcoinStore` | 전광판 가격 원천. 신규 API·소켓을 추가하지 않음 |
-| Cloudflare Worker | 2단계에서 `/v1/space/ws` 라우트만 추가. Origin 검사·IP 가드 유틸 재사용 |
-| `SpaceRoom` DO | 2단계. 좌석 50개 관리와 위치 중계 전용. **SQLite 영속 없음** |
+| Cloudflare Worker | `/v1/space/ws`. 기존 Origin 검사·IP 가드·경로별 접속 제한 재사용 |
+| `SpaceRoom` DO | 좌석 50개·위치·휘발성 채팅 중계. SQLite-backed 등록, 위치/본문 SQL 쓰기 없음 |
 | `ChatRoom` DO | 기존 채팅방. 공간 채팅과 **분리** 유지 |
 
 가격은 전역 `Initializer` 가 루트 레이아웃에서 이미 Upbit·Bithumb·Binance·Coinbase 소켓을 띄워 `bitcoinStore` 에 넣고 있다. 전광판은 그 스토어를 구독만 하므로 `/space` 전용 데이터 레이어를 만들지 않는다.
 
-위치 동기화는 기존 `ChatRoom` DO 에 넣지 않는다. `ChatRoom` 은 메시지마다 SQLite 쓰기와 발화 레이트리밋을 수행하는 영속 중심 설계이며, 현재 연결 상한은 500개(`MAXIMUM_ROOM_CONNECTION_COUNT`)다. 위치 프레임은 50명 × 10 Hz 의 휘발성 데이터이므로 같은 DO 에 섞지 않는다. 2단계에서는 같은 Worker 안에 별도 DO 클래스를 추가하고 Origin 검사·CORS·IP 가드를 재사용하도록 경로를 분리한다. 현재 Worker에는 `ChatRoom` 바인딩과 `/v1/chat/*` 라우트만 있다.
+위치 동기화는 기존 `ChatRoom` DO 에 넣지 않는다. `ChatRoom` 은 메시지마다 SQLite 쓰기와 발화 레이트리밋을 수행하는 영속 중심 설계이며, 현재 연결 상한은 500개(`MAXIMUM_ROOM_CONNECTION_COUNT`)다. 위치 프레임은 50명 × 10 Hz 의 휘발성 데이터이므로 같은 DO 에 섞지 않는다. 같은 Worker 안에서 `SPACE_ROOM` 바인딩과 `/v1/space/ws`를 추가하고 Origin 검사·CORS·IP 가드를 재사용했다. 기존 `/v1/chat/*`의 저장·인증 경로는 유지한다.
 
 ## 3. 파일 구조
 
@@ -83,6 +83,9 @@ src/entities/space/
   model/spaceWorld.test.ts
   model/avatar.ts            # 아바타 타입·색상 팔레트
   model/playerState.ts       # 플레이어 상태 타입(위치·회전·속도)
+  model/spaceProtocol.ts     # JSON 제어 프레임·런타임 검증
+  lib/spaceSnapshot.ts       # 8B 헤더 + 7B/인 바이너리 코덱
+  lib/remoteInterpolation.ts # 희소 위치 배치·100ms 지연 보간
   lib/spawnPoint.ts          # clientKey 해시 → 결정적 스폰 좌표
   lib/spawnPoint.test.ts
 
@@ -98,11 +101,20 @@ src/features/space-controls/
   model/pointerGesture.test.ts
   model/pointerGestureEvents.ts # 실제 포인터·휠·blur 이벤트를 입력 객체에 연결
   model/pointerGestureEvents.test.ts
-  model/useKeyboardInput.ts  # 키 상태 → 입력 벡터
+  model/keyboardInputEvents.ts # 키 상태 수집·입력창 격리·포커스/탭 전환 정리
+  model/useKeyboardInput.ts  # 키보드 이벤트 수명 연결
   model/usePointerDrag.ts    # 캔버스 포인터·휠 이벤트 연결
   model/useCoarsePointer.ts
   model/usePrefersReducedMotion.ts
   ui/VirtualJoystick.tsx     # DOM 조이스틱(캔버스 밖)
+
+src/features/space-session/
+  index.ts
+  api/spaceSessionController.ts # 소켓·재접속·전송 확인·로스터·메시지
+  api/spaceSessionController.test.ts
+  model/useSpaceSession.ts   # React 구독·브라우저 수명/가시성 연결
+
+src/shared/config/space.ts   # 기존 채팅 호스트 → /v1/space/ws
 
 src/views/space/
   index.ts
@@ -117,15 +129,18 @@ src/views/space/
   ui/scene/PlayerAvatar.tsx
   ui/scene/RemoteAvatars.tsx # InstancedMesh 50 슬롯
   ui/scene/Nameplates.tsx    # <Html> 명찰, 거리·개수 컬링
+  ui/scene/ChatBubbles.tsx    # <Html> 말풍선, 수신 시각 TTL·거리 제한
   ui/scene/PriceBillboard.tsx
   ui/scene/BillboardChartPulse.tsx # 차트 마지막 점의 선 색상 펄스
   ui/scene/AdBoard.tsx
   ui/scene/TextAdBanner.tsx
-  ui/hud/SpaceHud.tsx        # HUD 조립
+  ui/hud/SpaceHud.tsx        # HUD 조립·채팅 토글·연결 오류/재시도
+  ui/hud/SpaceChatPanel.tsx   # 100개 대화 로그·전송·모바일 키보드 대응
   ui/hud/SpacePresenceBadge.tsx
   ui/hud/SpaceActionBar.tsx  # SpaceHudAction 배열을 받아 버튼 묶음 렌더
   ui/hud/SpaceControlGuide.tsx
   ui/hud/useFullscreen.ts
+  lib/chatBubbles.ts         # 좌석별 최신 발화·5초 TTL·거리/개수 선별
   lib/presenceLabel.ts       # 순수 함수: 접속 상태 → 표시 문구
   lib/presenceLabel.test.ts
   lib/billboardTexture.ts    # CanvasTexture 드로잉(순수 로직)
@@ -218,7 +233,7 @@ src/app/space/page.tsx       # SpaceView 렌더
 
 ## 5. 이동·카메라 규격
 
-이동은 고정 타임스텝으로 적분한다. 2단계에서 원격 아바타 보간을 붙일 때 클라이언트마다 적분 결과가 갈리지 않게 하려는 목적이다.
+이동은 고정 타임스텝으로 적분한다. 클라이언트마다 적분 결과가 갈리지 않도록 하고 원격 아바타에는 별도의 수신 보간을 적용한다.
 
 | 항목 | 값 |
 | --- | --- |
@@ -549,7 +564,7 @@ interface AdSlot {
 
 ### 9.1 접속 표시
 
-숫자만 띄우면 네트워크가 없는 1단계에서도 접속자가 있는 것처럼 읽힌다. 상태를 함께 들고 다니며 문구 자체를 바꾼다.
+숫자만 띄우면 서버 미설정·접속 실패 중에도 접속자가 있는 것처럼 읽힌다. 상태를 함께 들고 다니며 문구 자체를 바꾼다.
 
 | 상태 | 문구 | 점 |
 | --- | --- | --- |
@@ -557,7 +572,7 @@ interface AdSlot {
 | `connecting` | 연결 중 | 오렌지, 깜빡임 |
 | `offline` | 오프라인 | 회색 |
 
-1단계는 항상 `offline` 이다. 2단계에서 `SpaceRoom` 연결 상태를 그대로 올린다.
+`SpaceRoom`의 입장 완료·연결·단절 상태를 표시한다. 서버 미설정과 개발 더미 모드도 `offline`이다. 채팅창이 닫혀 있어도 오류 사유와 수동 재접속 버튼을 표시한다.
 
 ### 9.2 버튼 묶음
 
@@ -581,9 +596,10 @@ interface SpaceHudAction {
 | --- | --- | --- |
 | 뒤로 가기 | `router.back()` | 히스토리가 없으면 `/orange` 로 보냄 |
 | 전체 화면 | Fullscreen API 토글 | 미지원 환경(iOS 사파리)에서는 버튼 자체를 숨김 |
+| 공간 채팅 | 대화창 토글 | 닫힌 동안 안 읽은 메시지 배지 |
 | 조작 안내 | 안내 패널 토글 | 데스크톱·모바일 조작을 함께 적음 |
 
-2단계 이후 채팅·설정·소리 버튼이 여기에 붙는다.
+설정·소리 버튼은 후속 확장 시 같은 배열에 추가한다.
 
 ### 9.3 접근성·폴백
 
@@ -593,7 +609,7 @@ interface SpaceHudAction {
 - yaw 가 커지면 시야는 **왼쪽**으로 돈다(전방 `(-sin θ, -cos θ)` 가 `-Z` 에서 `-X` 로 간다). 따라서 왼쪽 키가 양수다. 이 부호는 `followCamera.test.ts` 에서 고정한다.
 - 아이콘 버튼은 모두 `aria-label` 을 가지고, 토글 버튼은 `aria-pressed` 를 함께 준다.
 - `prefers-reduced-motion` 은 §5 대로 처리한다.
-- 입장 상한 초과 시 "공간이 가득 찼습니다" 안내와 재시도 버튼을 보여준다(2단계).
+- 입장 상한 초과 시 "공간이 가득 찼습니다" 안내와 재시도 버튼을 보여준다.
 
 ## 10. 1단계 작업 목록 — 진행 현황
 
@@ -631,62 +647,72 @@ interface SpaceHudAction {
 
 작업 `1-10`~`1-13` 은 1단계에 원격 플레이어가 없어도 수행한다. 50명 렌더 비용을 네트워크 레이어보다 먼저 확정하려는 목적이며, `1-11` 의 더미 하니스가 2단계 내내 회귀 측정 수단으로 남는다. 하니스 입력과 `InstancedMesh` 용량은 `SPACE_MAX_OCCUPANTS`(50)에 맞춘다. 운영 환경에서는 더미를 생성하지 않는다.
 
-## 11. 2단계 사전 설계 — 멀티플레이 (50명)
+## 11. 2단계 구현 — 위치 동기화와 공간 채팅
 
-1단계 구현이 이 설계를 막지 않도록 하는 목적의 초안이다. 확정값이 아니다. 현재 `SpaceRoom`, `/v1/space/ws`, 공간 접속 훅·프로토콜은 구현하지 않았으며, 원격 아바타 렌더 골격에 개발 더미만 연결돼 있다.
+`workers/chat/src/SpaceRoom.ts`와 `features/space-session`을 연결했다. 기존 전체 채팅의 `ChatRoom`과는 별도 방이며, `/space`는 일반 브라우저와 PWA 모두 이용한다. `NEXT_PUBLIC_CHAT_WS_URL`의 호스트를 그대로 쓰고 경로만 `/v1/space/ws`로 바꾸므로 새 프런트 환경변수는 필요 없다. Worker 배포가 선행돼야 운영 연결이 된다.
 
-### 11.1 전송 예산
+### 11.1 전송·렌더 구조
 
-위치 프레임을 양자화한다. 슬롯 1 B + `x` int16 2 B + `z` int16 2 B + yaw uint8 1 B + 플래그 1 B = **7 B/인**. int16 에 0.01 m 정밀도면 ±327 m 를 담으므로 월드 전체를 덮는다.
-
-| 항목 | 값 |
+| 항목 | 구현 |
 | --- | --- |
-| 서버 틱 | 10 Hz |
-| 틱당 페이로드 | 50명 × 7 B + 헤더 8 B = 358 B |
-| 클라이언트당 하향 | 약 3.5 KB/s |
-| 50명 전체 하향 | 약 175 KB/s |
-| 상향 총합 | 50명 × 10 Hz × 10 B ≈ 4.9 KB/s |
-| 틱당 직렬화 | **1회** (전원 공유 버퍼) |
+| 위치 상향 | JSON `move`, 좌표·회전이 바뀔 때만 최대 10 Hz |
+| 서버 전송 | 실제 이동 수신 후 100 ms 타이머 하나로 변경 좌석만 모아 전원에게 전송 |
+| 바이너리 헤더 | 버전 uint8 + 종류 uint8 + 인원 uint16 LE + 서버 시각 uint32 LE = 8 B |
+| 플레이어 레코드 | 좌석 uint8 + x/z int16 LE(0.01 m) + yaw uint8 + 달리기 플래그 uint8 = 7 B |
+| 최대 위치 페이로드 | 50명 동시 변경 시 358 B/회, 최대 10 Hz 기준 약 3.5 KB/s/수신자(프레임 헤더 제외) |
+| 직렬화 | 전송 배치당 1회, 같은 버퍼를 전원에게 공유 |
+| 원격 렌더 | 수신 시각 기준 100 ms 지연 보간, 최단 회전 경로, 외삽 없음 |
+| 상태 갱신 | 좌표는 가변 객체에서 처리. 입퇴장·메시지·접속 상태만 React 구독에 반영 |
 
-50명 규모에서는 **거리 기반 관심영역(AOI) 컬링을 넣지 않는다.** 전원을 한 버퍼에 담아도 클라이언트당 3.5 KB/s 로 충분히 작고, 그 대가로 틱당 직렬화가 접속자 수만큼(최대 50회)에서 1회로 줄어 DO CPU 가 크게 절약된다. 컬링을 넣으면 클라이언트마다 다른 버퍼를 만들어야 해 비용이 역전된다. 수백 명 규모로 올릴 때 AOI 와 샤딩을 함께 도입한다.
+거리 기반 전송 AOI는 두지 않는다. 렌더 시에는 기존의 50 슬롯 인스턴싱과 명찰·말풍선 거리/개수 제한을 적용한다. 희소 스냅샷에서 빠진 좌석은 이전 위치를 유지하며 `leave`만 퇴장으로 처리한다. 순서가 뒤집힌 스냅샷을 버리고 32비트 시각의 순환을 처리한다. 개발용 `?dummies=N` 측정 중에는 실제 공간 연결을 열지 않는다.
 
-렌더 측 컬링(명찰·말풍선)은 §8 대로 유지한다. 전송은 전원, 표시는 선별이다.
+### 11.2 서버와 비용 관리
 
-### 11.2 서버 구성
+- Worker의 기존 Origin 검사·IP 프리픽스 해시·업그레이드 rate limiter를 재사용한다. limiter key에 경로를 포함해 전체 채팅과 공간의 접속 횟수를 구분한다.
+- `SPACE_ROOM` 바인딩과 `v2` 마이그레이션을 추가하고 **SQLite-backed DO**로 등록한다. SQLite 등록은 저장 방식의 선택이며, 위치나 채팅 본문을 SQL에 쓰지 않는다. Free 플랜도 SQLite-backed DO를 지원한다([Cloudflare 요금 문서](https://developers.cloudflare.com/durable-objects/platform/pricing/)).
+- 50석, 입장 대기 연결 최대 10개, IP 프리픽스당 최대 20연결. 입장 프레임은 10초 내에 보내야 한다. 서버가 좌석·색·스폰을 결정한다.
+- 같은 사용자 키로 다시 입장하면 기존 좌석과 위치를 새 소켓으로 넘기고 이전 탭을 종료한다. 이전 소켓의 지연 close가 새 좌석을 제거하지 않도록 소유권을 확인한다. 하이버네이션 이후 close에서 종료 메타데이터까지 사라진 경우에는 살아 있는 로스터를 다시 보내 유령 아바타를 제거한다.
+- 클라이언트는 15초마다 raw `ping`을 보내고 런타임 auto-response가 `pong`으로 답한다. 이 응답은 DO를 깨우지 않는다. 클라이언트는 45초 무응답 시 재연결하고, 서버는 실제 이벤트가 있을 때 auto-response 시각까지 확인해 60초 이상 비활성 연결을 정리한다.
+- **상시 10 Hz 루프나 주기적인 SQL 쓰기가 없다.** 이동이 없으면 배치 타이머도 없으므로, 사람이 접속해 있어도 유휴 상태에서는 하이버네이션 조건을 만족한다. 런타임이 객체를 다시 생성할 때 WebSocket attachment에서 좌석·위치를 복원한다([WebSocket 하이버네이션](https://developers.cloudflare.com/durable-objects/best-practices/websockets/), [수명주기와 타이머 조건](https://developers.cloudflare.com/durable-objects/concepts/durable-object-lifecycle/)).
+- 프레임 크기·초당 입력 수·유한 좌표·월드 경계·이동 거리 예산을 서버에서 검증한다. 잘못된 이동에는 서버 좌표를 다시 보내 클라이언트를 보정한다.
 
-- `workers/chat/src/SpaceRoom.ts` 추가, `wrangler.jsonc` 에 `SPACE_ROOM` 바인딩과 마이그레이션 태그 추가. **SQLite 클래스로 등록하지 않는다**(위치는 휘발성).
-- Worker 라우트 `/v1/space/ws` 추가. Origin 검사·IP 가드는 기존 `handleWebSocketUpgrade` 경로를 재사용한다.
-- 좌석 50개를 인덱스 배열로 관리한다. 입장 시 빈 인덱스를 배정하고 퇴장 시 반납한다. 이 인덱스가 곧 클라이언트의 `InstancedMesh` 슬롯이다.
-- 좌석이 없으면 `{ t: "full" }` 을 보내고 연결을 닫는다.
-- 하트비트 20 초 무응답이면 좌석을 회수한다. 모바일 백그라운드 전환으로 생기는 유령 좌석이 50석을 잠식하는 것을 막는다. 좌석이 50개뿐이라 100석 설계보다 유령 좌석의 체감 영향이 크므로 회수 주기를 늘리지 않는다.
-- 접속자가 0 이면 틱을 멈춘다. 10 Hz 틱이 돌아가는 동안 DO 는 하이버네이트되지 않으므로 빈 방에서 비용이 새지 않게 한다.
-- 기존 `CHAT_UPGRADE_RATE_LIMITER` 는 IP 프리픽스당 60초 30회다. 같은 IPv6 `/64` 뒤에서 30명 넘게 입장하면 429 가 된다. 좌석 50개 중 30개가 한 프리픽스에서 나올 상황은 드물지만, `/space` 전용 네임스페이스로 분리할지는 2단계에서 결정한다.
+위 구조는 불필요한 요청과 실행 시간을 줄이는 구현이며 무료 운영을 보장하지 않는다. 실제 요금은 전체 계정 사용량·활동 인원·이동 빈도·접속 시간에 따라 달라진다.
 
-### 11.3 프레임 초안
+### 11.3 실제 프로토콜
 
-제어 프레임은 JSON, 위치 프레임은 바이너리(`ArrayBuffer`)로 보낸다. 기존 채팅 프로토콜이 바이너리를 거부하는 것과 의도적으로 다르다. 프레임 상한은 2 KiB 로 둔다.
+공유 타입·파서는 `entities/space/model/spaceProtocol.ts`, 바이너리 코덱은 `lib/spaceSnapshot.ts`에 둔다. 버전은 `v: 1`이다. 클라이언트는 텍스트 JSON을 보내고 서버 위치 배치만 바이너리다.
 
-| 방향 | 형식 | 타입 | 내용 |
-| --- | --- | --- | --- |
-| C→S | JSON | `enter` | `clientKey`, `nickname`, 아바타 색 |
-| C→S | 바이너리 | `move` | `x`, `z`, yaw (10 Hz 상한, 초과 프레임은 서버에서 드랍) |
-| C→S | JSON | `emote` | 고정 목록 이모트 |
-| C→S | JSON | `say` | 공간 말풍선 |
-| S→C | JSON | `seat` | 배정된 좌석 인덱스, 월드 버전 |
-| S→C | JSON | `full` | 좌석 없음 |
-| S→C | JSON | `roster` | 좌석별 닉네임·색 (입장 시 1회, 이후 변경분만) |
-| S→C | 바이너리 | `delta` | 틱당 전원 위치 버퍼 |
-| S→C | JSON | `leave` | 좌석 반납 |
+| 방향 | 타입 | 내용 |
+| --- | --- | --- |
+| C→S | `join` | 기존 채팅과 공유하는 `clientKey`, `nickname` |
+| C→S | `move` | `x`, `z`, `yaw`, `isRunning` |
+| C→S | `say` | UUID `rid`, `body` |
+| S→C | `welcome` | 자기 `self`와 자신을 제외한 `peers` |
+| S→C | `peer` | 신규 입장·메타데이터·자기 위치 보정 |
+| S→C | 바이너리 배치 | 변경된 좌석들의 좌표와 회전 |
+| S→C | `leave` | 반납 좌석 |
+| S→C | `say` | 메시지 ID·rid·좌석·닉네임·본문·서버 시각 |
+| S→C | `error` / `full` | 오류 또는 정원 초과 |
 
-닉네임·색 같은 저빈도 메타데이터는 `roster` 로 분리해 10 Hz 위치 버퍼에서 빼낸다. 50명 × 닉네임을 매 틱 보내면 358 B 짜리 틱이 수 KB 로 불어난다.
+소켓 세대 번호로 끊긴 연결의 늦은 이벤트를 무시한다. 연결 실패에는 지터가 있는 지수 백오프(최대 30초)를 적용한다. 방이 가득 차거나 다른 탭으로 교체된 경우 자동 재시도를 중단하고 HUD에서 수동 재연결한다. 브라우저가 숨겨지면 위치 전송과 재시도는 쉬며, 복귀 시 최신 상태를 전송하거나 끊긴 연결을 복구한다.
 
-클라이언트는 원격 아바타를 두 스냅샷 사이 100 ms 보간으로 그린다. 외삽은 하지 않는다.
+### 11.4 채팅 UI와 말풍선
 
-### 11.4 공간 채팅
+- HUD의 채팅 버튼으로 대화창을 열고 닫으며, 닫힌 동안 도착한 메시지는 숫자 배지로 표시한다. 이 페이지에서 받은 최근 100개만 메모리에 유지하고 과거 메시지를 서버에서 조회하지 않는다.
+- 닉네임과 본문은 기존 `textValidation.ts`로 정규화한다. 본문은 최대 300 grapheme, 3초에 한 번, 링크·연락처 제한과 선정성 필터를 적용한다. 별도 Turnstile 인증이나 기존 전체 채팅의 관리자 차단 상태는 공간에 연동하지 않았다.
+- 서버가 자기 발화를 echo해야 전송 성공으로 처리해 입력을 비운다. 오류·타임아웃에는 입력을 남긴다. 서버는 최근 32개의 요청 ID와 본문 해시를 attachment에 두고 같은 요청 ID의 중복 방송을 막는다. 이 보장은 하이버네이션·기존 연결 교체까지 유지되며, 연결이 완전히 종료된 뒤의 새 세션에는 이어지지 않는다. 프런트는 발화를 자동 재전송하지 않는다. 채팅 본문은 attachment에 저장하지 않는다.
+- 캐릭터 위 말풍선은 로컬 수신 시각부터 5초, 25 m 이내 가까운 12명까지 표시한다. 한 좌석은 최신 발화 하나만 표시한다. DOM 말풍선에는 입력 이벤트가 잡히지 않으며 본문은 일반 텍스트로 렌더한다.
+- 입력창·버튼·키보드로 스크롤 중인 채팅 로그에서는 WASD·방향키·Q/E를 이동으로 처리하지 않는다. 입력 포커스·창 이탈·탭 전환 시 눌린 키를 비우고, 채팅 포커스 중 모바일 조이스틱을 숨겨 잔류 이동을 막는다. 한글 조합 중 Enter는 전송하지 않는다.
+- 모바일 키보드가 뜨면 visual viewport에 맞춰 대화창 높이와 하단 위치를 조정한다. 스크롤로 예전 대화를 읽는 중에는 새 메시지로 강제 이동하지 않는다.
 
-- `ChatRoom` 과 별개로 `SpaceRoom` 에서 휘발성 말풍선으로 처리한다. 영속 로그가 필요해지면 그때 재검토한다.
-- 50명이 동시에 말하면 말풍선이 화면을 덮으므로 §8 의 동시 12개·TTL 5 s 상한을 적용한다. 서버는 발화를 전원에게 보내고, 어떤 12개를 띄울지는 클라이언트가 거리순으로 고른다.
-- 선정성 필터는 기존 `textValidation.ts` 를 재사용한다.
+### 11.5 로컬 실행·배포와 남은 검증
+
+로컬에서는 배포 없이 테스트할 수 있다. `pnpm chat:dev`가 `workers/chat/.dev.vars`의 빠진 개발 키 네 개와 localhost/127.0.0.1 Origin을 준비한 뒤 8787 포트에서 Worker를 실행한다. 기존 키는 덮어쓰지 않으며 파일은 Git에서 제외한다. 프런트의 `NEXT_PUBLIC_CHAT_API_URL=http://localhost:8787`, `NEXT_PUBLIC_CHAT_WS_URL=ws://localhost:8787/v1/chat/ws`를 적용해 `pnpm dev`를 실행한다. 일반 창과 시크릿 창에서 `http://localhost:3002/space`로 접속한다. Worker의 키 파일을 변경했다면 Worker도 재시작한다. 자세한 설정은 `workers/chat/README.md`를 따른다.
+
+1. 기존 Worker 환경에서 `pnpm chat:typecheck`, `pnpm build:chat`로 확인한다.
+2. 운영 반영 시 `pnpm chat:deploy`로 `SpaceRoom` 마이그레이션과 `/v1/space/ws`를 배포한다. 기존 secret과 Origin 설정을 재사용한다.
+3. 프런트를 배포한 뒤 서로 다른 사용자 키를 가진 브라우저 두 개에서 입퇴장·이동·채팅을 확인한다. 같은 브라우저의 여러 탭은 한 사용자로 취급해 앞 탭이 종료된다.
+4. 50석·네트워크 끊김/복귀·모바일 키보드/백그라운드·실제 FPS와 비용 지표를 확인한다. 현재 실행 환경에서는 실제 브라우저 렌더와 Cloudflare 배포 후 통합 검증이 남아 있다.
 
 ## 12. 3단계 사전 설계 — 라이트닝 광고
 
@@ -713,6 +739,10 @@ v0.23 가격 전환 검증은 전체 **67개 파일·565개 테스트**, TypeScr
 
 v0.24 끝점 펄스 검증은 관련 **3개 파일·56개 테스트**, TypeScript, 변경 코드 4개 파일의 Biome 검사, 순환 의존 0건과 `git diff --check` 가 통과했다. 빈 차트 숨김과 하락·보합 상태에서 실제 차트의 마지막 점·선 색·끝점 색 일치를 회귀 테스트로 확인했다. 링 애니메이션의 브라우저 시각 검수와 FPS 실측은 실행 환경 제한으로 미확인이다.
 
+v0.25 위치 동기화·공간 채팅 검증은 전체 **75개 파일·676개 테스트**, 프런트와 Worker TypeScript, 관련 코드 100개 파일의 Biome 검사, 순환 의존 0건, Webpack compile 모드, Worker 배포 dry-run, `git diff --check`가 통과했다. 연결·재연결·만석·중복 탭 교체·희소 위치 보간·잘못된 프레임·채팅 전송 확인·좌석 재사용 말풍선·입력 격리를 검증했다. Worker 테스트는 Cloudflare API 모의 환경이며, 실제 런타임 하이버네이션과 다중 브라우저 통합 검증 및 운영 배포는 수행하지 않았다. 전체 프리렌더 빌드와 실제 렌더 성능의 기존 제약은 유지된다.
+
+로컬 접속 보완에서는 누락 키로 인한 HMAC 실패를 재현하고 `pnpm chat:dev`에 개발 설정 준비 단계를 추가했다. 설정 준비 회귀 7개를 포함한 Worker 관련 **5개 파일·39개 테스트**, Worker TypeScript, 변경 코드 Biome, 순환 의존 0건과 `git diff --check`가 통과했다. 생성된 로컬 키로 실제 IP guard·공간 identity HMAC 계산이 성공함을 확인했다. 실행 중인 사용자 Worker의 재시작 이후 브라우저 접속 확인은 별도로 남는다.
+
 ## 14. 열린 질문
 
 | # | 질문 | 영향 |
@@ -720,13 +750,14 @@ v0.24 끝점 펄스 검증은 관련 **3개 파일·56개 테스트**, TypeScrip
 | Q1 | 관제 스테이션 분위기는 §4.1로 적용. 스카이박스·주변 소품을 확장할지 | 장식 범위·렌더 예산 |
 | Q2 | 아바타 커스터마이즈 범위(색만 / 모델 선택) | `roster` 프레임, `instanceColor` 사용 여부 |
 | Q3 | `/space` 를 하단 내비에도 노출할지 (현재 오렌지 서비스 목록에만 있음) | `route.tsx` 의 `isNav` |
-| Q4 | 공간 채팅과 기존 전역 채팅을 UI 에서 연결할지 | 2단계 HUD 설계 |
-| Q5 | 50석이 가득 찼을 때의 동작(대기열 / 거절만 / 2번 방 개설) | `SpaceRoom` 좌석 관리와 샤딩 시점 |
+| Q4 | 공간 채팅에 전체 채팅의 인증·관리자 차단·신고를 연동할지 | 현재는 별도 방·필터·rate limit만 적용 |
+| Q5 | 정원 초과 시 대기열·추가 방을 도입할지 | 현재는 `full` 거절 후 수동 재연결 |
 
 ## 15. 변경 이력
 
 | 버전 | 날짜 | 내용 |
 | --- | --- | --- |
+| v0.25 | 2026-10-31 | 2단계 위치 동기화와 공간 채팅 구현(§11). 별도 SQLite-backed `SpaceRoom`·50석·100ms 이동 배치·WebSocket 하이버네이션·attachment 복원·희소 바이너리 코덱·원격 보간 추가. 재연결/정원 초과·중복 탭 교체·채팅 전송 확인·100개 로그·5초 말풍선·키보드 입력 격리·모바일 키보드 대응. 로컬 실행 전 누락 개발 키 자동 준비·Git 제외를 추가. Worker 배포 및 실제 다중 브라우저 확인은 대기 |
 | v0.24 | 2026-10-31 | 차트 오른쪽 끝점을 라인과 같은 색으로 표시하고 1.8초 주기 펄스 추가(§6.3). 사용자 요청에 따라 최대 반경 16 → 64 px 로 확대하고 점 반경 12 px·두꺼운 링·최대 불투명도 0.85 적용, 끝점 가격 배지·툴팁 제거. 플롯 폭 1,320 px·끝점 x=1,380·시간 라벨 y=859로 여백 확보. 상단은 BTC pill·실시간 시세 헤더와 통화명 두 줄/가격/등락률의 3열 inset 패널 두 개로 재구성(§6.2). 패널 중심 y=220/368·높이 132·행간 16 px, 가격 최대 108 px·투명 텍스처 800 × 128 × 2로 조정하고 베이스 배경·구분선과 정렬. 플롯 상단 y=520/높이 250 px 로 재배치. 같은 차트 표본·좌표·색상 계산을 공유하며 3D 링의 크기·투명도만 갱신. 모션 축소에서는 정적인 끝점 유지 |
 | v0.23 | 2026-10-31 | 전광판 가격이 바뀔 때 이전 표시값에서 새 값으로 250ms 동안 움직이는 효과 추가(§6.7). 두 가격 칸만 소형 텍스처로 분리해 최대 30 Hz 로 갱신하고 시세 채택·베이스는 최대 4 Hz 유지. 최초 시세·결측값·모션 축소·숫자 애니메이션 꺼짐·탭 복귀 시 즉시 표시 |
 | v0.22 | 2026-10-31 | 바닥·전광판 벽·조명을 노드 관제 스테이션 톤으로 구성(§4.1). 넓은 금속 패널 바닥과 안내선·집결 코너를 단일 텍스처로 통합하고, 관제 벽·리브·청록 바·디스플레이 하우징을 7개 렌더 배치로 추가. 반구광·중성 키라이트·청록 보조광과 오렌지 전광판 광원 적용. 패널 크기·캐릭터·이동 경계 유지. 렌더 성능은 계속 실측 대기 |

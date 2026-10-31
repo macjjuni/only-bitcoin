@@ -3,8 +3,9 @@
 import { PerformanceMonitor, type PerformanceMonitorApi } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
-import { createOfflinePresence } from "@/entities/space";
+import type { ChatIdentity } from "@/features/chat-session";
 import { createSpaceInputSource, SPACE_CAMERA, useKeyboardInput } from "@/features/space-controls";
+import { useSpaceSession } from "@/features/space-session";
 import { isAndroidDevice, isIOSDevice } from "@/shared/utils/device";
 import {
   resolveDprFromPerformanceFactor,
@@ -22,7 +23,7 @@ const CAMERA_NEAR = 0.1;
 const CAMERA_FAR = 220;
 
 interface SpaceCanvasProps {
-  clientKey: string;
+  identity: ChatIdentity;
   /** 개발 전용 더미 아바타 수. */
   dummyCount: number;
 }
@@ -43,11 +44,9 @@ const hasRealtimeShadowBudget = (): boolean => {
 };
 // endregion
 
-function SpaceCanvas({ clientKey, dummyCount }: SpaceCanvasProps): ReactNode {
+function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   // region [Hooks]
   const inputSource = useMemo(() => createSpaceInputSource(), []);
-  /** 1단계는 네트워크가 없다. 2단계에서 SpaceRoom 연결 상태로 교체한다. */
-  const presence = useMemo(() => createOfflinePresence(dummyCount + 1), [dummyCount]);
   const [fallbackReason, setFallbackReason] = useState<SpaceFallbackReason | null>(null);
   const [isSupportProbed, setIsSupportProbed] = useState<boolean>(false);
   const [hasRealtimeShadows, setHasRealtimeShadows] = useState<boolean>(false);
@@ -58,6 +57,11 @@ function SpaceCanvas({ clientKey, dummyCount }: SpaceCanvasProps): ReactNode {
       process.env.NODE_ENV !== "production" &&
       new URLSearchParams(window.location.search).get("stats") === "1",
   );
+
+  const session = useSpaceSession({
+    identity,
+    enabled: isSupportProbed && !fallbackReason && dummyCount === 0,
+  });
 
   useKeyboardInput(inputSource);
   // endregion
@@ -167,14 +171,19 @@ function SpaceCanvas({ clientKey, dummyCount }: SpaceCanvasProps): ReactNode {
 
         <SpaceScene
           inputSource={inputSource}
-          clientKey={clientKey}
+          clientKey={identity.clientKey}
+          session={session}
           hasRealtimeShadows={hasRealtimeShadows}
           dummyCount={dummyCount}
         />
         {hasPerformanceStats && <SpacePerformanceStats dummyCount={dummyCount} />}
       </Canvas>
 
-      <SpaceHud inputSource={inputSource} presence={presence} />
+      <SpaceHud
+        inputSource={inputSource}
+        session={session}
+        nickname={session.self?.nickname ?? identity.nickname}
+      />
     </div>
   );
 }

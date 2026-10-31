@@ -53,6 +53,7 @@ function SpaceActionBar({ actions }: SpaceActionBarProps): ReactNode {
       {actions.map((action) => (
         <button
           key={action.id}
+          id={action.id}
           type="button"
           title={action.label}
           aria-label={action.label}

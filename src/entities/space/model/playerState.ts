@@ -30,9 +30,8 @@ export const createLocalPlayerState = (spawn: PlayerTransform): LocalPlayerState
 /**
  * 공간 접속 상태.
  *
- * 1단계에는 네트워크가 없어 항상 `offline` 이다. 2단계에서 `SpaceRoom` 연결
- * 상태를 그대로 올린다. 숫자만 띄우면 네트워크가 없는데도 접속자가 있는 것처럼
- * 읽히므로 상태를 함께 들고 다닌다.
+ * `SpaceRoom` 입장 완료 전에는 접속자 수를 노출하지 않는다. 서버 미설정·
+ * 연결 실패·개발 더미 모드는 `offline`, 연결·재접속 중에는 `connecting`이다.
  */
 export type SpacePresenceStatus = "offline" | "connecting" | "online";
 

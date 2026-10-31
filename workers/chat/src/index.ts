@@ -1,9 +1,10 @@
 import { ChatRoom } from "./ChatRoom";
 import { deriveIpGuardKey } from "./lib/crypto";
 import { authorizeGoogleAdministrator } from "./lib/googleAdministrator";
+import { SpaceRoom } from "./SpaceRoom";
 import type { ChatWorkerEnv } from "./types";
 
-export { ChatRoom };
+export { ChatRoom, SpaceRoom };
 
 // region [Privates]
 const jsonResponse = (payload: unknown, status: number, headers?: HeadersInit): Response => {
@@ -124,6 +125,7 @@ const handleOnlineRequest = async (
 const handleWebSocketUpgrade = async (
   request: Request,
   workerEnv: ChatWorkerEnv,
+  room: "chat" | "space" = "chat",
 ): Promise<Response> => {
   if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") {
     return jsonResponse({ error: "UPGRADE_REQUIRED" }, 426, { Upgrade: "websocket" });
@@ -137,7 +139,7 @@ const handleWebSocketUpgrade = async (
   const normalizedIpPrefix = normalizeIpGuardPrefix(connectingIpAddress);
   const ipGuardKey = await deriveIpGuardKey(workerEnv.IP_GUARD_SECRET, normalizedIpPrefix);
   const rateLimitResult = await workerEnv.CHAT_UPGRADE_RATE_LIMITER.limit({
-    key: `${ipGuardKey}:/v1/chat/ws`,
+    key: `${ipGuardKey}:/v1/${room}/ws`,
   });
 
   if (!rateLimitResult.success) {
@@ -149,7 +151,14 @@ const handleWebSocketUpgrade = async (
   forwardedHeaders.delete("CF-Connecting-IP");
   const forwardedRequest = new Request(request, { headers: forwardedHeaders });
 
-  return getChatRoomStub(workerEnv).fetch(forwardedRequest);
+  const roomStub =
+    room === "chat"
+      ? getChatRoomStub(workerEnv)
+      : workerEnv.SPACE_ROOM.get(workerEnv.SPACE_ROOM.idFromName("main"), {
+          locationHint: "apac-ne",
+        });
+
+  return roomStub.fetch(forwardedRequest);
 };
 
 const handleAdminRequest = async (
@@ -212,6 +221,9 @@ export default {
     const requestUrl = new URL(request.url);
     if (requestUrl.pathname === "/v1/chat/ws" && request.method === "GET") {
       return handleWebSocketUpgrade(request, workerEnv);
+    }
+    if (requestUrl.pathname === "/v1/space/ws" && request.method === "GET") {
+      return handleWebSocketUpgrade(request, workerEnv, "space");
     }
     if (requestUrl.pathname === "/v1/chat/online" && request.method === "GET") {
       return handleOnlineRequest(request, workerEnv, executionContext, allowedOrigin);

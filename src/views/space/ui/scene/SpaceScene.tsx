@@ -1,7 +1,7 @@
 "use client";
 
 import { useFrame, useThree } from "@react-three/fiber";
-import { memo, type ReactNode, useLayoutEffect, useMemo, useRef } from "react";
+import { memo, type ReactNode, useCallback, useLayoutEffect, useMemo, useRef } from "react";
 import type { Group } from "three";
 import {
   createLocalPlayerState,
@@ -9,6 +9,7 @@ import {
   type LocalPlayerState,
   SPACE_AD_BOARDS,
   SPACE_WALL_ANCHOR,
+  type SpacePeer,
 } from "@/entities/space";
 import {
   applyCameraDrag,
@@ -32,10 +33,12 @@ import {
   usePrefersReducedMotion,
   type Vector3Like,
 } from "@/features/space-controls";
+import type { SpaceSession } from "@/features/space-session";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 import { createEmptyAdTextSlot } from "@/views/space/lib/textBannerTexture";
 import { resolveWallAnchorY, resolveWallDisplayScale } from "@/views/space/lib/wallDisplay";
 import AdBoard from "./AdBoard";
+import ChatBubbles from "./ChatBubbles";
 import ControlWall from "./ControlWall";
 import Ground from "./Ground";
 import Nameplates from "./Nameplates";
@@ -48,8 +51,9 @@ import TextAdBanner from "./TextAdBanner";
 interface SpaceSceneProps {
   inputSource: SpaceInputSource;
   clientKey: string;
+  session: SpaceSession;
   hasRealtimeShadows: boolean;
-  /** 개발 전용 더미 아바타 수. 0 이면 원격 아바타를 그리지 않는다. */
+  /** 개발 전용 더미 아바타 수. 더미 측정 중에는 실제 공간 소켓을 열지 않는다. */
   dummyCount: number;
 }
 
@@ -63,6 +67,7 @@ const resolveColorIndexFromClientKey = (clientKey: string): number => {
 function SpaceScene({
   inputSource,
   clientKey,
+  session,
   hasRealtimeShadows,
   dummyCount,
 }: SpaceSceneProps): ReactNode {
@@ -83,7 +88,9 @@ function SpaceScene({
 
   const spawnTransform = useMemo(() => createSpawnPoint(clientKey), [clientKey]);
   const colorIndex = useMemo(() => resolveColorIndexFromClientKey(clientKey), [clientKey]);
+  const avatarColorIndex = session.self?.colorIndex ?? colorIndex;
   const dummies = useMemo(() => createStressDummies(dummyCount), [dummyCount]);
+  const remotePlayers = dummyCount > 0 ? dummies : session.remotePlayers;
   /** 1단계는 빈 슬롯이다. 3단계에서 라이트닝 결제로 채운다. */
   const textAdSlot = useMemo(() => createEmptyAdTextSlot(), []);
   /** 세로로 긴 화면에서 전광판 벽면을 줄인다. 리사이즈·회전에 따라 다시 계산된다. */
@@ -109,6 +116,14 @@ function SpaceScene({
   // endregion
 
   // region [Privates]
+  const applyServerTransform = useCallback((peer: SpacePeer): void => {
+    playerStateRef.current = createLocalPlayerState(peer);
+    accumulatedSecondsRef.current = 0;
+    smoothedCameraRef.current = resolveCameraPosition(peer, cameraOrbitRef.current);
+    playerGroupRef.current?.position.set(peer.x, 0, peer.z);
+    playerGroupRef.current?.rotation.set(0, peer.yaw, 0);
+  }, []);
+
   const advanceCameraOrbit = (deltaSeconds: number): CameraOrbit => {
     const { deltaX, deltaY } = consumePendingDrag(inputSource);
     const draggedOrbit = applyCameraDrag(cameraOrbitRef.current, deltaX, deltaY);
@@ -166,7 +181,14 @@ function SpaceScene({
     canvasElement.style.touchAction = "none";
   }, [camera, canvasElement, spawnTransform]);
 
+  useLayoutEffect(() => {
+    if (session.self) {
+      applyServerTransform(session.self);
+    }
+  }, [session.self, applyServerTransform]);
+
   useFrame(({ clock }, deltaSeconds) => {
+    session.sampleRemotePlayers(performance.now());
     if (dummies.length > 0) {
       advanceStressDummies(dummies, clock.elapsedTime);
     }
@@ -174,6 +196,7 @@ function SpaceScene({
     const cameraOrbit = advanceCameraOrbit(deltaSeconds);
     const playerState = advancePlayerState(cameraOrbit.yaw, deltaSeconds);
     applyPlayerTransform(playerState);
+    session.publishMovement(playerState);
 
     const targetPosition = resolveCameraPosition(playerState, cameraOrbit);
     const dampedPosition = dampVector(
@@ -187,7 +210,7 @@ function SpaceScene({
     const focus = resolveCameraFocus(playerState);
     camera.position.set(dampedPosition.x, dampedPosition.y, dampedPosition.z);
     camera.lookAt(focus.x, focus.y, focus.z);
-  });
+  }, -1);
   // endregion
 
   return (
@@ -207,11 +230,21 @@ function SpaceScene({
       </group>
 
       <group ref={playerGroupRef}>
-        <PlayerAvatar colorIndex={colorIndex} hasRealtimeShadows={hasRealtimeShadows} />
+        <PlayerAvatar colorIndex={avatarColorIndex} hasRealtimeShadows={hasRealtimeShadows} />
       </group>
 
-      <RemoteAvatars players={dummies} />
-      <Nameplates players={dummies} viewerTransformRef={playerStateRef} />
+      <RemoteAvatars players={remotePlayers} />
+      <Nameplates
+        players={remotePlayers}
+        rosterRevision={session.rosterRevision}
+        viewerTransformRef={playerStateRef}
+      />
+      <ChatBubbles
+        messages={session.bubbleMessages}
+        players={remotePlayers}
+        self={session.self}
+        viewerTransformRef={playerStateRef}
+      />
     </>
   );
 }

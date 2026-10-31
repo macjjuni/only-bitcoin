@@ -18,6 +18,8 @@ const NAMEPLATE_LIFT_Y = SPACE_AVATAR.headCenterY + 0.55;
 
 interface NameplatesProps {
   players: readonly RemotePlayer[];
+  /** 같은 배열의 닉네임 갱신에도 memo가 다시 렌더되게 한다. */
+  rosterRevision?: number;
   /** 거리 기준점. 매 프레임 바뀌므로 ref 로 받는다. */
   viewerTransformRef: React.RefObject<PlayerTransform>;
 }

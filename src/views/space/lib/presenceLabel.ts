@@ -14,7 +14,7 @@ export interface PresenceDisplay {
 /**
  * 접속 상태를 표시 문구로 바꾼다.
  *
- * 숫자만 띄우면 네트워크가 없는 1단계에서도 접속자가 있는 것처럼 읽힌다.
+ * 숫자만 띄우면 서버 미설정이나 연결 실패 중에도 접속자가 있는 것처럼 읽힌다.
  * 상태에 따라 문구 자체를 바꾼다.
  */
 export const resolvePresenceDisplay = (presence: SpacePresence): PresenceDisplay => {

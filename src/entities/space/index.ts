@@ -1,3 +1,5 @@
+export { createSpaceInterpolator, type SpaceInterpolator } from "./lib/remoteInterpolation";
+export { decodeSpaceSnapshot, encodeSpaceSnapshot } from "./lib/spaceSnapshot";
 export { createSpawnPoint } from "./lib/spawnPoint";
 export {
   resolveAvatarColor,
@@ -14,6 +16,19 @@ export {
   type SpacePresence,
   type SpacePresenceStatus,
 } from "./model/playerState";
+export {
+  parseSpaceClientFrame,
+  parseSpaceServerFrame,
+  SPACE_CHAT_COOLDOWN_MS,
+  SPACE_NETWORK_INTERVAL_MS,
+  SPACE_PROTOCOL_VERSION,
+  type SpaceChatMessage,
+  type SpaceClientFrame,
+  type SpaceMotion,
+  type SpaceMotionSnapshot,
+  type SpacePeer,
+  type SpaceServerFrame,
+} from "./model/spaceProtocol";
 export {
   SPACE_AD_BOARDS,
   SPACE_BILLBOARD,

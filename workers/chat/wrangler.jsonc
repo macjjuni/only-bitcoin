@@ -8,6 +8,10 @@
       {
         "name": "CHAT_ROOM",
         "class_name": "ChatRoom"
+      },
+      {
+        "name": "SPACE_ROOM",
+        "class_name": "SpaceRoom"
       }
     ]
   },
@@ -15,6 +19,10 @@
     {
       "tag": "v1",
       "new_sqlite_classes": ["ChatRoom"]
+    },
+    {
+      "tag": "v2",
+      "new_sqlite_classes": ["SpaceRoom"]
     }
   ],
   "ratelimits": [

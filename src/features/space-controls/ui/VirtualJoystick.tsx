@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, type ReactNode, useCallback, useRef, useState } from "react";
+import { memo, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import type { SpaceInputSource } from "../model/spaceInputSource";
 
 const JOYSTICK_BASE_RADIUS = 60;
@@ -68,6 +68,12 @@ function VirtualJoystick({ inputSource }: VirtualJoystickProps): ReactNode {
   );
 
   const resetJoystickInput = useCallback((): void => {
+    const pointerID = activePointerIdRef.current;
+    activePointerIdRef.current = null;
+    const baseElement = baseElementRef.current;
+    if (pointerID !== null && baseElement?.hasPointerCapture(pointerID)) {
+      baseElement.releasePointerCapture(pointerID);
+    }
     inputSource.joystick.forward = 0;
     inputSource.joystick.strafe = 0;
     inputSource.joystick.isRunning = false;
@@ -118,13 +124,36 @@ function VirtualJoystick({ inputSource }: VirtualJoystickProps): ReactNode {
   );
   // endregion
 
+  // region [Privates]
+  const attachJoystickResetEvents = useCallback((): (() => void) => {
+    window.addEventListener("blur", resetJoystickInput);
+    document.addEventListener("visibilitychange", resetJoystickInput);
+    return () => {
+      window.removeEventListener("blur", resetJoystickInput);
+      document.removeEventListener("visibilitychange", resetJoystickInput);
+      activePointerIdRef.current = null;
+      inputSource.joystick.forward = 0;
+      inputSource.joystick.strafe = 0;
+      inputSource.joystick.isRunning = false;
+    };
+  }, [inputSource, resetJoystickInput]);
+  // endregion
+
+  // region [Life Cycles]
+  useEffect(attachJoystickResetEvents, [attachJoystickResetEvents]);
+  // endregion
+
   return (
     <div
       ref={baseElementRef}
       role="presentation"
       aria-hidden="true"
       className="absolute bottom-16 left-1/2 -translate-x-1/2 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm touch-none select-none"
-      style={{ width: JOYSTICK_BASE_RADIUS * 2, height: JOYSTICK_BASE_RADIUS * 2 }}
+      style={{
+        width: JOYSTICK_BASE_RADIUS * 2,
+        height: JOYSTICK_BASE_RADIUS * 2,
+        bottom: "calc(4rem + env(safe-area-inset-bottom))",
+      }}
       onPointerDown={onPointerDownJoystickBase}
       onPointerMove={onPointerMoveJoystickBase}
       onPointerUp={onPointerUpJoystickBase}
