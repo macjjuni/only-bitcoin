@@ -35,6 +35,7 @@ import {
   type Vector3Like,
 } from "@/features/space-controls";
 import type { SpaceSession } from "@/features/space-session";
+import { spaceConfig } from "@/shared/config/space";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 import { createEmptyAdTextSlot } from "@/views/space/lib/textBannerTexture";
 import { resolveWallAnchorY, resolveWallDisplayScale } from "@/views/space/lib/wallDisplay";
@@ -216,11 +217,21 @@ function SpaceScene({
       {/* 전광판과 광고판은 한 덩어리로 묶어 기준점을 중심으로 함께 줄인다. */}
       <group position={wallAnchor} scale={wallDisplayScale}>
         <PriceBillboard />
-        <TextAdBanner slot={textAdSlot} />
 
-        {SPACE_AD_BOARDS.map((placement) => (
-          <AdBoard key={placement.id} placement={placement} />
-        ))}
+        {/*
+          광고를 끄면 표시 면만 빠지고 벽면 장비함은 남는다. 장비함은 광고가 아니라
+          전광판까지 함께 쓰는 벽 구조이고, 켜고 끌 때 벽 구성이 바뀌면 안 된다.
+          끈 동안에는 광고판 2장과 배너의 캔버스 텍스처도 만들지 않는다.
+        */}
+        {spaceConfig.isAdEnabled && (
+          <>
+            <TextAdBanner slot={textAdSlot} />
+
+            {SPACE_AD_BOARDS.map((placement) => (
+              <AdBoard key={placement.id} placement={placement} />
+            ))}
+          </>
+        )}
       </group>
 
       <group ref={playerGroupRef}>

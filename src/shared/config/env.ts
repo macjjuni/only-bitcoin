@@ -14,6 +14,8 @@ export const env = {
   NEXT_PUBLIC_CHAT_WS_URL: process.env.NEXT_PUBLIC_CHAT_WS_URL || "",
   NEXT_PUBLIC_TURNSTILE_SITE_KEY: process.env.NEXT_PUBLIC_TURNSTILE_SITE_KEY || "",
   NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID: process.env.NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID || "",
+  /** `/space` 광고 노출 스위치. 비어 있으면 노출한다. @see spaceConfig.isAdEnabled */
+  NEXT_PUBLIC_SPACE_ADS_ENABLED: process.env.NEXT_PUBLIC_SPACE_ADS_ENABLED || "",
 } as const;
 
 export const SERVICE_DOMAIN = env.NEXT_PUBLIC_URL.replace(/^https?:\/\/(www\.)?/, "");
