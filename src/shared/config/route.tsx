@@ -143,6 +143,15 @@ const clientRoutes: ClientRoute[] = [
   },
   { title: "BIP39", path: "/bip39", isNav: false, isFavorite: false, icon: null },
   { title: "Meme", path: "/meme", isNav: false, isFavorite: false, icon: null },
+  {
+    title: "BTC Space",
+    path: "/space",
+    isNav: false,
+    isFavorite: false,
+    icon: null,
+    hideHeader: true,
+    hideBottomNav: true,
+  },
   { title: "404 - Not Found", path: "/*", isNav: false, isFavorite: false, icon: null },
   { title: "Settings", path: "/settings", isNav: false, isFavorite: false, icon: null },
   {

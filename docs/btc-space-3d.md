@@ -233,13 +233,37 @@ interface AdSlot {
 | 그림자 | 아바타는 블롭 텍스처 접지 그림자(인스턴싱). 실시간 그림자 맵은 데스크톱만, 1024 | 50명 실시간 그림자는 예산 초과 |
 | 후처리 | 없음 | |
 | 탭 비활성 | `document.hidden` 이면 렌더 루프 정지 | |
-| three 번들 | gzip 200 KB 이하 유지 | `drei` 는 필요한 심볼만 개별 import |
+| `/space` 지연 청크 | gzip 260 KB 이하 | 측정 246 KB. three 코어가 대부분이며 §8.1 참고 |
 
 원격 아바타는 개별 `<mesh>` 로 만들지 않는다. 50명이면 몸통·머리·그림자로 **150 드로우 콜**이 되어 바닥·전광판·광고판·조명까지 올라간 모바일 씬에서 예산을 세 배 넘게 초과한다. 처음부터 `InstancedMesh` 3개로 고정하고, 슬롯 인덱스 0~49 를 플레이어에 배정한다. 빈 슬롯은 `count` 를 줄여 숨긴다.
 
 명찰과 말풍선은 `<Html>` DOM 이라 개수가 곧 레이아웃 비용이다. 거리순 선별은 `avatarCulling.ts` 의 순수 함수로 분리해 테스트한다.
 
-`/space` 외 라우트의 번들 크기가 변하지 않아야 한다. 1단계 완료 시 `pnpm build` 출력에서 다른 라우트의 First Load JS 증가가 없음을 확인한다.
+`/space` 외 라우트의 번들 크기가 변하지 않아야 한다.
+
+### 8.1 번들 측정 결과 (2026-10-31)
+
+| 항목 | 측정값 |
+| --- | --- |
+| three 포함 청크 | 936 KB(비압축) / **246 KB(gzip)** |
+| 이 청크를 참조하는 라우트 | `/space` 만 (`react-loadable-manifest`) |
+| 전 라우트 초기 HTML 참조 | 0건 (24개 프리렌더 HTML 검사) |
+| 공용 `rootMainFiles` | 429 KB(비압축), three 도입 전후 변화 없음 |
+
+three 가 다른 라우트에 섞이지 않는다는 목표는 달성했다. `/space` 를 열어 캔버스를
+마운트하는 시점에만 내려받고, `/space` 의 초기 HTML 에도 들어가지 않는다.
+
+다만 최초에 적었던 gzip 200 KB 목표는 `<Canvas>` 를 쓰는 한 달성할 수 없다.
+`@react-three/fiber` 의 `<Canvas>` 는 내부에서 `extend(THREE)` 를 호출해 **THREE
+네임스페이스 전체를 JSX 엘리먼트 카탈로그로 등록**한다(fiber 소스 주석에 명시됨).
+네임스페이스 전체가 참조되므로 번들러가 three 코어를 트리셰이킹하지 못한다.
+실제로 `drei` 의 무거운 의존(troika, maath, meshline, detect-gpu)은 모두 빠져 있어
+`drei` 쪽은 이미 최소다. 즉 246 KB 는 three 코어 자체의 바닥값에 가깝다.
+
+더 줄여야 할 때의 수단은 `<Canvas>` 를 버리고 `createRoot` 로 루트를 직접 만들어
+`extend({ Mesh, MeshStandardMaterial, ... })` 로 쓰는 엘리먼트만 등록하는 것이다.
+리사이즈·이벤트·컨텍스트 브리지를 직접 구현해야 하므로, 약 46 KB 를 위해 감수할
+복잡도는 아니라고 보고 1단계에서는 하지 않는다.
 
 ## 9. 접근성·폴백
 
@@ -259,26 +283,26 @@ interface AdSlot {
 | # | 작업 | 산출물 | 상태 |
 | --- | --- | --- | --- |
 | 1-1 | 의존성 설치 | `three`, `@react-three/fiber`, `@react-three/drei`, `@types/three` | 완료 |
-| 1-2 | 라우트·번들 골격 | `src/app/space/page.tsx`, `SpaceCanvas`, `route.tsx` 등록 | 대기 |
+| 1-2 | 라우트·번들 골격 | `src/app/space/page.tsx`, `SpaceCanvas`, `route.tsx` 등록 | 완료 |
 | 1-3 | 월드 상수·타입 | `spaceWorld.ts`, `playerState.ts`, `avatar.ts` | 완료 |
 | 1-4 | 스폰 산포 로직 + 테스트 | `spawnPoint.ts`, `spawnPoint.test.ts` | 완료 |
-| 1-5 | 바닥·조명 | `Ground.tsx`, `SceneLighting.tsx` | 대기 |
+| 1-5 | 바닥·조명 | `Ground.tsx`, `SceneLighting.tsx` | 완료 |
 | 1-6 | 이동 순수 로직 + 테스트 | `movement.ts`, `movement.test.ts` | 완료 |
 | 1-7 | 추적 카메라 순수 로직 + 테스트 | `followCamera.ts`, `followCamera.test.ts` | 완료 |
-| 1-8 | 키보드 입력 연결 | `useKeyboardInput.ts` | 대기 |
-| 1-9 | 플레이어 아바타 | `PlayerAvatar.tsx`, 접지 그림자 | 대기 |
-| 1-10 | 원격 아바타 인스턴싱 골격 | `RemoteAvatars.tsx` (50 슬롯, `instanceColor`) | 대기 |
-| 1-11 | 더미 스트레스 하니스 | `stressDummies.ts` (개발 전용, 기본 50 / 수 지정) | 대기 |
+| 1-8 | 키보드 입력 연결 | `useKeyboardInput.ts` | 완료 |
+| 1-9 | 플레이어 아바타 | `PlayerAvatar.tsx`, 접지 그림자 | 완료 |
+| 1-10 | 원격 아바타 인스턴싱 골격 | `RemoteAvatars.tsx` (50 슬롯, `instanceColor`) | 완료 |
+| 1-11 | 더미 스트레스 하니스 | `stressDummies.ts` (개발 전용, 기본 50 / 수 지정) | 완료 |
 | 1-12 | 거리 컬링 순수 로직 + 테스트 | `avatarCulling.ts`, `avatarCulling.test.ts` | 완료 |
-| 1-13 | 명찰 레이어 | `Nameplates.tsx` (25 m / 16개 상한) | 대기 |
+| 1-13 | 명찰 레이어 | `Nameplates.tsx` (25 m / 16개 상한) | 완료 |
 | 1-14 | 전광판 텍스처 로직 + 테스트 | `billboardTexture.ts`, `.test.ts` | 완료 |
-| 1-15 | 전광판 렌더 + 스토어 연결 | `PriceBillboard.tsx` | 대기 |
-| 1-16 | 광고판 플레이스홀더 | `AdBoard.tsx`, `AdSlot` 타입 | 대기 |
-| 1-17 | 모바일 조이스틱 | `useTouchInput.ts`, `VirtualJoystick.tsx` | 대기 |
-| 1-18 | HUD·조작 안내 | `SpaceHud.tsx` | 대기 |
-| 1-19 | 폴백·컨텍스트 로스트 | `SpaceFallback.tsx` | 대기 |
-| 1-20 | 성능 검증 | 더미 50명으로 §8 예산 전항목 측정, 100명으로 여유 확인 | 대기 |
-| 1-21 | 품질 게이트 | `pnpm check`, `tsc --noEmit`, `pnpm test`, `pnpm check:cycles` | 대기 |
+| 1-15 | 전광판 렌더 + 스토어 연결 | `PriceBillboard.tsx` | 완료 |
+| 1-16 | 광고판 플레이스홀더 | `AdBoard.tsx`, `AdSlot` 타입 | 완료 |
+| 1-17 | 모바일 조이스틱 | `useTouchInput.ts`, `VirtualJoystick.tsx` | 완료 |
+| 1-18 | HUD·조작 안내 | `SpaceHud.tsx` | 완료 |
+| 1-19 | 폴백·컨텍스트 로스트 | `SpaceFallback.tsx` | 완료 |
+| 1-20 | 성능 검증 | 번들 측정 완료(§8.1). fps·드로우 콜 실측은 브라우저 확인 대기 | 진행중 |
+| 1-21 | 품질 게이트 | `pnpm check`, `tsc --noEmit`, `pnpm test`, `pnpm check:cycles` | 완료 |
 
 작업 `1-10`~`1-13` 은 1단계에 원격 플레이어가 없어도 수행한다. 50명 렌더 비용을 네트워크 레이어보다 먼저 확정하려는 목적이며, `1-11` 의 더미 하니스가 2단계 내내 회귀 측정 수단으로 남는다. 하니스는 인원 수를 인자로 받으므로 상한을 올릴 때 그대로 재사용한다.
 
@@ -370,6 +394,7 @@ interface AdSlot {
 
 | 버전 | 날짜 | 내용 |
 | --- | --- | --- |
+| v0.4 | 2026-10-31 | 1단계 구현. 번들 예산을 측정값으로 정정(gzip 200 → 260 KB, 실측 246 KB)하고 `<Canvas>` 의 `extend(THREE)` 가 트리셰이킹을 막는 근거를 §8.1 에 기록 |
 | v0.3 | 2026-10-31 | 동시 접속 상한 100 → **50**. 밀도 33.3 m²/인 유지를 위해 월드 64×48(가용 52×32)로 축소, 스폰 링 r=5~14 로 축소, 아바타 슬롯 50, 드로우 콜 50·삼각형 60k 로 예산 하향, 전송 예산 358 B/틱·클라당 3.5 KB/s 로 재산출 |
 | v0.2 | 2026-10-31 | 동시 접속 100명 기준으로 재산정. 아바타 `InstancedMesh` 전환, 명찰·말풍선 표시 상한, 전송 예산 산출, AOI 컬링 배제 근거, 좌석 관리, 작업 21개로 재편 |
 | v0.1 | 2026-10-31 | 최초 작성. 렌더 스택·조작 방식·1단계 범위·접근 조건 확정 |
