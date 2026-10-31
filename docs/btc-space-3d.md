@@ -258,20 +258,20 @@ interface AdSlot {
 
 | # | 작업 | 산출물 | 상태 |
 | --- | --- | --- | --- |
-| 1-1 | 의존성 설치 | `three`, `@react-three/fiber`, `@react-three/drei`, `@types/three` | 대기 |
+| 1-1 | 의존성 설치 | `three`, `@react-three/fiber`, `@react-three/drei`, `@types/three` | 완료 |
 | 1-2 | 라우트·번들 골격 | `src/app/space/page.tsx`, `SpaceCanvas`, `route.tsx` 등록 | 대기 |
-| 1-3 | 월드 상수·타입 | `spaceWorld.ts`, `playerState.ts`, `avatar.ts` | 대기 |
-| 1-4 | 스폰 산포 로직 + 테스트 | `spawnPoint.ts`, `spawnPoint.test.ts` | 대기 |
+| 1-3 | 월드 상수·타입 | `spaceWorld.ts`, `playerState.ts`, `avatar.ts` | 완료 |
+| 1-4 | 스폰 산포 로직 + 테스트 | `spawnPoint.ts`, `spawnPoint.test.ts` | 완료 |
 | 1-5 | 바닥·조명 | `Ground.tsx`, `SceneLighting.tsx` | 대기 |
-| 1-6 | 이동 순수 로직 + 테스트 | `movement.ts`, `movement.test.ts` | 대기 |
-| 1-7 | 추적 카메라 순수 로직 + 테스트 | `followCamera.ts`, `followCamera.test.ts` | 대기 |
+| 1-6 | 이동 순수 로직 + 테스트 | `movement.ts`, `movement.test.ts` | 완료 |
+| 1-7 | 추적 카메라 순수 로직 + 테스트 | `followCamera.ts`, `followCamera.test.ts` | 완료 |
 | 1-8 | 키보드 입력 연결 | `useKeyboardInput.ts` | 대기 |
 | 1-9 | 플레이어 아바타 | `PlayerAvatar.tsx`, 접지 그림자 | 대기 |
 | 1-10 | 원격 아바타 인스턴싱 골격 | `RemoteAvatars.tsx` (50 슬롯, `instanceColor`) | 대기 |
 | 1-11 | 더미 스트레스 하니스 | `stressDummies.ts` (개발 전용, 기본 50 / 수 지정) | 대기 |
-| 1-12 | 거리 컬링 순수 로직 + 테스트 | `avatarCulling.ts`, `avatarCulling.test.ts` | 대기 |
+| 1-12 | 거리 컬링 순수 로직 + 테스트 | `avatarCulling.ts`, `avatarCulling.test.ts` | 완료 |
 | 1-13 | 명찰 레이어 | `Nameplates.tsx` (25 m / 16개 상한) | 대기 |
-| 1-14 | 전광판 텍스처 로직 + 테스트 | `billboardTexture.ts`, `.test.ts` | 대기 |
+| 1-14 | 전광판 텍스처 로직 + 테스트 | `billboardTexture.ts`, `.test.ts` | 완료 |
 | 1-15 | 전광판 렌더 + 스토어 연결 | `PriceBillboard.tsx` | 대기 |
 | 1-16 | 광고판 플레이스홀더 | `AdBoard.tsx`, `AdSlot` 타입 | 대기 |
 | 1-17 | 모바일 조이스틱 | `useTouchInput.ts`, `VirtualJoystick.tsx` | 대기 |
