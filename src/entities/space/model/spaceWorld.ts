@@ -78,19 +78,26 @@ export interface SpaceAdBoardPlacement {
 
 const AD_BOARD_TILT = (15 * Math.PI) / 180;
 
+/**
+ * 광고판은 전광판과 세로 중심을 맞춘다.
+ *
+ * 두 판의 높이가 다르므로(5.4 vs 4) 아래를 맞추면 윗변이 어긋나고 위를 맞추면
+ * 아랫변이 어긋난다. 중심을 맞춰야 세 판이 한 줄로 읽힌다. 시선 위계는 높이가
+ * 아니라 크기 차이로 준다.
+ */
 export const SPACE_AD_BOARDS: readonly SpaceAdBoardPlacement[] = [
   {
     id: "left",
     width: 6,
     height: 4,
-    position: [-11, 3.2, SPACE_WALL_Z + 0.6],
+    position: [-11, BILLBOARD_CENTER_Y, SPACE_WALL_Z + 0.6],
     rotationY: AD_BOARD_TILT,
   },
   {
     id: "right",
     width: 6,
     height: 4,
-    position: [11, 3.2, SPACE_WALL_Z + 0.6],
+    position: [11, BILLBOARD_CENTER_Y, SPACE_WALL_Z + 0.6],
     rotationY: -AD_BOARD_TILT,
   },
 ] as const;
