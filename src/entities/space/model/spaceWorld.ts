@@ -40,18 +40,19 @@ export const SPACE_SPAWN_RING = {
 /**
  * 전광판 중심 높이.
  *
- * 벽에 가장 가까이 붙은 경우(벽까지 8 m)에도 기본 피치에서 패널 전체가 화면에
- * 들어오는 상한이다. 그 위치의 가시 상단이 9.8 m 이고 프레임 상단이 9.5 m 다.
+ * 벽에 가장 가까이 붙은 경우(벽까지 8 m)에도 기본 피치에서 프레임 전체가 화면에
+ * 들어오는 높이다. 그 위치의 가시 상단이 9.8 m 이고 프레임 상단이 9.68 m 다.
  * 더 올리면 가까이서 올려다볼 때 시야를 끌어올려야 한다.
  */
-const BILLBOARD_CENTER_Y = 6.2;
+const BILLBOARD_CENTER_Y = 6;
 
+/** 패널은 16:9 다. 텍스처(1600 × 900) 와 비율이 어긋나면 글자가 늘어난다. */
 export const SPACE_BILLBOARD = {
   width: 12,
-  height: 6,
+  height: 6.75,
   position: [0, BILLBOARD_CENTER_Y, SPACE_WALL_Z] as const,
   frameWidth: 12.6,
-  frameHeight: 6.6,
+  frameHeight: 7.35,
   framePosition: [0, BILLBOARD_CENTER_Y, SPACE_WALL_Z - 0.1] as const,
   /**
    * 바닥을 물들이는 광원 위치.

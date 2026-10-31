@@ -4,6 +4,7 @@ import { useFrame } from "@react-three/fiber";
 import { memo, type ReactNode, useEffect, useMemo, useRef } from "react";
 import { CanvasTexture, SRGBColorSpace } from "three";
 import { useBitcoinStore } from "@/entities/bitcoin";
+import { usePriceMiniChartData } from "@/entities/bitcoin/client";
 import { SPACE_BILLBOARD } from "@/entities/space";
 import {
   BILLBOARD_COLORS,
@@ -30,7 +31,12 @@ const createBillboardSurface = (): BillboardSurface => {
   return { canvasElement, context: canvasElement.getContext("2d"), texture };
 };
 
-/** 변경 감지용 서명. 바뀌지 않았으면 텍스처를 다시 올리지 않는다. */
+/**
+ * 변경 감지용 서명.
+ *
+ * 시계열은 15분마다 갱신되고 길이가 288이라 전부 비교하면 비싸다. 길이와 끝값만
+ * 봐도 갱신 여부를 가릴 수 있다.
+ */
 const createStateSignature = (state: BillboardState): string => {
   return [
     state.krw,
@@ -39,10 +45,12 @@ const createStateSignature = (state: BillboardState): string => {
     state.usdChange24h,
     state.isKrwConnected,
     state.isUsdConnected,
+    state.usdSeries.length,
+    state.usdSeries[state.usdSeries.length - 1] ?? 0,
   ].join("|");
 };
 
-const readBillboardState = (): BillboardState => {
+const readBillboardState = (usdSeries: readonly number[]): BillboardState => {
   const { bitcoinPrice } = useBitcoinStore.getState();
 
   return {
@@ -52,8 +60,11 @@ const readBillboardState = (): BillboardState => {
     usdChange24h: bitcoinPrice.usdChange24h,
     isKrwConnected: bitcoinPrice.isKrwConnected ?? false,
     isUsdConnected: bitcoinPrice.isUsdConnected ?? false,
+    usdSeries,
   };
 };
+
+const EMPTY_SERIES: readonly number[] = [];
 // endregion
 
 /**
@@ -66,8 +77,13 @@ const readBillboardState = (): BillboardState => {
 function PriceBillboard(): ReactNode {
   // region [Hooks]
   const surface = useMemo(() => createBillboardSurface(), []);
+  const { priceMiniChartData } = usePriceMiniChartData();
   const lastDrawnAtRef = useRef<number>(0);
   const lastSignatureRef = useRef<string>("");
+  /** 프레임 루프에서 읽어야 하므로 ref 로 둔다. 쿼리 갱신은 15분에 한 번이다. */
+  const usdSeriesRef = useRef<readonly number[]>(EMPTY_SERIES);
+
+  usdSeriesRef.current = priceMiniChartData?.price ?? EMPTY_SERIES;
   // endregion
 
   // region [Privates]
@@ -83,7 +99,7 @@ function PriceBillboard(): ReactNode {
 
   // region [Life Cycles]
   useEffect(() => {
-    redrawBillboard(readBillboardState());
+    redrawBillboard(readBillboardState(usdSeriesRef.current));
 
     return () => {
       surface.texture.dispose();
@@ -99,7 +115,7 @@ function PriceBillboard(): ReactNode {
 
     lastDrawnAtRef.current = nowMs;
 
-    const state = readBillboardState();
+    const state = readBillboardState(usdSeriesRef.current);
     const signature = createStateSignature(state);
 
     if (signature === lastSignatureRef.current) {

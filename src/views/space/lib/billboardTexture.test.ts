@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   BILLBOARD_COLORS,
+  BILLBOARD_COLUMNS,
   BILLBOARD_MIN_FONT_SIZE_PX,
   BILLBOARD_PLACEHOLDER,
   BILLBOARD_TEXTURE,
@@ -37,8 +38,9 @@ describe("formatBillboardKrw", () => {
 });
 
 describe("formatBillboardUsd", () => {
-  it("달러는 정수로 끊어 보여준다", () => {
-    expect(formatBillboardUsd(108_432.5)).toBe("$108,433");
+  it("달러는 소수 두 자리로 보여준다", () => {
+    expect(formatBillboardUsd(108_432.5)).toBe("$108,432.50");
+    expect(formatBillboardUsd(100_000)).toBe("$100,000.00");
   });
 
   it("값이 없으면 자리표시다", () => {
@@ -85,66 +87,89 @@ describe("resolveChangeTone", () => {
 });
 
 describe("resolveFittedFontSize", () => {
-  const CONTENT_WIDTH = BILLBOARD_TEXTURE.width - BILLBOARD_TEXTURE.paddingX * 2;
+  const PRICE_WIDTH = BILLBOARD_COLUMNS.priceMaxWidth;
+  const PRICE_FONT_SIZE = 73;
 
   it("가용 폭에 들어가는 문자열은 최대 크기를 유지한다", () => {
-    const measuredWidth = measureMonospaceWidth("$108,433", 84);
+    const measuredWidth = measureMonospaceWidth("$108,432.50", PRICE_FONT_SIZE);
 
     expect(
-      resolveFittedFontSize(measuredWidth, { maxWidth: CONTENT_WIDTH, maxFontSizePx: 84 }),
-    ).toBe(84);
+      resolveFittedFontSize(measuredWidth, {
+        maxWidth: PRICE_WIDTH,
+        maxFontSizePx: PRICE_FONT_SIZE,
+      }),
+    ).toBe(PRICE_FONT_SIZE);
   });
 
   it("넘치는 문자열은 가용 폭에 맞게 줄인다", () => {
-    const measuredWidth = measureMonospaceWidth("₩158,420,000", 168);
+    const priceText = "₩1,234,567,890";
+    const measuredWidth = measureMonospaceWidth(priceText, PRICE_FONT_SIZE);
     const fittedFontSize = resolveFittedFontSize(measuredWidth, {
-      maxWidth: CONTENT_WIDTH,
-      maxFontSizePx: 168,
+      maxWidth: PRICE_WIDTH,
+      maxFontSizePx: PRICE_FONT_SIZE,
     });
 
-    expect(fittedFontSize).toBeLessThan(168);
-    expect(measureMonospaceWidth("₩158,420,000", fittedFontSize)).toBeLessThanOrEqual(
-      CONTENT_WIDTH,
-    );
+    expect(fittedFontSize).toBeLessThan(PRICE_FONT_SIZE);
+    expect(measureMonospaceWidth(priceText, fittedFontSize)).toBeLessThanOrEqual(PRICE_WIDTH);
   });
 
-  it("실제 시세 자리수 범위에서 어떤 가격도 넘치지 않는다", () => {
+  it("실제 시세 자리수 범위에서 가격이 변동률 칸을 침범하지 않는다", () => {
     const prices = [9_000_000, 58_420_000, 158_420_000, 999_999_999, 1_234_567_890];
 
     for (const price of prices) {
       const priceText = formatBillboardKrw(price);
-      const measuredWidth = measureMonospaceWidth(priceText, 168);
+      const measuredWidth = measureMonospaceWidth(priceText, PRICE_FONT_SIZE);
       const fittedFontSize = resolveFittedFontSize(measuredWidth, {
-        maxWidth: CONTENT_WIDTH,
-        maxFontSizePx: 168,
+        maxWidth: PRICE_WIDTH,
+        maxFontSizePx: PRICE_FONT_SIZE,
       });
 
-      expect(measureMonospaceWidth(priceText, fittedFontSize)).toBeLessThanOrEqual(CONTENT_WIDTH);
+      expect(measureMonospaceWidth(priceText, fittedFontSize)).toBeLessThanOrEqual(PRICE_WIDTH);
     }
+  });
+
+  it("변동률도 자기 칸을 넘지 않는다", () => {
+    const changeText = formatBillboardChange("-12.34");
+    const measuredWidth = measureMonospaceWidth(changeText, 48);
+    const fittedFontSize = resolveFittedFontSize(measuredWidth, {
+      maxWidth: BILLBOARD_COLUMNS.changeMaxWidth,
+      maxFontSizePx: 48,
+    });
+
+    expect(measureMonospaceWidth(changeText, fittedFontSize)).toBeLessThanOrEqual(
+      BILLBOARD_COLUMNS.changeMaxWidth,
+    );
   });
 
   it("하한보다 작게 줄이지 않는다", () => {
     const fittedFontSize = resolveFittedFontSize(100_000, {
-      maxWidth: CONTENT_WIDTH,
-      maxFontSizePx: 168,
+      maxWidth: PRICE_WIDTH,
+      maxFontSizePx: PRICE_FONT_SIZE,
     });
 
     expect(fittedFontSize).toBe(BILLBOARD_MIN_FONT_SIZE_PX);
   });
 
   it("최대 크기가 하한보다 작으면 최대 크기를 넘기지 않는다", () => {
+    const smallMaxFontSize = BILLBOARD_MIN_FONT_SIZE_PX - 10;
     const fittedFontSize = resolveFittedFontSize(100_000, {
-      maxWidth: CONTENT_WIDTH,
-      maxFontSizePx: 40,
+      maxWidth: PRICE_WIDTH,
+      maxFontSizePx: smallMaxFontSize,
     });
 
-    expect(fittedFontSize).toBe(40);
+    expect(fittedFontSize).toBe(smallMaxFontSize);
   });
 
   it("폭을 재지 못한 경우 최대 크기로 둔다", () => {
-    const options = { maxWidth: CONTENT_WIDTH, maxFontSizePx: 168 };
+    const options = { maxWidth: PRICE_WIDTH, maxFontSizePx: PRICE_FONT_SIZE };
 
-    expect(resolveFittedFontSize(0, options)).toBe(168);
-    expect(resolveFittedFontSize(Number.NaN, options)).toBe(168);
+    expect(resolveFittedFontSize(0, options)).toBe(PRICE_FONT_SIZE);
+    expect(resolveFittedFontSize(Number.NaN, options)).toBe(PRICE_FONT_SIZE);
+  });
+});
+
+describe("패널 비율", () => {
+  it("텍스처는 16:9 다. 패널 geometry 와 어긋나면 글자가 늘어난다", () => {
+    expect(BILLBOARD_TEXTURE.width / BILLBOARD_TEXTURE.height).toBeCloseTo(16 / 9, 6);
   });
 });
