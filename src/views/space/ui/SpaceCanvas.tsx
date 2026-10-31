@@ -13,6 +13,7 @@ import {
 } from "@/views/space/lib/renderQuality";
 import SpaceHud from "./hud/SpaceHud";
 import SpaceFallback, { type SpaceFallbackReason } from "./SpaceFallback";
+import SpacePerformanceStats from "./SpacePerformanceStats";
 import SpaceScene from "./scene/SpaceScene";
 
 /** 컨텍스트 복구를 기다리는 시간. 넘기면 폴백으로 전환한다. */
@@ -52,6 +53,11 @@ function SpaceCanvas({ clientKey, dummyCount }: SpaceCanvasProps): ReactNode {
   const [hasRealtimeShadows, setHasRealtimeShadows] = useState<boolean>(false);
   const [frameloop, setFrameloop] = useState<"always" | "never">("always");
   const [renderDpr, setRenderDpr] = useState<number>(SPACE_INITIAL_DPR);
+  const [hasPerformanceStats] = useState(
+    () =>
+      process.env.NODE_ENV !== "production" &&
+      new URLSearchParams(window.location.search).get("stats") === "1",
+  );
 
   useKeyboardInput(inputSource);
   // endregion
@@ -165,6 +171,7 @@ function SpaceCanvas({ clientKey, dummyCount }: SpaceCanvasProps): ReactNode {
           hasRealtimeShadows={hasRealtimeShadows}
           dummyCount={dummyCount}
         />
+        {hasPerformanceStats && <SpacePerformanceStats dummyCount={dummyCount} />}
       </Canvas>
 
       <SpaceHud inputSource={inputSource} presence={presence} />

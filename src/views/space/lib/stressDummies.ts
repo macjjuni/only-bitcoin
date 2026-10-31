@@ -1,4 +1,5 @@
 import { type RemotePlayer, SPACE_AVATAR_COLORS, SPACE_BOUNDS } from "@/entities/space";
+import { resolveSpaceAvatarCount } from "./avatarCapacity";
 
 /**
  * 개발 전용 더미 아바타.
@@ -29,12 +30,13 @@ const clamp = (value: number, min: number, max: number): number => {
  * 측정이 실제보다 좋게 나온다.
  */
 export const createStressDummies = (count: number): StressDummy[] => {
+  const boundedCount = resolveSpaceAvatarCount(count);
   const centerSpreadX = (SPACE_BOUNDS.maxX - SPACE_BOUNDS.minX) / 2 - 6;
   const centerSpreadZ = (SPACE_BOUNDS.maxZ - SPACE_BOUNDS.minZ) / 2 - 6;
 
-  return Array.from({ length: Math.max(count, 0) }, (_, seat) => {
+  return Array.from({ length: boundedCount }, (_, seat) => {
     const spiralAngle = seat * GOLDEN_ANGLE;
-    const spiralRadius = Math.sqrt((seat + 0.5) / Math.max(count, 1));
+    const spiralRadius = Math.sqrt((seat + 0.5) / boundedCount);
     const orbitCenterX = Math.cos(spiralAngle) * spiralRadius * centerSpreadX;
     const orbitCenterZ = Math.sin(spiralAngle) * spiralRadius * centerSpreadZ;
 

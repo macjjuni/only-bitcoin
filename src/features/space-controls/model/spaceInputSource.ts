@@ -1,3 +1,4 @@
+import { SPACE_CAMERA } from "./followCamera";
 import { createEmptyMovementInput, type MovementInput } from "./movement";
 
 /**
@@ -12,13 +13,17 @@ import { createEmptyMovementInput, type MovementInput } from "./movement";
 export interface SpaceInputSource {
   keyboard: MovementInput;
   joystick: MovementInput;
-  /** 키보드 시야 회전 방향. -1(좌) / 0 / 1(우) */
+  /** 키보드 시야 회전 방향. +1(좌) / 0 / -1(우) */
   yawDirection: number;
   /** 아직 카메라에 반영되지 않은 포인터 드래그 누적량(px). */
   pendingDragX: number;
   pendingDragY: number;
-  /** 아직 반영되지 않은 줌 누적량(m). 양수면 멀어진다. */
+  /** 휠과 정상 종료된 핀치의 미소비 줌 누적량(m). 양수면 멀어진다. */
   pendingZoomDistance: number;
+  /** 현재 두 손가락 사이 거리(px). 손가락이 둘이 아니면 `null`. */
+  pinchSpread: number | null;
+  /** 직전 프레임에 소비한 두 손가락 사이 거리. */
+  consumedPinchSpread: number | null;
 }
 
 export const createSpaceInputSource = (): SpaceInputSource => ({
@@ -28,6 +33,8 @@ export const createSpaceInputSource = (): SpaceInputSource => ({
   pendingDragX: 0,
   pendingDragY: 0,
   pendingZoomDistance: 0,
+  pinchSpread: null,
+  consumedPinchSpread: null,
 });
 
 const clamp = (value: number, min: number, max: number): number => {
@@ -59,11 +66,28 @@ export const consumePendingDrag = (
   return { deltaX, deltaY };
 };
 
-/** 누적된 줌량(m)을 읽고 비운다. */
+/**
+ * 이번 프레임의 줌량(m)을 계산하고 누적을 비운다.
+ *
+ * 이동 중 핀치는 **프레임마다 한 번만** 두 손가락 사이 거리를 비교한다. 포인터 이벤트는
+ * 손가락마다 따로 오므로 이벤트마다 비교하면, 두 손가락을 나란히 끌어도 한쪽만
+ * 움직인 중간 상태에서 거리가 변해 줌이 걸린다. 프레임 시점에는 두 손가락의
+ * 최신 위치가 모두 반영돼 있어 나란한 이동은 정확히 상쇄된다.
+ * 정상 종료 시에는 마지막 미소비 차이를 이벤트 연결부에서 누적 채널에 보관한다.
+ */
 export const consumePendingZoom = (inputSource: SpaceInputSource): number => {
-  const distanceDelta = inputSource.pendingZoomDistance;
-
+  const queuedZoomDistance = inputSource.pendingZoomDistance;
   inputSource.pendingZoomDistance = 0;
 
-  return distanceDelta;
+  const { pinchSpread, consumedPinchSpread } = inputSource;
+  inputSource.consumedPinchSpread = pinchSpread;
+
+  if (pinchSpread === null || consumedPinchSpread === null) {
+    return queuedZoomDistance;
+  }
+
+  // 손가락을 벌리면 가까워지고 모으면 멀어진다. 지도 확대와 같은 방향이다.
+  return (
+    queuedZoomDistance - (pinchSpread - consumedPinchSpread) * SPACE_CAMERA.pinchZoomSensitivity
+  );
 };

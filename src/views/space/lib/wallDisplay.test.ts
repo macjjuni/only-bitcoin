@@ -44,7 +44,14 @@ describe("resolveWallDisplayScale", () => {
 
   it("그보다 좁은 화면에서만 줄인다", () => {
     // 접는 폰 커버 화면이나 좁게 줄인 데스크톱 창.
-    expect(resolveWallDisplayScale(320 / 900)).toBeLessThan(1);
+    const narrowAspect = 320 / 900;
+    const scale = resolveWallDisplayScale(narrowAspect);
+
+    expect(scale).toBeLessThan(1);
+    expect(SPACE_BILLBOARD.frameWidth * scale).toBeCloseTo(
+      resolveVisibleWidth(narrowAspect) * 0.95,
+      6,
+    );
   });
 
   it("어떤 종횡비·카메라 거리에서도 전광판이 가시 폭 안에 들어온다", () => {

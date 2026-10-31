@@ -36,6 +36,7 @@ import { advanceStressDummies, createStressDummies } from "@/views/space/lib/str
 import { createEmptyAdTextSlot } from "@/views/space/lib/textBannerTexture";
 import { resolveWallAnchorY, resolveWallDisplayScale } from "@/views/space/lib/wallDisplay";
 import AdBoard from "./AdBoard";
+import ControlWall from "./ControlWall";
 import Ground from "./Ground";
 import Nameplates from "./Nameplates";
 import PlayerAvatar from "./PlayerAvatar";
@@ -73,8 +74,8 @@ function SpaceScene({
   const isCoarsePointer = useCoarsePointer();
 
   /**
-   * 손가락 기기는 가장 가까이 붙여 시작한다. 세로로 긴 화면은 가로 시야가 좁아
-   * 기본 거리에서 전광판이 작게 보인다. 시작값일 뿐이라 핀치로 물러날 수 있다.
+   * 손가락 기기는 가장 멀리 물러나 시작해 전광판 위 배너까지 담는다.
+   * 시작값일 뿐이라 핀치로 다가갈 수 있다.
    */
   const initialCameraDistance = isCoarsePointer
     ? SPACE_CAMERA.touchInitialDistance
@@ -193,6 +194,7 @@ function SpaceScene({
     <>
       <SceneLighting hasRealtimeShadows={hasRealtimeShadows} />
       <Ground hasRealtimeShadows={hasRealtimeShadows} />
+      <ControlWall wallAnchor={wallAnchor} displayScale={wallDisplayScale} />
 
       {/* 전광판과 광고판은 한 덩어리로 묶어 기준점을 중심으로 함께 줄인다. */}
       <group position={wallAnchor} scale={wallDisplayScale}>

@@ -2,8 +2,8 @@
 
 import dynamic from "next/dynamic";
 import { memo, type ReactNode, useEffect, useState } from "react";
-import { SPACE_MAX_OCCUPANTS } from "@/entities/space";
 import { loadOrCreateChatIdentity } from "@/features/chat-session";
+import { resolveSpaceAvatarCount } from "../lib/avatarCapacity";
 
 /**
  * three 는 라우트 단위로만 내려받는다. 정적 import 하면 공용 번들에 섞여
@@ -13,9 +13,6 @@ const SpaceCanvas = dynamic(() => import("./SpaceCanvas"), {
   ssr: false,
   loading: () => <div className="h-full w-full bg-[#06080e]" />,
 });
-
-/** 성능 측정용 더미 수 상한. 50석 설계에 여유를 보려면 2배까지 허용한다. */
-const MAX_DUMMY_COUNT = SPACE_MAX_OCCUPANTS * 2;
 
 // region [Privates]
 /**
@@ -38,11 +35,7 @@ const resolveDummyCountFromLocation = (): number => {
 
   const parsedCount = Number.parseInt(rawValue, 10);
 
-  if (!Number.isFinite(parsedCount) || parsedCount <= 0) {
-    return 0;
-  }
-
-  return Math.min(parsedCount, MAX_DUMMY_COUNT);
+  return resolveSpaceAvatarCount(parsedCount);
 };
 // endregion
 

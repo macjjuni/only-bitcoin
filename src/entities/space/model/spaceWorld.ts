@@ -125,12 +125,12 @@ export const SPACE_AD_BOARDS: readonly SpaceAdBoardPlacement[] = [
 /**
  * 전광판 위에 얹는 텍스트 전용 광고 배너.
  *
- * 16:1 로 가로가 길다. 짧은 문구 한 줄을 넓게 펴서 멀리서도 읽히게 하는 자리다.
+ * 전광판 패널과 같은 폭을 쓰며, 높이 0.8 m 의 12:1 배너다.
  * 별도 프레임 메시를 두지 않는다. 높이가 0.8 m 뿐이라 테두리 메시를 더하면
  * 패널보다 테두리가 두꺼워 보인다. 테두리는 텍스처에 그린다.
  */
 export const SPACE_TEXT_BANNER = {
-  width: 12.8,
+  width: SPACE_BILLBOARD.width,
   height: 0.8,
   /** 전광판 프레임 윗변(+3)에서 0.2 띄우고 배너 반높이(0.4)를 더한 값. */
   offset: [0, 3.6, 0] as const,

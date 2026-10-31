@@ -4,10 +4,10 @@ import { resolveFittedFontSize } from "./billboardTexture";
 /**
  * 텍스트 전용 광고 배너 텍스처.
  *
- * 패널(12.8 × 0.8)과 같은 16:1 이다. 비율이 어긋나면 글자가 늘어난다.
+ * 패널(9.6 × 0.8)과 같은 12:1 이다. 비율이 어긋나면 글자가 늘어난다.
  */
 export const TEXT_BANNER_TEXTURE = {
-  width: 1920,
+  width: 1440,
   height: 120,
   paddingX: 48,
   maxFontSizePx: 72,

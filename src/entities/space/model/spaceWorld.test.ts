@@ -86,8 +86,9 @@ describe("텍스트 배너 배치", () => {
     expect(bannerBottom - billboardFrameTop).toBeGreaterThanOrEqual(0.15);
   });
 
-  it("전광판 프레임보다 가로로 길다", () => {
-    expect(SPACE_TEXT_BANNER.width).toBeGreaterThan(SPACE_BILLBOARD.frameWidth);
+  it("전광판 패널과 폭이 같고 프레임 안쪽에 들어온다", () => {
+    expect(SPACE_TEXT_BANNER.width).toBe(SPACE_BILLBOARD.width);
+    expect(SPACE_TEXT_BANNER.width).toBeLessThan(SPACE_BILLBOARD.frameWidth);
   });
 
   it("가로가 세로보다 훨씬 길다", () => {

@@ -9,6 +9,7 @@ import {
   SPACE_AVATAR,
   SPACE_MAX_OCCUPANTS,
 } from "@/entities/space";
+import { selectSpaceAvatarSlots } from "@/views/space/lib/avatarCapacity";
 import { createShadowBlobTexture } from "@/views/space/lib/shadowBlobTexture";
 
 const SHADOW_LIFT_Y = 0.02;
@@ -33,11 +34,12 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
   /** 행렬 계산용 임시 객체. 프레임마다 새로 만들면 GC 부하가 측정값에 섞인다. */
   const transformProxy = useMemo(() => new Object3D(), []);
   const colorProxy = useMemo(() => new Color(), []);
+  const renderedPlayers = useMemo(() => selectSpaceAvatarSlots(players), [players]);
   // endregion
 
   // region [Privates]
   const applyInstanceColors = (): void => {
-    players.forEach((player, instanceIndex) => {
+    renderedPlayers.forEach((player, instanceIndex) => {
       colorProxy.set(resolveAvatarColor(player.colorIndex));
       bodyMeshRef.current?.setColorAt(instanceIndex, colorProxy);
       headMeshRef.current?.setColorAt(instanceIndex, colorProxy);
@@ -51,7 +53,7 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
   };
 
   const applyInstanceTransforms = (): void => {
-    players.forEach((player, instanceIndex) => {
+    renderedPlayers.forEach((player, instanceIndex) => {
       transformProxy.rotation.set(0, player.yaw, 0);
 
       transformProxy.position.set(player.x, SPACE_AVATAR.bodyCenterY, player.z);
@@ -80,7 +82,7 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
   // region [Life Cycles]
   useEffect(() => {
     applyInstanceColors();
-  }, [players]);
+  }, [renderedPlayers]);
 
   useEffect(() => {
     return () => {
@@ -97,7 +99,7 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
     <>
       <instancedMesh
         ref={bodyMeshRef}
-        count={players.length}
+        count={renderedPlayers.length}
         args={[undefined, undefined, SPACE_MAX_OCCUPANTS]}
       >
         <capsuleGeometry
@@ -113,7 +115,7 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
 
       <instancedMesh
         ref={headMeshRef}
-        count={players.length}
+        count={renderedPlayers.length}
         args={[undefined, undefined, SPACE_MAX_OCCUPANTS]}
       >
         <sphereGeometry
@@ -128,7 +130,7 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
 
       <instancedMesh
         ref={shadowMeshRef}
-        count={players.length}
+        count={renderedPlayers.length}
         args={[undefined, undefined, SPACE_MAX_OCCUPANTS]}
       >
         <planeGeometry args={[SPACE_AVATAR.shadowRadius * 2, SPACE_AVATAR.shadowRadius * 2]} />

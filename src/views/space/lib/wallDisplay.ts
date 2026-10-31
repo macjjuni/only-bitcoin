@@ -8,9 +8,9 @@ import { SPACE_CAMERA } from "@/features/space-controls";
  * 그래서 세로로 긴 화면에서는 가로 시야가 좁아진다. 세로 FOV 55° 기준으로
  * 데스크톱(종횡비 1.78)은 가로 85.6° 인데 아이폰 세로(0.46)는 27.0° 뿐이다.
  *
- * 다만 손가락 기기는 카메라를 가장 가까이 붙여 시작하므로 일반적인 폰도
- * 전광판이 가시 폭의 93% 라 들어온다. 축소는 그보다 좁은 화면(접는 폰 커버
- * 화면, 좁게 줄인 데스크톱 창)을 위한 안전장치다.
+ * 손가락 기기는 18 m 뒤에서 시작한다. 중앙 스택에서 가장 넓은 전광판 프레임이
+ * 화면을 넘지 않도록 실제 시작 거리로 배율을 구한다. 축소는 접는 폰 커버
+ * 화면이나 좁게 줄인 데스크톱 창을 위한 안전장치다.
  *
  * FOV 를 넓히는 방법도 있지만 씬 전체가 어안처럼 왜곡되고 다른 오브젝트까지
  * 작아진다. 화면에서 차지하는 비율이 같아지므로 글자 크기 이득도 없다.
@@ -18,7 +18,7 @@ import { SPACE_CAMERA } from "@/features/space-controls";
  */
 
 /**
- * 전광판 프레임이 차지해도 되는 가시 폭 비율.
+ * 중앙 스택이 차지해도 되는 가시 폭 비율.
  *
  * 크기를 정하는 값이 아니라 **넘침을 막는 가드**다. 작게 잡으면 화면이 좁을수록
  * 전광판을 필요 이상으로 줄이게 된다. 1 에 가깝게 두되 여백만 남긴다.
@@ -53,8 +53,8 @@ export const resolveWallDisplayScale = (
     Math.abs(SPACE_WALL_ANCHOR[2]) + safeCameraDistance * Math.cos(SPACE_CAMERA.defaultPitch);
   const visibleHeight = 2 * referenceDistance * Math.tan(toRadians(SPACE_CAMERA.fov) / 2);
   const visibleWidth = visibleHeight * viewportAspect;
-  // 중앙 스택에서 가장 넓은 요소를 기준으로 삼는다. 텍스트 배너가 전광판
-  // 프레임보다 넓어서, 프레임만 보면 배너가 먼저 화면을 넘는다.
+  // 중앙 스택에서 가장 넓은 요소를 기준으로 삼는다. 텍스트 배너는 패널과
+  // 폭이 같으므로 현재는 전광판 프레임이 가로 범위를 정한다.
   const widestCentralWidth = Math.max(SPACE_BILLBOARD.frameWidth, SPACE_TEXT_BANNER.width);
   const fittedScale = (TARGET_WIDTH_FRACTION * visibleWidth) / widestCentralWidth;
 

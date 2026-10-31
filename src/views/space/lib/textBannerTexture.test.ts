@@ -42,8 +42,8 @@ describe("isBannerPlaceholder", () => {
 });
 
 describe("배너 비율", () => {
-  it("텍스처는 16:1 이다", () => {
-    expect(TEXT_BANNER_TEXTURE.width / TEXT_BANNER_TEXTURE.height).toBeCloseTo(16, 6);
+  it("텍스처는 12:1 이다", () => {
+    expect(TEXT_BANNER_TEXTURE.width / TEXT_BANNER_TEXTURE.height).toBeCloseTo(12, 6);
   });
 
   it("패널 geometry 비율이 텍스처 비율과 같다", () => {

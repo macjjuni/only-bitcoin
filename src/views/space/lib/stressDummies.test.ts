@@ -24,6 +24,19 @@ describe("createStressDummies", () => {
     expect(createStressDummies(-5)).toEqual([]);
   });
 
+  it("슬롯 상한을 넘는 요청은 50명 측정과 같은 더미를 만든다", () => {
+    expect(createStressDummies(SPACE_MAX_OCCUPANTS * 2)).toEqual(
+      createStressDummies(SPACE_MAX_OCCUPANTS),
+    );
+  });
+
+  it("비유한 입력은 생성하지 않고 소수 인원은 정수로 내린다", () => {
+    expect(createStressDummies(Number.NaN)).toEqual([]);
+    expect(createStressDummies(Number.POSITIVE_INFINITY)).toEqual([]);
+    expect(createStressDummies(Number.NEGATIVE_INFINITY)).toEqual([]);
+    expect(createStressDummies(2.9)).toEqual(createStressDummies(2));
+  });
+
   it("궤도 중심이 한곳에 뭉치지 않는다", () => {
     const dummies = createStressDummies(SPACE_MAX_OCCUPANTS);
     const averageX =
