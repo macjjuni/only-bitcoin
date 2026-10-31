@@ -36,14 +36,6 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
   // endregion
 
   // region [Privates]
-  const applyInstanceCounts = (instanceCount: number): void => {
-    for (const meshRef of [bodyMeshRef, headMeshRef, shadowMeshRef]) {
-      if (meshRef.current) {
-        meshRef.current.count = instanceCount;
-      }
-    }
-  };
-
   const applyInstanceColors = (): void => {
     players.forEach((player, instanceIndex) => {
       colorProxy.set(resolveAvatarColor(player.colorIndex));
@@ -87,7 +79,6 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
 
   // region [Life Cycles]
   useEffect(() => {
-    applyInstanceCounts(players.length);
     applyInstanceColors();
   }, [players]);
 
@@ -104,7 +95,11 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
 
   return (
     <>
-      <instancedMesh ref={bodyMeshRef} args={[undefined, undefined, SPACE_MAX_OCCUPANTS]}>
+      <instancedMesh
+        ref={bodyMeshRef}
+        count={players.length}
+        args={[undefined, undefined, SPACE_MAX_OCCUPANTS]}
+      >
         <capsuleGeometry
           args={[
             SPACE_AVATAR.bodyRadius,
@@ -116,7 +111,11 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
         <meshStandardMaterial roughness={0.45} metalness={0.2} />
       </instancedMesh>
 
-      <instancedMesh ref={headMeshRef} args={[undefined, undefined, SPACE_MAX_OCCUPANTS]}>
+      <instancedMesh
+        ref={headMeshRef}
+        count={players.length}
+        args={[undefined, undefined, SPACE_MAX_OCCUPANTS]}
+      >
         <sphereGeometry
           args={[
             SPACE_AVATAR.headRadius,
@@ -127,7 +126,11 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
         <meshStandardMaterial roughness={0.35} metalness={0.25} />
       </instancedMesh>
 
-      <instancedMesh ref={shadowMeshRef} args={[undefined, undefined, SPACE_MAX_OCCUPANTS]}>
+      <instancedMesh
+        ref={shadowMeshRef}
+        count={players.length}
+        args={[undefined, undefined, SPACE_MAX_OCCUPANTS]}
+      >
         <planeGeometry args={[SPACE_AVATAR.shadowRadius * 2, SPACE_AVATAR.shadowRadius * 2]} />
         <meshBasicMaterial map={shadowTexture} transparent depthWrite={false} />
       </instancedMesh>
