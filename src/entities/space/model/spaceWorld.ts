@@ -79,6 +79,14 @@ export interface SpaceAdBoardPlacement {
 const AD_BOARD_TILT = (15 * Math.PI) / 180;
 
 /**
+ * 전광판 중심에서 광고판 중심까지의 거리.
+ *
+ * 15° 기울어 있어 가로 투영 반폭이 2.90 이므로 안쪽 끝은 7.00 이고, 전광판
+ * 프레임 끝(5.10)과 1.90 m 떨어진다.
+ */
+const AD_BOARD_OFFSET_X = 9.9;
+
+/**
  * 광고판은 전광판과 세로 중심을 맞춘다.
  *
  * 두 판의 높이가 다르므로(5.4 vs 4) 아래를 맞추면 윗변이 어긋나고 위를 맞추면
@@ -90,14 +98,14 @@ export const SPACE_AD_BOARDS: readonly SpaceAdBoardPlacement[] = [
     id: "left",
     width: 6,
     height: 4,
-    position: [-11, BILLBOARD_CENTER_Y, SPACE_WALL_Z + 0.6],
+    position: [-AD_BOARD_OFFSET_X, BILLBOARD_CENTER_Y, SPACE_WALL_Z + 0.6],
     rotationY: AD_BOARD_TILT,
   },
   {
     id: "right",
     width: 6,
     height: 4,
-    position: [11, BILLBOARD_CENTER_Y, SPACE_WALL_Z + 0.6],
+    position: [AD_BOARD_OFFSET_X, BILLBOARD_CENTER_Y, SPACE_WALL_Z + 0.6],
     rotationY: -AD_BOARD_TILT,
   },
 ] as const;
