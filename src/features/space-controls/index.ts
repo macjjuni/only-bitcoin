@@ -1,8 +1,11 @@
 export {
   applyCameraDrag,
+  applyCameraZoom,
   applyKeyboardYaw,
   type CameraOrbit,
+  clampCameraDistance,
   clampCameraPitch,
+  clampCameraPosition,
   createDefaultCameraOrbit,
   dampVector,
   resolveCameraFocus,
@@ -22,6 +25,7 @@ export {
 } from "./model/movement";
 export {
   consumePendingDrag,
+  consumePendingZoom,
   createSpaceInputSource,
   resolveMergedMovementInput,
   type SpaceInputSource,

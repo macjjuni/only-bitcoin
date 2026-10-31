@@ -1,8 +1,12 @@
 import { describe, expect, it } from "vitest";
+import { SPACE_GROUND, SPACE_WALL_Z } from "@/entities/space";
 import {
   applyCameraDrag,
+  applyCameraZoom,
   applyKeyboardYaw,
+  clampCameraDistance,
   clampCameraPitch,
+  clampCameraPosition,
   createDefaultCameraOrbit,
   dampVector,
   resolveCameraFocus,
@@ -55,10 +59,10 @@ describe("applyKeyboardYaw", () => {
 });
 
 describe("resolveCameraPosition", () => {
-  it("기본 피치에서 카메라 높이는 규격서의 3.2 다", () => {
+  it("기본 궤도에서 카메라는 주시점보다 높이 선다", () => {
     const position = resolveCameraPosition(ORIGIN_PLAYER, createDefaultCameraOrbit(0));
 
-    expect(position.y).toBeCloseTo(3.2, 9);
+    expect(position.y).toBeGreaterThan(SPACE_CAMERA_FOCUS_HEIGHT);
   });
 
   it("yaw 0 이면 카메라가 플레이어 뒤(+Z)에 선다", () => {
@@ -72,26 +76,55 @@ describe("resolveCameraPosition", () => {
     const position = resolveCameraPosition(ORIGIN_PLAYER, {
       yaw: Math.PI / 2,
       pitch: SPACE_CAMERA.defaultPitch,
+      distance: SPACE_CAMERA.defaultDistance,
     });
 
     expect(position.x).toBeGreaterThan(0);
     expect(position.z).toBeCloseTo(0, 9);
   });
 
-  it("주시점과의 거리는 피치와 무관하게 distance 로 유지된다", () => {
+  it("주시점과의 거리는 피치와 무관하게 궤도 거리로 유지된다", () => {
     const focus = resolveCameraFocus(ORIGIN_PLAYER);
 
     for (const pitch of [SPACE_CAMERA.minPitch, SPACE_CAMERA.defaultPitch, SPACE_CAMERA.maxPitch]) {
-      const position = resolveCameraPosition(ORIGIN_PLAYER, { yaw: 0.7, pitch });
+      const position = resolveCameraPosition(ORIGIN_PLAYER, {
+        yaw: 0.7,
+        pitch,
+        distance: SPACE_CAMERA.defaultDistance,
+      });
       const distance = Math.hypot(position.x - focus.x, position.y - focus.y, position.z - focus.z);
 
-      expect(distance).toBeCloseTo(SPACE_CAMERA.distance, 9);
+      expect(distance).toBeCloseTo(SPACE_CAMERA.defaultDistance, 9);
+    }
+  });
+
+  it("줌 거리가 그대로 카메라 거리에 반영된다", () => {
+    const focus = resolveCameraFocus(ORIGIN_PLAYER);
+
+    for (const distance of [SPACE_CAMERA.minDistance, 11, SPACE_CAMERA.maxDistance]) {
+      const position = resolveCameraPosition(ORIGIN_PLAYER, {
+        yaw: 0.4,
+        pitch: SPACE_CAMERA.defaultPitch,
+        distance,
+      });
+
+      expect(
+        Math.hypot(position.x - focus.x, position.y - focus.y, position.z - focus.z),
+      ).toBeCloseTo(distance, 9);
     }
   });
 
   it("피치를 내리면 카메라가 더 높이 올라간다", () => {
-    const shallow = resolveCameraPosition(ORIGIN_PLAYER, { yaw: 0, pitch: SPACE_CAMERA.maxPitch });
-    const steep = resolveCameraPosition(ORIGIN_PLAYER, { yaw: 0, pitch: SPACE_CAMERA.minPitch });
+    const shallow = resolveCameraPosition(ORIGIN_PLAYER, {
+      yaw: 0,
+      pitch: SPACE_CAMERA.maxPitch,
+      distance: SPACE_CAMERA.defaultDistance,
+    });
+    const steep = resolveCameraPosition(ORIGIN_PLAYER, {
+      yaw: 0,
+      pitch: SPACE_CAMERA.minPitch,
+      distance: SPACE_CAMERA.defaultDistance,
+    });
 
     expect(steep.y).toBeGreaterThan(shallow.y);
   });
@@ -149,5 +182,97 @@ describe("dampVector", () => {
     }
 
     expect(at60.x).toBeCloseTo(at30.x, 2);
+  });
+});
+
+describe("createDefaultCameraOrbit", () => {
+  it("기본 거리는 아바타가 화면 높이의 약 16% 가 되는 11 m 다", () => {
+    expect(createDefaultCameraOrbit(0).distance).toBe(SPACE_CAMERA.defaultDistance);
+    expect(SPACE_CAMERA.defaultDistance).toBe(11);
+  });
+});
+
+describe("clampCameraDistance", () => {
+  it("줌 범위를 벗어나지 않는다", () => {
+    expect(clampCameraDistance(0)).toBe(SPACE_CAMERA.minDistance);
+    expect(clampCameraDistance(999)).toBe(SPACE_CAMERA.maxDistance);
+    expect(clampCameraDistance(11)).toBe(11);
+  });
+});
+
+describe("applyCameraZoom", () => {
+  it("양수 입력은 멀어지고 음수 입력은 가까워진다", () => {
+    const orbit = createDefaultCameraOrbit(0);
+
+    expect(applyCameraZoom(orbit, 3).distance).toBe(SPACE_CAMERA.defaultDistance + 3);
+    expect(applyCameraZoom(orbit, -3).distance).toBe(SPACE_CAMERA.defaultDistance - 3);
+  });
+
+  it("줌 범위 밖으로 나가지 않는다", () => {
+    const orbit = createDefaultCameraOrbit(0);
+
+    expect(applyCameraZoom(orbit, 999).distance).toBe(SPACE_CAMERA.maxDistance);
+    expect(applyCameraZoom(orbit, -999).distance).toBe(SPACE_CAMERA.minDistance);
+  });
+
+  it("줌은 yaw 와 피치를 건드리지 않는다", () => {
+    const orbit = { yaw: 1.2, pitch: -0.3, distance: 11 };
+    const zoomed = applyCameraZoom(orbit, 4);
+
+    expect(zoomed.yaw).toBe(orbit.yaw);
+    expect(zoomed.pitch).toBe(orbit.pitch);
+  });
+
+  it("휠 한 노치(deltaY 100)는 약 1.2 m 를 움직인다", () => {
+    expect(100 * SPACE_CAMERA.wheelZoomSensitivity).toBeCloseTo(1.2, 9);
+  });
+});
+
+describe("회전 입력이 거리를 보존한다", () => {
+  it("드래그는 거리를 바꾸지 않는다", () => {
+    const orbit = { yaw: 0, pitch: SPACE_CAMERA.defaultPitch, distance: 14 };
+
+    expect(applyCameraDrag(orbit, 120, -40).distance).toBe(14);
+  });
+
+  it("키보드 회전은 거리를 바꾸지 않는다", () => {
+    const orbit = { yaw: 0, pitch: SPACE_CAMERA.defaultPitch, distance: 14 };
+
+    expect(applyKeyboardYaw(orbit, 1, 0.5).distance).toBe(14);
+  });
+});
+
+describe("clampCameraPosition", () => {
+  const GROUND_MAX_Z = SPACE_GROUND.centerZ + SPACE_GROUND.depth / 2;
+
+  it("뒷벽 뒤로 넘어가지 않는다", () => {
+    expect(clampCameraPosition({ x: 0, y: 4, z: -40 }).z).toBeGreaterThan(SPACE_WALL_Z);
+  });
+
+  it("바닥 아래로 내려가지 않는다", () => {
+    expect(clampCameraPosition({ x: 0, y: -5, z: 0 }).y).toBe(SPACE_CAMERA.minHeight);
+  });
+
+  it("좌우와 뒤쪽 바닥 밖으로 나가지 않는다", () => {
+    const clamped = clampCameraPosition({ x: 500, y: 4, z: 500 });
+
+    expect(clamped.x).toBeLessThan(SPACE_GROUND.width / 2);
+    expect(clamped.z).toBeLessThan(GROUND_MAX_Z);
+  });
+
+  it("월드 안쪽 위치는 그대로 둔다", () => {
+    const inside = { x: 3, y: 4, z: 6 };
+
+    expect(clampCameraPosition(inside)).toEqual(inside);
+  });
+
+  it("최대 줌에서 뒷벽을 등져도 카메라가 벽 뒤로 빠지지 않는다", () => {
+    // 플레이어가 경계(z=-16)에서 전광판을 등지고 선 상황
+    const position = resolveCameraPosition(
+      { x: 0, z: -16, yaw: 0 },
+      { yaw: Math.PI, pitch: SPACE_CAMERA.defaultPitch, distance: SPACE_CAMERA.maxDistance },
+    );
+
+    expect(position.z).toBeGreaterThan(SPACE_WALL_Z);
   });
 });

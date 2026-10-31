@@ -37,13 +37,30 @@ export const SPACE_SPAWN_RING = {
   maxRadius: 14,
 } as const;
 
+/**
+ * 전광판 중심 높이.
+ *
+ * 벽에 가장 가까이 붙은 경우(벽까지 8 m)에도 기본 피치에서 패널 전체가 화면에
+ * 들어오는 상한이다. 그 위치의 가시 상단이 9.8 m 이고 프레임 상단이 9.5 m 다.
+ * 더 올리면 가까이서 올려다볼 때 시야를 끌어올려야 한다.
+ */
+const BILLBOARD_CENTER_Y = 6.2;
+
 export const SPACE_BILLBOARD = {
   width: 12,
   height: 6,
-  position: [0, 4.2, SPACE_WALL_Z] as const,
+  position: [0, BILLBOARD_CENTER_Y, SPACE_WALL_Z] as const,
   frameWidth: 12.6,
   frameHeight: 6.6,
-  framePosition: [0, 4.2, SPACE_WALL_Z - 0.1] as const,
+  framePosition: [0, BILLBOARD_CENTER_Y, SPACE_WALL_Z - 0.1] as const,
+  /**
+   * 바닥을 물들이는 광원 위치.
+   *
+   * 패널을 따라 올리면 바닥까지의 거리가 멀어져(감쇠 제곱) 오렌지 반사가 절반
+   * 아래로 떨어진다. 패널 자체는 발광 재질이라 광원과 분리해도 밝기가 유지되므로
+   * 광원만 낮게 고정한다.
+   */
+  glowPosition: [0, 4, SPACE_WALL_Z + 2.5] as const,
   /** 가격 숫자 크기 기준 거리. 스폰 링 먼 쪽 끝. */
   referenceViewDistance: 32,
 } as const;

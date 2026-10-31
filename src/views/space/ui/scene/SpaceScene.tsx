@@ -11,9 +11,11 @@ import {
 } from "@/entities/space";
 import {
   applyCameraDrag,
+  applyCameraZoom,
   applyKeyboardYaw,
   type CameraOrbit,
   consumePendingDrag,
+  consumePendingZoom,
   createDefaultCameraOrbit,
   dampVector,
   planFixedSteps,
@@ -81,10 +83,11 @@ function SpaceScene({
   const advanceCameraOrbit = (deltaSeconds: number): CameraOrbit => {
     const { deltaX, deltaY } = consumePendingDrag(inputSource);
     const draggedOrbit = applyCameraDrag(cameraOrbitRef.current, deltaX, deltaY);
+    const zoomedOrbit = applyCameraZoom(draggedOrbit, consumePendingZoom(inputSource));
     const nextOrbit =
       inputSource.yawDirection === 0
-        ? draggedOrbit
-        : applyKeyboardYaw(draggedOrbit, inputSource.yawDirection, deltaSeconds);
+        ? zoomedOrbit
+        : applyKeyboardYaw(zoomedOrbit, inputSource.yawDirection, deltaSeconds);
 
     cameraOrbitRef.current = nextOrbit;
 

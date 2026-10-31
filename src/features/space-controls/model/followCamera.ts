@@ -1,10 +1,17 @@
-import type { PlayerTransform } from "@/entities/space";
+import { type PlayerTransform, SPACE_GROUND, SPACE_WALL_Z } from "@/entities/space";
 
 const toRadians = (degrees: number): number => (degrees * Math.PI) / 180;
 
 /** 카메라 튜닝 값. 근거는 `docs/btc-space-3d.md` §5 에 있다. */
 export const SPACE_CAMERA = {
-  distance: 7,
+  /** 아바타가 화면 높이의 약 16% 를 차지하는 거리. */
+  defaultDistance: 11,
+  minDistance: 5,
+  maxDistance: 18,
+  /** 휠 deltaY 1 단위당 거리 변화(m). 한 노치(100)에 약 1.2 m. */
+  wheelZoomSensitivity: 0.012,
+  /** 핀치 1 px 당 거리 변화(m). 200 px 벌리면 약 6 m. */
+  pinchZoomSensitivity: 0.03,
   defaultPitch: toRadians(-12),
   minPitch: toRadians(-35),
   maxPitch: toRadians(5),
@@ -16,20 +23,20 @@ export const SPACE_CAMERA = {
   /** 모션 축소 환경에서는 감쇠를 올려 흔들림을 줄인다. */
   reducedMotionFollowDamping: 20,
   fov: 55,
+  /** 카메라가 바닥을 뚫지 않는 최저 높이. */
+  minHeight: 0.6,
+  /** 뒷벽·바닥 경계에서 띄울 여유. */
+  boundaryMargin: 1,
 } as const;
 
-/**
- * 카메라가 바라보는 지점의 높이.
- *
- * 기본 피치에서 카메라 높이가 규격서의 3.2 가 되도록 역산한 값이며,
- * 결과적으로 아바타 머리(약 1.81) 근처를 주시한다.
- */
-export const SPACE_CAMERA_FOCUS_HEIGHT =
-  3.2 + SPACE_CAMERA.distance * Math.sin(SPACE_CAMERA.defaultPitch);
+/** 카메라가 바라보는 지점의 높이. 아바타 머리(약 1.81) 근처다. */
+export const SPACE_CAMERA_FOCUS_HEIGHT = 1.75;
 
 export interface CameraOrbit {
   yaw: number;
   pitch: number;
+  /** 주시점과 카메라 사이 거리. 휠·핀치로 바뀐다. */
+  distance: number;
 }
 
 export interface Vector3Like {
@@ -41,6 +48,7 @@ export interface Vector3Like {
 export const createDefaultCameraOrbit = (playerYaw: number): CameraOrbit => ({
   yaw: playerYaw,
   pitch: SPACE_CAMERA.defaultPitch,
+  distance: SPACE_CAMERA.defaultDistance,
 });
 
 // region [Privates]
@@ -52,6 +60,17 @@ const clamp = (value: number, min: number, max: number): number => {
 export const clampCameraPitch = (pitch: number): number => {
   return clamp(pitch, SPACE_CAMERA.minPitch, SPACE_CAMERA.maxPitch);
 };
+
+export const clampCameraDistance = (distance: number): number => {
+  return clamp(distance, SPACE_CAMERA.minDistance, SPACE_CAMERA.maxDistance);
+};
+
+/** 누적된 줌 입력(m)을 거리에 반영한다. 양수면 멀어진다. */
+export const applyCameraZoom = (orbit: CameraOrbit, distanceDelta: number): CameraOrbit => ({
+  yaw: orbit.yaw,
+  pitch: orbit.pitch,
+  distance: clampCameraDistance(orbit.distance + distanceDelta),
+});
 
 /**
  * 포인터 드래그를 궤도 회전에 반영한다.
@@ -65,6 +84,7 @@ export const applyCameraDrag = (
 ): CameraOrbit => ({
   yaw: orbit.yaw + deltaX * SPACE_CAMERA.dragSensitivity,
   pitch: clampCameraPitch(orbit.pitch - deltaY * SPACE_CAMERA.dragSensitivity),
+  distance: orbit.distance,
 });
 
 /** 포인터 없이 키보드로 시야를 돌린다. `direction` 은 -1 또는 1. */
@@ -75,6 +95,7 @@ export const applyKeyboardYaw = (
 ): CameraOrbit => ({
   yaw: orbit.yaw + direction * SPACE_CAMERA.keyboardYawRate * deltaSeconds,
   pitch: orbit.pitch,
+  distance: orbit.distance,
 });
 
 /** 플레이어 위에 있는 카메라 주시점. */
@@ -83,6 +104,37 @@ export const resolveCameraFocus = (player: PlayerTransform): Vector3Like => ({
   y: SPACE_CAMERA_FOCUS_HEIGHT,
   z: player.z,
 });
+
+/**
+ * 카메라를 월드 안으로 가둔다.
+ *
+ * 가두지 않으면 플레이어가 뒷벽 쪽에서 몸을 돌릴 때 카메라가 벽 뒤로 빠진다.
+ * 벽은 단면 렌더라 뒤에서는 보이지 않고, 광장이 바깥에서 들여다보이는 상태가 된다.
+ * 거리를 18 m 까지 늘릴 수 있게 되면서 이 구간이 훨씬 넓어졌다.
+ *
+ * 위를 보는 피치에서는 카메라가 주시점보다 낮아지므로 최저 높이도 함께 막는다.
+ * 거리 18 m·피치 +5° 면 높이가 0.18 m 까지 내려간다.
+ */
+export const clampCameraPosition = (position: Vector3Like): Vector3Like => {
+  const { boundaryMargin, minHeight } = SPACE_CAMERA;
+  const groundMinZ = SPACE_GROUND.centerZ - SPACE_GROUND.depth / 2;
+  const groundMaxZ = SPACE_GROUND.centerZ + SPACE_GROUND.depth / 2;
+
+  return {
+    x: clamp(
+      position.x,
+      -SPACE_GROUND.width / 2 + boundaryMargin,
+      SPACE_GROUND.width / 2 - boundaryMargin,
+    ),
+    y: Math.max(position.y, minHeight),
+    // 뒷벽 앞쪽으로만 둔다. 바닥 뒤편으로 넘어가면 벽 뒤가 된다.
+    z: clamp(
+      position.z,
+      Math.max(groundMinZ + boundaryMargin, SPACE_WALL_Z + boundaryMargin),
+      groundMaxZ - boundaryMargin,
+    ),
+  };
+};
 
 /**
  * 궤도상의 카메라 목표 위치.
@@ -98,11 +150,11 @@ export const resolveCameraPosition = (player: PlayerTransform, orbit: CameraOrbi
   const forwardY = Math.sin(orbit.pitch);
   const forwardZ = -Math.cos(orbit.yaw) * cosPitch;
 
-  return {
-    x: focus.x - forwardX * SPACE_CAMERA.distance,
-    y: focus.y - forwardY * SPACE_CAMERA.distance,
-    z: focus.z - forwardZ * SPACE_CAMERA.distance,
-  };
+  return clampCameraPosition({
+    x: focus.x - forwardX * orbit.distance,
+    y: focus.y - forwardY * orbit.distance,
+    z: focus.z - forwardZ * orbit.distance,
+  });
 };
 
 /**

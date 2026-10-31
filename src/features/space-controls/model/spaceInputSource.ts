@@ -17,6 +17,8 @@ export interface SpaceInputSource {
   /** 아직 카메라에 반영되지 않은 포인터 드래그 누적량(px). */
   pendingDragX: number;
   pendingDragY: number;
+  /** 아직 반영되지 않은 줌 누적량(m). 양수면 멀어진다. */
+  pendingZoomDistance: number;
 }
 
 export const createSpaceInputSource = (): SpaceInputSource => ({
@@ -25,6 +27,7 @@ export const createSpaceInputSource = (): SpaceInputSource => ({
   yawDirection: 0,
   pendingDragX: 0,
   pendingDragY: 0,
+  pendingZoomDistance: 0,
 });
 
 const clamp = (value: number, min: number, max: number): number => {
@@ -54,4 +57,13 @@ export const consumePendingDrag = (
   inputSource.pendingDragY = 0;
 
   return { deltaX, deltaY };
+};
+
+/** 누적된 줌량(m)을 읽고 비운다. */
+export const consumePendingZoom = (inputSource: SpaceInputSource): number => {
+  const distanceDelta = inputSource.pendingZoomDistance;
+
+  inputSource.pendingZoomDistance = 0;
+
+  return distanceDelta;
 };

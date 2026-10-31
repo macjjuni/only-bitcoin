@@ -18,8 +18,6 @@ interface SceneLightingProps {
 }
 
 function SceneLighting({ hasRealtimeShadows }: SceneLightingProps): ReactNode {
-  const [billboardX, billboardY, billboardZ] = SPACE_BILLBOARD.position;
-
   return (
     <>
       <ambientLight color={AMBIENT_COLOR} intensity={0.55} />
@@ -39,13 +37,13 @@ function SceneLighting({ hasRealtimeShadows }: SceneLightingProps): ReactNode {
         shadow-camera-far={60}
       />
 
-      {/* 전광판이 바닥을 물들이게 하는 광원. 패널보다 살짝 앞에 둔다. */}
+      {/* 전광판이 바닥을 물들이게 하는 광원. 패널보다 낮고 살짝 앞에 둔다. */}
       <pointLight
         color={BITCOIN_COLOR}
         intensity={BILLBOARD_GLOW_INTENSITY}
         distance={BILLBOARD_GLOW_DISTANCE}
         decay={2}
-        position={[billboardX, billboardY, billboardZ + 2.5]}
+        position={SPACE_BILLBOARD.glowPosition}
       />
     </>
   );
