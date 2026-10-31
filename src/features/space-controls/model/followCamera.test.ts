@@ -56,6 +56,27 @@ describe("applyKeyboardYaw", () => {
     expect(orbit.yaw).toBeCloseTo(SPACE_CAMERA.keyboardYawRate, 9);
     expect(orbit.pitch).toBe(SPACE_CAMERA.defaultPitch);
   });
+
+  /**
+   * 부호 규약을 못으로 박아 둔다. `useKeyboardInput` 이 왼쪽 키에 양수를 주므로
+   * 양수는 시야가 왼쪽으로 도는 쪽이어야 한다. 전방 `(-sin(yaw), -cos(yaw))` 의
+   * x 성분이 음수로 가면 왼쪽이다.
+   */
+  it("양수 방향은 시야를 왼쪽으로 돌린다", () => {
+    const turnedLeft = applyKeyboardYaw({ yaw: 0, pitch: 0, distance: 11 }, 1, 0.5);
+    const turnedRight = applyKeyboardYaw({ yaw: 0, pitch: 0, distance: 11 }, -1, 0.5);
+
+    expect(-Math.sin(turnedLeft.yaw)).toBeLessThan(0);
+    expect(-Math.sin(turnedRight.yaw)).toBeGreaterThan(0);
+  });
+
+  it("왼쪽으로 돌면 카메라가 플레이어 오른쪽(+X)으로 돈다", () => {
+    // 시야가 왼쪽을 보려면 카메라는 반대편으로 가야 한다.
+    const orbit = applyKeyboardYaw({ yaw: 0, pitch: 0, distance: 11 }, 1, 0.5);
+    const position = resolveCameraPosition({ x: 0, z: 0, yaw: 0 }, orbit);
+
+    expect(position.x).toBeGreaterThan(0);
+  });
 });
 
 describe("resolveCameraPosition", () => {

@@ -53,8 +53,10 @@ const useKeyboardInput = (inputSource: SpaceInputSource): void => {
       inputSource.keyboard.forward = forward;
       inputSource.keyboard.strafe = strafe;
       inputSource.keyboard.isRunning = hasAnyPressed(RUN_CODES);
+      // yaw 가 커지면 시야가 왼쪽으로 돈다(전방이 -Z 에서 -X 쪽으로 간다).
+      // 따라서 왼쪽 키가 양수다. 부호를 뒤집으면 Q·E 가 반대로 움직인다.
       inputSource.yawDirection =
-        Number(hasAnyPressed(YAW_RIGHT_CODES)) - Number(hasAnyPressed(YAW_LEFT_CODES));
+        Number(hasAnyPressed(YAW_LEFT_CODES)) - Number(hasAnyPressed(YAW_RIGHT_CODES));
     };
 
     const clearPressedCodes = (): void => {
