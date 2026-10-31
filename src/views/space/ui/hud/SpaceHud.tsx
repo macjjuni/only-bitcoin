@@ -1,43 +1,131 @@
 "use client";
 
-import { memo, type ReactNode } from "react";
-import { SPACE_MAX_OCCUPANTS } from "@/entities/space";
+import { ArrowLeft, CircleHelp, Maximize, Minimize } from "lucide-react";
+import { usePathname } from "next/navigation";
+import { useTransitionRouter } from "next-view-transitions";
+import { memo, type ReactNode, useCallback, useMemo, useState } from "react";
+import type { SpacePresence } from "@/entities/space";
 import { type SpaceInputSource, VirtualJoystick } from "@/features/space-controls";
+import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
+import SpaceControlGuide from "./SpaceControlGuide";
+import SpacePresenceBadge from "./SpacePresenceBadge";
+import { useFullscreen } from "./useFullscreen";
 
-const KEYBOARD_GUIDE = [
-  { keys: "W A S D", description: "이동" },
-  { keys: "Shift", description: "달리기" },
-  { keys: "드래그 / Q E", description: "시야 회전" },
-] as const;
+/** 히스토리가 없을 때(직접 링크 진입) 돌아갈 곳. `/space` 를 노출하는 목록이다. */
+const FALLBACK_BACK_PATH = "/orange";
+
+const ICON_SIZE = 18;
+const ICON_STROKE_WIDTH = 2;
 
 interface SpaceHudProps {
   inputSource: SpaceInputSource;
-  occupantCount: number;
+  presence: SpacePresence;
 }
 
 /**
  * 캔버스 위에 떠 있는 2D 조작 레이어.
  *
- * 조작 안내와 접속자 수를 DOM 으로 제공한다. 캔버스 안 텍스트에만 의존하면
- * 확대·스크린리더·WebGL 실패 상황에서 모두 읽히지 않는다.
+ * 좌측 상단은 접속 표시, 우측 상단은 버튼 묶음이다. 안내와 상태를 DOM 으로
+ * 제공한다. 캔버스 안 텍스트에만 의존하면 확대·스크린리더·WebGL 실패 상황에서
+ * 모두 읽히지 않는다.
+ *
+ * 노치와 둥근 모서리를 피하려고 `safe-area-inset` 만큼 안쪽으로 들인다.
+ * 전체 화면 3D 페이지라 브라우저가 대신 비켜주지 않는다.
  */
-function SpaceHud({ inputSource, occupantCount }: SpaceHudProps): ReactNode {
+function SpaceHud({ inputSource, presence }: SpaceHudProps): ReactNode {
+  // region [Hooks]
+  const router = useTransitionRouter();
+  const pathname = usePathname();
+  const { isFullscreen, isFullscreenSupported, toggleFullscreen } = useFullscreen();
+  const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
+  // endregion
+
+  // region [Events]
+  const onClickBack = useCallback((): void => {
+    // 직접 링크로 들어온 경우 뒤로 갈 곳이 없어 빈 화면에 남는다.
+    if (window.history.length > 1) {
+      router.back();
+      return;
+    }
+
+    router.push(FALLBACK_BACK_PATH);
+  }, [router]);
+
+  const onClickToggleGuide = useCallback((): void => {
+    setIsGuideOpen((previousOpen) => !previousOpen);
+  }, []);
+  // endregion
+
+  // region [Templates]
+  const hudActions = useMemo((): SpaceHudAction[] => {
+    const actions: SpaceHudAction[] = [
+      {
+        id: "back",
+        label: "뒤로 가기",
+        icon: <ArrowLeft size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+        onClick: onClickBack,
+      },
+    ];
+
+    if (isFullscreenSupported) {
+      actions.push({
+        id: "fullscreen",
+        label: isFullscreen ? "전체 화면 끄기" : "전체 화면",
+        icon: isFullscreen ? (
+          <Minimize size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />
+        ) : (
+          <Maximize size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />
+        ),
+        isActive: isFullscreen,
+        onClick: toggleFullscreen,
+      });
+    }
+
+    actions.push({
+      id: "guide",
+      label: "조작 안내",
+      icon: <CircleHelp size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+      isActive: isGuideOpen,
+      onClick: onClickToggleGuide,
+    });
+
+    return actions;
+  }, [
+    isFullscreen,
+    isFullscreenSupported,
+    isGuideOpen,
+    onClickBack,
+    onClickToggleGuide,
+    toggleFullscreen,
+  ]);
+
+  const GuidePanelTemplate = isGuideOpen ? (
+    <div className="mt-2">
+      <SpaceControlGuide />
+    </div>
+  ) : null;
+  // endregion
+
+  // 경로가 바뀌는 동안에도 HUD 가 남지 않도록 현재 경로를 키로 쓴다.
   return (
-    <div className="pointer-events-none absolute inset-0">
-      <div className="absolute left-4 top-4 rounded-xl bg-black/50 px-3 py-2 backdrop-blur-sm">
-        <p className="text-xs font-semibold text-white/90">
-          접속 {occupantCount} / {SPACE_MAX_OCCUPANTS}
-        </p>
+    <div
+      key={pathname}
+      className="pointer-events-none absolute inset-0"
+      style={{
+        paddingTop: "env(safe-area-inset-top)",
+        paddingRight: "env(safe-area-inset-right)",
+        paddingBottom: "env(safe-area-inset-bottom)",
+        paddingLeft: "env(safe-area-inset-left)",
+      }}
+    >
+      <div className="absolute left-4 top-4">
+        <SpacePresenceBadge presence={presence} />
       </div>
 
-      <dl className="absolute right-4 top-4 hidden rounded-xl bg-black/50 px-3 py-2 backdrop-blur-sm sm:block">
-        {KEYBOARD_GUIDE.map(({ keys, description }) => (
-          <div key={keys} className="flex items-center gap-2 text-[11px] leading-5">
-            <dt className="font-mono font-semibold text-bitcoin">{keys}</dt>
-            <dd className="text-white/70">{description}</dd>
-          </div>
-        ))}
-      </dl>
+      <div className="pointer-events-auto absolute right-4 top-4 flex flex-col items-end">
+        <SpaceActionBar actions={hudActions} />
+        {GuidePanelTemplate}
+      </div>
 
       <div className="pointer-events-auto sm:hidden">
         <VirtualJoystick inputSource={inputSource} />

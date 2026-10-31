@@ -107,7 +107,13 @@ src/views/space/
   ui/scene/Nameplates.tsx    # <Html> 명찰, 거리·개수 컬링
   ui/scene/PriceBillboard.tsx
   ui/scene/AdBoard.tsx
-  ui/hud/SpaceHud.tsx
+  ui/hud/SpaceHud.tsx        # HUD 조립
+  ui/hud/SpacePresenceBadge.tsx
+  ui/hud/SpaceActionBar.tsx  # SpaceHudAction 배열을 받아 버튼 묶음 렌더
+  ui/hud/SpaceControlGuide.tsx
+  ui/hud/useFullscreen.ts
+  lib/presenceLabel.ts       # 순수 함수: 접속 상태 → 표시 문구
+  lib/presenceLabel.test.ts
   lib/billboardTexture.ts    # CanvasTexture 드로잉(순수 로직)
   lib/billboardTexture.test.ts
   lib/avatarCulling.ts       # 순수 함수: 거리순 상위 N 선별
@@ -344,12 +350,63 @@ three 가 다른 라우트에 섞이지 않는다는 목표는 달성했다. `/s
 리사이즈·이벤트·컨텍스트 브리지를 직접 구현해야 하므로, 약 46 KB 를 위해 감수할
 복잡도는 아니라고 보고 1단계에서는 하지 않는다.
 
-## 9. 접근성·폴백
+## 9. HUD
+
+캔버스 위에 떠 있는 2D 레이어다. 상태와 조작을 DOM 으로 제공한다. 캔버스 안 텍스트에만 의존하면 확대·스크린리더·WebGL 실패 상황에서 모두 읽히지 않는다.
+
+| 위치 | 내용 |
+| --- | --- |
+| 좌측 상단 | 접속 표시 (상태 점 + 문구) |
+| 우측 상단 | 버튼 묶음 (세로로 쌓임) + 조작 안내 패널 |
+| 좌측 하단 | 가상 조이스틱 (모바일 전용) |
+
+전체 화면 페이지라 브라우저가 노치를 대신 비켜주지 않는다. HUD 전체를 `safe-area-inset` 만큼 안쪽으로 들인다.
+
+### 9.1 접속 표시
+
+숫자만 띄우면 네트워크가 없는 1단계에서도 접속자가 있는 것처럼 읽힌다. 상태를 함께 들고 다니며 문구 자체를 바꾼다.
+
+| 상태 | 문구 | 점 |
+| --- | --- | --- |
+| `online` | `12 / 50` | 초록 |
+| `connecting` | 연결 중 | 오렌지, 깜빡임 |
+| `offline` | 오프라인 | 회색 |
+
+1단계는 항상 `offline` 이다. 2단계에서 `SpaceRoom` 연결 상태를 그대로 올린다.
+
+### 9.2 버튼 묶음
+
+버튼이 늘어나도 배치·크기·접근성 처리를 각자 다시 쓰지 않도록, 모양은 `SpaceActionBar` 에서만 정의한다. 추가할 때는 `SpaceHudAction` 을 만족하는 항목을 배열에 넣는다.
+
+```ts
+interface SpaceHudAction {
+  id: string;
+  label: string;        // 스크린리더 이름이자 툴팁. 아이콘만으로는 뜻이 안 전달된다
+  icon: ReactNode;
+  isActive?: boolean;   // 토글 버튼이 켜진 상태
+  isDisabled?: boolean;
+  badgeCount?: number;  // 읽지 않은 수 등. 0 이면 표시하지 않음
+  onClick: () => void;
+}
+```
+
+현재 버튼:
+
+| 버튼 | 동작 | 비고 |
+| --- | --- | --- |
+| 뒤로 가기 | `router.back()` | 히스토리가 없으면 `/orange` 로 보냄 |
+| 전체 화면 | Fullscreen API 토글 | 미지원 환경(iOS 사파리)에서는 버튼 자체를 숨김 |
+| 조작 안내 | 안내 패널 토글 | 데스크톱·모바일 조작을 함께 적음 |
+
+2단계 이후 채팅·설정·소리 버튼이 여기에 붙는다.
+
+### 9.3 접근성·폴백
 
 - WebGL 컨텍스트 생성 실패 시 `SpaceFallback` 을 띄우고 `/overview` 로 가는 링크를 제공한다.
 - `webglcontextlost` 이벤트를 받아 복구를 시도하고, 실패 시 폴백으로 전환한다.
-- 키보드만으로 이동·시야 회전이 모두 가능해야 한다(드래그 없이 `Q`/`E` 로 yaw).
-- 조작 안내와 접속자 수는 DOM HUD 로 제공한다. 캔버스 안 텍스트에만 의존하지 않는다.
+- 키보드만으로 이동과 시야 회전이 모두 가능해야 한다(드래그 없이 `Q`/`E` 로 yaw).
+- yaw 가 커지면 시야는 **왼쪽**으로 돈다(전방 `(-sin θ, -cos θ)` 가 `-Z` 에서 `-X` 로 간다). 따라서 왼쪽 키가 양수다. 이 부호는 `followCamera.test.ts` 에서 고정한다.
+- 아이콘 버튼은 모두 `aria-label` 을 가지고, 토글 버튼은 `aria-pressed` 를 함께 준다.
 - `prefers-reduced-motion` 은 §5 대로 처리한다.
 - 입장 상한 초과 시 "공간이 가득 찼습니다" 안내와 재시도 버튼을 보여준다(2단계).
 
@@ -473,6 +530,7 @@ three 가 다른 라우트에 섞이지 않는다는 목표는 달성했다. `/s
 
 | 버전 | 날짜 | 내용 |
 | --- | --- | --- |
+| v0.15 | 2026-10-31 | HUD 골격 정비. 좌측 상단 접속 표시(상태별 문구), 우측 상단 확장 가능한 버튼 묶음(`SpaceHudAction`) 추가. 뒤로 가기·전체 화면·조작 안내 버튼을 넣고, 상시 노출되던 조작 안내를 버튼 토글로 바꿈. `safe-area-inset` 적용. §9 신설 |
 | v0.14 | 2026-10-31 | 축소 기준 거리를 플레이어→벽(18 m)에서 **카메라→벽(28.76 m)** 으로 수정. 가시 폭을 8.6 m 로 과소평가해 폰에서 불필요하게 0.68 배로 줄고 있었다. 일반적인 폰은 배율 1 로 복귀하고, 축소는 더 좁은 화면용 안전장치로 남는다 |
 | v0.13 | 2026-10-31 | 축소 시 패널 아랫변이 떠오르던 문제 수정(기준점을 배율에 맞춰 내림). 오렌지 서비스 목록에 `/space` 진입점 추가 |
 | v0.12 | 2026-10-31 | 모바일 대응. 폰 세로에서 전광판이 가시 폭의 111% 라 화면에 들어오지 않던 문제를, 벽면을 기준점 중심으로 축소해 해결(§6.4). 전광판·광고판 좌표를 벽면 기준 상대 좌표로 전환 |

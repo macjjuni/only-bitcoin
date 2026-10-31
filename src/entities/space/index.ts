@@ -7,9 +7,12 @@ export {
 } from "./model/avatar";
 export {
   createLocalPlayerState,
+  createOfflinePresence,
   type LocalPlayerState,
   type PlayerTransform,
   type RemotePlayer,
+  type SpacePresence,
+  type SpacePresenceStatus,
 } from "./model/playerState";
 export {
   SPACE_AD_BOARDS,

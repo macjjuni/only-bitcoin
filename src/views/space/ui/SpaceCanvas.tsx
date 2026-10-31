@@ -2,6 +2,7 @@
 
 import { Canvas } from "@react-three/fiber";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { createOfflinePresence } from "@/entities/space";
 import { createSpaceInputSource, SPACE_CAMERA, useKeyboardInput } from "@/features/space-controls";
 import { isAndroidDevice, isIOSDevice } from "@/shared/utils/device";
 import SpaceHud from "./hud/SpaceHud";
@@ -38,6 +39,8 @@ const hasRealtimeShadowBudget = (): boolean => {
 function SpaceCanvas({ clientKey, dummyCount }: SpaceCanvasProps): ReactNode {
   // region [Hooks]
   const inputSource = useMemo(() => createSpaceInputSource(), []);
+  /** 1단계는 네트워크가 없다. 2단계에서 SpaceRoom 연결 상태로 교체한다. */
+  const presence = useMemo(() => createOfflinePresence(dummyCount + 1), [dummyCount]);
   const [fallbackReason, setFallbackReason] = useState<SpaceFallbackReason | null>(null);
   const [isSupportProbed, setIsSupportProbed] = useState<boolean>(false);
   const [hasRealtimeShadows, setHasRealtimeShadows] = useState<boolean>(false);
@@ -137,7 +140,7 @@ function SpaceCanvas({ clientKey, dummyCount }: SpaceCanvasProps): ReactNode {
         />
       </Canvas>
 
-      <SpaceHud inputSource={inputSource} occupantCount={dummyCount + 1} />
+      <SpaceHud inputSource={inputSource} presence={presence} />
     </div>
   );
 }
