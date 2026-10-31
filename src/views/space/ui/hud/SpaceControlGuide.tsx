@@ -4,9 +4,9 @@ import { memo, type ReactNode } from "react";
 
 /** 데스크톱·모바일 조작을 함께 적는다. 기기마다 다른 안내를 띄우면 관리가 갈린다. */
 const CONTROL_GUIDE = [
-  { action: "이동", desktop: "W A S D", mobile: "왼쪽 화면 터치" },
+  { action: "이동", desktop: "W A S D", mobile: "조이스틱" },
   { action: "달리기", desktop: "Shift", mobile: "끝까지 밀기" },
-  { action: "시야 회전", desktop: "드래그 · Q E", mobile: "오른쪽 화면 드래그" },
+  { action: "시야 회전", desktop: "드래그 · Q E", mobile: "화면 드래그" },
   { action: "줌", desktop: "휠", mobile: "두 손가락" },
 ] as const;
 

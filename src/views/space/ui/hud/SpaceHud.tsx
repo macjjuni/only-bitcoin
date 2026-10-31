@@ -110,10 +110,7 @@ function SpaceHud({ inputSource, presence }: SpaceHudProps): ReactNode {
     </div>
   ) : null;
 
-  /**
-   * 조이스틱은 손가락 기기에만 띄운다. 화면 왼쪽 절반을 덮으므로 마우스
-   * 환경에 띄우면 시야 회전 드래그를 먹는다.
-   */
+  /** 조이스틱은 손가락 기기에만 띄운다. 마우스 환경에는 WASD 가 있다. */
   const JoystickTemplate = isCoarsePointer ? (
     <div className="pointer-events-auto">
       <VirtualJoystick inputSource={inputSource} />
@@ -137,8 +134,12 @@ function SpaceHud({ inputSource, presence }: SpaceHudProps): ReactNode {
         <SpacePresenceBadge presence={presence} />
       </div>
 
-      <div className="pointer-events-auto absolute right-4 top-4 flex flex-col items-end">
-        <SpaceActionBar actions={hudActions} />
+      <div className="absolute right-4 top-4 flex flex-col items-end">
+        <div className="pointer-events-auto">
+          <SpaceActionBar actions={hudActions} />
+        </div>
+
+        {/* 안내는 읽기 전용이다. 터치를 막으면 열어둔 동안 그 영역의 시야 조작이 죽는다. */}
         {GuidePanelTemplate}
       </div>
 
