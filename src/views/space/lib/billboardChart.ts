@@ -116,7 +116,7 @@ export const resolveTickY = (tickValue: number, scale: ChartScale, rect: ChartRe
 /**
  * 가격 배열을 목표 개수로 솎는다.
  *
- * 288개(5분봉 24시간)를 폭 1,375 px 에 그리면 한 점이 4.8 px 라 과하다.
+ * 288개(5분봉 24시간)를 폭 1,320 px 에 그리면 한 점이 4.6 px 라 과하다.
  * 균등 간격으로 뽑되 마지막 점은 반드시 남겨 현재가가 잘리지 않게 한다.
  */
 export const downsamplePrices = (prices: readonly number[], targetCount: number): number[] => {

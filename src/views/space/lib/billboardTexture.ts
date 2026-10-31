@@ -26,6 +26,12 @@ export const BILLBOARD_TEXTURE = {
 /** 차트에 그릴 최대 점 개수. 288개(5분봉 24시간)를 그대로 그리면 과하다. */
 export const BILLBOARD_CHART_MAX_POINTS = 180;
 
+/** 멀리서도 끝점이 보이도록 점과 확산 범위를 한 곳에서 관리한다. */
+export const BILLBOARD_CHART_MARKER = {
+  coreRadius: 12,
+  pulseRadius: 64,
+} as const;
+
 /** 가격·변동률 컬럼의 가용 폭. 이 폭을 넘으면 글자를 줄인다. */
 export const BILLBOARD_COLUMNS = {
   priceMaxWidth: 560,
@@ -35,9 +41,9 @@ export const BILLBOARD_COLUMNS = {
 /**
  * 글자 크기 하한.
  *
- * 패널 폭 12 m 가 텍스처 1600 px 에 대응하므로 1 px 는 7.5 mm 다. 36 px 글자의
- * 숫자 높이는 약 0.19 m 이고, 32 m 거리에서 약 21 arcmin 로 가독 한계(약
- * 5 arcmin)의 4배다. 계산이 틀렸을 때의 안전장치로 둔다.
+ * 패널 폭 9.6 m 가 텍스처 1600 px 에 대응하므로 1 px 는 6 mm 다. 36 px 글자의
+ * 숫자 높이는 약 0.15 m 이고, 32 m 거리에서 약 16 arcmin 로 가독 한계(약
+ * 5 arcmin)의 3배다. 계산이 틀렸을 때의 안전장치로 둔다.
  */
 export const BILLBOARD_MIN_FONT_SIZE_PX = 36;
 
@@ -74,11 +80,14 @@ export interface BillboardState {
   usdSeries: readonly number[];
 }
 
+export interface BillboardChartEndpoint {
+  x: number;
+  y: number;
+  color: string;
+}
+
 const KRW_FORMATTER = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
-const USD_FORMATTER = new Intl.NumberFormat("en-US", {
-  minimumFractionDigits: 2,
-  maximumFractionDigits: 2,
-});
+const USD_FORMATTER = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 const AXIS_FORMATTER = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 
 // region [Privates]
@@ -179,17 +188,37 @@ const LAYOUT = {
   },
   rowLabel: { x: 60, fontSize: 36 },
   rowUnit: { x: 145, fontSize: 29 },
-  rowPrice: { x: 273, fontSize: 73, maxWidth: BILLBOARD_COLUMNS.priceMaxWidth },
+  rowPrice: { x: 273, fontSize: 73, maxWidth: BILLBOARD_COLUMNS.priceMaxWidth, height: 104 },
   rowChange: { x: 880, fontSize: 48, maxWidth: BILLBOARD_COLUMNS.changeMaxWidth },
   rowChangeSuffix: { x: 1160, fontSize: 29 },
   dividers: [237, 367] as const,
   chartTitle: { x: 60, y: 423, fontSize: 38 },
   chartSubtitle: { x: 300, y: 426, fontSize: 29 },
-  chart: { left: 60, top: 470, width: 1375, height: 300 } satisfies ChartRect,
+  chart: { left: 60, top: 470, width: 1320, height: 300 } satisfies ChartRect,
   axisLabel: { x: 1452, fontSize: 26 },
-  timeLabel: { y: 812, fontSize: 27 },
+  timeLabel: { y: 859, fontSize: 27 },
   footer: { y: 866, fontSize: 24 },
   statusDot: { radius: 9, gap: 26 },
+} as const;
+
+export interface BillboardPriceRegion {
+  x: number;
+  y: number;
+  width: number;
+  height: number;
+}
+
+const createBillboardPriceRegion = (centerY: number): BillboardPriceRegion => ({
+  x: LAYOUT.rowPrice.x,
+  y: centerY - LAYOUT.rowPrice.height / 2,
+  width: LAYOUT.rowPrice.maxWidth,
+  height: LAYOUT.rowPrice.height,
+});
+
+/** 기본 전광판과 별도 가격 텍스처가 같은 칸을 사용하도록 레이아웃에서 계산한다. */
+export const BILLBOARD_PRICE_REGIONS = {
+  krw: createBillboardPriceRegion(LAYOUT.rows.krw.centerY),
+  usd: createBillboardPriceRegion(LAYOUT.rows.usd.centerY),
 } as const;
 
 const TIME_LABELS = ["24시간 전", "18시간 전", "12시간 전", "6시간 전", "현재"] as const;
@@ -197,6 +226,27 @@ const TIME_LABELS = ["24시간 전", "18시간 전", "12시간 전", "6시간 �
 // region [Privates]
 const resolveFontSpec = (fontWeight: number, fontSizePx: number, fontStack: string): string => {
   return `${fontWeight} ${fontSizePx}px ${fontStack}`;
+};
+
+const resolveChartLineColor = (tone: BillboardTone): string => {
+  return resolveToneColor(tone === "flat" ? "up" : tone);
+};
+
+/** 차트 본문과 별도 끝점 효과가 같은 표본·스케일·좌표를 사용한다. */
+const resolveBillboardChartGeometry = (
+  state: Pick<BillboardState, "usdSeries" | "usdChange24h">,
+) => {
+  const sampledPrices = downsamplePrices(state.usdSeries, BILLBOARD_CHART_MAX_POINTS);
+
+  if (sampledPrices.length < 2) {
+    return null;
+  }
+
+  const scale = resolveChartScale(sampledPrices);
+  const points = resolveChartPoints(sampledPrices, scale, LAYOUT.chart);
+  const tone = resolveChangeTone(state.usdChange24h);
+
+  return { scale, points, tone };
 };
 
 /** 가용 폭을 넘지 않도록 크기를 줄여 그린다. 그린 폭을 돌려준다. */
@@ -228,6 +278,23 @@ const drawFittedText = (
   context.fillText(text, x, y);
 
   return context.measureText(text).width;
+};
+
+const drawPriceText = (
+  context: CanvasRenderingContext2D,
+  priceText: string,
+  x: number,
+  y: number,
+): void => {
+  context.fillStyle = BILLBOARD_COLORS.price;
+  drawFittedText(context, priceText, {
+    x,
+    y,
+    fontWeight: 700,
+    maxFontSizePx: LAYOUT.rowPrice.fontSize,
+    maxWidth: LAYOUT.rowPrice.maxWidth,
+    fontStack: NUMERIC_FONT_STACK,
+  });
 };
 
 const drawPanelBackground = (context: CanvasRenderingContext2D): void => {
@@ -332,6 +399,7 @@ const drawPriceRow = (
     changeText: string;
     tone: BillboardTone;
     isConnected: boolean;
+    shouldDrawPrice: boolean;
   },
 ): void => {
   const { centerY, label, unit, priceText, isConnected } = options;
@@ -351,15 +419,9 @@ const drawPriceRow = (
   context.font = resolveFontSpec(500, LAYOUT.rowUnit.fontSize, SANS_FONT_STACK);
   context.fillText(unit, LAYOUT.rowUnit.x, centerY);
 
-  context.fillStyle = BILLBOARD_COLORS.price;
-  drawFittedText(context, priceText, {
-    x: LAYOUT.rowPrice.x,
-    y: centerY,
-    fontWeight: 700,
-    maxFontSizePx: LAYOUT.rowPrice.fontSize,
-    maxWidth: LAYOUT.rowPrice.maxWidth,
-    fontStack: NUMERIC_FONT_STACK,
-  });
+  if (options.shouldDrawPrice) {
+    drawPriceText(context, priceText, LAYOUT.rowPrice.x, centerY);
+  }
 
   const triangleSize = LAYOUT.rowChange.fontSize * 0.56;
 
@@ -435,45 +497,15 @@ const drawTimeLabels = (context: CanvasRenderingContext2D): void => {
   });
 };
 
-/**
- * 현재가를 가리키는 끝점 배지.
- *
- * 차트 위쪽 바깥에 두면 오른쪽 가격 축 라벨과 겹친다. 끝점 왼쪽 위에 붙이고
- * 차트 영역 안으로 가둬 축을 침범하지 않게 한다.
- */
-const drawCurrentPriceBadge = (
+/** 마지막 표본은 가격 배지 없이 선과 같은 색의 점으로 표시한다. */
+const drawChartEndpoint = (
   context: CanvasRenderingContext2D,
   lastPoint: { x: number; y: number },
-  priceText: string,
   tone: BillboardTone,
 ): void => {
-  const rect = LAYOUT.chart;
-  const badgeFontSize = 28;
-  const paddingX = 16;
-  const badgeHeight = badgeFontSize + 18;
-
-  context.font = resolveFontSpec(700, badgeFontSize, NUMERIC_FONT_STACK);
-
-  const badgeWidth = context.measureText(priceText).width + paddingX * 2;
-  const badgeLeft = Math.max(lastPoint.x - badgeWidth - 12, rect.left + 4);
-  const badgeTop = Math.min(
-    Math.max(lastPoint.y - badgeHeight - 12, rect.top + 4),
-    rect.top + rect.height - badgeHeight - 4,
-  );
-
   context.beginPath();
-  context.roundRect(badgeLeft, badgeTop, badgeWidth, badgeHeight, 8);
-  context.fillStyle = resolveToneColor(tone);
-  context.fill();
-
-  context.fillStyle = BILLBOARD_COLORS.background;
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  context.fillText(priceText, badgeLeft + badgeWidth / 2, badgeTop + badgeHeight / 2);
-
-  context.beginPath();
-  context.arc(lastPoint.x, lastPoint.y, 7, 0, Math.PI * 2);
-  context.fillStyle = "#ffffff";
+  context.arc(lastPoint.x, lastPoint.y, BILLBOARD_CHART_MARKER.coreRadius, 0, Math.PI * 2);
+  context.fillStyle = resolveChartLineColor(tone);
   context.fill();
 };
 
@@ -488,7 +520,7 @@ const drawChartSeries = (
   }
 
   const rect = LAYOUT.chart;
-  const lineColor = resolveToneColor(tone === "flat" ? "up" : tone);
+  const lineColor = resolveChartLineColor(tone);
   const areaGradient = context.createLinearGradient(0, rect.top, 0, rect.top + rect.height);
   areaGradient.addColorStop(0, `${lineColor}59`);
   areaGradient.addColorStop(1, `${lineColor}00`);
@@ -546,29 +578,46 @@ const drawChartSection = (context: CanvasRenderingContext2D, state: BillboardSta
   context.font = resolveFontSpec(500, LAYOUT.chartSubtitle.fontSize, SANS_FONT_STACK);
   context.fillText("BTC / USD", LAYOUT.chartSubtitle.x, LAYOUT.chartSubtitle.y);
 
-  const sampledPrices = downsamplePrices(state.usdSeries, BILLBOARD_CHART_MAX_POINTS);
+  const chartGeometry = resolveBillboardChartGeometry(state);
 
-  if (sampledPrices.length < 2) {
+  if (!chartGeometry) {
     drawChartPlaceholder(context);
     drawTimeLabels(context);
     return;
   }
 
-  const scale = resolveChartScale(sampledPrices);
-  const points = resolveChartPoints(sampledPrices, scale, LAYOUT.chart);
-  const tone = resolveChangeTone(state.usdChange24h);
+  const { scale, points, tone } = chartGeometry;
 
   drawChartAxes(context, scale.ticks, scale);
   drawChartSeries(context, points, tone);
   drawTimeLabels(context);
-  drawCurrentPriceBadge(
-    context,
-    points[points.length - 1],
-    formatAxisPrice(sampledPrices[sampledPrices.length - 1]),
-    tone,
-  );
+  drawChartEndpoint(context, points[points.length - 1], tone);
 };
 // endregion
+
+/** 실제 24시간 차트의 마지막 표본 좌표와 선 색상. 그릴 선이 없으면 효과도 표시하지 않는다. */
+export const resolveBillboardChartEndpoint = (
+  state: Pick<BillboardState, "usdSeries" | "usdChange24h">,
+): BillboardChartEndpoint | null => {
+  const chartGeometry = resolveBillboardChartGeometry(state);
+
+  if (!chartGeometry) {
+    return null;
+  }
+
+  const { points, tone } = chartGeometry;
+  const lastPoint = points[points.length - 1];
+
+  return { ...lastPoint, color: resolveChartLineColor(tone) };
+};
+
+/** 투명한 가격 전용 텍스처에 숫자만 그린다. 배경 전광판과 글꼴·자동 축소를 공유한다. */
+export const drawBillboardPrice = (context: CanvasRenderingContext2D, priceText: string): void => {
+  context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+  context.textAlign = "left";
+  context.textBaseline = "middle";
+  drawPriceText(context, priceText, 0, LAYOUT.rowPrice.height / 2);
+};
 
 /**
  * 전광판 한 장을 그린다.
@@ -576,7 +625,13 @@ const drawChartSection = (context: CanvasRenderingContext2D, state: BillboardSta
  * 모든 글자는 자기 칸의 가용 폭에 맞춰 자동으로 줄어든다. 고정 크기로 두면
  * 가격 자리수가 늘어나는 순간 옆 칸을 침범한다.
  */
-export const drawBillboard = (context: CanvasRenderingContext2D, state: BillboardState): void => {
+export const drawBillboard = (
+  context: CanvasRenderingContext2D,
+  state: BillboardState,
+  options: { shouldDrawPrices?: boolean } = {},
+): void => {
+  const shouldDrawPrices = options.shouldDrawPrices ?? true;
+
   drawPanelBackground(context);
   drawBitcoinMark(context);
 
@@ -599,6 +654,7 @@ export const drawBillboard = (context: CanvasRenderingContext2D, state: Billboar
     changeText: formatBillboardChange(state.krwChange24h),
     tone: resolveChangeTone(state.krwChange24h),
     isConnected: state.isKrwConnected,
+    shouldDrawPrice: shouldDrawPrices,
   });
 
   drawPriceRow(context, {
@@ -609,6 +665,7 @@ export const drawBillboard = (context: CanvasRenderingContext2D, state: Billboar
     changeText: formatBillboardChange(state.usdChange24h),
     tone: resolveChangeTone(state.usdChange24h),
     isConnected: state.isUsdConnected,
+    shouldDrawPrice: shouldDrawPrices,
   });
 
   drawChartSection(context, state);

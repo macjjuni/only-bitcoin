@@ -24,6 +24,16 @@ export {
   stepMovement,
 } from "./model/movement";
 export {
+  createPointerGestureState,
+  hasActivePointers,
+  movePointer,
+  type PointerDragDelta,
+  type PointerGestureState,
+  pressPointer,
+  readPinchSpread,
+  releasePointer,
+} from "./model/pointerGesture";
+export {
   consumePendingDrag,
   consumePendingZoom,
   createSpaceInputSource,

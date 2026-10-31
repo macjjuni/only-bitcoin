@@ -1,14 +1,18 @@
 import { describe, expect, it } from "vitest";
 import { SPACE_BILLBOARD } from "@/entities/space";
 import {
+  BILLBOARD_CHART_MARKER,
   BILLBOARD_COLORS,
   BILLBOARD_COLUMNS,
   BILLBOARD_MIN_FONT_SIZE_PX,
   BILLBOARD_PLACEHOLDER,
   BILLBOARD_TEXTURE,
+  type BillboardChartEndpoint,
+  drawBillboard,
   formatBillboardChange,
   formatBillboardKrw,
   formatBillboardUsd,
+  resolveBillboardChartEndpoint,
   resolveChangeTone,
   resolveFittedFontSize,
   resolveToneColor,
@@ -39,9 +43,9 @@ describe("formatBillboardKrw", () => {
 });
 
 describe("formatBillboardUsd", () => {
-  it("달러는 소수 두 자리로 보여준다", () => {
-    expect(formatBillboardUsd(108_432.5)).toBe("$108,432.50");
-    expect(formatBillboardUsd(100_000)).toBe("$100,000.00");
+  it("달러는 소수점 없이 반올림해 보여준다", () => {
+    expect(formatBillboardUsd(108_432.5)).toBe("$108,433");
+    expect(formatBillboardUsd(100_000)).toBe("$100,000");
   });
 
   it("값이 없으면 자리표시다", () => {
@@ -92,7 +96,7 @@ describe("resolveFittedFontSize", () => {
   const PRICE_FONT_SIZE = 73;
 
   it("가용 폭에 들어가는 문자열은 최대 크기를 유지한다", () => {
-    const measuredWidth = measureMonospaceWidth("$108,432.50", PRICE_FONT_SIZE);
+    const measuredWidth = measureMonospaceWidth("$108,433", PRICE_FONT_SIZE);
 
     expect(
       resolveFittedFontSize(measuredWidth, {
@@ -166,6 +170,73 @@ describe("resolveFittedFontSize", () => {
 
     expect(resolveFittedFontSize(0, options)).toBe(PRICE_FONT_SIZE);
     expect(resolveFittedFontSize(Number.NaN, options)).toBe(PRICE_FONT_SIZE);
+  });
+});
+
+describe("resolveBillboardChartEndpoint", () => {
+  it("선이 그려지지 않는 빈 시계열과 단일 표본에는 끝점 효과를 만들지 않는다", () => {
+    expect(resolveBillboardChartEndpoint({ usdSeries: [], usdChange24h: "1.2" })).toBeNull();
+    expect(resolveBillboardChartEndpoint({ usdSeries: [100_000], usdChange24h: "0" })).toBeNull();
+  });
+
+  it.each([
+    { change: "-2.4", expectedColor: BILLBOARD_COLORS.down },
+    { change: "0", expectedColor: BILLBOARD_COLORS.up },
+  ])("24시간 변동률 $change에서 실제 차트의 끝점·선 색상을 반환한다", ({
+    change,
+    expectedColor,
+  }) => {
+    const usdSeries = Array.from(
+      { length: 288 },
+      (_, sampleIndex) => 100_000 + Math.sin(sampleIndex / 12) * 500 + sampleIndex * 3,
+    );
+    const endpoint = resolveBillboardChartEndpoint({ usdSeries, usdChange24h: change });
+    const drawingTrace: { endpoint: BillboardChartEndpoint | null; lineColor: string | null } = {
+      endpoint: null,
+      lineColor: null,
+    };
+    let currentCircle: { x: number; y: number; radius: number } | null = null;
+    const ignoredDrawingOperation = (): void => undefined;
+    // 실제 drawBillboard 호출에서 선과 끝점 그리기만 기록해 레이아웃 상수 복제를 피한다.
+    const canvasProperties: Record<string, unknown> = {
+      measureText: (text: string) => ({ width: measureMonospaceWidth(text, 36) }),
+      createLinearGradient: () => ({ addColorStop: ignoredDrawingOperation }),
+      beginPath: () => {
+        currentCircle = null;
+      },
+      arc: (x: number, y: number, radius: number) => {
+        currentCircle = { x, y, radius };
+      },
+      fill: () => {
+        if (currentCircle?.radius === BILLBOARD_CHART_MARKER.coreRadius) {
+          drawingTrace.endpoint = {
+            x: currentCircle.x,
+            y: currentCircle.y,
+            color: String(canvasProperties.fillStyle),
+          };
+        }
+      },
+      stroke: () => {
+        drawingTrace.lineColor = String(canvasProperties.strokeStyle);
+      },
+    };
+    const context = new Proxy(canvasProperties, {
+      get: (target, property) => Reflect.get(target, property) ?? ignoredDrawingOperation,
+    }) as unknown as CanvasRenderingContext2D;
+
+    drawBillboard(context, {
+      krw: 150_000_000,
+      usd: 999_999,
+      krwChange24h: "1.2",
+      usdChange24h: change,
+      isKrwConnected: true,
+      isUsdConnected: true,
+      usdSeries,
+    });
+
+    expect(endpoint?.color).toBe(expectedColor);
+    expect(drawingTrace.endpoint).toEqual(endpoint);
+    expect(drawingTrace.lineColor).toBe(endpoint?.color);
   });
 });
 
