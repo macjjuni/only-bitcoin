@@ -129,13 +129,13 @@ function PriceBillboard(): ReactNode {
 
   return (
     <group>
-      <mesh position={SPACE_BILLBOARD.framePosition}>
+      <mesh position={SPACE_BILLBOARD.frameOffset}>
         <planeGeometry args={[SPACE_BILLBOARD.frameWidth, SPACE_BILLBOARD.frameHeight]} />
         <meshStandardMaterial color={BILLBOARD_COLORS.panelEdge} roughness={0.6} metalness={0.4} />
       </mesh>
 
       {/* 자체 발광 패널이라 조명 영향을 받지 않는 기본 재질을 쓴다. */}
-      <mesh position={SPACE_BILLBOARD.position}>
+      <mesh position={SPACE_BILLBOARD.offset}>
         <planeGeometry args={[SPACE_BILLBOARD.width, SPACE_BILLBOARD.height]} />
         <meshBasicMaterial map={surface.texture} toneMapped={false} />
       </mesh>

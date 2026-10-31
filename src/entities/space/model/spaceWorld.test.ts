@@ -1,12 +1,22 @@
 import { describe, expect, it } from "vitest";
-import { SPACE_AD_BOARDS, SPACE_BILLBOARD, SPACE_BOUNDS, SPACE_GROUND } from "@/entities/space";
+import {
+  SPACE_AD_BOARDS,
+  SPACE_BILLBOARD,
+  SPACE_BOUNDS,
+  SPACE_GROUND,
+  SPACE_WALL_ANCHOR,
+} from "@/entities/space";
 
-const BILLBOARD_CENTER_Y = SPACE_BILLBOARD.position[1];
+const BILLBOARD_CENTER_Y = SPACE_WALL_ANCHOR[1];
+
+/** 상대 오프셋을 월드 좌표로 되돌린다. */
+const toWorldY = (offsetY: number): number => SPACE_WALL_ANCHOR[1] + offsetY;
+const toWorldX = (offsetX: number): number => SPACE_WALL_ANCHOR[0] + offsetX;
 
 describe("전광판·광고판 배치", () => {
   it("광고판은 전광판과 세로 중심이 같다", () => {
     for (const adBoard of SPACE_AD_BOARDS) {
-      expect(adBoard.position[1]).toBeCloseTo(BILLBOARD_CENTER_Y, 6);
+      expect(toWorldY(adBoard.offset[1])).toBeCloseTo(BILLBOARD_CENTER_Y, 6);
     }
   });
 
@@ -15,8 +25,8 @@ describe("전광판·광고판 배치", () => {
     const billboardBottom = BILLBOARD_CENTER_Y - SPACE_BILLBOARD.height / 2;
 
     for (const adBoard of SPACE_AD_BOARDS) {
-      const adTop = adBoard.position[1] + adBoard.height / 2;
-      const adBottom = adBoard.position[1] - adBoard.height / 2;
+      const adTop = toWorldY(adBoard.offset[1]) + adBoard.height / 2;
+      const adBottom = toWorldY(adBoard.offset[1]) - adBoard.height / 2;
 
       expect(adTop).toBeLessThanOrEqual(billboardTop);
       expect(adBottom).toBeGreaterThanOrEqual(billboardBottom);
@@ -35,7 +45,7 @@ describe("전광판·광고판 배치", () => {
     for (const adBoard of SPACE_AD_BOARDS) {
       // 안쪽으로 기울어 있어 가로 투영 폭이 실제 폭보다 좁다.
       const projectedHalfWidth = (adBoard.width * Math.cos(adBoard.rotationY)) / 2;
-      const innerEdgeX = Math.abs(adBoard.position[0]) - projectedHalfWidth;
+      const innerEdgeX = Math.abs(toWorldX(adBoard.offset[0])) - projectedHalfWidth;
 
       expect(innerEdgeX).toBeGreaterThan(billboardHalfWidth);
     }
@@ -45,7 +55,7 @@ describe("전광판·광고판 배치", () => {
     const panels = [
       { y: BILLBOARD_CENTER_Y, height: SPACE_BILLBOARD.frameHeight },
       ...SPACE_AD_BOARDS.map((adBoard) => ({
-        y: adBoard.position[1],
+        y: toWorldY(adBoard.offset[1]),
         height: adBoard.height,
       })),
     ];

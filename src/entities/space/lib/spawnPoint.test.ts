@@ -1,6 +1,10 @@
 import { describe, expect, it } from "vitest";
 import { createSpawnPoint } from "@/entities/space/lib/spawnPoint";
-import { SPACE_BILLBOARD, SPACE_BOUNDS, SPACE_SPAWN_RING } from "@/entities/space/model/spaceWorld";
+import {
+  SPACE_BOUNDS,
+  SPACE_SPAWN_RING,
+  SPACE_WALL_ANCHOR,
+} from "@/entities/space/model/spaceWorld";
 
 const createClientKeys = (count: number): string[] => {
   return Array.from({ length: count }, (_, index) => `client-key-${index}`);
@@ -48,7 +52,7 @@ describe("createSpawnPoint", () => {
   });
 
   it("스폰 직후 전광판을 바라본다", () => {
-    const [billboardX, , billboardZ] = SPACE_BILLBOARD.position;
+    const [billboardX, , billboardZ] = SPACE_WALL_ANCHOR;
 
     for (const clientKey of createClientKeys(50)) {
       const { x, z, yaw } = createSpawnPoint(clientKey);

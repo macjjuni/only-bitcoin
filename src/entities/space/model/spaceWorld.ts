@@ -45,20 +45,29 @@ export const SPACE_SPAWN_RING = {
  */
 const BILLBOARD_CENTER_Y = 6;
 
+/**
+ * 전광판·광고판이 매달리는 기준점.
+ *
+ * 좁은 화면에서 이 점을 중심으로 전체를 축소한다. 패널 좌표를 절대값으로 두면
+ * 축소할 때 벽에서 떨어져 나오고 높이도 같이 내려간다.
+ */
+export const SPACE_WALL_ANCHOR = [0, BILLBOARD_CENTER_Y, SPACE_WALL_Z] as const;
+
 /** 패널은 16:9 다. 텍스처(1600 × 900) 와 비율이 어긋나면 글자가 늘어난다. */
 export const SPACE_BILLBOARD = {
   width: 9.6,
   height: 5.4,
-  position: [0, BILLBOARD_CENTER_Y, SPACE_WALL_Z] as const,
+  /** `SPACE_WALL_ANCHOR` 기준 상대 위치. */
+  offset: [0, 0, 0] as const,
   frameWidth: 10.2,
   frameHeight: 6,
-  framePosition: [0, BILLBOARD_CENTER_Y, SPACE_WALL_Z - 0.1] as const,
+  frameOffset: [0, 0, -0.1] as const,
   /**
-   * 바닥을 물들이는 광원 위치.
+   * 바닥을 물들이는 광원 위치. 축소 그룹 **바깥**의 절대 좌표다.
    *
    * 패널을 따라 올리면 바닥까지의 거리가 멀어져(감쇠 제곱) 오렌지 반사가 절반
    * 아래로 떨어진다. 패널 자체는 발광 재질이라 광원과 분리해도 밝기가 유지되므로
-   * 광원만 낮게 고정한다.
+   * 광원만 낮게 고정한다. 화면이 좁다고 조명까지 줄일 이유도 없다.
    */
   glowPosition: [0, 4, SPACE_WALL_Z + 2.5] as const,
   /** 가격 숫자 크기 기준 거리. 스폰 링 먼 쪽 끝. */
@@ -71,7 +80,8 @@ export interface SpaceAdBoardPlacement {
   id: SpaceAdBoardId;
   width: number;
   height: number;
-  position: readonly [number, number, number];
+  /** `SPACE_WALL_ANCHOR` 기준 상대 위치. */
+  offset: readonly [number, number, number];
   /** Y축 회전(라디안). 안쪽으로 15° 틀어 스폰 링 어디서든 한 화면에 잡히게 함. */
   rotationY: number;
 }
@@ -98,14 +108,14 @@ export const SPACE_AD_BOARDS: readonly SpaceAdBoardPlacement[] = [
     id: "left",
     width: 6,
     height: 4,
-    position: [-AD_BOARD_OFFSET_X, BILLBOARD_CENTER_Y, SPACE_WALL_Z + 0.6],
+    offset: [-AD_BOARD_OFFSET_X, 0, 0.6],
     rotationY: AD_BOARD_TILT,
   },
   {
     id: "right",
     width: 6,
     height: 4,
-    position: [AD_BOARD_OFFSET_X, BILLBOARD_CENTER_Y, SPACE_WALL_Z + 0.6],
+    offset: [AD_BOARD_OFFSET_X, 0, 0.6],
     rotationY: -AD_BOARD_TILT,
   },
 ] as const;

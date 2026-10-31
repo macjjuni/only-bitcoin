@@ -19,6 +19,7 @@ export {
   SPACE_MAX_OCCUPANTS,
   SPACE_OVERLAY_LIMITS,
   SPACE_SPAWN_RING,
+  SPACE_WALL_ANCHOR,
   SPACE_WALL_Z,
   type SpaceAdBoardId,
   type SpaceAdBoardPlacement,

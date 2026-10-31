@@ -80,7 +80,7 @@ function AdBoard({ placement }: AdBoardProps): ReactNode {
   // endregion
 
   return (
-    <group position={placement.position} rotation={[0, placement.rotationY, 0]}>
+    <group position={placement.offset} rotation={[0, placement.rotationY, 0]}>
       <mesh position={[0, 0, -0.06]}>
         <planeGeometry args={[placement.width + 0.4, placement.height + 0.4]} />
         <meshStandardMaterial color={PLACEHOLDER_BORDER} roughness={0.6} metalness={0.35} />

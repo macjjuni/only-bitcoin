@@ -1,5 +1,9 @@
 import type { PlayerTransform } from "@/entities/space/model/playerState";
-import { SPACE_BILLBOARD, SPACE_BOUNDS, SPACE_SPAWN_RING } from "@/entities/space/model/spaceWorld";
+import {
+  SPACE_BOUNDS,
+  SPACE_SPAWN_RING,
+  SPACE_WALL_ANCHOR,
+} from "@/entities/space/model/spaceWorld";
 
 const FNV_OFFSET_BASIS = 0x811c9dc5;
 const FNV_PRIME = 0x01000193;
@@ -43,7 +47,7 @@ const toRingRadius = (fraction: number): number => {
  * 목표 방향 `(dx, dz)` 와 맞추면 `θ = atan2(-dx, -dz)` 가 된다.
  */
 const toBillboardFacingYaw = (x: number, z: number): number => {
-  const [billboardX, , billboardZ] = SPACE_BILLBOARD.position;
+  const [billboardX, , billboardZ] = SPACE_WALL_ANCHOR;
 
   return Math.atan2(-(billboardX - x), -(billboardZ - z));
 };

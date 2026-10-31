@@ -8,6 +8,7 @@ import {
   createSpawnPoint,
   type LocalPlayerState,
   SPACE_AD_BOARDS,
+  SPACE_WALL_ANCHOR,
 } from "@/entities/space";
 import {
   applyCameraDrag,
@@ -30,6 +31,7 @@ import {
   type Vector3Like,
 } from "@/features/space-controls";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
+import { resolveWallDisplayScale } from "@/views/space/lib/wallDisplay";
 import AdBoard from "./AdBoard";
 import Ground from "./Ground";
 import Nameplates from "./Nameplates";
@@ -62,11 +64,16 @@ function SpaceScene({
   // region [Hooks]
   const canvasElement = useThree((rootState) => rootState.gl.domElement);
   const camera = useThree((rootState) => rootState.camera);
+  const viewportSize = useThree((rootState) => rootState.size);
   const prefersReducedMotion = usePrefersReducedMotion();
 
   const spawnTransform = useMemo(() => createSpawnPoint(clientKey), [clientKey]);
   const colorIndex = useMemo(() => resolveColorIndexFromClientKey(clientKey), [clientKey]);
   const dummies = useMemo(() => createStressDummies(dummyCount), [dummyCount]);
+  /** 세로로 긴 화면에서 전광판 벽면을 줄인다. 리사이즈·회전에 따라 다시 계산된다. */
+  const wallDisplayScale = useMemo(() => {
+    return resolveWallDisplayScale(viewportSize.width / viewportSize.height);
+  }, [viewportSize]);
 
   const playerStateRef = useRef<LocalPlayerState>(createLocalPlayerState(spawnTransform));
   const cameraOrbitRef = useRef<CameraOrbit>(createDefaultCameraOrbit(spawnTransform.yaw));
@@ -165,11 +172,15 @@ function SpaceScene({
     <>
       <SceneLighting hasRealtimeShadows={hasRealtimeShadows} />
       <Ground hasRealtimeShadows={hasRealtimeShadows} />
-      <PriceBillboard />
 
-      {SPACE_AD_BOARDS.map((placement) => (
-        <AdBoard key={placement.id} placement={placement} />
-      ))}
+      {/* 전광판과 광고판은 한 덩어리로 묶어 기준점을 중심으로 함께 줄인다. */}
+      <group position={SPACE_WALL_ANCHOR} scale={wallDisplayScale}>
+        <PriceBillboard />
+
+        {SPACE_AD_BOARDS.map((placement) => (
+          <AdBoard key={placement.id} placement={placement} />
+        ))}
+      </group>
 
       <group ref={playerGroupRef}>
         <PlayerAvatar colorIndex={colorIndex} hasRealtimeShadows={hasRealtimeShadows} />
