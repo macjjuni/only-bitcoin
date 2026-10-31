@@ -31,7 +31,7 @@ import {
   type Vector3Like,
 } from "@/features/space-controls";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
-import { resolveWallDisplayScale } from "@/views/space/lib/wallDisplay";
+import { resolveWallAnchorY, resolveWallDisplayScale } from "@/views/space/lib/wallDisplay";
 import AdBoard from "./AdBoard";
 import Ground from "./Ground";
 import Nameplates from "./Nameplates";
@@ -74,6 +74,10 @@ function SpaceScene({
   const wallDisplayScale = useMemo(() => {
     return resolveWallDisplayScale(viewportSize.width / viewportSize.height);
   }, [viewportSize]);
+  /** 줄여도 프레임 아랫변이 제자리에 남도록 기준점을 내린다. */
+  const wallAnchor = useMemo((): [number, number, number] => {
+    return [SPACE_WALL_ANCHOR[0], resolveWallAnchorY(wallDisplayScale), SPACE_WALL_ANCHOR[2]];
+  }, [wallDisplayScale]);
 
   const playerStateRef = useRef<LocalPlayerState>(createLocalPlayerState(spawnTransform));
   const cameraOrbitRef = useRef<CameraOrbit>(createDefaultCameraOrbit(spawnTransform.yaw));
@@ -174,7 +178,7 @@ function SpaceScene({
       <Ground hasRealtimeShadows={hasRealtimeShadows} />
 
       {/* 전광판과 광고판은 한 덩어리로 묶어 기준점을 중심으로 함께 줄인다. */}
-      <group position={SPACE_WALL_ANCHOR} scale={wallDisplayScale}>
+      <group position={wallAnchor} scale={wallDisplayScale}>
         <PriceBillboard />
 
         {SPACE_AD_BOARDS.map((placement) => (

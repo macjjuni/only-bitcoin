@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { HandCoins, Swords, TableProperties } from "lucide-react";
+import { Gamepad2, HandCoins, Swords, TableProperties } from "lucide-react";
 import type { ReactNode } from "react";
 import { useHasUnseenIncident } from "@/entities/incident";
 import {
@@ -47,6 +47,11 @@ interface ExternalLinkSectionData {
 const ICON_CLASS = "text-orange-500 dark:text-orange-400";
 
 const UTILITY_LINKS: OrangeLink[] = [
+  {
+    title: "BTC 스페이스",
+    icon: <Gamepad2 size={28} strokeWidth={1.8} className={ICON_CLASS} />,
+    href: "/space",
+  },
   {
     title: "M2·비트코인",
     icon: <BanknoteIcon size={28} className={ICON_CLASS} />,

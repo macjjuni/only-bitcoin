@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import { SPACE_BILLBOARD, SPACE_WALL_ANCHOR } from "@/entities/space";
 import { SPACE_CAMERA } from "@/features/space-controls";
-import { resolveWallDisplayScale } from "@/views/space/lib/wallDisplay";
+import { resolveWallAnchorY, resolveWallDisplayScale } from "@/views/space/lib/wallDisplay";
 
 const DESKTOP_ASPECT = 1920 / 1080;
 const LAPTOP_ASPECT = 1440 / 900;
@@ -55,5 +55,36 @@ describe("resolveWallDisplayScale", () => {
     expect(resolveWallDisplayScale(0)).toBe(1);
     expect(resolveWallDisplayScale(Number.NaN)).toBe(1);
     expect(resolveWallDisplayScale(-1)).toBe(1);
+  });
+});
+
+describe("resolveWallAnchorY", () => {
+  /** 주어진 배율에서 프레임 아랫변의 월드 높이. */
+  const resolveFrameBottom = (wallScale: number): number => {
+    return resolveWallAnchorY(wallScale) - (SPACE_BILLBOARD.frameHeight * wallScale) / 2;
+  };
+
+  const DESKTOP_FRAME_BOTTOM = resolveFrameBottom(1);
+
+  it("배율 1 이면 기준점을 그대로 둔다", () => {
+    expect(resolveWallAnchorY(1)).toBe(SPACE_WALL_ANCHOR[1]);
+  });
+
+  it("줄여도 프레임 아랫변이 제자리에 있다", () => {
+    for (const wallScale of [0.5, 0.68, 0.8, 1]) {
+      expect(resolveFrameBottom(wallScale)).toBeCloseTo(DESKTOP_FRAME_BOTTOM, 6);
+    }
+  });
+
+  it("줄이면 기준점이 내려간다", () => {
+    expect(resolveWallAnchorY(0.68)).toBeLessThan(SPACE_WALL_ANCHOR[1]);
+  });
+
+  it("줄여도 패널이 바닥 아래로 내려가지 않는다", () => {
+    expect(resolveFrameBottom(0.5)).toBeGreaterThan(0);
+  });
+
+  it("배율을 읽지 못하면 기준점을 그대로 둔다", () => {
+    expect(resolveWallAnchorY(Number.NaN)).toBe(SPACE_WALL_ANCHOR[1]);
   });
 });

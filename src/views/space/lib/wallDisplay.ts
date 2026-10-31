@@ -42,3 +42,23 @@ export const resolveWallDisplayScale = (viewportAspect: number): number => {
 
   return Math.min(1, Math.max(MIN_WALL_SCALE, fittedScale));
 };
+
+/**
+ * 축소 배율에 맞춘 벽면 기준점 높이.
+ *
+ * 기준점을 그대로 두고 줄이면 패널이 중심을 향해 수축하면서 **아랫변이 떠오른다**.
+ * 배율 0.68 에서 프레임 아랫변이 3.00 m → 3.96 m 로 1 m 올라가, 벽에 붙어 있던
+ * 간판이 공중에 뜬 것처럼 보인다.
+ *
+ * 아랫변이 제자리에 남도록 기준점을 내린다. 실물 간판도 작게 만들면 설치 높이를
+ * 유지하지 지붕 쪽으로 올리지 않는다.
+ */
+export const resolveWallAnchorY = (wallScale: number): number => {
+  const baseAnchorY = SPACE_WALL_ANCHOR[1];
+
+  if (!Number.isFinite(wallScale)) {
+    return baseAnchorY;
+  }
+
+  return baseAnchorY - (1 - wallScale) * (SPACE_BILLBOARD.frameHeight / 2);
+};
