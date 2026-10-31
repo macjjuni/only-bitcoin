@@ -70,10 +70,10 @@ describe("resolveWallDisplayScale", () => {
 
   it("카메라가 가까울수록 더 줄인다", () => {
     // 가까이 붙을수록 벽면이 화면을 더 많이 차지하므로 가드가 일찍 걸린다.
-    const atDefault = resolveWallDisplayScale(0.3, SPACE_CAMERA.defaultDistance);
-    const atTouchStart = resolveWallDisplayScale(0.3, SPACE_CAMERA.touchInitialDistance);
+    const atNear = resolveWallDisplayScale(0.3, SPACE_CAMERA.minDistance);
+    const atFar = resolveWallDisplayScale(0.3, SPACE_CAMERA.maxDistance);
 
-    expect(atTouchStart).toBeLessThan(atDefault);
+    expect(atNear).toBeLessThan(atFar);
   });
 
   it("손가락 기기 시작 거리에서도 일반적인 폰은 사실상 줄이지 않는다", () => {

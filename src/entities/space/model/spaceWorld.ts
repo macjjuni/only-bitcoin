@@ -38,10 +38,11 @@ export const SPACE_SPAWN_RING = {
 } as const;
 
 /**
- * 전광판 중심 높이.
+ * 벽면 기준점 높이.
  *
- * 벽에 가장 가까이 붙은 경우(벽까지 8 m)의 가시 상단이 9.8 m 다. 현재 프레임
- * 상단은 9.0 m 라 0.8 m 여유가 있다. 패널을 키우면 이 여유부터 줄어든다.
+ * 전광판 프레임 윗변은 9.0 m, 그 위 텍스트 배너 윗변은 10.0 m 다. 손가락
+ * 기기는 카메라가 최대 거리에서 시작해 세로 시야가 넓으므로, 스폰 링 어느
+ * 지점에서도(벽까지 4~32 m) 배너까지 한 화면에 들어온다.
  */
 const BILLBOARD_CENTER_Y = 6;
 
@@ -120,6 +121,20 @@ export const SPACE_AD_BOARDS: readonly SpaceAdBoardPlacement[] = [
     rotationY: -AD_BOARD_TILT,
   },
 ] as const;
+
+/**
+ * 전광판 위에 얹는 텍스트 전용 광고 배너.
+ *
+ * 16:1 로 가로가 길다. 짧은 문구 한 줄을 넓게 펴서 멀리서도 읽히게 하는 자리다.
+ * 별도 프레임 메시를 두지 않는다. 높이가 0.8 m 뿐이라 테두리 메시를 더하면
+ * 패널보다 테두리가 두꺼워 보인다. 테두리는 텍스처에 그린다.
+ */
+export const SPACE_TEXT_BANNER = {
+  width: 12.8,
+  height: 0.8,
+  /** 전광판 프레임 윗변(+3)에서 0.2 띄우고 배너 반높이(0.4)를 더한 값. */
+  offset: [0, 3.6, 0] as const,
+} as const;
 
 /** 명찰·말풍선 표시 상한. 인원 비례가 아니라 DOM 렌더 비용의 상한이다. */
 export const SPACE_OVERLAY_LIMITS = {

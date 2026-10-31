@@ -4,6 +4,7 @@ import {
   SPACE_BILLBOARD,
   SPACE_BOUNDS,
   SPACE_GROUND,
+  SPACE_TEXT_BANNER,
   SPACE_WALL_ANCHOR,
 } from "@/entities/space";
 
@@ -69,5 +70,39 @@ describe("전광판·광고판 배치", () => {
     expect(SPACE_BOUNDS.minZ).toBeGreaterThan(SPACE_GROUND.centerZ - SPACE_GROUND.depth / 2);
     expect(SPACE_BOUNDS.maxZ).toBeLessThan(SPACE_GROUND.centerZ + SPACE_GROUND.depth / 2);
     expect(SPACE_BOUNDS.maxX).toBeLessThan(SPACE_GROUND.width / 2);
+  });
+});
+
+describe("텍스트 배너 배치", () => {
+  const bannerCenterY = toWorldY(SPACE_TEXT_BANNER.offset[1]);
+  const bannerBottom = bannerCenterY - SPACE_TEXT_BANNER.height / 2;
+  const billboardFrameTop = BILLBOARD_CENTER_Y + SPACE_BILLBOARD.frameHeight / 2;
+
+  it("전광판 프레임 위에 놓인다", () => {
+    expect(bannerBottom).toBeGreaterThan(billboardFrameTop);
+  });
+
+  it("전광판과 맞닿지 않고 간격을 둔다", () => {
+    expect(bannerBottom - billboardFrameTop).toBeGreaterThanOrEqual(0.15);
+  });
+
+  it("전광판 프레임보다 가로로 길다", () => {
+    expect(SPACE_TEXT_BANNER.width).toBeGreaterThan(SPACE_BILLBOARD.frameWidth);
+  });
+
+  it("가로가 세로보다 훨씬 길다", () => {
+    expect(SPACE_TEXT_BANNER.width / SPACE_TEXT_BANNER.height).toBeGreaterThan(10);
+  });
+
+  it("좌우 중앙에 놓인다", () => {
+    expect(toWorldX(SPACE_TEXT_BANNER.offset[0])).toBeCloseTo(SPACE_WALL_ANCHOR[0], 6);
+  });
+
+  it("광고판과 세로로 겹치지 않는다", () => {
+    for (const adBoard of SPACE_AD_BOARDS) {
+      const adTop = toWorldY(adBoard.offset[1]) + adBoard.height / 2;
+
+      expect(bannerBottom).toBeGreaterThan(adTop);
+    }
   });
 });

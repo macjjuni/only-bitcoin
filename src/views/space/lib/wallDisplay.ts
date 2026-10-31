@@ -1,4 +1,4 @@
-import { SPACE_BILLBOARD, SPACE_WALL_ANCHOR } from "@/entities/space";
+import { SPACE_BILLBOARD, SPACE_TEXT_BANNER, SPACE_WALL_ANCHOR } from "@/entities/space";
 import { SPACE_CAMERA } from "@/features/space-controls";
 
 /**
@@ -53,7 +53,10 @@ export const resolveWallDisplayScale = (
     Math.abs(SPACE_WALL_ANCHOR[2]) + safeCameraDistance * Math.cos(SPACE_CAMERA.defaultPitch);
   const visibleHeight = 2 * referenceDistance * Math.tan(toRadians(SPACE_CAMERA.fov) / 2);
   const visibleWidth = visibleHeight * viewportAspect;
-  const fittedScale = (TARGET_WIDTH_FRACTION * visibleWidth) / SPACE_BILLBOARD.frameWidth;
+  // 중앙 스택에서 가장 넓은 요소를 기준으로 삼는다. 텍스트 배너가 전광판
+  // 프레임보다 넓어서, 프레임만 보면 배너가 먼저 화면을 넘는다.
+  const widestCentralWidth = Math.max(SPACE_BILLBOARD.frameWidth, SPACE_TEXT_BANNER.width);
+  const fittedScale = (TARGET_WIDTH_FRACTION * visibleWidth) / widestCentralWidth;
 
   return Math.min(1, Math.max(MIN_WALL_SCALE, fittedScale));
 };

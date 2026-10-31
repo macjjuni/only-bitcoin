@@ -33,6 +33,7 @@ import {
   type Vector3Like,
 } from "@/features/space-controls";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
+import { createEmptyAdTextSlot } from "@/views/space/lib/textBannerTexture";
 import { resolveWallAnchorY, resolveWallDisplayScale } from "@/views/space/lib/wallDisplay";
 import AdBoard from "./AdBoard";
 import Ground from "./Ground";
@@ -41,6 +42,7 @@ import PlayerAvatar from "./PlayerAvatar";
 import PriceBillboard from "./PriceBillboard";
 import RemoteAvatars from "./RemoteAvatars";
 import SceneLighting from "./SceneLighting";
+import TextAdBanner from "./TextAdBanner";
 
 interface SpaceSceneProps {
   inputSource: SpaceInputSource;
@@ -81,6 +83,8 @@ function SpaceScene({
   const spawnTransform = useMemo(() => createSpawnPoint(clientKey), [clientKey]);
   const colorIndex = useMemo(() => resolveColorIndexFromClientKey(clientKey), [clientKey]);
   const dummies = useMemo(() => createStressDummies(dummyCount), [dummyCount]);
+  /** 1단계는 빈 슬롯이다. 3단계에서 라이트닝 결제로 채운다. */
+  const textAdSlot = useMemo(() => createEmptyAdTextSlot(), []);
   /** 세로로 긴 화면에서 전광판 벽면을 줄인다. 리사이즈·회전에 따라 다시 계산된다. */
   const wallDisplayScale = useMemo(() => {
     return resolveWallDisplayScale(viewportSize.width / viewportSize.height, initialCameraDistance);
@@ -193,6 +197,7 @@ function SpaceScene({
       {/* 전광판과 광고판은 한 덩어리로 묶어 기준점을 중심으로 함께 줄인다. */}
       <group position={wallAnchor} scale={wallDisplayScale}>
         <PriceBillboard />
+        <TextAdBanner slot={textAdSlot} />
 
         {SPACE_AD_BOARDS.map((placement) => (
           <AdBoard key={placement.id} placement={placement} />
