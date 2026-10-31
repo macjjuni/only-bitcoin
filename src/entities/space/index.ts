@@ -1,3 +1,4 @@
+export { resolveColorIndexFromClientKey } from "./lib/clientKeyHash";
 export { createSpaceInterpolator, type SpaceInterpolator } from "./lib/remoteInterpolation";
 export { decodeSpaceSnapshot, encodeSpaceSnapshot } from "./lib/spaceSnapshot";
 export { createSpawnPoint } from "./lib/spawnPoint";

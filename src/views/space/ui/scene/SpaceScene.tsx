@@ -7,6 +7,7 @@ import {
   createLocalPlayerState,
   createSpawnPoint,
   type LocalPlayerState,
+  resolveColorIndexFromClientKey,
   SPACE_AD_BOARDS,
   SPACE_WALL_ANCHOR,
   type SpacePeer,
@@ -56,13 +57,6 @@ interface SpaceSceneProps {
   /** 개발 전용 더미 아바타 수. 더미 측정 중에는 실제 공간 소켓을 열지 않는다. */
   dummyCount: number;
 }
-
-// region [Privates]
-/** 닉네임 없이도 자기 아바타 색이 고정되도록 클라이언트 키에서 뽑는다. */
-const resolveColorIndexFromClientKey = (clientKey: string): number => {
-  return Array.from(clientKey).reduce((total, character) => total + character.charCodeAt(0), 0);
-};
-// endregion
 
 function SpaceScene({
   inputSource,

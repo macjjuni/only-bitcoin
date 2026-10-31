@@ -446,16 +446,23 @@ export class SpaceSessionController {
           this.stopAutomaticRetry(frame.message);
           return;
         }
-        if (
-          this.snapshot.presence.status === "connecting" ||
-          frame.code === "JOIN_REQUIRED" ||
-          frame.code === "UNAVAILABLE"
-        ) {
+        // 좌석이 없다는 응답과 입장 중 오류만 연결을 다시 세운다.
+        if (frame.code === "JOIN_REQUIRED" || this.snapshot.presence.status === "connecting") {
           this.handleDisconnected(frame.message);
           return;
         }
-        if (frame.rid && this.pendingMessage?.requestId === frame.rid) {
-          this.finishPendingMessage(false);
+        // rid 가 붙은 오류는 그 요청만 실패시킨다. 일시적인 서버 예외로 좌석과
+        // 위치까지 잃으면 메시지 한 번 실패한 대가가 너무 크다.
+        if (frame.rid) {
+          if (this.pendingMessage?.requestId === frame.rid) {
+            this.finishPendingMessage(false);
+          }
+          this.updateSnapshot({ error: frame.message });
+          return;
+        }
+        if (frame.code === "UNAVAILABLE") {
+          this.handleDisconnected(frame.message);
+          return;
         }
         this.updateSnapshot({ error: frame.message });
         return;

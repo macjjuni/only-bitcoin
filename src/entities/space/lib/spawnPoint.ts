@@ -4,28 +4,12 @@ import {
   SPACE_SPAWN_RING,
   SPACE_WALL_ANCHOR,
 } from "@/entities/space/model/spaceWorld";
+import { hashClientKey, toUnitFraction } from "./clientKeyHash";
 
-const FNV_OFFSET_BASIS = 0x811c9dc5;
-const FNV_PRIME = 0x01000193;
 /** 각도와 반지름이 같은 해시에서 나와 상관되지 않도록 분리하는 시드. */
 const RADIUS_SEED = 0x9e3779b9;
-const UINT32_RANGE = 0x1_0000_0000;
 
 // region [Privates]
-/** FNV-1a 32비트 해시. 암호용이 아니라 결정적 분산용이다. */
-const hashString = (value: string, seed: number): number => {
-  let hash = (FNV_OFFSET_BASIS ^ seed) >>> 0;
-
-  for (let index = 0; index < value.length; index += 1) {
-    hash ^= value.charCodeAt(index);
-    hash = Math.imul(hash, FNV_PRIME);
-  }
-
-  return hash >>> 0;
-};
-
-const toUnitFraction = (hash: number): number => hash / UINT32_RANGE;
-
 /**
  * 링 안에서 면적 기준으로 균일한 반지름을 뽑는다.
  *
@@ -64,8 +48,8 @@ const clamp = (value: number, min: number, max: number): number => {
  */
 export const createSpawnPoint = (clientKey: string): PlayerTransform => {
   const { centerX, centerZ } = SPACE_SPAWN_RING;
-  const angle = toUnitFraction(hashString(clientKey, 0)) * Math.PI * 2;
-  const radius = toRingRadius(toUnitFraction(hashString(clientKey, RADIUS_SEED)));
+  const angle = toUnitFraction(hashClientKey(clientKey, 0)) * Math.PI * 2;
+  const radius = toRingRadius(toUnitFraction(hashClientKey(clientKey, RADIUS_SEED)));
   const x = clamp(centerX + Math.cos(angle) * radius, SPACE_BOUNDS.minX, SPACE_BOUNDS.maxX);
   const z = clamp(centerZ + Math.sin(angle) * radius, SPACE_BOUNDS.minZ, SPACE_BOUNDS.maxZ);
 

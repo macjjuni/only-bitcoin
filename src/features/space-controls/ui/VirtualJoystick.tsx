@@ -117,7 +117,6 @@ function VirtualJoystick({ inputSource }: VirtualJoystickProps): ReactNode {
         return;
       }
 
-      activePointerIdRef.current = null;
       resetJoystickInput();
     },
     [resetJoystickInput],

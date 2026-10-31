@@ -2,11 +2,24 @@ import { describe, expect, it } from "vitest";
 import { attachSpaceKeyboardEvents } from "./keyboardInputEvents";
 import { createSpaceInputSource } from "./spaceInputSource";
 
+/**
+ * `closest` 를 실제 셀렉터와 맞춰 본다. 호출을 무조건 통과시키면 어떤 요소를
+ * 입력 대상으로 보는지 자체를 검증하지 못한다.
+ */
 class KeyboardEventTarget extends EventTarget {
-  isEditable = false;
+  /** 이 대상이 나타내는 태그. `input` 은 글자 입력, `button` 은 활성화 대상이다. */
+  elementName: "canvas" | "input" | "button" = "canvas";
 
-  closest(): object | null {
-    return this.isEditable ? this : null;
+  get isEditable(): boolean {
+    return this.elementName === "input";
+  }
+
+  set isEditable(nextEditable: boolean) {
+    this.elementName = nextEditable ? "input" : "canvas";
+  }
+
+  closest(selector: string): object | null {
+    return selector.split(", ").includes(this.elementName) ? this : null;
   }
 
   emitKey(type: string, code: string, properties = {}): Event {
@@ -59,6 +72,28 @@ describe("공간 키보드와 채팅 입력 격리", () => {
     windowEvents.emitKey("keydown", "KeyD");
     documentEvents.dispatchEvent(new Event("visibilitychange"));
     expect(inputSource.keyboard.strafe).toBe(0);
+    detach();
+  });
+
+  it("HUD 버튼에 포커스가 남아도 이동 키는 계속 받는다", () => {
+    const { inputSource, windowEvents, detach } = createKeyboard();
+    windowEvents.elementName = "button";
+    windowEvents.emitKey("keydown", "KeyW");
+    windowEvents.emitKey("keydown", "KeyD");
+    expect(inputSource.keyboard).toEqual({ forward: 1, strafe: 1, isRunning: false });
+    // 포커스된 버튼의 공백 활성화는 그대로 브라우저에 남긴다.
+    expect(windowEvents.emitKey("keydown", "Space").defaultPrevented).toBe(false);
+    // 방향키는 버튼을 활성화하지 않으므로 스크롤만 막는다.
+    expect(windowEvents.emitKey("keydown", "ArrowUp").defaultPrevented).toBe(true);
+    detach();
+  });
+
+  it("버튼에 포커스가 있어도 포커스 이동만으로 키를 비우지 않는다", () => {
+    const { inputSource, windowEvents, documentEvents, detach } = createKeyboard();
+    windowEvents.emitKey("keydown", "KeyW");
+    documentEvents.elementName = "button";
+    documentEvents.dispatchEvent(new Event("focusin"));
+    expect(inputSource.keyboard.forward).toBe(1);
     detach();
   });
 

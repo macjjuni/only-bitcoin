@@ -268,6 +268,59 @@ describe("SpaceSessionController", () => {
     controller.stop();
   });
 
+  it("요청 단위 서버 예외는 그 발화만 실패시키고 좌석·위치를 유지한다", async () => {
+    const { controller, sockets, welcome } = createHarness();
+    controller.start();
+    const socket = welcome();
+    const failed = controller.sendMessage("일시적 실패");
+    socket.receive({
+      v: 1,
+      t: "error",
+      rid: requestId,
+      code: "UNAVAILABLE",
+      message: "공간 요청을 처리하지 못했어요.",
+    });
+
+    expect(await failed).toBe(false);
+    // 메시지 한 번 실패한 대가로 재접속·리스폰까지 하면 안 된다.
+    expect(controller.getSnapshot().presence.status).toBe("online");
+    expect(controller.getSnapshot().self).not.toBeNull();
+    vi.advanceTimersByTime(30_000);
+    expect(sockets).toHaveLength(1);
+    controller.stop();
+  });
+
+  it("요청과 무관한 서버 예외와 좌석 상실 응답은 다시 접속한다", () => {
+    const unavailable = createHarness();
+    unavailable.controller.start();
+    unavailable.welcome();
+    unavailable.sockets[0].receive({
+      v: 1,
+      t: "error",
+      code: "UNAVAILABLE",
+      message: "공간 요청을 처리하지 못했어요.",
+    });
+    vi.advanceTimersByTime(750);
+    expect(unavailable.sockets).toHaveLength(2);
+    unavailable.controller.stop();
+
+    // 서버가 좌석을 모른다고 하면 rid 가 붙어 있어도 연결을 다시 세워야 한다.
+    const joinRequired = createHarness();
+    joinRequired.controller.start();
+    joinRequired.welcome();
+    joinRequired.sockets[0].receive({
+      v: 1,
+      t: "error",
+      rid: requestId,
+      code: "JOIN_REQUIRED",
+      message: "먼저 공간에 입장해 주세요.",
+    });
+    expect(joinRequired.controller.getSnapshot().self).toBeNull();
+    vi.advanceTimersByTime(750);
+    expect(joinRequired.sockets).toHaveLength(2);
+    joinRequired.controller.stop();
+  });
+
   it("재접속 지연 중 이전 소켓 이벤트를 무시하고 stop 후 타이머를 남기지 않는다", () => {
     const { controller, sockets, welcome } = createHarness();
     controller.start();

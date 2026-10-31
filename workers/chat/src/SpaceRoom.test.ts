@@ -1,5 +1,7 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import { resolveColorIndexFromClientKey } from "../../../src/entities/space/lib/clientKeyHash";
 import { decodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapshot";
+import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
 import type { SpacePeer, SpaceServerFrame } from "../../../src/entities/space/model/spaceProtocol";
 import { SPACE_BOUNDS } from "../../../src/entities/space/model/spaceWorld";
 
@@ -136,6 +138,21 @@ describe("SpaceRoom", () => {
     expect(overflow.frames()).toContainEqual({ v: 1, t: "full" });
     expect(overflow.closeCode).toBe(4003);
     expect(state.storage.sql.exec).not.toHaveBeenCalled();
+  });
+
+  it("스폰 좌표와 색을 clientKey 로 내려 클라이언트 예측과 일치시킨다", async () => {
+    const { join } = createRoom();
+    const socket = await join(clientKey(7));
+    const welcome = socket.frames().find((frame) => frame.t === "welcome");
+
+    // 클라이언트는 비밀키를 모르므로 stableActorKey 로 파생하면 예측할 수 없다.
+    // 두 값이 어긋나면 입장 직후 아바타가 순간이동하고 색이 바뀐다.
+    expect(welcome).toMatchObject({
+      self: {
+        ...createSpawnPoint(clientKey(7)),
+        colorIndex: resolveColorIndexFromClientKey(clientKey(7)),
+      },
+    });
   });
 
   it("같은 identity 재접속은 좌석·위치를 넘기고 구소켓 close는 새 좌석을 지우지 않는다", async () => {

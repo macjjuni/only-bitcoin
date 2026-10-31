@@ -1,7 +1,7 @@
 import { DurableObject } from "cloudflare:workers";
+import { resolveColorIndexFromClientKey } from "../../../src/entities/space/lib/clientKeyHash";
 import { encodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapshot";
 import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
-import { SPACE_AVATAR_COLORS } from "../../../src/entities/space/model/avatar";
 import {
   parseSpaceClientFrame,
   SPACE_CHAT_COOLDOWN_MS,
@@ -354,17 +354,21 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         return;
       }
       const now = Date.now();
+      // 스폰과 색은 클라이언트도 같은 값을 계산할 수 있어야 한다. 비밀키에서 파생한
+      // stableActorKey 로 뽑으면 입장 직후 welcome 이 아바타를 순간이동시킨다.
       const peer: SpacePeer = {
-        ...(previousPeer ?? createSpawnPoint(stableActorKey)),
+        ...(previousPeer ?? createSpawnPoint(frame.clientKey)),
         seat,
         nickname,
-        colorIndex: Number.parseInt(stableActorKey.slice(0, 8), 16) % SPACE_AVATAR_COLORS.length,
+        colorIndex: resolveColorIndexFromClientKey(frame.clientKey),
         isRunning: false,
       };
 
       if (previousSocket) {
         this.sendError(previousSocket, "SESSION_REPLACED", "다른 탭에서 스페이스에 접속했어요.");
-        this.removeSocket(previousSocket, 4001, "session replaced", false);
+        // 새 연결이 같은 좌석을 물려받을 때만 leave 를 생략한다. 다른 좌석을 받으면
+        // 옛 좌석이 다른 클라이언트에 유령으로 남는다.
+        this.removeSocket(previousSocket, 4001, "session replaced", previousPeer?.seat !== seat);
       }
 
       socket.serializeAttachment({

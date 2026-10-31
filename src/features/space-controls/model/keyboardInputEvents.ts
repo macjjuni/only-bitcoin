@@ -27,16 +27,33 @@ const ALL_HANDLED_CODES = new Set<string>([
   ...YAW_RIGHT_CODES,
 ]);
 
-const INTERACTIVE_SELECTOR =
-  'input, textarea, select, button, a[href], [role="log"], [contenteditable]:not([contenteditable="false"])';
+/**
+ * 키 입력을 그대로 넘겨야 하는 대상.
+ *
+ * 글자를 받거나 방향키로 스크롤하는 요소만 넣는다. 버튼·링크까지 넣으면 HUD
+ * 버튼을 한 번 누른 뒤 포커스가 남아 WASD 가 전부 죽는다.
+ */
+const TEXT_ENTRY_SELECTOR =
+  'input, textarea, select, [role="log"], [contenteditable]:not([contenteditable="false"])';
 
-const isInteractiveTarget = (target: EventTarget | null): boolean => {
+/** 포커스된 상태에서 공백으로 활성화되는 대상. 이동 키는 그대로 받는다. */
+const ACTIVATION_SELECTOR = 'button, a[href], summary, [role="button"], [role="link"]';
+
+const matchesSelector = (target: EventTarget | null, selector: string): boolean => {
   return Boolean(
     target &&
       "closest" in target &&
       typeof target.closest === "function" &&
-      target.closest(INTERACTIVE_SELECTOR),
+      target.closest(selector),
   );
+};
+
+const isTextEntryTarget = (target: EventTarget | null): boolean => {
+  return matchesSelector(target, TEXT_ENTRY_SELECTOR);
+};
+
+const isActivationTarget = (target: EventTarget | null): boolean => {
+  return matchesSelector(target, ACTIVATION_SELECTOR);
 };
 
 /** 입력창 포커스·탭 전환 시 눌린 키를 비워 채팅 중 이동과 고착 입력을 막는다. */
@@ -65,7 +82,7 @@ export const attachSpaceKeyboardEvents = (
   const onKeyDown = (event: Event): void => {
     const keyboardEvent = event as KeyboardEvent;
     if (
-      isInteractiveTarget(keyboardEvent.target) ||
+      isTextEntryTarget(keyboardEvent.target) ||
       keyboardEvent.isComposing ||
       keyboardEvent.ctrlKey ||
       keyboardEvent.metaKey ||
@@ -74,7 +91,12 @@ export const attachSpaceKeyboardEvents = (
       clearPressedCodes();
       return;
     }
-    if (SCROLL_BLOCKING_CODES.has(keyboardEvent.code)) {
+    // 포커스된 버튼의 공백 활성화를 빼앗지 않는다. 방향키는 버튼을 누르지 않는다.
+    const isActivationKey = keyboardEvent.code === "Space";
+    if (
+      SCROLL_BLOCKING_CODES.has(keyboardEvent.code) &&
+      !(isActivationKey && isActivationTarget(keyboardEvent.target))
+    ) {
       keyboardEvent.preventDefault();
     }
     if (ALL_HANDLED_CODES.has(keyboardEvent.code)) {
@@ -87,7 +109,7 @@ export const attachSpaceKeyboardEvents = (
     applyPressedCodes();
   };
   const onFocusInput = (event: Event): void => {
-    if (isInteractiveTarget(event.target)) {
+    if (isTextEntryTarget(event.target)) {
       clearPressedCodes();
     }
   };
