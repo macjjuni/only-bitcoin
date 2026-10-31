@@ -15,7 +15,19 @@ export const BILLBOARD_TEXTURE = {
   minRedrawIntervalMs: 250,
   /** LED 그릴 간격(px). */
   gridPitch: 6,
+  paddingX: 48,
+  /** 연결 표시 점이 차지하는 좌우 영역. 라벨이 점을 덮지 않게 한다. */
+  statusDotZoneX: 96,
 } as const;
+
+/**
+ * 글자 크기 하한.
+ *
+ * 패널 폭 12 m 가 텍스처 1024 px 에 대응하므로 1 px 는 11.7 mm 다. 72 px 글자의
+ * 숫자 높이는 약 0.6 m 이고, 32 m 거리에서 약 65 arcmin 로 가독 한계(약 5 arcmin)의
+ * 13배다. 이 밑으로 내려갈 일은 없지만 계산이 틀렸을 때의 안전장치로 둔다.
+ */
+export const BILLBOARD_MIN_FONT_SIZE_PX = 72;
 
 export const BILLBOARD_COLORS = {
   background: "#06080e",
@@ -96,6 +108,36 @@ export const resolveToneColor = (tone: BillboardTone): string => {
   return BILLBOARD_COLORS[tone];
 };
 
+export interface TextFitOptions {
+  maxWidth: number;
+  maxFontSizePx: number;
+  minFontSizePx?: number;
+}
+
+/**
+ * 가용 폭에 맞춰 글자 크기를 줄인다.
+ *
+ * 캔버스 텍스트 폭은 글자 크기에 선형이므로, 최대 크기에서 한 번 재고 비율만
+ * 곱하면 된다. 크기를 1 px 씩 줄이며 반복 측정할 필요가 없다.
+ *
+ * 자리수가 늘어나도(가격이 10자리가 되어도) 넘치지 않게 하려고 둔다. 고정
+ * 크기로 두면 `₩158,420,000` 같은 12자 문자열이 패널 밖으로 282 px 넘친다.
+ *
+ * @param measuredWidth 최대 글자 크기로 측정한 문자열 폭
+ */
+export const resolveFittedFontSize = (
+  measuredWidth: number,
+  { maxWidth, maxFontSizePx, minFontSizePx = BILLBOARD_MIN_FONT_SIZE_PX }: TextFitOptions,
+): number => {
+  if (!Number.isFinite(measuredWidth) || measuredWidth <= 0) {
+    return maxFontSizePx;
+  }
+
+  const shrinkRatio = Math.min(1, maxWidth / measuredWidth);
+
+  return Math.max(Math.min(minFontSizePx, maxFontSizePx), Math.floor(maxFontSizePx * shrinkRatio));
+};
+
 // region [Privates]
 const drawPanelBackground = (context: CanvasRenderingContext2D): void => {
   const { width, height } = BILLBOARD_TEXTURE;
@@ -134,35 +176,91 @@ const drawConnectionDot = (
 };
 // endregion
 
+/** 등폭 스택. 자리수마다 폭이 달라지면 4 Hz 갱신 때 글자가 떤다. */
+const MONOSPACE_FONT_STACK = "ui-monospace, SFMono-Regular, Menlo, monospace";
+
+// region [Privates]
+const resolveFontSpec = (fontWeight: number, fontSizePx: number): string => {
+  return `${fontWeight} ${fontSizePx}px ${MONOSPACE_FONT_STACK}`;
+};
+
+/** 가용 폭을 넘지 않도록 크기를 줄여 가운데 정렬로 그린다. */
+const drawFittedText = (
+  context: CanvasRenderingContext2D,
+  text: string,
+  {
+    fontWeight,
+    maxFontSizePx,
+    maxWidth,
+    centerY,
+  }: {
+    fontWeight: number;
+    maxFontSizePx: number;
+    maxWidth: number;
+    centerY: number;
+  },
+): void => {
+  context.font = resolveFontSpec(fontWeight, maxFontSizePx);
+
+  const fittedFontSize = resolveFittedFontSize(context.measureText(text).width, {
+    maxWidth,
+    maxFontSizePx,
+  });
+
+  if (fittedFontSize !== maxFontSizePx) {
+    context.font = resolveFontSpec(fontWeight, fittedFontSize);
+  }
+
+  context.fillText(text, BILLBOARD_TEXTURE.width / 2, centerY);
+};
+// endregion
+
 /**
  * 전광판 한 장을 그린다.
  *
- * 숫자는 가변폭 폰트에서 자리수마다 폭이 달라지므로 등폭 스택을 쓴다.
+ * 모든 행은 가용 폭에 맞춰 자동으로 줄어든다. 고정 크기로 두면 가격 자리수가
+ * 늘어나는 순간 패널 밖으로 넘친다.
  */
 export const drawBillboard = (context: CanvasRenderingContext2D, state: BillboardState): void => {
-  const { width } = BILLBOARD_TEXTURE;
-  const centerX = width / 2;
+  const { width, paddingX, statusDotZoneX } = BILLBOARD_TEXTURE;
+  const contentWidth = width - paddingX * 2;
+  const labelWidth = width - statusDotZoneX * 2;
 
   drawPanelBackground(context);
   context.textAlign = "center";
   context.textBaseline = "middle";
 
-  context.font = "600 40px ui-monospace, SFMono-Regular, Menlo, monospace";
   context.fillStyle = BILLBOARD_COLORS.label;
-  context.fillText("BITCOIN / KRW", centerX, 74);
+  drawFittedText(context, "BITCOIN", {
+    fontWeight: 600,
+    maxFontSizePx: 40,
+    maxWidth: labelWidth,
+    centerY: 74,
+  });
 
-  // 가격 숫자 높이 168 px. 패널 폭 12 m 기준으로 32 m 거리에서 읽히는 하한이다.
-  context.font = "700 168px ui-monospace, SFMono-Regular, Menlo, monospace";
   context.fillStyle = BILLBOARD_COLORS.price;
-  context.fillText(formatBillboardKrw(state.krw), centerX, 214);
+  drawFittedText(context, formatBillboardKrw(state.krw), {
+    fontWeight: 700,
+    maxFontSizePx: 168,
+    maxWidth: contentWidth,
+    centerY: 214,
+  });
 
-  context.font = "600 84px ui-monospace, SFMono-Regular, Menlo, monospace";
   context.fillStyle = BILLBOARD_COLORS.subPrice;
-  context.fillText(formatBillboardUsd(state.usd), centerX, 348);
+  drawFittedText(context, formatBillboardUsd(state.usd), {
+    fontWeight: 600,
+    maxFontSizePx: 84,
+    maxWidth: contentWidth,
+    centerY: 348,
+  });
 
-  context.font = "700 76px ui-monospace, SFMono-Regular, Menlo, monospace";
   context.fillStyle = resolveToneColor(resolveChangeTone(state.krwChange24h));
-  context.fillText(`24H ${formatBillboardChange(state.krwChange24h)}`, centerX, 444);
+  drawFittedText(context, `24H ${formatBillboardChange(state.krwChange24h)}`, {
+    fontWeight: 700,
+    maxFontSizePx: 76,
+    maxWidth: contentWidth,
+    centerY: 444,
+  });
 
   drawConnectionDot(context, 44, 74, state.isKrwConnected);
   drawConnectionDot(context, width - 44, 74, state.isUsdConnected);
