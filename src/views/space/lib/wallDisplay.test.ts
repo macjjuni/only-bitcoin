@@ -9,9 +9,15 @@ const TABLET_PORTRAIT_ASPECT = 820 / 1180;
 const PHONE_PORTRAIT_ASPECT = 393 / 852;
 const PHONE_LANDSCAPE_ASPECT = 852 / 393;
 
-/** 기준 거리에서 화면에 보이는 월드 가로 폭. */
+/**
+ * 기준 거리에서 화면에 보이는 월드 가로 폭.
+ *
+ * 카메라는 플레이어 뒤에 있으므로 벽까지의 거리에 카메라 거리를 더해야 한다.
+ */
 const resolveVisibleWidth = (viewportAspect: number): number => {
-  const distance = Math.abs(SPACE_WALL_ANCHOR[2]);
+  const distance =
+    Math.abs(SPACE_WALL_ANCHOR[2]) +
+    SPACE_CAMERA.defaultDistance * Math.cos(SPACE_CAMERA.defaultPitch);
   const visibleHeight = 2 * distance * Math.tan(((SPACE_CAMERA.fov / 2) * Math.PI) / 180);
 
   return visibleHeight * viewportAspect;
@@ -28,12 +34,19 @@ describe("resolveWallDisplayScale", () => {
     expect(resolveWallDisplayScale(TABLET_PORTRAIT_ASPECT)).toBe(1);
   });
 
-  it("폰 세로에서는 줄인다", () => {
-    expect(resolveWallDisplayScale(PHONE_PORTRAIT_ASPECT)).toBeLessThan(1);
+  it("일반적인 폰 세로는 기본 카메라 거리에서 이미 들어오므로 줄이지 않는다", () => {
+    for (const aspect of [PHONE_PORTRAIT_ASPECT, 360 / 780, 412 / 915]) {
+      expect(resolveWallDisplayScale(aspect)).toBe(1);
+    }
   });
 
-  it("줄인 뒤에는 전광판이 가시 폭 안에 들어온다", () => {
-    for (const aspect of [PHONE_PORTRAIT_ASPECT, 360 / 780, 320 / 900]) {
+  it("그보다 좁은 화면에서만 줄인다", () => {
+    // 접는 폰 커버 화면이나 좁게 줄인 데스크톱 창.
+    expect(resolveWallDisplayScale(320 / 900)).toBeLessThan(1);
+  });
+
+  it("어떤 종횡비에서도 전광판이 가시 폭 안에 들어온다", () => {
+    for (const aspect of [0.3, 320 / 900, PHONE_PORTRAIT_ASPECT, 360 / 780, 0.7, 1.78]) {
       const scaledFrameWidth = SPACE_BILLBOARD.frameWidth * resolveWallDisplayScale(aspect);
 
       expect(scaledFrameWidth).toBeLessThanOrEqual(resolveVisibleWidth(aspect));

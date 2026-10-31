@@ -116,7 +116,7 @@ function VirtualJoystick({ inputSource }: VirtualJoystickProps): ReactNode {
       ref={baseElementRef}
       role="presentation"
       aria-hidden="true"
-      className="absolute bottom-8 left-6 rounded-full border border-white/15 bg-white/5 backdrop-blur-sm touch-none select-none"
+      className="absolute bottom-12 left-8 rounded-full border border-white/15 bg-white/5 backdrop-blur-sm touch-none select-none"
       style={{ width: JOYSTICK_BASE_RADIUS * 2, height: JOYSTICK_BASE_RADIUS * 2 }}
       onPointerDown={onPointerDownJoystickBase}
       onPointerMove={onPointerMoveJoystickBase}
