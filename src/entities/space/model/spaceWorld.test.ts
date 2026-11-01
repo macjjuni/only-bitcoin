@@ -1,11 +1,12 @@
 import { describe, expect, it } from "vitest";
 import {
-  SPACE_AD_BOARDS,
   SPACE_BILLBOARD,
+  SPACE_BLOCK_DASHBOARD,
   SPACE_BOUNDS,
   SPACE_GROUND,
   SPACE_TEXT_BANNER,
   SPACE_WALL_ANCHOR,
+  SPACE_WALL_PANEL_SPAN,
 } from "@/entities/space";
 
 const BILLBOARD_CENTER_Y = SPACE_WALL_ANCHOR[1];
@@ -14,51 +15,62 @@ const BILLBOARD_CENTER_Y = SPACE_WALL_ANCHOR[1];
 const toWorldY = (offsetY: number): number => SPACE_WALL_ANCHOR[1] + offsetY;
 const toWorldX = (offsetX: number): number => SPACE_WALL_ANCHOR[0] + offsetX;
 
-describe("전광판·광고판 배치", () => {
-  it("광고판은 전광판과 세로 중심이 같다", () => {
-    for (const adBoard of SPACE_AD_BOARDS) {
-      expect(toWorldY(adBoard.offset[1])).toBeCloseTo(BILLBOARD_CENTER_Y, 6);
-    }
+describe("전광판·현황판 배치", () => {
+  it("현황판은 전광판과 세로 중심이 같다", () => {
+    expect(toWorldY(SPACE_BLOCK_DASHBOARD.offset[1])).toBeCloseTo(BILLBOARD_CENTER_Y, 6);
   });
 
-  it("광고판 윗변·아랫변이 전광판 안쪽에 들어온다", () => {
-    const billboardTop = BILLBOARD_CENTER_Y + SPACE_BILLBOARD.height / 2;
-    const billboardBottom = BILLBOARD_CENTER_Y - SPACE_BILLBOARD.height / 2;
-
-    for (const adBoard of SPACE_AD_BOARDS) {
-      const adTop = toWorldY(adBoard.offset[1]) + adBoard.height / 2;
-      const adBottom = toWorldY(adBoard.offset[1]) - adBoard.height / 2;
-
-      expect(adTop).toBeLessThanOrEqual(billboardTop);
-      expect(adBottom).toBeGreaterThanOrEqual(billboardBottom);
-    }
+  it("현황판은 전광판과 치수·프레임이 같다", () => {
+    // 같은 벽에 나란히 걸리는 형제라 크기가 다르면 한쪽이 보조처럼 읽힌다.
+    expect(SPACE_BLOCK_DASHBOARD.width).toBe(SPACE_BILLBOARD.width);
+    expect(SPACE_BLOCK_DASHBOARD.height).toBe(SPACE_BILLBOARD.height);
+    expect(SPACE_BLOCK_DASHBOARD.frameWidth).toBe(SPACE_BILLBOARD.frameWidth);
+    expect(SPACE_BLOCK_DASHBOARD.frameHeight).toBe(SPACE_BILLBOARD.frameHeight);
+    expect(SPACE_BLOCK_DASHBOARD.frameOffset).toEqual(SPACE_BILLBOARD.frameOffset);
   });
 
-  it("광고판은 3:2 비율이다", () => {
-    for (const adBoard of SPACE_AD_BOARDS) {
-      expect(adBoard.width / adBoard.height).toBeCloseTo(3 / 2, 6);
-    }
+  it("현황판은 16:9 비율이다", () => {
+    // 텍스처(1600 × 900)와 어긋나면 글자가 늘어난다.
+    expect(SPACE_BLOCK_DASHBOARD.width / SPACE_BLOCK_DASHBOARD.height).toBeCloseTo(16 / 9, 6);
   });
 
-  it("광고판이 전광판 프레임과 겹치지 않는다", () => {
-    const billboardHalfWidth = SPACE_BILLBOARD.frameWidth / 2;
+  it("두 판이 중앙선을 기준으로 좌우 대칭이다", () => {
+    const billboardX = toWorldX(SPACE_BILLBOARD.offset[0]);
+    const dashboardX = toWorldX(SPACE_BLOCK_DASHBOARD.offset[0]);
 
-    for (const adBoard of SPACE_AD_BOARDS) {
-      // 안쪽으로 기울어 있어 가로 투영 폭이 실제 폭보다 좁다.
-      const projectedHalfWidth = (adBoard.width * Math.cos(adBoard.rotationY)) / 2;
-      const innerEdgeX = Math.abs(toWorldX(adBoard.offset[0])) - projectedHalfWidth;
+    expect(billboardX).toBeLessThan(SPACE_WALL_ANCHOR[0]);
+    expect(dashboardX).toBeGreaterThan(SPACE_WALL_ANCHOR[0]);
+    expect(billboardX + dashboardX).toBeCloseTo(SPACE_WALL_ANCHOR[0] * 2, 6);
+  });
 
-      expect(innerEdgeX).toBeGreaterThan(billboardHalfWidth);
-    }
+  it("두 프레임이 겹치지 않고 간격을 둔다", () => {
+    const billboardInnerEdge = toWorldX(SPACE_BILLBOARD.offset[0]) + SPACE_BILLBOARD.frameWidth / 2;
+    const dashboardInnerEdge =
+      toWorldX(SPACE_BLOCK_DASHBOARD.offset[0]) - SPACE_BLOCK_DASHBOARD.frameWidth / 2;
+
+    expect(dashboardInnerEdge - billboardInnerEdge).toBeGreaterThanOrEqual(0.4);
+  });
+
+  it("두 프레임이 모두 바닥 폭 안에 들어온다", () => {
+    const outerEdgeX =
+      toWorldX(SPACE_BLOCK_DASHBOARD.offset[0]) + SPACE_BLOCK_DASHBOARD.frameWidth / 2;
+
+    expect(outerEdgeX).toBeLessThan(SPACE_GROUND.width / 2);
+    expect(SPACE_WALL_PANEL_SPAN).toBeCloseTo(outerEdgeX * 2, 6);
+  });
+
+  it("두 판 모두 기울이지 않는다", () => {
+    // 기울이면 표시 면이 옆 패널·장비함에 가려 글자가 잘려 보인다.
+    expect(SPACE_BLOCK_DASHBOARD.rotationY).toBe(0);
   });
 
   it("모든 패널이 바닥 위에 떠 있다", () => {
     const panels = [
       { y: BILLBOARD_CENTER_Y, height: SPACE_BILLBOARD.frameHeight },
-      ...SPACE_AD_BOARDS.map((adBoard) => ({
-        y: toWorldY(adBoard.offset[1]),
-        height: adBoard.height,
-      })),
+      {
+        y: toWorldY(SPACE_BLOCK_DASHBOARD.offset[1]),
+        height: SPACE_BLOCK_DASHBOARD.frameHeight,
+      },
     ];
 
     for (const panel of panels) {
@@ -95,15 +107,15 @@ describe("텍스트 배너 배치", () => {
     expect(SPACE_TEXT_BANNER.width / SPACE_TEXT_BANNER.height).toBeGreaterThan(10);
   });
 
-  it("좌우 중앙에 놓인다", () => {
-    expect(toWorldX(SPACE_TEXT_BANNER.offset[0])).toBeCloseTo(SPACE_WALL_ANCHOR[0], 6);
+  it("전광판 위에 얹히므로 전광판과 가로 중심이 같다", () => {
+    // 중앙선에 두면 전광판에서 떨어져 공중에 뜬 것처럼 보인다.
+    expect(SPACE_TEXT_BANNER.offset[0]).toBe(SPACE_BILLBOARD.offset[0]);
   });
 
-  it("광고판과 세로로 겹치지 않는다", () => {
-    for (const adBoard of SPACE_AD_BOARDS) {
-      const adTop = toWorldY(adBoard.offset[1]) + adBoard.height / 2;
+  it("현황판 프레임과 세로로 겹치지 않는다", () => {
+    const panelTop =
+      toWorldY(SPACE_BLOCK_DASHBOARD.offset[1]) + SPACE_BLOCK_DASHBOARD.frameHeight / 2;
 
-      expect(bannerBottom).toBeGreaterThan(adTop);
-    }
+    expect(bannerBottom).toBeGreaterThanOrEqual(panelTop);
   });
 });

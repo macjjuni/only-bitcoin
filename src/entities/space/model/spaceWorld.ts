@@ -62,12 +62,23 @@ const BILLBOARD_CENTER_Y = 6;
  */
 export const SPACE_WALL_ANCHOR = [0, BILLBOARD_CENTER_Y, SPACE_WALL_Z] as const;
 
+/**
+ * 두 패널 프레임 사이 간격.
+ *
+ * 전광판과 블록 현황판은 **중앙선을 기준으로 좌우 대칭**으로 걸린다. 한쪽을
+ * 중앙에 두고 다른 쪽을 옆에 붙이면 벽 전체가 한쪽으로 쏠린다.
+ */
+const WALL_PANEL_GAP = 0.8;
+
+/** 프레임 반폭 + 간격 반. 두 패널이 이 거리만큼 중앙선에서 벌어진다. */
+const WALL_PANEL_OFFSET_X = 5.1 + WALL_PANEL_GAP / 2;
+
 /** 패널은 16:9 다. 텍스처(1600 × 900) 와 비율이 어긋나면 글자가 늘어난다. */
 export const SPACE_BILLBOARD = {
   width: 9.6,
   height: 5.4,
-  /** `SPACE_WALL_ANCHOR` 기준 상대 위치. */
-  offset: [0, 0, 0] as const,
+  /** `SPACE_WALL_ANCHOR` 기준 상대 위치. 중앙선 **왼쪽**에 걸린다. */
+  offset: [-WALL_PANEL_OFFSET_X, 0, 0] as const,
   frameWidth: 10.2,
   frameHeight: 6,
   frameOffset: [0, 0, -0.1] as const,
@@ -78,57 +89,54 @@ export const SPACE_BILLBOARD = {
    * 아래로 떨어진다. 패널 자체는 발광 재질이라 광원과 분리해도 밝기가 유지되므로
    * 광원만 낮게 고정한다. 화면이 좁다고 조명까지 줄일 이유도 없다.
    */
-  glowPosition: [0, 4, SPACE_WALL_Z + 2.5] as const,
+  glowPosition: [-WALL_PANEL_OFFSET_X, 4, SPACE_WALL_Z + 2.5] as const,
   /** 가격 숫자 크기 기준 거리. 스폰 링 먼 쪽 끝. */
   referenceViewDistance: 32,
 } as const;
 
-export type SpaceAdBoardId = "left" | "right";
-
-export interface SpaceAdBoardPlacement {
-  id: SpaceAdBoardId;
-  width: number;
-  height: number;
-  /** `SPACE_WALL_ANCHOR` 기준 상대 위치. */
-  offset: readonly [number, number, number];
-  /** Y축 회전(라디안). 안쪽으로 15° 틀어 스폰 링 어디서든 한 화면에 잡히게 함. */
-  rotationY: number;
-}
-
-const AD_BOARD_TILT = (15 * Math.PI) / 180;
+/**
+ * 전광판 오른쪽 블록 현황판.
+ *
+ * **전광판과 같은 치수·프레임**(9.6 × 5.4, 프레임 10.2 × 6)을 쓰고, 중앙선을
+ * 기준으로 전광판과 좌우 대칭으로 걸린다. 같은 벽에 나란히 걸리는 형제라
+ * 크기가 다르면 한쪽이 보조처럼 읽힌다.
+ *
+ * ```text
+ *   [ 전광판 ]  [ 현황판 ]
+ *             │ 중앙선 (x = 0)
+ * ```
+ *
+ * **기울기를 두지 않는다.** 처음에는 두 판을 안쪽으로 15° 틀었는데, 기울어진
+ * 면이 옆 패널과 장비함에 가려 글자가 잘려 보였다. 두 판이 중앙선 양옆에 모여
+ * 있으면 스폰 링 어디서 봐도 정면에 들어오므로 틀 이유가 없다.
+ */
+export const SPACE_BLOCK_DASHBOARD = {
+  width: SPACE_BILLBOARD.width,
+  height: SPACE_BILLBOARD.height,
+  frameWidth: SPACE_BILLBOARD.frameWidth,
+  frameHeight: SPACE_BILLBOARD.frameHeight,
+  /** `SPACE_WALL_ANCHOR` 기준 상대 위치. 중앙선 **오른쪽**에 걸린다. */
+  offset: [WALL_PANEL_OFFSET_X, 0, 0] as const,
+  /** 프레임은 표시 면보다 0.1 뒤에 둔다. 전광판과 같은 값이다. */
+  frameOffset: SPACE_BILLBOARD.frameOffset,
+  rotationY: 0,
+  /**
+   * 바닥을 물들이는 광원 위치. 전광판과 같은 높이·깊이의 절대 좌표다.
+   *
+   * 두 판이 같은 규격으로 나란히 걸렸는데 한쪽 바닥만 오렌지로 물들면 현황판이
+   * 꺼진 간판처럼 보인다. 패널은 발광 재질이라 광원과 분리해도 밝기가 유지되므로
+   * 전광판과 마찬가지로 **축소 그룹 바깥**에 낮게 고정한다.
+   */
+  glowPosition: [WALL_PANEL_OFFSET_X, 4, SPACE_WALL_Z + 2.5] as const,
+} as const;
 
 /**
- * 전광판 중심에서 광고판 중심까지의 거리.
+ * 좌우 패널을 합친 가로 범위.
  *
- * 15° 기울어 있어 가로 투영 반폭이 2.90 이므로 안쪽 끝은 6.01 이고, 전광판
- * 프레임 끝(5.10)과 0.91 m 떨어진다. 여기서 10% 를 더 당기면 간격이 0.02 m 로
- * 사실상 맞붙으므로, 더 좁히려면 광고판 폭이나 기울기를 함께 조정해야 한다.
+ * 좁은 화면 축소 가드(§6.4)가 **두 판을 함께** 화면에 맞추는 기준이다. 전광판
+ * 하나만 기준으로 삼으면 현황판 바깥쪽이 잘린다.
  */
-const AD_BOARD_OFFSET_X = 8.91;
-
-/**
- * 광고판은 전광판과 세로 중심을 맞춘다.
- *
- * 두 판의 높이가 다르므로(5.4 vs 4) 아래를 맞추면 윗변이 어긋나고 위를 맞추면
- * 아랫변이 어긋난다. 중심을 맞춰야 세 판이 한 줄로 읽힌다. 시선 위계는 높이가
- * 아니라 크기 차이로 준다.
- */
-export const SPACE_AD_BOARDS: readonly SpaceAdBoardPlacement[] = [
-  {
-    id: "left",
-    width: 6,
-    height: 4,
-    offset: [-AD_BOARD_OFFSET_X, 0, 0.6],
-    rotationY: AD_BOARD_TILT,
-  },
-  {
-    id: "right",
-    width: 6,
-    height: 4,
-    offset: [AD_BOARD_OFFSET_X, 0, 0.6],
-    rotationY: -AD_BOARD_TILT,
-  },
-] as const;
+export const SPACE_WALL_PANEL_SPAN = (WALL_PANEL_OFFSET_X + 5.1) * 2;
 
 /**
  * 전광판 위에 얹는 텍스트 전용 광고 배너.
@@ -140,8 +148,11 @@ export const SPACE_AD_BOARDS: readonly SpaceAdBoardPlacement[] = [
 export const SPACE_TEXT_BANNER = {
   width: SPACE_BILLBOARD.width,
   height: 0.8,
-  /** 전광판 프레임 윗변(+3)에서 0.2 띄우고 배너 반높이(0.4)를 더한 값. */
-  offset: [0, 3.6, 0] as const,
+  /**
+   * 전광판 프레임 윗변(+3)에서 0.2 띄우고 배너 반높이(0.4)를 더한 값.
+   * 가로는 전광판을 따라간다 — 전광판 위에 얹는 배너라 중앙선에 두면 떠 보인다.
+   */
+  offset: [SPACE_BILLBOARD.offset[0], 3.6, 0] as const,
 } as const;
 
 /** 명찰·말풍선 표시 상한. 인원 비례가 아니라 DOM 렌더 비용의 상한이다. */

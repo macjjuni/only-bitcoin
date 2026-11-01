@@ -281,15 +281,17 @@ function PriceBillboard(): ReactNode {
   });
   // endregion
 
+  // 가격 텍스처·펄스 좌표가 모두 패널 중심 기준이라, 패널을 원점에 두고
+  // 그룹을 옮긴다. 패널 메시만 옮기면 숫자 레이어와 펄스가 제자리에 남는다.
   return (
-    <group>
+    <group position={SPACE_BILLBOARD.offset}>
       <mesh position={SPACE_BILLBOARD.frameOffset}>
         <planeGeometry args={[SPACE_BILLBOARD.frameWidth, SPACE_BILLBOARD.frameHeight]} />
         <meshStandardMaterial color={BILLBOARD_COLORS.panelEdge} roughness={0.6} metalness={0.4} />
       </mesh>
 
       {/* 자체 발광 패널이라 조명 영향을 받지 않는 기본 재질을 쓴다. */}
-      <mesh position={SPACE_BILLBOARD.offset}>
+      <mesh>
         <planeGeometry args={[SPACE_BILLBOARD.width, SPACE_BILLBOARD.height]} />
         <meshBasicMaterial map={surface.texture} toneMapped={false} />
       </mesh>

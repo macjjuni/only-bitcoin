@@ -8,7 +8,6 @@ import {
   createSpawnPoint,
   type LocalPlayerState,
   resolveColorIndexFromClientKey,
-  SPACE_AD_BOARDS,
   SPACE_WALL_ANCHOR,
   type SpacePeer,
 } from "@/entities/space";
@@ -39,7 +38,7 @@ import { spaceConfig } from "@/shared/config/space";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 import { createEmptyAdTextSlot } from "@/views/space/lib/textBannerTexture";
 import { resolveWallAnchorY, resolveWallDisplayScale } from "@/views/space/lib/wallDisplay";
-import AdBoard from "./AdBoard";
+import BlockDashboard from "./BlockDashboard";
 import ChatBubbles from "./ChatBubbles";
 import ControlWall from "./ControlWall";
 import Ground from "./Ground";
@@ -233,20 +232,15 @@ function SpaceScene({
       <group position={wallAnchor} scale={wallDisplayScale}>
         <PriceBillboard />
 
+        {/* 전광판 오른쪽 블록 현황판. 광고가 아니라 상설 패널이라 스위치와 무관하다. */}
+        <BlockDashboard />
+
         {/*
           광고를 끄면 표시 면만 빠지고 벽면 장비함은 남는다. 장비함은 광고가 아니라
           전광판까지 함께 쓰는 벽 구조이고, 켜고 끌 때 벽 구성이 바뀌면 안 된다.
-          끈 동안에는 광고판 2장과 배너의 캔버스 텍스처도 만들지 않는다.
+          끈 동안에는 배너의 캔버스 텍스처도 만들지 않는다.
         */}
-        {spaceConfig.isAdEnabled && (
-          <>
-            <TextAdBanner slot={textAdSlot} />
-
-            {SPACE_AD_BOARDS.map((placement) => (
-              <AdBoard key={placement.id} placement={placement} />
-            ))}
-          </>
-        )}
+        {spaceConfig.isAdEnabled && <TextAdBanner slot={textAdSlot} />}
       </group>
 
       <group ref={playerGroupRef}>

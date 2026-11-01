@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SPACE_BILLBOARD, SPACE_WALL_ANCHOR } from "@/entities/space";
+import { SPACE_BILLBOARD, SPACE_WALL_ANCHOR, SPACE_WALL_PANEL_SPAN } from "@/entities/space";
 import { SPACE_CAMERA } from "@/features/space-controls";
 import { resolveWallAnchorY, resolveWallDisplayScale } from "@/views/space/lib/wallDisplay";
 
@@ -32,29 +32,35 @@ describe("resolveWallDisplayScale", () => {
     expect(resolveWallDisplayScale(PHONE_LANDSCAPE_ASPECT)).toBe(1);
   });
 
-  it("태블릿 세로는 이미 들어오므로 줄이지 않는다", () => {
-    expect(resolveWallDisplayScale(TABLET_PORTRAIT_ASPECT)).toBe(1);
+  it("태블릿 세로는 거의 그대로 둔다", () => {
+    expect(resolveWallDisplayScale(TABLET_PORTRAIT_ASPECT)).toBeGreaterThan(0.9);
   });
 
-  it("일반적인 폰 세로는 기본 카메라 거리에서 이미 들어오므로 줄이지 않는다", () => {
+  it("폰 세로는 두 판을 함께 담으려고 줄인다", () => {
+    // 전광판 하나만 기준으로 삼으면 1 이지만, 좌우 두 판을 다 보여주는 것이
+    // 이 배치의 목적이라 세로로 긴 화면에서는 같이 줄인다.
     for (const aspect of [PHONE_PORTRAIT_ASPECT, 360 / 780, 412 / 915]) {
-      expect(resolveWallDisplayScale(aspect)).toBe(1);
+      const scale = resolveWallDisplayScale(aspect, SPACE_CAMERA.touchInitialDistance);
+
+      expect(scale).toBeLessThan(1);
+      expect(scale).toBeGreaterThan(0.7);
     }
   });
 
-  it("그보다 좁은 화면에서만 줄인다", () => {
-    // 접는 폰 커버 화면이나 좁게 줄인 데스크톱 창.
-    const narrowAspect = 320 / 900;
-    const scale = resolveWallDisplayScale(narrowAspect);
+  it("줄일 때는 두 판을 합친 폭이 가시 폭의 95% 에 맞는다", () => {
+    const aspect = PHONE_PORTRAIT_ASPECT;
+    const distance = SPACE_CAMERA.touchInitialDistance;
+    const scale = resolveWallDisplayScale(aspect, distance);
 
-    expect(scale).toBeLessThan(1);
-    expect(SPACE_BILLBOARD.frameWidth * scale).toBeCloseTo(
-      resolveVisibleWidth(narrowAspect) * 0.95,
+    expect(SPACE_WALL_PANEL_SPAN * scale).toBeCloseTo(
+      resolveVisibleWidth(aspect, distance) * 0.95,
       6,
     );
   });
 
-  it("어떤 종횡비·카메라 거리에서도 전광판이 가시 폭 안에 들어온다", () => {
+  it("어떤 종횡비·카메라 거리에서도 전광판 프레임은 가시 폭 안에 들어온다", () => {
+    // 하한(0.5)에 걸리면 두 판을 합친 폭은 넘칠 수 있다. 그래도 가격을 보여주는
+    // 전광판 자체는 잘리지 않아야 한다.
     const aspects = [0.25, 0.3, 320 / 900, PHONE_PORTRAIT_ASPECT, 360 / 780, 0.7, 1.78];
     const distances = [SPACE_CAMERA.touchInitialDistance, SPACE_CAMERA.defaultDistance];
 
@@ -69,27 +75,27 @@ describe("resolveWallDisplayScale", () => {
   });
 
   it("종횡비가 커질수록 배율도 커진다", () => {
-    const narrow = resolveWallDisplayScale(0.25);
-    const wide = resolveWallDisplayScale(0.35);
+    const narrow = resolveWallDisplayScale(0.45);
+    const wide = resolveWallDisplayScale(0.6);
 
     expect(wide).toBeGreaterThan(narrow);
   });
 
   it("카메라가 가까울수록 더 줄인다", () => {
     // 가까이 붙을수록 벽면이 화면을 더 많이 차지하므로 가드가 일찍 걸린다.
-    const atNear = resolveWallDisplayScale(0.3, SPACE_CAMERA.minDistance);
-    const atFar = resolveWallDisplayScale(0.3, SPACE_CAMERA.maxDistance);
+    // 0.3 은 두 판 기준에서 이미 하한에 닿으므로 조금 넓은 종횡비로 본다.
+    const atNear = resolveWallDisplayScale(0.6, SPACE_CAMERA.minDistance);
+    const atFar = resolveWallDisplayScale(0.6, SPACE_CAMERA.maxDistance);
 
     expect(atNear).toBeLessThan(atFar);
   });
 
-  it("손가락 기기 시작 거리에서도 일반적인 폰은 사실상 줄이지 않는다", () => {
-    // 가장 가까이 붙여 시작하므로 가드 경계에 바짝 붙는다. 0.1% 미만의 차이는
-    // 화면에서 구분되지 않지만, 경계를 넘지 않는다는 사실 자체가 중요하다.
+  it("손가락 기기는 멀리서 시작하므로 기본 거리보다 덜 줄인다", () => {
     for (const aspect of [PHONE_PORTRAIT_ASPECT, 360 / 780, 412 / 915]) {
-      expect(resolveWallDisplayScale(aspect, SPACE_CAMERA.touchInitialDistance)).toBeGreaterThan(
-        0.99,
-      );
+      const atTouchStart = resolveWallDisplayScale(aspect, SPACE_CAMERA.touchInitialDistance);
+      const atDefault = resolveWallDisplayScale(aspect, SPACE_CAMERA.defaultDistance);
+
+      expect(atTouchStart).toBeGreaterThan(atDefault);
     }
   });
 

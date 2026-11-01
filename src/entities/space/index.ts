@@ -33,8 +33,8 @@ export {
   type SpaceServerFrame,
 } from "./model/spaceProtocol";
 export {
-  SPACE_AD_BOARDS,
   SPACE_BILLBOARD,
+  SPACE_BLOCK_DASHBOARD,
   SPACE_BOUNDS,
   SPACE_GROUND,
   SPACE_MAX_JUMP_HEIGHT,
@@ -43,7 +43,6 @@ export {
   SPACE_SPAWN_RING,
   SPACE_TEXT_BANNER,
   SPACE_WALL_ANCHOR,
+  SPACE_WALL_PANEL_SPAN,
   SPACE_WALL_Z,
-  type SpaceAdBoardId,
-  type SpaceAdBoardPlacement,
 } from "./model/spaceWorld";

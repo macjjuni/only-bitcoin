@@ -1,7 +1,7 @@
 "use client";
 
 import { memo, type ReactNode } from "react";
-import { SPACE_BILLBOARD, SPACE_BOUNDS } from "@/entities/space";
+import { SPACE_BILLBOARD, SPACE_BLOCK_DASHBOARD, SPACE_BOUNDS } from "@/entities/space";
 import { BITCOIN_COLOR } from "@/shared/config/color";
 
 /** 밝은 천장과 어두운 바닥의 색을 나눠 금속 패널과 아바타의 입체감을 만든다. */
@@ -44,14 +44,20 @@ function SceneLighting({ hasRealtimeShadows }: SceneLightingProps): ReactNode {
       {/* 청록 보조광은 그림자를 만들지 않고 벽·캐릭터의 어두운 면만 드러낸다. */}
       <directionalLight color={FILL_LIGHT_COLOR} intensity={0.35} position={[-18, 10, -8]} />
 
-      {/* 전광판이 바닥을 물들이게 하는 광원. 패널보다 낮고 살짝 앞에 둔다. */}
-      <pointLight
-        color={BITCOIN_COLOR}
-        intensity={BILLBOARD_GLOW_INTENSITY}
-        distance={BILLBOARD_GLOW_DISTANCE}
-        decay={2}
-        position={SPACE_BILLBOARD.glowPosition}
-      />
+      {/*
+        두 패널이 바닥을 물들이게 하는 광원. 패널보다 낮고 살짝 앞에 둔다.
+        같은 규격으로 나란히 걸린 두 판이므로 한쪽만 물들이지 않는다.
+      */}
+      {[SPACE_BILLBOARD.glowPosition, SPACE_BLOCK_DASHBOARD.glowPosition].map((glowPosition) => (
+        <pointLight
+          key={glowPosition[0]}
+          color={BITCOIN_COLOR}
+          intensity={BILLBOARD_GLOW_INTENSITY}
+          distance={BILLBOARD_GLOW_DISTANCE}
+          decay={2}
+          position={glowPosition}
+        />
+      ))}
     </>
   );
 }

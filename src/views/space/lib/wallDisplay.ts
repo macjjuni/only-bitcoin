@@ -1,4 +1,4 @@
-import { SPACE_BILLBOARD, SPACE_TEXT_BANNER, SPACE_WALL_ANCHOR } from "@/entities/space";
+import { SPACE_BILLBOARD, SPACE_WALL_ANCHOR, SPACE_WALL_PANEL_SPAN } from "@/entities/space";
 import { SPACE_CAMERA } from "@/features/space-controls";
 
 /**
@@ -53,10 +53,10 @@ export const resolveWallDisplayScale = (
     Math.abs(SPACE_WALL_ANCHOR[2]) + safeCameraDistance * Math.cos(SPACE_CAMERA.defaultPitch);
   const visibleHeight = 2 * referenceDistance * Math.tan(toRadians(SPACE_CAMERA.fov) / 2);
   const visibleWidth = visibleHeight * viewportAspect;
-  // 중앙 스택에서 가장 넓은 요소를 기준으로 삼는다. 텍스트 배너는 패널과
-  // 폭이 같으므로 현재는 전광판 프레임이 가로 범위를 정한다.
-  const widestCentralWidth = Math.max(SPACE_BILLBOARD.frameWidth, SPACE_TEXT_BANNER.width);
-  const fittedScale = (TARGET_WIDTH_FRACTION * visibleWidth) / widestCentralWidth;
+  // 전광판과 블록 현황판을 **함께** 맞춘다. 전광판 하나만 기준으로 삼으면
+  // 세로로 긴 화면에서 현황판 바깥쪽이 잘린다. 두 판을 나란히 보여주는 것이
+  // 이 배치의 목적이므로, 좁은 화면에서는 둘을 같이 줄이는 쪽이 맞다.
+  const fittedScale = (TARGET_WIDTH_FRACTION * visibleWidth) / SPACE_WALL_PANEL_SPAN;
 
   return Math.min(1, Math.max(MIN_WALL_SCALE, fittedScale));
 };

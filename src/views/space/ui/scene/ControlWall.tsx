@@ -2,7 +2,12 @@
 
 import { memo, type ReactNode, useLayoutEffect, useMemo, useRef } from "react";
 import { type InstancedMesh, Object3D } from "three";
-import { SPACE_AD_BOARDS, SPACE_BILLBOARD, SPACE_GROUND, SPACE_WALL_Z } from "@/entities/space";
+import {
+  SPACE_BILLBOARD,
+  SPACE_BLOCK_DASHBOARD,
+  SPACE_GROUND,
+  SPACE_WALL_Z,
+} from "@/entities/space";
 
 // region [Types]
 interface ControlWallProps {
@@ -74,17 +79,17 @@ const housingSlots: readonly HousingSlot[] = [
     height: SPACE_BILLBOARD.frameHeight,
     rotationY: 0,
   },
-  ...SPACE_AD_BOARDS.map((placement) => ({
-    position: placement.offset,
-    width: placement.width + 0.4,
-    height: placement.height + 0.4,
-    rotationY: placement.rotationY,
-  })),
+  {
+    position: SPACE_BLOCK_DASHBOARD.offset,
+    width: SPACE_BLOCK_DASHBOARD.width + 0.4,
+    height: SPACE_BLOCK_DASHBOARD.height + 0.4,
+    rotationY: SPACE_BLOCK_DASHBOARD.rotationY,
+  },
 ];
 // endregion
 
 // region [Privates]
-/** 광고판의 회전축을 따라 뒤로 이동해 기울어진 표시 면과 평행한 장비함을 만든다. */
+/** 패널의 회전축을 따라 뒤로 이동해 기울어진 표시 면과 평행한 장비함을 만든다. */
 const createHousingPart = (
   slot: HousingSlot,
   depthOffset: number,
