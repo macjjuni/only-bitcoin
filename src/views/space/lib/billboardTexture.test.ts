@@ -3,6 +3,7 @@ import { SPACE_BILLBOARD } from "@/entities/space";
 import {
   BILLBOARD_CHART_MARKER,
   BILLBOARD_COLORS,
+  BILLBOARD_ONLINE_MARKER,
   BILLBOARD_COLUMNS,
   BILLBOARD_MIN_FONT_SIZE_PX,
   BILLBOARD_PLACEHOLDER,
@@ -13,6 +14,7 @@ import {
   formatBillboardKrw,
   formatBillboardUsd,
   resolveBillboardChartEndpoint,
+  resolveBillboardOnlineStatus,
   resolveChangeTone,
   resolveFittedFontSize,
   resolveToneColor,
@@ -237,6 +239,102 @@ describe("resolveBillboardChartEndpoint", () => {
     expect(endpoint?.color).toBe(expectedColor);
     expect(drawingTrace.endpoint).toEqual(endpoint);
     expect(drawingTrace.lineColor).toBe(endpoint?.color);
+  });
+});
+
+describe("resolveBillboardOnlineStatus", () => {
+  it.each([
+    { isKrwConnected: true, isUsdConnected: true, expected: true },
+    { isKrwConnected: true, isUsdConnected: false, expected: true },
+    { isKrwConnected: false, isUsdConnected: true, expected: true },
+    { isKrwConnected: false, isUsdConnected: false, expected: false },
+  ])(
+    "업비트 $isKrwConnected · 바이낸스 $isUsdConnected 면 $expected",
+    ({ isKrwConnected, isUsdConnected, expected }) => {
+      // 한쪽만 살아도 온라인이다. 숫자가 바뀌는데 오프라인이라고 적으면 더 혼란스럽다.
+      expect(
+        resolveBillboardOnlineStatus({
+          krw: 0,
+          usd: 0,
+          krwChange24h: "0",
+          usdChange24h: "0",
+          isKrwConnected,
+          isUsdConnected,
+          usdSeries: [],
+        }),
+      ).toBe(expected);
+    },
+  );
+});
+
+describe("우측 상단 접속 배지", () => {
+  const traceBadge = (isKrwConnected: boolean, isUsdConnected: boolean) => {
+    const badge: { dotColor: string | null; label: string | null } = {
+      dotColor: null,
+      label: null,
+    };
+    let currentCircle: { radius: number } | null = null;
+    const ignoredDrawingOperation = (): void => undefined;
+    const canvasProperties: Record<string, unknown> = {
+      measureText: (text: string) => ({ width: measureMonospaceWidth(text, 36) }),
+      createLinearGradient: () => ({ addColorStop: ignoredDrawingOperation }),
+      beginPath: () => {
+        currentCircle = null;
+      },
+      arc: (_x: number, _y: number, radius: number) => {
+        currentCircle = { radius };
+      },
+      fill: () => {
+        if (currentCircle?.radius === BILLBOARD_ONLINE_MARKER.coreRadius) {
+          badge.dotColor = String(canvasProperties.fillStyle);
+        }
+      },
+      fillText: (text: string) => {
+        if (text === "온라인" || text === "오프라인") {
+          badge.label = text;
+        }
+      },
+    };
+    const context = new Proxy(canvasProperties, {
+      get: (target, property) => Reflect.get(target, property) ?? ignoredDrawingOperation,
+    }) as unknown as CanvasRenderingContext2D;
+
+    drawBillboard(context, {
+      krw: 150_000_000,
+      usd: 99_999,
+      krwChange24h: "1.2",
+      usdChange24h: "1.2",
+      isKrwConnected,
+      isUsdConnected,
+      usdSeries: [],
+    });
+
+    return badge;
+  };
+
+  it("접속 중에는 초록 점과 온라인 문구를 그린다", () => {
+    expect(traceBadge(true, true)).toEqual({
+      dotColor: BILLBOARD_COLORS.online,
+      label: "온라인",
+    });
+  });
+
+  it("양쪽 피드가 끊기면 빨간 점과 오프라인 문구를 그린다", () => {
+    expect(traceBadge(false, false)).toEqual({
+      dotColor: BILLBOARD_COLORS.offline,
+      label: "오프라인",
+    });
+  });
+
+  /** 펄스 링은 텍스처가 아니라 3D 로 겹치므로 패널을 넘으면 허공에 뜬다. */
+  it("확산 링이 패널 안에 머문다", () => {
+    const { x, y, coreRadius, pulseRadius } = BILLBOARD_ONLINE_MARKER;
+
+    expect(pulseRadius).toBeGreaterThan(coreRadius);
+    expect(x + pulseRadius).toBeLessThanOrEqual(BILLBOARD_TEXTURE.width);
+    expect(x - pulseRadius).toBeGreaterThanOrEqual(0);
+    expect(y + pulseRadius).toBeLessThanOrEqual(BILLBOARD_TEXTURE.height);
+    expect(y - pulseRadius).toBeGreaterThanOrEqual(0);
   });
 });
 

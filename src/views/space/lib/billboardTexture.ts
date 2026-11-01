@@ -32,6 +32,23 @@ export const BILLBOARD_CHART_MARKER = {
   pulseRadius: 64,
 } as const;
 
+/**
+ * 우측 상단 접속 표시 점.
+ *
+ * 확산 효과는 이 텍스처가 아니라 `BillboardOnlinePulse` 가 3D 링으로 그린다.
+ * 베이스 텍스처는 상태가 바뀔 때만 다시 올리므로 프레임마다 커지는 원을 구울
+ * 수 없다. 두 쪽이 같은 자리에 붙어야 하므로 좌표를 여기서 한 번만 정한다.
+ *
+ * `pulseRadius` 는 확산 링의 최대 반지름이다. 아래로 116 px 까지 번지므로 원화
+ * 행 상단(154 px)과 38 px 떨어져 있다. 행 위치나 이 값을 키울 때 함께 본다.
+ */
+export const BILLBOARD_ONLINE_MARKER = {
+  x: 1366,
+  y: 82,
+  coreRadius: 9,
+  pulseRadius: 34,
+} as const;
+
 /** 가격·변동률 컬럼의 가용 폭. 이 폭을 넘으면 글자를 줄인다. */
 export const BILLBOARD_COLUMNS = {
   priceMaxWidth: 800,
@@ -189,7 +206,11 @@ const LAYOUT = {
   title: { x: 176, y: 82, fontSize: 64 },
   ticker: { x: 546, y: 82, fontSize: 42 },
   tickerBadge: { x: 488, y: 52, width: 116, height: 60, radius: 12 },
-  marketLabel: { x: 1514, y: 82, fontSize: 28 },
+  marketLabel: { x: 1310, y: 82, fontSize: 28 },
+  /** 더 긴 "오프라인" 기준으로 폭을 고정한다. 점 위치가 글자 길이에 흔들리면 펄스가 어긋난다. */
+  statusBadge: { x: 1338, y: 52, width: 176, height: 60, radius: 30 },
+  /** 점 오른쪽 남은 폭의 가운데. 글자 길이가 달라도 좌우 여백이 맞는다. */
+  statusBadgeText: { x: 1445, y: 82, fontSize: 28 },
   rows: {
     krw: { centerY: 220, label: "원화", unit: "KRW" },
     usd: { centerY: 368, label: "달러", unit: "USD" },
@@ -395,6 +416,54 @@ const drawConnectionDot = (
   context.arc(x, y, LAYOUT.statusDot.radius, 0, Math.PI * 2);
   context.fillStyle = isConnected ? BILLBOARD_COLORS.online : BILLBOARD_COLORS.offline;
   context.fill();
+};
+
+/**
+ * 전광판 접속 표시 기준.
+ *
+ * 한쪽 피드만 살아 있어도 온라인으로 본다. 숫자가 눈앞에서 바뀌는데 "오프라인"
+ * 이라고 적혀 있으면 더 혼란스럽다. 어느 피드가 끊겼는지는 각 가격 행의 점이
+ * 따로 알려준다.
+ */
+export const resolveBillboardOnlineStatus = (state: BillboardState): boolean => {
+  return state.isKrwConnected || state.isUsdConnected;
+};
+
+/** 우측 상단 접속 배지. 점의 확산 효과는 `BillboardOnlinePulse` 가 겹쳐 그린다. */
+const drawOnlineBadge = (context: CanvasRenderingContext2D, isOnline: boolean): void => {
+  const accentColor = isOnline ? BILLBOARD_COLORS.online : BILLBOARD_COLORS.offline;
+
+  context.beginPath();
+  context.roundRect(
+    LAYOUT.statusBadge.x,
+    LAYOUT.statusBadge.y,
+    LAYOUT.statusBadge.width,
+    LAYOUT.statusBadge.height,
+    LAYOUT.statusBadge.radius,
+  );
+  context.fillStyle = BILLBOARD_COLORS.tickerSurface;
+  context.fill();
+
+  context.beginPath();
+  context.arc(
+    BILLBOARD_ONLINE_MARKER.x,
+    BILLBOARD_ONLINE_MARKER.y,
+    BILLBOARD_ONLINE_MARKER.coreRadius,
+    0,
+    Math.PI * 2,
+  );
+  context.fillStyle = accentColor;
+  context.fill();
+
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillStyle = accentColor;
+  context.font = resolveFontSpec(600, LAYOUT.statusBadgeText.fontSize, SANS_FONT_STACK);
+  context.fillText(
+    isOnline ? "온라인" : "오프라인",
+    LAYOUT.statusBadgeText.x,
+    LAYOUT.statusBadgeText.y,
+  );
 };
 
 /** 통화·가격·등락을 분리하는 정적 표면. 숫자 레이어는 이 위에 투명하게 겹친다. */
@@ -707,7 +776,8 @@ export const drawBillboard = (
   context.textAlign = "right";
   context.fillStyle = BILLBOARD_COLORS.labelMuted;
   context.font = resolveFontSpec(500, LAYOUT.marketLabel.fontSize, SANS_FONT_STACK);
-  context.fillText("실시간 시세", LAYOUT.marketLabel.x, LAYOUT.marketLabel.y);
+
+  drawOnlineBadge(context, resolveBillboardOnlineStatus(state));
 
   drawPriceRow(context, {
     centerY: LAYOUT.rows.krw.centerY,

@@ -27,8 +27,10 @@ import {
   formatBillboardKrw,
   formatBillboardUsd,
   resolveBillboardChartEndpoint,
+  resolveBillboardOnlineStatus,
 } from "@/views/space/lib/billboardTexture";
 import BillboardChartPulse from "./BillboardChartPulse";
+import BillboardOnlinePulse from "./BillboardOnlinePulse";
 
 interface BillboardSurface {
   canvasElement: HTMLCanvasElement;
@@ -144,6 +146,7 @@ function PriceBillboard(): ReactNode {
   const shouldSnapNextSampleRef = useRef<boolean>(true);
   const needsPriceRedrawRef = useRef<boolean>(true);
   const chartEndpointRef = useRef<BillboardChartEndpoint | null>(null);
+  const isOnlineRef = useRef<boolean>(false);
   /** 프레임 루프에서 읽어야 하므로 ref 로 둔다. 쿼리 갱신은 15분에 한 번이다. */
   const usdSeriesRef = useRef<readonly number[]>(EMPTY_SERIES);
 
@@ -189,6 +192,7 @@ function PriceBillboard(): ReactNode {
     if (signature !== lastSignatureRef.current) {
       lastSignatureRef.current = signature;
       chartEndpointRef.current = resolveBillboardChartEndpoint(state);
+      isOnlineRef.current = resolveBillboardOnlineStatus(state);
       redrawBillboard(state);
     }
 
@@ -312,6 +316,11 @@ function PriceBillboard(): ReactNode {
 
       <BillboardChartPulse
         endpointRef={chartEndpointRef}
+        prefersReducedMotion={prefersReducedMotion}
+      />
+
+      <BillboardOnlinePulse
+        isOnlineRef={isOnlineRef}
         prefersReducedMotion={prefersReducedMotion}
       />
     </group>
