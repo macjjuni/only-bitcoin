@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CircleHelp, Maximize, MessageCircle, Minimize } from "lucide-react";
+import { ArrowLeft, CircleHelp, MessageCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -15,7 +15,6 @@ import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
 import SpaceChatPanel, { SPACE_CHAT_INPUT_ID } from "./SpaceChatPanel";
 import SpaceControlGuide from "./SpaceControlGuide";
 import SpacePresenceBadge from "./SpacePresenceBadge";
-import { useFullscreen } from "./useFullscreen";
 
 /** 히스토리가 없을 때(직접 링크 진입) 돌아갈 곳. `/space` 를 노출하는 목록이다. */
 const FALLBACK_BACK_PATH = "/orange";
@@ -43,7 +42,6 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
   // region [Hooks]
   const router = useTransitionRouter();
   const pathname = usePathname();
-  const { isFullscreen, isFullscreenSupported, toggleFullscreen } = useFullscreen();
   const isCoarsePointer = useCoarsePointer();
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
@@ -138,20 +136,6 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
       },
     ];
 
-    if (isFullscreenSupported) {
-      actions.push({
-        id: "fullscreen",
-        label: isFullscreen ? "전체 화면 끄기" : "전체 화면",
-        icon: isFullscreen ? (
-          <Minimize size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />
-        ) : (
-          <Maximize size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />
-        ),
-        isActive: isFullscreen,
-        onClick: toggleFullscreen,
-      });
-    }
-
     actions.push({
       id: "space-chat-toggle",
       label: isChatOpen ? "공간 채팅 닫기" : "공간 채팅 열기",
@@ -170,17 +154,7 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
     });
 
     return actions;
-  }, [
-    isChatOpen,
-    unreadCount,
-    onClickToggleChat,
-    isFullscreen,
-    isFullscreenSupported,
-    isGuideOpen,
-    onClickBack,
-    onClickToggleGuide,
-    toggleFullscreen,
-  ]);
+  }, [isChatOpen, unreadCount, onClickToggleChat, isGuideOpen, onClickBack, onClickToggleGuide]);
 
   const GuidePanelTemplate = isGuideOpen ? (
     <div className="mt-2">

@@ -140,7 +140,6 @@ src/views/space/
   ui/hud/SpacePresenceBadge.tsx
   ui/hud/SpaceActionBar.tsx  # SpaceHudAction 배열을 받아 버튼 묶음 렌더
   ui/hud/SpaceControlGuide.tsx
-  ui/hud/useFullscreen.ts
   lib/chatBubbles.ts         # 좌석별 최신 발화·5초 TTL·거리/개수 선별
   lib/presenceLabel.ts       # 순수 함수: 접속 상태 → 표시 문구
   lib/presenceLabel.test.ts
@@ -747,11 +746,12 @@ interface SpaceHudAction {
 | 버튼 | 동작 | 비고 |
 | --- | --- | --- |
 | 뒤로 가기 | `router.back()` | 히스토리가 없으면 `/orange` 로 보냄 |
-| 전체 화면 | Fullscreen API 토글 | 미지원 환경(iOS 사파리)에서는 버튼 자체를 숨김 |
 | 공간 채팅 | 대화창 토글 | 닫힌 동안 안 읽은 메시지 배지 |
 | 조작 안내 | 안내 패널 토글 | 데스크톱·모바일 조작을 함께 적음 |
 
 설정·소리 버튼은 후속 확장 시 같은 배열에 추가한다.
+
+전체 화면 버튼은 제거했다. iOS 사파리는 Fullscreen API 를 지원하지 않아 그 환경에서는 버튼이 아예 없었고, 브라우저 자체 전체 화면과 중복이었다.
 
 ### 9.3 접근성·폴백
 
