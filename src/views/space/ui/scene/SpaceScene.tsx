@@ -235,7 +235,11 @@ function SpaceScene({
       </group>
 
       <group ref={playerGroupRef}>
-        <PlayerAvatar colorIndex={avatarColorIndex} hasRealtimeShadows={hasRealtimeShadows} />
+        <PlayerAvatar
+          colorIndex={avatarColorIndex}
+          hasRealtimeShadows={hasRealtimeShadows}
+          playerStateRef={playerStateRef}
+        />
       </group>
 
       <RemoteAvatars players={remotePlayers} />

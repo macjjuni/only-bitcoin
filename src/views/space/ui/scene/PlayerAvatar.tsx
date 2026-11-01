@@ -1,61 +1,131 @@
 "use client";
 
-import { memo, type ReactNode, useEffect, useMemo } from "react";
-import { resolveAvatarColor, SPACE_AVATAR } from "@/entities/space";
+import { useFrame } from "@react-three/fiber";
+import { memo, type ReactNode, type RefObject, useEffect, useMemo, useRef } from "react";
+import { type InstancedMesh, MeshStandardMaterial, Object3D } from "three";
+import { type LocalPlayerState, resolveAvatarColor, SPACE_AVATAR } from "@/entities/space";
+import { CREW_WALK, useCrewModel } from "@/views/space/lib/crewModel";
+import {
+  applyCrewSkinning,
+  createCrewInstanceGeometry,
+  useSkinnedCrewMaterial,
+} from "@/views/space/lib/crewSkinning";
 import { createShadowBlobTexture } from "@/views/space/lib/shadowBlobTexture";
 
 /** 그림자 블롭이 바닥 격자와 겹쳐 지저분해지지 않도록 살짝 띄운다. */
 const SHADOW_LIFT_Y = 0.02;
+/** 이보다 느리면 멈춘 것으로 보고 레스트 포즈로 돌린다. */
+const MOVING_SPEED_THRESHOLD = 0.25;
 
 interface PlayerAvatarProps {
   colorIndex: number;
   hasRealtimeShadows: boolean;
+  /** 걷기 사이클 속도. 매 프레임 바뀌므로 ref 로 받는다. */
+  playerStateRef: RefObject<LocalPlayerState>;
 }
 
-function PlayerAvatar({ colorIndex, hasRealtimeShadows }: PlayerAvatarProps): ReactNode {
+/**
+ * 로컬 플레이어 아바타.
+ *
+ * 지오메트리·재질·걷기 모션 모두 `RemoteAvatars` 와 같아야 한다. 한쪽만 바꾸면
+ * 내 모습과 남이 보는 내 모습이 달라진다. 셰이더를 공유하려고 혼자여도
+ * `InstancedMesh`(count 1)로 그린다. 모델은 발바닥이 원점이라 그룹을 바닥에
+ * 그대로 둔다.
+ */
+// biome-ignore format: AGENTS.md requires two blank lines between regions.
+function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: PlayerAvatarProps): ReactNode {
   // region [Hooks]
   const shadowTexture = useMemo(() => createShadowBlobTexture(), []);
   const avatarColor = useMemo(() => resolveAvatarColor(colorIndex), [colorIndex]);
+  const crew = useCrewModel();
+  const bodyMaterial = useSkinnedCrewMaterial(crew.bodyMaterial, crew.walkTexture);
+  const body = useMemo(() => createCrewInstanceGeometry(crew.bodyGeometry, 1), [crew.bodyGeometry]);
+  const accent = useMemo(
+    () => createCrewInstanceGeometry(crew.accentGeometry, 1),
+    [crew.accentGeometry],
+  );
+  const accentMaterial = useMemo(() => {
+    const material = new MeshStandardMaterial({ roughness: 0.84, metalness: 0 });
+    applyCrewSkinning(material, crew.walkTexture);
+    return material;
+  }, [crew.walkTexture]);
+
+  // 혼자라 인스턴스 색이 필요 없다. 머티리얼에 바로 넣는다.
+  accentMaterial.color.set(avatarColor);
+  const bodyMeshRef = useRef<InstancedMesh>(null);
+  const accentMeshRef = useRef<InstancedMesh>(null);
   // endregion
 
+
+  // region [Privates]
+  /** 걸은 거리만큼 사이클을 돌린다. 시간 기준으로 돌리면 발이 미끄러진다. */
+  const advanceWalkCycle = (deltaSeconds: number): void => {
+    const state = playerStateRef.current;
+    const speed = state ? Math.hypot(state.velocityX, state.velocityZ) : 0;
+
+    const phase = body.phase.getX(0) + (speed * deltaSeconds) / CREW_WALK.metersPerCycle;
+    const step = deltaSeconds / CREW_WALK.blendSeconds;
+    const blend = body.blend.getX(0) + (speed > MOVING_SPEED_THRESHOLD ? step : -step);
+
+    for (const buffers of [body, accent]) {
+      buffers.phase.setX(0, phase - Math.floor(phase));
+      buffers.blend.setX(0, Math.min(1, Math.max(0, blend)));
+      buffers.phase.needsUpdate = true;
+      buffers.blend.needsUpdate = true;
+    }
+  };
+
+  /** 그룹이 위치를 잡으므로 인스턴스 행렬은 단위행렬 한 번만 넣는다. */
+  const resetInstanceMatrix = (): void => {
+    const identity = new Object3D();
+    identity.updateMatrix();
+    for (const meshRef of [bodyMeshRef, accentMeshRef]) {
+      meshRef.current?.setMatrixAt(0, identity.matrix);
+      if (meshRef.current) {
+        meshRef.current.instanceMatrix.needsUpdate = true;
+      }
+    }
+  };
+  // endregion
+
+
   // region [Life Cycles]
+  useEffect(resetInstanceMatrix, []);
+
   useEffect(() => {
     return () => {
       shadowTexture.dispose();
+      // 사본과 직접 만든 머티리얼만 정리한다. 공유 원본은 useGLTF 캐시가 가진다.
+      body.geometry.dispose();
+      accent.geometry.dispose();
+      accentMaterial.dispose();
     };
-  }, [shadowTexture]);
+  }, [shadowTexture, body, accent, accentMaterial]);
+
+  useFrame((_, deltaSeconds) => {
+    advanceWalkCycle(deltaSeconds);
+  });
   // endregion
 
   return (
     <>
-      <mesh position={[0, SPACE_AVATAR.bodyCenterY, 0]} castShadow={hasRealtimeShadows}>
-        <capsuleGeometry
-          args={[
-            SPACE_AVATAR.bodyRadius,
-            SPACE_AVATAR.bodyLength,
-            SPACE_AVATAR.bodyCapSegments,
-            SPACE_AVATAR.bodyRadialSegments,
-          ]}
-        />
-        <meshStandardMaterial color={avatarColor} roughness={0.45} metalness={0.2} />
-      </mesh>
+      {/* `dispose={null}` 로 useGLTF 캐시의 공유 머티리얼이 해제되지 않게 막는다. */}
+      <instancedMesh
+        ref={bodyMeshRef}
+        args={[body.geometry, bodyMaterial, 1]}
+        count={1}
+        castShadow={hasRealtimeShadows}
+        dispose={null}
+      />
 
-      <mesh position={[0, SPACE_AVATAR.headCenterY, 0]} castShadow={hasRealtimeShadows}>
-        <sphereGeometry
-          args={[
-            SPACE_AVATAR.headRadius,
-            SPACE_AVATAR.headWidthSegments,
-            SPACE_AVATAR.headHeightSegments,
-          ]}
-        />
-        <meshStandardMaterial color={avatarColor} roughness={0.35} metalness={0.25} />
-      </mesh>
-
-      {/* 어느 방향을 보는지 알려주는 표식. 전방은 -Z 다. */}
-      <mesh position={[0, SPACE_AVATAR.headCenterY, -SPACE_AVATAR.headRadius]}>
-        <sphereGeometry args={[0.07, 6, 5]} />
-        <meshStandardMaterial color="#06080e" />
-      </mesh>
+      {/* 앞치마 앞판만 플레이어 색을 받는다. 텍스처를 쓰지 않아야 색이 그대로 나온다. */}
+      <instancedMesh
+        ref={accentMeshRef}
+        args={[accent.geometry, accentMaterial, 1]}
+        count={1}
+        castShadow={hasRealtimeShadows}
+        dispose={null}
+      />
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, SHADOW_LIFT_Y, 0]}>
         <planeGeometry args={[SPACE_AVATAR.shadowRadius * 2, SPACE_AVATAR.shadowRadius * 2]} />

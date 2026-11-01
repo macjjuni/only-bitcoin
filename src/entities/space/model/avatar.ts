@@ -1,22 +1,17 @@
-/** 아바타 형상과 색상 팔레트. 형상 치수는 성능 예산(1인 192 tri)의 근거다. */
+/** 아바타 치수와 색상 팔레트. 형상 자체는 `public/models/crew.glb` 가 가진다. */
 
 /**
- * 아바타 프리미티브 치수.
+ * 모델 바깥에서 필요한 아바타 치수.
  *
- * 몸통 캡슐 + 머리 구로 총 높이 약 1.81 m. 세그먼트 수를 낮게 고정해
- * 50명 인스턴싱 시 삼각형 예산(9.6k) 안에 들어오게 한다.
+ * 형상은 `public/models/crew.glb` 가 정한다. 여기에는 모델이 알려줄 수 없는 값만
+ * 남긴다. 모델을 바꾸면 `headCenterY` 도 같이 바뀌므로
+ * `scripts/blender/process-voxel-crew.py` 가 출력하는 `[anchor]` 값을 옮겨 적는다.
  */
 export const SPACE_AVATAR = {
-  bodyRadius: 0.32,
-  /** 캡슐의 원통 구간 길이. 전체 높이는 length + radius × 2. */
-  bodyLength: 0.76,
-  bodyCenterY: 0.7,
-  bodyCapSegments: 4,
-  bodyRadialSegments: 8,
-  headRadius: 0.26,
-  headCenterY: 1.55,
-  headWidthSegments: 8,
-  headHeightSegments: 6,
+  /** 모델 전체 높이. 발바닥이 원점이라 아바타는 `(x, 0, z)` 에 둔다. */
+  height: 1.81,
+  /** 명찰·말풍선이 매달리는 머리 중심. 모델에서 측정한 값이다. */
+  headCenterY: 1.484,
   /** 접지 그림자 블롭 반경. 실시간 그림자 맵 대신 사용. */
   shadowRadius: 0.45,
 } as const;
