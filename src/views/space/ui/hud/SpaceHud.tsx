@@ -3,15 +3,16 @@
 import { ArrowLeft, CircleHelp, Maximize, MessageCircle, Minimize } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
-import { memo, type ReactNode, useCallback, useMemo, useState } from "react";
+import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import {
   type SpaceInputSource,
+  shouldIgnoreSpaceHotkey,
   useCoarsePointer,
   VirtualJoystick,
 } from "@/features/space-controls";
 import type { SpaceSession } from "@/features/space-session";
 import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
-import SpaceChatPanel from "./SpaceChatPanel";
+import SpaceChatPanel, { SPACE_CHAT_INPUT_ID } from "./SpaceChatPanel";
 import SpaceControlGuide from "./SpaceControlGuide";
 import SpacePresenceBadge from "./SpacePresenceBadge";
 import { useFullscreen } from "./useFullscreen";
@@ -47,6 +48,9 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [lastReadMessageID, setLastReadMessageID] = useState<string | null>(null);
+  /** 단축키 리스너가 메시지마다 다시 붙지 않도록 최신 목록만 참조한다. */
+  const messagesRef = useRef(session.messages);
+  messagesRef.current = session.messages;
   // endregion
 
   // region [Events]
@@ -74,6 +78,51 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
     setLastReadMessageID(session.messages.at(-1)?.id ?? null);
     setIsChatOpen((previous) => !previous);
   }, [session.messages]);
+  // endregion
+
+  // region [Privates]
+  /**
+   * 데스크톱에서 Enter 로 채팅을 연다.
+   *
+   * 손가락 기기에는 물리 키보드가 없고, 자판이 올라오면 화면 절반을 덮는다.
+   * 입력창·버튼에 포커스가 있을 때는 흘려보낸다. 글자를 치는 중이면 그 키는
+   * 입력창 몫이고, 버튼이면 브라우저가 기본 활성화를 처리한다.
+   */
+  const attachChatHotkey = useCallback((): (() => void) | undefined => {
+    if (isCoarsePointer) {
+      return;
+    }
+
+    const onKeyDownWindow = (event: KeyboardEvent): void => {
+      if (
+        event.key !== "Enter" ||
+        event.isComposing ||
+        event.ctrlKey ||
+        event.metaKey ||
+        event.altKey ||
+        shouldIgnoreSpaceHotkey(event.target)
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      setLastReadMessageID(messagesRef.current.at(-1)?.id ?? null);
+      setIsChatOpen(true);
+      // 이미 열려 있는데 캔버스를 클릭했다면 입력칸으로 되돌린다. 닫혀 있으면
+      // 아직 패널이 없어 아무 일도 하지 않고, 패널이 뜰 때 스스로 포커스한다.
+      document.getElementById(SPACE_CHAT_INPUT_ID)?.focus();
+    };
+
+    window.addEventListener("keydown", onKeyDownWindow);
+
+    return () => {
+      window.removeEventListener("keydown", onKeyDownWindow);
+    };
+  }, [isCoarsePointer]);
+  // endregion
+
+  // region [Life Cycles]
+  useEffect(attachChatHotkey, [attachChatHotkey]);
   // endregion
 
   // region [Templates]
@@ -220,6 +269,7 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
           onClose={onClickCloseChat}
           onRetry={session.retry}
           isBottomSheet={isCoarsePointer}
+          shouldAutoFocus={!isCoarsePointer}
         />
       )}
     </div>

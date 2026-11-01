@@ -8,6 +8,7 @@ const CONTROL_GUIDE = [
   { action: "달리기", desktop: "Shift", mobile: "끝까지 밀기" },
   { action: "시야 회전", desktop: "드래그 · Q E", mobile: "화면 드래그" },
   { action: "줌", desktop: "휠", mobile: "두 손가락" },
+  { action: "채팅", desktop: "Enter", mobile: "우측 상단 버튼" },
 ] as const;
 
 /** 조작 안내 패널. 우측 상단 버튼으로 여닫는다. */

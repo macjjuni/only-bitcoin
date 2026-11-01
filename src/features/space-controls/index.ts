@@ -16,6 +16,7 @@ export {
   SPACE_CAMERA_FOCUS_HEIGHT,
   type Vector3Like,
 } from "./model/followCamera";
+export { shouldIgnoreSpaceHotkey } from "./model/keyboardInputEvents";
 export {
   createEmptyMovementInput,
   type MovementInput,

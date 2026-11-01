@@ -18,6 +18,9 @@ import {
 } from "@/entities/space";
 import { countGraphemes } from "@/shared/lib/text/countGraphemes";
 
+/** 패널 밖에서 입력칸으로 포커스를 되돌릴 때 쓴다. */
+export const SPACE_CHAT_INPUT_ID = "space-chat-input";
+
 interface SpaceChatPanelProps {
   messages: readonly SpaceChatMessage[];
   presence: SpacePresence;
@@ -29,10 +32,12 @@ interface SpaceChatPanelProps {
   onRetry: () => void;
   /** 손가락 기기는 입력칸을 화면 하단에 붙인 시트로 띄운다. */
   isBottomSheet: boolean;
+  /** 열자마자 입력칸에 포커스를 줄지. 손가락 기기는 자판이 화면 절반을 덮는다. */
+  shouldAutoFocus: boolean;
 }
 
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending, sendMessage, onClose, onRetry, isBottomSheet }: SpaceChatPanelProps): ReactNode {
+function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending, sendMessage, onClose, onRetry, isBottomSheet, shouldAutoFocus }: SpaceChatPanelProps): ReactNode {
   // region [Hooks]
   const [draft, setDraft] = useState("");
   const [cooldownEndsAt, setCooldownEndsAt] = useState(0);
@@ -71,6 +76,12 @@ function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending,
       window.removeEventListener("resize", updateViewport);
     };
   }, []);
+
+  const focusDraftInput = useCallback((): void => {
+    if (shouldAutoFocus) {
+      inputRef.current?.focus();
+    }
+  }, [shouldAutoFocus]);
 
   const trackMountedPanel = useCallback((): (() => void) => {
     isMountedRef.current = true;
@@ -148,6 +159,7 @@ function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending,
 
   // region [Life Cycles]
   useEffect(trackMountedPanel, [trackMountedPanel]);
+  useEffect(focusDraftInput, [focusDraftInput]);
   useEffect(startViewportTracking, [startViewportTracking]);
   useEffect(followLatestMessages, [messages, followLatestMessages]);
   useEffect(startCooldownCountdown, [startCooldownCountdown]);
@@ -218,7 +230,7 @@ function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending,
 
       <form onSubmit={onSubmitMessage} className="border-t border-white/10 p-3">
         <div className="flex items-center gap-2 rounded-xl border border-white/10 bg-black/25 pl-3 focus-within:border-bitcoin/60">
-          <input ref={inputRef} aria-label="공간 메시지" value={draft} onChange={onChangeDraft} onKeyDown={onKeyDownChatInput} maxLength={8192} autoComplete="off" enterKeyHint="send" placeholder="메시지 입력" className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-white outline-none placeholder:text-white/30" />
+          <input ref={inputRef} id={SPACE_CHAT_INPUT_ID} aria-label="공간 메시지" value={draft} onChange={onChangeDraft} onKeyDown={onKeyDownChatInput} maxLength={8192} autoComplete="off" enterKeyHint="send" placeholder="메시지 입력" className="min-w-0 flex-1 bg-transparent py-2.5 text-base text-white outline-none placeholder:text-white/30" />
           <button type="submit" aria-label={sendLabel} title={sendLabel} disabled={!canSend} className="m-1 flex h-9 min-w-9 items-center justify-center rounded-lg bg-bitcoin px-2 text-xs font-bold text-black transition-opacity disabled:opacity-30">
             {remainingSeconds > 0 ? sendLabel : <Send size={16} />}
           </button>

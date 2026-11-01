@@ -56,6 +56,17 @@ const isActivationTarget = (target: EventTarget | null): boolean => {
   return matchesSelector(target, ACTIVATION_SELECTOR);
 };
 
+/**
+ * 전역 단축키를 흘려보내야 하는 대상인지.
+ *
+ * 글자를 입력 중이면 그 키는 입력창 몫이고, 버튼·링크에 포커스가 있으면
+ * 브라우저가 기본 활성화를 처리한다. 둘 다 가로채면 Enter 한 번에 두 가지
+ * 일이 일어난다. 셀렉터를 HUD 쪽에 복사하지 않도록 여기서 한 번만 정의한다.
+ */
+export const shouldIgnoreSpaceHotkey = (target: EventTarget | null): boolean => {
+  return isTextEntryTarget(target) || isActivationTarget(target);
+};
+
 /** 입력창 포커스·탭 전환 시 눌린 키를 비워 채팅 중 이동과 고착 입력을 막는다. */
 export const attachSpaceKeyboardEvents = (
   inputSource: SpaceInputSource,

@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { attachSpaceKeyboardEvents } from "./keyboardInputEvents";
+import { attachSpaceKeyboardEvents, shouldIgnoreSpaceHotkey } from "./keyboardInputEvents";
 import { createSpaceInputSource } from "./spaceInputSource";
 
 /**
@@ -37,6 +37,25 @@ const createKeyboard = () => {
   const detach = attachSpaceKeyboardEvents(inputSource, windowEvents, documentEvents);
   return { inputSource, windowEvents, documentEvents, detach };
 };
+
+describe("shouldIgnoreSpaceHotkey", () => {
+  const targetOf = (elementName: "canvas" | "input" | "button") => {
+    const target = new KeyboardEventTarget();
+    target.elementName = elementName;
+    return target;
+  };
+
+  it("입력창과 버튼에서는 전역 단축키를 흘려보낸다", () => {
+    // 글자를 치는 중이면 그 키는 입력창 몫이고, 버튼이면 브라우저가 활성화한다.
+    expect(shouldIgnoreSpaceHotkey(targetOf("input"))).toBe(true);
+    expect(shouldIgnoreSpaceHotkey(targetOf("button"))).toBe(true);
+  });
+
+  it("캔버스에서는 전역 단축키를 받는다", () => {
+    expect(shouldIgnoreSpaceHotkey(targetOf("canvas"))).toBe(false);
+    expect(shouldIgnoreSpaceHotkey(null)).toBe(false);
+  });
+});
 
 describe("공간 키보드와 채팅 입력 격리", () => {
   it("이동·회전 키를 합산하고 방향키의 스크롤을 막는다", () => {
