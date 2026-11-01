@@ -6,6 +6,7 @@ import {
   SPACE_BILLBOARD,
   SPACE_BLOCK_DASHBOARD,
   SPACE_GROUND,
+  SPACE_ROOM_HEIGHT,
   SPACE_WALL_Z,
 } from "@/entities/space";
 
@@ -35,20 +36,49 @@ interface InstancedWallPartsProps {
 // endregion
 
 // region [Constants]
-const wallHeight = 16;
+/** 방 높이와 같다. 뒷벽만 높으면 천장이 뒤쪽에서 끊겨 보인다. */
+const wallHeight = SPACE_ROOM_HEIGHT;
 const wallSurfaceZ = SPACE_WALL_Z - 0.4;
-const wallColor = "#111923";
-const panelColor = "#223345";
-const structuralColor = "#30495b";
-const recessColor = "#09111b";
-const lightBarColor = "#70bdc8";
-const structuralColumnPositions = [-30.5, -22.5, -14.5, 14.5, 22.5, 30.5];
+/**
+ * 벙커 톤.
+ *
+ * 청록 라이트바(`#70bdc8`)는 관제실 색이었다. 주황으로 바꿔 비상등·전광판 광원과
+ * 한 계열로 묶고, 벽·패널은 푸른 금속에서 콘크리트 회색으로 내렸다.
+ */
+const wallColor = "#1e2227";
+const panelColor = "#262a30";
+const structuralColor = "#33383f";
+const recessColor = "#0c0e11";
+const lightBarColor = "#ff8a3c";
+/**
+ * 수직 리브 위치.
+ *
+ * 바닥 폭(40)의 절반 안쪽이고, 두 표시 패널이 차지하는 구간(|x| ≤ 10.6)을
+ * 비켜 둔다. 리브가 패널 뒤로 들어가면 테두리와 겹쳐 지저분해진다.
+ */
+const structuralColumnPositions = [-18.5, -12.5, 12.5, 18.5];
 
-/** 큰 금속 패널의 이음새만 남겨 전광판 뒤 장식이 시선을 나누지 않게 한다. */
-const wallPanelParts: readonly WallPart[] = Array.from({ length: 16 }, (_, panelIndex) => ({
-  position: [((panelIndex % 8) - 3.5) * 8, panelIndex < 8 ? 4 : 12, wallSurfaceZ + 0.04],
-  size: [7.82, 7.78, 0.08],
-}));
+/**
+ * 큰 금속 패널의 이음새만 남겨 전광판 뒤 장식이 시선을 나누지 않게 한다.
+ *
+ * 바닥 폭 40 을 8 m 패널 5장으로 채우고 두 줄(y 4·12)로 쌓는다. 열 수를 바닥
+ * 폭에서 끌어오지 않고 상수로 둔 것은, 패널 폭이 바뀌면 이음새 두께(7.82)도
+ * 같이 손봐야 하기 때문이다.
+ */
+const WALL_PANEL_COLUMNS = 5;
+const WALL_PANEL_ROWS = 2;
+const wallPanelHeight = wallHeight / WALL_PANEL_ROWS;
+const wallPanelParts: readonly WallPart[] = Array.from(
+  { length: WALL_PANEL_COLUMNS * WALL_PANEL_ROWS },
+  (_, panelIndex): WallPart => ({
+    position: [
+      ((panelIndex % WALL_PANEL_COLUMNS) - (WALL_PANEL_COLUMNS - 1) / 2) * 8,
+      (Math.floor(panelIndex / WALL_PANEL_COLUMNS) + 0.5) * wallPanelHeight,
+      wallSurfaceZ + 0.04,
+    ],
+    size: [7.82, wallPanelHeight - 0.22, 0.08],
+  }),
+);
 
 const structuralParts: readonly WallPart[] = [
   ...structuralColumnPositions.map(
@@ -68,8 +98,8 @@ const structuralParts: readonly WallPart[] = [
 ];
 
 const wallLightParts: readonly WallPart[] = structuralColumnPositions.map((positionX) => ({
-  position: [positionX, 9, wallSurfaceZ + 0.37],
-  size: [0.055, 5.2, 0.025],
+  position: [positionX, wallHeight * 0.56, wallSurfaceZ + 0.37],
+  size: [0.055, wallHeight * 0.33, 0.025],
 }));
 
 const housingSlots: readonly HousingSlot[] = [

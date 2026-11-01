@@ -3,26 +3,34 @@
 import { useThree } from "@react-three/fiber";
 import { memo, type ReactNode, useEffect, useMemo } from "react";
 import { CanvasTexture, SRGBColorSpace } from "three";
-import { SPACE_GROUND, SPACE_WALL_Z } from "@/entities/space";
+import { SPACE_GROUND, SPACE_LOUNGE } from "@/entities/space";
 
 const FLOOR_TEXTURE_WIDTH = 2048;
 const FLOOR_PIXELS_PER_METER = FLOOR_TEXTURE_WIDTH / SPACE_GROUND.width;
 const FLOOR_PANEL_WIDTH = 8;
-const FLOOR_PANEL_DEPTH = 6;
+/** 바닥 폭 40·깊이 32 를 정확히 나누는 값. 나누어지지 않으면 끝줄이 빈 띠로 남는다. */
+const FLOOR_PANEL_DEPTH = 8;
+/**
+ * 지하 벙커 바닥.
+ *
+ * 전에는 금속 패널에 안내선과 집결 코너를 그려 관제 시설 어휘를 썼다. 아지트에는
+ * 바닥에 길을 그려 넣을 이유가 없고, 선이 공간을 "시설" 로 읽히게 만든다.
+ * 거친 콘크리트 판으로 바꾸고 중앙에 러그를 깔았다 — 러그 한 장이 분위기를
+ * 가장 많이 바꾸면서 드로우 콜은 그대로다(텍스처 한 장에 함께 그린다).
+ */
 const FLOOR_COLORS = {
-  joint: "#09111b",
-  panels: ["#202d3b", "#22303e", "#24323f"],
-  bevel: "#304252",
-  fastener: "#3b4d5d",
-  guide: "#4b6475",
-  gathering: "#81694b",
+  joint: "#13161a",
+  panels: ["#23272c", "#25292e", "#21252a"],
+  bevel: "#2f343a",
+  fastener: "#3a4047",
+  stain: "#1c1f23",
+  rug: "#2f231d",
+  rugEdge: "#4a3227",
+  rugPattern: "#3a2a21",
 } as const;
-const GATHERING_AREA = {
-  halfWidth: 9,
-  backZ: SPACE_WALL_Z + 4.5,
-  frontZ: SPACE_WALL_Z + 11,
-  cornerLength: 1.2,
-} as const;
+
+/** 라운지 러그. 소품·펜던트와 같은 구역 상수를 본다. */
+const RUG_AREA = SPACE_LOUNGE;
 
 interface GroundProps {
   /** 모바일에서는 그림자 수신도 끈다. */
@@ -70,46 +78,57 @@ const drawFloorPanels = (context: CanvasRenderingContext2D): void => {
   }
 };
 
-const drawFloorGuides = (context: CanvasRenderingContext2D): void => {
-  context.strokeStyle = FLOOR_COLORS.guide;
-  context.lineWidth = 2;
+/** 콘크리트 얼룩. 같은 색 판이 반복되는 티를 줄인다. */
+const drawFloorStains = (context: CanvasRenderingContext2D): void => {
+  const stainSpots: readonly [number, number, number][] = [
+    [-14, -12, 3.5],
+    [-6, 6, 2.6],
+    [9, -6, 3.2],
+    [16, 8, 2.2],
+    [2, 11, 2.8],
+    [-17, 4, 2],
+  ];
 
-  // 가운데는 비워 두고 양쪽의 가는 선만 전광판 앞 모임 구역으로 잇는다.
-  for (const worldX of [-3, 3]) {
+  context.fillStyle = FLOOR_COLORS.stain;
+
+  for (const [worldX, worldZ, radius] of stainSpots) {
     context.beginPath();
-    context.moveTo(toFloorTextureX(worldX), toFloorTextureZ(12));
-    context.lineTo(toFloorTextureX(worldX), toFloorTextureZ(GATHERING_AREA.frontZ));
-    context.stroke();
-
-    for (const worldZ of [5, -2]) {
-      context.beginPath();
-      context.moveTo(toFloorTextureX(worldX - 0.2), toFloorTextureZ(worldZ + 0.25));
-      context.lineTo(toFloorTextureX(worldX), toFloorTextureZ(worldZ));
-      context.lineTo(toFloorTextureX(worldX + 0.2), toFloorTextureZ(worldZ + 0.25));
-      context.stroke();
-    }
+    context.ellipse(
+      toFloorTextureX(worldX),
+      toFloorTextureZ(worldZ),
+      radius * FLOOR_PIXELS_PER_METER,
+      radius * 0.7 * FLOOR_PIXELS_PER_METER,
+      0,
+      0,
+      Math.PI * 2,
+    );
+    context.fill();
   }
+};
 
-  context.strokeStyle = FLOOR_COLORS.gathering;
+/** 라운지 러그. 테두리와 성긴 격자만 그려 멀리서도 면으로 읽히게 한다. */
+const drawLoungeRug = (context: CanvasRenderingContext2D): void => {
+  const left = toFloorTextureX(-RUG_AREA.halfWidth);
+  const right = toFloorTextureX(RUG_AREA.halfWidth);
+  const back = toFloorTextureZ(RUG_AREA.centerZ - RUG_AREA.halfDepth);
+  const front = toFloorTextureZ(RUG_AREA.centerZ + RUG_AREA.halfDepth);
+
+  context.fillStyle = FLOOR_COLORS.rug;
+  context.fillRect(left, back, right - left, front - back);
+
+  context.strokeStyle = FLOOR_COLORS.rugEdge;
+  context.lineWidth = 6;
+  context.strokeRect(left + 3, back + 3, right - left - 6, front - back - 6);
+
+  context.strokeStyle = FLOOR_COLORS.rugPattern;
   context.lineWidth = 3;
+  context.strokeRect(left + 26, back + 26, right - left - 52, front - back - 52);
 
-  for (const sideDirection of [-1, 1]) {
-    for (const cornerZ of [GATHERING_AREA.backZ, GATHERING_AREA.frontZ]) {
-      const cornerX = sideDirection * GATHERING_AREA.halfWidth;
-      const depthDirection = cornerZ === GATHERING_AREA.backZ ? 1 : -1;
-
-      context.beginPath();
-      context.moveTo(
-        toFloorTextureX(cornerX - sideDirection * GATHERING_AREA.cornerLength),
-        toFloorTextureZ(cornerZ),
-      );
-      context.lineTo(toFloorTextureX(cornerX), toFloorTextureZ(cornerZ));
-      context.lineTo(
-        toFloorTextureX(cornerX),
-        toFloorTextureZ(cornerZ + depthDirection * GATHERING_AREA.cornerLength),
-      );
-      context.stroke();
-    }
+  for (const worldX of [-3.5, 0, 3.5]) {
+    context.beginPath();
+    context.moveTo(toFloorTextureX(worldX), back + 26);
+    context.lineTo(toFloorTextureX(worldX), front - 26);
+    context.stroke();
   }
 };
 
@@ -125,7 +144,8 @@ const createFloorTexture = (): CanvasTexture => {
     context.fillStyle = FLOOR_COLORS.joint;
     context.fillRect(0, 0, canvasElement.width, canvasElement.height);
     drawFloorPanels(context);
-    drawFloorGuides(context);
+    drawFloorStains(context);
+    drawLoungeRug(context);
   }
 
   return texture;
@@ -158,7 +178,8 @@ function Ground({ hasRealtimeShadows }: GroundProps): ReactNode {
       receiveShadow={hasRealtimeShadows}
     >
       <planeGeometry args={[SPACE_GROUND.width, SPACE_GROUND.depth]} />
-      <meshStandardMaterial map={floorTexture} roughness={0.94} metalness={0.12} />
+          {/* 콘크리트라 금속기를 거의 없앤다. 금속기가 남으면 조명이 번져 축축해 보인다. */}
+      <meshStandardMaterial map={floorTexture} roughness={0.97} metalness={0.04} />
     </mesh>
   );
 }

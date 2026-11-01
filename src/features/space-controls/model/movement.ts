@@ -1,5 +1,5 @@
 import type { LocalPlayerState } from "@/entities/space";
-import { SPACE_BOUNDS } from "@/entities/space";
+import { resolveGroundHeight, resolveObstacleCollision, SPACE_BOUNDS } from "@/entities/space";
 
 /** 이동 튜닝 값. 근거는 `docs/btc-space-3d.md` §5 에 있다. */
 export const SPACE_MOVEMENT = {
@@ -163,26 +163,28 @@ export const planFixedSteps = (accumulatedSeconds: number): FixedStepPlan => {
 /**
  * 수직 속도와 높이를 적분한다.
  *
- * 바닥이 평평해 지면 판정은 `y <= 0` 하나면 된다. 착지하면 높이와 수직 속도를
- * 모두 0 으로 되돌려 바닥 아래로 새지 않게 한다.
+ * 지면 높이는 평평한 바닥(0)이 아니라 **발 아래 소품 윗면**이다. 상자 위로
+ * 올라설 수 있고, 가장자리에서 벗어나면 지면 높이가 0 으로 떨어져 그대로
+ * 떨어진다. 떨어지는 중에는 다시 올라설 수 없게 중력만 받는다(§5.1).
  */
 const stepJump = (
   y: number,
   velocityY: number,
   isJumping: boolean,
   deltaSeconds: number,
+  groundY: number,
 ): { y: number; velocityY: number } => {
-  const isGrounded = y <= 0 && velocityY <= 0;
+  const isGrounded = y <= groundY && velocityY <= 0;
 
   if (isGrounded && !isJumping) {
-    return { y: 0, velocityY: 0 };
+    return { y: groundY, velocityY: 0 };
   }
 
   const launched = isGrounded ? SPACE_MOVEMENT.jumpSpeed : velocityY;
   const nextVelocityY = launched - SPACE_MOVEMENT.gravity * deltaSeconds;
   const nextY = y + nextVelocityY * deltaSeconds;
 
-  return nextY <= 0 ? { y: 0, velocityY: 0 } : { y: nextY, velocityY: nextVelocityY };
+  return nextY <= groundY ? { y: groundY, velocityY: 0 } : { y: nextY, velocityY: nextVelocityY };
 };
 
 /** 고정 타임스텝 한 번 분량의 이동을 적분한다. */
@@ -205,12 +207,24 @@ export const stepMovement = (
   );
   const rawX = state.x + velocity.x * deltaSeconds;
   const rawZ = state.z + velocity.z * deltaSeconds;
-  const x = clamp(rawX, SPACE_BOUNDS.minX, SPACE_BOUNDS.maxX);
-  const z = clamp(rawZ, SPACE_BOUNDS.minZ, SPACE_BOUNDS.maxZ);
-  // 경계에 막힌 축의 속도를 지운다. 남겨두면 벽에 붙어 계속 밀어붙인다.
-  const velocityX = x === rawX ? velocity.x : 0;
-  const velocityZ = z === rawZ ? velocity.z : 0;
-  const jump = stepJump(state.y, state.velocityY, input.isJumping, deltaSeconds);
+  const boundedX = clamp(rawX, SPACE_BOUNDS.minX, SPACE_BOUNDS.maxX);
+  const boundedZ = clamp(rawZ, SPACE_BOUNDS.minZ, SPACE_BOUNDS.maxZ);
+  // 소품을 파고든 만큼 되밀어낸다. 경계 클램프 다음에 둬야 벽과 소품 사이
+  // 좁은 틈에서 벽 밖으로 밀려나지 않는다. 발 높이를 넘겨 "위에 올라선" 소품은
+  // 가로로 막지 않게 한다.
+  const resolved = resolveObstacleCollision(boundedX, boundedZ, state.y);
+  // 막힌 축의 속도를 지운다. 남겨두면 벽·소품에 붙어 계속 밀어붙인다.
+  const velocityX = boundedX === rawX && !resolved.blockedX ? velocity.x : 0;
+  const velocityZ = boundedZ === rawZ && !resolved.blockedZ ? velocity.z : 0;
+  const x = resolved.x;
+  const z = resolved.z;
+  const jump = stepJump(
+    state.y,
+    state.velocityY,
+    input.isJumping,
+    deltaSeconds,
+    resolveGroundHeight(resolved.x, resolved.z),
+  );
 
   return {
     x,

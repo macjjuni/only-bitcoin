@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SPACE_GROUND, SPACE_WALL_Z } from "@/entities/space";
+import { SPACE_BOUNDS, SPACE_CAMERA_BOUNDS, SPACE_WALL_Z } from "@/entities/space";
 import {
   applyCameraDrag,
   applyCameraZoom,
@@ -280,8 +280,6 @@ describe("회전 입력이 거리를 보존한다", () => {
 });
 
 describe("clampCameraPosition", () => {
-  const GROUND_MAX_Z = SPACE_GROUND.centerZ + SPACE_GROUND.depth / 2;
-
   it("뒷벽 뒤로 넘어가지 않는다", () => {
     expect(clampCameraPosition({ x: 0, y: 4, z: -40 }).z).toBeGreaterThan(SPACE_WALL_Z);
   });
@@ -290,11 +288,19 @@ describe("clampCameraPosition", () => {
     expect(clampCameraPosition({ x: 0, y: -5, z: 0 }).y).toBe(SPACE_CAMERA.minHeight);
   });
 
-  it("좌우와 뒤쪽 바닥 밖으로 나가지 않는다", () => {
+  it("좌우와 뒤쪽 카메라 경계 밖으로 나가지 않는다", () => {
     const clamped = clampCameraPosition({ x: 500, y: 4, z: 500 });
 
-    expect(clamped.x).toBeLessThan(SPACE_GROUND.width / 2);
-    expect(clamped.z).toBeLessThan(GROUND_MAX_Z);
+    expect(clamped.x).toBeLessThan(SPACE_CAMERA_BOUNDS.maxX);
+    expect(clamped.z).toBeLessThan(SPACE_CAMERA_BOUNDS.maxZ);
+  });
+
+  it("카메라 경계가 이동 경계보다 넓다", () => {
+    // 플레이어가 경계에 붙으면 카메라는 그 밖으로 나가야 한다. 이동 경계로
+    // 묶으면 카메라가 캐릭터 위로 올라탄다.
+    expect(SPACE_CAMERA_BOUNDS.maxX).toBeGreaterThan(SPACE_BOUNDS.maxX);
+    expect(SPACE_CAMERA_BOUNDS.minX).toBeLessThan(SPACE_BOUNDS.minX);
+    expect(SPACE_CAMERA_BOUNDS.maxZ).toBeGreaterThan(SPACE_BOUNDS.maxZ);
   });
 
   it("월드 안쪽 위치는 그대로 둔다", () => {

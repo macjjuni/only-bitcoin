@@ -39,6 +39,8 @@ import { advanceStressDummies, createStressDummies } from "@/views/space/lib/str
 import { createEmptyAdTextSlot } from "@/views/space/lib/textBannerTexture";
 import { resolveWallAnchorY, resolveWallDisplayScale } from "@/views/space/lib/wallDisplay";
 import BlockDashboard from "./BlockDashboard";
+import BunkerProps from "./BunkerProps";
+import BunkerShell from "./BunkerShell";
 import ChatBubbles from "./ChatBubbles";
 import ControlWall from "./ControlWall";
 import Ground from "./Ground";
@@ -226,6 +228,11 @@ function SpaceScene({
     <>
       <SceneLighting hasRealtimeShadows={hasRealtimeShadows} />
       <Ground hasRealtimeShadows={hasRealtimeShadows} />
+
+      {/* 공간을 닫는 외곽과 소품. 벽·천장이 없으면 어두운 배경 위 플랫폼으로 읽힌다. */}
+      <BunkerShell />
+      <BunkerProps hasRealtimeShadows={hasRealtimeShadows} />
+
       <ControlWall wallAnchor={wallAnchor} displayScale={wallDisplayScale} />
 
       {/* 전광판과 광고판은 한 덩어리로 묶어 기준점을 중심으로 함께 줄인다. */}

@@ -18,6 +18,13 @@ export {
   type SpacePresenceStatus,
 } from "./model/playerState";
 export {
+  resolveGroundHeight,
+  resolveObstacleCollision,
+  SPACE_AVATAR_COLLISION_RADIUS,
+  SPACE_OBSTACLES,
+  type SpaceObstacle,
+} from "./model/spaceObstacles";
+export {
   parseSpaceClientFrame,
   parseSpaceServerFrame,
   SPACE_CHAT_COOLDOWN_MS,
@@ -36,10 +43,13 @@ export {
   SPACE_BILLBOARD,
   SPACE_BLOCK_DASHBOARD,
   SPACE_BOUNDS,
+  SPACE_CAMERA_BOUNDS,
   SPACE_GROUND,
+  SPACE_LOUNGE,
   SPACE_MAX_JUMP_HEIGHT,
   SPACE_MAX_OCCUPANTS,
   SPACE_OVERLAY_LIMITS,
+  SPACE_ROOM_HEIGHT,
   SPACE_SPAWN_RING,
   SPACE_TEXT_BANNER,
   SPACE_WALL_ANCHOR,

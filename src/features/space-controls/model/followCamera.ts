@@ -1,4 +1,4 @@
-import { type PlayerTransform, SPACE_GROUND, SPACE_WALL_Z } from "@/entities/space";
+import { type PlayerTransform, SPACE_CAMERA_BOUNDS, SPACE_WALL_Z } from "@/entities/space";
 
 const toRadians = (degrees: number): number => (degrees * Math.PI) / 180;
 
@@ -134,22 +134,17 @@ export const resolveCameraFocus = (player: PlayerTransform): Vector3Like => ({
  */
 export const clampCameraPosition = (position: Vector3Like): Vector3Like => {
   const { boundaryMargin, minHeight } = SPACE_CAMERA;
-  const groundMinZ = SPACE_GROUND.centerZ - SPACE_GROUND.depth / 2;
-  const groundMaxZ = SPACE_GROUND.centerZ + SPACE_GROUND.depth / 2;
 
   return {
     x: clamp(
       position.x,
-      -SPACE_GROUND.width / 2 + boundaryMargin,
-      SPACE_GROUND.width / 2 - boundaryMargin,
+      SPACE_CAMERA_BOUNDS.minX + boundaryMargin,
+      SPACE_CAMERA_BOUNDS.maxX - boundaryMargin,
     ),
-    y: Math.max(position.y, minHeight),
-    // 뒷벽 앞쪽으로만 둔다. 바닥 뒤편으로 넘어가면 벽 뒤가 된다.
-    z: clamp(
-      position.z,
-      Math.max(groundMinZ + boundaryMargin, SPACE_WALL_Z + boundaryMargin),
-      groundMaxZ - boundaryMargin,
-    ),
+    // 바닥을 뚫지도, 천장을 뚫지도 않는다.
+    y: clamp(position.y, minHeight, SPACE_CAMERA_BOUNDS.maxY),
+    // 뒷벽 앞쪽으로만 둔다. 벽을 넘어가면 패널 뒷면을 보게 된다.
+    z: clamp(position.z, SPACE_WALL_Z + boundaryMargin, SPACE_CAMERA_BOUNDS.maxZ - boundaryMargin),
   };
 };
 

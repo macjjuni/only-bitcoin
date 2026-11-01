@@ -1,4 +1,5 @@
 import type { PlayerTransform } from "@/entities/space/model/playerState";
+import { resolveObstacleCollision } from "@/entities/space/model/spaceObstacles";
 import {
   SPACE_BOUNDS,
   SPACE_SPAWN_RING,
@@ -50,8 +51,11 @@ export const createSpawnPoint = (clientKey: string): PlayerTransform => {
   const { centerX, centerZ } = SPACE_SPAWN_RING;
   const angle = toUnitFraction(hashClientKey(clientKey, 0)) * Math.PI * 2;
   const radius = toRingRadius(toUnitFraction(hashClientKey(clientKey, RADIUS_SEED)));
-  const x = clamp(centerX + Math.cos(angle) * radius, SPACE_BOUNDS.minX, SPACE_BOUNDS.maxX);
-  const z = clamp(centerZ + Math.sin(angle) * radius, SPACE_BOUNDS.minZ, SPACE_BOUNDS.maxZ);
+  const ringX = clamp(centerX + Math.cos(angle) * radius, SPACE_BOUNDS.minX, SPACE_BOUNDS.maxX);
+  const ringZ = clamp(centerZ + Math.sin(angle) * radius, SPACE_BOUNDS.minZ, SPACE_BOUNDS.maxZ);
+  // 소품에 충돌이 생긴 뒤로는 소품 안에서 시작하면 첫 걸음에 튕겨 나간다.
+  // 스폰 자리를 미리 소품 밖으로 밀어 그 순간을 없앤다.
+  const { x, z } = resolveObstacleCollision(ringX, ringZ, 0);
 
   return { x, y: 0, z, yaw: toBillboardFacingYaw(x, z) };
 };

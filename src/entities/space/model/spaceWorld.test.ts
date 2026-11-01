@@ -3,12 +3,15 @@ import {
   SPACE_BILLBOARD,
   SPACE_BLOCK_DASHBOARD,
   SPACE_BOUNDS,
+  SPACE_CAMERA_BOUNDS,
   SPACE_GROUND,
   SPACE_OVERLAY_LIMITS,
+  SPACE_ROOM_HEIGHT,
   SPACE_SPAWN_RING,
   SPACE_TEXT_BANNER,
   SPACE_WALL_ANCHOR,
   SPACE_WALL_PANEL_SPAN,
+  SPACE_WALL_Z,
 } from "@/entities/space";
 
 const BILLBOARD_CENTER_Y = SPACE_WALL_ANCHOR[1];
@@ -80,10 +83,40 @@ describe("전광판·현황판 배치", () => {
     }
   });
 
-  it("뒷벽과 이동 경계가 바닥 안에 있다", () => {
-    expect(SPACE_BOUNDS.minZ).toBeGreaterThan(SPACE_GROUND.centerZ - SPACE_GROUND.depth / 2);
-    expect(SPACE_BOUNDS.maxZ).toBeLessThan(SPACE_GROUND.centerZ + SPACE_GROUND.depth / 2);
-    expect(SPACE_BOUNDS.maxX).toBeLessThan(SPACE_GROUND.width / 2);
+  it("바닥이 갈 수 있는 곳만 덮는다", () => {
+    const groundBackZ = SPACE_GROUND.centerZ - SPACE_GROUND.depth / 2;
+    const groundFrontZ = SPACE_GROUND.centerZ + SPACE_GROUND.depth / 2;
+
+    // 가로와 앞쪽 끝은 이동 경계와 같다. 못 가는 바닥을 보여주지 않는다.
+    expect(SPACE_GROUND.width / 2).toBe(SPACE_BOUNDS.maxX);
+    expect(groundFrontZ).toBe(SPACE_BOUNDS.maxZ);
+    // 뒤쪽만 뒷벽을 넘겨 덮는다. 벽이 바닥 위에 서 있어야 한다.
+    expect(groundBackZ).toBeLessThan(SPACE_WALL_Z);
+    expect(SPACE_BOUNDS.minZ).toBeGreaterThan(SPACE_WALL_Z);
+  });
+
+  it("바닥이 패널 크기로 정확히 나뉜다", () => {
+    // 나누어지지 않으면 끝줄이 칠해지지 않은 빈 띠로 남는다.
+    const FLOOR_PANEL_SIZE = 8;
+
+    expect(SPACE_GROUND.width % FLOOR_PANEL_SIZE).toBe(0);
+    expect(SPACE_GROUND.depth % FLOOR_PANEL_SIZE).toBe(0);
+  });
+});
+
+describe("방 높이", () => {
+  it("텍스트 배너 위로 여유를 남긴다", () => {
+    // 천장이 배너를 자르면 광고 지면이 벽에 파묻힌다.
+    const bannerTop =
+      SPACE_WALL_ANCHOR[1] + SPACE_TEXT_BANNER.offset[1] + SPACE_TEXT_BANNER.height / 2;
+
+    expect(SPACE_ROOM_HEIGHT).toBeGreaterThan(bannerTop);
+  });
+
+  it("카메라가 천장 아래에 머문다", () => {
+    // 최대 줌·최저 피치에서 카메라가 12 m 까지 오르므로 상한이 필요하다.
+    expect(SPACE_CAMERA_BOUNDS.maxY).toBeLessThan(SPACE_ROOM_HEIGHT);
+    expect(SPACE_CAMERA_BOUNDS.maxY).toBeGreaterThan(SPACE_WALL_ANCHOR[1]);
   });
 });
 

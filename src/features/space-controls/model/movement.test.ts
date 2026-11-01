@@ -1,6 +1,12 @@
 import { describe, expect, it } from "vitest";
 import type { LocalPlayerState } from "@/entities/space";
-import { createLocalPlayerState, SPACE_BOUNDS, SPACE_MAX_JUMP_HEIGHT } from "@/entities/space";
+import {
+  createLocalPlayerState,
+  SPACE_AVATAR_COLLISION_RADIUS,
+  SPACE_BOUNDS,
+  SPACE_LOUNGE,
+  SPACE_MAX_JUMP_HEIGHT,
+} from "@/entities/space";
 import {
   createEmptyMovementInput,
   type MovementInput,
@@ -9,7 +15,22 @@ import {
   stepMovement,
 } from "@/features/space-controls/model/movement";
 
+/**
+ * 소품이 없는 자리.
+ *
+ * 원점에는 라운지 테이블·드럼통이 있고 소품에 충돌이 있으므로, 속력을 재는
+ * 테스트가 원점에서 출발하면 소품에 막혀 0 이 나온다. 라운지와 벽 사이의 빈
+ * 레인에서 잰다.
+ */
+const CLEAR_LANE = { x: 14, z: 6 } as const;
+
 const createState = (overrides: Partial<LocalPlayerState> = {}): LocalPlayerState => ({
+  ...createLocalPlayerState({ x: CLEAR_LANE.x, z: CLEAR_LANE.z, y: 0, yaw: 0 }),
+  ...overrides,
+});
+
+/** 경계·소품 판정을 보는 테스트는 원점 기준이 필요하다. */
+const createOriginState = (overrides: Partial<LocalPlayerState> = {}): LocalPlayerState => ({
   ...createLocalPlayerState({ x: 0, z: 0, y: 0, yaw: 0 }),
   ...overrides,
 });
@@ -43,22 +64,22 @@ describe("stepMovement", () => {
   it("카메라 yaw 가 0 이면 전진 입력은 -Z 로 간다", () => {
     const next = runSteps(createState(), createInput({ forward: 1 }), 0, 30);
 
-    expect(next.z).toBeLessThan(0);
-    expect(next.x).toBeCloseTo(0, 6);
+    expect(next.z).toBeLessThan(CLEAR_LANE.z);
+    expect(next.x).toBeCloseTo(CLEAR_LANE.x, 6);
   });
 
   it("카메라 yaw 가 90° 면 전진 입력은 -X 로 간다", () => {
     const next = runSteps(createState(), createInput({ forward: 1 }), Math.PI / 2, 30);
 
-    expect(next.x).toBeLessThan(0);
-    expect(next.z).toBeCloseTo(0, 6);
+    expect(next.x).toBeLessThan(CLEAR_LANE.x);
+    expect(next.z).toBeCloseTo(CLEAR_LANE.z, 6);
   });
 
   it("오른쪽 입력은 카메라 기준 +X 로 간다", () => {
     const next = runSteps(createState(), createInput({ strafe: 1 }), 0, 30);
 
-    expect(next.x).toBeGreaterThan(0);
-    expect(next.z).toBeCloseTo(0, 6);
+    expect(next.x).toBeGreaterThan(CLEAR_LANE.x);
+    expect(next.z).toBeCloseTo(CLEAR_LANE.z, 6);
   });
 
   it("대각 입력이 직진보다 빠르지 않다", () => {
@@ -72,7 +93,7 @@ describe("stepMovement", () => {
   it("걷기는 walkSpeed, 달리기는 runSpeed 로 수렴한다", () => {
     // 뒤쪽 경계에서 출발해 앞으로 달린다. 원점에서 시작하면 2초 동안 달리기가
     // 전진 경계(13 m)에 닿아 클램프되고, 속력이 0 으로 읽힌다.
-    const backOfRoom = createState({ z: SPACE_BOUNDS.maxZ });
+    const backOfRoom = createState({ x: CLEAR_LANE.x, z: SPACE_BOUNDS.maxZ });
     const walking = runSteps(backOfRoom, createInput({ forward: 1 }), 0, 120);
     const running = runSteps(backOfRoom, createInput({ forward: 1, isRunning: true }), 0, 120);
 
@@ -215,6 +236,39 @@ describe("점프", () => {
     expect(Math.max(...heights.slice(60))).toBeGreaterThan(0.9);
   });
 
+  it("소품에 막혀 통과하지 못한다", () => {
+    // 러그 앞쪽 드럼통(중심 z = -2.5, 반깊이 0.43)을 향해 걸어간다.
+    const barrelFrontZ = SPACE_LOUNGE.centerZ + 5.5 + 0.43 + SPACE_AVATAR_COLLISION_RADIUS;
+    const next = runSteps(createOriginState(), createInput({ forward: 1 }), 0, 90);
+
+    expect(next.z).toBeCloseTo(barrelFrontZ, 6);
+    expect(next.velocityZ).toBe(0);
+  });
+
+  it("소품 위로 떨어지면 윗면에 선다", () => {
+    const barrelTop = 0.9;
+    let current = createOriginState({ x: 0, z: SPACE_LOUNGE.centerZ + 5.5, y: 1.4 });
+
+    for (let index = 0; index < 60; index += 1) {
+      current = stepMovement(current, createInput(), 0);
+    }
+
+    expect(current.y).toBeCloseTo(barrelTop, 6);
+    expect(current.velocityY).toBe(0);
+  });
+
+  it("소품 가장자리를 벗어나면 바닥으로 떨어진다", () => {
+    // 윗면에 선 상태에서 옆으로 걸어 나간다. 지면 높이가 0 으로 떨어져야 한다.
+    let current = createOriginState({ x: 0, z: SPACE_LOUNGE.centerZ + 5.5, y: 0.9 });
+
+    for (let index = 0; index < 60; index += 1) {
+      current = stepMovement(current, createInput({ strafe: 1 }), 0);
+    }
+
+    expect(current.x).toBeGreaterThan(1);
+    expect(current.y).toBe(0);
+  });
+
   it("점프 중에도 수평 이동은 그대로 적분한다", () => {
     let current = createState();
 
@@ -223,6 +277,6 @@ describe("점프", () => {
     }
 
     expect(current.y).toBeGreaterThan(0);
-    expect(current.z).toBeLessThan(0);
+    expect(current.z).toBeLessThan(CLEAR_LANE.z);
   });
 });
