@@ -116,6 +116,7 @@ function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: Player
         args={[body.geometry, bodyMaterial, 1]}
         count={1}
         castShadow={hasRealtimeShadows}
+        frustumCulled={false}
         dispose={null}
       />
 
@@ -125,6 +126,7 @@ function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: Player
         args={[accent.geometry, accentMaterial, 1]}
         count={1}
         castShadow={hasRealtimeShadows}
+        frustumCulled={false}
         dispose={null}
       />
 

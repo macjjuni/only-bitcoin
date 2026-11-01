@@ -163,11 +163,19 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
 
   return (
     <>
+      {/*
+        `frustumCulled={false}` 는 필수다. three 는 InstancedMesh 의 바운딩 스피어를
+        `boundingSphere === null` 일 때 **한 번만** 계산하고 인스턴스가 움직여도 다시
+        계산하지 않는다. 접속자가 없을 때(count 0) 첫 검사가 돌면 빈 구(반지름 -1)로
+        굳어 이후 들어온 아바타가 통째로 컬링된다. 명찰은 DOM 이라 그대로 보여서
+        "사람은 투명한데 닉네임만 뜨는" 상태가 된다.
+      */}
       {/* `dispose={null}` 로 useGLTF 캐시의 공유 머티리얼이 해제되지 않게 막는다. */}
       <instancedMesh
         ref={bodyMeshRef}
         count={renderedPlayers.length}
         args={[body.geometry, bodyMaterial, SPACE_MAX_OCCUPANTS]}
+        frustumCulled={false}
         dispose={null}
       />
 
@@ -175,6 +183,7 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
         ref={accentMeshRef}
         count={renderedPlayers.length}
         args={[accent.geometry, accentMaterial, SPACE_MAX_OCCUPANTS]}
+        frustumCulled={false}
         dispose={null}
       />
 
@@ -182,6 +191,7 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
         ref={shadowMeshRef}
         count={renderedPlayers.length}
         args={[undefined, undefined, SPACE_MAX_OCCUPANTS]}
+        frustumCulled={false}
       >
         <planeGeometry args={[SPACE_AVATAR.shadowRadius * 2, SPACE_AVATAR.shadowRadius * 2]} />
         <meshBasicMaterial map={shadowTexture} transparent depthWrite={false} />
