@@ -1,4 +1,8 @@
-export { type ChatIdentity, loadOrCreateChatIdentity } from "./model/chatIdentity";
+export {
+  type ChatIdentity,
+  loadOrCreateChatIdentity,
+  saveChatNickname,
+} from "./model/chatIdentity";
 export {
   type ChatConnectionStatus,
   type ChatPendingRequest,

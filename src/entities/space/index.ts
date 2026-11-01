@@ -22,6 +22,7 @@ export {
   parseSpaceServerFrame,
   SPACE_CHAT_COOLDOWN_MS,
   SPACE_NETWORK_INTERVAL_MS,
+  SPACE_NICKNAME_COOLDOWN_MS,
   SPACE_PROTOCOL_VERSION,
   type SpaceChatMessage,
   type SpaceClientFrame,

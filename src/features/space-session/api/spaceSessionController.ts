@@ -19,6 +19,7 @@ export interface SpaceSessionIdentity {
 
 export interface SpaceSessionSnapshot {
   presence: SpacePresence;
+  isNicknamePending: boolean;
   messages: SpaceChatMessage[];
   bubbleMessages: SpaceChatMessage[];
   error: string | null;
@@ -58,6 +59,10 @@ interface PendingMessage {
   requestId: string;
   resolve: (hasSucceeded: boolean) => void;
   timeout: ReturnType<typeof setTimeout>;
+}
+
+interface PendingNickname extends PendingMessage {
+  nickname: string;
 }
 
 const socketOpenState = 1;
@@ -131,6 +136,7 @@ export class SpaceSessionController {
   private connectionTimer: ReturnType<typeof setTimeout> | null = null;
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   private pendingMessage: PendingMessage | null = null;
+  private pendingNickname: PendingNickname | null = null;
   private latestMovement: MovementFrame | null = null;
   private lastSentMovement: MovementFrame | null = null;
   private lastMovementSentAt = Number.NEGATIVE_INFINITY;
@@ -144,9 +150,14 @@ export class SpaceSessionController {
     remotePlayers: [],
     rosterRevision: 0,
     isMessagePending: false,
+    isNicknamePending: false,
   };
 
+  /** 재접속 시 보낼 닉네임. 변경이 확정되면 갱신한다. */
+  private nickname: string;
+
   constructor(options: SpaceSessionControllerOptions) {
+    this.nickname = options.identity.nickname;
     this.options = {
       ...options,
       createSocket: options.createSocket ?? ((url) => new WebSocket(url)),
@@ -258,6 +269,58 @@ export class SpaceSessionController {
     });
   };
 
+  /**
+   * 닉네임을 바꾼다.
+   *
+   * 서버가 정규화한 뒤 `peer` 프레임으로 되돌려줘야 성공으로 본다. 길이·금지어
+   * 판정은 서버가 하므로 여기서는 비어 있는지만 본다.
+   */
+  changeNickname = (nickname: string): Promise<boolean> => {
+    const trimmedNickname = nickname.trim();
+
+    if (
+      !trimmedNickname ||
+      this.pendingNickname ||
+      this.snapshot.presence.status !== "online" ||
+      trimmedNickname === this.snapshot.self?.nickname
+    ) {
+      return Promise.resolve(false);
+    }
+
+    const requestId = this.options.createRequestId();
+
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        this.finishPendingNickname(false);
+        this.updateSnapshot({ error: "닉네임 변경 확인 시간이 초과됐어요. 다시 시도해 주세요." });
+      }, messageTimeoutMs);
+      this.pendingNickname = { requestId, resolve, timeout, nickname: trimmedNickname };
+      this.updateSnapshot({ isNicknamePending: true, error: null });
+
+      if (!this.sendFrame({ v: 1, t: "nick", rid: requestId, nickname: trimmedNickname })) {
+        this.finishPendingNickname(false);
+        this.updateSnapshot({ error: "닉네임을 바꾸지 못했어요. 연결을 확인해 주세요." });
+      }
+    });
+  };
+
+  private finishPendingNickname(hasSucceeded: boolean): void {
+    const pending = this.pendingNickname;
+
+    if (!pending) {
+      return;
+    }
+
+    this.pendingNickname = null;
+    clearTimeout(pending.timeout);
+    if (hasSucceeded) {
+      // 재접속할 때도 바뀐 이름으로 들어가야 한다.
+      this.nickname = pending.nickname;
+    }
+    this.updateSnapshot({ isNicknamePending: false });
+    pending.resolve(hasSucceeded);
+  }
+
   private updateSnapshot(changes: Partial<SpaceSessionSnapshot>): void {
     this.snapshot = { ...this.snapshot, ...changes };
     this.listeners.forEach((listener) => {
@@ -311,7 +374,7 @@ export class SpaceSessionController {
         v: 1,
         t: "join",
         clientKey: this.options.identity.clientKey,
-        nickname: this.options.identity.nickname,
+        nickname: this.nickname,
       });
     });
     socket.addEventListener("message", (event) => {
@@ -404,7 +467,14 @@ export class SpaceSessionController {
           return;
         }
         if (frame.peer.seat === this.snapshot.self.seat) {
-          this.setAuthoritativeMovement(frame.peer);
+          // 닉네임만 바뀐 프레임에 위치를 되감으면 캐릭터가 뒤로 튄다.
+          // 서버가 이동을 거절했을 때만 좌표가 실제로 달라진다.
+          if (!hasSameMovement(this.lastSentMovement, quantizeMovement(frame.peer))) {
+            this.setAuthoritativeMovement(frame.peer);
+          }
+          if (this.pendingNickname?.nickname === frame.peer.nickname) {
+            this.finishPendingNickname(true);
+          }
           this.updateSnapshot({
             self: frame.peer,
             bubbleMessages: this.snapshot.bubbleMessages.filter(
@@ -446,22 +516,32 @@ export class SpaceSessionController {
         return;
       }
       case "error": {
-        if (permanentErrorCodes.has(frame.code)) {
-          this.stopAutomaticRetry(frame.message);
-          return;
-        }
-        // 좌석이 없다는 응답과 입장 중 오류만 연결을 다시 세운다.
-        if (frame.code === "JOIN_REQUIRED" || this.snapshot.presence.status === "connecting") {
+        // 좌석을 잃었다는 뜻이라 rid 가 붙어 있어도 연결을 다시 세운다.
+        if (frame.code === "JOIN_REQUIRED") {
           this.handleDisconnected(frame.message);
           return;
         }
-        // rid 가 붙은 오류는 그 요청만 실패시킨다. 일시적인 서버 예외로 좌석과
-        // 위치까지 잃으면 메시지 한 번 실패한 대가가 너무 크다.
+        // rid 가 붙은 오류는 한 요청에 대한 답이다. 연결을 끊을 이유가 없다.
+        // 같은 코드라도 입장 때 오면(rid 없음) 영구 오류로 다뤄야 한다. 예를
+        // 들어 닉네임 거절은 입장이면 재시도해도 소용없지만, 이름 변경이면
+        // 입력만 고쳐 다시 보내면 된다.
         if (frame.rid) {
           if (this.pendingMessage?.requestId === frame.rid) {
             this.finishPendingMessage(false);
           }
+          if (this.pendingNickname?.requestId === frame.rid) {
+            this.finishPendingNickname(false);
+          }
           this.updateSnapshot({ error: frame.message });
+          return;
+        }
+        if (permanentErrorCodes.has(frame.code)) {
+          this.stopAutomaticRetry(frame.message);
+          return;
+        }
+        // 입장 중 오류는 연결을 다시 세운다.
+        if (this.snapshot.presence.status === "connecting") {
+          this.handleDisconnected(frame.message);
           return;
         }
         if (frame.code === "UNAVAILABLE") {
@@ -623,6 +703,7 @@ export class SpaceSessionController {
       this.heartbeatTimer = null;
     }
     this.finishPendingMessage(false);
+    this.finishPendingNickname(false);
 
     if (socket && socket.readyState < socketClosingState) {
       socket.close(1000, "space session closed");

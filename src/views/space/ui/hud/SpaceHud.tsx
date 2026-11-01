@@ -4,6 +4,7 @@ import { ArrowLeft, CircleHelp, MessageCircle } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { saveChatNickname } from "@/features/chat-session";
 import {
   type SpaceInputSource,
   shouldIgnoreSpaceHotkey,
@@ -71,6 +72,20 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
     setIsChatOpen(false);
     document.getElementById("space-chat-toggle")?.focus();
   }, [session.messages]);
+
+  /** 서버가 받아들인 이름만 저장한다. 채팅 위젯과 같은 저장소를 쓴다. */
+  const onSubmitNickname = useCallback(
+    async (nickname: string): Promise<boolean> => {
+      const wasAccepted = await session.changeNickname(nickname);
+
+      if (wasAccepted) {
+        saveChatNickname(nickname.trim());
+      }
+
+      return wasAccepted;
+    },
+    [session.changeNickname],
+  );
 
   const onClickToggleChat = useCallback((): void => {
     setLastReadMessageID(session.messages.at(-1)?.id ?? null);
@@ -244,6 +259,8 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
           onRetry={session.retry}
           isBottomSheet={isCoarsePointer}
           shouldAutoFocus={!isCoarsePointer}
+          isNicknamePending={session.isNicknamePending}
+          changeNickname={onSubmitNickname}
         />
       )}
     </div>

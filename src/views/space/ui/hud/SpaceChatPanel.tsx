@@ -1,6 +1,6 @@
 "use client";
 
-import { Send, WifiOff, X } from "lucide-react";
+import { Check, Pencil, Send, WifiOff, X } from "lucide-react";
 import {
   type ChangeEvent,
   type FormEvent,
@@ -16,6 +16,7 @@ import {
   type SpaceChatMessage,
   type SpacePresence,
 } from "@/entities/space";
+import { CHAT_MAX_NICKNAME_GRAPHEMES } from "@/shared/config/chat";
 import { countGraphemes } from "@/shared/lib/text/countGraphemes";
 
 /** 패널 밖에서 입력칸으로 포커스를 되돌릴 때 쓴다. */
@@ -34,10 +35,12 @@ interface SpaceChatPanelProps {
   isBottomSheet: boolean;
   /** 열자마자 입력칸에 포커스를 줄지. 손가락 기기는 자판이 화면 절반을 덮는다. */
   shouldAutoFocus: boolean;
+  isNicknamePending: boolean;
+  changeNickname: (nickname: string) => Promise<boolean>;
 }
 
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending, sendMessage, onClose, onRetry, isBottomSheet, shouldAutoFocus }: SpaceChatPanelProps): ReactNode {
+function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending, sendMessage, onClose, onRetry, isBottomSheet, shouldAutoFocus, isNicknamePending, changeNickname }: SpaceChatPanelProps): ReactNode {
   // region [Hooks]
   const [draft, setDraft] = useState("");
   const [cooldownEndsAt, setCooldownEndsAt] = useState(0);
@@ -48,6 +51,8 @@ function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending,
   const inputRef = useRef<HTMLInputElement>(null);
   const isSubmittingRef = useRef(false);
   const isMountedRef = useRef(false);
+  const [nicknameDraft, setNicknameDraft] = useState<string | null>(null);
+  const nicknameInputRef = useRef<HTMLInputElement>(null);
   // endregion
 
 
@@ -112,6 +117,41 @@ function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending,
 
 
   // region [Events]
+  const onClickEditNickname = useCallback((): void => {
+    setNicknameDraft(nickname);
+  }, [nickname]);
+
+  const onChangeNicknameDraft = useCallback((event: ChangeEvent<HTMLInputElement>): void => {
+    setNicknameDraft(event.target.value);
+  }, []);
+
+  /** 입력창 밖을 누르면 되돌린다. 실수로 바꾸는 것보다 취소가 안전하다. */
+  const onBlurNicknameInput = useCallback((): void => {
+    setNicknameDraft(null);
+  }, []);
+
+  const onKeyDownNicknameInput = useCallback((event: React.KeyboardEvent<HTMLInputElement>): void => {
+    if (event.key === "Escape") {
+      setNicknameDraft(null);
+    }
+    // 한글 조합 중 Enter 는 글자를 확정하는 키다. 전송으로 보면 안 된다.
+    if (event.key === "Enter" && (event.nativeEvent.isComposing || event.keyCode === 229)) {
+      event.preventDefault();
+    }
+  }, []);
+
+  const onSubmitNickname = useCallback(async (event: FormEvent<HTMLFormElement>): Promise<void> => {
+    event.preventDefault();
+    const submitted = (nicknameDraft ?? "").trim();
+    if (!submitted || countGraphemes(submitted) > CHAT_MAX_NICKNAME_GRAPHEMES || isNicknamePending) {
+      return;
+    }
+    const wasAccepted = await changeNickname(submitted);
+    if (isMountedRef.current && wasAccepted) {
+      setNicknameDraft(null);
+    }
+  }, [nicknameDraft, isNicknamePending, changeNickname]);
+
   const onChangeDraft = useCallback((event: ChangeEvent<HTMLInputElement>): void => {
     setDraft(event.target.value);
   }, []);
@@ -160,6 +200,12 @@ function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending,
   // region [Life Cycles]
   useEffect(trackMountedPanel, [trackMountedPanel]);
   useEffect(focusDraftInput, [focusDraftInput]);
+
+  useEffect(() => {
+    if (nicknameDraft !== null) {
+      nicknameInputRef.current?.focus();
+    }
+  }, [nicknameDraft]);
   useEffect(startViewportTracking, [startViewportTracking]);
   useEffect(followLatestMessages, [messages, followLatestMessages]);
   useEffect(startCooldownCountdown, [startCooldownCountdown]);
@@ -193,6 +239,9 @@ function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending,
   const panelClassName = isBottomSheet
     ? "pointer-events-auto absolute z-30 flex flex-col overflow-hidden rounded-t-2xl border-t border-white/15 bg-[#10151f]/95 text-white shadow-2xl backdrop-blur-xl"
     : "pointer-events-auto absolute z-30 flex w-[340px] max-w-[calc(100%-2rem)] flex-col overflow-hidden rounded-2xl border border-white/15 bg-[#10151f]/95 text-white shadow-2xl backdrop-blur-xl";
+  const nicknameCount = countGraphemes(nicknameDraft ?? "");
+  const canSaveNickname =
+    !isNicknamePending && nicknameCount > 0 && nicknameCount <= CHAT_MAX_NICKNAME_GRAPHEMES;
   const sendLabel = isMessagePending ? "전송 중" : remainingSeconds > 0 ? `${remainingSeconds}초` : "보내기";
   const connectionLabel = isOnline ? `현재 공간 · ${presence.occupantCount}명` : "연결 대기 중";
   // endregion
@@ -236,7 +285,23 @@ function SpaceChatPanel({ messages, presence, nickname, error, isMessagePending,
           </button>
         </div>
         <div className="mt-2 flex justify-between text-[10px] text-white/40">
-          <span>{nickname} · 대화는 이 공간에서만 보여요</span>
+          {nicknameDraft === null ? (
+            <button type="button" onClick={onClickEditNickname} className="flex items-center gap-1 rounded text-white/40 hover:text-white/70 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bitcoin">
+              <span>{nickname}</span>
+              <Pencil size={10} aria-hidden="true" />
+              <span className="sr-only">닉네임 바꾸기</span>
+              <span aria-hidden="true">· 대화는 이 공간에서만 보여요</span>
+            </button>
+          ) : (
+            <form onSubmit={onSubmitNickname} className="flex items-center gap-1">
+              <input ref={nicknameInputRef} aria-label="닉네임" value={nicknameDraft} onChange={onChangeNicknameDraft} onKeyDown={onKeyDownNicknameInput} onBlur={onBlurNicknameInput} maxLength={64} autoComplete="off" className="w-20 rounded border border-white/15 bg-black/30 px-1.5 py-0.5 text-[11px] text-white outline-none focus:border-bitcoin/60" />
+              <span className={nicknameCount > CHAT_MAX_NICKNAME_GRAPHEMES ? "text-amber-200" : undefined}>{nicknameCount}/{CHAT_MAX_NICKNAME_GRAPHEMES}</span>
+              {/* 입력창 blur 보다 먼저 눌리도록 mousedown 을 막는다. */}
+              <button type="submit" aria-label="닉네임 저장" disabled={!canSaveNickname} onMouseDown={(event) => event.preventDefault()} className="rounded p-0.5 text-bitcoin disabled:opacity-30">
+                <Check size={12} />
+              </button>
+            </form>
+          )}
           <span className={characterCount > 300 ? "text-amber-200" : undefined}>{characterCount}/300</span>
         </div>
       </form>

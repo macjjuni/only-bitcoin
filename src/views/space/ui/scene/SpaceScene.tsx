@@ -110,7 +110,10 @@ function SpaceScene({
   usePointerDrag(inputSource, canvasElement);
   // endregion
 
-  // region [Privates]
+  /** 서버 보정으로 볼 최소 거리(m). 좌표를 1 cm 로 접어 보내므로 그보다 크게 잡는다. */
+const SERVER_CORRECTION_THRESHOLD = 0.05;
+
+// region [Privates]
   const applyServerTransform = useCallback((peer: SpacePeer): void => {
     playerStateRef.current = createLocalPlayerState(peer);
     accumulatedSecondsRef.current = 0;
@@ -177,8 +180,18 @@ function SpaceScene({
   }, [camera, canvasElement, spawnTransform]);
 
   useLayoutEffect(() => {
-    if (session.self) {
-      applyServerTransform(session.self);
+    const self = session.self;
+
+    if (!self) {
+      return;
+    }
+    // 닉네임만 바뀐 peer 프레임에 위치를 되감으면 캐릭터가 뒤로 튄다. 서버가
+    // 이동을 거절했을 때만 좌표가 실제로 달라지므로 양자화 오차로 가른다.
+    const state = playerStateRef.current;
+    const gap = Math.hypot(self.x - state.x, self.y - state.y, self.z - state.z);
+
+    if (gap > SERVER_CORRECTION_THRESHOLD) {
+      applyServerTransform(self);
     }
   }, [session.self, applyServerTransform]);
 

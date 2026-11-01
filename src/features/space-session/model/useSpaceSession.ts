@@ -15,9 +15,15 @@ export type SpaceSession = ReturnType<typeof useSpaceSession>;
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 export const useSpaceSession = ({ identity, enabled }: UseSpaceSessionOptions) => {
   // region [Hooks]
+  /**
+   * 닉네임은 의존성에 넣지 않는다.
+   *
+   * 넣으면 이름을 바꿀 때마다 컨트롤러가 새로 만들어져 연결이 끊기고 좌석과
+   * 위치를 잃는다. 변경은 `changeNickname` 이 `nick` 프레임으로 처리한다.
+   */
   const controller = useMemo(
     () => new SpaceSessionController({ identity, webSocketUrl: spaceConfig.webSocketUrl }),
-    [identity.clientKey, identity.nickname],
+    [identity.clientKey],
   );
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   // endregion
@@ -74,6 +80,7 @@ export const useSpaceSession = ({ identity, enabled }: UseSpaceSessionOptions) =
     publishMovement: controller.publishMovement,
     sampleRemotePlayers: controller.sampleRemotePlayers,
     sendMessage: controller.sendMessage,
+    changeNickname: controller.changeNickname,
     retry: controller.retry,
   };
 };

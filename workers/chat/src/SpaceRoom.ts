@@ -6,6 +6,7 @@ import {
   parseSpaceClientFrame,
   SPACE_CHAT_COOLDOWN_MS,
   SPACE_NETWORK_INTERVAL_MS,
+  SPACE_NICKNAME_COOLDOWN_MS,
   type SpaceClientFrame,
   type SpacePeer,
   type SpaceServerFrame,
@@ -37,6 +38,7 @@ interface SpaceSocketAttachment {
   lastMoveAt: number;
   movementBudget: number;
   lastSayAt: number | null;
+  lastNickAt?: number | null;
   recentSayReceipts: SayReceipt[];
 }
 
@@ -458,6 +460,49 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     this.scheduleSnapshot();
   }
 
+  /**
+   * 닉네임을 바꾸고 모두에게 알린다.
+   *
+   * `peer` 프레임은 좌표까지 함께 담고 있어 본인에게도 그대로 보낸다. 수신 쪽은
+   * 좌표가 그대로면 위치를 되감지 않는다.
+   */
+  private async handleNick(
+    socket: WebSocket,
+    frame: Extract<SpaceClientFrame, { t: "nick" }>,
+  ): Promise<void> {
+    const nickname = normalizeNickname(frame.nickname);
+    const attachment = this.getJoinedAttachment(socket);
+    const peer = attachment?.peer;
+
+    if (!attachment || !peer) {
+      this.sendError(socket, "JOIN_REQUIRED", "먼저 공간에 입장해 주세요.", frame.rid);
+      return;
+    }
+    if (peer.nickname === nickname) {
+      this.sendFrame(socket, { v: 1, t: "peer", peer });
+      return;
+    }
+    const now = Date.now();
+
+    if (attachment.lastNickAt != null && now - attachment.lastNickAt < SPACE_NICKNAME_COOLDOWN_MS) {
+      this.sendError(
+        socket,
+        "RATE_NICK_INTERVAL",
+        "닉네임은 10초에 한 번 바꿀 수 있어요.",
+        frame.rid,
+      );
+      return;
+    }
+    const renamed: SpacePeer = { ...peer, nickname };
+    socket.serializeAttachment({
+      ...attachment,
+      peer: renamed,
+      lastActivityAt: now,
+      lastNickAt: now,
+    } satisfies SpaceSocketAttachment);
+    this.broadcastFrame({ v: 1, t: "peer", peer: renamed });
+  }
+
   private async handleSay(
     socket: WebSocket,
     frame: Extract<SpaceClientFrame, { t: "say" }>,
@@ -624,6 +669,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
           break;
         case "say":
           await this.handleSay(socket, frame);
+          break;
+        case "nick":
+          await this.handleNick(socket, frame);
           break;
         default:
           throw new Error("Unsupported space frame");

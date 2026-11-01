@@ -4,6 +4,8 @@ import { SPACE_MAX_JUMP_HEIGHT, SPACE_MAX_OCCUPANTS } from "./spaceWorld";
 export const SPACE_PROTOCOL_VERSION = 1;
 export const SPACE_NETWORK_INTERVAL_MS = 100;
 export const SPACE_CHAT_COOLDOWN_MS = 3_000;
+/** 닉네임 변경 간격. 자주 바꾸면 다른 사람이 누가 누군지 못 따라간다. */
+export const SPACE_NICKNAME_COOLDOWN_MS = 10_000;
 
 export interface SpaceMotion extends PlayerTransform {
   seat: number;
@@ -32,7 +34,8 @@ export interface SpaceMotionSnapshot {
 export type SpaceClientFrame =
   | { v: 1; t: "join"; clientKey: string; nickname: string }
   | { v: 1; t: "move"; x: number; y: number; z: number; yaw: number; isRunning: boolean }
-  | { v: 1; t: "say"; rid: string; body: string };
+  | { v: 1; t: "say"; rid: string; body: string }
+  | { v: 1; t: "nick"; rid: string; nickname: string };
 
 export type SpaceServerFrame =
   | { v: 1; t: "welcome"; self: SpacePeer; peers: SpacePeer[] }
@@ -171,6 +174,10 @@ export const parseSpaceClientFrame = (rawPayload: string): SpaceClientFrame | nu
         : null;
     case "say":
       return isUuid(payload.rid) && isBoundedString(payload.body, CLIENT_FRAME_MAX_BYTES)
+        ? (payload as SpaceClientFrame)
+        : null;
+    case "nick":
+      return isUuid(payload.rid) && isBoundedString(payload.nickname, 128)
         ? (payload as SpaceClientFrame)
         : null;
     default:

@@ -11,7 +11,8 @@ const self: SpacePeer = {
   colorIndex: 0,
   x: 0,
   z: 0,
-  y: 0, yaw: 0,
+  y: 0,
+  yaw: 0,
   isRunning: false,
 };
 const remote: SpacePeer = { ...self, seat: 1, nickname: "다른 사용자", x: 5 };
@@ -187,7 +188,8 @@ describe("SpaceSessionController", () => {
     expect(sentFrames(socket, "move").at(-1)).toMatchObject({
       x: 1.23,
       z: -2.35,
-      y: 0, yaw: Math.PI / 2,
+      y: 0,
+      yaw: Math.PI / 2,
     });
     vi.advanceTimersByTime(100);
     controller.publishMovement({
@@ -496,6 +498,86 @@ describe("SpaceSessionController", () => {
     expect(sockets).toHaveLength(0);
     expect(controller.getSnapshot().presence.status).toBe("offline");
     expect(controller.getSnapshot().error).toContain("설정");
+    controller.stop();
+  });
+
+  it("닉네임 변경은 서버가 되돌려준 peer 로 확정하고 재접속에도 이어진다", async () => {
+    const { controller, sockets, welcome } = createHarness();
+    controller.start();
+    const socket = welcome();
+
+    const renamed = controller.changeNickname("새이름");
+    expect(sentFrames(socket, "nick")).toEqual([
+      { v: 1, t: "nick", rid: requestId, nickname: "새이름" },
+    ]);
+    expect(controller.getSnapshot().isNicknamePending).toBe(true);
+
+    socket.receive({ v: 1, t: "peer", peer: { ...self, nickname: "새이름" } });
+    expect(await renamed).toBe(true);
+    expect(controller.getSnapshot().self?.nickname).toBe("새이름");
+    expect(controller.getSnapshot().isNicknamePending).toBe(false);
+
+    // 끊겼다 다시 들어갈 때 옛 이름으로 입장하면 바꾼 의미가 없다.
+    socket.emitClose();
+    vi.advanceTimersByTime(750);
+    sockets[1].open();
+    expect(sentFrames(sockets[1], "join")).toEqual([
+      { v: 1, t: "join", clientKey: identity.clientKey, nickname: "새이름" },
+    ]);
+    controller.stop();
+  });
+
+  it("닉네임 거절은 연결을 끊지 않고 그 요청만 실패시킨다", async () => {
+    const { controller, sockets, welcome } = createHarness();
+    controller.start();
+    const socket = welcome();
+    const rejected = controller.changeNickname("##");
+    socket.receive({
+      v: 1,
+      t: "error",
+      rid: requestId,
+      code: "INVALID_NICKNAME",
+      message: "사용할 수 없는 닉네임입니다.",
+    });
+
+    expect(await rejected).toBe(false);
+    // 입장 때 같은 코드가 오면 영구 오류지만, 이름 변경이면 입력만 고치면 된다.
+    expect(controller.getSnapshot().presence.status).toBe("online");
+    expect(controller.getSnapshot().self?.nickname).toBe("익명");
+    vi.advanceTimersByTime(30_000);
+    expect(sockets).toHaveLength(1);
+    controller.stop();
+  });
+
+  it("이름만 바뀐 peer 프레임은 위치를 되감지 않는다", () => {
+    const { controller, welcome } = createHarness();
+    controller.start();
+    const socket = welcome();
+    controller.publishMovement(movement(4));
+    const beforeMoves = sentFrames(socket, "move").length;
+
+    // 서버는 이름만 바뀌어도 현재 좌표를 그대로 담아 보낸다.
+    socket.receive({ v: 1, t: "peer", peer: { ...self, x: 4, nickname: "새이름" } });
+    vi.advanceTimersByTime(200);
+    controller.publishMovement(movement(4));
+
+    // 되감으면 같은 자리를 한 번 더 보낸다.
+    expect(sentFrames(socket, "move").length).toBe(beforeMoves);
+    controller.stop();
+  });
+
+  it("서버가 이동을 거절하면 좌표를 되감는다", () => {
+    const { controller, welcome } = createHarness();
+    controller.start();
+    const socket = welcome();
+    controller.publishMovement(movement(4));
+    const beforeMoves = sentFrames(socket, "move").length;
+
+    socket.receive({ v: 1, t: "peer", peer: { ...self, x: 0 } });
+    vi.advanceTimersByTime(200);
+    controller.publishMovement(movement(4));
+
+    expect(sentFrames(socket, "move").length).toBeGreaterThan(beforeMoves);
     controller.stop();
   });
 });

@@ -101,6 +101,8 @@ const createRoom = (state = new RoomState()) => {
   return { state, room, send, join };
 };
 
+const requestId = "11111111-1111-4111-8111-111111111111";
+const otherRequestId = "22222222-2222-4222-8222-222222222222";
 const clientKey = (index: number): string => `client-key-${String(index).padStart(22, "0")}`;
 
 beforeEach(() => {
@@ -443,5 +445,53 @@ describe("SpaceRoom", () => {
 
     expect(repeatedEcho).toEqual(previousEcho);
     expect(state.storage.sql.exec).not.toHaveBeenCalled();
+  });
+
+  it("닉네임을 바꾸면 모두에게 새 peer 를 보내고 좌표는 유지한다", async () => {
+    const { join, send } = createRoom();
+    const mover = await join(clientKey(1));
+    const observer = await join(clientKey(2));
+    const before = mover.peer();
+
+    await send(mover, { v: 1, t: "nick", rid: requestId, nickname: "새이름" });
+
+    expect(mover.peer()).toMatchObject({ nickname: "새이름", x: before.x, z: before.z });
+    // 좌표를 함께 담아야 수신 쪽이 위치를 되감지 않는다.
+    expect(observer.frames()).toContainEqual({
+      v: 1,
+      t: "peer",
+      peer: { ...before, nickname: "새이름" },
+    });
+  });
+
+  it("닉네임은 10초에 한 번만 바꿀 수 있다", async () => {
+    const { join, send } = createRoom();
+    const socket = await join(clientKey(1));
+
+    await send(socket, { v: 1, t: "nick", rid: requestId, nickname: "첫번째" });
+    await send(socket, { v: 1, t: "nick", rid: otherRequestId, nickname: "두번째" });
+
+    expect(socket.peer().nickname).toBe("첫번째");
+    expect(socket.frames()).toContainEqual(
+      expect.objectContaining({ t: "error", code: "RATE_NICK_INTERVAL", rid: otherRequestId }),
+    );
+
+    vi.advanceTimersByTime(10_000);
+    await send(socket, { v: 1, t: "nick", rid: otherRequestId, nickname: "두번째" });
+    expect(socket.peer().nickname).toBe("두번째");
+  });
+
+  it("쓸 수 없는 닉네임은 거절하되 연결은 유지한다", async () => {
+    const { join, send } = createRoom();
+    const socket = await join(clientKey(1));
+
+    // 8 grapheme 한도를 넘는다. 프레임 자체는 멀쩡하므로 정규화에서 걸린다.
+    await send(socket, { v: 1, t: "nick", rid: requestId, nickname: "아주아주아주긴닉네임" });
+
+    expect(socket.peer().nickname).toBe("참여자");
+    expect(socket.closeCode).toBeNull();
+    expect(socket.frames()).toContainEqual(
+      expect.objectContaining({ t: "error", code: "INVALID_NICKNAME", rid: requestId }),
+    );
   });
 });
