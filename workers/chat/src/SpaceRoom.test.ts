@@ -347,11 +347,19 @@ describe("SpaceRoom", () => {
     expect(observer.frames().filter((item) => item.t === "say")).toHaveLength(2);
   });
 
-  it("8KiB 이하의 복합 이모지 본문은 채팅 정규화 정책에 맞춰 허용한다", async () => {
+  it("공간 채팅은 복합 이모지 100자는 허용하고 101자는 거부한다", async () => {
     const { join, send } = createRoom();
     const sender = await join(clientKey(1));
-    const body = Array.from({ length: 90 }, (_, index) => `👨‍👩‍👧‍👦${index % 10}`).join("");
+    const body = Array.from({ length: 100 }, (_, index) =>
+      index % 2 === 0 ? "👨‍👩‍👧‍👦" : "👩‍👩‍👧‍👧",
+    ).join("");
     expect(new TextEncoder().encode(body).byteLength).toBeGreaterThan(2048);
+    await send(sender, { v: 1, t: "say", rid: crypto.randomUUID(), body: `${body}👨‍👩‍👧‍👦` });
+    expect(sender.frames()).toContainEqual(
+      expect.objectContaining({ t: "error", code: "BODY_TOO_LONG" }),
+    );
+    expect(sender.frames().some((frame) => frame.t === "say")).toBe(false);
+
     await send(sender, { v: 1, t: "say", rid: crypto.randomUUID(), body });
     expect(sender.frames().some((frame) => frame.t === "say")).toBe(true);
   });

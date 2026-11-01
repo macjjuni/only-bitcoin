@@ -5,6 +5,7 @@ import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
 import {
   parseSpaceClientFrame,
   SPACE_CHAT_COOLDOWN_MS,
+  SPACE_CHAT_MAX_GRAPHEMES,
   SPACE_NETWORK_INTERVAL_MS,
   SPACE_NICKNAME_COOLDOWN_MS,
   type SpaceClientFrame,
@@ -17,7 +18,12 @@ import {
   SPACE_MAX_OCCUPANTS,
 } from "../../../src/entities/space/model/spaceWorld";
 import { createSha256Hex, deriveStableActorKey } from "./lib/crypto";
-import { ChatValidationError, normalizeChatMessage, normalizeNickname } from "./lib/textValidation";
+import {
+  ChatValidationError,
+  countGraphemes,
+  normalizeChatMessage,
+  normalizeNickname,
+} from "./lib/textValidation";
 import type { ChatWorkerEnv } from "./types";
 
 interface SayReceipt {
@@ -520,6 +526,12 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
     try {
       const body = normalizeChatMessage(frame.body);
+      if (countGraphemes(body) > SPACE_CHAT_MAX_GRAPHEMES) {
+        throw new ChatValidationError(
+          "BODY_TOO_LONG",
+          `공간 메시지는 최대 ${SPACE_CHAT_MAX_GRAPHEMES}자까지 작성할 수 있어요.`,
+        );
+      }
       const bodyHash = await createSha256Hex(body);
       const attachment = this.getJoinedAttachment(socket);
       const peer = attachment?.peer;
