@@ -552,7 +552,7 @@ export class SpaceSessionController {
         return;
       }
       case "full": {
-        this.stopAutomaticRetry("공간이 가득 찼습니다. 잠시 후 다시 접속해 주세요.");
+        this.stopAutomaticRetry("지금은 빈자리가 없어요. 잠시 후 다시 접속해 주세요.");
         return;
       }
       default: {
