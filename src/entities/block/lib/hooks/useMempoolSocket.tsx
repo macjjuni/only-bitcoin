@@ -10,8 +10,9 @@ import type { MemPoolBlockTypes, MempoolInfoMessage } from "../../model/types";
 
 const MEMPOOL_WS_URL = "wss://mempool.space/api/v1/ws";
 
-export default function useMempoolSocket() {
+export default function useMempoolSocket(shouldShowMiningEffects: boolean) {
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
+  const shouldShowMiningEffectsRef = useRef(shouldShowMiningEffects);
 
   const handleMempoolBlocks = useCallback((blocks: MemPoolBlockTypes[]) => {
     const { setBlockData } = useBlockStore.getState();
@@ -45,8 +46,10 @@ export default function useMempoolSocket() {
       poolName: extras.pool.name,
     };
 
-    kToast.info(`${comma(height)}번째 블록 채굴!️`, { duration: 3500 });
-    useConfettiStore.getState().show();
+    if (shouldShowMiningEffectsRef.current) {
+      kToast.info(`${comma(height)}번째 블록 채굴!️`, { duration: 3500 });
+      useConfettiStore.getState().show();
+    }
 
     setBlockData([sanitizedBlock, ...blockData]);
   }, []);
@@ -131,6 +134,10 @@ export default function useMempoolSocket() {
     disconnect();
     connect();
   }, [disconnect, connect]);
+
+  useEffect(() => {
+    shouldShowMiningEffectsRef.current = shouldShowMiningEffects;
+  }, [shouldShowMiningEffects]);
 
   useEffect(() => {
     connect();

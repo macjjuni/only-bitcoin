@@ -2,6 +2,7 @@
 
 import { KToast } from "kku-ui";
 import dynamic from "next/dynamic";
+import { usePathname } from "next/navigation";
 import { memo, Suspense } from "react";
 import {
   useBinanceSocket,
@@ -29,12 +30,15 @@ const AlarmManager = dynamic(() => import("@/widgets/alarm-manager").then((m) =>
  */
 function BaseInitializer() {
   // region [Hooks]
+  const pathname = usePathname();
+  const shouldShowMiningEffects = pathname !== "/space";
+
   // 외부 API/소켓 초기화
   useCoinbaseSocket();
   useUpbitSocket();
   useBithumbSocket();
   useBinanceSocket();
-  useMempoolSocket();
+  useMempoolSocket(shouldShowMiningEffects);
 
   // 앱 설정 및 환경 초기화
   useTheme();
