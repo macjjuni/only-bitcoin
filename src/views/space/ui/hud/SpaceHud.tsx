@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CircleHelp, MessageCircle } from "lucide-react";
+import { ArrowLeft, CircleHelp, MessageCircle, Pencil } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -15,6 +15,7 @@ import type { SpaceSession } from "@/features/space-session";
 import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
 import SpaceChatPanel, { SPACE_CHAT_INPUT_ID } from "./SpaceChatPanel";
 import SpaceControlGuide from "./SpaceControlGuide";
+import SpaceNicknameEditor from "./SpaceNicknameEditor";
 import SpacePresenceBadge from "./SpacePresenceBadge";
 
 /** 히스토리가 없을 때(직접 링크 진입) 돌아갈 곳. `/space` 를 노출하는 목록이다. */
@@ -39,6 +40,7 @@ interface SpaceHudProps {
  * 노치와 둥근 모서리를 피하려고 `safe-area-inset` 만큼 안쪽으로 들인다.
  * 전체 화면 3D 페이지라 브라우저가 대신 비켜주지 않는다.
  */
+// biome-ignore format: AGENTS.md requires two blank lines between regions.
 function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode {
   // region [Hooks]
   const router = useTransitionRouter();
@@ -46,11 +48,13 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
   const isCoarsePointer = useCoarsePointer();
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
+  const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
   const [lastReadMessageID, setLastReadMessageID] = useState<string | null>(null);
   /** 단축키 리스너가 메시지마다 다시 붙지 않도록 최신 목록만 참조한다. */
   const messagesRef = useRef(session.messages);
   messagesRef.current = session.messages;
   // endregion
+
 
   // region [Events]
   const onClickBack = useCallback((): void => {
@@ -64,7 +68,18 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
   }, [router]);
 
   const onClickToggleGuide = useCallback((): void => {
+    setIsNicknameEditorOpen(false);
     setIsGuideOpen((previousOpen) => !previousOpen);
+  }, []);
+
+  const onClickToggleNicknameEditor = useCallback((): void => {
+    setIsGuideOpen(false);
+    setIsNicknameEditorOpen((previousOpen) => !previousOpen);
+  }, []);
+
+  const onClickCloseNicknameEditor = useCallback((): void => {
+    setIsNicknameEditorOpen(false);
+    document.getElementById("space-nickname-toggle")?.focus();
   }, []);
 
   const onClickCloseChat = useCallback((): void => {
@@ -88,10 +103,12 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
   );
 
   const onClickToggleChat = useCallback((): void => {
+    setIsNicknameEditorOpen(false);
     setLastReadMessageID(session.messages.at(-1)?.id ?? null);
     setIsChatOpen((previous) => !previous);
   }, [session.messages]);
   // endregion
+
 
   // region [Privates]
   /**
@@ -119,6 +136,7 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
       }
 
       event.preventDefault();
+      setIsNicknameEditorOpen(false);
       setLastReadMessageID(messagesRef.current.at(-1)?.id ?? null);
       setIsChatOpen(true);
       // 이미 열려 있는데 캔버스를 클릭했다면 입력칸으로 되돌린다. 닫혀 있으면
@@ -134,9 +152,11 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
   }, [isCoarsePointer]);
   // endregion
 
+
   // region [Life Cycles]
   useEffect(attachChatHotkey, [attachChatHotkey]);
   // endregion
+
 
   // region [Templates]
   const lastReadIndex = session.messages.findIndex(({ id }) => id === lastReadMessageID);
@@ -161,6 +181,14 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
     });
 
     actions.push({
+      id: "space-nickname-toggle",
+      label: "닉네임 변경",
+      icon: <Pencil size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+      isActive: isNicknameEditorOpen,
+      onClick: onClickToggleNicknameEditor,
+    });
+
+    actions.push({
       id: "guide",
       label: "조작 안내",
       icon: <CircleHelp size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
@@ -169,7 +197,28 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
     });
 
     return actions;
-  }, [isChatOpen, unreadCount, onClickToggleChat, isGuideOpen, onClickBack, onClickToggleGuide]);
+  }, [
+    isChatOpen,
+    unreadCount,
+    onClickToggleChat,
+    isNicknameEditorOpen,
+    onClickToggleNicknameEditor,
+    isGuideOpen,
+    onClickBack,
+    onClickToggleGuide,
+  ]);
+
+  const NicknameEditorTemplate = isNicknameEditorOpen ? (
+    <div className="pointer-events-auto absolute right-12 top-24">
+      <SpaceNicknameEditor
+        nickname={nickname}
+        error={session.error}
+        isNicknamePending={session.isNicknamePending}
+        changeNickname={onSubmitNickname}
+        onClose={onClickCloseNicknameEditor}
+      />
+    </div>
+  ) : null;
 
   const GuidePanelTemplate = isGuideOpen ? (
     <div className="mt-2">
@@ -180,11 +229,12 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
   /**
    * 조이스틱은 손가락 기기에만 띄운다. 마우스 환경에는 WASD 가 있다.
    *
-   * 채팅 시트가 하단을 덮는 동안에는 손가락이 조이스틱에 닿지 않으므로 내린다.
+   * 채팅이나 닉네임 입력 중에는 조이스틱을 내려 키보드와 조작이 겹치지 않게 한다.
    * 언마운트 정리가 눌려 있던 입력까지 0 으로 비운다.
    */
+  const shouldRenderJoystick = isCoarsePointer && !isChatOpen && !isNicknameEditorOpen;
   const JoystickTemplate =
-    isCoarsePointer && !isChatOpen ? (
+    shouldRenderJoystick ? (
       <div className="pointer-events-auto">
         <VirtualJoystick inputSource={inputSource} />
       </div>
@@ -231,7 +281,7 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
       </div>
 
       <div
-        className="absolute right-4 top-4 flex flex-col items-end"
+        className="absolute right-4 top-4 z-40 flex flex-col items-end"
         style={{
           right: "calc(1rem + env(safe-area-inset-right))",
           top: "calc(1rem + env(safe-area-inset-top))",
@@ -240,6 +290,8 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
         <div className="pointer-events-auto">
           <SpaceActionBar actions={hudActions} />
         </div>
+
+        {NicknameEditorTemplate}
 
         {/* 안내는 읽기 전용이다. 터치를 막으면 열어둔 동안 그 영역의 시야 조작이 죽는다. */}
         {GuidePanelTemplate}
@@ -251,7 +303,6 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
         <SpaceChatPanel
           messages={session.messages}
           presence={session.presence}
-          nickname={nickname}
           error={session.error}
           isMessagePending={session.isMessagePending}
           sendMessage={session.sendMessage}
@@ -259,8 +310,6 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
           onRetry={session.retry}
           isBottomSheet={isCoarsePointer}
           shouldAutoFocus={!isCoarsePointer}
-          isNicknamePending={session.isNicknamePending}
-          changeNickname={onSubmitNickname}
         />
       )}
     </div>
