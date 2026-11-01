@@ -4,6 +4,8 @@ import {
   SPACE_BLOCK_DASHBOARD,
   SPACE_BOUNDS,
   SPACE_GROUND,
+  SPACE_OVERLAY_LIMITS,
+  SPACE_SPAWN_RING,
   SPACE_TEXT_BANNER,
   SPACE_WALL_ANCHOR,
   SPACE_WALL_PANEL_SPAN,
@@ -82,6 +84,27 @@ describe("전광판·현황판 배치", () => {
     expect(SPACE_BOUNDS.minZ).toBeGreaterThan(SPACE_GROUND.centerZ - SPACE_GROUND.depth / 2);
     expect(SPACE_BOUNDS.maxZ).toBeLessThan(SPACE_GROUND.centerZ + SPACE_GROUND.depth / 2);
     expect(SPACE_BOUNDS.maxX).toBeLessThan(SPACE_GROUND.width / 2);
+  });
+});
+
+describe("오버레이 표시 상한", () => {
+  it("명찰 거리가 스폰 링 지름을 덮는다", () => {
+    // 링 양쪽에 스폰된 두 사람(최대 28 m)이 서로 이름을 볼 수 있어야 한다.
+    const spawnRingDiameter = SPACE_SPAWN_RING.maxRadius * 2;
+
+    expect(SPACE_OVERLAY_LIMITS.nameplateMaxDistance).toBeGreaterThan(spawnRingDiameter);
+  });
+
+  it("DOM 비용은 개수 상한이 정한다", () => {
+    // 거리를 늘려도 그리는 개수는 그대로다. 성능 가드는 이쪽이다.
+    expect(SPACE_OVERLAY_LIMITS.nameplateMaxCount).toBeLessThanOrEqual(16);
+  });
+
+  it("말풍선은 명찰보다 좁은 범위에 둔다", () => {
+    // 말풍선은 "들리는 거리" 라서 이름표보다 가까워야 한다.
+    expect(SPACE_OVERLAY_LIMITS.bubbleMaxCount).toBeLessThan(
+      SPACE_OVERLAY_LIMITS.nameplateMaxCount,
+    );
   });
 });
 

@@ -84,6 +84,23 @@ function Nameplates({
         ?.position.set(player.x, player.y + NAMEPLATE_LIFT_Y, player.z);
     }
   };
+
+  /**
+   * 그룹이 붙는 즉시 제자리로 보낸다.
+   *
+   * 새로 보이게 된 좌석의 `<group>` 은 원점(0, 0, 0)에서 마운트되고, `<Html>` 은
+   * 그 프레임에 이미 화면 좌표를 계산한다. 다음 프레임에야 위치가 잡히므로
+   * 명찰이 공간 중앙에서 한 번 깜빡인다.
+   */
+  const attachRemoteGroup = (player: RemotePlayer, group: Group | null): void => {
+    if (!group) {
+      remoteGroupRefs.current.delete(player.seat);
+      return;
+    }
+
+    group.position.set(player.x, player.y + NAMEPLATE_LIFT_Y, player.z);
+    remoteGroupRefs.current.set(player.seat, group);
+  };
   // endregion
 
   // region [Life Cycles]
@@ -109,22 +126,21 @@ function Nameplates({
 
   return (
     <>
-      <group ref={selfGroupRef}>
-        <Html center distanceFactor={nameplateDistanceFactor} zIndexRange={[20, 0]}>
-          <span className="whitespace-nowrap rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-medium text-white/90 backdrop-blur-sm">
-            {selfNickname}
-          </span>
-        </Html>
-      </group>
+      {/* 이름이 비면 글자 없는 검은 알약만 뜬다. 그릴 것이 없으면 그리지 않는다. */}
+      {selfNickname !== "" && (
+        <group ref={selfGroupRef}>
+          <Html center distanceFactor={nameplateDistanceFactor} zIndexRange={[20, 0]}>
+            <span className="whitespace-nowrap rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-medium text-white/90 backdrop-blur-sm">
+              {selfNickname}
+            </span>
+          </Html>
+        </group>
+      )}
       {visiblePlayers.map((player) => (
         <group
           key={player.seat}
           ref={(group) => {
-            if (group) {
-              remoteGroupRefs.current.set(player.seat, group);
-            } else {
-              remoteGroupRefs.current.delete(player.seat);
-            }
+            attachRemoteGroup(player, group);
           }}
         >
           <Html center distanceFactor={nameplateDistanceFactor} zIndexRange={[20, 0]}>

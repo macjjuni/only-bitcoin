@@ -157,7 +157,18 @@ export const SPACE_TEXT_BANNER = {
 
 /** 명찰·말풍선 표시 상한. 인원 비례가 아니라 DOM 렌더 비용의 상한이다. */
 export const SPACE_OVERLAY_LIMITS = {
-  nameplateMaxDistance: 25,
+  /**
+   * 명찰 표시 거리.
+   *
+   * 25 m 로 뒀더니 **스폰 직후 서로 이름이 안 보이는 경우**가 생겼다. 스폰 링
+   * 반지름이 최대 14 m 라 두 사람이 링 양쪽에 떨어지면 28 m 다. 각도차 150°
+   * 부터 상한을 넘겨, 접속만 하고 가만히 있으면 상대 이름을 못 본다.
+   *
+   * DOM 비용을 정하는 것은 거리가 아니라 `nameplateMaxCount` 다. 가까운 순으로
+   * 16개만 그리므로 거리를 늘려도 노드 수는 그대로다. 스폰 링 지름(28)에 여유를
+   * 더해 36 m 로 둔다. 멀면 글자가 작아지지만 다가가거나 줌하면 커진다.
+   */
+  nameplateMaxDistance: 36,
   nameplateMaxCount: 16,
   bubbleMaxCount: 12,
   bubbleTtlMs: 5_000,
