@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { resolveSpaceAdEnabled, resolveSpaceWebSocketUrl } from "./space";
+import { resolveAdContactLabel, resolveSpaceWebSocketUrl } from "./space";
 
 describe("resolveSpaceWebSocketUrl", () => {
   it("채팅 호스트를 유지하고 경로만 공간 엔드포인트로 바꾼다", () => {
@@ -13,21 +13,27 @@ describe("resolveSpaceWebSocketUrl", () => {
   });
 });
 
-describe("resolveSpaceAdEnabled", () => {
-  it("값을 넣지 않으면 광고를 노출한다", () => {
-    // 변수를 빼먹은 배포에서 광고가 조용히 사라지면 원인을 찾기 어렵다.
-    expect(resolveSpaceAdEnabled("")).toBe(true);
+describe("resolveAdContactLabel", () => {
+  it("X 프로필에서 핸들만 뽑는다", () => {
+    expect(resolveAdContactLabel("https://x.com/a7w2en7z_")).toBe("X @a7w2en7z_");
+    expect(resolveAdContactLabel("https://twitter.com/foo")).toBe("X @foo");
   });
 
-  it("끄는 값과 대소문자·공백 변형을 모두 OFF 로 읽는다", () => {
-    for (const rawValue of ["false", "0", "off", "no", "FALSE", " Off ", "\tNO\n"]) {
-      expect(resolveSpaceAdEnabled(rawValue)).toBe(false);
-    }
+  it("프로필이 아닌 트윗 URL 에서도 핸들만 남긴다", () => {
+    // 실제 피드백 URL 이 특정 트윗이다. 경로를 그대로 쓰면 배너가 깨진다.
+    expect(resolveAdContactLabel("https://x.com/a7w2en7z_/status/1895109142622413102")).toBe(
+      "X @a7w2en7z_",
+    );
   });
 
-  it("켜는 값과 알 수 없는 값은 노출로 읽는다", () => {
-    for (const rawValue of ["true", "1", "on", "yes", "fasle", "disabled"]) {
-      expect(resolveSpaceAdEnabled(rawValue)).toBe(true);
+  it("X 가 아닌 주소는 호스트만 쓴다", () => {
+    expect(resolveAdContactLabel("https://example.com/contact/very/long/path")).toBe("example.com");
+  });
+
+  it("비거나 파싱이 안 되는 값은 빈 문자열이다", () => {
+    // 호출부는 빈 문자열이면 연락처 줄을 그리지 않는다.
+    for (const rawValue of ["", "   ", "not-a-url", "https://x.com/"]) {
+      expect(resolveAdContactLabel(rawValue)).toBe("");
     }
   });
 });

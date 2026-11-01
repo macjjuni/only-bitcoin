@@ -1,4 +1,5 @@
 import { BITCOIN_COLOR } from "@/shared/config/color";
+import { spaceConfig } from "@/shared/config/space";
 import { resolveFittedFontSize } from "./billboardTexture";
 
 /**
@@ -22,7 +23,16 @@ export const TEXT_BANNER_COLORS = {
   accent: BITCOIN_COLOR,
 } as const;
 
-export const TEXT_BANNER_PLACEHOLDER = "이 자리에 텍스트 광고를 실을 수 있습니다";
+/**
+ * 비어 있는 배너에 그리는 안내.
+ *
+ * 연락처를 함께 붙인다. "광고를 실을 수 있습니다" 만 적고 연락할 곳을 주지
+ * 않으면 보는 사람이 할 수 있는 일이 없다. 연락처 파싱이 실패하면 안내만 남는다.
+ */
+export const TEXT_BANNER_PLACEHOLDER =
+  spaceConfig.adContactLabel === ""
+    ? "이 자리에 광고를 실을 수 있습니다"
+    : `이 자리에 광고를 실을 수 있습니다 · 문의 ${spaceConfig.adContactLabel}`;
 
 const SANS_FONT_STACK =
   '"Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif';
