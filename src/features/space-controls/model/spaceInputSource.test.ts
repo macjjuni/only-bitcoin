@@ -11,6 +11,7 @@ describe("resolveMergedMovementInput", () => {
       forward: 0,
       strafe: 0,
       isRunning: false,
+      isJumping: false,
     });
   });
 
@@ -23,6 +24,7 @@ describe("resolveMergedMovementInput", () => {
       forward: 0.4,
       strafe: -0.25,
       isRunning: false,
+      isJumping: false,
     });
   });
 

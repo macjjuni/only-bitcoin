@@ -8,6 +8,14 @@
 /** 동시 접속 상한. `InstancedMesh` 슬롯 수와 서버 좌석 수가 이 값을 따른다. */
 export const SPACE_MAX_OCCUPANTS = 50;
 
+/**
+ * 점프가 닿을 수 있는 최대 높이(m).
+ *
+ * 서버가 이 값으로 들어온 좌표를 검증하고, 스냅샷은 1 cm 정밀도의 1바이트로
+ * 담는다. 실제 정점(약 1.13 m)보다 여유를 두되 255 cm 를 넘기면 안 된다.
+ */
+export const SPACE_MAX_JUMP_HEIGHT = 2.5;
+
 /** 전광판·광고판이 붙는 뒷벽의 z 좌표. */
 export const SPACE_WALL_Z = -18;
 

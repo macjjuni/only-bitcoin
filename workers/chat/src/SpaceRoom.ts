@@ -10,7 +10,11 @@ import {
   type SpacePeer,
   type SpaceServerFrame,
 } from "../../../src/entities/space/model/spaceProtocol";
-import { SPACE_BOUNDS, SPACE_MAX_OCCUPANTS } from "../../../src/entities/space/model/spaceWorld";
+import {
+  SPACE_BOUNDS,
+  SPACE_MAX_JUMP_HEIGHT,
+  SPACE_MAX_OCCUPANTS,
+} from "../../../src/entities/space/model/spaceWorld";
 import { createSha256Hex, deriveStableActorKey } from "./lib/crypto";
 import { ChatValidationError, normalizeChatMessage, normalizeNickname } from "./lib/textValidation";
 import type { ChatWorkerEnv } from "./types";
@@ -280,7 +284,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         const peer = socket ? this.getJoinedAttachment(socket)?.peer : null;
 
         return peer
-          ? [{ seat, x: peer.x, z: peer.z, yaw: peer.yaw, isRunning: peer.isRunning }]
+          ? [{ seat, x: peer.x, y: peer.y, z: peer.z, yaw: peer.yaw, isRunning: peer.isRunning }]
           : [];
       });
       this.dirtySeats.clear();
@@ -422,7 +426,10 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       frame.x >= SPACE_BOUNDS.minX &&
       frame.x <= SPACE_BOUNDS.maxX &&
       frame.z >= SPACE_BOUNDS.minZ &&
-      frame.z <= SPACE_BOUNDS.maxZ;
+      frame.z <= SPACE_BOUNDS.maxZ &&
+      // 바닥은 평평하다. 점프로 닿을 수 있는 높이만 허용한다.
+      frame.y >= 0 &&
+      frame.y <= SPACE_MAX_JUMP_HEIGHT;
 
     if (!isInBounds || distance > availableDistance) {
       this.sendError(socket, "INVALID_MOVE", "이동 가능한 범위와 속도를 확인해 주세요.");
@@ -433,6 +440,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
     if (
       peer.x === frame.x &&
+      peer.y === frame.y &&
       peer.z === frame.z &&
       peer.yaw === yaw &&
       peer.isRunning === frame.isRunning
@@ -441,7 +449,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     }
     socket.serializeAttachment({
       ...attachment,
-      peer: { ...peer, x: frame.x, z: frame.z, yaw, isRunning: frame.isRunning },
+      peer: { ...peer, x: frame.x, y: frame.y, z: frame.z, yaw, isRunning: frame.isRunning },
       lastMoveAt: now,
       lastActivityAt: now,
       movementBudget: availableDistance - distance,

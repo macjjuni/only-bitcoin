@@ -6,22 +6,22 @@ const createMotion = (overrides: Partial<SpaceMotion> = {}): SpaceMotion => ({
   seat: 0,
   x: 0,
   z: 0,
-  yaw: 0,
+  y: 0, yaw: 0,
   isRunning: false,
   ...overrides,
 });
 
 describe("공간 바이너리 스냅샷", () => {
-  it("8바이트 LE 헤더와 좌석당 7바이트를 기록하고 cm 단위로 반올림한다", () => {
+  it("8바이트 LE 헤더와 좌석당 8바이트를 기록하고 cm 단위로 반올림한다", () => {
     const buffer = encodeSpaceSnapshot({
       timestamp: 0x12345678,
-      players: [createMotion({ seat: 49, x: -12.345, z: 26.126, yaw: Math.PI, isRunning: true })],
+      players: [createMotion({ seat: 49, x: -12.345, z: 26.126, y: 0, yaw: Math.PI, isRunning: true })],
     });
-    expect(buffer.byteLength).toBe(15);
+    expect(buffer.byteLength).toBe(16);
     expect([...new Uint8Array(buffer).slice(0, 8)]).toEqual([1, 1, 1, 0, 0x78, 0x56, 0x34, 0x12]);
     expect(decodeSpaceSnapshot(buffer)).toEqual({
       timestamp: 0x12345678,
-      players: [createMotion({ seat: 49, x: -12.34, z: 26.13, yaw: Math.PI, isRunning: true })],
+      players: [createMotion({ seat: 49, x: -12.34, z: 26.13, y: 0, yaw: Math.PI, isRunning: true })],
     });
   });
 
@@ -33,18 +33,21 @@ describe("공간 바이너리 스냅샷", () => {
           seat,
           x: seat === 0 ? -327.68 : 327.67,
           z: -16,
+          // 점프 높이도 1 cm 정밀도로 왕복해야 한다.
+          y: (seat % 26) / 10,
           yaw: -0.1 + seat * 0.2,
         }),
       ),
     };
     const buffer = encodeSpaceSnapshot(snapshot);
     const decoded = decodeSpaceSnapshot(buffer);
-    expect(buffer.byteLength).toBe(358);
+    expect(buffer.byteLength).toBe(408);
     expect(decoded?.timestamp).toBe(snapshot.timestamp);
     expect(decoded?.players).toHaveLength(50);
     snapshot.players.forEach((player, index) => {
       const restored = decoded?.players[index];
       expect(restored?.x).toBe(player.x);
+      expect(restored?.y).toBeCloseTo(player.y, 2);
       expect(
         Math.abs(
           Math.atan2(
@@ -68,7 +71,9 @@ describe("공간 바이너리 스냅샷", () => {
     (view: DataView) => view.setUint8(1, 2),
     (view: DataView) => view.setUint16(2, 51, true),
     (view: DataView) => view.setUint8(8, 50),
-    (view: DataView) => view.setUint8(14, 2),
+    (view: DataView) => view.setUint8(15, 2),
+    // 점프 높이 상한(250 cm)을 넘는 값도 거절한다.
+    (view: DataView) => view.setUint8(14, 251),
   ])("잘못된 버전·종류·좌석·예약 플래그를 거절한다", (mutate) => {
     const buffer = encodeSpaceSnapshot({ timestamp: 100, players: [createMotion()] });
     mutate(new DataView(buffer));
@@ -85,7 +90,7 @@ describe("공간 바이너리 스냅샷", () => {
     const oversized = new Uint8Array(buffer.byteLength + 1);
     oversized.set(new Uint8Array(buffer));
     expect(decodeSpaceSnapshot(oversized.buffer)).toBeNull();
-    new DataView(buffer).setUint8(15, 0);
+    new DataView(buffer).setUint8(16, 0);
     expect(decodeSpaceSnapshot(buffer)).toBeNull();
   });
 

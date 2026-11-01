@@ -11,7 +11,7 @@ const self: SpacePeer = {
   colorIndex: 0,
   x: 0,
   z: 0,
-  yaw: 0,
+  y: 0, yaw: 0,
   isRunning: false,
 };
 const remote: SpacePeer = { ...self, seat: 1, nickname: "다른 사용자", x: 5 };
@@ -82,12 +82,14 @@ const createHarness = (webSocketUrl = "wss://example.com/v1/space/ws") => {
   return { controller, sockets, welcome };
 };
 
-const movement = (x: number): LocalPlayerState => ({
+const movement = (x: number, y = 0): LocalPlayerState => ({
   x,
+  y,
   z: 0,
   yaw: 0,
   velocityX: 0,
   velocityZ: 0,
+  velocityY: 0,
   isRunning: false,
 });
 
@@ -185,7 +187,7 @@ describe("SpaceSessionController", () => {
     expect(sentFrames(socket, "move").at(-1)).toMatchObject({
       x: 1.23,
       z: -2.35,
-      yaw: Math.PI / 2,
+      y: 0, yaw: Math.PI / 2,
     });
     vi.advanceTimersByTime(100);
     controller.publishMovement({

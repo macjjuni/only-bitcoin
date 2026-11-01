@@ -109,10 +109,16 @@ export const applyKeyboardYaw = (
   distance: orbit.distance,
 });
 
-/** 플레이어 위에 있는 카메라 주시점. */
+/**
+ * 플레이어 위에 있는 카메라 주시점.
+ *
+ * 점프 높이를 그대로 따라간다. 고정해 두면 뛰었을 때 캐릭터가 화면 위로
+ * 빠져나간다. 카메라 위치는 `dampVector` 가 이미 부드럽게 따라가므로 여기서
+ * 따로 감쇠하지 않는다.
+ */
 export const resolveCameraFocus = (player: PlayerTransform): Vector3Like => ({
   x: player.x,
-  y: SPACE_CAMERA_FOCUS_HEIGHT,
+  y: SPACE_CAMERA_FOCUS_HEIGHT + player.y,
   z: player.z,
 });
 

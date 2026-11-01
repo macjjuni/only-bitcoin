@@ -48,6 +48,7 @@ interface SpaceSessionControllerOptions {
 
 interface MovementFrame {
   x: number;
+  y: number;
   z: number;
   yaw: number;
   isRunning: boolean;
@@ -86,6 +87,7 @@ const hasSameMovement = (first: MovementFrame | null, second: MovementFrame): bo
   return (
     first !== null &&
     first.x === second.x &&
+    first.y === second.y &&
     first.z === second.z &&
     first.yaw === second.yaw &&
     first.isRunning === second.isRunning
@@ -99,6 +101,8 @@ const quantizeMovement = (state: MovementFrame): MovementFrame => {
 
   return {
     x: Math.round(state.x * 100) / 100,
+    // 스냅샷이 1 cm 1바이트로 담으므로 같은 정밀도로 접는다.
+    y: Math.round(state.y * 100) / 100,
     z: Math.round(state.z * 100) / 100,
     yaw: (yawStep / yawSteps) * fullTurn,
     isRunning: state.isRunning,
@@ -218,7 +222,7 @@ export class SpaceSessionController {
   }
 
   publishMovement = (state: LocalPlayerState): void => {
-    if (![state.x, state.z, state.yaw].every(Number.isFinite)) {
+    if (![state.x, state.y, state.z, state.yaw].every(Number.isFinite)) {
       return;
     }
 

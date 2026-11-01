@@ -53,5 +53,5 @@ export const createSpawnPoint = (clientKey: string): PlayerTransform => {
   const x = clamp(centerX + Math.cos(angle) * radius, SPACE_BOUNDS.minX, SPACE_BOUNDS.maxX);
   const z = clamp(centerZ + Math.sin(angle) * radius, SPACE_BOUNDS.minZ, SPACE_BOUNDS.maxZ);
 
-  return { x, z, yaw: toBillboardFacingYaw(x, z) };
+  return { x, y: 0, z, yaw: toBillboardFacingYaw(x, z) };
 };

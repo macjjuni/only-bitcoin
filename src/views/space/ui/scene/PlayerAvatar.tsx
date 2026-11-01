@@ -61,7 +61,8 @@ function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: Player
   /** 걸은 거리만큼 사이클을 돌린다. 시간 기준으로 돌리면 발이 미끄러진다. */
   const advanceWalkCycle = (deltaSeconds: number): void => {
     const state = playerStateRef.current;
-    const speed = state ? Math.hypot(state.velocityX, state.velocityZ) : 0;
+    // 공중에서는 다리를 멈춘다. 뛰는 중에 걷는 모션이 돌면 허우적대 보인다.
+    const speed = state && state.y <= 0 ? Math.hypot(state.velocityX, state.velocityZ) : 0;
 
     const phase = body.phase.getX(0) + (speed * deltaSeconds) / CREW_WALK.metersPerCycle;
     const step = deltaSeconds / CREW_WALK.blendSeconds;

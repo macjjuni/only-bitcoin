@@ -13,6 +13,15 @@ export const SPACE_MOVEMENT = {
   maxYawRate: 12,
   /** 이 속력 미만에서는 캐릭터 방향을 돌리지 않는다. 정지 직전 떨림 방지. */
   yawUpdateSpeedThreshold: 0.1,
+  /**
+   * 점프 초기 속도(m/s)와 중력(m/s²).
+   *
+   * 정점 `v²/2g` = 1.13 m, 체공 `2v/g` = 0.75 초다. 키 1.81 m 기준으로 무릎보다
+   * 조금 높이 뜨는 정도이며, 서버가 검증하는 `SPACE_MAX_JUMP_HEIGHT`(2.5 m)
+   * 안에 든다.
+   */
+  jumpSpeed: 6,
+  gravity: 16,
 } as const;
 
 export interface MovementInput {
@@ -21,6 +30,13 @@ export interface MovementInput {
   /** 화면 기준 좌우. 양수가 오른쪽. -1 ~ 1 */
   strafe: number;
   isRunning: boolean;
+  /**
+   * 점프 키를 누르고 있는지.
+   *
+   * 누르고 있으면 착지할 때마다 다시 뛴다. 누름 순간만 잡으려면 입력 계층에
+   * 상태를 더 둬야 하는데, 복셀 게임에서는 연속 점프가 흔한 조작이다.
+   */
+  isJumping: boolean;
 }
 
 export interface FixedStepPlan {
@@ -33,6 +49,7 @@ export const createEmptyMovementInput = (): MovementInput => ({
   forward: 0,
   strafe: 0,
   isRunning: false,
+  isJumping: false,
 });
 
 // region [Privates]
@@ -143,6 +160,31 @@ export const planFixedSteps = (accumulatedSeconds: number): FixedStepPlan => {
   return { stepCount: maxCatchUpSteps, remainder: 0 };
 };
 
+/**
+ * 수직 속도와 높이를 적분한다.
+ *
+ * 바닥이 평평해 지면 판정은 `y <= 0` 하나면 된다. 착지하면 높이와 수직 속도를
+ * 모두 0 으로 되돌려 바닥 아래로 새지 않게 한다.
+ */
+const stepJump = (
+  y: number,
+  velocityY: number,
+  isJumping: boolean,
+  deltaSeconds: number,
+): { y: number; velocityY: number } => {
+  const isGrounded = y <= 0 && velocityY <= 0;
+
+  if (isGrounded && !isJumping) {
+    return { y: 0, velocityY: 0 };
+  }
+
+  const launched = isGrounded ? SPACE_MOVEMENT.jumpSpeed : velocityY;
+  const nextVelocityY = launched - SPACE_MOVEMENT.gravity * deltaSeconds;
+  const nextY = y + nextVelocityY * deltaSeconds;
+
+  return nextY <= 0 ? { y: 0, velocityY: 0 } : { y: nextY, velocityY: nextVelocityY };
+};
+
 /** 고정 타임스텝 한 번 분량의 이동을 적분한다. */
 export const stepMovement = (
   state: LocalPlayerState,
@@ -168,13 +210,16 @@ export const stepMovement = (
   // 경계에 막힌 축의 속도를 지운다. 남겨두면 벽에 붙어 계속 밀어붙인다.
   const velocityX = x === rawX ? velocity.x : 0;
   const velocityZ = z === rawZ ? velocity.z : 0;
+  const jump = stepJump(state.y, state.velocityY, input.isJumping, deltaSeconds);
 
   return {
     x,
     z,
+    y: jump.y,
     yaw: approachYaw(state.yaw, velocityX, velocityZ, deltaSeconds),
     velocityX,
     velocityZ,
+    velocityY: jump.velocityY,
     isRunning: input.isRunning && direction.magnitude > 0,
   };
 };

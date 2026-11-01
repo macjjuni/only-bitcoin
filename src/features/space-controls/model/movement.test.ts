@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { LocalPlayerState } from "@/entities/space";
-import { createLocalPlayerState, SPACE_BOUNDS } from "@/entities/space";
+import { createLocalPlayerState, SPACE_BOUNDS, SPACE_MAX_JUMP_HEIGHT } from "@/entities/space";
 import {
   createEmptyMovementInput,
   type MovementInput,
@@ -10,7 +10,7 @@ import {
 } from "@/features/space-controls/model/movement";
 
 const createState = (overrides: Partial<LocalPlayerState> = {}): LocalPlayerState => ({
-  ...createLocalPlayerState({ x: 0, z: 0, yaw: 0 }),
+  ...createLocalPlayerState({ x: 0, z: 0, y: 0, yaw: 0 }),
   ...overrides,
 });
 
@@ -162,5 +162,64 @@ describe("planFixedSteps", () => {
 
   it("음수 누적은 스텝을 만들지 않는다", () => {
     expect(planFixedSteps(-1).stepCount).toBe(0);
+  });
+});
+
+describe("점프", () => {
+  /** 입력을 바꿔 가며 적분하고 매 스텝의 높이를 모은다. */
+  const runJump = (stepCount: number, isJumpingAt: (step: number) => boolean): number[] => {
+    let current = createState();
+    const heights: number[] = [];
+
+    for (let index = 0; index < stepCount; index += 1) {
+      current = stepMovement(current, createInput({ isJumping: isJumpingAt(index) }), 0);
+      heights.push(current.y);
+    }
+
+    return heights;
+  };
+
+  it("서 있을 때는 바닥에 붙어 있다", () => {
+    const heights = runJump(60, () => false);
+
+    expect(Math.max(...heights)).toBe(0);
+  });
+
+  it("뛰면 올라갔다 정확히 바닥으로 돌아온다", () => {
+    // 체공 2v/g = 0.75 초라 60 스텝(1초) 안에 착지가 끝난다.
+    const heights = runJump(60, (step) => step === 0);
+    const apex = Math.max(...heights);
+
+    expect(apex).toBeGreaterThan(0.9);
+    // 서버가 검증하는 상한을 넘으면 이동이 거절된다.
+    expect(apex).toBeLessThan(SPACE_MAX_JUMP_HEIGHT);
+    expect(heights.at(-1)).toBe(0);
+  });
+
+  it("공중에서 다시 누르거나 떼도 궤적이 바뀌지 않는다", () => {
+    // 중력만 받는 포물선이어야 한다. 공중 조작을 허용하면 높이가 튄다.
+    const held = runJump(45, () => true);
+    const tapped = runJump(45, (step) => step === 0);
+
+    expect(held.slice(0, 40)).toEqual(tapped.slice(0, 40));
+  });
+
+  it("누르고 있으면 착지할 때마다 다시 뛴다", () => {
+    const heights = runJump(120, () => true);
+    const landings = heights.filter((height, index) => height === 0 && heights[index - 1] > 0);
+
+    expect(landings.length).toBeGreaterThanOrEqual(1);
+    expect(Math.max(...heights.slice(60))).toBeGreaterThan(0.9);
+  });
+
+  it("점프 중에도 수평 이동은 그대로 적분한다", () => {
+    let current = createState();
+
+    for (let index = 0; index < 20; index += 1) {
+      current = stepMovement(current, createInput({ forward: 1, isJumping: index === 0 }), 0);
+    }
+
+    expect(current.y).toBeGreaterThan(0);
+    expect(current.z).toBeLessThan(0);
   });
 });

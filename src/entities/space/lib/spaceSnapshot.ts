@@ -3,10 +3,12 @@ import {
   SPACE_PROTOCOL_VERSION,
   type SpaceMotionSnapshot,
 } from "../model/spaceProtocol";
-import { SPACE_MAX_OCCUPANTS } from "../model/spaceWorld";
+import { SPACE_MAX_JUMP_HEIGHT, SPACE_MAX_OCCUPANTS } from "../model/spaceWorld";
 
 const HEADER_BYTES = 8;
-const PLAYER_BYTES = 7;
+const PLAYER_BYTES = 8;
+/** 점프 높이는 1 cm 정밀도의 1바이트로 담는다. 바닥이 평평해 범위가 좁다. */
+const HEIGHT_SCALE = 100;
 const SNAPSHOT_KIND = 1;
 const RUNNING_FLAG = 1;
 const FULL_TURN = Math.PI * 2;
@@ -52,7 +54,8 @@ export const encodeSpaceSnapshot = (snapshot: SpaceMotionSnapshot): ArrayBuffer 
     view.setInt16(offset + 1, Math.round(player.x * 100), true);
     view.setInt16(offset + 3, Math.round(player.z * 100), true);
     view.setUint8(offset + 5, encodeYaw(player.yaw));
-    view.setUint8(offset + 6, player.isRunning ? RUNNING_FLAG : 0);
+    view.setUint8(offset + 6, Math.round(player.y * HEIGHT_SCALE));
+    view.setUint8(offset + 7, player.isRunning ? RUNNING_FLAG : 0);
   });
 
   return buffer;
@@ -82,9 +85,14 @@ export const decodeSpaceSnapshot = (buffer: ArrayBuffer): SpaceMotionSnapshot | 
   for (let playerIndex = 0; playerIndex < count; playerIndex += 1) {
     const offset = HEADER_BYTES + playerIndex * PLAYER_BYTES;
     const seat = view.getUint8(offset);
-    const flags = view.getUint8(offset + 6);
+    const flags = view.getUint8(offset + 7);
 
-    if (seat >= SPACE_MAX_OCCUPANTS || occupiedSeats.has(seat) || (flags & ~RUNNING_FLAG) !== 0) {
+    if (
+      seat >= SPACE_MAX_OCCUPANTS ||
+      occupiedSeats.has(seat) ||
+      (flags & ~RUNNING_FLAG) !== 0 ||
+      view.getUint8(offset + 6) > SPACE_MAX_JUMP_HEIGHT * HEIGHT_SCALE
+    ) {
       return null;
     }
 
@@ -94,6 +102,7 @@ export const decodeSpaceSnapshot = (buffer: ArrayBuffer): SpaceMotionSnapshot | 
       x: view.getInt16(offset + 1, true) / 100,
       z: view.getInt16(offset + 3, true) / 100,
       yaw: (view.getUint8(offset + 5) / YAW_STEPS) * FULL_TURN,
+      y: view.getUint8(offset + 6) / HEIGHT_SCALE,
       isRunning: (flags & RUNNING_FLAG) !== 0,
     });
   }

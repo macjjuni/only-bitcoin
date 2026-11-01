@@ -71,7 +71,7 @@ function ChatBubbles({ messages, players, self, viewerTransformRef }: ChatBubble
       if (group) {
         group.visible = Boolean(player);
         if (player) {
-          group.position.set(player.x, SPACE_AVATAR.headCenterY + 1.25, player.z);
+          group.position.set(player.x, player.y + SPACE_AVATAR.headCenterY + 1.25, player.z);
         }
       }
     }
@@ -100,7 +100,7 @@ function ChatBubbles({ messages, players, self, viewerTransformRef }: ChatBubble
   return (
     <>
       {activeBubbles.map((bubble) => (
-        <group key={bubble.message.id} position={[bubble.x, SPACE_AVATAR.headCenterY + 1.25, bubble.z]} ref={(group) => {
+        <group key={bubble.message.id} position={[bubble.x, bubble.y + SPACE_AVATAR.headCenterY + 1.25, bubble.z]} ref={(group) => {
           if (group) {
             groupRefs.current.set(bubble.message.id, group);
           } else {

@@ -68,7 +68,7 @@ function Nameplates({ players, viewerTransformRef }: NameplatesProps): ReactNode
         return;
       }
 
-      slotGroup.position.set(player.x, NAMEPLATE_LIFT_Y, player.z);
+      slotGroup.position.set(player.x, player.y + NAMEPLATE_LIFT_Y, player.z);
     });
   };
   // endregion

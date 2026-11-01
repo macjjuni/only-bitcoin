@@ -7,6 +7,7 @@ const STRAFE_RIGHT_CODES = ["KeyD", "ArrowRight"] as const;
 const RUN_CODES = ["ShiftLeft", "ShiftRight"] as const;
 const YAW_LEFT_CODES = ["KeyQ"] as const;
 const YAW_RIGHT_CODES = ["KeyE"] as const;
+const JUMP_CODES = ["Space"] as const;
 
 /** 브라우저 기본 스크롤을 막아야 하는 키. */
 const SCROLL_BLOCKING_CODES = new Set<string>([
@@ -25,6 +26,7 @@ const ALL_HANDLED_CODES = new Set<string>([
   ...RUN_CODES,
   ...YAW_LEFT_CODES,
   ...YAW_RIGHT_CODES,
+  ...JUMP_CODES,
 ]);
 
 /**
@@ -83,6 +85,7 @@ export const attachSpaceKeyboardEvents = (
     inputSource.keyboard.strafe =
       Number(hasAnyPressed(STRAFE_RIGHT_CODES)) - Number(hasAnyPressed(STRAFE_LEFT_CODES));
     inputSource.keyboard.isRunning = hasAnyPressed(RUN_CODES);
+    inputSource.keyboard.isJumping = hasAnyPressed(JUMP_CODES);
     inputSource.yawDirection =
       Number(hasAnyPressed(YAW_LEFT_CODES)) - Number(hasAnyPressed(YAW_RIGHT_CODES));
   };

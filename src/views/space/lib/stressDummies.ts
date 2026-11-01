@@ -51,6 +51,7 @@ export const createStressDummies = (count: number): StressDummy[] => {
       initialAngle: spiralAngle,
       x: orbitCenterX,
       z: orbitCenterZ,
+      y: 0,
       yaw: 0,
     };
   });

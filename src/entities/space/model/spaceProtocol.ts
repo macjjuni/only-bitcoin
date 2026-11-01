@@ -1,5 +1,5 @@
 import type { PlayerTransform, RemotePlayer } from "./playerState";
-import { SPACE_MAX_OCCUPANTS } from "./spaceWorld";
+import { SPACE_MAX_JUMP_HEIGHT, SPACE_MAX_OCCUPANTS } from "./spaceWorld";
 
 export const SPACE_PROTOCOL_VERSION = 1;
 export const SPACE_NETWORK_INTERVAL_MS = 100;
@@ -31,7 +31,7 @@ export interface SpaceMotionSnapshot {
 
 export type SpaceClientFrame =
   | { v: 1; t: "join"; clientKey: string; nickname: string }
-  | { v: 1; t: "move"; x: number; z: number; yaw: number; isRunning: boolean }
+  | { v: 1; t: "move"; x: number; y: number; z: number; yaw: number; isRunning: boolean }
   | { v: 1; t: "say"; rid: string; body: string };
 
 export type SpaceServerFrame =
@@ -79,6 +79,10 @@ const isTransform = (value: Record<string, unknown>): boolean => {
     isFiniteNumber(value.z) &&
     value.z >= -327.68 &&
     value.z <= 327.67 &&
+    // 바닥은 평평하다. 점프로 닿을 수 있는 높이만 허용한다.
+    isFiniteNumber(value.y) &&
+    value.y >= 0 &&
+    value.y <= SPACE_MAX_JUMP_HEIGHT &&
     isFiniteNumber(value.yaw)
   );
 };

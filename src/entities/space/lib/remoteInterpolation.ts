@@ -62,6 +62,7 @@ export const createSpaceInterpolator = (): SpaceInterpolator => {
 
   const applyMotion = (player: SpacePeer, motion: SpaceMotion): void => {
     player.x = motion.x;
+    player.y = motion.y;
     player.z = motion.z;
     player.yaw = motion.yaw;
     player.isRunning = motion.isRunning;
@@ -96,6 +97,8 @@ export const createSpaceInterpolator = (): SpaceInterpolator => {
     const next = history[nextIndex];
     const progress = (targetTime - previous.receivedAt) / (next.receivedAt - previous.receivedAt);
     player.x = previous.motion.x + (next.motion.x - previous.motion.x) * progress;
+    // 점프 궤적도 같은 방식으로 섞는다. 100 ms 간격이라 정점이 조금 깎인다.
+    player.y = previous.motion.y + (next.motion.y - previous.motion.y) * progress;
     player.z = previous.motion.z + (next.motion.z - previous.motion.z) * progress;
     player.yaw = interpolateYaw(previous.motion.yaw, next.motion.yaw, progress);
     player.isRunning = previous.motion.isRunning;

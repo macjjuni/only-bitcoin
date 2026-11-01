@@ -20,6 +20,7 @@ const createMessage = (
 const createPlayer = (seat: number, x = seat): RemotePlayer => ({
   seat,
   x,
+  y: 0,
   z: 0,
   yaw: 0,
   nickname: `사토시${seat}`,

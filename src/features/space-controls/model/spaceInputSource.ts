@@ -51,6 +51,7 @@ export const resolveMergedMovementInput = (inputSource: SpaceInputSource): Movem
   forward: clamp(inputSource.keyboard.forward + inputSource.joystick.forward, -1, 1),
   strafe: clamp(inputSource.keyboard.strafe + inputSource.joystick.strafe, -1, 1),
   isRunning: inputSource.keyboard.isRunning || inputSource.joystick.isRunning,
+  isJumping: inputSource.keyboard.isJumping || inputSource.joystick.isJumping,
 });
 
 /** 누적된 드래그량을 읽고 비운다. 같은 드래그가 두 프레임에 걸쳐 적용되는 것을 막는다. */

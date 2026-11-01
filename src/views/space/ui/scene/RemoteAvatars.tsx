@@ -98,7 +98,9 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
       const phase = phases.getX(instanceIndex) + moved / CREW_WALK.metersPerCycle;
       phases.setX(instanceIndex, phase - Math.floor(phase));
 
-      const isMoving = deltaSeconds > 0 && moved / deltaSeconds > MOVING_SPEED_THRESHOLD;
+      // 공중에서는 다리를 멈춘다. 뛰는 중에 걷는 모션이 돌면 허우적대 보인다.
+      const isMoving =
+        player.y <= 0 && deltaSeconds > 0 && moved / deltaSeconds > MOVING_SPEED_THRESHOLD;
       const step = deltaSeconds / CREW_WALK.blendSeconds;
       const blend = blends.getX(instanceIndex) + (isMoving ? step : -step);
       blends.setX(instanceIndex, Math.min(1, Math.max(0, blend)));
@@ -115,9 +117,9 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
 
   const applyInstanceTransforms = (): void => {
     renderedPlayers.forEach((player, instanceIndex) => {
-      // 모델은 발바닥이 원점이라 바닥 좌표를 그대로 쓴다.
+      // 모델은 발바닥이 원점이라 좌표를 그대로 쓴다. y 는 점프 중에만 0 이 아니다.
       transformProxy.rotation.set(0, player.yaw, 0);
-      transformProxy.position.set(player.x, 0, player.z);
+      transformProxy.position.set(player.x, player.y, player.z);
       transformProxy.updateMatrix();
       bodyMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
       accentMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);

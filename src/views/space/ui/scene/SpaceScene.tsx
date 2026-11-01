@@ -115,7 +115,7 @@ function SpaceScene({
     playerStateRef.current = createLocalPlayerState(peer);
     accumulatedSecondsRef.current = 0;
     smoothedCameraRef.current = resolveCameraPosition(peer, cameraOrbitRef.current);
-    playerGroupRef.current?.position.set(peer.x, 0, peer.z);
+    playerGroupRef.current?.position.set(peer.x, peer.y, peer.z);
     playerGroupRef.current?.rotation.set(0, peer.yaw, 0);
   }, []);
 
@@ -159,7 +159,7 @@ function SpaceScene({
       return;
     }
 
-    playerGroup.position.set(playerState.x, 0, playerState.z);
+    playerGroup.position.set(playerState.x, playerState.y, playerState.z);
     playerGroup.rotation.set(0, playerState.yaw, 0);
   };
   // endregion

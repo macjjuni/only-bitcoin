@@ -9,14 +9,14 @@ const createPeer = (seat = 0): SpacePeer => ({
   colorIndex: seat % 12,
   x: 0,
   z: 0,
-  yaw: 0,
+  y: 0, yaw: 0,
   isRunning: false,
 });
 
 describe("parseSpaceClientFrame", () => {
   it.each([
     { v: 1, t: "join", clientKey, nickname: "비트코인" },
-    { v: 1, t: "move", x: -26.12, z: 16, yaw: -Math.PI, isRunning: true },
+    { v: 1, t: "move", x: -26.12, z: 16, y: 0, yaw: -Math.PI, isRunning: true },
     { v: 1, t: "say", rid: requestId, body: "안녕하세요" },
   ])("지원하는 $t 프레임을 검증한다", (frame) => {
     expect(parseSpaceClientFrame(JSON.stringify(frame))).toEqual(frame);
@@ -29,8 +29,8 @@ describe("parseSpaceClientFrame", () => {
     '{"v":2,"t":"move","x":0,"z":0,"yaw":0,"isRunning":false}',
     '{"v":1,"t":"move","x":1e309,"z":0,"yaw":0,"isRunning":false}',
     '{"v":1,"t":"move","x":0,"z":0,"yaw":null,"isRunning":false}',
-    JSON.stringify({ v: 1, t: "move", x: 327.68, z: 0, yaw: 0, isRunning: false }),
-    JSON.stringify({ v: 1, t: "move", x: 0, z: 0, yaw: 0, isRunning: 1 }),
+    JSON.stringify({ v: 1, t: "move", x: 327.68, z: 0, y: 0, yaw: 0, isRunning: false }),
+    JSON.stringify({ v: 1, t: "move", x: 0, z: 0, y: 0, yaw: 0, isRunning: 1 }),
     JSON.stringify({ v: 1, t: "say", rid: "invalid", body: "안녕하세요" }),
     JSON.stringify({ v: 1, t: "say", rid: requestId, body: "   " }),
     JSON.stringify({ v: 1, t: "join", clientKey: "short", nickname: "익명" }),

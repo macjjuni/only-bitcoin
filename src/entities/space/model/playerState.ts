@@ -1,8 +1,14 @@
-/** 플레이어 상태 타입. 위치는 2D(x, z) 로만 다룬다. 월드에 높이 변화가 없다. */
+/**
+ * 플레이어 상태 타입.
+ *
+ * 바닥은 평평하므로 `y` 는 점프로만 바뀐다. 서 있을 때는 항상 0 이다.
+ */
 
 export interface PlayerTransform {
   x: number;
   z: number;
+  /** 발바닥 높이(m). 바닥은 0 이고 점프 중에만 양수다. */
+  y: number;
   /** Y축 회전(라디안). */
   yaw: number;
 }
@@ -10,6 +16,7 @@ export interface PlayerTransform {
 export interface LocalPlayerState extends PlayerTransform {
   velocityX: number;
   velocityZ: number;
+  velocityY: number;
   isRunning: boolean;
 }
 
@@ -24,6 +31,7 @@ export const createLocalPlayerState = (spawn: PlayerTransform): LocalPlayerState
   ...spawn,
   velocityX: 0,
   velocityZ: 0,
+  velocityY: 0,
   isRunning: false,
 });
 

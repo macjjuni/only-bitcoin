@@ -8,13 +8,14 @@ const createPeer = (seat = 0, overrides: Partial<SpacePeer> = {}): SpacePeer => 
   colorIndex: 0,
   x: 0,
   z: 0,
-  yaw: 0,
+  y: 0, yaw: 0,
   isRunning: false,
   ...overrides,
 });
-const createMotion = (seat: number, x: number, yaw = 0): SpaceMotion => ({
+const createMotion = (seat: number, x: number, yaw = 0, y = 0): SpaceMotion => ({
   seat,
   x,
+  y,
   z: 0,
   yaw,
   isRunning: true,

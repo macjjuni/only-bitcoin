@@ -165,6 +165,7 @@ describe("SpaceRoom", () => {
       v: 1,
       t: "move",
       x: original.x + 0.5,
+      y: 0,
       z: original.z,
       yaw: 0,
       isRunning: true,

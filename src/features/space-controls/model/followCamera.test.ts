@@ -17,7 +17,7 @@ import {
   SPACE_CAMERA_FOCUS_HEIGHT,
 } from "@/features/space-controls/model/followCamera";
 
-const ORIGIN_PLAYER = { x: 0, z: 0, yaw: 0 };
+const ORIGIN_PLAYER = { x: 0, z: 0, y: 0, yaw: 0 };
 
 describe("clampCameraPitch", () => {
   it("피치를 허용 범위로 자른다", () => {
@@ -73,7 +73,7 @@ describe("applyKeyboardYaw", () => {
   it("왼쪽으로 돌면 카메라가 플레이어 오른쪽(+X)으로 돈다", () => {
     // 시야가 왼쪽을 보려면 카메라는 반대편으로 가야 한다.
     const orbit = applyKeyboardYaw({ yaw: 0, pitch: 0, distance: 11 }, 1, 0.5);
-    const position = resolveCameraPosition({ x: 0, z: 0, yaw: 0 }, orbit);
+    const position = resolveCameraPosition({ x: 0, z: 0, y: 0, yaw: 0 }, orbit);
 
     expect(position.x).toBeGreaterThan(0);
   });
@@ -151,7 +151,7 @@ describe("resolveCameraPosition", () => {
   });
 
   it("주시점은 플레이어를 따라가고 높이는 고정이다", () => {
-    const focus = resolveCameraFocus({ x: 4, z: -9, yaw: 2 });
+    const focus = resolveCameraFocus({ x: 4, z: -9, y: 0, yaw: 2 });
 
     expect(focus).toEqual({ x: 4, y: SPACE_CAMERA_FOCUS_HEIGHT, z: -9 });
   });
@@ -306,7 +306,7 @@ describe("clampCameraPosition", () => {
   it("최대 줌에서 뒷벽을 등져도 카메라가 벽 뒤로 빠지지 않는다", () => {
     // 플레이어가 경계(z=-16)에서 전광판을 등지고 선 상황
     const position = resolveCameraPosition(
-      { x: 0, z: -16, yaw: 0 },
+      { x: 0, z: -16, y: 0, yaw: 0 },
       { yaw: Math.PI, pitch: SPACE_CAMERA.defaultPitch, distance: SPACE_CAMERA.maxDistance },
     );
 
