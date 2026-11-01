@@ -13,6 +13,7 @@ import {
 } from "react";
 import {
   SPACE_CHAT_COOLDOWN_MS,
+  SPACE_CHAT_MAX_GRAPHEMES,
   type SpaceChatMessage,
   type SpacePresence,
 } from "@/entities/space";
@@ -135,7 +136,7 @@ function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessa
   const onSubmitMessage = useCallback(async (event: FormEvent<HTMLFormElement>): Promise<void> => {
     event.preventDefault();
     const submittedDraft = draft.trim();
-    if (!submittedDraft || countGraphemes(submittedDraft) > 300 || presence.status !== "online" || isSubmittingRef.current || isMessagePending || cooldownEndsAt > Date.now()) {
+    if (!submittedDraft || countGraphemes(submittedDraft) > SPACE_CHAT_MAX_GRAPHEMES || presence.status !== "online" || isSubmittingRef.current || isMessagePending || cooldownEndsAt > Date.now()) {
       return;
     }
     isSubmittingRef.current = true;
@@ -168,7 +169,7 @@ function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessa
   // region [Templates]
   const characterCount = countGraphemes(draft);
   const isOnline = presence.status === "online";
-  const canSend = isOnline && !isMessagePending && remainingSeconds === 0 && characterCount > 0 && characterCount <= 300;
+  const canSend = isOnline && !isMessagePending && remainingSeconds === 0 && characterCount > 0 && characterCount <= SPACE_CHAT_MAX_GRAPHEMES;
   /**
    * 하단 시트는 화면 아래 모서리에 붙여 입력칸을 엄지 범위에 둔다.
    *
@@ -236,7 +237,7 @@ function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessa
         </form>
         <div className="mt-2 flex justify-between text-[10px] text-white/40">
           <span>대화는 이 공간에서만 보여요</span>
-          <span className={characterCount > 300 ? "text-amber-200" : undefined}>{characterCount}/300</span>
+          <span className={characterCount > SPACE_CHAT_MAX_GRAPHEMES ? "text-amber-200" : undefined}>{characterCount}/{SPACE_CHAT_MAX_GRAPHEMES}</span>
         </div>
       </div>
     </section>

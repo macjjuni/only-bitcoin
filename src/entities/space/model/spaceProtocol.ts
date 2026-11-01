@@ -4,6 +4,7 @@ import { SPACE_MAX_JUMP_HEIGHT, SPACE_MAX_OCCUPANTS } from "./spaceWorld";
 export const SPACE_PROTOCOL_VERSION = 1;
 export const SPACE_NETWORK_INTERVAL_MS = 100;
 export const SPACE_CHAT_COOLDOWN_MS = 3_000;
+export const SPACE_CHAT_MAX_GRAPHEMES = 100;
 /** 닉네임 변경 간격. 자주 바꾸면 다른 사람이 누가 누군지 못 따라간다. */
 export const SPACE_NICKNAME_COOLDOWN_MS = 10_000;
 
