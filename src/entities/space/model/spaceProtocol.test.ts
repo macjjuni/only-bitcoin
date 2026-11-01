@@ -9,7 +9,8 @@ const createPeer = (seat = 0): SpacePeer => ({
   colorIndex: seat % 12,
   x: 0,
   z: 0,
-  y: 0, yaw: 0,
+  y: 0,
+  yaw: 0,
   isRunning: false,
 });
 

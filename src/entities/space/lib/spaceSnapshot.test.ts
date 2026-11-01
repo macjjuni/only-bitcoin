@@ -6,7 +6,8 @@ const createMotion = (overrides: Partial<SpaceMotion> = {}): SpaceMotion => ({
   seat: 0,
   x: 0,
   z: 0,
-  y: 0, yaw: 0,
+  y: 0,
+  yaw: 0,
   isRunning: false,
   ...overrides,
 });
@@ -15,13 +16,17 @@ describe("공간 바이너리 스냅샷", () => {
   it("8바이트 LE 헤더와 좌석당 8바이트를 기록하고 cm 단위로 반올림한다", () => {
     const buffer = encodeSpaceSnapshot({
       timestamp: 0x12345678,
-      players: [createMotion({ seat: 49, x: -12.345, z: 26.126, y: 0, yaw: Math.PI, isRunning: true })],
+      players: [
+        createMotion({ seat: 49, x: -12.345, z: 26.126, y: 0, yaw: Math.PI, isRunning: true }),
+      ],
     });
     expect(buffer.byteLength).toBe(16);
     expect([...new Uint8Array(buffer).slice(0, 8)]).toEqual([1, 1, 1, 0, 0x78, 0x56, 0x34, 0x12]);
     expect(decodeSpaceSnapshot(buffer)).toEqual({
       timestamp: 0x12345678,
-      players: [createMotion({ seat: 49, x: -12.34, z: 26.13, y: 0, yaw: Math.PI, isRunning: true })],
+      players: [
+        createMotion({ seat: 49, x: -12.34, z: 26.13, y: 0, yaw: Math.PI, isRunning: true }),
+      ],
     });
   });
 

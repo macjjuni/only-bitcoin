@@ -3,9 +3,9 @@ import { SPACE_BILLBOARD } from "@/entities/space";
 import {
   BILLBOARD_CHART_MARKER,
   BILLBOARD_COLORS,
-  BILLBOARD_ONLINE_MARKER,
   BILLBOARD_COLUMNS,
   BILLBOARD_MIN_FONT_SIZE_PX,
+  BILLBOARD_ONLINE_MARKER,
   BILLBOARD_PLACEHOLDER,
   BILLBOARD_TEXTURE,
   type BillboardChartEndpoint,
@@ -248,23 +248,24 @@ describe("resolveBillboardOnlineStatus", () => {
     { isKrwConnected: true, isUsdConnected: false, expected: true },
     { isKrwConnected: false, isUsdConnected: true, expected: true },
     { isKrwConnected: false, isUsdConnected: false, expected: false },
-  ])(
-    "업비트 $isKrwConnected · 바이낸스 $isUsdConnected 면 $expected",
-    ({ isKrwConnected, isUsdConnected, expected }) => {
-      // 한쪽만 살아도 온라인이다. 숫자가 바뀌는데 오프라인이라고 적으면 더 혼란스럽다.
-      expect(
-        resolveBillboardOnlineStatus({
-          krw: 0,
-          usd: 0,
-          krwChange24h: "0",
-          usdChange24h: "0",
-          isKrwConnected,
-          isUsdConnected,
-          usdSeries: [],
-        }),
-      ).toBe(expected);
-    },
-  );
+  ])("업비트 $isKrwConnected · 바이낸스 $isUsdConnected 면 $expected", ({
+    isKrwConnected,
+    isUsdConnected,
+    expected,
+  }) => {
+    // 한쪽만 살아도 온라인이다. 숫자가 바뀌는데 오프라인이라고 적으면 더 혼란스럽다.
+    expect(
+      resolveBillboardOnlineStatus({
+        krw: 0,
+        usd: 0,
+        krwChange24h: "0",
+        usdChange24h: "0",
+        isKrwConnected,
+        isUsdConnected,
+        usdSeries: [],
+      }),
+    ).toBe(expected);
+  });
 });
 
 describe("우측 상단 접속 배지", () => {

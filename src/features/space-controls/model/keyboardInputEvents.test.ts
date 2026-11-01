@@ -63,7 +63,12 @@ describe("공간 키보드와 채팅 입력 격리", () => {
     expect(windowEvents.emitKey("keydown", "ArrowUp").defaultPrevented).toBe(true);
     windowEvents.emitKey("keydown", "KeyQ");
     windowEvents.emitKey("keydown", "ShiftLeft");
-    expect(inputSource.keyboard).toEqual({ forward: 1, strafe: 0, isRunning: true, isJumping: false });
+    expect(inputSource.keyboard).toEqual({
+      forward: 1,
+      strafe: 0,
+      isRunning: true,
+      isJumping: false,
+    });
     expect(inputSource.yawDirection).toBe(1);
     windowEvents.emitKey("keyup", "ArrowUp");
     expect(inputSource.keyboard.forward).toBe(0);
@@ -99,7 +104,12 @@ describe("공간 키보드와 채팅 입력 격리", () => {
     windowEvents.elementName = "button";
     windowEvents.emitKey("keydown", "KeyW");
     windowEvents.emitKey("keydown", "KeyD");
-    expect(inputSource.keyboard).toEqual({ forward: 1, strafe: 1, isRunning: false, isJumping: false });
+    expect(inputSource.keyboard).toEqual({
+      forward: 1,
+      strafe: 1,
+      isRunning: false,
+      isJumping: false,
+    });
     // 포커스된 버튼의 공백 활성화는 그대로 브라우저에 남긴다.
     expect(windowEvents.emitKey("keydown", "Space").defaultPrevented).toBe(false);
     // 방향키는 버튼을 활성화하지 않으므로 스크롤만 막는다.

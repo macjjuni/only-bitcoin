@@ -8,7 +8,8 @@ const createPeer = (seat = 0, overrides: Partial<SpacePeer> = {}): SpacePeer => 
   colorIndex: 0,
   x: 0,
   z: 0,
-  y: 0, yaw: 0,
+  y: 0,
+  yaw: 0,
   isRunning: false,
   ...overrides,
 });
