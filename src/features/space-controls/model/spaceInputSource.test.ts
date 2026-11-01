@@ -28,6 +28,21 @@ describe("resolveMergedMovementInput", () => {
     });
   });
 
+  it("점프 버튼이 쓰는 조이스틱 채널의 점프를 그대로 전달한다", () => {
+    const inputSource = createSpaceInputSource();
+    inputSource.joystick.isJumping = true;
+
+    expect(resolveMergedMovementInput(inputSource)).toMatchObject({ isJumping: true });
+  });
+
+  it("점프는 어느 한 채널만 눌려 있어도 유지된다", () => {
+    const inputSource = createSpaceInputSource();
+    inputSource.keyboard.isJumping = true;
+    inputSource.joystick.isJumping = false;
+
+    expect(resolveMergedMovementInput(inputSource)).toMatchObject({ isJumping: true });
+  });
+
   it("두 채널을 합친 뒤 축마다 -1 ~ 1 로 깎는다", () => {
     const inputSource = createSpaceInputSource();
     inputSource.keyboard.forward = 1;

@@ -45,4 +45,5 @@ export { default as useCoarsePointer } from "./model/useCoarsePointer";
 export { default as useKeyboardInput } from "./model/useKeyboardInput";
 export { default as usePointerDrag } from "./model/usePointerDrag";
 export { default as usePrefersReducedMotion } from "./model/usePrefersReducedMotion";
+export { default as JumpButton } from "./ui/JumpButton";
 export { default as VirtualJoystick } from "./ui/VirtualJoystick";

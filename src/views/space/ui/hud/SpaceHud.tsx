@@ -6,6 +6,7 @@ import { useTransitionRouter } from "next-view-transitions";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { saveChatNickname } from "@/features/chat-session";
 import {
+  JumpButton,
   type SpaceInputSource,
   shouldIgnoreSpaceHotkey,
   useCoarsePointer,
@@ -227,16 +228,17 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
   ) : null;
 
   /**
-   * 조이스틱은 손가락 기기에만 띄운다. 마우스 환경에는 WASD 가 있다.
+   * 조이스틱과 점프 버튼은 손가락 기기에만 띄운다. 마우스 환경에는 WASD·Space 가 있다.
    *
-   * 채팅이나 닉네임 입력 중에는 조이스틱을 내려 키보드와 조작이 겹치지 않게 한다.
+   * 채팅이나 닉네임 입력 중에는 둘 다 내려 키보드와 조작이 겹치지 않게 한다.
    * 언마운트 정리가 눌려 있던 입력까지 0 으로 비운다.
    */
-  const shouldRenderJoystick = isCoarsePointer && !isChatOpen && !isNicknameEditorOpen;
-  const JoystickTemplate =
-    shouldRenderJoystick ? (
+  const shouldRenderTouchControls = isCoarsePointer && !isChatOpen && !isNicknameEditorOpen;
+  const TouchControlsTemplate =
+    shouldRenderTouchControls ? (
       <div className="pointer-events-auto">
         <VirtualJoystick inputSource={inputSource} />
+        <JumpButton inputSource={inputSource} />
       </div>
     ) : null;
   // endregion
@@ -297,7 +299,7 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
         {GuidePanelTemplate}
       </div>
 
-      {JoystickTemplate}
+      {TouchControlsTemplate}
 
       {isChatOpen && (
         <SpaceChatPanel
