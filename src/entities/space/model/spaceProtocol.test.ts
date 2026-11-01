@@ -7,6 +7,7 @@ const createPeer = (seat = 0): SpacePeer => ({
   seat,
   nickname: "익명",
   colorIndex: seat % 12,
+  modelIndex: 0,
   x: 0,
   z: 0,
   y: 0,
@@ -16,7 +17,7 @@ const createPeer = (seat = 0): SpacePeer => ({
 
 describe("parseSpaceClientFrame", () => {
   it.each([
-    { v: 1, t: "join", clientKey, nickname: "비트코인" },
+    { v: 1, t: "join", clientKey, nickname: "비트코인", modelIndex: 1 },
     { v: 1, t: "move", x: -26.12, z: 16, y: 0, yaw: -Math.PI, isRunning: true },
     { v: 1, t: "say", rid: requestId, body: "안녕하세요" },
   ])("지원하는 $t 프레임을 검증한다", (frame) => {
@@ -127,5 +128,52 @@ describe("parseSpaceServerFrame", () => {
     { v: 2, t: "full" },
   ])("좌석 중복·상한·잘못된 서버 payload를 거절한다", (frame) => {
     expect(parseSpaceServerFrame(JSON.stringify(frame))).toBeNull();
+  });
+});
+
+describe("모델 선택 전 버전과의 호환", () => {
+  it("modelIndex 없는 join 을 받아들인다", () => {
+    // 프런트가 먼저 배포되기 전의 클라이언트는 이 값을 보내지 않는다.
+    const frame = { v: 1, t: "join", clientKey, nickname: "비트코인" };
+
+    expect(parseSpaceClientFrame(JSON.stringify(frame))).toEqual(frame);
+  });
+
+  it("modelIndex 없는 welcome 의 peer 에 기본 모델을 채운다", () => {
+    // Worker 가 먼저 배포되기 전의 서버는 이 값을 보내지 않는다. 거절하면
+    // 배포 창 동안 접속이 전부 막힌다.
+    const { modelIndex: _self, ...selfWithoutModel } = createPeer(0);
+    const { modelIndex: _other, ...peerWithoutModel } = createPeer(1);
+    const parsed = parseSpaceServerFrame(
+      JSON.stringify({ v: 1, t: "welcome", self: selfWithoutModel, peers: [peerWithoutModel] }),
+    );
+
+    expect(parsed).not.toBeNull();
+    if (parsed?.t !== "welcome") {
+      throw new Error("welcome 프레임이 아닙니다.");
+    }
+    expect(parsed.self.modelIndex).toBe(0);
+    expect(parsed.peers[0].modelIndex).toBe(0);
+  });
+
+  it("modelIndex 없는 peer 에도 기본 모델을 채운다", () => {
+    const { modelIndex: _omitted, ...peerWithoutModel } = createPeer(3);
+    const parsed = parseSpaceServerFrame(
+      JSON.stringify({ v: 1, t: "peer", peer: peerWithoutModel }),
+    );
+
+    if (parsed?.t !== "peer") {
+      throw new Error("peer 프레임이 아닙니다.");
+    }
+    expect(parsed.peer.modelIndex).toBe(0);
+  });
+
+  it("범위를 벗어난 modelIndex 는 거절한다", () => {
+    // 관용은 "없는 것" 까지다. 모르는 번호는 아바타를 못 그린다.
+    const parsed = parseSpaceServerFrame(
+      JSON.stringify({ v: 1, t: "peer", peer: { ...createPeer(0), modelIndex: 99 } }),
+    );
+
+    expect(parsed).toBeNull();
   });
 });

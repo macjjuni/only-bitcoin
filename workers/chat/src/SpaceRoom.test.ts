@@ -91,10 +91,10 @@ const createRoom = (state = new RoomState()) => {
   const room = new SpaceRoom(state.asDurableState(), workerEnv);
   const send = (socket: RoomSocket, frame: unknown) =>
     room.webSocketMessage(socket.asWebSocket(), JSON.stringify(frame));
-  const join = async (clientKey: string, nickname = "참여자") => {
+  const join = async (clientKey: string, nickname = "참여자", modelIndex = 0) => {
     const socket = new RoomSocket();
     state.sockets.push(socket);
-    await send(socket, { v: 1, t: "join", clientKey, nickname });
+    await send(socket, { v: 1, t: "join", clientKey, nickname, modelIndex });
     return socket;
   };
 
@@ -259,7 +259,13 @@ describe("SpaceRoom", () => {
     const failed = new RoomSocket();
     failed.shouldFailSend = true;
     state.sockets.push(failed);
-    await send(failed, { v: 1, t: "join", clientKey: clientKey(2), nickname: "참여자" });
+    await send(failed, {
+      v: 1,
+      t: "join",
+      clientKey: clientKey(2),
+      nickname: "참여자",
+      modelIndex: 0,
+    });
 
     expect(observer.frames().filter((frame) => frame.t === "peer")).toHaveLength(0);
     expect(observer.frames()).toContainEqual({ v: 1, t: "leave", seat: 1 });

@@ -1,6 +1,6 @@
 """Transfer the soft red pupil glint to the instanced crew model without Blender.
 
-Run after process-voxel-crew.py has regenerated crew.glb. The source and soft
+Run after process-voxel-character.py has regenerated crew.glb. The source and soft
 GLBs share vertex order; only the two dark pupils' UVs and materials differ.
 The existing baked walk matrices remain valid because the rig is unchanged.
 """

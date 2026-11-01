@@ -9,6 +9,7 @@ const self: SpacePeer = {
   seat: 0,
   nickname: "익명",
   colorIndex: 0,
+  modelIndex: 0,
   x: 0,
   z: 0,
   y: 0,
@@ -63,6 +64,7 @@ const createHarness = (webSocketUrl = "wss://example.com/v1/space/ws") => {
   const sockets: FakeSocket[] = [];
   const controller = new SpaceSessionController({
     identity,
+    modelIndex: 0,
     webSocketUrl,
     createSocket: () => {
       const socket = new FakeSocket();
@@ -124,7 +126,7 @@ describe("SpaceSessionController", () => {
     expect(controller.getSnapshot().presence.status).toBe("connecting");
     const socket = welcome(sockets[0], [remote]);
 
-    expect(sentFrames(socket, "join")).toEqual([{ v: 1, t: "join", ...identity }]);
+    expect(sentFrames(socket, "join")).toEqual([{ v: 1, t: "join", ...identity, modelIndex: 0 }]);
     expect(socket.binaryType).toBe("arraybuffer");
     expect(controller.getSnapshot().presence).toEqual({ status: "online", occupantCount: 2 });
     const roster = controller.getSnapshot().remotePlayers;
@@ -501,6 +503,36 @@ describe("SpaceSessionController", () => {
     controller.stop();
   });
 
+  it("아바타 변경은 서버가 되돌려준 peer 로 확정하고 재접속에도 이어진다", async () => {
+    const { controller, sockets, welcome } = createHarness();
+    controller.start();
+    const socket = welcome();
+
+    const changed = controller.changeModel(1);
+    expect(sentFrames(socket, "model")).toEqual([
+      { v: 1, t: "model", rid: requestId, modelIndex: 1 },
+    ]);
+
+    socket.receive({ v: 1, t: "peer", peer: { ...self, modelIndex: 1 } });
+    expect(await changed).toBe(true);
+    expect(controller.getSnapshot().self?.modelIndex).toBe(1);
+
+    // 끊겼다 다시 들어갈 때 옛 모델로 입장하면 바꾼 의미가 없다.
+    socket.emitClose();
+    vi.advanceTimersByTime(750);
+    sockets[1].open();
+    expect(sentFrames(sockets[1], "join")).toEqual([
+      {
+        v: 1,
+        t: "join",
+        clientKey: identity.clientKey,
+        nickname: identity.nickname,
+        modelIndex: 1,
+      },
+    ]);
+    controller.stop();
+  });
+
   it("닉네임 변경은 서버가 되돌려준 peer 로 확정하고 재접속에도 이어진다", async () => {
     const { controller, sockets, welcome } = createHarness();
     controller.start();
@@ -522,7 +554,7 @@ describe("SpaceSessionController", () => {
     vi.advanceTimersByTime(750);
     sockets[1].open();
     expect(sentFrames(sockets[1], "join")).toEqual([
-      { v: 1, t: "join", clientKey: identity.clientKey, nickname: "새이름" },
+      { v: 1, t: "join", clientKey: identity.clientKey, nickname: "새이름", modelIndex: 0 },
     ]);
     controller.stop();
   });

@@ -4,7 +4,13 @@ import { PerformanceMonitor, type PerformanceMonitorApi } from "@react-three/dre
 import { Canvas } from "@react-three/fiber";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
 import type { ChatIdentity } from "@/features/chat-session";
-import { createSpaceInputSource, SPACE_CAMERA, useKeyboardInput } from "@/features/space-controls";
+import {
+  createSpaceInputSource,
+  loadAvatarModelIndex,
+  SPACE_CAMERA,
+  saveAvatarModelIndex,
+  useKeyboardInput,
+} from "@/features/space-controls";
 import { useSpaceSession } from "@/features/space-session";
 import { isAndroidDevice, isIOSDevice } from "@/shared/utils/device";
 import {
@@ -52,19 +58,51 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   const [hasRealtimeShadows, setHasRealtimeShadows] = useState<boolean>(false);
   const [frameloop, setFrameloop] = useState<"always" | "never">("always");
   const [renderDpr, setRenderDpr] = useState<number>(SPACE_INITIAL_DPR);
+  /**
+   * 계측 패널 표시 여부.
+   *
+   * **운영에서도 `?stats=1` 로 켠다.** 개발 환경에만 두면 실기기 측정이
+   * `pnpm dev` 를 띄운 PC 와 같은 네트워크에 폰을 붙이는 일이 되고, dpr·번들·
+   * 소스맵이 모두 달라 운영 성능을 대신하지 못한다. §8.2 가 계속 "미측정" 인
+   * 이유도 그것이다.
+   *
+   * 쿼리로만 켜지므로 일반 접속자에게는 보이지 않고, 패널에는 렌더 통계 외에
+   * 아무 정보도 없다. 더미(`?dummies=N`)는 운영에서 계속 막는다 — 가짜 아바타
+   * 50명은 실제 접속자에게 보이고 좌석을 혼동시킨다.
+   */
   const [hasPerformanceStats] = useState(
-    () =>
-      process.env.NODE_ENV !== "production" &&
-      new URLSearchParams(window.location.search).get("stats") === "1",
+    () => new URLSearchParams(window.location.search).get("stats") === "1",
   );
 
+  /**
+   * 고른 아바타 모델.
+   *
+   * 저장소에서 한 번 읽어 입장 프레임에 실어 보내고, 서버가 확정한 값이 오면
+   * 그쪽을 쓴다. 바꿀 때는 저장소와 이 상태를 함께 갱신한다.
+   */
+  const [localModelIndex, setLocalModelIndex] = useState<number>(loadAvatarModelIndex);
   const session = useSpaceSession({
     identity,
+    modelIndex: localModelIndex,
     enabled: isSupportProbed && !fallbackReason && dummyCount === 0,
   });
   const nickname = session.self?.nickname ?? identity.nickname;
+  const modelIndex = session.self?.modelIndex ?? localModelIndex;
 
   useKeyboardInput(inputSource);
+  // endregion
+
+  // region [Events]
+  /** 선택을 저장하고 서버에 알린다. 서버가 받아들이면 `peer` 로 모두에게 퍼진다. */
+  const onChangeModel = useCallback(
+    async (nextModelIndex: number): Promise<boolean> => {
+      setLocalModelIndex(nextModelIndex);
+      saveAvatarModelIndex(nextModelIndex);
+
+      return session.changeModel(nextModelIndex);
+    },
+    [session.changeModel],
+  );
   // endregion
 
   // region [Privates]
@@ -173,6 +211,7 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
         <SpaceScene
           inputSource={inputSource}
           clientKey={identity.clientKey}
+          modelIndex={modelIndex}
           nickname={nickname}
           session={session}
           hasRealtimeShadows={hasRealtimeShadows}
@@ -181,7 +220,13 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
         {hasPerformanceStats && <SpacePerformanceStats dummyCount={dummyCount} />}
       </Canvas>
 
-      <SpaceHud inputSource={inputSource} session={session} nickname={nickname} />
+      <SpaceHud
+        inputSource={inputSource}
+        session={session}
+        nickname={nickname}
+        modelIndex={modelIndex}
+        onChangeModel={onChangeModel}
+      />
     </div>
   );
 }

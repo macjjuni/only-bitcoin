@@ -1,15 +1,17 @@
 "use client";
 
 import { useFrame } from "@react-three/fiber";
-import { memo, type ReactNode, useEffect, useMemo, useRef } from "react";
+import { memo, type ReactNode, Suspense, useEffect, useMemo, useRef } from "react";
 import { Color, type InstancedMesh, MeshStandardMaterial, Object3D } from "three";
 import {
   type RemotePlayer,
   resolveAvatarColor,
+  resolveAvatarModel,
   SPACE_AVATAR,
   SPACE_MAX_OCCUPANTS,
+  type SpaceAvatarModel,
 } from "@/entities/space";
-import { selectSpaceAvatarSlots } from "@/views/space/lib/avatarCapacity";
+import { groupPlayersByModel, selectSpaceAvatarSlots } from "@/views/space/lib/avatarCapacity";
 import { CREW_WALK, useCrewModel } from "@/views/space/lib/crewModel";
 import {
   applyCrewSkinning,
@@ -22,26 +24,28 @@ const SHADOW_LIFT_Y = 0.02;
 /** 이보다 느리면 멈춘 것으로 보고 레스트 포즈로 돌린다. */
 const MOVING_SPEED_THRESHOLD = 0.25;
 
-interface RemoteAvatarsProps {
+interface RemoteAvatarGroupProps {
+  /** 이 그룹이 쓰는 모델. 그룹 하나가 `InstancedMesh` 4개를 쓴다. */
+  model: SpaceAvatarModel;
   players: readonly RemotePlayer[];
 }
 
 /**
- * 원격 아바타를 인스턴싱으로 그린다.
+ * 같은 모델을 고른 원격 아바타를 인스턴싱으로 그린다.
  *
  * 개별 `<mesh>` 로 만들면 50명이면 부위마다 50 콜씩 쌓여 모바일 예산(50)을 몇 배
- * 넘긴다. `InstancedMesh` 4개로 고정해 전원을 드로우 콜 4개에 담는다. 걷기는
+ * 넘긴다. `InstancedMesh` 4개로 고정해 그룹 전원을 드로우 콜 4개에 담는다. 걷기는
  * 구워 둔 본 행렬을 셰이더가 읽어 처리한다. 근거는 `docs/btc-space-3d.md` §8 에 있다.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
+function RemoteAvatarGroup({ model, players }: RemoteAvatarGroupProps): ReactNode {
   // region [Hooks]
   const bodyMeshRef = useRef<InstancedMesh>(null);
   const accentMeshRef = useRef<InstancedMesh>(null);
   const pupilGlintMeshRef = useRef<InstancedMesh>(null);
   const shadowMeshRef = useRef<InstancedMesh>(null);
   const shadowTexture = useMemo(() => createShadowBlobTexture(), []);
-  const crew = useCrewModel();
+  const crew = useCrewModel(model);
   const bodyMaterial = useSkinnedCrewMaterial(crew.bodyMaterial, crew.walkTexture);
   const pupilGlintMaterial = useSkinnedCrewMaterial(crew.pupilGlintMaterial, crew.walkTexture);
 
@@ -54,8 +58,12 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
     () => createCrewInstanceGeometry(crew.accentGeometry, SPACE_MAX_OCCUPANTS),
     [crew.accentGeometry],
   );
+  /** 글린트가 없는 모델(곰)에서는 `null` 이다. 메시도 그리지 않는다. */
   const pupilGlint = useMemo(
-    () => createCrewInstanceGeometry(crew.pupilGlintGeometry, SPACE_MAX_OCCUPANTS),
+    () =>
+      crew.pupilGlintGeometry
+        ? createCrewInstanceGeometry(crew.pupilGlintGeometry, SPACE_MAX_OCCUPANTS)
+        : null,
     [crew.pupilGlintGeometry],
   );
   const accentMaterial = useMemo(() => {
@@ -115,11 +123,23 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
     // 앞치마와 눈은 몸통과 같은 위상이어야 따로 놀지 않는다. 복사를 먼저 하지 않으면
     // 한 프레임 뒤처진 값이 올라간다.
     for (const part of [accent, pupilGlint]) {
+      if (!part) {
+        continue;
+      }
       part.phase.array.set(phases.array);
       part.blend.array.set(blends.array);
     }
-    for (const attribute of [phases, blends, accent.phase, accent.blend, pupilGlint.phase, pupilGlint.blend]) {
-      attribute.needsUpdate = true;
+    for (const attribute of [
+      phases,
+      blends,
+      accent.phase,
+      accent.blend,
+      pupilGlint?.phase,
+      pupilGlint?.blend,
+    ]) {
+      if (attribute) {
+        attribute.needsUpdate = true;
+      }
     }
   };
 
@@ -160,7 +180,7 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
       // 사본과 직접 만든 머티리얼만 정리한다. 공유 원본은 useGLTF 캐시가 가진다.
       body.geometry.dispose();
       accent.geometry.dispose();
-      pupilGlint.geometry.dispose();
+      pupilGlint?.geometry.dispose();
       accentMaterial.dispose();
     };
   }, [shadowTexture, body, accent, pupilGlint, accentMaterial]);
@@ -197,13 +217,15 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
         dispose={null}
       />
 
-      <instancedMesh
-        ref={pupilGlintMeshRef}
-        count={renderedPlayers.length}
-        args={[pupilGlint.geometry, pupilGlintMaterial, SPACE_MAX_OCCUPANTS]}
-        frustumCulled={false}
-        dispose={null}
-      />
+      {pupilGlint && pupilGlintMaterial && (
+        <instancedMesh
+          ref={pupilGlintMeshRef}
+          count={renderedPlayers.length}
+          args={[pupilGlint.geometry, pupilGlintMaterial, SPACE_MAX_OCCUPANTS]}
+          frustumCulled={false}
+          dispose={null}
+        />
+      )}
 
       <instancedMesh
         ref={shadowMeshRef}
@@ -214,6 +236,42 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
         <planeGeometry args={[SPACE_AVATAR.shadowRadius * 2, SPACE_AVATAR.shadowRadius * 2]} />
         <meshBasicMaterial map={shadowTexture} transparent depthWrite={false} />
       </instancedMesh>
+    </>
+  );
+}
+
+const MemoizedRemoteAvatarGroup = memo(RemoteAvatarGroup);
+MemoizedRemoteAvatarGroup.displayName = "RemoteAvatarGroup";
+
+interface RemoteAvatarsProps {
+  players: readonly RemotePlayer[];
+  /** 같은 배열의 로스터 변경에도 모델별 묶음을 다시 계산하게 한다. */
+  rosterRevision?: number;
+}
+
+/**
+ * 원격 아바타를 **모델별로 나눠** 그린다.
+ *
+ * 모델마다 지오메트리가 다르니 하나의 `InstancedMesh` 에 담을 수 없다. 사람이
+ * 있는 모델만 그룹을 띄우므로, 아무도 곰을 고르지 않았으면 곰 에셋을 받지도
+ * 않는다. 그룹마다 `Suspense` 로 감싸는 이유는, 새 모델이 로드되는 동안 씬
+ * 전체가 사라지지 않게 하기 위함이다.
+ */
+function RemoteAvatars({ players, rosterRevision }: RemoteAvatarsProps): ReactNode {
+  // region [Hooks]
+  const groups = useMemo(() => groupPlayersByModel(players), [players, rosterRevision]);
+  // endregion
+
+  return (
+    <>
+      {groups.map((group) => (
+        <Suspense key={group.modelIndex} fallback={null}>
+          <MemoizedRemoteAvatarGroup
+            model={resolveAvatarModel(group.modelIndex)}
+            players={group.players}
+          />
+        </Suspense>
+      ))}
     </>
   );
 }

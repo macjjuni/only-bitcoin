@@ -55,6 +55,8 @@ interface SpaceSceneProps {
   inputSource: SpaceInputSource;
   clientKey: string;
   nickname: string;
+  /** 접속 전에 보여줄 모델. 서버가 확정하면 그 값이 우선한다. */
+  modelIndex: number;
   session: SpaceSession;
   hasRealtimeShadows: boolean;
   /** 개발 전용 더미 아바타 수. 더미 측정 중에는 실제 공간 소켓을 열지 않는다. */
@@ -65,6 +67,7 @@ function SpaceScene({
   inputSource,
   clientKey,
   nickname,
+  modelIndex,
   session,
   hasRealtimeShadows,
   dummyCount,
@@ -87,6 +90,8 @@ function SpaceScene({
   const spawnTransform = useMemo(() => createSpawnPoint(clientKey), [clientKey]);
   const colorIndex = useMemo(() => resolveColorIndexFromClientKey(clientKey), [clientKey]);
   const avatarColorIndex = session.self?.colorIndex ?? colorIndex;
+  /** 서버가 확정한 모델을 쓴다. 접속 전에는 저장된 선택으로 보여준다. */
+  const avatarModelIndex = session.self?.modelIndex ?? modelIndex;
   const dummies = useMemo(() => createStressDummies(dummyCount), [dummyCount]);
   const remotePlayers = dummyCount > 0 ? dummies : session.remotePlayers;
   /** 1단계는 빈 슬롯이다. 3단계에서 라이트닝 결제로 채운다. */
@@ -253,12 +258,13 @@ function SpaceScene({
       <group ref={playerGroupRef}>
         <PlayerAvatar
           colorIndex={avatarColorIndex}
+          modelIndex={avatarModelIndex}
           hasRealtimeShadows={hasRealtimeShadows}
           playerStateRef={playerStateRef}
         />
       </group>
 
-      <RemoteAvatars players={remotePlayers} />
+      <RemoteAvatars players={remotePlayers} rosterRevision={session.rosterRevision} />
       <Nameplates
         players={remotePlayers}
         selfNickname={nickname}

@@ -3,7 +3,12 @@
 import { useFrame } from "@react-three/fiber";
 import { memo, type ReactNode, type RefObject, useEffect, useMemo, useRef } from "react";
 import { type InstancedMesh, MeshStandardMaterial, Object3D } from "three";
-import { type LocalPlayerState, resolveAvatarColor, SPACE_AVATAR } from "@/entities/space";
+import {
+  type LocalPlayerState,
+  resolveAvatarColor,
+  resolveAvatarModel,
+  SPACE_AVATAR,
+} from "@/entities/space";
 import { CREW_WALK, useCrewModel } from "@/views/space/lib/crewModel";
 import {
   applyCrewSkinning,
@@ -19,6 +24,8 @@ const MOVING_SPEED_THRESHOLD = 0.25;
 
 interface PlayerAvatarProps {
   colorIndex: number;
+  /** 고른 아바타 모델 번호. 남이 보는 내 모습과 같아야 하므로 서버 값을 쓴다. */
+  modelIndex: number;
   hasRealtimeShadows: boolean;
   /** 걷기 사이클 속도. 매 프레임 바뀌므로 ref 로 받는다. */
   playerStateRef: RefObject<LocalPlayerState>;
@@ -33,15 +40,19 @@ interface PlayerAvatarProps {
  * 그대로 둔다.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: PlayerAvatarProps): ReactNode {
+function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateRef }: PlayerAvatarProps): ReactNode {
   // region [Hooks]
   const shadowTexture = useMemo(() => createShadowBlobTexture(), []);
   const avatarColor = useMemo(() => resolveAvatarColor(colorIndex), [colorIndex]);
-  const crew = useCrewModel();
+  const crew = useCrewModel(resolveAvatarModel(modelIndex));
   const bodyMaterial = useSkinnedCrewMaterial(crew.bodyMaterial, crew.walkTexture);
   const pupilGlintMaterial = useSkinnedCrewMaterial(crew.pupilGlintMaterial, crew.walkTexture);
   const body = useMemo(() => createCrewInstanceGeometry(crew.bodyGeometry, 1), [crew.bodyGeometry]);
-  const pupilGlint = useMemo(() => createCrewInstanceGeometry(crew.pupilGlintGeometry, 1), [crew.pupilGlintGeometry]);
+  /** 글린트가 없는 모델(곰)에서는 `null` 이다. 메시도 그리지 않는다. */
+  const pupilGlint = useMemo(
+    () => (crew.pupilGlintGeometry ? createCrewInstanceGeometry(crew.pupilGlintGeometry, 1) : null),
+    [crew.pupilGlintGeometry],
+  );
   const accent = useMemo(
     () => createCrewInstanceGeometry(crew.accentGeometry, 1),
     [crew.accentGeometry],
@@ -72,6 +83,10 @@ function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: Player
     const blend = body.blend.getX(0) + (speed > MOVING_SPEED_THRESHOLD ? step : -step);
 
     for (const buffers of [body, accent, pupilGlint]) {
+      if (!buffers) {
+        continue;
+      }
+
       buffers.phase.setX(0, phase - Math.floor(phase));
       buffers.blend.setX(0, Math.min(1, Math.max(0, blend)));
       buffers.phase.needsUpdate = true;
@@ -102,7 +117,7 @@ function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: Player
       // 사본과 직접 만든 머티리얼만 정리한다. 공유 원본은 useGLTF 캐시가 가진다.
       body.geometry.dispose();
       accent.geometry.dispose();
-      pupilGlint.geometry.dispose();
+      pupilGlint?.geometry.dispose();
       accentMaterial.dispose();
     };
   }, [shadowTexture, body, accent, pupilGlint, accentMaterial]);
@@ -134,13 +149,15 @@ function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: Player
         dispose={null}
       />
 
-      <instancedMesh
-        ref={pupilGlintMeshRef}
-        args={[pupilGlint.geometry, pupilGlintMaterial, 1]}
-        count={1}
-        frustumCulled={false}
-        dispose={null}
-      />
+      {pupilGlint && pupilGlintMaterial && (
+        <instancedMesh
+          ref={pupilGlintMeshRef}
+          args={[pupilGlint.geometry, pupilGlintMaterial, 1]}
+          count={1}
+          frustumCulled={false}
+          dispose={null}
+        />
+      )}
 
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, SHADOW_LIFT_Y, 0]}>
         <planeGeometry args={[SPACE_AVATAR.shadowRadius * 2, SPACE_AVATAR.shadowRadius * 2]} />

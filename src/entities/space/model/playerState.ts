@@ -25,6 +25,13 @@ export interface RemotePlayer extends PlayerTransform {
   seat: number;
   nickname: string;
   colorIndex: number;
+  /**
+   * 고른 아바타 모델 번호.
+   *
+   * 모델마다 지오메트리가 달라 `InstancedMesh` 를 따로 써야 하므로, 렌더 쪽에서
+   * 이 값으로 사람을 묶는다.
+   */
+  modelIndex: number;
 }
 
 export const createLocalPlayerState = (spawn: PlayerTransform): LocalPlayerState => ({

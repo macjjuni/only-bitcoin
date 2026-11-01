@@ -1,3 +1,4 @@
+import { isAvatarModelIndex, SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "./avatarModel";
 import type { PlayerTransform, RemotePlayer } from "./playerState";
 import { SPACE_MAX_JUMP_HEIGHT, SPACE_MAX_OCCUPANTS } from "./spaceWorld";
 
@@ -33,10 +34,11 @@ export interface SpaceMotionSnapshot {
 }
 
 export type SpaceClientFrame =
-  | { v: 1; t: "join"; clientKey: string; nickname: string }
+  | { v: 1; t: "join"; clientKey: string; nickname: string; modelIndex?: number }
   | { v: 1; t: "move"; x: number; y: number; z: number; yaw: number; isRunning: boolean }
   | { v: 1; t: "say"; rid: string; body: string }
-  | { v: 1; t: "nick"; rid: string; nickname: string };
+  | { v: 1; t: "nick"; rid: string; nickname: string }
+  | { v: 1; t: "model"; rid: string; modelIndex: number };
 
 export type SpaceServerFrame =
   | { v: 1; t: "welcome"; self: SpacePeer; peers: SpacePeer[] }
@@ -150,7 +152,10 @@ export const isSpacePeer = (value: unknown): value is SpacePeer => {
     isFiniteNumber(value.colorIndex) &&
     Number.isInteger(value.colorIndex) &&
     value.colorIndex >= 0 &&
-    value.colorIndex <= 255
+    value.colorIndex <= 255 &&
+    // 모델 번호는 목록 길이로 검증한다. 모르는 번호가 오면 아바타를 못 그린다.
+    // **없는 것은 통과시킨다** — 모델 선택 전에 배포된 서버가 보내지 않는다.
+    (value.modelIndex === undefined || isAvatarModelIndex(value.modelIndex))
   );
 };
 
@@ -166,7 +171,9 @@ export const parseSpaceClientFrame = (rawPayload: string): SpaceClientFrame | nu
     case "join":
       return typeof payload.clientKey === "string" &&
         CLIENT_KEY_PATTERN.test(payload.clientKey) &&
-        isBoundedString(payload.nickname, 128)
+        isBoundedString(payload.nickname, 128) &&
+        // 모델 선택 전에 배포된 클라이언트는 이 값을 보내지 않는다.
+        (payload.modelIndex === undefined || isAvatarModelIndex(payload.modelIndex))
         ? (payload as SpaceClientFrame)
         : null;
     case "move":
@@ -181,9 +188,26 @@ export const parseSpaceClientFrame = (rawPayload: string): SpaceClientFrame | nu
       return isUuid(payload.rid) && isBoundedString(payload.nickname, 128)
         ? (payload as SpaceClientFrame)
         : null;
+    case "model":
+      return isUuid(payload.rid) && isAvatarModelIndex(payload.modelIndex)
+        ? (payload as SpaceClientFrame)
+        : null;
     default:
       return null;
   }
+};
+
+/**
+ * 모델 번호가 빠진 peer 에 기본값을 채운다.
+ *
+ * 배포가 원자적이지 않아 **모델 선택을 모르는 서버**가 잠시 살아 있을 수 있다.
+ * 그 서버의 `welcome`·`peer` 를 거절하면 그 사이 접속이 전부 막힌다. 빠진 값은
+ * 기본 모델로 읽어 아바타를 그리는 쪽이 낫다.
+ */
+const withDefaultModel = (peer: SpacePeer): SpacePeer => {
+  return peer.modelIndex === undefined
+    ? { ...peer, modelIndex: SPACE_DEFAULT_AVATAR_MODEL_INDEX }
+    : peer;
 };
 
 export const parseSpaceServerFrame = (rawPayload: string): SpaceServerFrame | null => {
@@ -196,15 +220,27 @@ export const parseSpaceServerFrame = (rawPayload: string): SpaceServerFrame | nu
   switch (payload.t) {
     case "welcome": {
       const selfPeer = payload.self;
-      return isSpacePeer(selfPeer) &&
-        isPeerArray(payload.peers) &&
-        payload.peers.length < SPACE_MAX_OCCUPANTS &&
-        payload.peers.every((peer) => peer.seat !== selfPeer.seat)
-        ? (payload as SpaceServerFrame)
-        : null;
+      const peers = payload.peers;
+
+      if (
+        !isSpacePeer(selfPeer) ||
+        !isPeerArray(peers) ||
+        peers.length >= SPACE_MAX_OCCUPANTS ||
+        peers.some((peer) => peer.seat === selfPeer.seat)
+      ) {
+        return null;
+      }
+
+      return {
+        ...payload,
+        self: withDefaultModel(selfPeer),
+        peers: peers.map(withDefaultModel),
+      } as SpaceServerFrame;
     }
     case "peer":
-      return isSpacePeer(payload.peer) ? (payload as SpaceServerFrame) : null;
+      return isSpacePeer(payload.peer)
+        ? ({ ...payload, peer: withDefaultModel(payload.peer) } as SpaceServerFrame)
+        : null;
     case "leave":
       return isSeat(payload.seat) ? (payload as SpaceServerFrame) : null;
     case "say":

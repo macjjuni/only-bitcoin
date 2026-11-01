@@ -1,3 +1,4 @@
+export { loadAvatarModelIndex, saveAvatarModelIndex } from "./model/avatarModelStore";
 export {
   applyCameraDrag,
   applyCameraZoom,

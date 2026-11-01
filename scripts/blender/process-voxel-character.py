@@ -1,16 +1,24 @@
 """
-`voxel-crew.blend` 를 인스턴싱 가능한 런타임 에셋으로 가공한다.
+복셀 캐릭터 `.blend` 를 인스턴싱 가능한 런타임 에셋으로 가공한다.
 
 원본은 부위마다 메시가 쪼개져 있고 스킨·애니메이션이 붙어 있어, 그대로 쓰면
 아바타 한 명이 부위 수만큼 드로우 콜을 쓴다. 50명이면 예산(50)의 수십 배다.
 
-출력
-  crew.glb        메시 2개로 병합한 지오메트리(JOINTS_0 유지, 애니메이션 제거)
-  crew-walk.bin   Walk 한 사이클의 본 스키닝 행렬(Float32)
+세 모델이 **본 22개**를 공유해 한 스크립트로 모두 굽는다. 프레임 수는 모델마다
+다를 수 있고(크루·곰 40, 황소 48) 런타임이 `.bin` 크기에서 읽는다.
 
-실행
+출력 (`<prefix>` 기본값 `crew`)
+  <prefix>.glb        메시 2개로 병합한 지오메트리(애니메이션 제거)
+  <prefix>-walk.bin   Walk 한 사이클의 본 스키닝 행렬(Float32)
+
+실행 — `<prefix>`, 색을 받을 메시, 발광시킬 눈동자 메시를 쉼표로 구분해 넘긴다
   blender --background public/models/voxel-crew.blend \
-      --python scripts/blender/process-voxel-crew.py -- public/models
+      --python scripts/blender/process-voxel-character.py -- public/models crew
+  blender --background public/models/voxel-bear.blend \
+      --python scripts/blender/process-voxel-character.py -- public/models bear
+  blender --background public/models/voxel-bull.blend \
+      --python scripts/blender/process-voxel-character.py -- public/models bull \
+      burgundy_waistcoat_front l_bull_eye_dark_pixel,r_bull_eye_dark_pixel
 """
 import bpy
 import math
@@ -20,16 +28,37 @@ import sys
 
 from mathutils import Matrix
 
-OUT = sys.argv[-1]
+# `--` 뒤 인자만 받는다. 블렌더가 앞쪽 인자를 전부 먹는다.
+ARGS = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
+OUT = ARGS[0] if ARGS else "public/models"
+# 출력 파일과 메시 이름의 접두사. 런타임 상수(`crewModel.ts`)와 같아야 한다.
+PREFIX = ARGS[1] if len(ARGS) > 1 else "crew"
+ACCENT_NAMES = (
+    tuple(name.strip().lower() for name in ARGS[2].split(",") if name.strip())
+    if len(ARGS) > 2
+    else DEFAULT_ACCENT_NAMES
+)
+# 붉게 발광시킬 눈동자 메시. 비우면 글린트 메시를 만들지 않는다.
+#
+# 크루의 글린트는 레이저아이 변형 glb 에서 UV·발광 마스크를 옮겨 만들었다
+# (`apply-laser-eyes-to-crew.py`). 변형본이 없는 모델은 눈동자를 떼어 **여기서
+# 만든 발광 재질**을 입힌다 — 아틀라스를 고치지 않아도 눈이 빛난다.
+PUPIL_NAMES = (
+    tuple(name.strip().lower() for name in ARGS[3].split(",") if name.strip())
+    if len(ARGS) > 3
+    else ()
+)
 HEIGHT = 1.81
 WALK_ACTION = "Walk"
 
-# 앞치마 **앞판만** 플레이어 색을 받도록 뺀다(§6 B안).
+# 플레이어 색을 받는 **앞면 한 조각만** 뺀다(§6 B안).
 #
-# 앞치마 전체를 빼면 주머니·끈·빨간 트림까지 단색이 되어 디테일이 사라진다.
-# 아틀라스의 앞치마 색이 #18171a(밝기 13%)라 텍스처를 곱하는 방식으로는 색이
-# 나오지 않으므로, 앞판은 텍스처 없는 단색 머티리얼로 그린다.
-ACCENT_NAMES = ("l_apron_front_panel", "r_apron_front_panel")
+# 옷 전체를 빼면 주머니·끈·단추까지 단색이 되어 디테일이 사라진다. 아틀라스의
+# 옷 색이 어두워(크루 앞치마 #18171a, 밝기 13%) 텍스처를 곱하는 방식으로는 색이
+# 나오지 않으므로, 앞면만 텍스처 없는 단색 머티리얼로 그린다.
+#
+# 모델마다 옷이 달라 이름도 다르다 — 크루·곰은 앞치마 앞판, 황소는 조끼 앞면이다.
+DEFAULT_ACCENT_NAMES = ("l_apron_front_panel", "r_apron_front_panel")
 
 # glTF 는 Y-up, Blender 는 Z-up 이다. 지오메트리는 익스포터가 변환해 주지만
 # 본 행렬은 직접 같은 변환을 해 줘야 셰이더에서 정점과 맞는다.
@@ -90,6 +119,77 @@ def bake_bone_index(objs, bones):
 
     if missing:
         print(f"[warn] 본을 못 찾은 정점 {missing}개 — 0번 본으로 둔다")
+
+
+def create_laser_pupil_material(name):
+    """
+    붉게 발광하는 눈동자 재질.
+
+    텍스처를 쓰지 않는다. 아틀라스에 발광 마스크를 그려 넣으려면 원본 이미지를
+    고쳐야 하고, 눈동자는 몇 픽셀이라 단색으로 충분하다. 런타임은 이 재질을
+    복사해 걷기 셰이더만 심는다.
+    """
+    material = bpy.data.materials.new(name)
+    material.use_nodes = True
+    bsdf = material.node_tree.nodes["Principled BSDF"]
+    bsdf.inputs["Base Color"].default_value = (0.09, 0.005, 0.005, 1.0)
+    bsdf.inputs["Roughness"].default_value = 0.35
+    bsdf.inputs["Metallic"].default_value = 0.0
+
+    # 소켓 이름이 Blender 3.x("Emission")와 4.x("Emission Color")에서 다르다.
+    for socket_name in ("Emission Color", "Emission"):
+        if socket_name in bsdf.inputs:
+            bsdf.inputs[socket_name].default_value = (1.0, 0.07, 0.04, 1.0)
+            break
+    if "Emission Strength" in bsdf.inputs:
+        bsdf.inputs["Emission Strength"].default_value = 1.0
+
+    return material
+
+
+def base_image_name(material):
+    """재질이 쓰는 베이스 컬러 이미지 이름. 노드가 없으면 `None`."""
+    if not material or not material.node_tree:
+        return None
+
+    return next(
+        (n.image.name for n in material.node_tree.nodes if n.type == "TEX_IMAGE" and n.image),
+        None,
+    )
+
+
+def collapse_materials(obj, name):
+    """
+    재질 슬롯을 하나로 합친다.
+
+    glTF 는 재질마다 primitive 를 쪼개고, three 는 primitive 가 둘 이상인 메시를
+    **Mesh 가 아니라 Group** 으로 만든다. 런타임은 `getObjectByName` 으로 Mesh 를
+    찾아 인스턴싱하므로 Group 이 오면 지오메트리를 꺼내지 못한다.
+    (황소의 금색 단추가 이 경우였다 — 같은 아틀라스를 쓰고 metallic 만 달랐다.)
+
+    **같은 텍스처를 쓰는 경우에만** 합친다. 다른 텍스처를 쓰는 재질이 섞여 있으면
+    색이 통째로 바뀌므로 베이크를 멈춘다. 런타임에서 터지는 것보다 여기서 멈추는
+    쪽이 낫다.
+    """
+    materials = list(obj.data.materials)
+
+    if len(materials) <= 1:
+        return
+
+    images = {base_image_name(material) for material in materials}
+    images.discard(None)
+
+    if len(images) > 1:
+        raise SystemExit(
+            f"[error] {name} 의 재질이 서로 다른 텍스처를 씁니다: {sorted(images)}. "
+            "아틀라스 하나로 합친 뒤 다시 구우세요."
+        )
+
+    print(f"[info] {name} 재질 {len(materials)}개를 1개로 합친다 (텍스처 {images})")
+    for polygon in obj.data.polygons:
+        polygon.material_index = 0
+    while len(obj.data.materials) > 1:
+        obj.data.materials.pop(index=len(obj.data.materials) - 1)
 
 
 def join_group(objs, name):
@@ -167,10 +267,15 @@ bpy.context.view_layer.update()
 print(f"[info] 가공 전 메시 {len(mesh_objects())}개, 본 {len(armature.data.bones)}개")
 
 accent = [o for o in mesh_objects() if o.name.lower() in ACCENT_NAMES]
-body = [o for o in mesh_objects() if o not in accent]
+pupil = [o for o in mesh_objects() if o.name.lower() in PUPIL_NAMES]
+body = [o for o in mesh_objects() if o not in accent and o not in pupil]
+if PUPIL_NAMES and not pupil:
+    raise SystemExit(f"[error] 눈동자 메시 {PUPIL_NAMES} 를 찾지 못했습니다.")
 if not accent:
-    raise SystemExit("[error] 앞치마 앞판을 찾지 못했습니다. 노드 이름을 확인하세요.")
-print(f"[info] 앞판 {len(accent)}개 / 몸통 {len(body)}개")
+    raise SystemExit(
+        f"[error] 색을 받을 메시 {ACCENT_NAMES} 를 찾지 못했습니다. 노드 이름을 확인하세요."
+    )
+print(f"[info] 앞판 {len(accent)}개 / 눈동자 {len(pupil)}개 / 몸통 {len(body)}개")
 
 transform = resolve_transform(mesh_objects())
 frames, bones, matrix_rows = bake_walk_matrices(armature, transform)
@@ -180,9 +285,15 @@ bpy.context.scene.frame_set(int(bpy.data.actions[WALK_ACTION].frame_range[0]))
 armature.animation_data.action = None
 
 bake_bone_index(mesh_objects(), bones)
-body_obj = join_group(body, "crew_body")
-accent_obj = join_group(accent, "crew_accent")
-for obj in (body_obj, accent_obj):
+body_obj = join_group(body, f"{PREFIX}_body")
+accent_obj = join_group(accent, f"{PREFIX}_accent")
+pupil_obj = join_group(pupil, f"{PREFIX}_pupil_glint") if pupil else None
+if pupil_obj:
+    pupil_obj.data.materials.clear()
+    pupil_obj.data.materials.append(create_laser_pupil_material(f"{PREFIX}_laser_pupil"))
+exported = [body_obj, accent_obj] + ([pupil_obj] if pupil_obj else [])
+for obj in exported:
+    collapse_materials(obj, obj.name)
     while len(obj.data.uv_layers) > 1:
         obj.data.uv_layers.remove(obj.data.uv_layers[-1])
     # mesh.transform 은 정점과 법선을 함께 돌린다. transform_apply 오퍼레이터는
@@ -191,10 +302,10 @@ for obj in (body_obj, accent_obj):
     obj.matrix_world = Matrix.Identity(4)
 
 bpy.ops.object.select_all(action="DESELECT")
-for obj in (body_obj, accent_obj):
+for obj in exported:
     obj.select_set(True)
 bpy.context.view_layer.objects.active = body_obj
-glb_path = os.path.join(OUT, "crew.glb")
+glb_path = os.path.join(OUT, f"{PREFIX}.glb")
 bpy.ops.export_scene.gltf(
     filepath=glb_path, export_format="GLB", use_selection=True, export_apply=True,
     export_yup=True, export_normals=True, export_texcoords=True,
@@ -202,13 +313,13 @@ bpy.ops.export_scene.gltf(
     # 익스포터가 아마추어 모디파이어를 적용해 포즈가 지오메트리에 굳는다.
     export_skins=False, export_animations=False, export_attributes=True)
 
-bin_path = os.path.join(OUT, "crew-walk.bin")
+bin_path = os.path.join(OUT, f"{PREFIX}-walk.bin")
 with open(bin_path, "wb") as handle:
     handle.write(struct.pack(f"<{len(matrix_rows)}f", *matrix_rows))
 
-tri = sum(len(p.vertices) - 2 for o in (body_obj, accent_obj) for p in o.data.polygons)
+tri = sum(len(p.vertices) - 2 for o in exported for p in o.data.polygons)
 head = [v.co.z for v in body_obj.data.vertices if 1.40 < v.co.z < 1.56]
-print(f"[export] crew.glb {os.path.getsize(glb_path)/1024:.0f} KB | 삼각형={tri} | 50명={tri*50:,}")
-print(f"[export] crew-walk.bin {os.path.getsize(bin_path)/1024:.0f} KB | "
+print(f"[export] {PREFIX}.glb {os.path.getsize(glb_path)/1024:.0f} KB | 삼각형={tri} | 50명={tri*50:,}")
+print(f"[export] {PREFIX}-walk.bin {os.path.getsize(bin_path)/1024:.0f} KB | "
       f"프레임={len(frames)} 본={len(bones)} 길이={len(frames)/24:.2f}초")
 print(f"[anchor] headCenterY={sum(head)/len(head):.4f}")

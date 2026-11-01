@@ -40,6 +40,8 @@ export interface SpaceSessionSocket {
 
 interface SpaceSessionControllerOptions {
   identity: SpaceSessionIdentity;
+  /** 입장할 때 보낼 아바타 모델. 저장소에서 읽은 값을 그대로 받는다. */
+  modelIndex: number;
   webSocketUrl: string;
   createSocket?: (url: string) => SpaceSessionSocket;
   now?: () => number;
@@ -63,6 +65,10 @@ interface PendingMessage {
 
 interface PendingNickname extends PendingMessage {
   nickname: string;
+}
+
+interface PendingModel extends PendingMessage {
+  modelIndex: number;
 }
 
 const socketOpenState = 1;
@@ -137,6 +143,7 @@ export class SpaceSessionController {
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
   private pendingMessage: PendingMessage | null = null;
   private pendingNickname: PendingNickname | null = null;
+  private pendingModel: PendingModel | null = null;
   private latestMovement: MovementFrame | null = null;
   private lastSentMovement: MovementFrame | null = null;
   private lastMovementSentAt = Number.NEGATIVE_INFINITY;
@@ -155,9 +162,12 @@ export class SpaceSessionController {
 
   /** 재접속 시 보낼 닉네임. 변경이 확정되면 갱신한다. */
   private nickname: string;
+  /** 고른 아바타 모델. 재접속할 때 입장 프레임에 다시 실어 보낸다. */
+  private modelIndex: number;
 
   constructor(options: SpaceSessionControllerOptions) {
     this.nickname = options.identity.nickname;
+    this.modelIndex = options.modelIndex;
     this.options = {
       ...options,
       createSocket: options.createSocket ?? ((url) => new WebSocket(url)),
@@ -304,6 +314,53 @@ export class SpaceSessionController {
     });
   };
 
+  /**
+   * 아바타 모델을 바꾼다.
+   *
+   * 닉네임과 같은 흐름이다 — 서버가 `peer` 프레임으로 되돌려줘야 성공으로 본다.
+   * 연결 전이라면 보낼 곳이 없으므로 저장만 하고(호출부가 한다) 거짓을 돌려준다.
+   */
+  changeModel = (modelIndex: number): Promise<boolean> => {
+    // 연결 전에도 선택은 유지돼야 한다. 다음 입장 프레임에 실어 보낸다.
+    this.modelIndex = modelIndex;
+
+    if (
+      this.pendingModel ||
+      this.snapshot.presence.status !== "online" ||
+      modelIndex === this.snapshot.self?.modelIndex
+    ) {
+      return Promise.resolve(false);
+    }
+
+    const requestId = this.options.createRequestId();
+
+    return new Promise((resolve) => {
+      const timeout = setTimeout(() => {
+        this.finishPendingModel(false);
+        this.updateSnapshot({ error: "아바타 변경 확인 시간이 초과됐어요. 다시 시도해 주세요." });
+      }, messageTimeoutMs);
+      this.pendingModel = { requestId, resolve, timeout, modelIndex };
+      this.updateSnapshot({ error: null });
+
+      if (!this.sendFrame({ v: 1, t: "model", rid: requestId, modelIndex })) {
+        this.finishPendingModel(false);
+        this.updateSnapshot({ error: "아바타를 바꾸지 못했어요. 연결을 확인해 주세요." });
+      }
+    });
+  };
+
+  private finishPendingModel(hasSucceeded: boolean): void {
+    const pending = this.pendingModel;
+
+    if (!pending) {
+      return;
+    }
+
+    this.pendingModel = null;
+    clearTimeout(pending.timeout);
+    pending.resolve(hasSucceeded);
+  }
+
   private finishPendingNickname(hasSucceeded: boolean): void {
     const pending = this.pendingNickname;
 
@@ -375,6 +432,7 @@ export class SpaceSessionController {
         t: "join",
         clientKey: this.options.identity.clientKey,
         nickname: this.nickname,
+        modelIndex: this.modelIndex,
       });
     });
     socket.addEventListener("message", (event) => {
@@ -471,6 +529,9 @@ export class SpaceSessionController {
           // 서버가 이동을 거절했을 때만 좌표가 실제로 달라진다.
           if (!hasSameMovement(this.lastSentMovement, quantizeMovement(frame.peer))) {
             this.setAuthoritativeMovement(frame.peer);
+          }
+          if (this.pendingModel?.modelIndex === frame.peer.modelIndex) {
+            this.finishPendingModel(true);
           }
           if (this.pendingNickname?.nickname === frame.peer.nickname) {
             this.finishPendingNickname(true);

@@ -3,7 +3,7 @@
 import { memo, type ReactNode } from "react";
 
 /**
- * 우측 상단 버튼 하나.
+ * HUD 버튼 하나.
  *
  * 버튼이 늘어나도 배치·크기·접근성 처리를 각자 다시 쓰지 않도록 모양을
  * 여기서만 정의한다. 추가할 때는 이 타입을 만족하는 항목을 배열에 넣으면 된다.
@@ -23,6 +23,13 @@ export interface SpaceHudAction {
 
 interface SpaceActionBarProps {
   actions: readonly SpaceHudAction[];
+  /**
+   * 가로 정렬. 우측 상단 묶음은 오른쪽, 좌측 하단 버튼은 왼쪽에 붙인다.
+   *
+   * 버튼 모양·배지·접근성 처리를 한 곳에 두려고 좌측 하단 버튼도 이 컴포넌트를
+   * 쓴다. 정렬만 다르다.
+   */
+  align?: "start" | "end";
 }
 
 const BASE_BUTTON_CLASS =
@@ -42,14 +49,14 @@ const resolveBadgeLabel = (badgeCount: number): string => {
 };
 // endregion
 
-/** 우측 상단 버튼 묶음. 항목이 늘어나면 세로로 쌓인다. */
-function SpaceActionBar({ actions }: SpaceActionBarProps): ReactNode {
+/** 버튼 묶음. 항목이 늘어나면 세로로 쌓인다. */
+function SpaceActionBar({ actions, align = "end" }: SpaceActionBarProps): ReactNode {
   if (actions.length === 0) {
     return null;
   }
 
   return (
-    <div className="flex flex-col items-end gap-2">
+    <div className={`flex flex-col gap-2 ${align === "start" ? "items-start" : "items-end"}`}>
       {actions.map((action) => (
         <button
           key={action.id}

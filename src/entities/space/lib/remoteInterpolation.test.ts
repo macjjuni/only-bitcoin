@@ -6,6 +6,7 @@ const createPeer = (seat = 0, overrides: Partial<SpacePeer> = {}): SpacePeer => 
   seat,
   nickname: "익명",
   colorIndex: 0,
+  modelIndex: 0,
   x: 0,
   z: 0,
   y: 0,

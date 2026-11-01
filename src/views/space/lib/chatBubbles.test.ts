@@ -25,6 +25,7 @@ const createPlayer = (seat: number, x = seat): RemotePlayer => ({
   yaw: 0,
   nickname: `사토시${seat}`,
   colorIndex: 0,
+  modelIndex: 0,
 });
 
 describe("공간 채팅 말풍선", () => {

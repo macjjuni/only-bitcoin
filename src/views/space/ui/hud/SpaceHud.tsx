@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CircleHelp, MessageCircle, Pencil } from "lucide-react";
+import { ArrowLeft, CircleHelp, MessageCircle, Pencil, UserRound } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -14,6 +14,7 @@ import {
 } from "@/features/space-controls";
 import type { SpaceSession } from "@/features/space-session";
 import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
+import SpaceAvatarPicker from "./SpaceAvatarPicker";
 import SpaceChatPanel, { SPACE_CHAT_INPUT_ID } from "./SpaceChatPanel";
 import SpaceControlGuide from "./SpaceControlGuide";
 import SpaceNicknameEditor from "./SpaceNicknameEditor";
@@ -29,6 +30,9 @@ interface SpaceHudProps {
   inputSource: SpaceInputSource;
   session: SpaceSession;
   nickname: string;
+  /** 지금 쓰는 아바타 모델. 서버가 확정한 값이 우선한다. */
+  modelIndex: number;
+  onChangeModel: (modelIndex: number) => Promise<boolean>;
 }
 
 /**
@@ -42,7 +46,7 @@ interface SpaceHudProps {
  * 전체 화면 3D 페이지라 브라우저가 대신 비켜주지 않는다.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode {
+function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }: SpaceHudProps): ReactNode {
   // region [Hooks]
   const router = useTransitionRouter();
   const pathname = usePathname();
@@ -50,6 +54,7 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
+  const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
   const [lastReadMessageID, setLastReadMessageID] = useState<string | null>(null);
   /** 단축키 리스너가 메시지마다 다시 붙지 않도록 최신 목록만 참조한다. */
   const messagesRef = useRef(session.messages);
@@ -70,11 +75,24 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
 
   const onClickToggleGuide = useCallback((): void => {
     setIsNicknameEditorOpen(false);
+    setIsAvatarPickerOpen(false);
     setIsGuideOpen((previousOpen) => !previousOpen);
+  }, []);
+
+  const onClickToggleAvatarPicker = useCallback((): void => {
+    setIsGuideOpen(false);
+    setIsNicknameEditorOpen(false);
+    setIsAvatarPickerOpen((previousOpen) => !previousOpen);
+  }, []);
+
+  const onClickCloseAvatarPicker = useCallback((): void => {
+    setIsAvatarPickerOpen(false);
+    document.getElementById("space-avatar-toggle")?.focus();
   }, []);
 
   const onClickToggleNicknameEditor = useCallback((): void => {
     setIsGuideOpen(false);
+    setIsAvatarPickerOpen(false);
     setIsNicknameEditorOpen((previousOpen) => !previousOpen);
   }, []);
 
@@ -162,6 +180,16 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
   // region [Templates]
   const lastReadIndex = session.messages.findIndex(({ id }) => id === lastReadMessageID);
   const unreadCount = isChatOpen ? 0 : session.messages.length - lastReadIndex - 1;
+  const chatAction = useMemo((): SpaceHudAction => {
+    return {
+      id: "space-chat-toggle",
+      label: isChatOpen ? "공간 채팅 닫기" : "공간 채팅 열기",
+      icon: <MessageCircle size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+      isActive: isChatOpen,
+      badgeCount: unreadCount,
+      onClick: onClickToggleChat,
+    };
+  }, [isChatOpen, unreadCount, onClickToggleChat]);
   const hudActions = useMemo((): SpaceHudAction[] => {
     const actions: SpaceHudAction[] = [
       {
@@ -172,14 +200,16 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
       },
     ];
 
-    actions.push({
-      id: "space-chat-toggle",
-      label: isChatOpen ? "공간 채팅 닫기" : "공간 채팅 열기",
-      icon: <MessageCircle size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
-      isActive: isChatOpen,
-      badgeCount: unreadCount,
-      onClick: onClickToggleChat,
-    });
+    /*
+     * 손가락 기기에서는 채팅 버튼을 좌측 하단으로 내린다(아래 별도 묶음).
+     *
+     * 우측 상단은 엄지에서 가장 먼 자리다. 채팅은 이 화면에서 가장 자주 누르는
+     * 버튼이라 조이스틱 반대쪽, 엄지가 닿는 곳에 둔다. 마우스 환경에서는 커서가
+     * 어디든 같은 비용이라 묶음을 쪼개지 않는다.
+     */
+    if (!isCoarsePointer) {
+      actions.push(chatAction);
+    }
 
     actions.push({
       id: "space-nickname-toggle",
@@ -187,6 +217,14 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
       icon: <Pencil size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
       isActive: isNicknameEditorOpen,
       onClick: onClickToggleNicknameEditor,
+    });
+
+    actions.push({
+      id: "space-avatar-toggle",
+      label: "아바타 변경",
+      icon: <UserRound size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+      isActive: isAvatarPickerOpen,
+      onClick: onClickToggleAvatarPicker,
     });
 
     actions.push({
@@ -199,11 +237,12 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
 
     return actions;
   }, [
-    isChatOpen,
-    unreadCount,
-    onClickToggleChat,
+    isCoarsePointer,
+    chatAction,
     isNicknameEditorOpen,
     onClickToggleNicknameEditor,
+    isAvatarPickerOpen,
+    onClickToggleAvatarPicker,
     isGuideOpen,
     onClickBack,
     onClickToggleGuide,
@@ -221,6 +260,17 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
     </div>
   ) : null;
 
+  const AvatarPickerTemplate = isAvatarPickerOpen ? (
+    <div className="pointer-events-auto absolute right-12 top-24">
+      <SpaceAvatarPicker
+        modelIndex={modelIndex}
+        colorIndex={session.self?.colorIndex ?? 0}
+        onChangeModel={onChangeModel}
+        onClose={onClickCloseAvatarPicker}
+      />
+    </div>
+  ) : null;
+
   const GuidePanelTemplate = isGuideOpen ? (
     <div className="mt-2">
       <SpaceControlGuide />
@@ -233,7 +283,8 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
    * 채팅이나 닉네임 입력 중에는 둘 다 내려 키보드와 조작이 겹치지 않게 한다.
    * 언마운트 정리가 눌려 있던 입력까지 0 으로 비운다.
    */
-  const shouldRenderTouchControls = isCoarsePointer && !isChatOpen && !isNicknameEditorOpen;
+  const shouldRenderTouchControls =
+    isCoarsePointer && !isChatOpen && !isNicknameEditorOpen && !isAvatarPickerOpen;
   const TouchControlsTemplate =
     shouldRenderTouchControls ? (
       <div className="pointer-events-auto">
@@ -295,9 +346,24 @@ function SpaceHud({ inputSource, session, nickname }: SpaceHudProps): ReactNode 
 
         {NicknameEditorTemplate}
 
+        {AvatarPickerTemplate}
+
         {/* 안내는 읽기 전용이다. 터치를 막으면 열어둔 동안 그 영역의 시야 조작이 죽는다. */}
         {GuidePanelTemplate}
       </div>
+
+      {/* 손가락 기기 전용 좌측 하단 채팅 버튼. 조이스틱 반대쪽 엄지 자리다. */}
+      {shouldRenderTouchControls && (
+        <div
+          className="pointer-events-auto absolute"
+          style={{
+            left: "calc(1.5rem + env(safe-area-inset-left))",
+            bottom: "calc(4.5rem + env(safe-area-inset-bottom))",
+          }}
+        >
+          <SpaceActionBar actions={[chatAction]} align="start" />
+        </div>
+      )}
 
       {TouchControlsTemplate}
 

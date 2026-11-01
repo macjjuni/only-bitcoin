@@ -9,6 +9,13 @@ export {
   type SpaceAvatarColor,
 } from "./model/avatar";
 export {
+  isAvatarModelIndex,
+  resolveAvatarModel,
+  SPACE_AVATAR_MODELS,
+  SPACE_DEFAULT_AVATAR_MODEL_INDEX,
+  type SpaceAvatarModel,
+} from "./model/avatarModel";
+export {
   createLocalPlayerState,
   createOfflinePresence,
   type LocalPlayerState,

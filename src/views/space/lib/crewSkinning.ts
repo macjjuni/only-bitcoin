@@ -1,5 +1,5 @@
 import { useMemo } from "react";
-import type { BufferGeometry, Material, Texture } from "three";
+import type { BufferGeometry, DataTexture, Material, Texture } from "three";
 import { DynamicDrawUsage, InstancedBufferAttribute, Vector2 } from "three";
 import { CREW_MODEL, CREW_WALK } from "./crewModel";
 
@@ -42,17 +42,21 @@ const VERTEX_DECLARATIONS = /* glsl */ `
 /**
  * 두 프레임을 섞어 읽는다.
  *
- * 40 프레임을 1.67초에 재생하면 24 fps 라 그냥 끊어 쓰면 다리가 덜컥거린다.
- * 위치를 선형 보간해야 부드럽다.
+ * 24 fps 로 구워 그냥 끊어 쓰면 다리가 덜컥거린다. 위치를 선형 보간해야 부드럽다.
+ *
+ * 프레임 수를 셰이더에 **상수로 박지 않고** 텍스처 높이(`uWalkTextureSize.y`)에서
+ * 읽는다. 모델마다 Walk 길이가 달라(크루·곰 40, 황소 48) 상수로 박으면 모델마다
+ * 셰이더 프로그램이 따로 컴파일된다.
  */
 const WALK_POSE = /* glsl */ `
-  float walkFrame = ${WALK_PHASE_ATTRIBUTE} * ${CREW_WALK.frameCount}.0;
+  float walkFrameCount = uWalkTextureSize.y;
+  float walkFrame = ${WALK_PHASE_ATTRIBUTE} * walkFrameCount;
   float walkFrameFloor = floor(walkFrame);
   float walkLerp = walkFrame - walkFrameFloor;
   mat4 walkBoneA = readBoneMatrix(
-    ${CREW_MODEL.boneIndexAttribute}, mod(walkFrameFloor, ${CREW_WALK.frameCount}.0));
+    ${CREW_MODEL.boneIndexAttribute}, mod(walkFrameFloor, walkFrameCount));
   mat4 walkBoneB = readBoneMatrix(
-    ${CREW_MODEL.boneIndexAttribute}, mod(walkFrameFloor + 1.0, ${CREW_WALK.frameCount}.0));
+    ${CREW_MODEL.boneIndexAttribute}, mod(walkFrameFloor + 1.0, walkFrameCount));
 `;
 
 /**
@@ -65,7 +69,11 @@ export const applyCrewSkinning = (material: Material, walkTexture: Texture): voi
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uWalkTexture = { value: walkTexture };
     shader.uniforms.uWalkTextureSize = {
-      value: new Vector2(CREW_WALK.boneCount * CREW_WALK.rowsPerBone, CREW_WALK.frameCount),
+      // 세로 크기가 곧 프레임 수다. 셰이더가 이 값으로 사이클을 돈다.
+      value: new Vector2(
+        (walkTexture as DataTexture).image.width,
+        (walkTexture as DataTexture).image.height,
+      ),
     };
 
     shader.vertexShader = shader.vertexShader
@@ -132,8 +140,25 @@ export const createCrewInstanceGeometry = (
  */
 const skinnedMaterials = new WeakMap<Material, Material>();
 
-export const useSkinnedCrewMaterial = (source: Material, walkTexture: Texture): Material => {
+/**
+ * 글린트가 없는 모델(곰)에서는 `source` 가 `null` 이라 그대로 `null` 을 돌려준다.
+ *
+ * 오버로드를 두는 이유는 몸통 머티리얼이 **항상 있기** 때문이다. 반환형을
+ * `Material | null` 하나로 두면 호출부마다 없을 수도 있는 값처럼 다뤄야 한다.
+ */
+export function useSkinnedCrewMaterial(source: Material, walkTexture: Texture): Material;
+export function useSkinnedCrewMaterial(
+  source: Material | null,
+  walkTexture: Texture,
+): Material | null;
+export function useSkinnedCrewMaterial(
+  source: Material | null,
+  walkTexture: Texture,
+): Material | null {
   return useMemo(() => {
+    if (!source) {
+      return null;
+    }
     const cached = skinnedMaterials.get(source);
 
     if (cached) {
@@ -145,4 +170,4 @@ export const useSkinnedCrewMaterial = (source: Material, walkTexture: Texture): 
 
     return material;
   }, [source, walkTexture]);
-};
+}

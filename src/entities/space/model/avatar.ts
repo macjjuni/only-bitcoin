@@ -5,7 +5,7 @@
  *
  * 형상은 `public/models/crew.glb` 가 정한다. 여기에는 모델이 알려줄 수 없는 값만
  * 남긴다. 모델을 바꾸면 `headCenterY` 도 같이 바뀌므로
- * `scripts/blender/process-voxel-crew.py` 가 출력하는 `[anchor]` 값을 옮겨 적는다.
+ * `scripts/blender/process-voxel-character.py` 가 출력하는 `[anchor]` 값을 옮겨 적는다.
  */
 export const SPACE_AVATAR = {
   /** 모델 전체 높이. 발바닥이 원점이라 아바타는 `(x, 0, z)` 에 둔다. */

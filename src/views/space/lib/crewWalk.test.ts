@@ -1,7 +1,8 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { CREW_MODEL, CREW_WALK } from "./crewModel";
+import { SPACE_AVATAR_MODELS } from "@/entities/space";
+import { CREW_WALK } from "./crewModel";
 
 /**
  * 셰이더가 읽는 자료를 같은 방식으로 풀어 본다.
@@ -84,7 +85,7 @@ describe("Walk 본 행렬", () => {
   const walk = new Float32Array(
     walkBuffer.buffer.slice(walkBuffer.byteOffset, walkBuffer.byteOffset + walkBuffer.byteLength),
   );
-  const body = glb.json.meshes.find((m) => m.name === CREW_MODEL.bodyMeshName);
+  const body = glb.json.meshes.find((m) => m.name === SPACE_AVATAR_MODELS[0].bodyMeshName);
   if (!body) {
     throw new Error("crew_body 메시가 없습니다.");
   }
@@ -138,7 +139,7 @@ describe("Walk 본 행렬", () => {
     const at = (frame: number) =>
       positions.map((p, i) => applyBone(walk, frame, boneIndexes[i], p));
     const first = at(0);
-    const last = at(CREW_WALK.frameCount - 1);
+    const last = at(SPACE_AVATAR_MODELS[0].walkFrameCount - 1);
     const gap = Math.max(
       ...first.map((p, i) => Math.hypot(p[0] - last[i][0], p[1] - last[i][1], p[2] - last[i][2])),
     );

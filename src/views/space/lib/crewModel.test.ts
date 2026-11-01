@@ -1,11 +1,28 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
-import { SPACE_AVATAR, SPACE_MAX_OCCUPANTS } from "@/entities/space";
+import {
+  SPACE_AVATAR,
+  SPACE_AVATAR_MODELS,
+  SPACE_MAX_OCCUPANTS,
+  type SpaceAvatarModel,
+} from "@/entities/space";
 import { CREW_MODEL, CREW_WALK } from "./crewModel";
 
-/** `docs/btc-space-3d.md` §8 의 예산. 아바타 외 씬은 약 1,000 tri 다. */
-const TRIANGLE_BUDGET = 80_000;
+const CREW = SPACE_AVATAR_MODELS[0];
+
+/**
+ * `docs/btc-space-3d.md` §8 의 예산. 아바타 외 씬은 약 1,750 tri 다.
+ *
+ * 처음 80k 로 잡은 값을 황소(1,972 tri × 50 = 98,600)를 넣으며 110k 로 올렸다.
+ * 올린 근거는 §8 에 적는다 — 요약하면 80k 는 **측정값이 아니라 설계 당시의
+ * 가정**이고(§8.2 는 여전히 전부 미측정), 같은 절에서 실질 병목으로 지목한
+ * 드로우 콜은 모델 3종 최악의 경우에도 12개로 예산(50) 안이다.
+ *
+ * 그래도 상한을 없애지는 않는다. 110k 는 모델 하나가 약 2,200 tri 를 넘기면
+ * 깨지는 선이라, 다음 모델이 더 무거워지면 이 테스트가 알려 준다.
+ */
+const TRIANGLE_BUDGET = 110_000;
 /** 아틀라스 1장과 검은 눈동자의 색·발광 마스크 2장. */
 const MAXIMUM_IMAGE_COUNT = 3;
 
@@ -37,8 +54,8 @@ interface GltfJson {
 
 // region [Privates]
 /** GLB 의 JSON 청크만 읽는다. three 를 띄우지 않고 규격을 확인하기 위함이다. */
-const readGlbJson = (): GltfJson => {
-  const buffer = readFileSync(resolve(process.cwd(), "public/models/crew.glb"));
+const readGlbJson = (modelUrl: string = CREW.modelUrl): GltfJson => {
+  const buffer = readFileSync(resolve(process.cwd(), `public${modelUrl}`));
 
   expect(buffer.readUInt32LE(0)).toBe(0x46546c67);
   const jsonLength = buffer.readUInt32LE(12);
@@ -50,10 +67,17 @@ const findMesh = (gltf: GltfJson, name: string) => {
   const mesh = gltf.meshes.find((candidate) => candidate.name === name);
 
   if (!mesh) {
-    throw new Error(`crew.glb 에 '${name}' 메시가 없습니다.`);
+    throw new Error(`glb 에 '${name}' 메시가 없습니다.`);
   }
 
   return mesh;
+};
+
+/** 모델 하나의 메시 이름 목록. 글린트가 없는 모델(곰)은 두 개다. */
+const meshNamesOf = (model: SpaceAvatarModel): string[] => {
+  return [model.bodyMeshName, model.accentMeshName, model.pupilGlintMeshName].filter(
+    (name): name is string => name !== null,
+  );
 };
 
 const countTriangles = (gltf: GltfJson): number => {
@@ -64,7 +88,7 @@ const countTriangles = (gltf: GltfJson): number => {
 // endregion
 
 /**
- * 모델은 `scripts/blender/process-voxel-crew.py` 가 원본 `voxel-crew.glb` 에서
+ * 모델은 `scripts/blender/process-voxel-character.py` 가 원본 `voxel-crew.glb` 에서
  * 만든다. 원본은 메시 97개에 스킨·애니메이션이 붙어 있어 그대로 쓸 수 없다.
  * 여기서는 가공 결과가 런타임이 기대하는 규격인지만 고정한다.
  */
@@ -75,15 +99,15 @@ describe("크루 모델 규격", () => {
 
     // 병합하지 않으면 아바타 한 명이 부위 수만큼 드로우 콜을 쓴다.
     expect(gltf.meshes).toHaveLength(3);
-    expect(nodeNames).toContain(CREW_MODEL.bodyMeshName);
-    expect(nodeNames).toContain(CREW_MODEL.accentMeshName);
-    expect(nodeNames).toContain(CREW_MODEL.pupilGlintMeshName);
+    expect(nodeNames).toContain(CREW.bodyMeshName);
+    expect(nodeNames).toContain(CREW.accentMeshName);
+    expect(nodeNames).toContain(CREW.pupilGlintMeshName as string);
   });
 
   it("검은 눈동자 중앙에만 약한 붉은 발광 마스크를 쓴다", () => {
     const gltf = readGlbJson();
-    const body = findMesh(gltf, CREW_MODEL.bodyMeshName).primitives[0];
-    const pupil = findMesh(gltf, CREW_MODEL.pupilGlintMeshName).primitives[0];
+    const body = findMesh(gltf, CREW.bodyMeshName).primitives[0];
+    const pupil = findMesh(gltf, CREW.pupilGlintMeshName as string).primitives[0];
     const pupilMaterial = gltf.materials[pupil.material];
 
     expect(gltf.accessors[pupil.indices].count).toBe(24 * 3);
@@ -123,40 +147,12 @@ describe("크루 모델 규격", () => {
 
   it("몸통은 아틀라스를 쓰고 앞판은 단색으로 칠한다", () => {
     const gltf = readGlbJson();
-    const body = findMesh(gltf, CREW_MODEL.bodyMeshName).primitives[0];
+    const body = findMesh(gltf, CREW.bodyMeshName).primitives[0];
 
     // 몸통 배색은 텍스처에 있다. UV 가 없으면 아틀라스를 못 읽는다.
     expect(Object.keys(body.attributes)).toContain("TEXCOORD_0");
     // 여분 UV 셋은 아틀라스 하나만 쓰는 모델에 불필요한 용량이다.
     expect(Object.keys(body.attributes)).not.toContain("TEXCOORD_1");
-  });
-
-  it("모든 메시가 본 번호를 들고 있다", () => {
-    const gltf = readGlbJson();
-
-    // 셰이더가 이 번호로 본 행렬 텍스처를 조회한다. 없으면 걷기가 죽는다.
-    for (const name of [
-      CREW_MODEL.bodyMeshName,
-      CREW_MODEL.accentMeshName,
-      CREW_MODEL.pupilGlintMeshName,
-    ]) {
-      for (const primitive of findMesh(gltf, name).primitives) {
-        expect(Object.keys(primitive.attributes)).toContain("_BONEINDEX");
-      }
-    }
-  });
-
-  it("Walk 행렬 파일이 셰이더가 기대하는 크기다", () => {
-    const buffer = readFileSync(resolve(process.cwd(), "public/models/crew-walk.bin"));
-    const expected =
-      CREW_WALK.frameCount *
-      CREW_WALK.boneCount *
-      CREW_WALK.rowsPerBone *
-      4 *
-      Float32Array.BYTES_PER_ELEMENT;
-
-    // 크기가 어긋나면 셰이더가 엉뚱한 텍셀을 읽어 아바타가 터진다.
-    expect(buffer.byteLength).toBe(expected);
   });
 
   it("50명이 삼각형 예산 안에 들어온다", () => {
@@ -167,7 +163,7 @@ describe("크루 모델 규격", () => {
 
   it("발바닥이 원점이고 키가 상수와 일치한다", () => {
     const gltf = readGlbJson();
-    const body = findMesh(gltf, CREW_MODEL.bodyMeshName).primitives[0];
+    const body = findMesh(gltf, CREW.bodyMeshName).primitives[0];
     const position = gltf.accessors[body.attributes.POSITION];
     const [, minY] = position.min ?? [];
     const [, maxY] = position.max ?? [];
@@ -180,7 +176,7 @@ describe("크루 모델 규격", () => {
 
   it("전방이 -Z 라 yaw 를 그대로 쓸 수 있다", () => {
     const gltf = readGlbJson();
-    const body = findMesh(gltf, CREW_MODEL.bodyMeshName).primitives[0];
+    const body = findMesh(gltf, CREW.bodyMeshName).primitives[0];
     const position = gltf.accessors[body.attributes.POSITION];
     const minZ = (position.min ?? [])[2] ?? 0;
     const maxZ = (position.max ?? [])[2] ?? 0;
@@ -191,7 +187,7 @@ describe("크루 모델 규격", () => {
 
   it("명찰 기준점이 모델 머리 높이 안에 있다", () => {
     const gltf = readGlbJson();
-    const body = findMesh(gltf, CREW_MODEL.bodyMeshName).primitives[0];
+    const body = findMesh(gltf, CREW.bodyMeshName).primitives[0];
     const maxY = (gltf.accessors[body.attributes.POSITION].max ?? [])[1] ?? 0;
 
     // 모델을 바꾸면 가공 스크립트의 [anchor] 값을 SPACE_AVATAR 에 옮겨 적어야 한다.
@@ -201,7 +197,7 @@ describe("크루 모델 규격", () => {
 
   it("앞치마 앞판이 몸 앞쪽 허리 아래에 있다", () => {
     const gltf = readGlbJson();
-    const accent = findMesh(gltf, CREW_MODEL.accentMeshName).primitives[0];
+    const accent = findMesh(gltf, CREW.accentMeshName).primitives[0];
     const position = gltf.accessors[accent.attributes.POSITION];
     const maxZ = (position.max ?? [])[2] ?? 0;
     const maxY = (position.max ?? [])[1] ?? 0;
@@ -209,5 +205,91 @@ describe("크루 모델 규격", () => {
     // 앞판이 뒤로 가면 플레이어 색이 정면에서 보이지 않는다.
     expect(maxZ).toBeLessThan(0);
     expect(maxY).toBeLessThan(SPACE_AVATAR.headCenterY);
+  });
+});
+
+/**
+ * 고를 수 있는 모든 모델에 적용되는 규격.
+ *
+ * 두 모델이 같은 셰이더·같은 걷기 상수를 쓰므로, 한쪽만 규격을 어겨도 그 모델을
+ * 고른 사람의 아바타가 조용히 터진다. 모델을 추가하면 이 블록이 자동으로 검사한다.
+ */
+describe.each(
+  SPACE_AVATAR_MODELS.map((model) => [model.id, model] as const),
+)("아바타 모델 규격 — %s", (_id, model) => {
+  it("메시가 병합돼 있고 이름이 상수와 맞는다", () => {
+    const gltf = readGlbJson(model.modelUrl);
+    const nodeNames = gltf.nodes.map((node) => node.name);
+    const expectedNames = meshNamesOf(model);
+
+    // 병합하지 않으면 아바타 한 명이 부위 수만큼 드로우 콜을 쓴다.
+    expect(gltf.meshes).toHaveLength(expectedNames.length);
+    for (const name of expectedNames) {
+      expect(nodeNames).toContain(name);
+    }
+  });
+
+  it("스킨과 애니메이션이 제거돼 있다", () => {
+    const gltf = readGlbJson(model.modelUrl);
+
+    expect(gltf.skins ?? []).toHaveLength(0);
+    expect(gltf.animations ?? []).toHaveLength(0);
+  });
+
+  it("메시마다 primitive 가 하나뿐이다", () => {
+    /*
+     * glTF 는 재질마다 primitive 를 쪼개고, three 는 primitive 가 둘 이상인
+     * 메시를 **Mesh 가 아니라 Group** 으로 만든다. 런타임은 Mesh 를 찾아
+     * 인스턴싱하므로 Group 이 오면 "메시가 없습니다" 로 터진다.
+     * (황소의 금색 단추 재질이 이 경우였다 — 같은 아틀라스를 쓰고 metallic 만
+     * 달라, 가공 스크립트가 재질을 하나로 합치게 했다.)
+     */
+    const gltf = readGlbJson(model.modelUrl);
+
+    for (const name of meshNamesOf(model)) {
+      expect(findMesh(gltf, name).primitives).toHaveLength(1);
+    }
+  });
+
+  it("모든 메시가 본 번호를 들고 있다", () => {
+    const gltf = readGlbJson(model.modelUrl);
+
+    // 셰이더가 이 번호로 본 행렬 텍스처를 조회한다. 없으면 걷기가 죽는다.
+    for (const name of meshNamesOf(model)) {
+      for (const primitive of findMesh(gltf, name).primitives) {
+        expect(Object.keys(primitive.attributes)).toContain("_BONEINDEX");
+      }
+    }
+  });
+
+  it("Walk 행렬 파일이 셰이더가 기대하는 크기다", () => {
+    const buffer = readFileSync(resolve(process.cwd(), `public${model.walkUrl}`));
+    const expected =
+      model.walkFrameCount *
+      CREW_WALK.boneCount *
+      CREW_WALK.rowsPerBone *
+      4 *
+      Float32Array.BYTES_PER_ELEMENT;
+
+    // 크기가 어긋나면 셰이더가 엉뚱한 텍셀을 읽어 아바타가 터진다.
+    expect(buffer.byteLength).toBe(expected);
+  });
+
+  it("삼각형 수가 상수와 맞고 50명이 예산 안에 들어온다", () => {
+    const triangles = countTriangles(readGlbJson(model.modelUrl));
+
+    expect(triangles).toBe(model.triangleCount);
+    expect(triangles * SPACE_MAX_OCCUPANTS).toBeLessThanOrEqual(TRIANGLE_BUDGET);
+  });
+
+  it("발바닥이 원점이고 키가 상수와 일치한다", () => {
+    const gltf = readGlbJson(model.modelUrl);
+    const body = findMesh(gltf, model.bodyMeshName).primitives[0];
+    const position = gltf.accessors[body.attributes.POSITION];
+    const [, minY] = position.min ?? [];
+    const [, maxY] = position.max ?? [];
+
+    expect(minY).toBeCloseTo(0, 2);
+    expect((maxY ?? 0) - (minY ?? 0)).toBeCloseTo(CREW_MODEL.height, 2);
   });
 });

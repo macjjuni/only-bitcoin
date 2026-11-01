@@ -13,33 +13,26 @@ import {
   RGBAFormat,
   type Texture,
 } from "three";
+import {
+  SPACE_AVATAR_MODELS,
+  SPACE_DEFAULT_AVATAR_MODEL_INDEX,
+  type SpaceAvatarModel,
+} from "@/entities/space";
 
 /**
- * 크루 캐릭터 모델.
+ * 아바타 모델 로더.
  *
- * 원본은 `public/models/voxel-crew.blend` 이고,
- * `scripts/blender/process-voxel-crew.py` 가 인스턴싱 가능한 형태로 가공한다.
+ * 원본은 `public/models/voxel-*.blend` 이고,
+ * `scripts/blender/process-voxel-character.py` 가 인스턴싱 가능한 형태로 가공한다.
  * 원본은 메시가 부위마다 쪼개져 있고 스킨이 붙어 있어, 그대로 쓰면 아바타 한
  * 명이 드로우 콜 수십 개를 쓴다.
+ *
+ * 모델 목록과 에셋 경로는 `entities/space` 의 `SPACE_AVATAR_MODELS` 가 가진다.
+ * 여기서는 그중 하나를 받아 three 객체로 바꾸는 일만 한다.
  */
-export const CREW_MODEL_URL = "/models/crew.glb";
-
-/** Walk 한 사이클의 본 스키닝 행렬. 가공 스크립트가 함께 굽는다. */
-export const CREW_WALK_URL = "/models/crew-walk.bin";
-
 export const CREW_MODEL = {
-  /** 발바닥이 원점이라 아바타를 `(x, 0, z)` 에 그대로 둔다. */
+  /** 발바닥이 원점이라 아바타를 `(x, 0, z)` 에 그대로 둔다. 두 모델 공통. */
   height: 1.81,
-  /** 고정 배색 메시. 아틀라스 텍스처를 그대로 쓴다. */
-  bodyMeshName: "crew_body",
-  /**
-   * 플레이어 색을 받는 앞치마 앞판.
-   *
-   * 아틀라스의 앞치마 색이 `#18171a`(밝기 13%)라 텍스처에 색을 곱하면 검게
-   * 남는다. 앞판만 텍스처 없는 단색으로 그려야 색이 보인다.
-   */
-  accentMeshName: "crew_accent",
-  pupilGlintMeshName: "crew_pupil_glint",
   /** 정점마다 따라갈 본 번호. glTF 의 `_BONEINDEX` 를 three 가 소문자로 바꾼다. */
   boneIndexAttribute: "_boneindex",
 } as const;
@@ -51,8 +44,13 @@ export const CREW_MODEL = {
  * 아바타가 터진다. `crewModel.test.ts` 가 `.bin` 크기로 검증한다.
  */
 export const CREW_WALK = {
+  /**
+   * 본 수. **모든 모델이 같아야 한다** — 셰이더의 텍셀 조회 폭을 정한다.
+   *
+   * 프레임 수는 여기 두지 않는다. 모델마다 달라(크루·곰 40, 황소 48) 레지스트리의
+   * `walkFrameCount` 가 들고 있고, 셰이더는 텍스처 높이에서 읽는다.
+   */
   boneCount: 22,
-  frameCount: 40,
   /** 행렬 한 개는 4x4 의 위 3행만 저장한다. 마지막 행은 항상 (0,0,0,1) 이다. */
   rowsPerBone: 3,
   /**
@@ -70,23 +68,36 @@ export const CREW_WALK = {
 export interface CrewModelParts {
   bodyGeometry: BufferGeometry;
   accentGeometry: BufferGeometry;
-  pupilGlintGeometry: BufferGeometry;
+  /** 눈 글린트가 없는 모델(곰)에서는 `null`. */
+  pupilGlintGeometry: BufferGeometry | null;
   /**
    * 아틀라스가 붙은 **원본** 머티리얼. 픽셀 아트라 확대 필터를 유지해야 한다.
    * 걷기 셰이더는 `useSkinnedCrewMaterial` 이 사본에 심는다.
    */
   bodyMaterial: Material;
-  pupilGlintMaterial: Material;
+  pupilGlintMaterial: Material | null;
   /** Walk 본 행렬 텍스처. 셰이더가 본 번호와 프레임으로 조회한다. */
   walkTexture: Texture;
 }
 
 // region [Privates]
-const findMesh = (root: Object3D, name: string): Mesh => {
+const findMesh = (root: Object3D, name: string, modelUrl: string): Mesh => {
   const found = root.getObjectByName(name);
 
   if (!found || !("geometry" in found)) {
-    throw new Error(`크루 모델에 '${name}' 메시가 없습니다. ${CREW_MODEL_URL} 를 확인하세요.`);
+    /*
+     * 실제로 들어 있는 이름을 함께 알려 준다.
+     *
+     * 이름이 엉뚱하면 **베이크가 잘못된 것**이고, 목록이 비어 있거나 다른 모델의
+     * 이름이 보이면 **`useGLTF` 캐시에 옛 응답이 남은 것**이다. drei 는 URL 별로
+     * 파싱 결과를 영구 캐시하므로, 모델을 다시 구운 뒤에는 새로고침해야 한다.
+     */
+    const actualNames = root.children.map((child) => child.name).join(", ") || "(없음)";
+
+    throw new Error(
+      `아바타 모델에 '${name}' 메시가 없습니다. ${modelUrl} 에 들어 있는 것: ${actualNames}. ` +
+        "모델을 다시 구웠다면 새로고침하세요.",
+    );
   }
   const mesh = found as Mesh;
 
@@ -94,7 +105,7 @@ const findMesh = (root: Object3D, name: string): Mesh => {
   if (!mesh.geometry.getAttribute(CREW_MODEL.boneIndexAttribute)) {
     throw new Error(
       `'${name}' 에 '${CREW_MODEL.boneIndexAttribute}' 속성이 없습니다. ` +
-        "scripts/blender/process-voxel-crew.py 로 모델을 다시 가공하세요.",
+        "scripts/blender/process-voxel-character.py 로 모델을 다시 가공하세요.",
     );
   }
 
@@ -107,18 +118,18 @@ const findMesh = (root: Object3D, name: string): Mesh => {
  * 본 하나가 텍셀 3개(행렬의 위 3행)를 쓰고, 세로 한 줄이 한 프레임이다.
  * 정점 위치를 통째로 굽는 VAT 보다 자료가 훨씬 작다(41 KB).
  */
-const createWalkTexture = (buffer: ArrayBuffer): Texture => {
+const createWalkTexture = (buffer: ArrayBuffer, model: SpaceAvatarModel): Texture => {
   const width = CREW_WALK.boneCount * CREW_WALK.rowsPerBone;
-  const expected = width * CREW_WALK.frameCount * 4;
+  const expected = width * model.walkFrameCount * 4;
   const data = new Float32Array(buffer);
 
   if (data.length !== expected) {
     throw new Error(
-      `${CREW_WALK_URL} 크기가 규격과 다릅니다. float ${data.length}개, 기대 ${expected}개.`,
+      `${model.walkUrl} 크기가 규격과 다릅니다. float ${data.length}개, 기대 ${expected}개.`,
     );
   }
 
-  const texture = new DataTexture(data, width, CREW_WALK.frameCount, RGBAFormat, FloatType);
+  const texture = new DataTexture(data, width, model.walkFrameCount, RGBAFormat, FloatType);
   // 프레임 보간은 셰이더가 직접 한다. 텍셀을 섞으면 이웃 본의 행렬이 번진다.
   texture.magFilter = NearestFilter;
   texture.minFilter = NearestFilter;
@@ -135,23 +146,26 @@ const createWalkTexture = (buffer: ArrayBuffer): Texture => {
  * 머티리얼을 직접 만들지 않고 glTF 가 만든 것을 그대로 쓴다. 아틀라스 샘플러의
  * `NEAREST` 확대 필터가 함께 따라와야 픽셀 아트가 뭉개지지 않는다.
  */
-export const useCrewModel = (): CrewModelParts => {
-  const { scene } = useGLTF(CREW_MODEL_URL);
-  const walkBuffer = useLoader(FileLoader, CREW_WALK_URL, (loader) => {
+export const useCrewModel = (model: SpaceAvatarModel): CrewModelParts => {
+  const { scene } = useGLTF(model.modelUrl);
+  const walkBuffer = useLoader(FileLoader, model.walkUrl, (loader) => {
     loader.setResponseType("arraybuffer");
   }) as unknown as ArrayBuffer;
-  const walkTexture = useMemo(() => createWalkTexture(walkBuffer), [walkBuffer]);
-  const body = findMesh(scene, CREW_MODEL.bodyMeshName);
-  const pupilGlint = findMesh(scene, CREW_MODEL.pupilGlintMeshName);
+  const walkTexture = useMemo(() => createWalkTexture(walkBuffer, model), [walkBuffer, model]);
+  const body = findMesh(scene, model.bodyMeshName, model.modelUrl);
+  const pupilGlint = model.pupilGlintMeshName
+    ? findMesh(scene, model.pupilGlintMeshName, model.modelUrl)
+    : null;
 
   return {
     bodyGeometry: body.geometry,
-    accentGeometry: findMesh(scene, CREW_MODEL.accentMeshName).geometry,
-    pupilGlintGeometry: pupilGlint.geometry,
+    accentGeometry: findMesh(scene, model.accentMeshName, model.modelUrl).geometry,
+    pupilGlintGeometry: pupilGlint?.geometry ?? null,
     bodyMaterial: body.material as Material,
-    pupilGlintMaterial: pupilGlint.material as Material,
+    pupilGlintMaterial: (pupilGlint?.material as Material | undefined) ?? null,
     walkTexture,
   };
 };
 
-useGLTF.preload(CREW_MODEL_URL);
+// 기본 모델만 미리 받는다. 나머지는 쓰는 아바타가 생길 때 로드된다.
+useGLTF.preload(SPACE_AVATAR_MODELS[SPACE_DEFAULT_AVATAR_MODEL_INDEX].modelUrl);

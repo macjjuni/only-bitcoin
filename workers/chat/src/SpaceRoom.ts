@@ -2,6 +2,7 @@ import { DurableObject } from "cloudflare:workers";
 import { resolveColorIndexFromClientKey } from "../../../src/entities/space/lib/clientKeyHash";
 import { encodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapshot";
 import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
+import { SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "../../../src/entities/space/model/avatarModel";
 import {
   parseSpaceClientFrame,
   SPACE_CHAT_COOLDOWN_MS,
@@ -373,6 +374,10 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         seat,
         nickname,
         colorIndex: resolveColorIndexFromClientKey(frame.clientKey),
+        // 아바타 모델은 클라이언트가 고른다. 색·스폰과 달리 서버가 정할 근거가
+        // 없고, 프레임 파서가 이미 목록 범위를 검증한다. 모델 선택을 모르는
+        // 옛 클라이언트는 이 값을 보내지 않으므로 기본 모델로 받는다.
+        modelIndex: frame.modelIndex ?? SPACE_DEFAULT_AVATAR_MODEL_INDEX,
         isRunning: false,
       };
 
@@ -507,6 +512,37 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       lastNickAt: now,
     } satisfies SpaceSocketAttachment);
     this.broadcastFrame({ v: 1, t: "peer", peer: renamed });
+  }
+
+  /**
+   * 아바타 모델을 바꾼다.
+   *
+   * 닉네임과 같은 흐름이다. 다만 **쿨다운을 두지 않는다** — 이름은 자주 바뀌면
+   * 누가 누군지 못 따라가지만, 모델은 그 사람의 좌석·색·이름이 그대로라 혼동이
+   * 생기지 않는다. 프레임 수 제한(초당 40)이 이미 연타를 막는다.
+   */
+  private async handleModel(
+    socket: WebSocket,
+    frame: Extract<SpaceClientFrame, { t: "model" }>,
+  ): Promise<void> {
+    const attachment = this.getJoinedAttachment(socket);
+    const peer = attachment?.peer;
+
+    if (!attachment || !peer) {
+      this.sendError(socket, "JOIN_REQUIRED", "먼저 공간에 입장해 주세요.", frame.rid);
+      return;
+    }
+    if (peer.modelIndex === frame.modelIndex) {
+      this.sendFrame(socket, { v: 1, t: "peer", peer });
+      return;
+    }
+    const changed: SpacePeer = { ...peer, modelIndex: frame.modelIndex };
+    socket.serializeAttachment({
+      ...attachment,
+      peer: changed,
+      lastActivityAt: Date.now(),
+    } satisfies SpaceSocketAttachment);
+    this.broadcastFrame({ v: 1, t: "peer", peer: changed });
   }
 
   private async handleSay(
@@ -690,6 +726,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
           break;
         case "nick":
           await this.handleNick(socket, frame);
+          break;
+        case "model":
+          await this.handleModel(socket, frame);
           break;
         default:
           throw new Error("Unsupported space frame");

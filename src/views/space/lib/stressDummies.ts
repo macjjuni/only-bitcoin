@@ -1,4 +1,9 @@
-import { type RemotePlayer, SPACE_AVATAR_COLORS, SPACE_BOUNDS } from "@/entities/space";
+import {
+  type RemotePlayer,
+  SPACE_AVATAR_COLORS,
+  SPACE_AVATAR_MODELS,
+  SPACE_BOUNDS,
+} from "@/entities/space";
 import { resolveSpaceAvatarCount } from "./avatarCapacity";
 
 /**
@@ -42,6 +47,9 @@ export const createStressDummies = (count: number): StressDummy[] => {
 
     return {
       seat,
+      // 모델을 번갈아 준다. 한 모델만 띄우면 모델이 둘일 때의 드로우 콜·
+      // 삼각형 비용을 측정에서 놓친다.
+      modelIndex: seat % SPACE_AVATAR_MODELS.length,
       nickname: `더미${String(seat + 1).padStart(2, "0")}`,
       colorIndex: seat % SPACE_AVATAR_COLORS.length,
       orbitCenterX,
