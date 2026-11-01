@@ -261,6 +261,7 @@ function SpaceScene({
       <Nameplates
         players={remotePlayers}
         selfNickname={nickname}
+        isCoarsePointer={isCoarsePointer}
         rosterRevision={session.rosterRevision}
         viewerTransformRef={playerStateRef}
       />
