@@ -533,6 +533,50 @@ describe("SpaceSessionController", () => {
     controller.stop();
   });
 
+  it("아바타를 바꾸는 중 연결이 끊기면 보류를 비워 다시 시도할 수 있게 둔다", async () => {
+    const { controller, sockets, welcome } = createHarness();
+    controller.start();
+    const socket = welcome();
+
+    const changed = controller.changeModel(1);
+    // 구 버전 서버는 모르는 프레임을 받으면 연결을 끊는다. 보류가 남으면
+    // 타임아웃이 뜰 때까지 다음 시도가 조용히 막힌다.
+    socket.emitClose();
+    expect(await changed).toBe(false);
+
+    vi.advanceTimersByTime(750);
+    const retried = sockets[1];
+    retried.open();
+    retried.receive({ v: 1, t: "welcome", self: { ...self, modelIndex: 1 }, peers: [] });
+    expect(controller.changeModel(2)).toBeInstanceOf(Promise);
+    expect(sentFrames(retried, "model")).toEqual([
+      { v: 1, t: "model", rid: requestId, modelIndex: 2 },
+    ]);
+    controller.stop();
+  });
+
+  it("아바타 변경이 rid 오류로 거절되면 연결을 지키고 보류만 비운다", async () => {
+    const { controller, welcome } = createHarness();
+    controller.start();
+    const socket = welcome();
+
+    const changed = controller.changeModel(1);
+    socket.receive({
+      v: 1,
+      t: "error",
+      code: "INVALID_PROTOCOL",
+      message: "입력 형식을 확인해 주세요.",
+      rid: requestId,
+    });
+    expect(await changed).toBe(false);
+    expect(controller.getSnapshot().presence.status).toBe("online");
+    expect(controller.getSnapshot().self?.modelIndex).toBe(0);
+    // 보류가 비었으니 같은 연결에서 바로 다시 보낼 수 있다.
+    expect(controller.changeModel(2)).toBeInstanceOf(Promise);
+    expect(sentFrames(socket, "model")).toHaveLength(2);
+    controller.stop();
+  });
+
   it("닉네임 변경은 서버가 되돌려준 peer 로 확정하고 재접속에도 이어진다", async () => {
     const { controller, sockets, welcome } = createHarness();
     controller.start();

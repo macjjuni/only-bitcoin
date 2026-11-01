@@ -593,6 +593,9 @@ export class SpaceSessionController {
           if (this.pendingNickname?.requestId === frame.rid) {
             this.finishPendingNickname(false);
           }
+          if (this.pendingModel?.requestId === frame.rid) {
+            this.finishPendingModel(false);
+          }
           this.updateSnapshot({ error: frame.message });
           return;
         }
@@ -765,6 +768,7 @@ export class SpaceSessionController {
     }
     this.finishPendingMessage(false);
     this.finishPendingNickname(false);
+    this.finishPendingModel(false);
 
     if (socket && socket.readyState < socketClosingState) {
       socket.close(1000, "space session closed");
