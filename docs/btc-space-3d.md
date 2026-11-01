@@ -29,7 +29,7 @@ Three.js 기반 3D 공간에 비트코인 실시간 가격 전광판을 세우�
 | 전광판 | 9.6 × 5.4, 중앙 뒷벽 | `CanvasTexture` 1600 × 900, 가격 2행·24시간 차트 |
 | 광고판 | 6 × 4 (3:2) × 2면 | 전광판 좌우, 안쪽 15° 회전 |
 | 가격 소스 | `useBitcoinStore` | 전역 `Initializer` 의 거래소 소켓을 그대로 구독 |
-| 아바타 렌더 | `InstancedMesh` 50 슬롯 | 50명 전체가 드로우 콜 3개 |
+| 아바타 렌더 | `InstancedMesh` 50 슬롯 | 50명 전체가 드로우 콜 4개 |
 | 명찰 표시 상한 | 25 m 이내 & 가장 가까운 16명 | DOM 노드 폭발 방지 |
 | 말풍선 표시 상한 | 동시 12개, TTL 5 s | 25 m 이내 가까운 순, 좌석당 최신 발화만 표시 |
 | 성능 목표 | 데스크톱 60 fps, 중급 모바일 30 fps 이상 | 아바타 50명 상태 기준 |
@@ -517,9 +517,9 @@ interface AdSlot {
 | 항목 | 값 |
 | --- | --- |
 | 원본 | `public/models/voxel-crew.blend` (메시 94개, 본 22개, Idle·Walk 액션) |
-| 런타임 | `public/models/crew.glb` (메시 2개, 1,240 tri, 119 KB) + `crew-walk.bin` (41 KB) |
-| 가공 | `scripts/blender/process-voxel-crew.py` |
-| 메시 | `crew_body`(아틀라스) · `crew_accent`(앞치마 앞판, 단색) |
+| 런타임 | `public/models/crew.glb` (메시 3개, 1,240 tri, 121 KB) + `crew-walk.bin` (41 KB) |
+| 가공 | `scripts/blender/process-voxel-crew.py` → `scripts/blender/apply-laser-eyes-to-crew.py` |
+| 메시 | `crew_body`(흰자 포함) · `crew_accent`(앞치마 앞판, 단색) · `crew_pupil_glint`(검은 눈동자 속 붉은 점) |
 | 키 / 원점 | 1.81 m / 발바닥이 원점 |
 | 전방 | `-Z` |
 
@@ -527,7 +527,7 @@ interface AdSlot {
 
 원본은 부위마다 메시가 따로 있어 **아바타 한 명에 드로우 콜 94개**가 든다. 50명이면 4,700 콜로 예산(50)의 94배다. 가공 스크립트가 세 가지를 바꾼다.
 
-1. **메시 병합** — 94개를 몸통·앞판 2개로 합친다. 머티리얼이 하나뿐이라 병합해도 배색이 유지된다.
+1. **메시 병합** — 94개를 먼저 몸통·앞판 2개로 합친다. 이후 검은 눈동자만 분리해 소프트 버전의 색상·발광 마스크를 옮긴다. 흰자는 원본 그대로 둔다.
 2. **스킨 제거 + 본 행렬 베이크** — `InstancedMesh` 는 스키닝을 못 한다. 지오메트리는 레스트 포즈로 굳히고, Walk 한 사이클의 본 스키닝 행렬을 따로 구워 셰이더가 읽게 한다(§아래).
 3. **스튜디오 바닥 제외** — `.blend` 에는 200 x 200 m 바닥과 조명·카메라가 함께 있다. 타입만 보고 고르면 바닥이 아바타마다 딸려 간다. **리그에 묶인 메시만** 캐릭터로 본다.
 4. **180° 회전** — 원본은 `+Z` 를 본다. 프로젝트 규약(`-Z`)에 맞춰야 `yaw` 를 그대로 쓸 수 있다. `mesh.transform` 으로 정점과 법선을 함께 돌린다. `transform_apply` 오퍼레이터는 백그라운드 실행에서 선택 상태를 타므로 쓰지 않는다.
@@ -579,7 +579,7 @@ three 는 `InstancedMesh` 의 바운딩 스피어를 `boundingSphere === null` �
 
 굳은 빈 구는 중심이 원점이라 컬링 통과 여부가 "원점이 화면에 들어오는지"로 갈린다. 증상이 **가끔** 나타나는 이유다. 명찰·말풍선은 DOM(`<Html>`)이라 컬링과 무관하게 보이므로 **사람은 투명한데 닉네임만 뜨는** 상태가 된다.
 
-월드는 64 × 48 m 이고 아바타 50명이 드로우 콜 3개에 담긴다. 컬링으로 아낄 것이 없다. `avatarCulling.frustum.test.ts` 가 three 의 이 동작을 고정하므로, 상류에서 고쳐지면 테스트가 깨져 알려 준다.
+월드는 64 × 48 m 이고 아바타 50명이 드로우 콜 4개에 담긴다. 컬링으로 아낄 것이 없다. `avatarCulling.frustum.test.ts` 가 three 의 이 동작을 고정하므로, 상류에서 고쳐지면 테스트가 깨져 알려 준다.
 
 ##### 공유 지오메트리 해제 방지
 
@@ -588,6 +588,8 @@ GLTF 지오메트리·머티리얼을 쓰는 메시에는 **`dispose={null}` 이
 로딩은 `<Canvas>` 가 children 을 `Suspense` 로 감싸므로 별도 경계가 필요 없다. `useGLTF.preload` 로 라우트 진입과 함께 받아둔다.
 
 ##### 모델을 바꿀 때
+
+기본 가공으로 `crew.glb` 를 재생성한 뒤 `python3 scripts/blender/apply-laser-eyes-to-crew.py` 를 실행한다. 소프트 버전의 편집 원본은 `public/models/voxel-crew-laser-eyes-soft.blend` 이고, 스크립트는 함께 보관한 `.glb` 에서 검은 눈동자의 UV·색상·발광 마스크를 가져온다. 흰자와 눈동자 형상, 걷기 동작은 원본 그대로이며 눈 주변 번짐 효과는 사용하지 않는다.
 
 `crewModel.test.ts` 가 `.glb` 를 직접 파싱해 메시 개수·이름·삼각형 예산·원점·전방·아틀라스 필터를 고정한다. 가공 스크립트가 출력하는 `[anchor] headCenterY` 값은 명찰·말풍선이 매달리는 높이이므로 `SPACE_AVATAR.headCenterY` 에 옮겨 적는다.
 

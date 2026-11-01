@@ -39,7 +39,9 @@ function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: Player
   const avatarColor = useMemo(() => resolveAvatarColor(colorIndex), [colorIndex]);
   const crew = useCrewModel();
   const bodyMaterial = useSkinnedCrewMaterial(crew.bodyMaterial, crew.walkTexture);
+  const pupilGlintMaterial = useSkinnedCrewMaterial(crew.pupilGlintMaterial, crew.walkTexture);
   const body = useMemo(() => createCrewInstanceGeometry(crew.bodyGeometry, 1), [crew.bodyGeometry]);
+  const pupilGlint = useMemo(() => createCrewInstanceGeometry(crew.pupilGlintGeometry, 1), [crew.pupilGlintGeometry]);
   const accent = useMemo(
     () => createCrewInstanceGeometry(crew.accentGeometry, 1),
     [crew.accentGeometry],
@@ -53,6 +55,7 @@ function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: Player
   // 혼자라 인스턴스 색이 필요 없다. 머티리얼에 바로 넣는다.
   accentMaterial.color.set(avatarColor);
   const bodyMeshRef = useRef<InstancedMesh>(null);
+  const pupilGlintMeshRef = useRef<InstancedMesh>(null);
   const accentMeshRef = useRef<InstancedMesh>(null);
   // endregion
 
@@ -68,7 +71,7 @@ function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: Player
     const step = deltaSeconds / CREW_WALK.blendSeconds;
     const blend = body.blend.getX(0) + (speed > MOVING_SPEED_THRESHOLD ? step : -step);
 
-    for (const buffers of [body, accent]) {
+    for (const buffers of [body, accent, pupilGlint]) {
       buffers.phase.setX(0, phase - Math.floor(phase));
       buffers.blend.setX(0, Math.min(1, Math.max(0, blend)));
       buffers.phase.needsUpdate = true;
@@ -80,7 +83,7 @@ function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: Player
   const resetInstanceMatrix = (): void => {
     const identity = new Object3D();
     identity.updateMatrix();
-    for (const meshRef of [bodyMeshRef, accentMeshRef]) {
+    for (const meshRef of [bodyMeshRef, accentMeshRef, pupilGlintMeshRef]) {
       meshRef.current?.setMatrixAt(0, identity.matrix);
       if (meshRef.current) {
         meshRef.current.instanceMatrix.needsUpdate = true;
@@ -99,9 +102,10 @@ function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: Player
       // 사본과 직접 만든 머티리얼만 정리한다. 공유 원본은 useGLTF 캐시가 가진다.
       body.geometry.dispose();
       accent.geometry.dispose();
+      pupilGlint.geometry.dispose();
       accentMaterial.dispose();
     };
-  }, [shadowTexture, body, accent, accentMaterial]);
+  }, [shadowTexture, body, accent, pupilGlint, accentMaterial]);
 
   useFrame((_, deltaSeconds) => {
     advanceWalkCycle(deltaSeconds);
@@ -126,6 +130,14 @@ function PlayerAvatar({ colorIndex, hasRealtimeShadows, playerStateRef }: Player
         args={[accent.geometry, accentMaterial, 1]}
         count={1}
         castShadow={hasRealtimeShadows}
+        frustumCulled={false}
+        dispose={null}
+      />
+
+      <instancedMesh
+        ref={pupilGlintMeshRef}
+        args={[pupilGlint.geometry, pupilGlintMaterial, 1]}
+        count={1}
         frustumCulled={false}
         dispose={null}
       />

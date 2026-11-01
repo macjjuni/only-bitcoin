@@ -39,6 +39,7 @@ export const CREW_MODEL = {
    * 남는다. 앞판만 텍스처 없는 단색으로 그려야 색이 보인다.
    */
   accentMeshName: "crew_accent",
+  pupilGlintMeshName: "crew_pupil_glint",
   /** 정점마다 따라갈 본 번호. glTF 의 `_BONEINDEX` 를 three 가 소문자로 바꾼다. */
   boneIndexAttribute: "_boneindex",
 } as const;
@@ -69,11 +70,13 @@ export const CREW_WALK = {
 export interface CrewModelParts {
   bodyGeometry: BufferGeometry;
   accentGeometry: BufferGeometry;
+  pupilGlintGeometry: BufferGeometry;
   /**
    * 아틀라스가 붙은 **원본** 머티리얼. 픽셀 아트라 확대 필터를 유지해야 한다.
    * 걷기 셰이더는 `useSkinnedCrewMaterial` 이 사본에 심는다.
    */
   bodyMaterial: Material;
+  pupilGlintMaterial: Material;
   /** Walk 본 행렬 텍스처. 셰이더가 본 번호와 프레임으로 조회한다. */
   walkTexture: Texture;
 }
@@ -139,11 +142,14 @@ export const useCrewModel = (): CrewModelParts => {
   }) as unknown as ArrayBuffer;
   const walkTexture = useMemo(() => createWalkTexture(walkBuffer), [walkBuffer]);
   const body = findMesh(scene, CREW_MODEL.bodyMeshName);
+  const pupilGlint = findMesh(scene, CREW_MODEL.pupilGlintMeshName);
 
   return {
     bodyGeometry: body.geometry,
     accentGeometry: findMesh(scene, CREW_MODEL.accentMeshName).geometry,
+    pupilGlintGeometry: pupilGlint.geometry,
     bodyMaterial: body.material as Material,
+    pupilGlintMaterial: pupilGlint.material as Material,
     walkTexture,
   };
 };

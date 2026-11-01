@@ -6,8 +6,8 @@ import { CREW_MODEL, CREW_WALK } from "./crewModel";
 
 /** `docs/btc-space-3d.md` §8 의 예산. 아바타 외 씬은 약 1,000 tri 다. */
 const TRIANGLE_BUDGET = 80_000;
-/** 아틀라스 한 장을 넘기면 드로우 콜을 더 쓰게 된다. */
-const MAXIMUM_IMAGE_COUNT = 1;
+/** 아틀라스 1장과 검은 눈동자의 색·발광 마스크 2장. */
+const MAXIMUM_IMAGE_COUNT = 3;
 
 interface GltfAccessor {
   count: number;
@@ -16,12 +16,22 @@ interface GltfAccessor {
 }
 
 interface GltfJson {
-  meshes: { name: string; primitives: { attributes: Record<string, number>; indices: number }[] }[];
+  meshes: {
+    name: string;
+    primitives: { attributes: Record<string, number>; indices: number; material: number }[];
+  }[];
   accessors: GltfAccessor[];
   nodes: { name?: string }[];
+  materials: {
+    name: string;
+    emissiveFactor?: number[];
+    emissiveTexture?: { index: number };
+    pbrMetallicRoughness?: { baseColorTexture?: { index: number } };
+  }[];
   skins?: unknown[];
   animations?: unknown[];
-  images?: unknown[];
+  images?: { name?: string }[];
+  textures?: { source: number }[];
   samplers?: { magFilter?: number }[];
 }
 
@@ -59,14 +69,38 @@ const countTriangles = (gltf: GltfJson): number => {
  * 여기서는 가공 결과가 런타임이 기대하는 규격인지만 고정한다.
  */
 describe("크루 모델 규격", () => {
-  it("원본의 수십 개 메시가 런타임이 찾는 두 개로 병합돼 있다", () => {
+  it("흰자는 몸통에 남기고 눈동자만 별도 메시로 분리한다", () => {
     const gltf = readGlbJson();
     const nodeNames = gltf.nodes.map((node) => node.name);
 
     // 병합하지 않으면 아바타 한 명이 부위 수만큼 드로우 콜을 쓴다.
-    expect(gltf.meshes).toHaveLength(2);
+    expect(gltf.meshes).toHaveLength(3);
     expect(nodeNames).toContain(CREW_MODEL.bodyMeshName);
     expect(nodeNames).toContain(CREW_MODEL.accentMeshName);
+    expect(nodeNames).toContain(CREW_MODEL.pupilGlintMeshName);
+  });
+
+  it("검은 눈동자 중앙에만 약한 붉은 발광 마스크를 쓴다", () => {
+    const gltf = readGlbJson();
+    const body = findMesh(gltf, CREW_MODEL.bodyMeshName).primitives[0];
+    const pupil = findMesh(gltf, CREW_MODEL.pupilGlintMeshName).primitives[0];
+    const pupilMaterial = gltf.materials[pupil.material];
+
+    expect(gltf.accessors[pupil.indices].count).toBe(24 * 3);
+    expect(gltf.accessors[body.indices].count).toBe(1192 * 3);
+    expect(gltf.materials[body.material].name).toBe("Crew_Pixel_PBR");
+    expect(pupilMaterial.name).toBe("Subtle_Red_Pupil");
+    expect(pupilMaterial.emissiveFactor?.[0]).toBeCloseTo(0.45, 2);
+    expect(
+      gltf.images?.[gltf.textures?.[pupilMaterial.emissiveTexture?.index ?? -1]?.source ?? -1]
+        ?.name,
+    ).toBe("laser-pupil-soft-emission");
+    expect(
+      gltf.images?.[
+        gltf.textures?.[pupilMaterial.pbrMetallicRoughness?.baseColorTexture?.index ?? -1]
+          ?.source ?? -1
+      ]?.name,
+    ).toBe("laser-pupil-soft-color");
   });
 
   it("스킨과 애니메이션이 제거돼 있다", () => {
@@ -77,7 +111,7 @@ describe("크루 모델 규격", () => {
     expect(gltf.animations ?? []).toHaveLength(0);
   });
 
-  it("아틀라스 한 장만 쓰고 확대 필터가 NEAREST 다", () => {
+  it("아틀라스와 눈동자 텍스처를 픽셀 필터로 쓴다", () => {
     const gltf = readGlbJson();
 
     expect(gltf.images ?? []).toHaveLength(MAXIMUM_IMAGE_COUNT);
@@ -97,11 +131,15 @@ describe("크루 모델 규격", () => {
     expect(Object.keys(body.attributes)).not.toContain("TEXCOORD_1");
   });
 
-  it("두 메시 모두 본 번호를 들고 있다", () => {
+  it("모든 메시가 본 번호를 들고 있다", () => {
     const gltf = readGlbJson();
 
     // 셰이더가 이 번호로 본 행렬 텍스처를 조회한다. 없으면 걷기가 죽는다.
-    for (const name of [CREW_MODEL.bodyMeshName, CREW_MODEL.accentMeshName]) {
+    for (const name of [
+      CREW_MODEL.bodyMeshName,
+      CREW_MODEL.accentMeshName,
+      CREW_MODEL.pupilGlintMeshName,
+    ]) {
       for (const primitive of findMesh(gltf, name).primitives) {
         expect(Object.keys(primitive.attributes)).toContain("_BONEINDEX");
       }

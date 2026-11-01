@@ -30,7 +30,7 @@ interface RemoteAvatarsProps {
  * 원격 아바타를 인스턴싱으로 그린다.
  *
  * 개별 `<mesh>` 로 만들면 50명이면 부위마다 50 콜씩 쌓여 모바일 예산(50)을 몇 배
- * 넘긴다. `InstancedMesh` 3개로 고정해 전원을 드로우 콜 3개에 담는다. 걷기는
+ * 넘긴다. `InstancedMesh` 4개로 고정해 전원을 드로우 콜 4개에 담는다. 걷기는
  * 구워 둔 본 행렬을 셰이더가 읽어 처리한다. 근거는 `docs/btc-space-3d.md` §8 에 있다.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
@@ -38,10 +38,12 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
   // region [Hooks]
   const bodyMeshRef = useRef<InstancedMesh>(null);
   const accentMeshRef = useRef<InstancedMesh>(null);
+  const pupilGlintMeshRef = useRef<InstancedMesh>(null);
   const shadowMeshRef = useRef<InstancedMesh>(null);
   const shadowTexture = useMemo(() => createShadowBlobTexture(), []);
   const crew = useCrewModel();
   const bodyMaterial = useSkinnedCrewMaterial(crew.bodyMaterial, crew.walkTexture);
+  const pupilGlintMaterial = useSkinnedCrewMaterial(crew.pupilGlintMaterial, crew.walkTexture);
 
   /** 공유 지오메트리에 인스턴스 버퍼를 직접 달면 로컬 플레이어와 서로 덮어쓴다. */
   const body = useMemo(
@@ -51,6 +53,10 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
   const accent = useMemo(
     () => createCrewInstanceGeometry(crew.accentGeometry, SPACE_MAX_OCCUPANTS),
     [crew.accentGeometry],
+  );
+  const pupilGlint = useMemo(
+    () => createCrewInstanceGeometry(crew.pupilGlintGeometry, SPACE_MAX_OCCUPANTS),
+    [crew.pupilGlintGeometry],
   );
   const accentMaterial = useMemo(() => {
     const material = new MeshStandardMaterial({ roughness: 0.84, metalness: 0 });
@@ -106,11 +112,13 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
       blends.setX(instanceIndex, Math.min(1, Math.max(0, blend)));
     });
 
-    // 앞치마는 몸통과 같은 위상이어야 따로 놀지 않는다. 복사를 먼저 하지 않으면
+    // 앞치마와 눈은 몸통과 같은 위상이어야 따로 놀지 않는다. 복사를 먼저 하지 않으면
     // 한 프레임 뒤처진 값이 올라간다.
-    accent.phase.array.set(phases.array);
-    accent.blend.array.set(blends.array);
-    for (const attribute of [phases, blends, accent.phase, accent.blend]) {
+    for (const part of [accent, pupilGlint]) {
+      part.phase.array.set(phases.array);
+      part.blend.array.set(blends.array);
+    }
+    for (const attribute of [phases, blends, accent.phase, accent.blend, pupilGlint.phase, pupilGlint.blend]) {
       attribute.needsUpdate = true;
     }
   };
@@ -123,6 +131,7 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
       transformProxy.updateMatrix();
       bodyMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
       accentMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
+      pupilGlintMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
 
       // 그림자 평면은 눕혀야 하므로 회전을 따로 준다.
       transformProxy.rotation.set(-Math.PI / 2, 0, 0);
@@ -131,7 +140,7 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
       shadowMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
     });
 
-    for (const meshRef of [bodyMeshRef, accentMeshRef, shadowMeshRef]) {
+    for (const meshRef of [bodyMeshRef, accentMeshRef, pupilGlintMeshRef, shadowMeshRef]) {
       if (meshRef.current) {
         meshRef.current.instanceMatrix.needsUpdate = true;
       }
@@ -151,9 +160,10 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
       // 사본과 직접 만든 머티리얼만 정리한다. 공유 원본은 useGLTF 캐시가 가진다.
       body.geometry.dispose();
       accent.geometry.dispose();
+      pupilGlint.geometry.dispose();
       accentMaterial.dispose();
     };
-  }, [shadowTexture, body, accent, accentMaterial]);
+  }, [shadowTexture, body, accent, pupilGlint, accentMaterial]);
 
   useFrame((_, deltaSeconds) => {
     applyInstanceTransforms();
@@ -183,6 +193,14 @@ function RemoteAvatars({ players }: RemoteAvatarsProps): ReactNode {
         ref={accentMeshRef}
         count={renderedPlayers.length}
         args={[accent.geometry, accentMaterial, SPACE_MAX_OCCUPANTS]}
+        frustumCulled={false}
+        dispose={null}
+      />
+
+      <instancedMesh
+        ref={pupilGlintMeshRef}
+        count={renderedPlayers.length}
+        args={[pupilGlint.geometry, pupilGlintMaterial, SPACE_MAX_OCCUPANTS]}
         frustumCulled={false}
         dispose={null}
       />
