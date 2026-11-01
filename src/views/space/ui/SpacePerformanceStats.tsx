@@ -91,6 +91,7 @@ export default function SpacePerformanceStats({
   const phaseLabel = summary.isWarmingUp ? "준비 5초" : "측정 중";
   const statusLabel = summary.isComplete ? "측정 완료" : phaseLabel;
   const progressLabel = `${summary.elapsedSeconds.toFixed(1)} / 10초 · ${summary.frameCount} frames`;
+  const liveLabel = `지금 ${summary.liveFramesPerSecond.toFixed(1)} FPS`;
   const fpsLabel = `${summary.framesPerSecond.toFixed(1)} FPS · p95 ${summary.p95FrameMilliseconds.toFixed(1)} ms`;
   const renderLabel = `최대 ${summary.maxDrawCalls} calls · ${summary.maxTriangles.toLocaleString()} triangles`;
   const dprLabel = `DPR ${summary.minDpr.toFixed(2)} ~ ${summary.maxDpr.toFixed(2)}`;
@@ -107,10 +108,12 @@ export default function SpacePerformanceStats({
         <span className="block">
           {statusLabel} · {progressLabel}
         </span>
+        {/* 실시간 값이 먼저다. 10초 표본은 끝나면 멈추지만 이 줄은 계속 돈다. */}
+        <span className="block font-bold text-white">{liveLabel}</span>
         <span className="block">{fpsLabel}</span>
         <span className="block">{renderLabel}</span>
         <span className="block">{dprLabel}</span>
-        <span className="block text-white/60">새로고침으로 재측정 · 실기기에서 확인</span>
+        <span className="block text-white/60">10초 표본은 새로고침으로 재측정</span>
       </output>
     </Html>
   );

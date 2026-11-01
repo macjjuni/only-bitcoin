@@ -68,3 +68,48 @@ describe("space performance sample", () => {
     expect(sample.frameMilliseconds).toEqual([]);
   });
 });
+
+describe("실시간 FPS", () => {
+  it("준비 구간에서도 값이 나온다", () => {
+    // 10초 표본이 시작되기 전에도 "지금 몇 fps 인가" 는 보여야 한다.
+    const sample = createSpacePerformanceSample();
+
+    for (let index = 0; index < 30; index += 1) {
+      recordFrame(sample, 16.7);
+    }
+
+    expect(summarizeSpacePerformance(sample).isWarmingUp).toBe(true);
+    expect(summarizeSpacePerformance(sample).liveFramesPerSecond).toBeCloseTo(59.9, 0);
+  });
+
+  it("표본이 끝난 뒤에도 계속 갱신된다", () => {
+    const sample = createSpacePerformanceSample();
+
+    // 준비 5초 + 표본 10초를 채운다.
+    for (let index = 0; index < 900; index += 1) {
+      recordFrame(sample, 16.7);
+    }
+    expect(summarizeSpacePerformance(sample).isComplete).toBe(true);
+
+    // 이후 느려진 프레임만 들어오면 실시간 값이 따라 내려간다.
+    for (let index = 0; index < 30; index += 1) {
+      recordFrame(sample, 33.3);
+    }
+
+    expect(summarizeSpacePerformance(sample).liveFramesPerSecond).toBeCloseTo(30, 0);
+    // 10초 표본은 멈춘 채 그대로다.
+    expect(summarizeSpacePerformance(sample).framesPerSecond).toBeCloseTo(59.9, 0);
+  });
+
+  it("창이 1초를 넘지 않는다", () => {
+    const sample = createSpacePerformanceSample();
+
+    for (let index = 0; index < 600; index += 1) {
+      recordFrame(sample, 16.7);
+    }
+
+    const windowMilliseconds = sample.liveFrameMilliseconds.reduce((sum, ms) => sum + ms, 0);
+
+    expect(windowMilliseconds).toBeLessThanOrEqual(1_000);
+  });
+});
