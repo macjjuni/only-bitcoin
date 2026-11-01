@@ -62,6 +62,7 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
     identity,
     enabled: isSupportProbed && !fallbackReason && dummyCount === 0,
   });
+  const nickname = session.self?.nickname ?? identity.nickname;
 
   useKeyboardInput(inputSource);
   // endregion
@@ -172,6 +173,7 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
         <SpaceScene
           inputSource={inputSource}
           clientKey={identity.clientKey}
+          nickname={nickname}
           session={session}
           hasRealtimeShadows={hasRealtimeShadows}
           dummyCount={dummyCount}
@@ -179,11 +181,7 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
         {hasPerformanceStats && <SpacePerformanceStats dummyCount={dummyCount} />}
       </Canvas>
 
-      <SpaceHud
-        inputSource={inputSource}
-        session={session}
-        nickname={session.self?.nickname ?? identity.nickname}
-      />
+      <SpaceHud inputSource={inputSource} session={session} nickname={nickname} />
     </div>
   );
 }

@@ -53,6 +53,7 @@ import TextAdBanner from "./TextAdBanner";
 interface SpaceSceneProps {
   inputSource: SpaceInputSource;
   clientKey: string;
+  nickname: string;
   session: SpaceSession;
   hasRealtimeShadows: boolean;
   /** 개발 전용 더미 아바타 수. 더미 측정 중에는 실제 공간 소켓을 열지 않는다. */
@@ -62,6 +63,7 @@ interface SpaceSceneProps {
 function SpaceScene({
   inputSource,
   clientKey,
+  nickname,
   session,
   hasRealtimeShadows,
   dummyCount,
@@ -111,9 +113,9 @@ function SpaceScene({
   // endregion
 
   /** 서버 보정으로 볼 최소 거리(m). 좌표를 1 cm 로 접어 보내므로 그보다 크게 잡는다. */
-const SERVER_CORRECTION_THRESHOLD = 0.05;
+  const SERVER_CORRECTION_THRESHOLD = 0.05;
 
-// region [Privates]
+  // region [Privates]
   const applyServerTransform = useCallback((peer: SpacePeer): void => {
     playerStateRef.current = createLocalPlayerState(peer);
     accumulatedSecondsRef.current = 0;
@@ -258,6 +260,7 @@ const SERVER_CORRECTION_THRESHOLD = 0.05;
       <RemoteAvatars players={remotePlayers} />
       <Nameplates
         players={remotePlayers}
+        selfNickname={nickname}
         rosterRevision={session.rosterRevision}
         viewerTransformRef={playerStateRef}
       />
