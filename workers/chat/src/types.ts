@@ -8,6 +8,7 @@ export interface ChatWorkerEnv {
   SPACE_ROOM: DurableObjectNamespace;
   CHAT_UPGRADE_RATE_LIMITER: RateLimit;
   CHAT_ALLOWED_ORIGINS: string;
+  SPACE_DISABLE_IP_CONNECTION_LIMIT?: string;
   ACTOR_SECRET: string;
   ENFORCEMENT_SECRET: string;
   IP_GUARD_SECRET: string;

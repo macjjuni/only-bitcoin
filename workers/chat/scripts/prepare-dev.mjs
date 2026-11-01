@@ -32,6 +32,11 @@ export const ensureChatDevVars = (devVarsPath = defaultDevVarsPath) => {
     addedNames.push("CHAT_ALLOWED_ORIGINS");
   }
 
+  if (!configuredValues.SPACE_DISABLE_IP_CONNECTION_LIMIT?.trim()) {
+    additions.push("SPACE_DISABLE_IP_CONNECTION_LIMIT=true");
+    addedNames.push("SPACE_DISABLE_IP_CONNECTION_LIMIT");
+  }
+
   if (additions.length > 0) {
     const prefix = hasDevVarsFile
       ? originalContent

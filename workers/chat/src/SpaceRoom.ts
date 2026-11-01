@@ -18,6 +18,7 @@ import {
   SPACE_MAX_OCCUPANTS,
 } from "../../../src/entities/space/model/spaceWorld";
 import { createSha256Hex, deriveStableActorKey } from "./lib/crypto";
+import { getSpaceIpConnectionLimit } from "./lib/spaceConnectionLimit";
 import {
   ChatValidationError,
   countGraphemes,
@@ -49,7 +50,6 @@ interface SpaceSocketAttachment {
 }
 
 const MAXIMUM_PENDING_CONNECTIONS = 10;
-const MAXIMUM_IP_CONNECTIONS = 20;
 const MAXIMUM_FRAME_BYTES = 8 * 1024;
 const MAXIMUM_FRAMES_PER_SECOND = 40;
 const MAXIMUM_RECENT_SAY_RECEIPTS = 32;
@@ -601,7 +601,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
   // region [Transactions]
   async fetch(request: Request): Promise<Response> {
-    if (new URL(request.url).pathname !== "/v1/space/ws" || request.method !== "GET") {
+    const requestUrl = new URL(request.url);
+
+    if (requestUrl.pathname !== "/v1/space/ws" || request.method !== "GET") {
       return new Response(null, { status: 404 });
     }
     if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") {
@@ -618,10 +620,14 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     const ipCount = sockets.filter(
       (socket) => this.getAttachment(socket)?.ipGuardKey === ipGuardKey,
     ).length;
+    const ipConnectionLimit = getSpaceIpConnectionLimit(
+      requestUrl,
+      this.workerEnv.SPACE_DISABLE_IP_CONNECTION_LIMIT === "true",
+    );
 
     if (
       pendingCount >= MAXIMUM_PENDING_CONNECTIONS ||
-      ipCount >= MAXIMUM_IP_CONNECTIONS ||
+      ipCount >= ipConnectionLimit ||
       sockets.length >= SPACE_MAX_OCCUPANTS + MAXIMUM_PENDING_CONNECTIONS
     ) {
       return new Response(null, { status: 429, headers: { "Retry-After": "10" } });

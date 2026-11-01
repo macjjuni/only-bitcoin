@@ -53,7 +53,9 @@ describe("ensureChatDevVars", () => {
     const addedNames = ensureChatDevVars(devVarsPath);
     const values = parseEnv(readFileSync(devVarsPath, "utf8"));
 
-    expect(new Set(addedNames)).toEqual(new Set([...secretNames, "CHAT_ALLOWED_ORIGINS"]));
+    expect(new Set(addedNames)).toEqual(
+      new Set([...secretNames, "CHAT_ALLOWED_ORIGINS", "SPACE_DISABLE_IP_CONNECTION_LIMIT"]),
+    );
     for (const secretName of secretNames) {
       expect(values[secretName]).toMatch(/^[a-f0-9]{64}$/);
     }
@@ -61,6 +63,7 @@ describe("ensureChatDevVars", () => {
       secretNames.length,
     );
     expect(values.CHAT_ALLOWED_ORIGINS).toBe("http://localhost:3002,http://127.0.0.1:3002");
+    expect(values.SPACE_DISABLE_IP_CONNECTION_LIMIT).toBe("true");
     expect(statSync(devVarsPath).mode & 0o777).toBe(0o600);
   });
 
@@ -100,7 +103,9 @@ describe("ensureChatDevVars", () => {
     const updatedContent = readFileSync(devVarsPath, "utf8");
     const values = parseEnv(updatedContent);
 
-    expect(new Set(addedNames)).toEqual(new Set(["IP_GUARD_SECRET", "PASS_SIGNING_SECRET"]));
+    expect(new Set(addedNames)).toEqual(
+      new Set(["IP_GUARD_SECRET", "PASS_SIGNING_SECRET", "SPACE_DISABLE_IP_CONNECTION_LIMIT"]),
+    );
     expect(updatedContent.startsWith(`${originalContent}\n`)).toBe(true);
     expect(values.ACTOR_SECRET).toBe("actor#inside-quotes");
     expect(values.ENFORCEMENT_SECRET).toBe("existing enforcement");
@@ -124,7 +129,12 @@ describe("ensureChatDevVars", () => {
     const values = parseEnv(readFileSync(devVarsPath, "utf8"));
 
     expect(new Set(addedNames)).toEqual(
-      new Set(["ACTOR_SECRET", "IP_GUARD_SECRET", "CHAT_ALLOWED_ORIGINS"]),
+      new Set([
+        "ACTOR_SECRET",
+        "IP_GUARD_SECRET",
+        "CHAT_ALLOWED_ORIGINS",
+        "SPACE_DISABLE_IP_CONNECTION_LIMIT",
+      ]),
     );
     expect(values.ACTOR_SECRET).toMatch(/^[a-f0-9]{64}$/);
     expect(values.IP_GUARD_SECRET).toMatch(/^[a-f0-9]{64}$/);
