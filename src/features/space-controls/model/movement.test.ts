@@ -70,8 +70,11 @@ describe("stepMovement", () => {
   });
 
   it("걷기는 walkSpeed, 달리기는 runSpeed 로 수렴한다", () => {
-    const walking = runSteps(createState(), createInput({ forward: 1 }), 0, 120);
-    const running = runSteps(createState(), createInput({ forward: 1, isRunning: true }), 0, 120);
+    // 뒤쪽 경계에서 출발해 앞으로 달린다. 원점에서 시작하면 2초 동안 달리기가
+    // 전진 경계(13 m)에 닿아 클램프되고, 속력이 0 으로 읽힌다.
+    const backOfRoom = createState({ z: SPACE_BOUNDS.maxZ });
+    const walking = runSteps(backOfRoom, createInput({ forward: 1 }), 0, 120);
+    const running = runSteps(backOfRoom, createInput({ forward: 1, isRunning: true }), 0, 120);
 
     expect(speedOf(walking)).toBeCloseTo(SPACE_MOVEMENT.walkSpeed, 4);
     expect(speedOf(running)).toBeCloseTo(SPACE_MOVEMENT.runSpeed, 4);

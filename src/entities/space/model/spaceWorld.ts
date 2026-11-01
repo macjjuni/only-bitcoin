@@ -1,7 +1,7 @@
 /**
  * 월드 치수와 배치 상수.
  *
- * 값의 근거는 `docs/btc-space-3d.md` §4 에 있다. 밀도(33.3 m²/인)를 기준으로
+ * 값의 근거는 `docs/btc-space-3d.md` §4 에 있다. 밀도(20.8 m²/인)를 기준으로
  * 역산한 값이므로 동시 접속 상한을 바꾸면 경계도 함께 다시 계산해야 한다.
  */
 
@@ -19,19 +19,32 @@ export const SPACE_MAX_JUMP_HEIGHT = 2.5;
 /** 전광판·광고판이 붙는 뒷벽의 z 좌표. */
 export const SPACE_WALL_Z = -18;
 
+/**
+ * 바닥. 이동 경계보다 사방으로 넓게 둔다.
+ *
+ * 남는 여백은 장식이 아니라 **카메라 공간**이다. 카메라는 이동 경계가 아니라
+ * 바닥 안으로 클램프되므로(`clampCameraPosition`), 플레이어가 경계에 붙었을 때
+ * 뒤로 물러날 자리가 이 여백에서 나온다. 가로 ±6 m, 뒤 10 m, 앞 6 m 다.
+ */
 export const SPACE_GROUND = {
-  width: 64,
-  depth: 48,
+  width: 52,
+  depth: 42,
   /** 뒷벽과 이동 경계를 모두 덮도록 중심을 뒤로 당김. */
   centerZ: -2,
 } as const;
 
-/** 이동 가능 영역. 가용 52 × 32 = 1,664 m². */
+/**
+ * 이동 가능 영역. 가용 40 × 26 = 1,040 m².
+ *
+ * 52 × 32(1,664 m²)에서 줄였다. 50명을 꽉 채운 상태를 기준으로 역산한 넓이라
+ * 실제 접속 인원이 적을 때는 서로 마주치지 않고 빈 운동장처럼 보였다. 밀도는
+ * 33.3 → 20.8 m²/인(한 변 4.6 m)이 된다.
+ */
 export const SPACE_BOUNDS = {
-  minX: -26,
-  maxX: 26,
-  minZ: -16,
-  maxZ: 16,
+  minX: -20,
+  maxX: 20,
+  minZ: -13,
+  maxZ: 13,
 } as const;
 
 /**
@@ -41,8 +54,8 @@ export const SPACE_BOUNDS = {
 export const SPACE_SPAWN_RING = {
   centerX: 0,
   centerZ: 0,
-  minRadius: 5,
-  maxRadius: 14,
+  minRadius: 4,
+  maxRadius: 11,
 } as const;
 
 /**
