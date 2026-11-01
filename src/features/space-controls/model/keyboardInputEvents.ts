@@ -38,7 +38,7 @@ const ALL_HANDLED_CODES = new Set<string>([
 const TEXT_ENTRY_SELECTOR =
   'input, textarea, select, [role="log"], [contenteditable]:not([contenteditable="false"])';
 
-/** 포커스된 상태에서 공백으로 활성화되는 대상. 이동 키는 그대로 받는다. */
+/** 포커스된 상태에서 Enter 로 활성화되는 대상. 이동 키는 그대로 받는다. */
 const ACTIVATION_SELECTOR = 'button, a[href], summary, [role="button"], [role="link"]';
 
 const matchesSelector = (target: EventTarget | null, selector: string): boolean => {
@@ -105,12 +105,16 @@ export const attachSpaceKeyboardEvents = (
       clearPressedCodes();
       return;
     }
-    // 포커스된 버튼의 공백 활성화를 빼앗지 않는다. 방향키는 버튼을 누르지 않는다.
-    const isActivationKey = keyboardEvent.code === "Space";
-    if (
-      SCROLL_BLOCKING_CODES.has(keyboardEvent.code) &&
-      !(isActivationKey && isActivationTarget(keyboardEvent.target))
-    ) {
+    /*
+     * 공백은 **항상 점프**다. 포커스된 버튼의 공백 활성화를 브라우저에 남겨
+     * 뒀더니, 채팅을 닫을 때 포커스가 토글 버튼으로 돌아가(`onClickCloseChat`)
+     * 그 다음 공백이 점프와 채팅 열기를 한 번에 일으켰다.
+     *
+     * 버튼은 Tab 으로 가서 Enter 로 누를 수 있으므로 키보드 조작이 막히지
+     * 않는다. 공백으로도 눌리는 것은 Enter 와 겹치는 기능이고, 이 화면에서
+     * 공백은 게임 조작이다. 겹칠 때는 게임 조작이 이긴다.
+     */
+    if (SCROLL_BLOCKING_CODES.has(keyboardEvent.code)) {
       keyboardEvent.preventDefault();
     }
     if (ALL_HANDLED_CODES.has(keyboardEvent.code)) {

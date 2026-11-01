@@ -104,16 +104,23 @@ describe("공간 키보드와 채팅 입력 격리", () => {
     windowEvents.elementName = "button";
     windowEvents.emitKey("keydown", "KeyW");
     windowEvents.emitKey("keydown", "KeyD");
-    expect(inputSource.keyboard).toEqual({
-      forward: 1,
-      strafe: 1,
-      isRunning: false,
-      isJumping: false,
-    });
-    // 포커스된 버튼의 공백 활성화는 그대로 브라우저에 남긴다.
-    expect(windowEvents.emitKey("keydown", "Space").defaultPrevented).toBe(false);
+    expect(inputSource.keyboard).toMatchObject({ forward: 1, strafe: 1 });
     // 방향키는 버튼을 활성화하지 않으므로 스크롤만 막는다.
     expect(windowEvents.emitKey("keydown", "ArrowUp").defaultPrevented).toBe(true);
+    detach();
+  });
+
+  it("버튼에 포커스가 남아 있어도 공백은 버튼을 누르지 않고 점프한다", () => {
+    // 채팅을 닫으면 포커스가 토글 버튼으로 돌아간다. 그 상태에서 공백이 버튼을
+    // 활성화하면 점프와 채팅 열기가 한 번에 일어난다.
+    const { inputSource, windowEvents, detach } = createKeyboard();
+    windowEvents.elementName = "button";
+
+    expect(windowEvents.emitKey("keydown", "Space").defaultPrevented).toBe(true);
+    expect(inputSource.keyboard.isJumping).toBe(true);
+
+    windowEvents.emitKey("keyup", "Space");
+    expect(inputSource.keyboard.isJumping).toBe(false);
     detach();
   });
 
