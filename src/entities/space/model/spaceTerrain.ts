@@ -35,8 +35,14 @@ export interface SpaceTerrain {
    * **`feetY` 아래쪽만 본다.** 머리 위 아치나 다리 상판을 지면으로 잡으면
    * 그 밑을 지나갈 수 없다. 오를 수 있는 턱(`stepHeight`)까지는 위도 본다.
    *
-   * 아래에 아무것도 없으면 바다 높이를 돌려준다. 바다로 떨어지는 일은
-   * 가장자리 투명 벽이 막으므로 실제로는 거의 쓰이지 않는 안전값이다.
+   * 아래에 아무것도 없으면 **`-Infinity`** 를 돌려준다. 발밑이 열린 바다라는
+   * 뜻이고, 적분기는 그대로 떨어뜨린다.
+   *
+   * 전에는 바다 높이(0)를 돌려줬다. 그러면 **수면이 걸어다닐 수 있는 바닥**이
+   * 되어, 한 번 떨어진 사람이 월드 상자 끝까지 물 위를 걷고 돌아오지 못했다 —
+   * 섬 가장자리가 5 m 절벽인데 점프 정점은 1.13 m 다. 새로고침 말고는 복구
+   * 수단이 없는 소프트락이었다. 떨어지게 두고 `SpaceScene` 이 스폰으로
+   * 되돌린다.
    */
   resolveGroundY(x: number, z: number, feetY: number): number;
 
@@ -77,6 +83,9 @@ export const SPACE_STEP_HEIGHT = 0.35;
  * GLB 가 도착하기 전 첫 프레임과 단위 테스트가 쓴다. 광장 높이에 평평한 바닥이
  * 하나 있고 벽은 바깥 상자뿐이라고 본다. 짧은 순간이라 그 사이에 광장 밖으로
  * 걸어 나가도 GLB 가 붙는 순간 지형이 다시 잡는다.
+ *
+ * **지면이 없는 자리를 만들지 않는다.** 맵이 오기 전에 빠질 바다가 없어야
+ * 접속 직후 물에 빠졌다고 되돌려지는 일이 없다.
  */
 export const createFlatTerrain = (groundY: number = SPACE_ISLAND.plazaY): SpaceTerrain => ({
   resolveGroundY: () => groundY,

@@ -18,6 +18,7 @@ import {
   createSpawnPoint,
   type LocalPlayerState,
   resolveColorIndexFromClientKey,
+  SPACE_ISLAND,
   SPACE_SCREEN_PLACEMENTS,
   SPACE_SCREEN_SCALE,
   type SpacePeer,
@@ -195,6 +196,36 @@ function SpaceScene({
   };
 
   /**
+   * 바다에 빠진 플레이어를 스폰 지점으로 되돌린다.
+   *
+   * 지형이 발밑에 아무것도 없다고 하면(`-Infinity`) 그대로 떨어지는데, 수면
+   * 아래로 내려간 순간이 그 신호다. 맵에 뚫린 구멍이 어디든 **한 곳에서 전부
+   * 받아낸다** — 무지개 다리 난간처럼 알려진 자리만 막으면 모르는 구멍이
+   * 남는다.
+   *
+   * **`publishMovement` 보다 먼저 돌아야 한다.** 서버는 `y < 0` 을 거절하므로
+   * 음수 좌표가 한 번이라도 나가면 이동이 반려되고 화면이 튄다.
+   *
+   * 카메라 궤도의 yaw 도 스폰 방향으로 돌린다. 거리·피치는 사용자가 맞춰 둔
+   * 값이라 건드리지 않는다.
+   */
+  const resolveDrowning = (playerState: LocalPlayerState): LocalPlayerState => {
+    if (playerState.y >= SPACE_ISLAND.seaY) {
+      return playerState;
+    }
+
+    const respawned = createLocalPlayerState(spawnTransform);
+
+    playerStateRef.current = respawned;
+    accumulatedSecondsRef.current = 0;
+    cameraOrbitRef.current = { ...cameraOrbitRef.current, yaw: spawnTransform.yaw };
+    smoothedCameraRef.current = resolveCameraPosition(spawnTransform, cameraOrbitRef.current);
+    applyPlayerTransform(respawned);
+
+    return respawned;
+  };
+
+  /**
    * 지형을 파고들지 않는 카메라 위치.
    *
    * 감쇠 **뒤에** 건다. 감쇠 전에 걸면 목표만 당겨지고 실제 카메라는 한 박자
@@ -256,12 +287,17 @@ function SpaceScene({
     }
 
     const cameraOrbit = advanceCameraOrbit(deltaSeconds);
-    const playerState = advancePlayerState(cameraOrbit.yaw, deltaSeconds);
-    applyPlayerTransform(playerState);
+    const steppedState = advancePlayerState(cameraOrbit.yaw, deltaSeconds);
+    applyPlayerTransform(steppedState);
+
+    // 물에 빠졌으면 여기서 스폰으로 되돌아온다. 되돌린 궤도를 쓰려고 아래
+    // 카메라 계산은 지역 변수가 아니라 ref 를 다시 읽는다.
+    const playerState = resolveDrowning(steppedState);
+
     session.publishMovement(playerState);
 
     const focus = resolveCameraFocus(playerState);
-    const targetPosition = resolveCameraPosition(playerState, cameraOrbit);
+    const targetPosition = resolveCameraPosition(playerState, cameraOrbitRef.current);
     const dampedPosition = dampVector(
       smoothedCameraRef.current,
       targetPosition,

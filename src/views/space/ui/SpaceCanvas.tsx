@@ -25,6 +25,18 @@ import SpaceScene from "./scene/SpaceScene";
 
 /** 컨텍스트 복구를 기다리는 시간. 넘기면 폴백으로 전환한다. */
 const CONTEXT_RESTORE_TIMEOUT_MS = 3_000;
+/**
+ * 톤 매핑 노출.
+ *
+ * 1.0 으로 뒀더니 "눈이 피로하다·멀미난다" 는 말이 나왔다. 섬은 노을 하늘이
+ * 화면의 절반을 채우고 복셀 블록도 채도가 높아, 기본 노출에서는 밝은 면이
+ * 계속 눈을 때린다.
+ *
+ * **조명만 줄여서는 안 된다.** 하늘은 배경 텍스처라 광원과 무관하게 그대로
+ * 밝다. 노출은 하늘까지 포함해 최종 이미지를 한 번에 내리는 유일한 손잡이다.
+ */
+const SPACE_TONE_MAPPING_EXPOSURE = 0.72;
+
 const CAMERA_NEAR = 0.1;
 /**
  * 원평면.
@@ -206,7 +218,11 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
         frameloop={frameloop}
         shadows={hasRealtimeShadows}
         camera={{ fov: SPACE_CAMERA.fov, near: CAMERA_NEAR, far: CAMERA_FAR }}
-        gl={{ antialias: true, powerPreference: "high-performance" }}
+        gl={{
+          antialias: true,
+          powerPreference: "high-performance",
+          toneMappingExposure: SPACE_TONE_MAPPING_EXPOSURE,
+        }}
         onCreated={onCreatedCanvas}
       >
         <PerformanceMonitor

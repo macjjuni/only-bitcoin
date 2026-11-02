@@ -52,8 +52,17 @@ const FOG_FAR = 320;
 /** 물리 기반 조도라 점광원 강도는 칸델라 단위로 크게 잡아야 보인다. */
 const LANTERN_INTENSITY = 90;
 const LANTERN_DISTANCE = 16;
-const SCREEN_GLOW_INTENSITY = 150;
-const SCREEN_GLOW_DISTANCE = 26;
+/**
+ * 전광판이 바닥을 물들이는 세기.
+ *
+ * 벙커(180)에서 150 으로 내렸다가 다시 내렸다. 벙커는 전역광이 어두워서 그
+ * 세기가 "패널이 빛난다" 로 읽혔는데, 섬은 태양이 밝아 같은 값이 광장 바닥을
+ * **하얗게 태운다.** 패널 자체는 발광 재질이라 이 광원과 무관하게 밝으므로,
+ * 바닥에 오렌지 기운만 남을 만큼으로 줄인다.
+ */
+const SCREEN_GLOW_INTENSITY = 45;
+/** 도달 거리도 줄여 액자 앞에만 고이게 한다. 26 m 는 광장을 가로질렀다. */
+const SCREEN_GLOW_DISTANCE = 14;
 
 /**
  * 동시에 켜는 랜턴 수.
@@ -198,13 +207,13 @@ function SceneLighting({
       <fog attach="fog" args={[HORIZON_FOG_COLOR, FOG_NEAR, FOG_FAR]} />
 
       {/* 하늘과 바다에서 오는 전역광. 섬의 그늘진 면이 새까매지지 않게 받친다. */}
-      <hemisphereLight color={SKY_LIGHT_COLOR} groundColor={WATER_BOUNCE_COLOR} intensity={1.1} />
+      <hemisphereLight color={SKY_LIGHT_COLOR} groundColor={WATER_BOUNCE_COLOR} intensity={0.8} />
 
       {/* 이 섬의 밝기는 사실상 전부 여기서 나온다. */}
       <directionalLight
         ref={sunRef}
         color={SUN_COLOR}
-        intensity={2.2}
+        intensity={1.7}
         castShadow={hasRealtimeShadows}
         shadow-mapSize-width={SUN_SHADOW_MAP_SIZE}
         shadow-mapSize-height={SUN_SHADOW_MAP_SIZE}

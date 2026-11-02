@@ -353,6 +353,24 @@ describe("지형 위 걷기", () => {
     expect(next.velocityZ).toBeLessThan(-SPACE_MOVEMENT.walkSpeed * 0.5);
   });
 
+  it("지면이 없으면 수면 아래로 계속 떨어진다", () => {
+    // `SpaceScene` 이 이 신호를 받아 스폰으로 되돌린다. 여기서 바닥을
+    // 만들어 주면 물 위에 서게 되고, 그게 소프트락의 원인이었다.
+    const openWater: SpaceTerrain = {
+      ...GROUND,
+      resolveGroundY: () => Number.NEGATIVE_INFINITY,
+    };
+    const next = runSteps(createState(), createEmptyMovementInput(), 0, 60, openWater);
+
+    expect(next.y).toBeLessThan(0);
+    expect(next.velocityY).toBeLessThan(0);
+  });
+
+  it("평지 대체본은 지면 없는 자리를 만들지 않는다", () => {
+    // 맵이 오기 전에 빠질 바다가 있으면 접속 직후 되돌려진다.
+    expect(Number.isFinite(createFlatTerrain().resolveGroundY(999, 999, 0))).toBe(true);
+  });
+
   it("단 가장자리를 벗어나면 아래 지면으로 떨어진다", () => {
     const onStep = createState({ x: 9.9, z: 0, y: 0.25 });
     const next = runSteps(onStep, createInput({ strafe: 1 }), 0, 60, STEP);

@@ -135,9 +135,9 @@ export const createIslandTerrain = (geometry: BufferGeometry): IslandTerrain => 
 
     const hit = bvh.raycastFirst(ray, FrontSide, 0, GROUND_PROBE_DISTANCE);
 
-    // 아래에 아무것도 없으면 바다다. 가장자리 투명 벽이 막으므로 정상 조작으로는
-    // 닿지 않지만, 좌표가 틀어졌을 때 무한히 떨어지지 않게 받아 준다.
-    return hit ? hit.point.y : SPACE_ISLAND.seaY;
+    // 아래에 아무것도 없으면 열린 바다다. 수면을 바닥으로 돌려주면 그 위를
+    // 걸어다니게 되고, 섬 가장자리가 5 m 절벽이라 돌아올 수도 없다.
+    return hit ? hit.point.y : Number.NEGATIVE_INFINITY;
   };
 
   /**

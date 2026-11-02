@@ -127,12 +127,14 @@ describe("resolveGroundY", () => {
     expect(terrain.resolveGroundY(3, 0, 0)).toBeCloseTo(0.25, 6);
   });
 
-  it("오를 수 있는 턱보다 높은 면은 지면으로 쓰지 않는다", () => {
-    // 캡슐 아랫점 위로는 보지 않으므로 벽 너머 바닥(0)이 그대로 지면이다.
-    const groundY = terrain.resolveGroundY(3, 0, -1);
-
-    expect(groundY).toBe(0);
-    expect(SPACE_STEP_HEIGHT).toBeLessThan(1.25);
+  it("발밑보다 위에 있는 바닥은 지면으로 쓰지 않는다", () => {
+    // 발이 바닥(0)보다 1 m 아래면 레이는 −0.65 에서 아래로 간다. 바닥은
+    // 오를 수 있는 턱보다 높으니 집어 올리지 않고 '지면 없음' 이 된다.
+    //
+    // 전에는 이 자리에서 0 이 나와 통과했는데, 규칙이 맞아서가 아니라
+    // 폴백값(바다 높이 0)이 바닥 높이와 우연히 같았기 때문이다.
+    expect(SPACE_STEP_HEIGHT).toBeLessThan(1);
+    expect(terrain.resolveGroundY(3, 0, -1)).toBe(Number.NEGATIVE_INFINITY);
   });
 
   it("머리 위 천장을 지면으로 잡지 않는다", () => {
@@ -140,8 +142,10 @@ describe("resolveGroundY", () => {
     expect(terrain.resolveGroundY(9, 0, 0)).toBe(0);
   });
 
-  it("아래에 아무것도 없으면 바다 높이를 돌려준다", () => {
-    expect(terrain.resolveGroundY(100, 100, 0)).toBe(0);
+  it("아래에 아무것도 없으면 '지면 없음' 을 돌려준다", () => {
+    // 바다 높이(0)를 돌려주면 수면이 걸어다닐 수 있는 바닥이 된다.
+    // 섬 가장자리가 5 m 절벽이라 한 번 빠지면 돌아올 수도 없었다.
+    expect(terrain.resolveGroundY(100, 100, 0)).toBe(Number.NEGATIVE_INFINITY);
   });
 });
 
