@@ -95,7 +95,8 @@ describe("resolveChangeTone", () => {
 
 describe("resolveFittedFontSize", () => {
   const PRICE_WIDTH = BILLBOARD_COLUMNS.priceMaxWidth;
-  const PRICE_FONT_SIZE = 108;
+  /** `LAYOUT.rowPrice.fontSize` 와 같은 값. 레이아웃은 내보내지 않는다. */
+  const PRICE_FONT_SIZE = 124;
 
   it("가용 폭에 들어가는 문자열은 최대 크기를 유지한다", () => {
     const measuredWidth = measureMonospaceWidth("$108,433", PRICE_FONT_SIZE);
@@ -109,7 +110,11 @@ describe("resolveFittedFontSize", () => {
   });
 
   it("넘치는 문자열은 가용 폭에 맞게 줄인다", () => {
-    const priceText = "₩1,234,567,890";
+    // 칸 폭을 넓힐 때마다 테스트가 깨지지 않도록 넘치는 길이를 역산한다.
+    // 전에는 `₩1,234,567,890` 을 박아 뒀다가 칸이 800 → 980 으로 넓어지면서
+    // 더는 넘치지 않아 조용히 통과 조건을 잃었다.
+    const overflowLength = Math.ceil(PRICE_WIDTH / (MONOSPACE_ADVANCE_RATIO * PRICE_FONT_SIZE)) + 2;
+    const priceText = `₩${"1".repeat(overflowLength - 1)}`;
     const measuredWidth = measureMonospaceWidth(priceText, PRICE_FONT_SIZE);
     const fittedFontSize = resolveFittedFontSize(measuredWidth, {
       maxWidth: PRICE_WIDTH,
@@ -340,8 +345,12 @@ describe("우측 상단 접속 배지", () => {
 });
 
 describe("패널 비율", () => {
-  it("텍스처는 16:9 다", () => {
-    expect(BILLBOARD_TEXTURE.width / BILLBOARD_TEXTURE.height).toBeCloseTo(16 / 9, 6);
+  it("텍스처 비율이 맵의 액자 안쪽과 같다", () => {
+    // 16:9 였을 때는 높이에 맞춰 끼우느라 좌우로 0.56 m 씩 빈 홈이 남았다.
+    expect(BILLBOARD_TEXTURE.width / BILLBOARD_TEXTURE.height).toBeCloseTo(
+      SPACE_SCREEN_FRAME.width / SPACE_SCREEN_FRAME.height,
+      6,
+    );
   });
 
   /**

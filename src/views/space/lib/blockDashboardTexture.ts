@@ -5,6 +5,7 @@ import {
   getNextHalvingData,
   TARGET_BLOCK_INTERVAL_SECONDS,
 } from "@/entities/block";
+import { drawBitcoinCoin } from "@/shared/lib/bitcoinIconCanvas";
 import {
   BILLBOARD_COLORS,
   BILLBOARD_MIN_FONT_SIZE_PX,
@@ -19,10 +20,16 @@ import {
  * 가져온다(`BILLBOARD_COLORS`). 같은 벽에 나란히 걸리는 두 판이 서로 다른
  * 디자인을 쓰면 벽이 두 개로 쪼개져 보인다.
  */
+/**
+ * 텍스처 규격. **전광판과 같은 값**이어야 한다(`BILLBOARD_TEXTURE`).
+ *
+ * 광장을 사이에 두고 마주 보는 두 판이라 비율이 다르면 한쪽만 액자에 덜
+ * 채워진다. 액자 안쪽(6.0 × 2.75 m)과 같은 24:11 이다.
+ */
 export const BLOCK_DASHBOARD_TEXTURE = {
-  width: 1600,
-  height: 900,
-  paddingX: 60,
+  width: 1920,
+  height: 880,
+  paddingX: 72,
 } as const;
 
 export const BLOCK_DASHBOARD_PLACEHOLDER = BILLBOARD_PLACEHOLDER;
@@ -39,35 +46,42 @@ const SANS_FONT_STACK =
  * 헤더·구분선·행 패널의 좌표는 전광판(`billboardTexture.ts` 의 `LAYOUT`)과 같은
  * 값이다. 두 판을 나란히 봤을 때 글자 높이와 패널 선이 어긋나지 않아야 한다.
  */
+/**
+ * 1920 × 880 기준 레이아웃. 전광판과 같은 격자를 쓴다.
+ *
+ * 헤더 높이(126), 행 패널(x 64, 폭 1792, 높이 138, 중심 218·372), 세로 구분선
+ * (300·1392)이 전광판과 같은 값이라, 광장에서 두 판을 함께 봤을 때 선과 글자
+ * 높이가 어긋나지 않는다.
+ */
 const LAYOUT = {
-  logo: { centerX: 106, centerY: 80, radius: 44 },
-  title: { x: 176, y: 82, fontSize: 64 },
-  /** 전광판의 `BTC` 알약은 세 글자라 42 px 이 들어가지만 일곱 글자는 넘친다. */
-  badgeText: { x: 544, y: 82, fontSize: 32 },
-  badge: { x: 452, y: 52, width: 184, height: 60, radius: 12 },
-  statusBadge: { x: 1338, y: 52, width: 176, height: 60, radius: 30 },
-  statusDot: { x: 1366, y: 82, radius: 9 },
-  statusText: { x: 1445, y: 82, fontSize: 28 },
-  headerDividerY: 132,
+  logo: { centerX: 124, centerY: 78, radius: 46 },
+  title: { x: 198, y: 80, fontSize: 66 },
+  /** 전광판의 `BTC` 알약은 세 글자라 44 px 이 들어가지만 일곱 글자는 넘친다. */
+  badgeText: { x: 622, y: 80, fontSize: 32 },
+  badge: { x: 520, y: 48, width: 204, height: 62, radius: 12 },
+  statusBadge: { x: 1628, y: 48, width: 184, height: 62, radius: 31 },
+  statusDot: { x: 1658, y: 80, radius: 9 },
+  statusText: { x: 1740, y: 80, fontSize: 28 },
+  headerDividerY: 126,
   rows: {
-    height: { centerY: 220, label: "블록", unit: "HEIGHT" },
-    pool: { centerY: 368, label: "채굴", unit: "POOL" },
+    height: { centerY: 218, label: "블록", unit: "HEIGHT" },
+    pool: { centerY: 372, label: "채굴", unit: "POOL" },
   },
-  rowPanel: { x: 56, width: 1488, height: 132, radius: 16, dividerXs: [252, 1104] },
-  rowLabel: { x: 84, fontSize: 52, offsetY: -18 },
-  rowUnit: { x: 84, fontSize: 30, offsetY: 30 },
-  rowValue: { x: 288, fontSize: 108, maxWidth: 800 },
-  rowAside: { x: 1140, fontSize: 56, maxWidth: 380, offsetY: 14 },
-  rowAsideLabel: { x: 1140, fontSize: 24, offsetY: -40 },
-  sectionTitle: { x: 60, y: 468, fontSize: 38 },
-  sectionSubtitle: { x: 268, y: 471, fontSize: 29 },
+  rowPanel: { x: 64, width: 1792, height: 138, radius: 16, dividerXs: [300, 1392] },
+  rowLabel: { x: 96, fontSize: 54, offsetY: -18 },
+  rowUnit: { x: 96, fontSize: 30, offsetY: 32 },
+  rowValue: { x: 336, fontSize: 124, maxWidth: 980 },
+  rowAside: { x: 1432, fontSize: 58, maxWidth: 400, offsetY: 14 },
+  rowAsideLabel: { x: 1432, fontSize: 24, offsetY: -42 },
+  sectionTitle: { x: 72, y: 486, fontSize: 40 },
+  sectionSubtitle: { x: 300, y: 489, fontSize: 30 },
   /** 진행률은 섹션 제목 줄 오른쪽 끝에 붙인다. 바 위에 겹쳐 쓰면 읽기 어렵다. */
-  progressLabel: { x: 1544, y: 468, fontSize: 40 },
-  progressBar: { x: 56, y: 512, width: 1488, height: 28, radius: 14 },
+  progressLabel: { x: 1856, y: 486, fontSize: 42 },
+  progressBar: { x: 64, y: 530, width: 1792, height: 28, radius: 14 },
   /** 반감기 지표 3열. 전광판 차트가 쓰던 아래 영역을 채운다. */
-  metricPanel: { x: 56, top: 580, width: 1488, height: 264, radius: 16, columns: 3 },
-  metricLabel: { fontSize: 30, offsetY: -50 },
-  metricValue: { fontSize: 72, offsetY: 30 },
+  metricPanel: { x: 64, top: 596, width: 1792, height: 236, radius: 16, columns: 3 },
+  metricLabel: { fontSize: 30, offsetY: -46 },
+  metricValue: { fontSize: 74, offsetY: 30 },
 } as const;
 
 export interface BlockDashboardState {
@@ -281,32 +295,11 @@ const drawPanelBackground = (context: CanvasRenderingContext2D): void => {
  * 전광판과 같은 도형이다. `₿`(U+20BF) 글리프가 없는 환경에서 두부가 뜨는 것을
  * 막으려고 도형으로 그린다.
  */
+/** 전광판과 같은 코인 아이콘. 두 판의 마크가 달라 보이면 안 된다. */
 const drawBitcoinMark = (context: CanvasRenderingContext2D): void => {
   const { centerX, centerY, radius } = LAYOUT.logo;
 
-  context.beginPath();
-  context.arc(centerX, centerY, radius, 0, Math.PI * 2);
-  context.fillStyle = BILLBOARD_COLORS.brand;
-  context.fill();
-
-  context.save();
-  context.translate(centerX, centerY);
-  context.rotate(-(14 * Math.PI) / 180);
-  context.fillStyle = "#ffffff";
-
-  const strokeWidth = radius * 0.13;
-  const strokeHeight = radius * 0.42;
-
-  for (const offsetX of [-radius * 0.22, radius * 0.1]) {
-    context.fillRect(offsetX, -radius * 0.78, strokeWidth, strokeHeight);
-    context.fillRect(offsetX, radius * 0.36, strokeWidth, strokeHeight);
-  }
-
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  context.font = resolveFontSpec(700, radius * 1.5);
-  context.fillText("B", 0, 0);
-  context.restore();
+  drawBitcoinCoin(context, centerX, centerY, radius, BILLBOARD_COLORS.brand, "#ffffff");
 };
 
 /** 우측 상단 채굴 상태 배지. 전광판 접속 배지와 같은 자리·같은 규격이다. */

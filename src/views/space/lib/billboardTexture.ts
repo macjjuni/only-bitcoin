@@ -1,4 +1,5 @@
 import { BITCOIN_COLOR } from "@/shared/config/color";
+import { drawBitcoinCoin } from "@/shared/lib/bitcoinIconCanvas";
 import {
   type ChartRect,
   downsamplePrices,
@@ -15,12 +16,23 @@ import {
  * 라이브러리 없이 그릴 수 있다. 근거는 `docs/btc-space-3d.md` §6 에 있다.
  */
 
+/**
+ * 텍스처 규격. **맵의 금장 액자 안쪽(6.0 × 2.75 m)과 같은 비율**이다.
+ *
+ * 전에는 16:9(1600 × 900)였다. 액자가 24:11 이라 높이에 맞춰 끼우면 좌우로
+ * 0.56 m 씩 어두운 홈이 남았는데, 멀리서 보면 간판이 액자 가운데 덜 채워진
+ * 것으로 읽혔다.
+ *
+ * 1920 × 880 은 24:11 을 정수로 떨어뜨리는 값(24·80 × 11·80)이고, 텍셀 밀도가
+ * 320 px/m 로 전과 같다(1600 px / 4.889 m = 327). 비율만 바꾸고 선명도는
+ * 유지한다.
+ */
 export const BILLBOARD_TEXTURE = {
-  width: 1600,
-  height: 900,
+  width: 1920,
+  height: 880,
   /** 텍스처 재업로드 간격 상한. 시세는 초당 수십 번 바뀐다. */
   minRedrawIntervalMs: 250,
-  paddingX: 60,
+  paddingX: 72,
 } as const;
 
 /** 차트에 그릴 최대 점 개수. 288개(5분봉 24시간)를 그대로 그리면 과하다. */
@@ -50,17 +62,24 @@ export const BILLBOARD_ONLINE_MARKER = {
 } as const;
 
 /** 가격·변동률 컬럼의 가용 폭. 이 폭을 넘으면 글자를 줄인다. */
+/**
+ * 가격·등락률 칸의 최대 폭.
+ *
+ * 액자를 꽉 채우며 가로로 320 px 가 생겼다. 그 여유를 **가격 칸에 몰아준다** —
+ * 전광판에서 사람이 보는 것은 숫자이고, 전에는 열 자리 원화가 들어오면
+ * `resolveFittedFontSize` 가 글자를 줄이고 있었다.
+ */
 export const BILLBOARD_COLUMNS = {
-  priceMaxWidth: 800,
-  changeMaxWidth: 300,
+  priceMaxWidth: 980,
+  changeMaxWidth: 340,
 } as const;
 
 /**
  * 글자 크기 하한.
  *
- * 패널 폭 9.6 m 가 텍스처 1600 px 에 대응하므로 1 px 는 6 mm 다. 36 px 글자의
- * 숫자 높이는 약 0.15 m 이고, 32 m 거리에서 약 16 arcmin 로 가독 한계(약
- * 5 arcmin)의 3배다. 계산이 틀렸을 때의 안전장치로 둔다.
+ * 패널 폭 6.0 m 가 텍스처 1920 px 에 대응하므로 1 px 는 3.1 mm 다. 36 px 글자의
+ * 숫자 높이는 약 0.11 m 이고, 광장 건너편(약 24 m)에서 16 arcmin 로 가독
+ * 한계(약 5 arcmin)의 3배다. 계산이 틀렸을 때의 안전장치로 둔다.
  */
 export const BILLBOARD_MIN_FONT_SIZE_PX = 36;
 
@@ -200,35 +219,42 @@ const SANS_FONT_STACK =
 /** 숫자용 등폭. 자리수마다 폭이 달라지면 4 Hz 갱신 때 글자가 떤다. */
 const NUMERIC_FONT_STACK = "ui-monospace, SFMono-Regular, Menlo, monospace";
 
-/** 1600 × 900 기준 원거리 시인성 레이아웃. 가격 행의 높이와 칸 폭을 함께 확보한다. */
+/**
+ * 1920 × 880 기준 원거리 시인성 레이아웃.
+ *
+ * 16:9 에서 24:11 로 옮기며 **세로 예산은 그대로, 가로만 320 px 늘었다**
+ * (900 → 880, 1600 → 1920). 그래서 글자 높이는 거의 그대로 두고 늘어난 가로를
+ * 가격 칸·차트에 나눠 줬다. 가격만 108 → 124 px 로 키웠는데, 행 높이를
+ * 132 → 138 로 6 px 늘려 받아낸 몫이다.
+ */
 const LAYOUT = {
-  logo: { centerX: 106, centerY: 80, radius: 44 },
-  title: { x: 176, y: 82, fontSize: 64 },
-  ticker: { x: 546, y: 82, fontSize: 42 },
-  tickerBadge: { x: 488, y: 52, width: 116, height: 60, radius: 12 },
-  marketLabel: { x: 1310, y: 82, fontSize: 28 },
+  logo: { centerX: 124, centerY: 78, radius: 46 },
+  title: { x: 198, y: 80, fontSize: 66 },
+  ticker: { x: 622, y: 80, fontSize: 44 },
+  tickerBadge: { x: 560, y: 48, width: 124, height: 62, radius: 12 },
+  marketLabel: { x: 1596, y: 80, fontSize: 28 },
   /** 더 긴 "오프라인" 기준으로 폭을 고정한다. 점 위치가 글자 길이에 흔들리면 펄스가 어긋난다. */
-  statusBadge: { x: 1338, y: 52, width: 176, height: 60, radius: 30 },
+  statusBadge: { x: 1628, y: 48, width: 184, height: 62, radius: 31 },
   /** 점 오른쪽 남은 폭의 가운데. 글자 길이가 달라도 좌우 여백이 맞는다. */
-  statusBadgeText: { x: 1445, y: 82, fontSize: 28 },
+  statusBadgeText: { x: 1740, y: 80, fontSize: 28 },
   rows: {
-    krw: { centerY: 220, label: "원화", unit: "KRW" },
-    usd: { centerY: 368, label: "달러", unit: "USD" },
+    krw: { centerY: 218, label: "원화", unit: "KRW" },
+    usd: { centerY: 372, label: "달러", unit: "USD" },
   },
-  rowPanel: { x: 56, width: 1488, height: 132, radius: 16, dividerXs: [252, 1104] },
-  rowLabel: { x: 84, fontSize: 52, offsetY: -18 },
-  rowUnit: { x: 84, fontSize: 30, offsetY: 30 },
-  rowPrice: { x: 288, fontSize: 108, maxWidth: BILLBOARD_COLUMNS.priceMaxWidth, height: 128 },
-  rowChange: { x: 1140, fontSize: 68, maxWidth: BILLBOARD_COLUMNS.changeMaxWidth, offsetY: 16 },
-  rowChangeSuffix: { x: 1180, fontSize: 24, offsetY: -36 },
-  dividers: [132] as const,
-  chartTitle: { x: 60, y: 470, fontSize: 38 },
-  chartSubtitle: { x: 300, y: 473, fontSize: 29 },
-  chart: { left: 60, top: 520, width: 1320, height: 250 } satisfies ChartRect,
-  axisLabel: { x: 1452, fontSize: 26 },
-  timeLabel: { y: 859, fontSize: 27 },
-  footer: { y: 866, fontSize: 24 },
-  statusDot: { radius: 7, gap: 26, offsetY: -36 },
+  rowPanel: { x: 64, width: 1792, height: 138, radius: 16, dividerXs: [300, 1392] },
+  rowLabel: { x: 96, fontSize: 54, offsetY: -18 },
+  rowUnit: { x: 96, fontSize: 30, offsetY: 32 },
+  rowPrice: { x: 336, fontSize: 124, maxWidth: BILLBOARD_COLUMNS.priceMaxWidth, height: 140 },
+  rowChange: { x: 1432, fontSize: 72, maxWidth: BILLBOARD_COLUMNS.changeMaxWidth, offsetY: 16 },
+  rowChangeSuffix: { x: 1476, fontSize: 24, offsetY: -38 },
+  dividers: [126] as const,
+  chartTitle: { x: 72, y: 486, fontSize: 40 },
+  chartSubtitle: { x: 330, y: 489, fontSize: 30 },
+  chart: { left: 72, top: 530, width: 1640, height: 236 } satisfies ChartRect,
+  axisLabel: { x: 1784, fontSize: 27 },
+  timeLabel: { y: 838, fontSize: 28 },
+  footer: { y: 846, fontSize: 24 },
+  statusDot: { radius: 7, gap: 28, offsetY: -36 },
 } as const;
 
 export interface BillboardPriceRegion {
@@ -350,35 +376,14 @@ const drawPanelBackground = (context: CanvasRenderingContext2D): void => {
 /**
  * 비트코인 마크.
  *
- * `₿`(U+20BF) 글리프가 없는 환경에서 두부가 뜨는 것을 막으려고 도형으로 그린다.
- * 주황 원 + 기울인 `B` + 위아래로 뻗은 세로 획 두 개다.
+ * 헤더의 `<KIcon icon="bitcoin" />` 과 같은 패스를 쓴다. 전에는 시스템 폰트의
+ * `B` 를 회전시켜 흉내 냈는데, 글꼴에 따라 모양이 달라지고 진짜 ₿ 비율과도
+ * 맞지 않았다.
  */
 const drawBitcoinMark = (context: CanvasRenderingContext2D): void => {
   const { centerX, centerY, radius } = LAYOUT.logo;
 
-  context.beginPath();
-  context.arc(centerX, centerY, radius, 0, Math.PI * 2);
-  context.fillStyle = BILLBOARD_COLORS.brand;
-  context.fill();
-
-  context.save();
-  context.translate(centerX, centerY);
-  context.rotate(-(14 * Math.PI) / 180);
-  context.fillStyle = "#ffffff";
-
-  const strokeWidth = radius * 0.13;
-  const strokeHeight = radius * 0.42;
-
-  for (const offsetX of [-radius * 0.22, radius * 0.1]) {
-    context.fillRect(offsetX, -radius * 0.78, strokeWidth, strokeHeight);
-    context.fillRect(offsetX, radius * 0.36, strokeWidth, strokeHeight);
-  }
-
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  context.font = resolveFontSpec(700, radius * 1.5, SANS_FONT_STACK);
-  context.fillText("B", 0, 0);
-  context.restore();
+  drawBitcoinCoin(context, centerX, centerY, radius, BILLBOARD_COLORS.brand, "#ffffff");
 };
 
 /** 상승·하락 삼각형. 글리프 대신 도형이라 폰트에 기대지 않는다. */
