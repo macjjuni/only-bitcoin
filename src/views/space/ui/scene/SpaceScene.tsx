@@ -49,6 +49,7 @@ import {
 } from "@/features/space-controls";
 import type { SpaceSession } from "@/features/space-session";
 import { spaceConfig } from "@/shared/config/space";
+import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import type { LanternAnchor } from "@/views/space/lib/islandModel";
 import type { IslandTerrain } from "@/views/space/lib/islandTerrain";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
@@ -358,7 +359,7 @@ function SpaceScene({
     const safePosition = resolveSafeCameraPosition(focus, dampedPosition, deltaSeconds);
     camera.position.set(safePosition.x, safePosition.y, safePosition.z);
     camera.lookAt(focus.x, focus.y, focus.z);
-  }, -1);
+  }, SPACE_FRAME_PRIORITY.simulation);
   // endregion
 
   return (

@@ -11,6 +11,7 @@ import {
   SPACE_OVERLAY_LIMITS,
 } from "@/entities/space";
 import { selectNearestVisible } from "@/views/space/lib/avatarCulling";
+import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 
 /** 명찰 선별 주기. 매 프레임 고르면 React 상태가 60 Hz 로 갱신된다. */
 const SELECTION_INTERVAL_MS = 200;
@@ -121,7 +122,7 @@ function Nameplates({
     }
 
     applySlotPositions();
-  });
+  }, SPACE_FRAME_PRIORITY.overlay);
   // endregion
 
   return (

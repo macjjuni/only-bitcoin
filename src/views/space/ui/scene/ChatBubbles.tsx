@@ -21,6 +21,7 @@ import {
   type SpacePeer,
 } from "@/entities/space";
 import { truncateGraphemes } from "@/shared/lib/text/countGraphemes";
+import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import {
   type ReceivedSpaceMessage,
   type SpaceChatBubble,
@@ -89,7 +90,7 @@ function ChatBubbles({ messages, players, self, viewerTransformRef }: ChatBubble
       selectVisibleBubbles(now);
     }
     updateBubblePositions();
-  });
+  }, SPACE_FRAME_PRIORITY.overlay);
   // endregion
 
   // region [Templates]
