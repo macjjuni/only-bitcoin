@@ -179,6 +179,40 @@ const nextConfig: NextConfig = {
           },
         ],
       },
+      {
+        /**
+         * `/space` 전용 3D 에셋 — 맵·아바타·Draco 디코더.
+         *
+         * 일반 정적 리소스(7일)보다 **한 달**로 길게 잡는다. 콜드 로드
+         * 1.7 MB 중 1.25 MB 가 이 규칙과 아래 하늘 규칙에 걸리고, 바뀔
+         * 때는 파일을 다시 굽는 종류라 자주 갱신되지 않는다. 확장자
+         * 목록에 `glb`·`bin`·`wasm` 이 빠져 있어 원래는 `max-age=0` 으로
+         * 나가고 있었다.
+         */
+        source: "/:dir(models|draco)/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=2592000, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
+        /**
+         * 360° 파노라마 하늘. 콜드 로드에서 가장 큰 단일 파일(575 KB)이다.
+         *
+         * **위의 일반 이미지 규칙보다 뒤에 와야 한다.** `webp` 라 양쪽에
+         * 걸리는데, Next 는 같은 헤더 키를 **뒤에 선언한 규칙으로 덮어쓴다.**
+         * 앞에 뒀더니 일반 규칙의 7일이 이겼다.
+         */
+        source: "/images/360.webp",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=2592000, stale-while-revalidate=86400",
+          },
+        ],
+      },
     ];
   },
 };
