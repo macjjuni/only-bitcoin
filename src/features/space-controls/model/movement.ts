@@ -212,11 +212,11 @@ const stepJump = (
   deltaSeconds: number,
   groundY: number,
   ceilingY: number,
-): { y: number; velocityY: number } => {
+): { y: number; velocityY: number; isGrounded: boolean } => {
   const isGrounded = y <= groundY && velocityY <= 0;
 
   if (isGrounded && !isJumping) {
-    return { y: groundY, velocityY: 0 };
+    return { y: groundY, velocityY: 0, isGrounded: true };
   }
 
   const launched = isGrounded ? SPACE_MOVEMENT.jumpSpeed : velocityY;
@@ -224,11 +224,13 @@ const stepJump = (
   const nextY = y + nextVelocityY * deltaSeconds;
 
   if (nextY <= groundY) {
-    return { y: groundY, velocityY: 0 };
+    return { y: groundY, velocityY: 0, isGrounded: true };
   }
 
   // 천장에 닿으면 올라가던 속도를 지운다. 남겨두면 다음 스텝에 다시 밀어 올린다.
-  return nextY >= ceilingY ? { y: ceilingY, velocityY: 0 } : { y: nextY, velocityY: nextVelocityY };
+  return nextY >= ceilingY
+    ? { y: ceilingY, velocityY: 0, isGrounded: false }
+    : { y: nextY, velocityY: nextVelocityY, isGrounded: false };
 };
 
 /**
@@ -294,5 +296,6 @@ export const stepMovement = (
     velocityZ,
     velocityY: jump.velocityY,
     isRunning: input.isRunning && direction.magnitude > 0,
+    isGrounded: jump.isGrounded,
   };
 };

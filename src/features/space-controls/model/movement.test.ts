@@ -329,6 +329,30 @@ describe("지형 위 걷기", () => {
   /** 점프로도 못 오르는 벽. */
   const WALL = createPlatformTerrain({ minX: 1, maxX: 10, minZ: -10, maxZ: 10, top: 3 });
 
+  it("높은 지면에 서 있어도 접지로 본다", () => {
+    // 걷기 모션이 이 값으로 다리를 멈춘다. 전에는 `y <= 0` 으로 접지를 봤는데,
+    // 섬은 광장이 5·테라스가 7.5·궁전이 11 이라 서 있어도 거짓이 되어
+    // 걷기 모션이 통째로 멈춰 있었다.
+    const plaza = createFlatTerrain(5);
+    const next = runSteps(createState({ y: 5 }), createInput({ forward: 1 }), 0, 30, plaza);
+
+    expect(next.y).toBe(5);
+    expect(next.isGrounded).toBe(true);
+  });
+
+  it("공중에서는 접지가 풀린다", () => {
+    const jumped = stepMovement(
+      createState(),
+      createInput({ isJumping: true }),
+      0,
+      undefined,
+      GROUND,
+    );
+
+    expect(jumped.y).toBeGreaterThan(0);
+    expect(jumped.isGrounded).toBe(false);
+  });
+
   it("계단 한 칸은 걸어서 올라선다", () => {
     const next = runSteps(createState(), createInput({ strafe: 1 }), 0, 60, STEP);
 

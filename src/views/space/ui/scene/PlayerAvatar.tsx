@@ -76,7 +76,11 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
   const advanceWalkCycle = (deltaSeconds: number): void => {
     const state = playerStateRef.current;
     // 공중에서는 다리를 멈춘다. 뛰는 중에 걷는 모션이 돌면 허우적대 보인다.
-    const speed = state && state.y <= 0 ? Math.hypot(state.velocityX, state.velocityZ) : 0;
+    //
+    // 접지 판정은 **지형이 정하고 적분기가 넘겨준다.** 전에는 `y <= 0` 으로
+    // 봤는데, 그건 바닥이 0 이던 벙커 기준이라 광장(5)·테라스(7.5)·궁전(11)
+    // 어디에 서 있어도 거짓이 되어 걷기 모션이 통째로 멈춰 있었다.
+    const speed = state?.isGrounded ? Math.hypot(state.velocityX, state.velocityZ) : 0;
 
     const phase = body.phase.getX(0) + (speed * deltaSeconds) / CREW_WALK.metersPerCycle;
     const step = deltaSeconds / CREW_WALK.blendSeconds;

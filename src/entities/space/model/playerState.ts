@@ -18,6 +18,15 @@ export interface LocalPlayerState extends PlayerTransform {
   velocityZ: number;
   velocityY: number;
   isRunning: boolean;
+  /**
+   * 발이 지면에 붙어 있는지.
+   *
+   * **`y` 로는 알 수 없다.** 벙커는 바닥이 0 이라 `y <= 0` 이 곧 접지였지만,
+   * 섬은 광장이 5·테라스가 7.5·궁전이 11 이라 서 있어도 `y` 가 0 이 아니다.
+   * 지면 높이는 지형에 물어봐야 알 수 있으므로 적분기가 계산한 결과를 그대로
+   * 실어 보낸다 — 걷기 모션이 이 값으로 다리를 멈춘다.
+   */
+  isGrounded: boolean;
 }
 
 export interface RemotePlayer extends PlayerTransform {
@@ -40,6 +49,7 @@ export const createLocalPlayerState = (spawn: PlayerTransform): LocalPlayerState
   velocityZ: 0,
   velocityY: 0,
   isRunning: false,
+  isGrounded: true,
 });
 
 /**

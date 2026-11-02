@@ -95,6 +95,7 @@ const movement = (x: number, y = 0): LocalPlayerState => ({
   y,
   z: 0,
   yaw: 0,
+  isGrounded: true,
   velocityX: 0,
   velocityZ: 0,
   velocityY: 0,
