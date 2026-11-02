@@ -9,19 +9,23 @@ const CONTROL_GUIDE = [
   { action: "점프", desktop: "Space", mobile: "우측 하단 버튼" },
   { action: "시야 회전", desktop: "드래그 · Q E", mobile: "화면 드래그" },
   { action: "줌", desktop: "휠", mobile: "두 손가락" },
-  { action: "채팅", desktop: "Enter", mobile: "우측 상단 버튼" },
+  { action: "채팅", desktop: "Enter", mobile: "좌측 하단 버튼" },
 ] as const;
 
+interface SpaceControlGuideProps {
+  /** 손가락 기기인지. 화면 폭으로 가르면 가로 폰·태블릿에 키보드 안내가 뜸. */
+  isCoarsePointer: boolean;
+}
+
 /** 조작 안내 패널. 우측 상단 버튼으로 여닫는다. */
-function SpaceControlGuide(): ReactNode {
+function SpaceControlGuide({ isCoarsePointer }: SpaceControlGuideProps): ReactNode {
   return (
     <dl className="w-56 rounded-xl bg-black/65 px-3 py-2.5 backdrop-blur-sm">
       {CONTROL_GUIDE.map(({ action, desktop, mobile }) => (
         <div key={action} className="flex items-baseline justify-between gap-2 py-0.5">
           <dt className="shrink-0 text-[11px] font-semibold text-white/85">{action}</dt>
           <dd className="text-right text-[11px] leading-4 text-white/55">
-            <span className="hidden sm:inline">{desktop}</span>
-            <span className="sm:hidden">{mobile}</span>
+            {isCoarsePointer ? mobile : desktop}
           </dd>
         </div>
       ))}

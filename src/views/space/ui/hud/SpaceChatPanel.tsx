@@ -173,15 +173,20 @@ function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessa
   /**
    * 하단 시트는 화면 아래 모서리에 붙여 입력칸을 엄지 범위에 둔다.
    *
-   * `absolute` 기준은 safe-area 패딩을 가진 HUD 루트의 패딩 박스라 `0` 이 이미
-   * 안전 영역 안쪽이다. 키보드가 올라오면 그만큼 띄우되, 키보드가 safe-area 까지
-   * 덮으므로 그 몫을 빼서 자판 위에 딱 붙인다.
+   * `absolute` 의 `bottom: 0` 은 HUD 루트 패딩 박스의 바깥 모서리, 즉 화면 맨 아래임.
+   * 그래서 키보드가 없을 땐 홈 인디케이터만큼 안쪽 패딩을 줌. 키보드가 올라오면
+   * 자판이 safe-area 까지 덮으니 키보드 높이만큼만 띄우고 패딩은 뺌.
    */
+  // 일부 안드로이드는 키보드 없이도 1px 미만 오차가 남아 문턱을 둠.
+  const isKeyboardOpen = viewport.bottomInset > 1;
   const panelStyle = isBottomSheet
     ? {
         left: 0,
         right: 0,
-        bottom: `max(0px, calc(${viewport.bottomInset}px - env(safe-area-inset-bottom)))`,
+        bottom: viewport.bottomInset,
+        paddingBottom: isKeyboardOpen ? 0 : "env(safe-area-inset-bottom)",
+        paddingLeft: "env(safe-area-inset-left)",
+        paddingRight: "env(safe-area-inset-right)",
         maxHeight: Math.max(160, Math.min(420, viewport.height - 88)),
       }
     : {

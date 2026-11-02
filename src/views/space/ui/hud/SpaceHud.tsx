@@ -273,7 +273,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
 
   const GuidePanelTemplate = isGuideOpen ? (
     <div className="mt-2">
-      <SpaceControlGuide />
+      <SpaceControlGuide isCoarsePointer={isCoarsePointer} />
     </div>
   ) : null;
 

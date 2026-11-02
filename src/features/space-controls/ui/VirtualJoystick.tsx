@@ -157,6 +157,7 @@ function VirtualJoystick({ inputSource }: VirtualJoystickProps): ReactNode {
       onPointerMove={onPointerMoveJoystickBase}
       onPointerUp={onPointerUpJoystickBase}
       onPointerCancel={onPointerUpJoystickBase}
+      onLostPointerCapture={onPointerUpJoystickBase}
     >
       <div
         className="absolute rounded-full bg-bitcoin/75 shadow-lg"
