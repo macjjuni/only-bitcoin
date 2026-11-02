@@ -19,6 +19,8 @@ import { BITCOIN_COLOR } from "@/shared/config/color";
  *
  * 천장이 닫혀 있어 위에서 들어오는 빛이 막힌다는 점도 같이 반영했다. 키라이트는
  * 입체감만 남길 정도로 낮추고, 실제 밝기는 펜던트 점광원이 담당한다.
+ *
+ * 너무 어둡다는 의견이 있어 전역광·펜던트를 2~3할 올렸음. 명암 구조는 그대로 둠.
  */
 const SKY_LIGHT_COLOR = "#4a4138";
 const GROUND_LIGHT_COLOR = "#0f0d0c";
@@ -28,7 +30,7 @@ const PENDANT_LIGHT_COLOR = "#ff9d4d";
 /** 물리 기반 조도라 점광원 강도는 칸델라 단위로 크게 잡아야 보인다. */
 const BILLBOARD_GLOW_INTENSITY = 180;
 const BILLBOARD_GLOW_DISTANCE = 44;
-const PENDANT_LIGHT_INTENSITY = 150;
+const PENDANT_LIGHT_INTENSITY = 190;
 /**
  * 펜던트 도달 거리.
  *
@@ -69,11 +71,11 @@ function SceneLighting({ hasRealtimeShadows }: SceneLightingProps): ReactNode {
       {/* 벽과 천장이 시야를 덮으므로 배경은 틈새로만 보인다. 거의 검게 둔다. */}
       <color attach="background" args={["#08090b"]} />
 
-      <hemisphereLight color={SKY_LIGHT_COLOR} groundColor={GROUND_LIGHT_COLOR} intensity={0.6} />
+      <hemisphereLight color={SKY_LIGHT_COLOR} groundColor={GROUND_LIGHT_COLOR} intensity={0.8} />
 
       <directionalLight
         color={KEY_LIGHT_COLOR}
-        intensity={0.7}
+        intensity={0.85}
         position={[12, 22, 10]}
         castShadow={hasRealtimeShadows}
         shadow-mapSize-width={SHADOW_MAP_SIZE}
@@ -87,7 +89,7 @@ function SceneLighting({ hasRealtimeShadows }: SceneLightingProps): ReactNode {
       />
 
       {/* 보조광은 그림자를 만들지 않고 벽·캐릭터의 어두운 면만 드러낸다. */}
-      <directionalLight color={FILL_LIGHT_COLOR} intensity={0.3} position={[-18, 10, -8]} />
+      <directionalLight color={FILL_LIGHT_COLOR} intensity={0.4} position={[-18, 10, -8]} />
 
       {/* 천장 펜던트. 이 방의 실제 밝기는 여기서 나온다. */}
       {PENDANT_POSITIONS.map((pendantPosition) => (
