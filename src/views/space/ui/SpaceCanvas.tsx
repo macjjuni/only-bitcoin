@@ -26,7 +26,14 @@ import SpaceScene from "./scene/SpaceScene";
 /** 컨텍스트 복구를 기다리는 시간. 넘기면 폴백으로 전환한다. */
 const CONTEXT_RESTORE_TIMEOUT_MS = 3_000;
 const CAMERA_NEAR = 0.1;
-const CAMERA_FAR = 220;
+/**
+ * 원평면.
+ *
+ * 벙커는 사방이 막혀 220 m 로 충분했다. 섬은 600 m 바다 평면이 깔려 있어서,
+ * 안개가 수평선을 다 덮기(320 m) 전에 잘리면 바다가 **싹둑 끊긴 가장자리**로
+ * 보인다. 안개 끝보다 넉넉히 뒤에 둔다.
+ */
+const CAMERA_FAR = 420;
 
 interface SpaceCanvasProps {
   identity: ChatIdentity;

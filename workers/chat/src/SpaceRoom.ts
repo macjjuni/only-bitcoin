@@ -9,13 +9,14 @@ import {
   SPACE_CHAT_MAX_GRAPHEMES,
   SPACE_NETWORK_INTERVAL_MS,
   SPACE_NICKNAME_COOLDOWN_MS,
+  SPACE_PROTOCOL_VERSION,
   type SpaceClientFrame,
   type SpacePeer,
   type SpaceServerFrame,
 } from "../../../src/entities/space/model/spaceProtocol";
 import {
   SPACE_BOUNDS,
-  SPACE_MAX_JUMP_HEIGHT,
+  SPACE_MAX_ALTITUDE,
   SPACE_MAX_OCCUPANTS,
 } from "../../../src/entities/space/model/spaceWorld";
 import { createSha256Hex, deriveStableActorKey } from "./lib/crypto";
@@ -36,7 +37,13 @@ interface SayReceipt {
 }
 
 interface SpaceSocketAttachment {
-  v: 1;
+  /**
+   * 소켓에 붙여 둔 상태의 버전.
+   *
+   * 프레임 버전과 같은 값을 쓴다. 프로토콜이 바뀌면 재배포 전에 붙은 소켓의
+   * 상태도 더 이상 믿을 수 없으므로, 한 숫자로 묶어 두면 둘이 어긋날 일이 없다.
+   */
+  v: typeof SPACE_PROTOCOL_VERSION;
   joined: boolean;
   ipGuardKey: string;
   joinDeadlineAt?: number;
@@ -60,8 +67,15 @@ const PRUNE_INTERVAL_MS = 15_000;
 const MINIMUM_MOVE_INTERVAL_MS = 70;
 /** 클라이언트 달리기 8 m/s에 전송·적분 오차 여유만 더한다. */
 const MAXIMUM_SPEED_METERS_PER_SECOND = 8.5;
+/**
+ * 한 번에 인정하는 최대 이동 거리.
+ *
+ * 맵 대각선이다. 이보다 멀리 가는 이동은 어떤 예산이 쌓여도 받지 않는다.
+ * 높이도 포함한다 — 섬은 층이 여러 개라 수직 이동도 실제 거리다.
+ */
 const MAXIMUM_MOVEMENT_BUDGET = Math.hypot(
   SPACE_BOUNDS.maxX - SPACE_BOUNDS.minX,
+  SPACE_MAX_ALTITUDE,
   SPACE_BOUNDS.maxZ - SPACE_BOUNDS.minZ,
 );
 const textEncoder = new TextEncoder();
@@ -117,7 +131,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     }
     const candidate = attachment as Partial<SpaceSocketAttachment>;
 
-    return candidate.v === 1 &&
+    return candidate.v === SPACE_PROTOCOL_VERSION &&
       typeof candidate.joined === "boolean" &&
       typeof candidate.ipGuardKey === "string" &&
       Array.isArray(candidate.recentSayReceipts)
@@ -148,7 +162,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   }
 
   private sendError(socket: WebSocket, code: string, message: string, rid?: string): void {
-    this.sendFrame(socket, { v: 1, t: "error", code, message, ...(rid ? { rid } : {}) });
+    this.sendFrame(socket, { v: SPACE_PROTOCOL_VERSION, t: "error", code, message, ...(rid ? { rid } : {}) });
   }
 
   private broadcastFrame(frame: SpaceServerFrame, excludedSocket?: WebSocket): void {
@@ -179,7 +193,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
     for (const current of connectedPeers) {
       this.sendFrame(current.socket, {
-        v: 1,
+        v: SPACE_PROTOCOL_VERSION,
         t: "welcome",
         self: current.peer,
         peers: connectedPeers
@@ -235,7 +249,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       this.dirtySeats.delete(ownedSeat);
 
       if (shouldAnnounceLeave) {
-        this.broadcastFrame({ v: 1, t: "leave", seat: ownedSeat });
+        this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "leave", seat: ownedSeat });
       }
     } else if (!attachment && shouldAnnounceLeave) {
       // 희소 위치 delta만으로는 사라진 좌석을 추론할 수 없으므로 누락된 leave를 보완한다.
@@ -362,7 +376,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         );
 
       if (seat === undefined) {
-        this.sendFrame(socket, { v: 1, t: "full" });
+        this.sendFrame(socket, { v: SPACE_PROTOCOL_VERSION, t: "full" });
         this.removeSocket(socket, 4003, "room full");
         return;
       }
@@ -406,10 +420,10 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         const currentPeer = this.getJoinedAttachment(candidate)?.peer;
         return candidate !== socket && currentPeer ? [currentPeer] : [];
       });
-      this.sendFrame(socket, { v: 1, t: "welcome", self: peer, peers });
+      this.sendFrame(socket, { v: SPACE_PROTOCOL_VERSION, t: "welcome", self: peer, peers });
 
       if (this.getJoinedAttachment(socket)) {
-        this.broadcastFrame({ v: 1, t: "peer", peer }, socket);
+        this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer }, socket);
       }
     } finally {
       this.joiningSockets.delete(socket);
@@ -434,19 +448,22 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       MAXIMUM_MOVEMENT_BUDGET,
       attachment.movementBudget + (elapsed / 1000) * MAXIMUM_SPEED_METERS_PER_SECOND,
     );
-    const distance = Math.hypot(frame.x - peer.x, frame.z - peer.z);
+    // 높이도 거리에 넣는다. 벙커는 바닥이 평평해 `y` 가 점프뿐이라 뺐지만,
+    // 섬에서는 궁전 단과 바다가 11 m 차이라 수직 순간이동이 실제 이동이 된다.
+    const distance = Math.hypot(frame.x - peer.x, frame.y - peer.y, frame.z - peer.z);
     const isInBounds =
       frame.x >= SPACE_BOUNDS.minX &&
       frame.x <= SPACE_BOUNDS.maxX &&
       frame.z >= SPACE_BOUNDS.minZ &&
       frame.z <= SPACE_BOUNDS.maxZ &&
-      // 바닥은 평평하다. 점프로 닿을 수 있는 높이만 허용한다.
+      // 섬 전체를 덮는 높이 상한만 본다. 층별 판정은 서버가 지형을 모르므로
+      // 할 수 없고, 클라이언트의 지형 충돌이 맡는다.
       frame.y >= 0 &&
-      frame.y <= SPACE_MAX_JUMP_HEIGHT;
+      frame.y <= SPACE_MAX_ALTITUDE;
 
     if (!isInBounds || distance > availableDistance) {
       this.sendError(socket, "INVALID_MOVE", "이동 가능한 범위와 속도를 확인해 주세요.");
-      this.sendFrame(socket, { v: 1, t: "peer", peer });
+      this.sendFrame(socket, { v: SPACE_PROTOCOL_VERSION, t: "peer", peer });
       return;
     }
     const yaw = Math.atan2(Math.sin(frame.yaw), Math.cos(frame.yaw));
@@ -490,7 +507,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       return;
     }
     if (peer.nickname === nickname) {
-      this.sendFrame(socket, { v: 1, t: "peer", peer });
+      this.sendFrame(socket, { v: SPACE_PROTOCOL_VERSION, t: "peer", peer });
       return;
     }
     const now = Date.now();
@@ -511,7 +528,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       lastActivityAt: now,
       lastNickAt: now,
     } satisfies SpaceSocketAttachment);
-    this.broadcastFrame({ v: 1, t: "peer", peer: renamed });
+    this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: renamed });
   }
 
   /**
@@ -533,7 +550,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       return;
     }
     if (peer.modelIndex === frame.modelIndex) {
-      this.sendFrame(socket, { v: 1, t: "peer", peer });
+      this.sendFrame(socket, { v: SPACE_PROTOCOL_VERSION, t: "peer", peer });
       return;
     }
     const changed: SpacePeer = { ...peer, modelIndex: frame.modelIndex };
@@ -542,7 +559,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       peer: changed,
       lastActivityAt: Date.now(),
     } satisfies SpaceSocketAttachment);
-    this.broadcastFrame({ v: 1, t: "peer", peer: changed });
+    this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: changed });
   }
 
   private async handleSay(
@@ -586,7 +603,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
           return;
         }
         this.sendFrame(socket, {
-          v: 1,
+          v: SPACE_PROTOCOL_VERSION,
           t: "say",
           message: {
             id: previousReceipt.id,
@@ -627,7 +644,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
           -MAXIMUM_RECENT_SAY_RECEIPTS,
         ),
       } satisfies SpaceSocketAttachment);
-      this.broadcastFrame({ v: 1, t: "say", message });
+      this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "say", message });
     } finally {
       this.sayingSockets.delete(socket);
     }
@@ -672,7 +689,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     const server = pair[1];
     const now = Date.now();
     const attachment: SpaceSocketAttachment = {
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       joined: false,
       ipGuardKey,
       joinDeadlineAt: now + JOIN_TIMEOUT_MS,

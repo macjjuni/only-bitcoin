@@ -25,13 +25,6 @@ export {
   type SpacePresenceStatus,
 } from "./model/playerState";
 export {
-  resolveGroundHeight,
-  resolveObstacleCollision,
-  SPACE_AVATAR_COLLISION_RADIUS,
-  SPACE_OBSTACLES,
-  type SpaceObstacle,
-} from "./model/spaceObstacles";
-export {
   parseSpaceClientFrame,
   parseSpaceServerFrame,
   SPACE_CHAT_COOLDOWN_MS,
@@ -47,19 +40,27 @@ export {
   type SpaceServerFrame,
 } from "./model/spaceProtocol";
 export {
+  createFlatTerrain,
+  SPACE_AVATAR_COLLISION_HEIGHT,
+  SPACE_AVATAR_COLLISION_RADIUS,
+  SPACE_STEP_HEIGHT,
+  type SpaceTerrain,
+  type TerrainMoveResult,
+} from "./model/spaceTerrain";
+export {
   SPACE_BILLBOARD,
   SPACE_BLOCK_DASHBOARD,
   SPACE_BOUNDS,
   SPACE_CAMERA_BOUNDS,
-  SPACE_GROUND,
-  SPACE_LOUNGE,
-  SPACE_MAX_JUMP_HEIGHT,
+  SPACE_ISLAND,
+  SPACE_MAX_ALTITUDE,
   SPACE_MAX_OCCUPANTS,
   SPACE_OVERLAY_LIMITS,
-  SPACE_ROOM_HEIGHT,
+  SPACE_SCREEN_FRAME,
+  SPACE_SCREEN_GLOW_POSITIONS,
+  SPACE_SCREEN_PLACEMENTS,
+  SPACE_SCREEN_SCALE,
+  SPACE_SPAWN_FACING,
   SPACE_SPAWN_RING,
   SPACE_TEXT_BANNER,
-  SPACE_WALL_ANCHOR,
-  SPACE_WALL_PANEL_SPAN,
-  SPACE_WALL_Z,
 } from "./model/spaceWorld";

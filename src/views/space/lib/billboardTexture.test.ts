@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SPACE_BILLBOARD } from "@/entities/space";
+import { SPACE_BILLBOARD, SPACE_SCREEN_FRAME, SPACE_SCREEN_SCALE } from "@/entities/space";
 import {
   BILLBOARD_CHART_MARKER,
   BILLBOARD_COLORS,
@@ -355,8 +355,19 @@ describe("패널 비율", () => {
     );
   });
 
-  it("프레임이 패널보다 크다", () => {
-    expect(SPACE_BILLBOARD.frameWidth).toBeGreaterThan(SPACE_BILLBOARD.width);
-    expect(SPACE_BILLBOARD.frameHeight).toBeGreaterThan(SPACE_BILLBOARD.height);
+  it("액자에 끼운 패널도 텍스처 비율을 유지한다", () => {
+    // 테두리는 맵의 금장 액자가 맡고, 패널은 한 배율로만 줄인다. 폭과 높이를
+    // 따로 맞추면 글자가 늘어난다.
+    const scaled = {
+      width: SPACE_BILLBOARD.width * SPACE_SCREEN_SCALE,
+      height: SPACE_BILLBOARD.height * SPACE_SCREEN_SCALE,
+    };
+
+    expect(scaled.width / scaled.height).toBeCloseTo(
+      BILLBOARD_TEXTURE.width / BILLBOARD_TEXTURE.height,
+      6,
+    );
+    expect(scaled.width).toBeLessThanOrEqual(SPACE_SCREEN_FRAME.width);
+    expect(scaled.height).toBeLessThanOrEqual(SPACE_SCREEN_FRAME.height);
   });
 });

@@ -1,5 +1,13 @@
-import type { LocalPlayerState } from "@/entities/space";
-import { resolveGroundHeight, resolveObstacleCollision, SPACE_BOUNDS } from "@/entities/space";
+import type { LocalPlayerState, SpaceTerrain } from "@/entities/space";
+import { createFlatTerrain, SPACE_BOUNDS } from "@/entities/space";
+
+/**
+ * 지형이 아직 없을 때 쓰는 대체 평지.
+ *
+ * GLB 가 도착하기 전 한두 프레임과 단위 테스트가 쓴다. 모듈 수준에 한 번만
+ * 만들어 둔다 — 매 스텝 새로 만들면 초당 60번 객체를 버린다.
+ */
+const FALLBACK_TERRAIN: SpaceTerrain = createFlatTerrain();
 
 /** 이동 튜닝 값. 근거는 `docs/btc-space-3d.md` §5 에 있다. */
 export const SPACE_MOVEMENT = {
@@ -17,8 +25,8 @@ export const SPACE_MOVEMENT = {
    * 점프 초기 속도(m/s)와 중력(m/s²).
    *
    * 정점 `v²/2g` = 1.13 m, 체공 `2v/g` = 0.75 초다. 키 1.81 m 기준으로 무릎보다
-   * 조금 높이 뜨는 정도이며, 서버가 검증하는 `SPACE_MAX_JUMP_HEIGHT`(2.5 m)
-   * 안에 든다.
+   * 조금 높이 뜨는 정도다. 섬에서는 이 정점이 **오를 수 없는 턱의 하한**이기도
+   * 하다 — 1.13 m 보다 낮은 난간은 뛰어 넘을 수 있다.
    */
   jumpSpeed: 6,
   gravity: 16,
@@ -117,6 +125,31 @@ const approachVelocity = (
   };
 };
 
+/**
+ * 벽 법선 쪽으로 파고드는 속도 성분만 지운다.
+ *
+ * 벽에 부딪혔다고 속도를 통째로 지우면 비스듬히 다가간 벽에서 그 자리에 선다.
+ * 법선 성분만 빼면 남는 접선 성분이 벽을 따라 미끄러진다 — 좁은 통로나 계단
+ * 난간을 스치며 지나갈 때 걸리는 느낌이 사라진다.
+ *
+ * `pushX/pushZ` 는 벽이 밀어낸 방향(바깥쪽 법선)이라, 속도가 그 **반대로**
+ * 향할 때만 지운다. 이미 벽에서 멀어지는 중이면 건드리지 않는다.
+ */
+const slideAlongWall = (
+  velocityX: number,
+  velocityZ: number,
+  pushX: number,
+  pushZ: number,
+): { x: number; z: number } => {
+  const intoWall = velocityX * pushX + velocityZ * pushZ;
+
+  if (intoWall >= 0) {
+    return { x: velocityX, z: velocityZ };
+  }
+
+  return { x: velocityX - intoWall * pushX, z: velocityZ - intoWall * pushZ };
+};
+
 /** 속도 방향으로 캐릭터 yaw 를 회전 속도 상한 안에서 돌린다. */
 const approachYaw = (
   currentYaw: number,
@@ -163,9 +196,14 @@ export const planFixedSteps = (accumulatedSeconds: number): FixedStepPlan => {
 /**
  * 수직 속도와 높이를 적분한다.
  *
- * 지면 높이는 평평한 바닥(0)이 아니라 **발 아래 소품 윗면**이다. 상자 위로
- * 올라설 수 있고, 가장자리에서 벗어나면 지면 높이가 0 으로 떨어져 그대로
- * 떨어진다. 떨어지는 중에는 다시 올라설 수 없게 중력만 받는다(§5.1).
+ * 지면 높이는 평평한 바닥(0)이 아니라 **발 아래 지형면**이다. 계단 한 칸처럼
+ * 낮은 턱은 `groundY` 가 올라오면서 자연히 올라서지고, 가장자리에서 벗어나면
+ * `groundY` 가 뚝 떨어져 그대로 떨어진다. 떨어지는 중에는 다시 올라설 수 없게
+ * 중력만 받는다(§5.1).
+ *
+ * `ceilingY` 는 머리 위 천장이다. 궁전 안에서 뛰었을 때 천장을 뚫고 나가지
+ * 않도록 상승을 끊는다 — 뚫고 나가면 지붕 위에 서게 되고, 거기서는 내려올
+ * 길이 없어 갇힌다.
  */
 const stepJump = (
   y: number,
@@ -173,6 +211,7 @@ const stepJump = (
   isJumping: boolean,
   deltaSeconds: number,
   groundY: number,
+  ceilingY: number,
 ): { y: number; velocityY: number } => {
   const isGrounded = y <= groundY && velocityY <= 0;
 
@@ -184,15 +223,26 @@ const stepJump = (
   const nextVelocityY = launched - SPACE_MOVEMENT.gravity * deltaSeconds;
   const nextY = y + nextVelocityY * deltaSeconds;
 
-  return nextY <= groundY ? { y: groundY, velocityY: 0 } : { y: nextY, velocityY: nextVelocityY };
+  if (nextY <= groundY) {
+    return { y: groundY, velocityY: 0 };
+  }
+
+  // 천장에 닿으면 올라가던 속도를 지운다. 남겨두면 다음 스텝에 다시 밀어 올린다.
+  return nextY >= ceilingY ? { y: ceilingY, velocityY: 0 } : { y: nextY, velocityY: nextVelocityY };
 };
 
-/** 고정 타임스텝 한 번 분량의 이동을 적분한다. */
+/**
+ * 고정 타임스텝 한 번 분량의 이동을 적분한다.
+ *
+ * `terrain` 은 지형 질의다. 넘기지 않으면 광장 높이의 평지로 본다 — GLB 가
+ * 도착하기 전 첫 프레임과 단위 테스트가 그 경로를 탄다.
+ */
 export const stepMovement = (
   state: LocalPlayerState,
   input: MovementInput,
   cameraYaw: number,
   deltaSeconds: number = SPACE_MOVEMENT.fixedTimeStep,
+  terrain: SpaceTerrain = FALLBACK_TERRAIN,
 ): LocalPlayerState => {
   const direction = resolveMoveDirection(input, cameraYaw);
   const speed = input.isRunning ? SPACE_MOVEMENT.runSpeed : SPACE_MOVEMENT.walkSpeed;
@@ -209,21 +259,30 @@ export const stepMovement = (
   const rawZ = state.z + velocity.z * deltaSeconds;
   const boundedX = clamp(rawX, SPACE_BOUNDS.minX, SPACE_BOUNDS.maxX);
   const boundedZ = clamp(rawZ, SPACE_BOUNDS.minZ, SPACE_BOUNDS.maxZ);
-  // 소품을 파고든 만큼 되밀어낸다. 경계 클램프 다음에 둬야 벽과 소품 사이
-  // 좁은 틈에서 벽 밖으로 밀려나지 않는다. 발 높이를 넘겨 "위에 올라선" 소품은
-  // 가로로 막지 않게 한다.
-  const resolved = resolveObstacleCollision(boundedX, boundedZ, state.y);
-  // 막힌 축의 속도를 지운다. 남겨두면 벽·소품에 붙어 계속 밀어붙인다.
-  const velocityX = boundedX === rawX && !resolved.blockedX ? velocity.x : 0;
-  const velocityZ = boundedZ === rawZ && !resolved.blockedZ ? velocity.z : 0;
+  // 벽을 파고든 만큼 되밀어낸다. 바깥 상자 클램프 다음에 둬야 상자 모서리와
+  // 지형 사이 좁은 틈에서 상자 밖으로 밀려나지 않는다.
+  const resolved = terrain.resolveMove(boundedX, boundedZ, state.y);
+  // 바깥 상자에 막힌 축은 통째로 지우고, 지형 벽은 법선 성분만 지운다.
+  const bounded = {
+    x: boundedX === rawX ? velocity.x : 0,
+    z: boundedZ === rawZ ? velocity.z : 0,
+  };
+  const slid = slideAlongWall(bounded.x, bounded.z, resolved.pushX, resolved.pushZ);
+  const velocityX = slid.x;
+  const velocityZ = slid.z;
   const x = resolved.x;
   const z = resolved.z;
+  // 천장은 **올라가는 중에만** 묻는다. 서 있거나 떨어지는 동안에는 쓸 일이
+  // 없는데, 레이캐스트는 스텝마다 도는 비용이라 공짜가 아니다.
+  const isRising = state.velocityY > 0 || input.isJumping;
+  const ceilingY = isRising ? terrain.resolveCeilingY(x, z, state.y) : Number.POSITIVE_INFINITY;
   const jump = stepJump(
     state.y,
     state.velocityY,
     input.isJumping,
     deltaSeconds,
-    resolveGroundHeight(resolved.x, resolved.z),
+    terrain.resolveGroundY(x, z, state.y),
+    ceilingY,
   );
 
   return {

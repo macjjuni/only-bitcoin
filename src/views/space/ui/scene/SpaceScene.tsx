@@ -1,15 +1,27 @@
 "use client";
 
 import { useFrame, useThree } from "@react-three/fiber";
-import { memo, type ReactNode, useCallback, useLayoutEffect, useMemo, useRef } from "react";
+import {
+  memo,
+  type ReactNode,
+  Suspense,
+  useCallback,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import type { Group } from "three";
 import {
+  createFlatTerrain,
   createLocalPlayerState,
   createSpawnPoint,
   type LocalPlayerState,
   resolveColorIndexFromClientKey,
-  SPACE_WALL_ANCHOR,
+  SPACE_SCREEN_PLACEMENTS,
+  SPACE_SCREEN_SCALE,
   type SpacePeer,
+  type SpaceTerrain,
 } from "@/entities/space";
 import {
   applyCameraDrag,
@@ -35,20 +47,19 @@ import {
 } from "@/features/space-controls";
 import type { SpaceSession } from "@/features/space-session";
 import { spaceConfig } from "@/shared/config/space";
+import type { LanternAnchor } from "@/views/space/lib/islandModel";
+import type { IslandTerrain } from "@/views/space/lib/islandTerrain";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 import { createEmptyAdTextSlot } from "@/views/space/lib/textBannerTexture";
-import { resolveWallAnchorY, resolveWallDisplayScale } from "@/views/space/lib/wallDisplay";
 import BlockDashboard from "./BlockDashboard";
-import BunkerProps from "./BunkerProps";
-import BunkerShell from "./BunkerShell";
 import ChatBubbles from "./ChatBubbles";
-import ControlWall from "./ControlWall";
-import Ground from "./Ground";
+import Island from "./Island";
 import Nameplates from "./Nameplates";
 import PlayerAvatar from "./PlayerAvatar";
 import PriceBillboard from "./PriceBillboard";
 import RemoteAvatars from "./RemoteAvatars";
-import SceneLighting from "./SceneLighting";
+import SceneLighting, { SKY_FALLBACK_COLOR } from "./SceneLighting";
+import SkyBackground from "./SkyBackground";
 import TextAdBanner from "./TextAdBanner";
 
 interface SpaceSceneProps {
@@ -63,6 +74,8 @@ interface SpaceSceneProps {
   dummyCount: number;
 }
 
+const EMPTY_LANTERN_ANCHORS: readonly LanternAnchor[] = [];
+
 function SpaceScene({
   inputSource,
   clientKey,
@@ -75,14 +88,10 @@ function SpaceScene({
   // region [Hooks]
   const canvasElement = useThree((rootState) => rootState.gl.domElement);
   const camera = useThree((rootState) => rootState.camera);
-  const viewportSize = useThree((rootState) => rootState.size);
   const prefersReducedMotion = usePrefersReducedMotion();
   const isCoarsePointer = useCoarsePointer();
 
-  /**
-   * 손가락 기기는 가장 멀리 물러나 시작해 전광판 위 배너까지 담는다.
-   * 시작값일 뿐이라 핀치로 다가갈 수 있다.
-   */
+  /** 손가락 기기는 가장 멀리 물러나 시작해 섬 전체가 한 화면에 들어오게 한다. */
   const initialCameraDistance = isCoarsePointer
     ? SPACE_CAMERA.touchInitialDistance
     : SPACE_CAMERA.defaultDistance;
@@ -96,14 +105,6 @@ function SpaceScene({
   const remotePlayers = dummyCount > 0 ? dummies : session.remotePlayers;
   /** 1단계는 빈 슬롯이다. 3단계에서 라이트닝 결제로 채운다. */
   const textAdSlot = useMemo(() => createEmptyAdTextSlot(), []);
-  /** 세로로 긴 화면에서 전광판 벽면을 줄인다. 리사이즈·회전에 따라 다시 계산된다. */
-  const wallDisplayScale = useMemo(() => {
-    return resolveWallDisplayScale(viewportSize.width / viewportSize.height, initialCameraDistance);
-  }, [initialCameraDistance, viewportSize]);
-  /** 줄여도 프레임 아랫변이 제자리에 남도록 기준점을 내린다. */
-  const wallAnchor = useMemo((): [number, number, number] => {
-    return [SPACE_WALL_ANCHOR[0], resolveWallAnchorY(wallDisplayScale), SPACE_WALL_ANCHOR[2]];
-  }, [wallDisplayScale]);
 
   const playerStateRef = useRef<LocalPlayerState>(createLocalPlayerState(spawnTransform));
   const cameraOrbitRef = useRef<CameraOrbit>(
@@ -114,6 +115,25 @@ function SpaceScene({
   );
   const accumulatedSecondsRef = useRef<number>(0);
   const playerGroupRef = useRef<Group>(null);
+  /**
+   * 지형 질의.
+   *
+   * GLB 가 도착하기 전에는 광장 높이의 평지다. 그 사이에도 걸을 수 있고,
+   * 맵이 붙는 순간 발밑이 실제 지형으로 바뀐다. 상태가 아니라 ref 인 이유는
+   * `useFrame` 안에서만 읽기 때문이다 — 상태로 올리면 맵 도착이 씬 전체
+   * 리렌더가 된다.
+   */
+  const terrainRef = useRef<SpaceTerrain>(createFlatTerrain());
+  /** 카메라 충돌용. 지형과 달리 평지 대체본이 없어 도착 전에는 건너뛴다. */
+  const islandTerrainRef = useRef<IslandTerrain | null>(null);
+  /**
+   * 랜턴 자리.
+   *
+   * 조명 컴포넌트가 `props` 로 받아야 해서 여기서는 상태로 둔다. 맵이 도착할
+   * 때 한 번만 바뀌고, 그 한 번은 조명이 실제로 다시 그려져야 하는 순간이다.
+   */
+  const [lanternAnchors, setLanternAnchors] =
+    useState<readonly LanternAnchor[]>(EMPTY_LANTERN_ANCHORS);
 
   usePointerDrag(inputSource, canvasElement);
   // endregion
@@ -155,7 +175,7 @@ function SpaceScene({
     let nextState = playerStateRef.current;
 
     for (let stepIndex = 0; stepIndex < stepPlan.stepCount; stepIndex += 1) {
-      nextState = stepMovement(nextState, movementInput, cameraYaw);
+      nextState = stepMovement(nextState, movementInput, cameraYaw, undefined, terrainRef.current);
     }
 
     playerStateRef.current = nextState;
@@ -173,6 +193,32 @@ function SpaceScene({
     playerGroup.position.set(playerState.x, playerState.y, playerState.z);
     playerGroup.rotation.set(0, playerState.yaw, 0);
   };
+
+  /**
+   * 지형을 파고들지 않는 카메라 위치.
+   *
+   * 감쇠 **뒤에** 건다. 감쇠 전에 걸면 목표만 당겨지고 실제 카메라는 한 박자
+   * 늦게 따라와서, 벽에 붙는 순간 한 프레임 동안 벽 안이 보인다.
+   */
+  const resolveSafeCameraPosition = (focus: Vector3Like, position: Vector3Like): Vector3Like => {
+    return (
+      islandTerrainRef.current?.resolveCameraPosition(
+        focus,
+        position,
+        SPACE_CAMERA.boundaryMargin,
+      ) ?? position
+    );
+  };
+  // endregion
+
+  // region [Events]
+  const onReadyTerrain = useCallback((terrain: IslandTerrain): void => {
+    islandTerrainRef.current = terrain;
+  }, []);
+
+  const onReadyLanterns = useCallback((anchors: readonly LanternAnchor[]): void => {
+    setLanternAnchors(anchors);
+  }, []);
   // endregion
 
   // region [Life Cycles]
@@ -214,6 +260,7 @@ function SpaceScene({
     applyPlayerTransform(playerState);
     session.publishMovement(playerState);
 
+    const focus = resolveCameraFocus(playerState);
     const targetPosition = resolveCameraPosition(playerState, cameraOrbit);
     const dampedPosition = dampVector(
       smoothedCameraRef.current,
@@ -223,36 +270,67 @@ function SpaceScene({
     );
     smoothedCameraRef.current = dampedPosition;
 
-    const focus = resolveCameraFocus(playerState);
-    camera.position.set(dampedPosition.x, dampedPosition.y, dampedPosition.z);
+    const safePosition = resolveSafeCameraPosition(focus, dampedPosition);
+    camera.position.set(safePosition.x, safePosition.y, safePosition.z);
     camera.lookAt(focus.x, focus.y, focus.z);
   }, -1);
   // endregion
 
   return (
     <>
-      <SceneLighting hasRealtimeShadows={hasRealtimeShadows} />
-      <Ground hasRealtimeShadows={hasRealtimeShadows} />
+      <SceneLighting
+        hasRealtimeShadows={hasRealtimeShadows}
+        playerStateRef={playerStateRef}
+        lanternAnchors={lanternAnchors}
+      />
 
-      {/* 공간을 닫는 외곽과 소품. 벽·천장이 없으면 어두운 배경 위 플랫폼으로 읽힌다. */}
-      <BunkerShell />
-      <BunkerProps hasRealtimeShadows={hasRealtimeShadows} />
+      {/*
+        360° 파노라마 하늘. 받는 동안에는 단색으로 버틴다 — 맵과 같은
+        경계에 묶으면 하늘 한 장 때문에 섬까지 늦게 뜬다.
+      */}
+      <Suspense fallback={<color attach="background" args={[SKY_FALLBACK_COLOR]} />}>
+        <SkyBackground />
+      </Suspense>
 
-      <ControlWall wallAnchor={wallAnchor} displayScale={wallDisplayScale} />
+      {/*
+        맵은 따로 매달아 둔다. 0.57 MB 를 받고 Draco 를 푸는 동안 씬 전체가
+        멈추면 아바타도 HUD 뒤 빈 화면도 아무것도 안 보인다. 그 사이 발밑은
+        광장 높이의 평지라 걸어다닐 수는 있다.
+      */}
+      <Suspense fallback={null}>
+        <Island
+          terrainRef={terrainRef}
+          onReadyTerrain={onReadyTerrain}
+          onReadyLanterns={onReadyLanterns}
+          hasRealtimeShadows={hasRealtimeShadows}
+        />
+      </Suspense>
 
-      {/* 전광판과 광고판은 한 덩어리로 묶어 기준점을 중심으로 함께 줄인다. */}
-      <group position={wallAnchor} scale={wallDisplayScale}>
+      {/*
+        광장 양옆 금장 액자에 실시간 패널을 끼운다. 액자 안쪽 홈이 6 × 2.75 라
+        설계 치수(9.6 × 5.4)를 높이에 맞춰 줄인다. 위치·회전은 GLB 의
+        `Screen_*` 쿼드에서 읽은 값이다.
+      */}
+      <group
+        position={SPACE_SCREEN_PLACEMENTS.billboard.position}
+        rotation={[0, SPACE_SCREEN_PLACEMENTS.billboard.rotationY, 0]}
+        scale={SPACE_SCREEN_SCALE}
+      >
         <PriceBillboard />
 
-        {/* 전광판 오른쪽 블록 현황판. 광고가 아니라 상설 패널이라 스위치와 무관하다. */}
-        <BlockDashboard />
-
         {/*
-          광고를 끄면 표시 면만 빠지고 벽면 장비함은 남는다. 장비함은 광고가 아니라
-          전광판까지 함께 쓰는 벽 구조이고, 켜고 끌 때 벽 구성이 바뀌면 안 된다.
-          끈 동안에는 배너의 캔버스 텍스처도 만들지 않는다.
+          광고를 끄면 표시 면만 빠진다. 끈 동안에는 배너의 캔버스 텍스처도
+          만들지 않는다.
         */}
         {spaceConfig.isAdEnabled && <TextAdBanner slot={textAdSlot} />}
+      </group>
+
+      <group
+        position={SPACE_SCREEN_PLACEMENTS.blockDashboard.position}
+        rotation={[0, SPACE_SCREEN_PLACEMENTS.blockDashboard.rotationY, 0]}
+        scale={SPACE_SCREEN_SCALE}
+      >
+        <BlockDashboard />
       </group>
 
       <group ref={playerGroupRef}>

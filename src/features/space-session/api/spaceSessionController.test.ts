@@ -1,5 +1,10 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
-import { encodeSpaceSnapshot, type LocalPlayerState, type SpacePeer } from "@/entities/space";
+import {
+  encodeSpaceSnapshot,
+  type LocalPlayerState,
+  SPACE_PROTOCOL_VERSION,
+  type SpacePeer,
+} from "@/entities/space";
 import { resolveSpaceWebSocketUrl } from "@/shared/config/space";
 import { SpaceSessionController, type SpaceSessionSocket } from "./spaceSessionController";
 
@@ -78,7 +83,7 @@ const createHarness = (webSocketUrl = "wss://example.com/v1/space/ws") => {
 
   const welcome = (socket = sockets[sockets.length - 1], peers: SpacePeer[] = []) => {
     socket.open();
-    socket.receive({ v: 1, t: "welcome", self, peers });
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "welcome", self, peers });
     return socket;
   };
 
@@ -126,14 +131,16 @@ describe("SpaceSessionController", () => {
     expect(controller.getSnapshot().presence.status).toBe("connecting");
     const socket = welcome(sockets[0], [remote]);
 
-    expect(sentFrames(socket, "join")).toEqual([{ v: 1, t: "join", ...identity, modelIndex: 0 }]);
+    expect(sentFrames(socket, "join")).toEqual([
+      { v: SPACE_PROTOCOL_VERSION, t: "join", ...identity, modelIndex: 0 },
+    ]);
     expect(socket.binaryType).toBe("arraybuffer");
     expect(controller.getSnapshot().presence).toEqual({ status: "online", occupantCount: 2 });
     const roster = controller.getSnapshot().remotePlayers;
     expect(roster.map(({ seat }) => seat)).toEqual([1]);
     expect(controller.sampleRemotePlayers(Date.now())).toBe(roster);
 
-    socket.receive({ v: 1, t: "leave", seat: 1 });
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "leave", seat: 1 });
     expect(controller.getSnapshot().remotePlayers).toHaveLength(0);
     expect(controller.getSnapshot().presence.occupantCount).toBe(1);
     controller.stop();
@@ -172,7 +179,7 @@ describe("SpaceSessionController", () => {
     const socket = welcome();
     expect(sentFrames(socket, "move")).toHaveLength(0);
 
-    socket.receive({ v: 1, t: "peer", peer: { ...self, x: 3 } });
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: { ...self, x: 3 } });
     expect(controller.getSnapshot().self?.x).toBe(3);
     controller.publishMovement(movement(3));
     expect(sentFrames(socket, "move")).toHaveLength(0);
@@ -226,11 +233,11 @@ describe("SpaceSessionController", () => {
     expect(controller.getSnapshot().isMessagePending).toBe(true);
     expect(await controller.sendMessage("중복")).toBe(false);
     expect(sentFrames(socket, "say")).toEqual([
-      { v: 1, t: "say", rid: requestId, body: "안녕하세요" },
+      { v: SPACE_PROTOCOL_VERSION, t: "say", rid: requestId, body: "안녕하세요" },
     ]);
 
     socket.receive({
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "say",
       message: {
         id: requestId,
@@ -253,7 +260,7 @@ describe("SpaceSessionController", () => {
     const socket = welcome();
     const rejected = controller.sendMessage("거절");
     socket.receive({
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "error",
       rid: requestId,
       code: "RATE_LIMITED",
@@ -280,7 +287,7 @@ describe("SpaceSessionController", () => {
     const socket = welcome();
     const failed = controller.sendMessage("일시적 실패");
     socket.receive({
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "error",
       rid: requestId,
       code: "UNAVAILABLE",
@@ -301,7 +308,7 @@ describe("SpaceSessionController", () => {
     unavailable.controller.start();
     unavailable.welcome();
     unavailable.sockets[0].receive({
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "error",
       code: "UNAVAILABLE",
       message: "공간 요청을 처리하지 못했어요.",
@@ -315,7 +322,7 @@ describe("SpaceSessionController", () => {
     joinRequired.controller.start();
     joinRequired.welcome();
     joinRequired.sockets[0].receive({
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "error",
       rid: requestId,
       code: "JOIN_REQUIRED",
@@ -337,7 +344,7 @@ describe("SpaceSessionController", () => {
     vi.advanceTimersByTime(1);
     expect(sockets).toHaveLength(2);
     welcome();
-    previous.receive({ v: 1, t: "full" });
+    previous.receive({ v: SPACE_PROTOCOL_VERSION, t: "full" });
     expect(controller.getSnapshot().presence.status).toBe("online");
 
     controller.stop();
@@ -348,8 +355,13 @@ describe("SpaceSessionController", () => {
   });
 
   it.each([
-    { v: 1, t: "full" },
-    { v: 1, t: "error", code: "SESSION_REPLACED", message: "다른 탭에서 연결됨" },
+    { v: SPACE_PROTOCOL_VERSION, t: "full" },
+    {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "error",
+      code: "SESSION_REPLACED",
+      message: "다른 탭에서 연결됨",
+    },
     "invalid json",
   ])("방 만원·세션 교체·잘못된 프로토콜에서는 수동 재시도 전까지 멈춘다: %j", (payload) => {
     const { controller, sockets, welcome } = createHarness();
@@ -381,7 +393,7 @@ describe("SpaceSessionController", () => {
     permanent.controller.start();
     permanent.sockets[0].open();
     permanent.sockets[0].receive({
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "error",
       code: "INVALID_NICKNAME",
       message: "사용할 수 없는 닉네임입니다.",
@@ -395,7 +407,7 @@ describe("SpaceSessionController", () => {
     transient.controller.start();
     transient.sockets[0].open();
     transient.sockets[0].receive({
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "error",
       code: "UNAVAILABLE",
       message: "잠시 후 다시 입장해 주세요.",
@@ -428,8 +440,8 @@ describe("SpaceSessionController", () => {
         body: `메시지 ${index}`,
         createdAt: Date.now(),
       };
-      socket.receive({ v: 1, t: "say", message });
-      socket.receive({ v: 1, t: "say", message });
+      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "say", message });
+      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "say", message });
     }
     expect(controller.getSnapshot().messages).toHaveLength(100);
     expect(controller.getSnapshot().bubbleMessages).toHaveLength(100);
@@ -450,21 +462,29 @@ describe("SpaceSessionController", () => {
       createdAt: Date.now(),
     };
 
-    socket.receive({ v: 1, t: "say", message });
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "say", message });
     expect(controller.getSnapshot().bubbleMessages).toEqual([message]);
-    socket.receive({ v: 1, t: "leave", seat: remote.seat });
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "leave", seat: remote.seat });
     expect(controller.getSnapshot().bubbleMessages).toEqual([]);
     expect(controller.getSnapshot().messages).toEqual([message]);
 
-    socket.receive({ v: 1, t: "peer", peer: { ...remote, nickname: "새 사용자" } });
-    socket.receive({ v: 1, t: "say", message });
+    socket.receive({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "peer",
+      peer: { ...remote, nickname: "새 사용자" },
+    });
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "say", message });
     expect(controller.getSnapshot().bubbleMessages).toEqual([]);
     expect(controller.getSnapshot().messages).toEqual([message]);
 
     const replacementMessage = { ...message, id: "second-message", body: "교체 전 사용자 발화" };
-    socket.receive({ v: 1, t: "say", message: replacementMessage });
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "say", message: replacementMessage });
     expect(controller.getSnapshot().bubbleMessages).toEqual([replacementMessage]);
-    socket.receive({ v: 1, t: "peer", peer: { ...remote, nickname: "다른 탭 사용자" } });
+    socket.receive({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "peer",
+      peer: { ...remote, nickname: "다른 탭 사용자" },
+    });
     expect(controller.getSnapshot().bubbleMessages).toEqual([]);
     expect(controller.getSnapshot().messages).toEqual([message, replacementMessage]);
     controller.stop();
@@ -482,13 +502,13 @@ describe("SpaceSessionController", () => {
       body: "기록",
       createdAt: Date.now(),
     };
-    socket.receive({ v: 1, t: "say", message });
-    socket.receive({ v: 1, t: "welcome", self, peers: [] });
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "say", message });
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "welcome", self, peers: [] });
     expect(controller.getSnapshot().bubbleMessages).toEqual([]);
     expect(controller.getSnapshot().messages).toEqual([message]);
 
     const nextMessage = { ...message, id: "next-message" };
-    socket.receive({ v: 1, t: "say", message: nextMessage });
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "say", message: nextMessage });
     controller.stop();
     expect(controller.getSnapshot().bubbleMessages).toEqual([]);
     expect(controller.getSnapshot().messages).toEqual([message, nextMessage]);
@@ -510,10 +530,10 @@ describe("SpaceSessionController", () => {
 
     const changed = controller.changeModel(1);
     expect(sentFrames(socket, "model")).toEqual([
-      { v: 1, t: "model", rid: requestId, modelIndex: 1 },
+      { v: SPACE_PROTOCOL_VERSION, t: "model", rid: requestId, modelIndex: 1 },
     ]);
 
-    socket.receive({ v: 1, t: "peer", peer: { ...self, modelIndex: 1 } });
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: { ...self, modelIndex: 1 } });
     expect(await changed).toBe(true);
     expect(controller.getSnapshot().self?.modelIndex).toBe(1);
 
@@ -523,7 +543,7 @@ describe("SpaceSessionController", () => {
     sockets[1].open();
     expect(sentFrames(sockets[1], "join")).toEqual([
       {
-        v: 1,
+        v: SPACE_PROTOCOL_VERSION,
         t: "join",
         clientKey: identity.clientKey,
         nickname: identity.nickname,
@@ -547,10 +567,15 @@ describe("SpaceSessionController", () => {
     vi.advanceTimersByTime(750);
     const retried = sockets[1];
     retried.open();
-    retried.receive({ v: 1, t: "welcome", self: { ...self, modelIndex: 1 }, peers: [] });
+    retried.receive({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "welcome",
+      self: { ...self, modelIndex: 1 },
+      peers: [],
+    });
     expect(controller.changeModel(2)).toBeInstanceOf(Promise);
     expect(sentFrames(retried, "model")).toEqual([
-      { v: 1, t: "model", rid: requestId, modelIndex: 2 },
+      { v: SPACE_PROTOCOL_VERSION, t: "model", rid: requestId, modelIndex: 2 },
     ]);
     controller.stop();
   });
@@ -562,7 +587,7 @@ describe("SpaceSessionController", () => {
 
     const changed = controller.changeModel(1);
     socket.receive({
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "error",
       code: "INVALID_PROTOCOL",
       message: "입력 형식을 확인해 주세요.",
@@ -584,11 +609,11 @@ describe("SpaceSessionController", () => {
 
     const renamed = controller.changeNickname("새이름");
     expect(sentFrames(socket, "nick")).toEqual([
-      { v: 1, t: "nick", rid: requestId, nickname: "새이름" },
+      { v: SPACE_PROTOCOL_VERSION, t: "nick", rid: requestId, nickname: "새이름" },
     ]);
     expect(controller.getSnapshot().isNicknamePending).toBe(true);
 
-    socket.receive({ v: 1, t: "peer", peer: { ...self, nickname: "새이름" } });
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: { ...self, nickname: "새이름" } });
     expect(await renamed).toBe(true);
     expect(controller.getSnapshot().self?.nickname).toBe("새이름");
     expect(controller.getSnapshot().isNicknamePending).toBe(false);
@@ -598,7 +623,13 @@ describe("SpaceSessionController", () => {
     vi.advanceTimersByTime(750);
     sockets[1].open();
     expect(sentFrames(sockets[1], "join")).toEqual([
-      { v: 1, t: "join", clientKey: identity.clientKey, nickname: "새이름", modelIndex: 0 },
+      {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "join",
+        clientKey: identity.clientKey,
+        nickname: "새이름",
+        modelIndex: 0,
+      },
     ]);
     controller.stop();
   });
@@ -609,7 +640,7 @@ describe("SpaceSessionController", () => {
     const socket = welcome();
     const rejected = controller.changeNickname("##");
     socket.receive({
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "error",
       rid: requestId,
       code: "INVALID_NICKNAME",
@@ -633,7 +664,11 @@ describe("SpaceSessionController", () => {
     const beforeMoves = sentFrames(socket, "move").length;
 
     // 서버는 이름만 바뀌어도 현재 좌표를 그대로 담아 보낸다.
-    socket.receive({ v: 1, t: "peer", peer: { ...self, x: 4, nickname: "새이름" } });
+    socket.receive({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "peer",
+      peer: { ...self, x: 4, nickname: "새이름" },
+    });
     vi.advanceTimersByTime(200);
     controller.publishMovement(movement(4));
 
@@ -649,7 +684,7 @@ describe("SpaceSessionController", () => {
     controller.publishMovement(movement(4));
     const beforeMoves = sentFrames(socket, "move").length;
 
-    socket.receive({ v: 1, t: "peer", peer: { ...self, x: 0 } });
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: { ...self, x: 0 } });
     vi.advanceTimersByTime(200);
     controller.publishMovement(movement(4));
 

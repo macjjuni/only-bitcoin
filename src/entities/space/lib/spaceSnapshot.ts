@@ -3,11 +3,24 @@ import {
   SPACE_PROTOCOL_VERSION,
   type SpaceMotionSnapshot,
 } from "../model/spaceProtocol";
-import { SPACE_MAX_JUMP_HEIGHT, SPACE_MAX_OCCUPANTS } from "../model/spaceWorld";
+import { SPACE_MAX_ALTITUDE, SPACE_MAX_OCCUPANTS } from "../model/spaceWorld";
 
 const HEADER_BYTES = 8;
-const PLAYER_BYTES = 8;
-/** 점프 높이는 1 cm 정밀도의 1바이트로 담는다. 바닥이 평평해 범위가 좁다. */
+/**
+ * 좌석 1 + x 2 + z 2 + yaw 1 + y 2 + 플래그 1.
+ *
+ * 벙커 시절에는 8바이트였다(`y` 1바이트). 섬은 층이 여러 개라 `y` 가 절대
+ * 높이고 2.55 m 에 들어가지 않는다. 50명 기준으로 450바이트, 초당 10번
+ * 보내므로 늘어난 50바이트는 사실상 공짜다.
+ */
+const PLAYER_BYTES = 9;
+/**
+ * 높이는 1 cm 정밀도의 **2바이트**로 담는다.
+ *
+ * 상한 36 m 는 3,600 으로 `Uint16`(65,535) 안에 넉넉히 들어간다. 정밀도를
+ * 낮춰 1바이트에 밀어 넣을 수도 있지만(14 cm 격자) 계단 한 칸이 25 cm 라
+ * 다른 사람이 계단을 오르는 모습이 뚝뚝 끊긴다.
+ */
 const HEIGHT_SCALE = 100;
 const SNAPSHOT_KIND = 1;
 const RUNNING_FLAG = 1;
@@ -54,8 +67,8 @@ export const encodeSpaceSnapshot = (snapshot: SpaceMotionSnapshot): ArrayBuffer 
     view.setInt16(offset + 1, Math.round(player.x * 100), true);
     view.setInt16(offset + 3, Math.round(player.z * 100), true);
     view.setUint8(offset + 5, encodeYaw(player.yaw));
-    view.setUint8(offset + 6, Math.round(player.y * HEIGHT_SCALE));
-    view.setUint8(offset + 7, player.isRunning ? RUNNING_FLAG : 0);
+    view.setUint16(offset + 6, Math.round(player.y * HEIGHT_SCALE), true);
+    view.setUint8(offset + 8, player.isRunning ? RUNNING_FLAG : 0);
   });
 
   return buffer;
@@ -85,13 +98,13 @@ export const decodeSpaceSnapshot = (buffer: ArrayBuffer): SpaceMotionSnapshot | 
   for (let playerIndex = 0; playerIndex < count; playerIndex += 1) {
     const offset = HEADER_BYTES + playerIndex * PLAYER_BYTES;
     const seat = view.getUint8(offset);
-    const flags = view.getUint8(offset + 7);
+    const flags = view.getUint8(offset + 8);
 
     if (
       seat >= SPACE_MAX_OCCUPANTS ||
       occupiedSeats.has(seat) ||
       (flags & ~RUNNING_FLAG) !== 0 ||
-      view.getUint8(offset + 6) > SPACE_MAX_JUMP_HEIGHT * HEIGHT_SCALE
+      view.getUint16(offset + 6, true) > SPACE_MAX_ALTITUDE * HEIGHT_SCALE
     ) {
       return null;
     }
@@ -102,7 +115,7 @@ export const decodeSpaceSnapshot = (buffer: ArrayBuffer): SpaceMotionSnapshot | 
       x: view.getInt16(offset + 1, true) / 100,
       z: view.getInt16(offset + 3, true) / 100,
       yaw: (view.getUint8(offset + 5) / YAW_STEPS) * FULL_TURN,
-      y: view.getUint8(offset + 6) / HEIGHT_SCALE,
+      y: view.getUint16(offset + 6, true) / HEIGHT_SCALE,
       isRunning: (flags & RUNNING_FLAG) !== 0,
     });
   }

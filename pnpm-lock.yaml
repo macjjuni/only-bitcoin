@@ -92,6 +92,9 @@ importers:
       three:
         specifier: ^0.187.0
         version: 0.187.0
+      three-mesh-bvh:
+        specifier: ^0.9.17
+        version: 0.9.17(three@0.187.0)
       uuid:
         specifier: ^13.0.0
         version: 13.0.0
@@ -2604,6 +2607,11 @@ packages:
 
   three-mesh-bvh@0.8.3:
     resolution: {integrity: sha512-4G5lBaF+g2auKX3P0yqx+MJC6oVt6sB5k+CchS6Ob0qvH0YIhuUk1eYr7ktsIpY+albCqE80/FVQGV190PmiAg==}
+    peerDependencies:
+      three: '>= 0.159.0'
+
+  three-mesh-bvh@0.9.17:
+    resolution: {integrity: sha512-uU2DNnTHsMcrsAM1kiLXEeLx4JNsPLayLTPE5Rf7exbFRuQYEifS4DhGEA+lDiU8/7mID1PsE9sH8i6p5prZSg==}
     peerDependencies:
       three: '>= 0.159.0'
 
@@ -5137,6 +5145,10 @@ snapshots:
   third-party-capital@1.0.20: {}
 
   three-mesh-bvh@0.8.3(three@0.187.0):
+    dependencies:
+      three: 0.187.0
+
+  three-mesh-bvh@0.9.17(three@0.187.0):
     dependencies:
       three: 0.187.0
 

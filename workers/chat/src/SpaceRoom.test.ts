@@ -2,7 +2,11 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveColorIndexFromClientKey } from "../../../src/entities/space/lib/clientKeyHash";
 import { decodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapshot";
 import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
-import type { SpacePeer, SpaceServerFrame } from "../../../src/entities/space/model/spaceProtocol";
+import {
+  SPACE_PROTOCOL_VERSION,
+  type SpacePeer,
+  type SpaceServerFrame,
+} from "../../../src/entities/space/model/spaceProtocol";
 import { SPACE_BOUNDS } from "../../../src/entities/space/model/spaceWorld";
 
 vi.mock("cloudflare:workers", () => ({ DurableObject: class {} }));
@@ -19,7 +23,7 @@ class RoomSocket {
 
   constructor(ipGuardKey = "test-ip") {
     this.attachment = {
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       joined: false,
       ipGuardKey,
       joinDeadlineAt: Date.now() + 10_000,
@@ -94,7 +98,7 @@ const createRoom = (state = new RoomState()) => {
   const join = async (clientKey: string, nickname = "참여자", modelIndex = 0) => {
     const socket = new RoomSocket();
     state.sockets.push(socket);
-    await send(socket, { v: 1, t: "join", clientKey, nickname, modelIndex });
+    await send(socket, { v: SPACE_PROTOCOL_VERSION, t: "join", clientKey, nickname, modelIndex });
     return socket;
   };
 
@@ -137,7 +141,7 @@ describe("SpaceRoom", () => {
     const overflow = await join(clientKey(50));
 
     expect(seats.size).toBe(50);
-    expect(overflow.frames()).toContainEqual({ v: 1, t: "full" });
+    expect(overflow.frames()).toContainEqual({ v: SPACE_PROTOCOL_VERSION, t: "full" });
     expect(overflow.closeCode).toBe(4003);
     expect(state.storage.sql.exec).not.toHaveBeenCalled();
   });
@@ -164,10 +168,11 @@ describe("SpaceRoom", () => {
     const original = previous.peer();
     vi.advanceTimersByTime(100);
     await send(previous, {
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "move",
       x: original.x + 0.5,
-      y: 0,
+      // 광장 높이에서 출발한다. 0 으로 두면 5 m 수직 순간이동이라 거절된다.
+      y: original.y,
       z: original.z,
       yaw: 0,
       isRunning: true,
@@ -191,7 +196,7 @@ describe("SpaceRoom", () => {
     room.webSocketClose(departing.asWebSocket());
     const arriving = await join(clientKey(3));
 
-    expect(observer.frames()).toContainEqual({ v: 1, t: "leave", seat });
+    expect(observer.frames()).toContainEqual({ v: SPACE_PROTOCOL_VERSION, t: "leave", seat });
     expect(arriving.peer().seat).toBe(seat);
   });
 
@@ -211,7 +216,7 @@ describe("SpaceRoom", () => {
     observer.sent = [];
     restored.room.webSocketClose(departing.asWebSocket());
 
-    expect(observer.frames()).toContainEqual({ v: 1, t: "leave", seat });
+    expect(observer.frames()).toContainEqual({ v: SPACE_PROTOCOL_VERSION, t: "leave", seat });
     expect((await restored.join(clientKey(3))).peer().seat).toBe(seat);
   });
 
@@ -228,7 +233,7 @@ describe("SpaceRoom", () => {
     restored.room.webSocketClose(departing.asWebSocket());
 
     expect(observer.frames()).toContainEqual({
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "welcome",
       self: observer.peer(),
       peers: [remaining.peer()],
@@ -260,7 +265,7 @@ describe("SpaceRoom", () => {
     failed.shouldFailSend = true;
     state.sockets.push(failed);
     await send(failed, {
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "join",
       clientKey: clientKey(2),
       nickname: "참여자",
@@ -268,7 +273,7 @@ describe("SpaceRoom", () => {
     });
 
     expect(observer.frames().filter((frame) => frame.t === "peer")).toHaveLength(0);
-    expect(observer.frames()).toContainEqual({ v: 1, t: "leave", seat: 1 });
+    expect(observer.frames()).toContainEqual({ v: SPACE_PROTOCOL_VERSION, t: "leave", seat: 1 });
   });
 
   it("변경 좌석만 100ms에 한 번 인코딩하고 움직임이 없으면 타이머·전송이 없다", async () => {
@@ -278,8 +283,18 @@ describe("SpaceRoom", () => {
     first.sent = [];
     second.sent = [];
     vi.advanceTimersByTime(100);
-    await send(first, { v: 1, t: "move", ...first.peer(), x: first.peer().x + 0.4 });
-    await send(second, { v: 1, t: "move", ...second.peer(), z: second.peer().z + 0.4 });
+    await send(first, {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "move",
+      ...first.peer(),
+      x: first.peer().x + 0.4,
+    });
+    await send(second, {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "move",
+      ...second.peer(),
+      z: second.peer().z + 0.4,
+    });
     vi.advanceTimersByTime(99);
     expect(first.sent).toHaveLength(0);
     vi.advanceTimersByTime(1);
@@ -299,13 +314,17 @@ describe("SpaceRoom", () => {
     const socket = await join(clientKey(1));
     const original = socket.peer();
     vi.advanceTimersByTime(100);
-    await send(socket, { v: 1, t: "move", ...original, x: original.x + 5 });
+    await send(socket, { v: SPACE_PROTOCOL_VERSION, t: "move", ...original, x: original.x + 5 });
 
     expect(socket.peer().x).toBe(original.x);
-    expect(socket.frames()).toContainEqual({ v: 1, t: "peer", peer: original });
+    expect(socket.frames()).toContainEqual({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "peer",
+      peer: original,
+    });
     vi.advanceTimersByTime(15_000);
     await send(socket, {
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "move",
       ...original,
       x: SPACE_BOUNDS.maxX,
@@ -332,7 +351,7 @@ describe("SpaceRoom", () => {
     const sender = await join(clientKey(1));
     const observer = await join(clientKey(2));
     const rid = crypto.randomUUID();
-    const frame = { v: 1, t: "say", rid, body: "함께 지켜봐요" };
+    const frame = { v: SPACE_PROTOCOL_VERSION, t: "say", rid, body: "함께 지켜봐요" };
     await send(sender, frame);
     await send(sender, frame);
     const echoes = sender.frames().filter((item) => item.t === "say");
@@ -360,13 +379,18 @@ describe("SpaceRoom", () => {
       index % 2 === 0 ? "👨‍👩‍👧‍👦" : "👩‍👩‍👧‍👧",
     ).join("");
     expect(new TextEncoder().encode(body).byteLength).toBeGreaterThan(2048);
-    await send(sender, { v: 1, t: "say", rid: crypto.randomUUID(), body: `${body}👨‍👩‍👧‍👦` });
+    await send(sender, {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "say",
+      rid: crypto.randomUUID(),
+      body: `${body}👨‍👩‍👧‍👦`,
+    });
     expect(sender.frames()).toContainEqual(
       expect.objectContaining({ t: "error", code: "BODY_TOO_LONG" }),
     );
     expect(sender.frames().some((frame) => frame.t === "say")).toBe(false);
 
-    await send(sender, { v: 1, t: "say", rid: crypto.randomUUID(), body });
+    await send(sender, { v: SPACE_PROTOCOL_VERSION, t: "say", rid: crypto.randomUUID(), body });
     expect(sender.frames().some((frame) => frame.t === "say")).toBe(true);
   });
 
@@ -380,7 +404,11 @@ describe("SpaceRoom", () => {
 
     expect(idle.closeCode).toBe(4000);
     expect(alive.closeCode).toBeNull();
-    expect(alive.frames()).toContainEqual({ v: 1, t: "leave", seat: idle.peer().seat });
+    expect(alive.frames()).toContainEqual({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "leave",
+      seat: idle.peer().seat,
+    });
   });
 
   it("미입장 소켓은 10초 후 정리하고 프레임 폭주와 잘못된 버전은 종료한다", async () => {
@@ -393,11 +421,12 @@ describe("SpaceRoom", () => {
     const flooder = await join(clientKey(1));
 
     for (let index = 0; index < 41; index += 1) {
-      await send(flooder, { v: 1, t: "move", ...flooder.peer() });
+      await send(flooder, { v: SPACE_PROTOCOL_VERSION, t: "move", ...flooder.peer() });
     }
     expect(flooder.closeCode).toBe(4008);
     const incompatible = await join(clientKey(2));
-    await send(incompatible, { v: 2, t: "move", ...incompatible.peer() });
+    // 벙커 시절 버전. `y` 의 의미가 달라 그대로 받으면 안 된다.
+    await send(incompatible, { v: 1, t: "move", ...incompatible.peer() });
     expect(incompatible.closeCode).toBe(4002);
   });
 
@@ -435,7 +464,7 @@ describe("SpaceRoom", () => {
 
     for (let index = 0; index < 36; index += 1) {
       lastRid = crypto.randomUUID();
-      await send(sender, { v: 1, t: "say", rid: lastRid, body });
+      await send(sender, { v: SPACE_PROTOCOL_VERSION, t: "say", rid: lastRid, body });
       vi.advanceTimersByTime(3000);
     }
     const attachment = sender.deserializeAttachment() as { recentSayReceipts: unknown[] };
@@ -448,7 +477,7 @@ describe("SpaceRoom", () => {
       .frames()
       .filter((frame) => frame.t === "say")
       .at(-1);
-    await restored.send(sender, { v: 1, t: "say", rid: lastRid, body });
+    await restored.send(sender, { v: SPACE_PROTOCOL_VERSION, t: "say", rid: lastRid, body });
     const repeatedEcho = sender
       .frames()
       .filter((frame) => frame.t === "say")
@@ -464,12 +493,12 @@ describe("SpaceRoom", () => {
     const observer = await join(clientKey(2));
     const before = mover.peer();
 
-    await send(mover, { v: 1, t: "nick", rid: requestId, nickname: "새이름" });
+    await send(mover, { v: SPACE_PROTOCOL_VERSION, t: "nick", rid: requestId, nickname: "새이름" });
 
     expect(mover.peer()).toMatchObject({ nickname: "새이름", x: before.x, z: before.z });
     // 좌표를 함께 담아야 수신 쪽이 위치를 되감지 않는다.
     expect(observer.frames()).toContainEqual({
-      v: 1,
+      v: SPACE_PROTOCOL_VERSION,
       t: "peer",
       peer: { ...before, nickname: "새이름" },
     });
@@ -479,8 +508,18 @@ describe("SpaceRoom", () => {
     const { join, send } = createRoom();
     const socket = await join(clientKey(1));
 
-    await send(socket, { v: 1, t: "nick", rid: requestId, nickname: "첫번째" });
-    await send(socket, { v: 1, t: "nick", rid: otherRequestId, nickname: "두번째" });
+    await send(socket, {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "nick",
+      rid: requestId,
+      nickname: "첫번째",
+    });
+    await send(socket, {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "nick",
+      rid: otherRequestId,
+      nickname: "두번째",
+    });
 
     expect(socket.peer().nickname).toBe("첫번째");
     expect(socket.frames()).toContainEqual(
@@ -488,7 +527,12 @@ describe("SpaceRoom", () => {
     );
 
     vi.advanceTimersByTime(10_000);
-    await send(socket, { v: 1, t: "nick", rid: otherRequestId, nickname: "두번째" });
+    await send(socket, {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "nick",
+      rid: otherRequestId,
+      nickname: "두번째",
+    });
     expect(socket.peer().nickname).toBe("두번째");
   });
 
@@ -497,7 +541,12 @@ describe("SpaceRoom", () => {
     const socket = await join(clientKey(1));
 
     // 8 grapheme 한도를 넘는다. 프레임 자체는 멀쩡하므로 정규화에서 걸린다.
-    await send(socket, { v: 1, t: "nick", rid: requestId, nickname: "아주아주아주긴닉네임" });
+    await send(socket, {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "nick",
+      rid: requestId,
+      nickname: "아주아주아주긴닉네임",
+    });
 
     expect(socket.peer().nickname).toBe("참여자");
     expect(socket.closeCode).toBeNull();

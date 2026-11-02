@@ -1,11 +1,11 @@
 import { describe, expect, it } from "vitest";
-import type { LocalPlayerState } from "@/entities/space";
+import type { LocalPlayerState, SpaceTerrain, TerrainMoveResult } from "@/entities/space";
 import {
+  createFlatTerrain,
   createLocalPlayerState,
   SPACE_AVATAR_COLLISION_RADIUS,
   SPACE_BOUNDS,
-  SPACE_LOUNGE,
-  SPACE_MAX_JUMP_HEIGHT,
+  SPACE_STEP_HEIGHT,
 } from "@/entities/space";
 import {
   createEmptyMovementInput,
@@ -16,21 +16,84 @@ import {
 } from "@/features/space-controls/model/movement";
 
 /**
- * 소품이 없는 자리.
+ * 해발 0 의 평지.
  *
- * 원점에는 라운지 테이블·드럼통이 있고 소품에 충돌이 있으므로, 속력을 재는
- * 테스트가 원점에서 출발하면 소품에 막혀 0 이 나온다. 라운지와 벽 사이의 빈
- * 레인에서 잰다.
+ * `stepMovement` 의 기본 지형은 광장 높이(5 m)라 그대로 쓰면 모든 기대값에
+ * 5 를 더해야 한다. 이동·점프 적분 자체를 보는 테스트는 0 에서 재는 쪽이
+ * 읽기 쉽다.
  */
-const CLEAR_LANE = { x: 14, z: 6 } as const;
+const GROUND = createFlatTerrain(0);
+
+interface Platform {
+  minX: number;
+  maxX: number;
+  minZ: number;
+  maxZ: number;
+  top: number;
+}
+
+/**
+ * 해발 0 평지 위에 네모난 단 하나를 올린 지형.
+ *
+ * 실제 지형(`createIslandTerrain`)은 BVH 레이캐스트라 테스트에서 GLB 를 띄워야
+ * 한다. 적분기가 지형에 **무엇을 묻고 어떻게 쓰는지**만 보면 되므로, 같은
+ * 규칙을 따르는 최소 구현을 세운다 — 오를 수 있는 턱 이하는 막지 않고 올려
+ * 주고, 그보다 높으면 벽처럼 민다.
+ */
+const createPlatformTerrain = (platform: Platform): SpaceTerrain => {
+  const isOver = (x: number, z: number): boolean => {
+    return x >= platform.minX && x <= platform.maxX && z >= platform.minZ && z <= platform.maxZ;
+  };
+
+  return {
+    resolveGroundY: (x, z, feetY) => {
+      const canStepUp = feetY + SPACE_STEP_HEIGHT >= platform.top;
+
+      return isOver(x, z) && canStepUp ? platform.top : 0;
+    },
+    resolveMove: (x, z, feetY): TerrainMoveResult => {
+      const radius = SPACE_AVATAR_COLLISION_RADIUS;
+
+      if (feetY + SPACE_STEP_HEIGHT >= platform.top) {
+        return { x, z, pushX: 0, pushZ: 0 };
+      }
+
+      const overlapX = Math.min(x - (platform.minX - radius), platform.maxX + radius - x);
+      const overlapZ = Math.min(z - (platform.minZ - radius), platform.maxZ + radius - z);
+
+      if (overlapX <= 0 || overlapZ <= 0) {
+        return { x, z, pushX: 0, pushZ: 0 };
+      }
+
+      // 얕게 파고든 축으로 민다. 깊은 축으로 밀면 단을 가로질러 반대편에 선다.
+      const centerX = (platform.minX + platform.maxX) / 2;
+      const centerZ = (platform.minZ + platform.maxZ) / 2;
+
+      if (overlapX < overlapZ) {
+        const direction = x >= centerX ? 1 : -1;
+
+        return {
+          x: (direction > 0 ? platform.maxX : platform.minX) + direction * radius,
+          z,
+          pushX: direction,
+          pushZ: 0,
+        };
+      }
+
+      const direction = z >= centerZ ? 1 : -1;
+
+      return {
+        x,
+        z: (direction > 0 ? platform.maxZ : platform.minZ) + direction * radius,
+        pushX: 0,
+        pushZ: direction,
+      };
+    },
+    resolveCeilingY: () => Number.POSITIVE_INFINITY,
+  };
+};
 
 const createState = (overrides: Partial<LocalPlayerState> = {}): LocalPlayerState => ({
-  ...createLocalPlayerState({ x: CLEAR_LANE.x, z: CLEAR_LANE.z, y: 0, yaw: 0 }),
-  ...overrides,
-});
-
-/** 경계·소품 판정을 보는 테스트는 원점 기준이 필요하다. */
-const createOriginState = (overrides: Partial<LocalPlayerState> = {}): LocalPlayerState => ({
   ...createLocalPlayerState({ x: 0, z: 0, y: 0, yaw: 0 }),
   ...overrides,
 });
@@ -46,11 +109,12 @@ const runSteps = (
   input: MovementInput,
   cameraYaw: number,
   stepCount: number,
+  terrain: SpaceTerrain = GROUND,
 ): LocalPlayerState => {
   let current = state;
 
   for (let index = 0; index < stepCount; index += 1) {
-    current = stepMovement(current, input, cameraYaw);
+    current = stepMovement(current, input, cameraYaw, undefined, terrain);
   }
 
   return current;
@@ -64,22 +128,22 @@ describe("stepMovement", () => {
   it("카메라 yaw 가 0 이면 전진 입력은 -Z 로 간다", () => {
     const next = runSteps(createState(), createInput({ forward: 1 }), 0, 30);
 
-    expect(next.z).toBeLessThan(CLEAR_LANE.z);
-    expect(next.x).toBeCloseTo(CLEAR_LANE.x, 6);
+    expect(next.z).toBeLessThan(0);
+    expect(next.x).toBeCloseTo(0, 6);
   });
 
   it("카메라 yaw 가 90° 면 전진 입력은 -X 로 간다", () => {
     const next = runSteps(createState(), createInput({ forward: 1 }), Math.PI / 2, 30);
 
-    expect(next.x).toBeLessThan(CLEAR_LANE.x);
-    expect(next.z).toBeCloseTo(CLEAR_LANE.z, 6);
+    expect(next.x).toBeLessThan(0);
+    expect(next.z).toBeCloseTo(0, 6);
   });
 
   it("오른쪽 입력은 카메라 기준 +X 로 간다", () => {
     const next = runSteps(createState(), createInput({ strafe: 1 }), 0, 30);
 
-    expect(next.x).toBeGreaterThan(CLEAR_LANE.x);
-    expect(next.z).toBeCloseTo(CLEAR_LANE.z, 6);
+    expect(next.x).toBeGreaterThan(0);
+    expect(next.z).toBeCloseTo(0, 6);
   });
 
   it("대각 입력이 직진보다 빠르지 않다", () => {
@@ -91,11 +155,8 @@ describe("stepMovement", () => {
   });
 
   it("걷기는 walkSpeed, 달리기는 runSpeed 로 수렴한다", () => {
-    // 뒤쪽 경계에서 출발해 앞으로 달린다. 원점에서 시작하면 2초 동안 달리기가
-    // 전진 경계(13 m)에 닿아 클램프되고, 속력이 0 으로 읽힌다.
-    const backOfRoom = createState({ x: CLEAR_LANE.x, z: SPACE_BOUNDS.maxZ });
-    const walking = runSteps(backOfRoom, createInput({ forward: 1 }), 0, 120);
-    const running = runSteps(backOfRoom, createInput({ forward: 1, isRunning: true }), 0, 120);
+    const walking = runSteps(createState(), createInput({ forward: 1 }), 0, 120);
+    const running = runSteps(createState(), createInput({ forward: 1, isRunning: true }), 0, 120);
 
     expect(speedOf(walking)).toBeCloseTo(SPACE_MOVEMENT.walkSpeed, 4);
     expect(speedOf(running)).toBeCloseTo(SPACE_MOVEMENT.runSpeed, 4);
@@ -114,7 +175,7 @@ describe("stepMovement", () => {
     expect(speedOf(stopped)).toBe(0);
   });
 
-  it("이동 경계를 넘지 않고 막힌 축의 속도가 0 이 된다", () => {
+  it("바깥 상자를 넘지 않고 막힌 축의 속도가 0 이 된다", () => {
     const next = runSteps(
       createState({ z: SPACE_BOUNDS.minZ + 0.2 }),
       createInput({ forward: 1 }),
@@ -126,7 +187,7 @@ describe("stepMovement", () => {
     expect(next.velocityZ).toBe(0);
   });
 
-  it("경계에 막혀도 다른 축으로는 계속 움직인다", () => {
+  it("상자에 막혀도 다른 축으로는 계속 움직인다", () => {
     const next = runSteps(
       createState({ z: SPACE_BOUNDS.minZ }),
       createInput({ forward: 1, strafe: 1 }),
@@ -144,7 +205,7 @@ describe("stepMovement", () => {
       velocityZ: -SPACE_MOVEMENT.walkSpeed,
       yaw: Math.PI,
     });
-    const next = stepMovement(moving, createInput({ forward: 1 }), 0);
+    const next = stepMovement(moving, createInput({ forward: 1 }), 0, undefined, GROUND);
     const deltaYaw = Math.abs(
       Math.atan2(Math.sin(next.yaw - moving.yaw), Math.cos(next.yaw - moving.yaw)),
     );
@@ -156,9 +217,15 @@ describe("stepMovement", () => {
 
   it("거의 멈춘 상태에서는 방향을 돌리지 않는다", () => {
     const almostStopped = createState({ yaw: 1.2, velocityX: 0.01, velocityZ: 0.01 });
-    const next = stepMovement(almostStopped, createEmptyMovementInput(), 0);
+    const next = stepMovement(almostStopped, createEmptyMovementInput(), 0, undefined, GROUND);
 
     expect(next.yaw).toBe(1.2);
+  });
+
+  it("지형을 넘기지 않으면 광장 높이의 평지로 본다", () => {
+    // GLB 가 도착하기 전 한두 프레임이 이 경로를 탄다. 0 으로 떨어뜨리면
+    // 맵이 붙는 순간 광장으로 솟아오른다.
+    expect(stepMovement(createState(), createEmptyMovementInput(), 0).y).toBe(5);
   });
 });
 
@@ -191,12 +258,22 @@ describe("planFixedSteps", () => {
 
 describe("점프", () => {
   /** 입력을 바꿔 가며 적분하고 매 스텝의 높이를 모은다. */
-  const runJump = (stepCount: number, isJumpingAt: (step: number) => boolean): number[] => {
+  const runJump = (
+    stepCount: number,
+    isJumpingAt: (step: number) => boolean,
+    terrain: SpaceTerrain = GROUND,
+  ): number[] => {
     let current = createState();
     const heights: number[] = [];
 
     for (let index = 0; index < stepCount; index += 1) {
-      current = stepMovement(current, createInput({ isJumping: isJumpingAt(index) }), 0);
+      current = stepMovement(
+        current,
+        createInput({ isJumping: isJumpingAt(index) }),
+        0,
+        undefined,
+        terrain,
+      );
       heights.push(current.y);
     }
 
@@ -215,8 +292,7 @@ describe("점프", () => {
     const apex = Math.max(...heights);
 
     expect(apex).toBeGreaterThan(0.9);
-    // 서버가 검증하는 상한을 넘으면 이동이 거절된다.
-    expect(apex).toBeLessThan(SPACE_MAX_JUMP_HEIGHT);
+    expect(apex).toBeLessThan(1.2);
     expect(heights.at(-1)).toBe(0);
   });
 
@@ -236,47 +312,52 @@ describe("점프", () => {
     expect(Math.max(...heights.slice(60))).toBeGreaterThan(0.9);
   });
 
-  it("소품에 막혀 통과하지 못한다", () => {
-    // 러그 앞쪽 드럼통(중심 z = -2.5, 반깊이 0.43)을 향해 걸어간다.
-    const barrelFrontZ = SPACE_LOUNGE.centerZ + 5.5 + 0.43 + SPACE_AVATAR_COLLISION_RADIUS;
-    const next = runSteps(createOriginState(), createInput({ forward: 1 }), 0, 90);
+  it("천장에 닿으면 상승이 끊긴다", () => {
+    // 궁전 안에서 뛰어 지붕 위로 빠져나가면 내려올 길이 없어 갇힌다.
+    const ceilingY = 0.4;
+    const lowRoom: SpaceTerrain = { ...GROUND, resolveCeilingY: () => ceilingY };
+    const heights = runJump(60, (step) => step === 0, lowRoom);
 
-    expect(next.z).toBeCloseTo(barrelFrontZ, 6);
-    expect(next.velocityZ).toBe(0);
+    expect(Math.max(...heights)).toBeCloseTo(ceilingY, 6);
+    expect(heights.at(-1)).toBe(0);
+  });
+});
+
+describe("지형 위 걷기", () => {
+  /** 걸어서 오를 수 있는 턱. 맵의 계단 한 칸(0.25 m)을 대표한다. */
+  const STEP = createPlatformTerrain({ minX: 1, maxX: 10, minZ: -10, maxZ: 10, top: 0.25 });
+  /** 점프로도 못 오르는 벽. */
+  const WALL = createPlatformTerrain({ minX: 1, maxX: 10, minZ: -10, maxZ: 10, top: 3 });
+
+  it("계단 한 칸은 걸어서 올라선다", () => {
+    const next = runSteps(createState(), createInput({ strafe: 1 }), 0, 60, STEP);
+
+    expect(next.x).toBeGreaterThan(1);
+    expect(next.y).toBe(0.25);
   });
 
-  it("소품 위로 떨어지면 윗면에 선다", () => {
-    const barrelTop = 0.9;
-    let current = createOriginState({ x: 0, z: SPACE_LOUNGE.centerZ + 5.5, y: 1.4 });
+  it("오를 수 없는 벽에는 막히고 속도가 지워진다", () => {
+    const next = runSteps(createState(), createInput({ strafe: 1 }), 0, 60, WALL);
 
-    for (let index = 0; index < 60; index += 1) {
-      current = stepMovement(current, createInput(), 0);
-    }
-
-    expect(current.y).toBeCloseTo(barrelTop, 6);
-    expect(current.velocityY).toBe(0);
+    expect(next.x).toBeCloseTo(1 - SPACE_AVATAR_COLLISION_RADIUS, 6);
+    expect(next.velocityX).toBe(0);
+    expect(next.y).toBe(0);
   });
 
-  it("소품 가장자리를 벗어나면 바닥으로 떨어진다", () => {
-    // 윗면에 선 상태에서 옆으로 걸어 나간다. 지면 높이가 0 으로 떨어져야 한다.
-    let current = createOriginState({ x: 0, z: SPACE_LOUNGE.centerZ + 5.5, y: 0.9 });
+  it("벽을 비스듬히 밀면 벽을 따라 미끄러진다", () => {
+    // 법선 성분만 지운다. 둘 다 지우면 벽에 닿는 순간 그 자리에 선다.
+    const next = runSteps(createState(), createInput({ forward: 1, strafe: 1 }), 0, 60, WALL);
 
-    for (let index = 0; index < 60; index += 1) {
-      current = stepMovement(current, createInput({ strafe: 1 }), 0);
-    }
-
-    expect(current.x).toBeGreaterThan(1);
-    expect(current.y).toBe(0);
+    expect(next.x).toBeCloseTo(1 - SPACE_AVATAR_COLLISION_RADIUS, 6);
+    expect(next.velocityX).toBe(0);
+    expect(next.velocityZ).toBeLessThan(-SPACE_MOVEMENT.walkSpeed * 0.5);
   });
 
-  it("점프 중에도 수평 이동은 그대로 적분한다", () => {
-    let current = createState();
+  it("단 가장자리를 벗어나면 아래 지면으로 떨어진다", () => {
+    const onStep = createState({ x: 9.9, z: 0, y: 0.25 });
+    const next = runSteps(onStep, createInput({ strafe: 1 }), 0, 60, STEP);
 
-    for (let index = 0; index < 20; index += 1) {
-      current = stepMovement(current, createInput({ forward: 1, isJumping: index === 0 }), 0);
-    }
-
-    expect(current.y).toBeGreaterThan(0);
-    expect(current.z).toBeLessThan(CLEAR_LANE.z);
+    expect(next.x).toBeGreaterThan(10);
+    expect(next.y).toBe(0);
   });
 });

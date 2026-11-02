@@ -1,5 +1,6 @@
 import { describe, expect, it } from "vitest";
 import { SPACE_AVATAR_COLORS } from "../model/avatar";
+import { SPACE_SPAWN_RING } from "../model/spaceWorld";
 import { hashClientKey, resolveColorIndexFromClientKey, toUnitFraction } from "./clientKeyHash";
 import { createSpawnPoint } from "./spawnPoint";
 
@@ -43,9 +44,13 @@ describe("resolveColorIndexFromClientKey", () => {
       anglesByColor.set(colorIndex, angles);
     }
 
+    // 스폰이 궁전 쪽 반원으로 좁아져 각도가 가질 수 있는 폭 자체가 π 다.
+    // 상관이 없다면 같은 색이라도 그 폭의 대부분에 흩어져야 한다.
+    const arcSpan = SPACE_SPAWN_RING.arcHalfSpan * 2;
+
     for (const angles of anglesByColor.values()) {
       const spread = Math.max(...angles) - Math.min(...angles);
-      expect(spread).toBeGreaterThan(Math.PI);
+      expect(spread).toBeGreaterThan(arcSpan * 0.8);
     }
   });
 });

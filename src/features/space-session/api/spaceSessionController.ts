@@ -6,6 +6,7 @@ import {
   type LocalPlayerState,
   parseSpaceServerFrame,
   type RemotePlayer,
+  SPACE_PROTOCOL_VERSION,
   type SpaceChatMessage,
   type SpacePeer,
   type SpacePresence,
@@ -272,7 +273,9 @@ export class SpaceSessionController {
       this.pendingMessage = { requestId, resolve, timeout };
       this.updateSnapshot({ isMessagePending: true, error: null });
 
-      if (!this.sendFrame({ v: 1, t: "say", rid: requestId, body: trimmedBody })) {
+      if (
+        !this.sendFrame({ v: SPACE_PROTOCOL_VERSION, t: "say", rid: requestId, body: trimmedBody })
+      ) {
         this.finishPendingMessage(false);
         this.updateSnapshot({ error: "메시지를 전송하지 못했어요. 연결을 확인해 주세요." });
       }
@@ -307,7 +310,14 @@ export class SpaceSessionController {
       this.pendingNickname = { requestId, resolve, timeout, nickname: trimmedNickname };
       this.updateSnapshot({ isNicknamePending: true, error: null });
 
-      if (!this.sendFrame({ v: 1, t: "nick", rid: requestId, nickname: trimmedNickname })) {
+      if (
+        !this.sendFrame({
+          v: SPACE_PROTOCOL_VERSION,
+          t: "nick",
+          rid: requestId,
+          nickname: trimmedNickname,
+        })
+      ) {
         this.finishPendingNickname(false);
         this.updateSnapshot({ error: "닉네임을 바꾸지 못했어요. 연결을 확인해 주세요." });
       }
@@ -342,7 +352,7 @@ export class SpaceSessionController {
       this.pendingModel = { requestId, resolve, timeout, modelIndex };
       this.updateSnapshot({ error: null });
 
-      if (!this.sendFrame({ v: 1, t: "model", rid: requestId, modelIndex })) {
+      if (!this.sendFrame({ v: SPACE_PROTOCOL_VERSION, t: "model", rid: requestId, modelIndex })) {
         this.finishPendingModel(false);
         this.updateSnapshot({ error: "아바타를 바꾸지 못했어요. 연결을 확인해 주세요." });
       }
@@ -428,7 +438,7 @@ export class SpaceSessionController {
       }
 
       this.sendFrame({
-        v: 1,
+        v: SPACE_PROTOCOL_VERSION,
         t: "join",
         clientKey: this.options.identity.clientKey,
         nickname: this.nickname,
@@ -673,7 +683,7 @@ export class SpaceSessionController {
       return;
     }
 
-    if (this.sendFrame({ v: 1, t: "move", ...movement })) {
+    if (this.sendFrame({ v: SPACE_PROTOCOL_VERSION, t: "move", ...movement })) {
       this.lastSentMovement = { ...movement };
       this.lastMovementSentAt = now;
     }

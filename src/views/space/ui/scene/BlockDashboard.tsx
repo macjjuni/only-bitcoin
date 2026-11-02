@@ -5,7 +5,6 @@ import { memo, type ReactNode, useEffect, useMemo, useRef } from "react";
 import { CanvasTexture, SRGBColorSpace } from "three";
 import { useBlockStore } from "@/entities/block";
 import { SPACE_BLOCK_DASHBOARD } from "@/entities/space";
-import { BILLBOARD_COLORS } from "@/views/space/lib/billboardTexture";
 import {
   BLOCK_DASHBOARD_TEXTURE,
   type BlockDashboardState,
@@ -135,22 +134,14 @@ function BlockDashboard(): ReactNode {
   });
   // endregion
 
+  // 테두리 메시를 두지 않는다. 맵의 금장 액자가 이미 테두리라, 그 안에 또
+  // 테두리를 넣으면 액자 안쪽 홈이 두 겹이 된다.
   return (
-    <group position={SPACE_BLOCK_DASHBOARD.offset}>
-      {/* 프레임은 전광판과 같은 재질·치수다. 두 판의 테두리가 달라 보이면 안 된다. */}
-      <mesh position={SPACE_BLOCK_DASHBOARD.frameOffset}>
-        <planeGeometry
-          args={[SPACE_BLOCK_DASHBOARD.frameWidth, SPACE_BLOCK_DASHBOARD.frameHeight]}
-        />
-        <meshStandardMaterial color={BILLBOARD_COLORS.panelEdge} roughness={0.6} metalness={0.4} />
-      </mesh>
-
-      <mesh>
-        <planeGeometry args={[SPACE_BLOCK_DASHBOARD.width, SPACE_BLOCK_DASHBOARD.height]} />
-        {/* 자체 발광으로 그린다. 조명에 맡기면 벽 쪽이라 글자가 어두워진다. */}
-        <meshBasicMaterial map={surface.texture} toneMapped={false} />
-      </mesh>
-    </group>
+    <mesh>
+      <planeGeometry args={[SPACE_BLOCK_DASHBOARD.width, SPACE_BLOCK_DASHBOARD.height]} />
+      {/* 자체 발광으로 그린다. 조명에 맡기면 노을 역광에서 글자가 어두워진다. */}
+      <meshBasicMaterial map={surface.texture} toneMapped={false} />
+    </mesh>
   );
 }
 // endregion

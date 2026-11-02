@@ -1,118 +1,244 @@
 "use client";
 
-import { memo, type ReactNode } from "react";
-import {
-  SPACE_BILLBOARD,
-  SPACE_BLOCK_DASHBOARD,
-  SPACE_BOUNDS,
-  SPACE_LOUNGE,
-} from "@/entities/space";
+import { useFrame } from "@react-three/fiber";
+import { memo, type ReactNode, type RefObject, useMemo, useRef } from "react";
+import type { DirectionalLight, PointLight } from "three";
+import { type PlayerTransform, SPACE_ISLAND, SPACE_SCREEN_GLOW_POSITIONS } from "@/entities/space";
 import { BITCOIN_COLOR } from "@/shared/config/color";
+import type { LanternAnchor } from "@/views/space/lib/islandModel";
 
 /**
- * 지하 벙커 조명.
+ * 비트코인 아일랜드 조명 — 노을.
  *
- * 전에는 중성 키라이트(1.65)와 청록 보조광으로 관제실 톤을 만들었다. 청록은
- * "상황실" 색이고, 밝은 전역광은 공간을 야외처럼 평평하게 만든다. 전체 조도를
- * 내리고 **따뜻한 국소광**으로 바꿨다 — 아지트의 아늑함은 천장 높이보다 어두운
- * 바탕에 떨어지는 빛 몇 덩어리가 만든다.
+ * 벙커는 천장이 닫힌 실내라 전역광을 낮추고 펜던트 몇 개로 밝기를 만들었다.
+ * 섬은 하늘이 열려 있어 **태양 하나가 밝기의 대부분**을 담당하고, 랜턴은
+ * 광장·계단의 분위기만 더한다.
  *
- * 천장이 닫혀 있어 위에서 들어오는 빛이 막힌다는 점도 같이 반영했다. 키라이트는
- * 입체감만 남길 정도로 낮추고, 실제 밝기는 펜던트 점광원이 담당한다.
- *
- * 너무 어둡다는 의견이 있어 전역광·펜던트를 2~3할 올렸음. 명암 구조는 그대로 둠.
+ * 맵이 노을 톤(분홍 하늘·황금 궁전)으로 구워져 있어 조명도 거기에 맞춘다.
+ * 한낮의 흰 빛을 쓰면 버텍스컬러에 구워진 따뜻한 색과 싸워서 금장이 누렇게
+ * 뜬다.
  */
-const SKY_LIGHT_COLOR = "#4a4138";
-const GROUND_LIGHT_COLOR = "#0f0d0c";
-const KEY_LIGHT_COLOR = "#ffd8b0";
-const FILL_LIGHT_COLOR = "#8a6a4a";
-const PENDANT_LIGHT_COLOR = "#ff9d4d";
+
+/**
+ * 파노라마가 도착하기 전까지 깔아 둘 단색.
+ *
+ * 그림의 수평선 부근 하늘색에서 뽑았다. 다른 색을 쓰면 파노라마가 붙는 순간
+ * 하늘이 한 번 번쩍 바뀐다.
+ */
+export const SKY_FALLBACK_COLOR = "#b98aa0";
+/**
+ * 안개 색.
+ *
+ * 600 m 바다 평면이 끝나는 자리를 파노라마의 **수평선 바로 아래 물빛**으로
+ * 녹인다. 색이 어긋나면 먼바다에 띠가 생겨 평면의 가장자리가 드러난다.
+ */
+const HORIZON_FOG_COLOR = "#706186";
+const SKY_LIGHT_COLOR = "#ffd9c4";
+/** 바다 반사광. 아래에서 올라오는 빛이라 푸른기를 남긴다. */
+const WATER_BOUNCE_COLOR = "#54708f";
+const SUN_COLOR = "#ffc08a";
+const LANTERN_COLOR = "#ffb259";
+
+/**
+ * 안개 범위.
+ *
+ * 바다 평면이 600 m 라 끝이 화면에 잡히면 "판때기 위의 섬" 으로 보인다.
+ * 섬 지름이 약 45 m, 무지개 다리 끝이 57 m 이므로 다리까지는 또렷하게 두고
+ * 그 너머 바다를 하늘색으로 녹인다.
+ */
+const FOG_NEAR = 90;
+const FOG_FAR = 320;
+
 /** 물리 기반 조도라 점광원 강도는 칸델라 단위로 크게 잡아야 보인다. */
-const BILLBOARD_GLOW_INTENSITY = 180;
-const BILLBOARD_GLOW_DISTANCE = 44;
-const PENDANT_LIGHT_INTENSITY = 190;
-/**
- * 펜던트 도달 거리.
- *
- * 20 m 로 뒀더니 앞쪽 모서리가 최근접 펜던트에서 19.6 m 라 빛이 거의 끊겼다.
- * 감쇠가 제곱이므로 경계에 걸치는 거리는 사실상 어둠이다. 모서리까지 13 m 안에
- * 들어오게 배치를 바꾸고(아래) 거리에도 여유를 뒀다.
- */
-const PENDANT_LIGHT_DISTANCE = 28;
-const SHADOW_MAP_SIZE = 1024;
+const LANTERN_INTENSITY = 90;
+const LANTERN_DISTANCE = 16;
+const SCREEN_GLOW_INTENSITY = 150;
+const SCREEN_GLOW_DISTANCE = 26;
 
 /**
- * 천장 펜던트 위치.
+ * 동시에 켜는 랜턴 수.
  *
- * 처음에는 라운지와 좌우 작업 구역에 몰아 뒀는데, 네 모서리가 최근접 펜던트에서
- * 15~20 m 떨어져 아무것도 보이지 않았다. 어두운 코너는 분위기지만 **형체가
- * 안 보이는 것은 분위기가 아니다.**
- *
- * 방(40 × 29)을 2 × 2 로 나눠 네 등을 걸고 라운지(`SPACE_LOUNGE`)에 한 등을 더한다. 어느
- * 모서리든 최근접 펜던트가 13.3 m 안에 들어온다. 등 아래가 밝고 사이가 어두운
- * 명암 자체는 그대로 남는다.
+ * 맵에는 랜턴 자리가 20곳 있는데 전부 켜면 포인트라이트 20개가 매 프래그먼트를
+ * 돈다 — 모바일에서 그대로 프레임이 반토막 난다. **가까운 것만 켜고 따라
+ * 옮긴다.** 광원 개수가 프레임마다 고정이라 셰이더가 다시 컴파일되지 않는다.
  */
-const PENDANT_POSITIONS: readonly [number, number, number][] = [
-  [-11, 6.8, -9],
-  [11, 6.8, -9],
-  [-11, 6.8, 6],
-  [11, 6.8, 6],
-  [0, 6.8, SPACE_LOUNGE.centerZ],
-];
+const LANTERN_BUDGET = { desktop: 6, mobile: 3 } as const;
+
+/**
+ * 켤 랜턴을 다시 고르는 간격(초).
+ *
+ * 매 프레임 고르면 20개를 정렬하는 비용이 계속 든다. 걷는 속도가 4.5 m/s 라
+ * 0.25 초면 1 m 남짓 움직이는데, 랜턴 간격이 그보다 훨씬 넓어 그 사이 순위가
+ * 뒤집히는 일이 거의 없다.
+ */
+const LANTERN_REPICK_INTERVAL = 0.25;
+
+/**
+ * 태양 그림자 상자의 반폭(m).
+ *
+ * 섬 전체(80 m)를 한 상자로 덮으면 1024 맵에서 텍셀이 8 cm 라 아바타 그림자가
+ * 뭉개진다. **플레이어를 따라다니는 작은 상자**로 바꿔 2.4 cm 로 줄였다.
+ * 상자 밖은 그림자가 없지만, 그림자를 지는 것이 아바타뿐이라 눈에 띄지 않는다.
+ */
+const SUN_SHADOW_EXTENT = 26;
+const SUN_SHADOW_MAP_SIZE = 2048;
+
+/**
+ * 주시점에서 본 태양 방향·거리. 낮게 깔린 노을이라 고도를 낮게 잡는다.
+ *
+ * **방위각이 `SkyBackground.SKY_ROTATION_Y` 와 짝이다.** 파노라마를 그 각도로
+ * 돌려 그려진 해를 여기에 맞춰 두었으니, 이 값을 바꾸면 하늘의 해와 그림자가
+ * 따로 논다.
+ *
+ * 그림의 해는 수평선에 걸려 있지만 광원 고도까지 0° 로 맞추지는 않는다.
+ * 그러면 그림자가 끝없이 길어지고 블록 윗면에 빛이 전혀 안 들어 복셀이
+ * 납작해 보인다. 방위만 맞추고 고도는 입체감이 사는 값으로 둔다.
+ */
+const SUN_OFFSET: readonly [number, number, number] = [-48, 40, 34];
 
 interface SceneLightingProps {
   /** 모바일에서는 실시간 그림자 맵을 끈다. 아바타는 블롭 그림자로 대체한다. */
   hasRealtimeShadows: boolean;
+  /** 랜턴 선택과 그림자 상자가 따라갈 기준. */
+  playerStateRef: RefObject<PlayerTransform>;
+  /** 맵에서 읽은 랜턴 자리. GLB 가 오기 전에는 비어 있다. */
+  lanternAnchors: readonly LanternAnchor[];
 }
 
-function SceneLighting({ hasRealtimeShadows }: SceneLightingProps): ReactNode {
+function SceneLighting({
+  hasRealtimeShadows,
+  playerStateRef,
+  lanternAnchors,
+}: SceneLightingProps): ReactNode {
+  // region [Hooks]
+  const sunRef = useRef<DirectionalLight>(null);
+  const lanternRefs = useRef<(PointLight | null)[]>([]);
+  const repickCountdownRef = useRef<number>(0);
+  const lanternCount = hasRealtimeShadows ? LANTERN_BUDGET.desktop : LANTERN_BUDGET.mobile;
+  /** 슬롯은 개수만 고정이면 된다. 위치는 매번 가까운 랜턴으로 덮어쓴다. */
+  const lanternSlots = useMemo(() => {
+    return Array.from({ length: lanternCount }, (_, index) => index);
+  }, [lanternCount]);
+  // endregion
+
+  // region [Privates]
+  /**
+   * 가까운 랜턴 자리로 광원을 옮긴다.
+   *
+   * 자리가 광원 수보다 적으면(GLB 도착 전) 남는 광원은 강도를 0 으로 둔다.
+   * 끄는 대신 강도를 0 으로 두는 이유는 개수를 바꾸지 않기 위해서다.
+   */
+  const repositionLanterns = (player: PlayerTransform): void => {
+    const nearest = [...lanternAnchors]
+      .sort((left, right) => {
+        const leftDistance = (left[0] - player.x) ** 2 + (left[2] - player.z) ** 2;
+        const rightDistance = (right[0] - player.x) ** 2 + (right[2] - player.z) ** 2;
+
+        return leftDistance - rightDistance;
+      })
+      .slice(0, lanternCount);
+
+    lanternRefs.current.forEach((light, index) => {
+      if (!light) {
+        return;
+      }
+
+      const anchor = nearest[index];
+
+      light.intensity = anchor ? LANTERN_INTENSITY : 0;
+
+      if (anchor) {
+        light.position.set(anchor[0], anchor[1], anchor[2]);
+      }
+    });
+  };
+
+  /**
+   * 그림자 상자를 플레이어 위로 옮긴다.
+   *
+   * `target` 을 옮긴 뒤 행렬을 직접 갱신해야 한다 — 타깃은 씬 그래프에 붙지
+   * 않은 기본 객체라 렌더러가 대신 갱신해 주지 않는다.
+   */
+  const followSun = (player: PlayerTransform): void => {
+    const sun = sunRef.current;
+
+    if (!sun) {
+      return;
+    }
+
+    sun.position.set(player.x + SUN_OFFSET[0], player.y + SUN_OFFSET[1], player.z + SUN_OFFSET[2]);
+    sun.target.position.set(player.x, player.y, player.z);
+    sun.target.updateMatrixWorld();
+  };
+  // endregion
+
+  // region [Life Cycles]
+  useFrame((_, deltaSeconds) => {
+    const player = playerStateRef.current;
+
+    followSun(player);
+
+    repickCountdownRef.current -= deltaSeconds;
+
+    if (repickCountdownRef.current > 0) {
+      return;
+    }
+
+    repickCountdownRef.current = LANTERN_REPICK_INTERVAL;
+    repositionLanterns(player);
+  });
+  // endregion
+
   return (
     <>
-      {/* 벽과 천장이 시야를 덮으므로 배경은 틈새로만 보인다. 거의 검게 둔다. */}
-      <color attach="background" args={["#08090b"]} />
+      {/*
+        하늘은 `SkyBackground` 가 파노라마로 덮는다. 여기서는 안개만 건다 —
+        안개 색이 파노라마 수평선과 같아야 바다 평면의 끝이 보이지 않는다.
+      */}
+      <fog attach="fog" args={[HORIZON_FOG_COLOR, FOG_NEAR, FOG_FAR]} />
 
-      <hemisphereLight color={SKY_LIGHT_COLOR} groundColor={GROUND_LIGHT_COLOR} intensity={0.8} />
+      {/* 하늘과 바다에서 오는 전역광. 섬의 그늘진 면이 새까매지지 않게 받친다. */}
+      <hemisphereLight color={SKY_LIGHT_COLOR} groundColor={WATER_BOUNCE_COLOR} intensity={1.1} />
 
+      {/* 이 섬의 밝기는 사실상 전부 여기서 나온다. */}
       <directionalLight
-        color={KEY_LIGHT_COLOR}
-        intensity={0.85}
-        position={[12, 22, 10]}
+        ref={sunRef}
+        color={SUN_COLOR}
+        intensity={2.2}
         castShadow={hasRealtimeShadows}
-        shadow-mapSize-width={SHADOW_MAP_SIZE}
-        shadow-mapSize-height={SHADOW_MAP_SIZE}
-        shadow-camera-left={SPACE_BOUNDS.minX}
-        shadow-camera-right={SPACE_BOUNDS.maxX}
-        shadow-camera-top={SPACE_BOUNDS.maxZ}
-        shadow-camera-bottom={SPACE_BOUNDS.minZ}
+        shadow-mapSize-width={SUN_SHADOW_MAP_SIZE}
+        shadow-mapSize-height={SUN_SHADOW_MAP_SIZE}
+        shadow-camera-left={-SUN_SHADOW_EXTENT}
+        shadow-camera-right={SUN_SHADOW_EXTENT}
+        shadow-camera-top={SUN_SHADOW_EXTENT}
+        shadow-camera-bottom={-SUN_SHADOW_EXTENT}
         shadow-camera-near={1}
-        shadow-camera-far={80}
+        shadow-camera-far={160}
+        shadow-bias={-0.0008}
       />
 
-      {/* 보조광은 그림자를 만들지 않고 벽·캐릭터의 어두운 면만 드러낸다. */}
-      <directionalLight color={FILL_LIGHT_COLOR} intensity={0.4} position={[-18, 10, -8]} />
-
-      {/* 천장 펜던트. 이 방의 실제 밝기는 여기서 나온다. */}
-      {PENDANT_POSITIONS.map((pendantPosition) => (
+      {/* 가까운 랜턴만 켠다. 위치는 매 0.25 초 가까운 자리로 옮겨 간다. */}
+      {lanternSlots.map((slotIndex) => (
         <pointLight
-          key={`${pendantPosition[0]}:${pendantPosition[2]}`}
-          color={PENDANT_LIGHT_COLOR}
-          intensity={PENDANT_LIGHT_INTENSITY}
-          distance={PENDANT_LIGHT_DISTANCE}
+          key={slotIndex}
+          ref={(light) => {
+            lanternRefs.current[slotIndex] = light;
+          }}
+          color={LANTERN_COLOR}
+          intensity={0}
+          distance={LANTERN_DISTANCE}
           decay={2}
-          position={pendantPosition}
+          position={[0, SPACE_ISLAND.plazaY, 0]}
         />
       ))}
 
-      {/*
-        두 패널이 바닥을 물들이게 하는 광원. 패널보다 낮고 살짝 앞에 둔다.
-        같은 규격으로 나란히 걸린 두 판이므로 한쪽만 물들이지 않는다.
-      */}
-      {[SPACE_BILLBOARD.glowPosition, SPACE_BLOCK_DASHBOARD.glowPosition].map((glowPosition) => (
+      {/* 두 전광판이 광장 바닥을 오렌지로 물들이게 하는 광원. */}
+      {SPACE_SCREEN_GLOW_POSITIONS.map((glowPosition) => (
         <pointLight
           key={glowPosition[0]}
           color={BITCOIN_COLOR}
-          intensity={BILLBOARD_GLOW_INTENSITY}
-          distance={BILLBOARD_GLOW_DISTANCE}
+          intensity={SCREEN_GLOW_INTENSITY}
+          distance={SCREEN_GLOW_DISTANCE}
           decay={2}
           position={glowPosition}
         />

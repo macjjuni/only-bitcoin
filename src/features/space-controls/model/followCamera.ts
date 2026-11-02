@@ -1,4 +1,4 @@
-import { type PlayerTransform, SPACE_CAMERA_BOUNDS, SPACE_WALL_Z } from "@/entities/space";
+import { type PlayerTransform, SPACE_CAMERA_BOUNDS } from "@/entities/space";
 
 const toRadians = (degrees: number): number => (degrees * Math.PI) / 180;
 
@@ -11,9 +11,9 @@ export const SPACE_CAMERA = {
   /**
    * 손가락 기기의 시작 거리. 가장 멀리 물러난 값이다.
    *
-   * 세로로 긴 화면은 세로 시야가 넓고 가로가 좁다. 가까이 붙으면 전광판은
-   * 커지지만 위아래가 잘려 전광판 위 텍스트 배너까지 한 화면에 들어오지 않는다.
-   * 물러나면 벽면 전체가 잡힌다. 시작값일 뿐이라 핀치로 다가갈 수 있다.
+   * 세로로 긴 화면은 세로 시야가 넓고 가로가 좁다. 광장에서 가까이 붙으면
+   * 궁전이 화면 위로 잘려 "여기가 어디인지" 가 안 보인다. 물러나면 궁전과
+   * 양옆 전광판이 한 화면에 들어온다. 시작값일 뿐이라 핀치로 다가갈 수 있다.
    */
   touchInitialDistance: 18,
   /** 휠 deltaY 1 단위당 거리 변화(m). 한 노치(100)에 약 1.2 m. */
@@ -31,10 +31,20 @@ export const SPACE_CAMERA = {
   /** 모션 축소 환경에서는 감쇠를 올려 흔들림을 줄인다. */
   reducedMotionFollowDamping: 20,
   fov: 55,
-  /** 카메라가 바닥을 뚫지 않는 최저 높이. */
+  /**
+   * 카메라가 바다 아래로 내려가지 않는 최저 높이.
+   *
+   * 섬은 바다가 y = 0 이고 선착장이 0.5 다. 선착장에서 올려다볼 때 카메라가
+   * 수면 아래로 내려가면 화면이 바다 평면에 덮인다.
+   */
   minHeight: 0.6,
-  /** 뒷벽·바닥 경계에서 띄울 여유. */
-  boundaryMargin: 1,
+  /**
+   * 지형·경계에서 띄울 여유.
+   *
+   * 지형 충돌에서는 벽에 닿은 지점보다 이만큼 앞에 카메라를 세운다. 0 으로
+   * 두면 근평면(0.1)이 벽을 파고들어 벽 너머가 비친다.
+   */
+  boundaryMargin: 0.4,
 } as const;
 
 /** 카메라가 바라보는 지점의 높이. 아바타 머리(약 1.81) 근처다. */
@@ -123,28 +133,24 @@ export const resolveCameraFocus = (player: PlayerTransform): Vector3Like => ({
 });
 
 /**
- * 카메라를 월드 안으로 가둔다.
+ * 카메라를 월드 상자 안으로 가둔다.
  *
- * 가두지 않으면 플레이어가 뒷벽 쪽에서 몸을 돌릴 때 카메라가 벽 뒤로 빠진다.
- * 벽은 단면 렌더라 뒤에서는 보이지 않고, 광장이 바깥에서 들여다보이는 상태가 된다.
- * 거리를 18 m 까지 늘릴 수 있게 되면서 이 구간이 훨씬 넓어졌다.
+ * 섬은 사방이 바다라 벙커처럼 "벽 뒤로 빠지는" 문제가 없다. 이 상자는 지형을
+ * 파고드는 것을 막지 않고 — 그쪽은 `IslandTerrain.resolveCameraPosition` 이
+ * 레이캐스트로 한다 — 카메라가 섬에서 한없이 멀어지거나 수면 아래로 내려가는
+ * 것만 막는다.
  *
  * 위를 보는 피치에서는 카메라가 주시점보다 낮아지므로 최저 높이도 함께 막는다.
  * 거리 18 m·피치 +5° 면 높이가 0.18 m 까지 내려간다.
  */
 export const clampCameraPosition = (position: Vector3Like): Vector3Like => {
-  const { boundaryMargin, minHeight } = SPACE_CAMERA;
+  const { minHeight } = SPACE_CAMERA;
 
   return {
-    x: clamp(
-      position.x,
-      SPACE_CAMERA_BOUNDS.minX + boundaryMargin,
-      SPACE_CAMERA_BOUNDS.maxX - boundaryMargin,
-    ),
-    // 바닥을 뚫지도, 천장을 뚫지도 않는다.
+    x: clamp(position.x, SPACE_CAMERA_BOUNDS.minX, SPACE_CAMERA_BOUNDS.maxX),
+    // 수면 아래로 내려가지도, 궁전 꼭대기보다 높이 뜨지도 않는다.
     y: clamp(position.y, minHeight, SPACE_CAMERA_BOUNDS.maxY),
-    // 뒷벽 앞쪽으로만 둔다. 벽을 넘어가면 패널 뒷면을 보게 된다.
-    z: clamp(position.z, SPACE_WALL_Z + boundaryMargin, SPACE_CAMERA_BOUNDS.maxZ - boundaryMargin),
+    z: clamp(position.z, SPACE_CAMERA_BOUNDS.minZ, SPACE_CAMERA_BOUNDS.maxZ),
   };
 };
 

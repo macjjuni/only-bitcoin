@@ -1,177 +1,253 @@
+import { readFileSync } from "node:fs";
+import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   SPACE_BILLBOARD,
   SPACE_BLOCK_DASHBOARD,
   SPACE_BOUNDS,
   SPACE_CAMERA_BOUNDS,
-  SPACE_GROUND,
-  SPACE_OVERLAY_LIMITS,
-  SPACE_ROOM_HEIGHT,
+  SPACE_ISLAND,
+  SPACE_MAX_ALTITUDE,
+  SPACE_SCREEN_FRAME,
+  SPACE_SCREEN_GLOW_POSITIONS,
+  SPACE_SCREEN_PLACEMENTS,
+  SPACE_SCREEN_SCALE,
+  SPACE_SPAWN_FACING,
   SPACE_SPAWN_RING,
-  SPACE_TEXT_BANNER,
-  SPACE_WALL_ANCHOR,
-  SPACE_WALL_PANEL_SPAN,
-  SPACE_WALL_Z,
 } from "@/entities/space";
 
-const BILLBOARD_CENTER_Y = SPACE_WALL_ANCHOR[1];
+/**
+ * 월드 상수를 **맵 GLB 와 맞춰 둔다.**
+ *
+ * `spaceWorld.ts` 의 좌표는 전부 `bitcoin_island_draco.glb` 에서 읽은 값이다.
+ * 맵을 다시 구우면 조용히 어긋나는데, 어긋난 결과가 "전광판이 액자 옆에 떠
+ * 있다" 처럼 **화면을 봐야만 보이는** 종류라 눈으로 잡기 어렵다.
+ *
+ * GLB 는 Draco 로 압축돼 있지만 **JSON 청크는 평문**이다. 노드 좌표와
+ * 액세서의 `min`/`max` 가 거기 들어 있어서, 디코더 없이도 필요한 값은 전부
+ * 읽을 수 있다. 메시 정점까지 보려면 Draco 디코더가 필요한데 여기서 볼 일이
+ * 없다.
+ */
 
-/** 상대 오프셋을 월드 좌표로 되돌린다. */
-const toWorldY = (offsetY: number): number => SPACE_WALL_ANCHOR[1] + offsetY;
-const toWorldX = (offsetX: number): number => SPACE_WALL_ANCHOR[0] + offsetX;
+interface GltfAccessor {
+  min: number[];
+  max: number[];
+}
 
-describe("전광판·현황판 배치", () => {
-  it("현황판은 전광판과 세로 중심이 같다", () => {
-    expect(toWorldY(SPACE_BLOCK_DASHBOARD.offset[1])).toBeCloseTo(BILLBOARD_CENTER_Y, 6);
+interface GltfNode {
+  name: string;
+  translation?: number[];
+  extras?: { spawn?: boolean; light_anchor?: boolean; collision?: boolean };
+}
+
+interface GltfJson {
+  accessors: GltfAccessor[];
+  meshes: { name: string; primitives: { attributes: { POSITION: number } }[] }[];
+  nodes: GltfNode[];
+}
+
+const GLB_JSON_CHUNK_OFFSET = 20;
+
+// region [Privates]
+const readIslandGltf = (): GltfJson => {
+  const buffer = readFileSync(resolve(process.cwd(), "public/models/bitcoin_island_draco.glb"));
+  const jsonLength = buffer.readUInt32LE(12);
+
+  return JSON.parse(
+    buffer.subarray(GLB_JSON_CHUNK_OFFSET, GLB_JSON_CHUNK_OFFSET + jsonLength).toString("utf8"),
+  ) as GltfJson;
+};
+
+const island = readIslandGltf();
+
+const findNode = (name: string): GltfNode => {
+  const node = island.nodes.find((candidate) => candidate.name === name);
+
+  if (!node) {
+    throw new Error(`맵 GLB 에 '${name}' 노드가 없습니다.`);
+  }
+
+  return node;
+};
+
+/** 메시 정점의 축 정렬 경계 상자. Draco 로 압축돼도 액세서에 그대로 남는다. */
+const readMeshBounds = (name: string): GltfAccessor => {
+  const mesh = island.meshes.find((candidate) => candidate.name === name);
+
+  if (!mesh) {
+    throw new Error(`맵 GLB 에 '${name}' 메시가 없습니다.`);
+  }
+
+  return island.accessors[mesh.primitives[0].attributes.POSITION];
+};
+
+/** 쿼드의 중심·폭·높이. 화면 네 점이 한 평면에 있으므로 상자에서 바로 읽는다. */
+const readScreenQuad = (name: string) => {
+  const { min, max } = readMeshBounds(name);
+
+  return {
+    center: [(min[0] + max[0]) / 2, (min[1] + max[1]) / 2, (min[2] + max[2]) / 2] as const,
+    width: Math.hypot(max[0] - min[0], max[2] - min[2]),
+    height: max[1] - min[1],
+  };
+};
+// endregion
+
+describe("섬의 층 높이", () => {
+  it("바다에서 궁전 단까지 순서대로 올라간다", () => {
+    expect(SPACE_ISLAND.seaY).toBeLessThan(SPACE_ISLAND.dockY);
+    expect(SPACE_ISLAND.dockY).toBeLessThan(SPACE_ISLAND.plazaY);
+    expect(SPACE_ISLAND.plazaY).toBeLessThan(SPACE_ISLAND.terraceY);
+    expect(SPACE_ISLAND.terraceY).toBeLessThan(SPACE_ISLAND.palaceY);
   });
 
-  it("현황판은 전광판과 치수·프레임이 같다", () => {
-    // 같은 벽에 나란히 걸리는 형제라 크기가 다르면 한쪽이 보조처럼 읽힌다.
-    expect(SPACE_BLOCK_DASHBOARD.width).toBe(SPACE_BILLBOARD.width);
-    expect(SPACE_BLOCK_DASHBOARD.height).toBe(SPACE_BILLBOARD.height);
-    expect(SPACE_BLOCK_DASHBOARD.frameWidth).toBe(SPACE_BILLBOARD.frameWidth);
-    expect(SPACE_BLOCK_DASHBOARD.frameHeight).toBe(SPACE_BILLBOARD.frameHeight);
-    expect(SPACE_BLOCK_DASHBOARD.frameOffset).toEqual(SPACE_BILLBOARD.frameOffset);
+  it("스폰 노드가 가리키는 높이와 같다", () => {
+    expect(findNode("Spawn_Dock").translation?.[1]).toBe(SPACE_ISLAND.dockY);
+    expect(findNode("Spawn_Plaza").translation?.[1]).toBe(SPACE_ISLAND.plazaY);
+    expect(findNode("Spawn_Palace").translation?.[1]).toBe(SPACE_ISLAND.palaceY);
+  });
+});
+
+describe("이동 경계", () => {
+  it("충돌 메시 전체를 덮는다", () => {
+    const { min, max } = readMeshBounds("Collision");
+
+    expect(SPACE_BOUNDS.minX).toBeLessThanOrEqual(min[0]);
+    expect(SPACE_BOUNDS.maxX).toBeGreaterThanOrEqual(max[0]);
+    expect(SPACE_BOUNDS.minZ).toBeLessThanOrEqual(min[2]);
+    expect(SPACE_BOUNDS.maxZ).toBeGreaterThanOrEqual(max[2]);
   });
 
-  it("현황판은 16:9 비율이다", () => {
-    // 텍스처(1600 × 900)와 어긋나면 글자가 늘어난다.
-    expect(SPACE_BLOCK_DASHBOARD.width / SPACE_BLOCK_DASHBOARD.height).toBeCloseTo(16 / 9, 6);
+  it("무지개 다리 끝 스폰 지점까지 담는다", () => {
+    // 다리는 +X 로 길게 뻗어 섬 본체보다 훨씬 멀다. 경계를 섬에만 맞추면
+    // 다리를 건너는 순간 서버가 이동을 거절한다.
+    const [bridgeX, , bridgeZ] = findNode("Spawn_BridgeEnd").translation ?? [];
+
+    expect(bridgeX).toBeGreaterThan(SPACE_BOUNDS.minX);
+    expect(bridgeX).toBeLessThan(SPACE_BOUNDS.maxX);
+    expect(bridgeZ).toBeGreaterThan(SPACE_BOUNDS.minZ);
+    expect(bridgeZ).toBeLessThan(SPACE_BOUNDS.maxZ);
   });
 
-  it("두 판이 중앙선을 기준으로 좌우 대칭이다", () => {
-    const billboardX = toWorldX(SPACE_BILLBOARD.offset[0]);
-    const dashboardX = toWorldX(SPACE_BLOCK_DASHBOARD.offset[0]);
+  it("높이 상한이 맵에서 가장 높은 지점보다 위에 있다", () => {
+    // 궁전 첨탑 꼭대기까지 덮어야 한다. 그보다 낮으면 정상적인 좌표를 서버가
+    // 거절할 수 있고, 지나치게 높으면 위생 검사로서 의미가 없다.
+    const { max } = readMeshBounds("Collision");
 
-    expect(billboardX).toBeLessThan(SPACE_WALL_ANCHOR[0]);
-    expect(dashboardX).toBeGreaterThan(SPACE_WALL_ANCHOR[0]);
-    expect(billboardX + dashboardX).toBeCloseTo(SPACE_WALL_ANCHOR[0] * 2, 6);
+    expect(SPACE_MAX_ALTITUDE).toBeGreaterThan(max[1]);
+    expect(SPACE_MAX_ALTITUDE).toBeLessThan(max[1] * 1.5);
   });
 
-  it("두 프레임이 겹치지 않고 간격을 둔다", () => {
-    const billboardInnerEdge = toWorldX(SPACE_BILLBOARD.offset[0]) + SPACE_BILLBOARD.frameWidth / 2;
-    const dashboardInnerEdge =
-      toWorldX(SPACE_BLOCK_DASHBOARD.offset[0]) - SPACE_BLOCK_DASHBOARD.frameWidth / 2;
+  it("스냅샷 2바이트 높이 칸에 들어간다", () => {
+    // 1 cm 정밀도의 `Uint16` 이라 655.35 m 가 한계다.
+    expect(SPACE_MAX_ALTITUDE * 100).toBeLessThanOrEqual(0xffff);
+  });
+});
 
-    expect(dashboardInnerEdge - billboardInnerEdge).toBeGreaterThanOrEqual(0.4);
+describe("카메라 범위", () => {
+  it("이동 경계보다 넓고 궁전보다 높다", () => {
+    const { max } = readMeshBounds("Collision");
+
+    expect(SPACE_CAMERA_BOUNDS.minX).toBeLessThan(SPACE_BOUNDS.minX);
+    expect(SPACE_CAMERA_BOUNDS.maxX).toBeGreaterThan(SPACE_BOUNDS.maxX);
+    expect(SPACE_CAMERA_BOUNDS.minZ).toBeLessThan(SPACE_BOUNDS.minZ);
+    expect(SPACE_CAMERA_BOUNDS.maxZ).toBeGreaterThan(SPACE_BOUNDS.maxZ);
+    expect(SPACE_CAMERA_BOUNDS.maxY).toBeGreaterThan(max[1]);
+  });
+});
+
+describe("스폰 링", () => {
+  it("광장 한가운데에 있고 원형극장 계단에 닿지 않는다", () => {
+    // 원형극장 아랫단이 중심에서 12 m 다. 서버에는 지형이 없어 링 안에서
+    // 그대로 세우므로, 계단에 걸치면 접속하자마자 턱에 끼인다.
+    expect(SPACE_SPAWN_RING.centerX).toBe(0);
+    expect(SPACE_SPAWN_RING.centerZ).toBe(0);
+    expect(SPACE_SPAWN_RING.minRadius).toBeGreaterThan(0);
+    expect(SPACE_SPAWN_RING.maxRadius).toBeLessThan(12);
   });
 
-  it("두 프레임이 모두 바닥 폭 안에 들어온다", () => {
-    const outerEdgeX =
-      toWorldX(SPACE_BLOCK_DASHBOARD.offset[0]) + SPACE_BLOCK_DASHBOARD.frameWidth / 2;
-
-    expect(outerEdgeX).toBeLessThan(SPACE_GROUND.width / 2);
-    expect(SPACE_WALL_PANEL_SPAN).toBeCloseTo(outerEdgeX * 2, 6);
+  it("광장 바닥 높이에서 시작한다", () => {
+    expect(SPACE_SPAWN_RING.y).toBe(SPACE_ISLAND.plazaY);
   });
 
-  it("두 판 모두 기울이지 않는다", () => {
-    // 기울이면 표시 면이 옆 패널·장비함에 가려 글자가 잘려 보인다.
-    expect(SPACE_BLOCK_DASHBOARD.rotationY).toBe(0);
+  it("궁전 스폰 지점을 바라보게 되어 있다", () => {
+    expect([...SPACE_SPAWN_FACING]).toEqual(findNode("Spawn_Palace").translation);
+  });
+});
+
+describe("전광판 액자", () => {
+  it("표시 영역 치수가 GLB 쿼드와 같다", () => {
+    const quad = readScreenQuad("Screen_BTCUSD");
+
+    expect(quad.width).toBeCloseTo(SPACE_SCREEN_FRAME.width, 3);
+    expect(quad.height).toBeCloseTo(SPACE_SCREEN_FRAME.height, 3);
   });
 
-  it("모든 패널이 바닥 위에 떠 있다", () => {
-    const panels = [
-      { y: BILLBOARD_CENTER_Y, height: SPACE_BILLBOARD.frameHeight },
-      {
-        y: toWorldY(SPACE_BLOCK_DASHBOARD.offset[1]),
-        height: SPACE_BLOCK_DASHBOARD.frameHeight,
-      },
-    ];
+  it("두 패널의 위치가 GLB 쿼드 중심과 같다", () => {
+    expect([...SPACE_SCREEN_PLACEMENTS.billboard.position]).toEqual(
+      readScreenQuad("Screen_BTCUSD").center.map((value) => expect.closeTo(value, 5)),
+    );
+    expect([...SPACE_SCREEN_PLACEMENTS.blockDashboard.position]).toEqual(
+      readScreenQuad("Screen_Network").center.map((value) => expect.closeTo(value, 5)),
+    );
+  });
 
-    for (const panel of panels) {
-      expect(panel.y - panel.height / 2).toBeGreaterThan(0);
+  it("두 패널이 광장 중심을 바라본다", () => {
+    // 기본 법선 +Z 인 평면을 Y축으로 θ 돌리면 법선이 (sin θ, 0, cos θ) 다.
+    // 그 방향이 패널에서 광장 중심을 향해야 한다.
+    for (const placement of Object.values(SPACE_SCREEN_PLACEMENTS)) {
+      const [x, , z] = placement.position;
+      const toCenter = Math.hypot(x, z);
+
+      expect(Math.sin(placement.rotationY)).toBeCloseTo(-x / toCenter, 3);
+      expect(Math.cos(placement.rotationY)).toBeCloseTo(-z / toCenter, 3);
     }
   });
 
-  it("바닥이 갈 수 있는 곳만 덮는다", () => {
-    const groundBackZ = SPACE_GROUND.centerZ - SPACE_GROUND.depth / 2;
-    const groundFrontZ = SPACE_GROUND.centerZ + SPACE_GROUND.depth / 2;
+  it("두 액자가 광장 중심선을 기준으로 좌우 대칭이다", () => {
+    const [billboardX, billboardY, billboardZ] = SPACE_SCREEN_PLACEMENTS.billboard.position;
+    const [dashboardX, dashboardY, dashboardZ] = SPACE_SCREEN_PLACEMENTS.blockDashboard.position;
 
-    // 가로와 앞쪽 끝은 이동 경계와 같다. 못 가는 바닥을 보여주지 않는다.
-    expect(SPACE_GROUND.width / 2).toBe(SPACE_BOUNDS.maxX);
-    expect(groundFrontZ).toBe(SPACE_BOUNDS.maxZ);
-    // 뒤쪽만 뒷벽을 넘겨 덮는다. 벽이 바닥 위에 서 있어야 한다.
-    expect(groundBackZ).toBeLessThan(SPACE_WALL_Z);
-    expect(SPACE_BOUNDS.minZ).toBeGreaterThan(SPACE_WALL_Z);
+    expect(dashboardX).toBeCloseTo(-billboardX, 6);
+    expect(dashboardY).toBe(billboardY);
+    expect(dashboardZ).toBeCloseTo(billboardZ, 6);
   });
 
-  it("바닥이 패널 크기로 정확히 나뉜다", () => {
-    // 나누어지지 않으면 끝줄이 칠해지지 않은 빈 띠로 남는다.
-    const FLOOR_PANEL_SIZE = 8;
-
-    expect(SPACE_GROUND.width % FLOOR_PANEL_SIZE).toBe(0);
-    expect(SPACE_GROUND.depth % FLOOR_PANEL_SIZE).toBe(0);
-  });
-});
-
-describe("방 높이", () => {
-  it("텍스트 배너 위로 여유를 남긴다", () => {
-    // 천장이 배너를 자르면 광고 지면이 벽에 파묻힌다.
-    const bannerTop =
-      SPACE_WALL_ANCHOR[1] + SPACE_TEXT_BANNER.offset[1] + SPACE_TEXT_BANNER.height / 2;
-
-    expect(SPACE_ROOM_HEIGHT).toBeGreaterThan(bannerTop);
-  });
-
-  it("카메라가 천장 아래에 머문다", () => {
-    // 최대 줌·최저 피치에서 카메라가 12 m 까지 오르므로 상한이 필요하다.
-    expect(SPACE_CAMERA_BOUNDS.maxY).toBeLessThan(SPACE_ROOM_HEIGHT);
-    expect(SPACE_CAMERA_BOUNDS.maxY).toBeGreaterThan(SPACE_WALL_ANCHOR[1]);
-  });
-});
-
-describe("오버레이 표시 상한", () => {
-  it("명찰 거리가 스폰 링 지름을 덮는다", () => {
-    // 링 양쪽에 스폰된 두 사람(최대 28 m)이 서로 이름을 볼 수 있어야 한다.
-    const spawnRingDiameter = SPACE_SPAWN_RING.maxRadius * 2;
-
-    expect(SPACE_OVERLAY_LIMITS.nameplateMaxDistance).toBeGreaterThan(spawnRingDiameter);
-  });
-
-  it("DOM 비용은 개수 상한이 정한다", () => {
-    // 거리를 늘려도 그리는 개수는 그대로다. 성능 가드는 이쪽이다.
-    expect(SPACE_OVERLAY_LIMITS.nameplateMaxCount).toBeLessThanOrEqual(16);
-  });
-
-  it("말풍선은 명찰보다 좁은 범위에 둔다", () => {
-    // 말풍선은 "들리는 거리" 라서 이름표보다 가까워야 한다.
-    expect(SPACE_OVERLAY_LIMITS.bubbleMaxCount).toBeLessThan(
-      SPACE_OVERLAY_LIMITS.nameplateMaxCount,
+  it("축소한 패널이 액자 안쪽 홈을 넘지 않는다", () => {
+    // 넘으면 금장 베벨 위로 글자가 올라타 잘려 보인다.
+    expect(SPACE_BILLBOARD.height * SPACE_SCREEN_SCALE).toBeCloseTo(SPACE_SCREEN_FRAME.height, 6);
+    expect(SPACE_BILLBOARD.width * SPACE_SCREEN_SCALE).toBeLessThanOrEqual(
+      SPACE_SCREEN_FRAME.width,
     );
   });
+
+  it("두 패널이 같은 규격이라 한쪽이 보조처럼 보이지 않는다", () => {
+    expect(SPACE_BLOCK_DASHBOARD.width).toBe(SPACE_BILLBOARD.width);
+    expect(SPACE_BLOCK_DASHBOARD.height).toBe(SPACE_BILLBOARD.height);
+  });
+
+  it("바닥 광원이 패널보다 낮고 광장 안쪽에 있다", () => {
+    SPACE_SCREEN_GLOW_POSITIONS.forEach((glowPosition, index) => {
+      const panel =
+        index === 0
+          ? SPACE_SCREEN_PLACEMENTS.billboard.position
+          : SPACE_SCREEN_PLACEMENTS.blockDashboard.position;
+
+      expect(glowPosition[1]).toBeLessThan(panel[1]);
+      // 패널보다 중심에 가깝다. 뒤에 두면 액자 뒷면만 비춘다.
+      expect(Math.hypot(glowPosition[0], glowPosition[2])).toBeLessThan(
+        Math.hypot(panel[0], panel[2]),
+      );
+    });
+  });
 });
 
-describe("텍스트 배너 배치", () => {
-  const bannerCenterY = toWorldY(SPACE_TEXT_BANNER.offset[1]);
-  const bannerBottom = bannerCenterY - SPACE_TEXT_BANNER.height / 2;
-  const billboardFrameTop = BILLBOARD_CENTER_Y + SPACE_BILLBOARD.frameHeight / 2;
+describe("랜턴 자리", () => {
+  it("맵이 가진 20곳을 그대로 쓴다", () => {
+    const anchors = island.nodes.filter((node) => node.extras?.light_anchor === true);
 
-  it("전광판 프레임 위에 놓인다", () => {
-    expect(bannerBottom).toBeGreaterThan(billboardFrameTop);
-  });
-
-  it("전광판과 맞닿지 않고 간격을 둔다", () => {
-    expect(bannerBottom - billboardFrameTop).toBeGreaterThanOrEqual(0.15);
-  });
-
-  it("전광판 패널과 폭이 같고 프레임 안쪽에 들어온다", () => {
-    expect(SPACE_TEXT_BANNER.width).toBe(SPACE_BILLBOARD.width);
-    expect(SPACE_TEXT_BANNER.width).toBeLessThan(SPACE_BILLBOARD.frameWidth);
-  });
-
-  it("가로가 세로보다 훨씬 길다", () => {
-    expect(SPACE_TEXT_BANNER.width / SPACE_TEXT_BANNER.height).toBeGreaterThan(10);
-  });
-
-  it("전광판 위에 얹히므로 전광판과 가로 중심이 같다", () => {
-    // 중앙선에 두면 전광판에서 떨어져 공중에 뜬 것처럼 보인다.
-    expect(SPACE_TEXT_BANNER.offset[0]).toBe(SPACE_BILLBOARD.offset[0]);
-  });
-
-  it("현황판 프레임과 세로로 겹치지 않는다", () => {
-    const panelTop =
-      toWorldY(SPACE_BLOCK_DASHBOARD.offset[1]) + SPACE_BLOCK_DASHBOARD.frameHeight / 2;
-
-    expect(bannerBottom).toBeGreaterThanOrEqual(panelTop);
+    expect(anchors).toHaveLength(20);
+    // 이름 접두사로 찾으므로 규칙이 깨지면 조명이 통째로 꺼진다.
+    expect(anchors.every((node) => node.name.startsWith("Light_Lantern_"))).toBe(true);
   });
 });

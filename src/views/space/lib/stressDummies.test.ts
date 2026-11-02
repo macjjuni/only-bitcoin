@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SPACE_AVATAR_COLORS, SPACE_BOUNDS, SPACE_MAX_OCCUPANTS } from "@/entities/space";
+import { SPACE_AVATAR_COLORS, SPACE_ISLAND, SPACE_MAX_OCCUPANTS } from "@/entities/space";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 
 describe("createStressDummies", () => {
@@ -45,23 +45,28 @@ describe("createStressDummies", () => {
       ...dummies.map(({ orbitCenterX }) => Math.abs(orbitCenterX - averageX)),
     );
 
-    expect(spreadX).toBeGreaterThan(8);
+    expect(spreadX).toBeGreaterThan(5);
   });
 });
 
 describe("advanceStressDummies", () => {
-  it("어느 시점에서도 이동 경계를 벗어나지 않는다", () => {
+  it("어느 시점에서도 광장 밖으로 나가지 않는다", () => {
+    // 더미는 지형을 보지 않는다. 광장 밖으로 나가면 원형극장 계단이나 바다에
+    // 떠서, 재려던 렌더 비용 대신 프러스텀 컬링 결과를 재게 된다.
     const dummies = createStressDummies(SPACE_MAX_OCCUPANTS);
 
     for (const elapsedSeconds of [0, 0.5, 3, 17, 120]) {
       advanceStressDummies(dummies, elapsedSeconds);
 
       for (const dummy of dummies) {
-        expect(dummy.x).toBeGreaterThanOrEqual(SPACE_BOUNDS.minX);
-        expect(dummy.x).toBeLessThanOrEqual(SPACE_BOUNDS.maxX);
-        expect(dummy.z).toBeGreaterThanOrEqual(SPACE_BOUNDS.minZ);
-        expect(dummy.z).toBeLessThanOrEqual(SPACE_BOUNDS.maxZ);
+        expect(Math.hypot(dummy.x, dummy.z)).toBeLessThanOrEqual(12 + 1e-9);
       }
+    }
+  });
+
+  it("광장 바닥 높이에 선다", () => {
+    for (const dummy of createStressDummies(SPACE_MAX_OCCUPANTS)) {
+      expect(dummy.y).toBe(SPACE_ISLAND.plazaY);
     }
   });
 

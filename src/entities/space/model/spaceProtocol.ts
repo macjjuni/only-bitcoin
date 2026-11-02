@@ -1,8 +1,20 @@
 import { isAvatarModelIndex, SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "./avatarModel";
 import type { PlayerTransform, RemotePlayer } from "./playerState";
-import { SPACE_MAX_JUMP_HEIGHT, SPACE_MAX_OCCUPANTS } from "./spaceWorld";
+import { SPACE_MAX_ALTITUDE, SPACE_MAX_OCCUPANTS } from "./spaceWorld";
 
-export const SPACE_PROTOCOL_VERSION = 1;
+/**
+ * 프레임 버전.
+ *
+ * 맵이 벙커에서 섬으로 바뀌면서 **`y` 의 의미와 범위가 달라졌다.** 벙커의
+ * `y` 는 평평한 바닥 위 점프 높이(0 ~ 2.5 m)였고 스냅샷에 1바이트로 담겼다.
+ * 섬의 `y` 는 층이 다른 지면의 절대 높이(0 ~ 36 m)이고 2바이트가 필요하다.
+ *
+ * 1 을 그대로 두면 옛 서버가 보낸 "점프 높이 2.0" 을 새 클라이언트가 "해발
+ * 2.0 m" 로 읽어 광장 아래에 선 사람이 생긴다. 호환이 불가능한 변경이므로
+ * 버전을 올려 **서로를 거절하게** 한다. 배포는 원자적이지 않으니 워커를 먼저
+ * 올리고 웹을 올린다.
+ */
+export const SPACE_PROTOCOL_VERSION = 2;
 export const SPACE_NETWORK_INTERVAL_MS = 100;
 export const SPACE_CHAT_COOLDOWN_MS = 3_000;
 export const SPACE_CHAT_MAX_GRAPHEMES = 100;
@@ -33,20 +45,42 @@ export interface SpaceMotionSnapshot {
   players: SpaceMotion[];
 }
 
+/**
+ * 프레임의 버전 칸.
+ *
+ * 숫자를 직접 쓰지 않는다. 전에는 양쪽 유니온과 호출부 40여 곳이 `v: 1` 을
+ * 각자 들고 있어서, 버전을 올리려면 그 전부를 찾아 고쳐야 했다.
+ */
+type SpaceProtocolVersion = typeof SPACE_PROTOCOL_VERSION;
+
 export type SpaceClientFrame =
-  | { v: 1; t: "join"; clientKey: string; nickname: string; modelIndex?: number }
-  | { v: 1; t: "move"; x: number; y: number; z: number; yaw: number; isRunning: boolean }
-  | { v: 1; t: "say"; rid: string; body: string }
-  | { v: 1; t: "nick"; rid: string; nickname: string }
-  | { v: 1; t: "model"; rid: string; modelIndex: number };
+  | {
+      v: SpaceProtocolVersion;
+      t: "join";
+      clientKey: string;
+      nickname: string;
+      modelIndex?: number;
+    }
+  | {
+      v: SpaceProtocolVersion;
+      t: "move";
+      x: number;
+      y: number;
+      z: number;
+      yaw: number;
+      isRunning: boolean;
+    }
+  | { v: SpaceProtocolVersion; t: "say"; rid: string; body: string }
+  | { v: SpaceProtocolVersion; t: "nick"; rid: string; nickname: string }
+  | { v: SpaceProtocolVersion; t: "model"; rid: string; modelIndex: number };
 
 export type SpaceServerFrame =
-  | { v: 1; t: "welcome"; self: SpacePeer; peers: SpacePeer[] }
-  | { v: 1; t: "peer"; peer: SpacePeer }
-  | { v: 1; t: "leave"; seat: number }
-  | { v: 1; t: "say"; message: SpaceChatMessage }
-  | { v: 1; t: "error"; code: string; message: string; rid?: string }
-  | { v: 1; t: "full" };
+  | { v: SpaceProtocolVersion; t: "welcome"; self: SpacePeer; peers: SpacePeer[] }
+  | { v: SpaceProtocolVersion; t: "peer"; peer: SpacePeer }
+  | { v: SpaceProtocolVersion; t: "leave"; seat: number }
+  | { v: SpaceProtocolVersion; t: "say"; message: SpaceChatMessage }
+  | { v: SpaceProtocolVersion; t: "error"; code: string; message: string; rid?: string }
+  | { v: SpaceProtocolVersion; t: "full" };
 
 const CLIENT_FRAME_MAX_BYTES = 8 * 1024;
 const SERVER_FRAME_MAX_BYTES = 64 * 1024;
@@ -85,10 +119,11 @@ const isTransform = (value: Record<string, unknown>): boolean => {
     isFiniteNumber(value.z) &&
     value.z >= -327.68 &&
     value.z <= 327.67 &&
-    // 바닥은 평평하다. 점프로 닿을 수 있는 높이만 허용한다.
+    // 섬은 층이 여러 개라 `y` 가 절대 높이다. 서버는 지형을 모르므로 섬 전체를
+    // 덮는 상한만 본다 — 층별 판정은 클라이언트의 지형 충돌이 한다.
     isFiniteNumber(value.y) &&
     value.y >= 0 &&
-    value.y <= SPACE_MAX_JUMP_HEIGHT &&
+    value.y <= SPACE_MAX_ALTITUDE &&
     isFiniteNumber(value.yaw)
   );
 };
