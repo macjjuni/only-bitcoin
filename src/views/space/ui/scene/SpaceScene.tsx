@@ -28,6 +28,7 @@ import {
   applyCameraDrag,
   applyCameraZoom,
   applyKeyboardYaw,
+  approachCollisionDistance,
   type CameraOrbit,
   consumePendingDrag,
   consumePendingZoom,
@@ -128,6 +129,13 @@ function SpaceScene({
   /** 카메라 충돌용. 지형과 달리 평지 대체본이 없어 도착 전에는 건너뛴다. */
   const islandTerrainRef = useRef<IslandTerrain | null>(null);
   /**
+   * 지형이 허용하는 카메라 거리 상한. 막히면 즉시 줄고 풀리면 천천히 는다.
+   *
+   * 최대 거리로 시작한다. 0 으로 두면 첫 프레임에 카메라가 머리에 붙었다가
+   * 밀려 나오는 것이 보인다.
+   */
+  const allowedCameraDistanceRef = useRef<number>(SPACE_CAMERA.maxDistance);
+  /**
    * 랜턴 자리.
    *
    * 조명 컴포넌트가 `props` 로 받아야 해서 여기서는 상태로 둔다. 맵이 도착할
@@ -147,6 +155,8 @@ function SpaceScene({
     playerStateRef.current = createLocalPlayerState(peer);
     accumulatedSecondsRef.current = 0;
     smoothedCameraRef.current = resolveCameraPosition(peer, cameraOrbitRef.current);
+    // 순간이동 뒤에는 옛 상한에서 천천히 풀릴 이유가 없다.
+    allowedCameraDistanceRef.current = SPACE_CAMERA.maxDistance;
     playerGroupRef.current?.position.set(peer.x, peer.y, peer.z);
     playerGroupRef.current?.rotation.set(0, peer.yaw, 0);
   }, []);
@@ -220,6 +230,7 @@ function SpaceScene({
     accumulatedSecondsRef.current = 0;
     cameraOrbitRef.current = { ...cameraOrbitRef.current, yaw: spawnTransform.yaw };
     smoothedCameraRef.current = resolveCameraPosition(spawnTransform, cameraOrbitRef.current);
+    allowedCameraDistanceRef.current = SPACE_CAMERA.maxDistance;
     applyPlayerTransform(respawned);
 
     return respawned;
@@ -230,15 +241,53 @@ function SpaceScene({
    *
    * 감쇠 **뒤에** 건다. 감쇠 전에 걸면 목표만 당겨지고 실제 카메라는 한 박자
    * 늦게 따라와서, 벽에 붙는 순간 한 프레임 동안 벽 안이 보인다.
+   *
+   * 지형이 허용하는 **거리 상한**을 따로 들고 비대칭으로 따라간다. 당길 때는
+   * 즉시, 풀 때는 감쇠다. 광장 소품 옆을 지날 때 카메라가 튕기는 것이
+   * 멀미의 주범이라 푸는 쪽만 늦춘다. 사용자가 줌을 바꾼 거리는 이 상한과
+   * 무관하게 `Math.min` 으로 그대로 반영된다 — 상한에 감쇠를 걸었다고
+   * 줌아웃까지 늦어지면 조작이 둔해진다.
    */
-  const resolveSafeCameraPosition = (focus: Vector3Like, position: Vector3Like): Vector3Like => {
-    return (
+  const resolveSafeCameraPosition = (
+    focus: Vector3Like,
+    position: Vector3Like,
+    deltaSeconds: number,
+  ): Vector3Like => {
+    const offsetX = position.x - focus.x;
+    const offsetY = position.y - focus.y;
+    const offsetZ = position.z - focus.z;
+    const desiredDistance = Math.hypot(offsetX, offsetY, offsetZ);
+
+    if (desiredDistance < 1e-3) {
+      return position;
+    }
+
+    const blocked =
       islandTerrainRef.current?.resolveCameraPosition(
         focus,
         position,
         SPACE_CAMERA.boundaryMargin,
-      ) ?? position
+      ) ?? position;
+    const blockedDistance = Math.hypot(
+      blocked.x - focus.x,
+      blocked.y - focus.y,
+      blocked.z - focus.z,
     );
+    const allowedDistance = approachCollisionDistance(
+      allowedCameraDistanceRef.current,
+      blockedDistance,
+      deltaSeconds,
+    );
+
+    allowedCameraDistanceRef.current = allowedDistance;
+
+    const scale = Math.min(desiredDistance, allowedDistance) / desiredDistance;
+
+    return {
+      x: focus.x + offsetX * scale,
+      y: focus.y + offsetY * scale,
+      z: focus.z + offsetZ * scale,
+    };
   };
   // endregion
 
@@ -306,7 +355,7 @@ function SpaceScene({
     );
     smoothedCameraRef.current = dampedPosition;
 
-    const safePosition = resolveSafeCameraPosition(focus, dampedPosition);
+    const safePosition = resolveSafeCameraPosition(focus, dampedPosition, deltaSeconds);
     camera.position.set(safePosition.x, safePosition.y, safePosition.z);
     camera.lookAt(focus.x, focus.y, focus.z);
   }, -1);

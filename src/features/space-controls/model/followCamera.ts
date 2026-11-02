@@ -45,6 +45,17 @@ export const SPACE_CAMERA = {
    * 두면 근평면(0.1)이 벽을 파고들어 벽 너머가 비친다.
    */
   boundaryMargin: 0.4,
+  /**
+   * 지형에 막혔다 풀릴 때 거리를 되돌리는 감쇠 계수.
+   *
+   * 당기는 쪽은 감쇠하지 않는다 — 한 프레임이라도 늦으면 벽 너머가 비친다.
+   * 푸는 쪽만 늦춘다. 광장은 화분·벚나무·기둥이 촘촘해서 그 옆을 지날 때마다
+   * 카메라가 즉시 들어왔다 즉시 나가는데, 그 **튕김이 멀미를 만든다.**
+   *
+   * 8 이면 0.12 초, 4 면 0.25 초쯤 걸려 제자리로 간다. 너무 낮추면 소품을
+   * 지나친 뒤에도 카메라가 한참 가까이 붙어 있어 답답하다.
+   */
+  collisionReleaseDamping: 6,
 } as const;
 
 /** 카메라가 바라보는 지점의 높이. 아바타 머리(약 1.81) 근처다. */
@@ -192,6 +203,28 @@ export const resolveFollowDamping = (prefersReducedMotion: boolean): number => {
   return prefersReducedMotion
     ? SPACE_CAMERA.reducedMotionFollowDamping
     : SPACE_CAMERA.followDamping;
+};
+
+/**
+ * 지형이 허용하는 카메라 거리 상한을 **비대칭**으로 따라간다.
+ *
+ * 상한이 줄면(벽에 가까워지면) 그 값을 즉시 받아들이고, 늘면(벽에서 멀어지면)
+ * 감쇠하며 천천히 되돌린다. 양쪽 다 즉시면 소품 옆을 지날 때 카메라가 툭툭
+ * 튀고, 양쪽 다 감쇠하면 벽에 붙는 순간 한 프레임 동안 벽 안이 보인다.
+ */
+export const approachCollisionDistance = (
+  current: number,
+  target: number,
+  deltaSeconds: number,
+): number => {
+  if (target <= current) {
+    return target;
+  }
+
+  return (
+    current +
+    (target - current) * resolveDampFactor(SPACE_CAMERA.collisionReleaseDamping, deltaSeconds)
+  );
 };
 
 /** 현재 위치를 목표 위치로 감쇠 이동시킨 결과. */

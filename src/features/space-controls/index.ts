@@ -3,6 +3,7 @@ export {
   applyCameraDrag,
   applyCameraZoom,
   applyKeyboardYaw,
+  approachCollisionDistance,
   type CameraOrbit,
   clampCameraDistance,
   clampCameraPitch,

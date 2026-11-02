@@ -4,6 +4,7 @@ import {
   applyCameraDrag,
   applyCameraZoom,
   applyKeyboardYaw,
+  approachCollisionDistance,
   clampCameraDistance,
   clampCameraPitch,
   clampCameraPosition,
@@ -276,6 +277,33 @@ describe("회전 입력이 거리를 보존한다", () => {
     const orbit = { yaw: 0, pitch: SPACE_CAMERA.defaultPitch, distance: 14 };
 
     expect(applyKeyboardYaw(orbit, 1, 0.5).distance).toBe(14);
+  });
+});
+
+describe("approachCollisionDistance", () => {
+  it("상한이 줄면 즉시 받아들인다", () => {
+    // 한 프레임이라도 늦으면 카메라가 벽 안에 남아 벽 너머가 비친다.
+    expect(approachCollisionDistance(11, 3, 1 / 60)).toBe(3);
+  });
+
+  it("상한이 늘면 감쇠하며 천천히 되돌린다", () => {
+    // 소품 옆을 지날 때 즉시 되돌리면 카메라가 튕기고, 그게 멀미를 만든다.
+    const next = approachCollisionDistance(3, 11, 1 / 60);
+
+    expect(next).toBeGreaterThan(3);
+    expect(next).toBeLessThan(11);
+  });
+
+  it("되돌아가는 속도가 프레임레이트에 무관하다", () => {
+    // 60fps 두 번과 30fps 한 번이 같은 거리에 도달해야 한다.
+    const at60 = approachCollisionDistance(approachCollisionDistance(3, 11, 1 / 60), 11, 1 / 60);
+    const at30 = approachCollisionDistance(3, 11, 1 / 30);
+
+    expect(at60).toBeCloseTo(at30, 6);
+  });
+
+  it("상한이 같으면 움직이지 않는다", () => {
+    expect(approachCollisionDistance(7, 7, 1 / 60)).toBe(7);
   });
 });
 
