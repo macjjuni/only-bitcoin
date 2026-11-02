@@ -22,7 +22,7 @@ import {
 /**
  * 아바타 모델 로더.
  *
- * 원본은 `public/models/voxel-*.blend` 이고,
+ * 원본은 `assets/avatars/voxel-*.blend` 이고,
  * `scripts/blender/process-voxel-character.py` 가 인스턴싱 가능한 형태로 가공한다.
  * 원본은 메시가 부위마다 쪼개져 있고 스킨이 붙어 있어, 그대로 쓰면 아바타 한
  * 명이 드로우 콜 수십 개를 쓴다.

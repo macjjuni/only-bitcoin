@@ -12,13 +12,16 @@
   <prefix>-walk.bin   Walk 한 사이클의 본 스키닝 행렬(Float32)
 
 실행 — `<prefix>`, 색을 받을 메시, 발광시킬 눈동자 메시를 쉼표로 구분해 넘긴다
-  blender --background public/models/voxel-crew.blend \
+  blender --background assets/avatars/voxel-crew.blend \
       --python scripts/blender/process-voxel-character.py -- public/models crew
-  blender --background public/models/voxel-bear.blend \
+  blender --background assets/avatars/voxel-bear.blend \
       --python scripts/blender/process-voxel-character.py -- public/models bear
-  blender --background public/models/voxel-bull.blend \
+  blender --background assets/avatars/voxel-bull.blend \
       --python scripts/blender/process-voxel-character.py -- public/models bull \
       burgundy_waistcoat_front l_bull_eye_dark_pixel,r_bull_eye_dark_pixel
+
+편집 원본(`.blend`, 변형 `.glb`)은 `assets/avatars/` 에 있고 런타임은 읽지
+않는다. `public/` 에 두면 4 MB 가 아무도 안 받는 채로 배포된다.
 """
 import bpy
 import math

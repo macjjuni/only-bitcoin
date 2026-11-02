@@ -11,9 +11,12 @@ import struct
 from pathlib import Path
 
 
-MODELS = Path(__file__).resolve().parents[2] / "public" / "models"
-SOURCE = MODELS / "voxel-crew.glb"
-LASER = MODELS / "voxel-crew-laser-eyes-soft.glb"
+ROOT = Path(__file__).resolve().parents[2]
+# 편집 원본은 런타임이 읽지 않는다. `public/` 에 두면 4 MB 가 그대로 배포된다.
+SOURCES = ROOT / "assets" / "avatars"
+MODELS = ROOT / "public" / "models"
+SOURCE = SOURCES / "voxel-crew.glb"
+LASER = SOURCES / "voxel-crew-laser-eyes-soft.glb"
 RUNTIME = MODELS / "crew.glb"
 EYE_NAMES = (
     "L_Eye_Dark_Pixel_mesh",
