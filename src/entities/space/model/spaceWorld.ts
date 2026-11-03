@@ -243,14 +243,21 @@ export const SPACE_TEXT_BANNER = {
 /** 명찰·말풍선 표시 상한. 인원 비례가 아니라 DOM 렌더 비용의 상한이다. */
 export const SPACE_OVERLAY_LIMITS = {
   /**
-   * 명찰 표시 거리.
+   * 명찰 표시 거리. **맵 대각선이라 사실상 제한이 없다.**
    *
-   * 스폰 링 지름(18 m)에 여유를 더하고, 광장에서 궁전 단까지(약 38 m) 올려다볼
-   * 때도 이름이 보이도록 잡는다. DOM 비용을 정하는 것은 거리가 아니라
-   * `nameplateMaxCount` 다 — 가까운 순으로 16개만 그리므로 거리를 늘려도
-   * 노드 수는 그대로다.
+   * 44 m 였다. 광장에서 궁전 단까지(약 38 m)를 기준으로 잡은 값인데, 섬은
+   * 대각선이 108 m 다. 원평면이 420 m 라 멀리 있는 사람의 아바타는 그려지므로
+   * **"사람은 보이는데 이름만 없는"** 상태가 됐다. 반대쪽 끝에 있을 때 누가
+   * 스폰 링에 들어오면 매번 그랬다.
+   *
+   * DOM 비용을 정하는 것은 거리가 아니라 `nameplateMaxCount` 다 — 가까운 순으로
+   * 16개만 그리므로 거리를 늘려도 노드 수는 그대로다. 멀리 있는 명찰은
+   * `distanceFactor` 가 거리에 비례해 줄여 주므로 가까운 이름을 가리지도 않는다.
    */
-  nameplateMaxDistance: 44,
+  nameplateMaxDistance: Math.hypot(
+    SPACE_BOUNDS.maxX - SPACE_BOUNDS.minX,
+    SPACE_BOUNDS.maxZ - SPACE_BOUNDS.minZ,
+  ),
   nameplateMaxCount: 16,
   bubbleMaxCount: 12,
   bubbleTtlMs: 5_000,
