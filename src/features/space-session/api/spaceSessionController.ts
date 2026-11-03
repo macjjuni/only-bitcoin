@@ -79,6 +79,23 @@ const heartbeatIntervalMs = 15_000;
 const heartbeatTimeoutMs = 45_000;
 const connectionTimeoutMs = 10_000;
 const messageTimeoutMs = 10_000;
+/**
+ * 업그레이드 한도를 넘겼다고 서버가 알려주는 종료 코드.
+ *
+ * 핸드셰이크 429는 브라우저가 JS 에 숨기므로 Worker 가 101 로 받은 뒤 이 코드로
+ * 닫는다. 영구 오류가 아니다 — 창이 지나면 다시 들어갈 수 있다.
+ */
+const rateLimitCloseCode = 4010;
+/** 한도를 맞은 뒤 쉬는 시간. 서버 리미터 창(60초)과 같게 둔다. */
+const rateLimitCooldownMs = 60_000;
+/**
+ * 수동 재시도의 최소 간격.
+ *
+ * 재시도 버튼은 백오프를 0으로 되돌리고 바로 올라간다. 연타하면 그대로
+ * 업그레이드 요청이 되어 IP당 30회/60초 한도를 태우고, 거절된 요청도 창에
+ * 쌓이므로 눌러서 고치려는 행동이 장애를 분 단위로 늘린다.
+ */
+const retryThrottleMs = 5_000;
 const maximumBufferedBytes = 16_384;
 const maximumMessageCount = 100;
 const fullTurn = Math.PI * 2;
@@ -148,6 +165,8 @@ export class SpaceSessionController {
   private latestMovement: MovementFrame | null = null;
   private lastSentMovement: MovementFrame | null = null;
   private lastMovementSentAt = Number.NEGATIVE_INFINITY;
+  private lastRetryAt = Number.NEGATIVE_INFINITY;
+  private rateLimitedUntil = 0;
   private lastReceivedAt = 0;
   private snapshot: SpaceSessionSnapshot = {
     presence: createOfflinePresence(),
@@ -204,11 +223,29 @@ export class SpaceSessionController {
   }
 
   retry = (): void => {
+    const now = this.options.now();
+
+    if (now - this.lastRetryAt < retryThrottleMs) {
+      return;
+    }
+    this.lastRetryAt = now;
     this.isRetryStopped = false;
     this.retryAttempt = 0;
     this.clearReconnectTimer();
     this.detachSocket();
     this.clearRoster();
+
+    // 한도를 맞은 직후라면 눌러도 올라가지 않는다. 다시 때리면 창만 길어진다.
+    if (now < this.rateLimitedUntil) {
+      this.updateSnapshot({
+        presence: createOfflinePresence(),
+        self: null,
+        error: "접속 요청이 많아요. 잠시 뒤 자동으로 다시 연결합니다.",
+      });
+      this.scheduleReconnect();
+      return;
+    }
+
     this.connect();
   };
 
@@ -404,6 +441,12 @@ export class SpaceSessionController {
       return;
     }
 
+    // 탭 복귀처럼 백오프를 거치지 않는 경로도 쉬는 시간은 지켜야 한다.
+    if (this.options.now() < this.rateLimitedUntil) {
+      this.scheduleReconnect();
+      return;
+    }
+
     if (!this.options.webSocketUrl) {
       this.updateSnapshot({
         presence: createOfflinePresence(),
@@ -456,6 +499,11 @@ export class SpaceSessionController {
       }
 
       const closeCode = (event as CloseEvent).code;
+      if (closeCode === rateLimitCloseCode) {
+        this.rateLimitedUntil = this.options.now() + rateLimitCooldownMs;
+        this.handleDisconnected("접속 요청이 많아요. 잠시 뒤 자동으로 다시 연결합니다.");
+        return;
+      }
       if (permanentCloseCodes.has(closeCode)) {
         this.stopAutomaticRetry(
           closeCode === 4001
@@ -512,6 +560,7 @@ export class SpaceSessionController {
       case "welcome": {
         this.clearConnectionTimer();
         this.retryAttempt = 0;
+        this.rateLimitedUntil = 0;
         this.peers.clear();
         const peers = frame.peers.filter((peer) => peer.seat !== frame.self.seat);
         peers.forEach((peer) => {
@@ -759,7 +808,9 @@ export class SpaceSessionController {
     const exponent = Math.min(this.retryAttempt, 5);
     const baseDelayMs = Math.min(1_000 * 2 ** exponent, 30_000);
     const randomValue = Math.min(Math.max(this.options.random(), 0), 1);
-    const delayMs = Math.min(Math.round(baseDelayMs * (0.75 + randomValue * 0.5)), 30_000);
+    const backoffDelayMs = Math.min(Math.round(baseDelayMs * (0.75 + randomValue * 0.5)), 30_000);
+    // 쉬는 시간이 남아 있으면 백오프보다 그쪽을 따른다. 먼저 올라가면 창만 길어진다.
+    const delayMs = Math.max(backoffDelayMs, this.rateLimitedUntil - this.options.now());
     this.retryAttempt += 1;
     this.reconnectTimer = setTimeout(() => {
       this.reconnectTimer = null;

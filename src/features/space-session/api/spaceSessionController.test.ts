@@ -428,6 +428,42 @@ describe("SpaceSessionController", () => {
     controller.stop();
   });
 
+  it("업그레이드 한도 close code는 쉬는 시간이 지난 뒤에만 다시 올라간다", () => {
+    const { controller, sockets, welcome } = createHarness();
+    controller.start();
+    welcome().emitClose(4010);
+    expect(controller.getSnapshot().error).toContain("접속 요청이 많아요");
+
+    // 백오프(최대 30초)가 먼저 깨워도 창이 남아 있는 동안은 소켓을 만들지 않는다.
+    vi.advanceTimersByTime(59_000);
+    expect(sockets).toHaveLength(1);
+    // 창이 남아 있으면 재시도 버튼도 올라가지 않는다. 다시 때리면 창만 길어진다.
+    controller.retry();
+    expect(sockets).toHaveLength(1);
+
+    vi.advanceTimersByTime(2_000);
+    expect(sockets).toHaveLength(2);
+    controller.stop();
+  });
+
+  it("재시도 연타는 최소 간격 안에서 업그레이드 요청이 되지 않는다", () => {
+    const { controller, sockets, welcome } = createHarness();
+    controller.start();
+    welcome().emitClose(1006);
+    expect(sockets).toHaveLength(1);
+
+    controller.retry();
+    expect(sockets).toHaveLength(2);
+    controller.retry();
+    controller.retry();
+    expect(sockets).toHaveLength(2);
+
+    vi.advanceTimersByTime(5_000);
+    controller.retry();
+    expect(sockets).toHaveLength(3);
+    controller.stop();
+  });
+
   it("메시지는 최신 100개만 보존하고 중복 echo를 중복 표시하지 않는다", () => {
     const { controller, welcome } = createHarness();
     controller.start();

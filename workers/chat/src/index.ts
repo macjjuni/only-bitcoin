@@ -122,6 +122,25 @@ const handleOnlineRequest = async (
   }
 };
 
+/**
+ * 업그레이드 한도를 넘긴 연결을 닫는 코드.
+ *
+ * 핸드셰이크 단계의 429와 `Retry-After` 는 브라우저가 JS 에 전달하지 않는다.
+ * 클라이언트는 그냥 "연결 실패" 로 보고 1초 뒤에 다시 올라오고, 리미터는 거절한
+ * 요청도 창에 쌓으므로 락아웃이 스스로 길어진다. 101 로 받은 뒤 전용 코드로
+ * 닫으면 사유가 `CloseEvent.code` 로 전달되어 클라이언트가 대기로 전환할 수 있다.
+ */
+const RATE_LIMIT_CLOSE_CODE = 4010;
+
+/** 핸드셰이크는 성공시키고 즉시 닫아 거절 사유만 전달한다. 방까지 올려보내지 않는다. */
+const createRateLimitedSocketResponse = (): Response => {
+  const pair = new WebSocketPair();
+  pair[1].accept();
+  pair[1].close(RATE_LIMIT_CLOSE_CODE, "upgrade rate limit");
+
+  return new Response(null, { status: 101, webSocket: pair[0] });
+};
+
 const handleWebSocketUpgrade = async (
   request: Request,
   workerEnv: ChatWorkerEnv,
@@ -143,7 +162,7 @@ const handleWebSocketUpgrade = async (
   });
 
   if (!rateLimitResult.success) {
-    return new Response(null, { status: 429, headers: { "Retry-After": "60" } });
+    return createRateLimitedSocketResponse();
   }
 
   const forwardedHeaders = new Headers(request.headers);

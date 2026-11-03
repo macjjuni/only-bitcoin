@@ -19,7 +19,7 @@ NEXT_PUBLIC_CHAT_WS_URL=ws://localhost:8787/v1/chat/ws
 NEXT_PUBLIC_GOOGLE_OAUTH_CLIENT_ID=replace-with-google-oauth-client-id.apps.googleusercontent.com
 ```
 
-다른 터미널에서 `pnpm dev`를 실행하고 `http://localhost:3002/space`를 일반 창과 시크릿 창에서 엽니다. 같은 일반 브라우저의 탭끼리는 identity를 공유하므로 로컬에서는 앞 탭의 연결이 교체됩니다. 운영에서는 IP당 1개 연결 제한이 먼저 적용되어 기존 연결을 닫은 뒤 새 탭이 접속할 수 있습니다.
+다른 터미널에서 `pnpm dev`를 실행하고 `http://localhost:3002/space`를 일반 창과 시크릿 창에서 엽니다. 같은 일반 브라우저의 탭끼리는 identity를 공유하므로 로컬에서는 앞 탭의 연결이 교체됩니다. 운영에서는 IP당 2개 연결 제한이 적용되고, 같은 identity의 두 번째 연결은 입장할 때 앞 연결을 닫고 좌석을 물려받습니다.
 
 두 서버를 실행해도 재연결이 반복되면 Worker 터미널에서 비밀키 누락 오류를 먼저 확인합니다. `IP_GUARD_SECRET`이 없으면 WebSocket 업그레이드 전에 HMAC 오류가 나고, `ENFORCEMENT_SECRET`이 없으면 입장을 완료하지 못합니다. `pnpm chat:dev`를 다시 실행하면 누락된 로컬 키가 준비됩니다.
 
@@ -45,7 +45,7 @@ Durable Object는 `apac-ne` 위치 힌트로 생성되며, `wrangler.jsonc`의 S
 ## 공간 연결·비용 구조
 
 - 좌석은 50개입니다. 서버가 좌석·아바타 색·초기 위치를 배정하고, 접속 중인 같은 clientKey가 재접속하면 기존 좌석·위치를 새 소켓에 넘깁니다. 구소켓에는 `SESSION_REPLACED`와 close `4001`을 보내므로 클라이언트는 자동 재접속을 중단해야 합니다.
-- 입장 대기는 최대 10개, 전체 소켓은 최대 60개, 공간 IP guard별 연결은 운영에서 1개입니다. 로컬 `localhost`/`127.0.0.1` Worker는 `.dev.vars`의 `SPACE_DISABLE_IP_CONNECTION_LIMIT=true`일 때만 IP 연결 제한을 해제합니다. 입장 프레임을 10초 안에 보내지 않으면 종료합니다. 두 경로 모두 기존 Origin allowlist와 IP upgrade limiter(경로별 30회/60초)를 통과해야 합니다.
+- 입장 대기는 최대 10개, 전체 소켓은 최대 60개, 공간 IP guard별 연결은 운영에서 2개입니다(재접속이 자기 자신의 죽은 소켓에 막히지 않게 1이 아니라 2입니다). 로컬 `localhost`/`127.0.0.1` Worker는 `.dev.vars`의 `SPACE_DISABLE_IP_CONNECTION_LIMIT=true`일 때만 IP 연결 제한을 해제합니다. 입장 프레임을 10초 안에 보내지 않으면 종료합니다. 두 경로 모두 기존 Origin allowlist와 IP upgrade limiter(경로별 30회/60초)를 통과해야 합니다. 한도를 넘긴 업그레이드는 429가 아니라 101로 받은 뒤 close `4010`으로 닫습니다 — 핸드셰이크 429는 브라우저가 JS에 전달하지 않아 클라이언트가 사유를 모르고 바로 다시 올라오고, 리미터는 거절한 요청도 창에 쌓으므로 락아웃이 스스로 길어집니다. `4010`을 받은 클라이언트는 60초를 쉽니다.
 - 클라이언트는 15초마다 JSON이 아닌 원문 `ping`을 보내고 원문 `pong`을 처리합니다. `setWebSocketAutoResponse`가 유휴 ping에 응답하므로 이 keepalive는 공간 DO를 깨우지 않습니다.
 - 이동이 들어오면 변경 좌석만 모아 100ms 후 바이너리 프레임 한 장으로 전원에게 보냅니다. 프레임 하나는 헤더 8B + 좌석당 7B이며 최대 358B입니다. 변경분이 없으면 타이머·스냅샷·SQL 쓰기가 없습니다. 입장·퇴장·말풍선은 JSON 이벤트입니다.
 - 연결 메타데이터와 최종 위치는 `serializeAttachment`로 보관하고 hibernation 복귀 때 roster를 복원합니다. 채팅 본문은 attachment에도 저장하지 않으며 이전 말풍선을 재생하지 않습니다.

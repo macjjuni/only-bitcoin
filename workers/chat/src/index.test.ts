@@ -63,13 +63,32 @@ describe("space WebSocket ingress", () => {
     expect(ingress.rateLimit).not.toHaveBeenCalled();
   });
 
-  it("30/min IP upgrade 제한을 통과하지 못하면 429로 종료한다", async () => {
+  it("30/min IP upgrade 제한을 통과하지 못하면 101로 받은 뒤 4010으로 닫는다", async () => {
+    const serverSocket = { accept: vi.fn(), close: vi.fn() };
+    const clientSocket = { side: "client" };
+    vi.stubGlobal("WebSocketPair", function WebSocketPairStub() {
+      return { 0: clientSocket, 1: serverSocket };
+    });
+    // Node 의 Response 는 101 을 만들지 못한다. 핸드셰이크 응답만 가짜로 받는다.
+    const NativeResponse = Response;
+    vi.stubGlobal(
+      "Response",
+      function ResponseStub(body: BodyInit | null, init: ResponseInit & { webSocket?: unknown }) {
+        return init?.status === 101
+          ? { status: 101, webSocket: init.webSocket }
+          : new NativeResponse(body, init);
+      },
+    );
+
     const ingress = createIngress(false);
     const response = await ingress.fetch(ingress.request("/v1/space/ws"));
 
-    expect(response.status).toBe(429);
-    expect(response.headers.get("Retry-After")).toBe("60");
+    expect(response.status).toBe(101);
+    expect(response.webSocket).toBe(clientSocket);
+    expect(serverSocket.accept).toHaveBeenCalledOnce();
+    expect(serverSocket.close).toHaveBeenCalledWith(4010, "upgrade rate limit");
     expect(ingress.spaceFetch).not.toHaveBeenCalled();
+    vi.unstubAllGlobals();
   });
 
   it("원본 IP와 위조 guard 헤더를 제거하고 서버에서 만든 guard만 전달한다", async () => {

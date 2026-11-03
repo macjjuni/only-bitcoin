@@ -444,9 +444,10 @@ describe("SpaceRoom", () => {
     expect(state.sockets).toHaveLength(10);
   });
 
-  it("입장 완료된 소켓도 같은 IP guard의 1개 연결 상한에 포함한다", async () => {
+  it("입장 완료된 소켓도 같은 IP guard의 2개 연결 상한에 포함한다", async () => {
     const { room, join } = createRoom();
     await join(clientKey(1));
+    await join(clientKey(2));
     const response = await room.fetch(
       new Request("https://worker.test/v1/space/ws", {
         headers: { Upgrade: "websocket", "X-Chat-IP-Guard-Key": "test-ip" },
