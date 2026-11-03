@@ -191,9 +191,12 @@ function RemoteAvatarGroup({ model, players, terrainRef }: RemoteAvatarGroupProp
       accentMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
       pupilGlintMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
 
-      // 그림자 평면은 눕혀야 하므로 회전을 따로 준다.
+      // 그림자 평면은 눕혀야 하므로 회전을 따로 준다. 높이는 **발밑 기준**이다.
+      // 상수만 넣으면 바닥이 0 이던 벙커 기준이 되어, 광장(5)·테라스(7.5)·궁전(11)
+      // 에 선 사람의 그림자가 저 아래 해수면에 깔린다. 로컬 아바타는 그림자가
+      // 플레이어 그룹 안에 있어 자연히 발밑을 따라간다(`PlayerAvatar`).
       transformProxy.rotation.set(-Math.PI / 2, 0, 0);
-      transformProxy.position.set(player.x, SHADOW_LIFT_Y, player.z);
+      transformProxy.position.set(player.x, player.y + SHADOW_LIFT_Y, player.z);
       transformProxy.updateMatrix();
       shadowMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
     });
