@@ -428,7 +428,11 @@ function SpaceScene({
         />
       </group>
 
-      <RemoteAvatars players={remotePlayers} rosterRevision={session.rosterRevision} />
+      <RemoteAvatars
+        players={remotePlayers}
+        rosterRevision={session.rosterRevision}
+        terrainRef={terrainRef}
+      />
       <Nameplates
         players={remotePlayers}
         selfNickname={nickname}
