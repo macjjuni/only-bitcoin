@@ -3,15 +3,7 @@
 import { kToast } from "kku-ui";
 import { clipboardUtil } from "kku-util";
 import { Copy, X, Zap } from "lucide-react";
-import {
-  type KeyboardEvent,
-  type MouseEvent,
-  memo,
-  type ReactNode,
-  useCallback,
-  useEffect,
-  useRef,
-} from "react";
+import { type MouseEvent, memo, type ReactNode, useCallback, useEffect, useRef } from "react";
 import { ShareCardQr } from "@/shared/ui";
 
 interface SpaceDonationDialogProps {
@@ -43,19 +35,29 @@ function SpaceDonationDialog({ lightningAddress, onClose }: SpaceDonationDialogP
   const focusCloseButton = useCallback((): void => {
     closeButtonRef.current?.focus();
   }, []);
+
+  /**
+   * Esc 는 문서 전체에서 받음. QR 이나 빈 곳을 눌러 포커스가 대화상자 밖으로 빠져도
+   * 닫히게 함.
+   */
+  const attachEscapeKey = useCallback((): (() => void) => {
+    const onKeyDownDocument = (event: globalThis.KeyboardEvent): void => {
+      if (event.key === "Escape") {
+        event.stopPropagation();
+        onClose();
+      }
+    };
+    document.addEventListener("keydown", onKeyDownDocument);
+    return () => {
+      document.removeEventListener("keydown", onKeyDownDocument);
+    };
+  }, [onClose]);
   // endregion
 
 
   // region [Events]
   const onClickBackdrop = useCallback((event: MouseEvent<HTMLDivElement>): void => {
     if (event.target === event.currentTarget) {
-      onClose();
-    }
-  }, [onClose]);
-
-  const onKeyDownDialog = useCallback((event: KeyboardEvent<HTMLDivElement>): void => {
-    if (event.key === "Escape") {
-      event.stopPropagation();
       onClose();
     }
   }, [onClose]);
@@ -71,12 +73,13 @@ function SpaceDonationDialog({ lightningAddress, onClose }: SpaceDonationDialogP
 
   // region [Life Cycles]
   useEffect(focusCloseButton, [focusCloseButton]);
+  useEffect(attachEscapeKey, [attachEscapeKey]);
   // endregion
 
   return (
     // 배경 클릭 닫기는 보조 수단임. 키보드는 대화상자의 Esc·닫기 버튼이 맡음.
     <div className="pointer-events-auto fixed inset-0 z-50 flex items-center justify-center bg-black/60 p-4 backdrop-blur-sm" onClick={onClickBackdrop}>
-      <div role="dialog" aria-modal="true" aria-labelledby={DONATION_TITLE_ID} onKeyDown={onKeyDownDialog} className="w-full max-w-[300px] rounded-2xl border border-white/10 bg-[#0d1119]/95 p-4 text-white shadow-2xl">
+      <div role="dialog" aria-modal="true" aria-labelledby={DONATION_TITLE_ID} className="w-full max-w-[300px] rounded-2xl border border-white/10 bg-[#0d1119]/95 p-4 text-white shadow-2xl">
         <div className="flex items-center justify-between">
           <h2 id={DONATION_TITLE_ID} className="flex items-center gap-1.5 text-sm font-semibold">
             <Zap size={16} className="text-bitcoin" />

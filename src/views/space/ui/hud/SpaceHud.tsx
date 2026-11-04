@@ -150,10 +150,10 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
    *
    * 손가락 기기에는 물리 키보드가 없다. 입력창·버튼에 포커스가 있을 때는
    * 흘려보낸다. 글자를 치는 중이면 그 키는 입력창 몫이고, 버튼이면 브라우저가
-   * 기본 활성화를 처리한다.
+   * 기본 활성화를 처리한다. 후원 모달이 떠 있으면 뒤에 가려진 입력칸으로 들어가지 않게 함.
    */
   const attachChatHotkey = useCallback((): (() => void) | undefined => {
-    if (isCoarsePointer) {
+    if (isCoarsePointer || isDonationOpen) {
       return;
     }
 
@@ -179,7 +179,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     return () => {
       window.removeEventListener("keydown", onKeyDownWindow);
     };
-  }, [isCoarsePointer]);
+  }, [isCoarsePointer, isDonationOpen]);
   // endregion
 
 

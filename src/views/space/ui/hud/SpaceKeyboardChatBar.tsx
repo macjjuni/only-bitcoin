@@ -1,6 +1,6 @@
 "use client";
 
-import { memo, type ReactNode, useCallback, useEffect, useState } from "react";
+import { memo, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import type { SpacePresence } from "@/entities/space";
 import SpaceChatComposer from "./SpaceChatComposer";
 
@@ -11,6 +11,14 @@ interface SpaceKeyboardChatBarProps {
   /** 입력 중인지 호출부에 알림. 입력 중에는 조이스틱·채팅 버튼을 내림. */
   onComposingChange: (isComposing: boolean) => void;
 }
+
+/**
+ * 포커스가 빠진 뒤 막대를 숨기기까지 기다리는 시간.
+ *
+ * 보내기를 누르는 순간 기기에 따라 입력칸 포커스가 먼저 빠짐. 그때 막대를 바로
+ * 숨기면(터치 통과로 바뀌면) 뒤따르는 클릭이 버튼에 닿지 않아 메시지가 안 나감.
+ */
+const HIDE_DELAY_AFTER_BLUR_MS = 200;
 
 /**
  * 손가락 기기에서 키보드 바로 위에 붙는 입력 막대.
@@ -28,10 +36,18 @@ function SpaceKeyboardChatBar({ presence, isMessagePending, sendMessage, onCompo
   // region [Hooks]
   const [isComposing, setIsComposing] = useState(false);
   const [keyboardInset, setKeyboardInset] = useState(0);
+  const hideTimerRef = useRef<number | null>(null);
   // endregion
 
 
   // region [Privates]
+  const clearHideTimer = useCallback((): void => {
+    if (hideTimerRef.current !== null) {
+      window.clearTimeout(hideTimerRef.current);
+      hideTimerRef.current = null;
+    }
+  }, []);
+
   const startViewportTracking = useCallback((): (() => void) => {
     const visualViewport = window.visualViewport;
     const updateKeyboardInset = (): void => {
@@ -53,19 +69,26 @@ function SpaceKeyboardChatBar({ presence, isMessagePending, sendMessage, onCompo
 
   // region [Events]
   const onFocusComposer = useCallback((): void => {
+    clearHideTimer();
     setIsComposing(true);
     onComposingChange(true);
-  }, [onComposingChange]);
+  }, [clearHideTimer, onComposingChange]);
 
   const onBlurComposer = useCallback((): void => {
-    setIsComposing(false);
-    onComposingChange(false);
-  }, [onComposingChange]);
+    clearHideTimer();
+    hideTimerRef.current = window.setTimeout(() => {
+      hideTimerRef.current = null;
+      setIsComposing(false);
+      onComposingChange(false);
+    }, HIDE_DELAY_AFTER_BLUR_MS);
+  }, [clearHideTimer, onComposingChange]);
   // endregion
 
 
   // region [Life Cycles]
   useEffect(startViewportTracking, [startViewportTracking]);
+  // 언마운트 뒤 타이머가 상태를 건드리지 않게 함.
+  useEffect(() => clearHideTimer, [clearHideTimer]);
   // endregion
 
 
