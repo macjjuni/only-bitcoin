@@ -27,6 +27,21 @@
     border-radius: 9999px;
     background: color-mix(in srgb, currentColor 32%, transparent);
   }
+  /* 스페이스 채팅 내역 세로 스크롤 막대. 3D 화면 위 검은 반투명 배경에 맞춰 흰색으로 씀. */
+  .space-chat-scrollbar {
+    scrollbar-color: rgb(255 255 255 / 0.35) transparent;
+    scrollbar-width: thin;
+  }
+  .space-chat-scrollbar::-webkit-scrollbar {
+    width: 4px;
+  }
+  .space-chat-scrollbar::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .space-chat-scrollbar::-webkit-scrollbar-thumb {
+    border-radius: 9999px;
+    background: rgb(255 255 255 / 0.35);
+  }
   /* iOS에서 링크 길게 누를 때 뜨는 콜아웃 메뉴(열기·링크 복사·공유 등) 차단 */
   .touch-callout-none {
     -webkit-touch-callout: none;
