@@ -13,6 +13,7 @@ import CountdownBackFloatingBanner from "./ui/CountdownBackFloatingBanner";
 import DcaAddRecordFloatingBanner from "./ui/DcaAddRecordFloatingBanner";
 import OrangeBackFloatingBanner from "./ui/OrangeBackFloatingBanner";
 import ScrollUpFloatingBanner from "./ui/ScrollUpFloatingBanner";
+import SpaceLinkFloatingBanner from "./ui/SpaceLinkFloatingBanner";
 
 interface BannerConfig {
   id: string;
@@ -124,6 +125,11 @@ const BANNER_CONFIGS: BannerConfig[] = [
       const pathname = usePathname();
       return pathname.startsWith("/dca");
     },
+  },
+  {
+    id: "space-link",
+    Component: SpaceLinkFloatingBanner,
+    useIsVisible: () => isOverviewPath(usePathname()),
   },
   {
     id: "scroll-up",

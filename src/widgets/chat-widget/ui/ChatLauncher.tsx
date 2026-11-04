@@ -20,7 +20,8 @@ interface ChatLauncherProps {
   onClickLauncher: () => void;
 }
 
-const CHAT_LAUNCHER_VISIBLE_PATHS = ["/", "/overview", "/blocks", "/btc2fiat", "/orange"] as const;
+/** 개요(`/`, `/overview`)는 스페이스 이동 버튼으로 바꿨음. */
+const CHAT_LAUNCHER_VISIBLE_PATHS = ["/blocks", "/btc2fiat", "/orange"] as const;
 
 // region [Privates]
 const createLauncherAccessibleName = (
