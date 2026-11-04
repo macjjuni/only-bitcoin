@@ -401,8 +401,9 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
             sendMessage={session.sendMessage}
             onRetry={session.retry}
             hasComposer
+            messageTextClassName="text-sm"
             height={248}
-            className="w-[320px]"
+            className="w-[400px] max-w-[calc(100vw-2rem)]"
           />
         </div>
       )}

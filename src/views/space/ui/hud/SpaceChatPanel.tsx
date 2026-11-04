@@ -36,6 +36,8 @@ interface SpaceChatPanelProps {
   onRetry: () => void;
   /** 손가락 기기는 내역만 띄우고 입력은 키보드 위 막대가 맡음. */
   hasComposer: boolean;
+  /** 메시지 글자 크기. 모바일은 12px, 데스크톱은 14px 로 씀. */
+  messageTextClassName?: string;
   /** 내역을 펼쳤을 때 높이(px). 숨기면 접속 표시 줄 높이만 남음. */
   height: number;
   /** 너비만 호출부가 정함. 모바일은 좌측 상단, 데스크톱은 좌측 하단에 둠. */
@@ -49,7 +51,7 @@ interface SpaceChatPanelProps {
  * 위에서도 읽히게 했음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessage, onRetry, hasComposer, height, className }: SpaceChatPanelProps): ReactNode {
+function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessage, onRetry, hasComposer, messageTextClassName = "text-xs", height, className }: SpaceChatPanelProps): ReactNode {
   // region [Hooks]
   const [isLogHidden, setIsLogHidden] = useState(readIsLogHidden);
   /**
@@ -136,10 +138,10 @@ function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessa
 
       {/* biome-ignore lint/a11y/noNoninteractiveTabindex: The scrollable chat log needs keyboard scrolling. */}
       <div ref={logRef} id={CHAT_LOG_ID} role="log" aria-label="공간 대화" aria-live="polite" aria-relevant="additions" tabIndex={0} hidden={isLogHidden} onScroll={onScrollLog} className="min-h-0 flex-1 overflow-y-auto overscroll-contain space-chat-scrollbar py-2 pl-2.5 pr-1.5">
-        {messages.length === 0 && <p className="text-xs text-white/60">함께 전광판을 보며 이야기해 보세요.</p>}
+        {messages.length === 0 && <p className={`${messageTextClassName} text-white/60`}>함께 전광판을 보며 이야기해 보세요.</p>}
         <ol className="flex flex-col gap-0.5">
           {messages.map((message) => (
-            <li key={message.id} className="break-words whitespace-pre-wrap text-xs leading-snug [overflow-wrap:anywhere]">
+            <li key={message.id} className={`break-words whitespace-pre-wrap leading-snug [overflow-wrap:anywhere] ${messageTextClassName}`}>
               <span className="mr-1 font-semibold text-bitcoin">{message.nickname}</span>
               <span className="text-white">{message.body}</span>
             </li>
