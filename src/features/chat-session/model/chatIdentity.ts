@@ -1,15 +1,19 @@
 import { CHAT_MAX_NICKNAME_GRAPHEMES, CHAT_STORAGE_KEYS } from "@/shared/config/chat";
 import { countGraphemes } from "@/shared/lib/text/countGraphemes";
 
+/**
+ * 스페이스 입장에 쓰는 브라우저 신원.
+ *
+ * 익명 공개 채팅 시절에 만든 저장 키를 그대로 씀. 키를 바꾸면 기존 사용자의
+ * 닉네임·스폰 위치·아바타 색이 전부 새로 뽑힘.
+ */
 export interface ChatIdentity {
   clientKey: string;
   nickname: string;
-  passToken?: string;
 }
 
 const DEFAULT_CHAT_NICKNAME = "익명";
 const CLIENT_KEY_PATTERN = /^[A-Za-z0-9_-]{22,128}$/;
-const PASS_TOKEN_PATTERN = /^[A-Za-z0-9_-]+(?:\.[A-Za-z0-9_-]+){1,2}$/;
 
 // region [Privates]
 const encodeBase64Url = (bytes: Uint8Array): string => {
@@ -28,10 +32,6 @@ const isValidStoredNickname = (nickname: string | null): nickname is string => {
 
   return countGraphemes(nickname.trim()) <= CHAT_MAX_NICKNAME_GRAPHEMES;
 };
-
-const isValidStoredPassToken = (passToken: string | null): passToken is string => {
-  return Boolean(passToken && passToken.length <= 4096 && PASS_TOKEN_PATTERN.test(passToken));
-};
 // endregion
 
 export const loadOrCreateChatIdentity = (): ChatIdentity => {
@@ -44,28 +44,13 @@ export const loadOrCreateChatIdentity = (): ChatIdentity => {
   const nickname = isValidStoredNickname(storedNickname)
     ? storedNickname.trim()
     : DEFAULT_CHAT_NICKNAME;
-  const storedPassToken = window.localStorage.getItem(CHAT_STORAGE_KEYS.passToken);
 
   window.localStorage.setItem(CHAT_STORAGE_KEYS.clientKey, clientKey);
   window.localStorage.setItem(CHAT_STORAGE_KEYS.nickname, nickname);
 
-  if (!isValidStoredPassToken(storedPassToken)) {
-    window.localStorage.removeItem(CHAT_STORAGE_KEYS.passToken);
-  }
-
-  return {
-    clientKey,
-    nickname,
-    passToken: isValidStoredPassToken(storedPassToken) ? storedPassToken : undefined,
-  };
+  return { clientKey, nickname };
 };
 
 export const saveChatNickname = (nickname: string): void => {
   window.localStorage.setItem(CHAT_STORAGE_KEYS.nickname, nickname);
-};
-
-export const saveChatPassToken = (passToken: string): void => {
-  if (isValidStoredPassToken(passToken)) {
-    window.localStorage.setItem(CHAT_STORAGE_KEYS.passToken, passToken);
-  }
 };

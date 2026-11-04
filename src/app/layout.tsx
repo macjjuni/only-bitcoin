@@ -11,9 +11,9 @@ import { THEME_INITIALIZATION_SCRIPT } from "@/shared/config/theme";
 import { ConfettiEffect, DitherBackground, JsonLd } from "@/shared/ui";
 import { Content, DefaultLayout } from "@/shared/ui/layout";
 import { BottomNavigation } from "@/widgets/bottom-navigation";
-import { ChatWidget } from "@/widgets/chat-widget";
 import { GlobalFloatingBanner } from "@/widgets/floating-banner";
 import { Header } from "@/widgets/header";
+import { SpaceWidget } from "@/widgets/space-widget";
 import "./globals.css";
 
 // 1. Viewport
@@ -124,7 +124,7 @@ export default function RootLayout({ children }: Readonly<{ children: ReactNode 
               <Content>{children}</Content>
               <BottomNavigation />
               <GlobalFloatingBanner>
-                <ChatWidget />
+                <SpaceWidget />
               </GlobalFloatingBanner>
             </DefaultLayout>
             <ConfettiEffect />

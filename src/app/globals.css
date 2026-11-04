@@ -212,49 +212,6 @@
 .only-btc__bottom-nav { view-transition-name: bottom-nav; }
 .only-btc__floating-banner { view-transition-name: floating-banner; }
 .only-btc__floating-banner-left { view-transition-name: floating-banner-left; }
-.only-btc__chat-panel { view-transition-name: chat-panel; }
-.only-btc__chat-backdrop { view-transition-name: chat-backdrop; }
-
-/*
-  라우트 전환에서는 채팅 패널이 제자리에 머물러야 하므로 스냅샷 애니메이션을 끔.
-  전체화면 토글(`html.chat-panel-resizing`)만 예외로 두어 UA 기본 모프를 살린다.
-*/
-html:not(.chat-panel-resizing)::view-transition-group(chat-panel),
-html:not(.chat-panel-resizing)::view-transition-group(chat-backdrop),
-html:not(.chat-panel-resizing)::view-transition-image-pair(chat-panel),
-html:not(.chat-panel-resizing)::view-transition-image-pair(chat-backdrop) {
-  animation: none;
-}
-
-html:not(.chat-panel-resizing)::view-transition-old(chat-panel),
-html:not(.chat-panel-resizing)::view-transition-old(chat-backdrop) {
-  animation: none;
-  opacity: 0;
-}
-
-html:not(.chat-panel-resizing)::view-transition-new(chat-panel),
-html:not(.chat-panel-resizing)::view-transition-new(chat-backdrop) {
-  animation: none;
-  opacity: 1;
-}
-
-/*
-  전체화면 토글에서만 UA 기본 애니메이션(패널은 박스 모프, 백드롭은 페이드)을 쓰고
-  재생 시간과 이징만 패널 열림/닫힘 모션에 맞춘다.
-  백드롭에 이름을 주지 않으면 루트 스냅샷에 포함돼, 루트 애니메이션을 끈 탓에
-  화면이 한 프레임에 툭 어두워짐.
-*/
-html.chat-panel-resizing::view-transition-group(chat-panel),
-html.chat-panel-resizing::view-transition-group(chat-backdrop),
-html.chat-panel-resizing::view-transition-image-pair(chat-panel),
-html.chat-panel-resizing::view-transition-image-pair(chat-backdrop),
-html.chat-panel-resizing::view-transition-old(chat-panel),
-html.chat-panel-resizing::view-transition-old(chat-backdrop),
-html.chat-panel-resizing::view-transition-new(chat-panel),
-html.chat-panel-resizing::view-transition-new(chat-backdrop) {
-  animation-duration: 0.28s;
-  animation-timing-function: cubic-bezier(0.32, 0.72, 0, 1);
-}
 
 ::view-transition-old(root),
 ::view-transition-new(root) {
