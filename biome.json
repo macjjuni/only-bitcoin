@@ -57,6 +57,7 @@
       "!**/package-lock.json",
       "!**/tsconfig.tsbuildinfo",
       "!public/draco",
+      "!assets",
       "!**/*.css",
       "!src/shared/assets/lottie",
       "!src/entities/etf/model/bitcoinEtfFlowArchive.json",

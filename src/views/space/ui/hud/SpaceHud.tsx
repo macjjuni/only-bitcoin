@@ -224,6 +224,16 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
       },
     ];
 
+    if (DONATION_LIGHTNING_ADDRESS) {
+      actions.push({
+        id: "space-donation-toggle",
+        label: "개발자 후원",
+        icon: <Zap size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+        isActive: isDonationOpen,
+        onClick: onClickOpenDonation,
+      });
+    }
+
     actions.push({
       id: "space-nickname-toggle",
       label: "닉네임 변경",
@@ -247,16 +257,6 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
       isActive: isShareOpen,
       onClick: onClickOpenShare,
     });
-
-    if (DONATION_LIGHTNING_ADDRESS) {
-      actions.push({
-        id: "space-donation-toggle",
-        label: "개발자 후원",
-        icon: <Zap size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
-        isActive: isDonationOpen,
-        onClick: onClickOpenDonation,
-      });
-    }
 
     actions.push({
       id: "guide",
