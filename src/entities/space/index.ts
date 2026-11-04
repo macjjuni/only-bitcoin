@@ -32,6 +32,7 @@ export {
   SPACE_NETWORK_INTERVAL_MS,
   SPACE_NICKNAME_COOLDOWN_MS,
   SPACE_PROTOCOL_VERSION,
+  SPACE_SERVER_FRAME_MAX_BYTES,
   type SpaceChatMessage,
   type SpaceClientFrame,
   type SpaceMotion,

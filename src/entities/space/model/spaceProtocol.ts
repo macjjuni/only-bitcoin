@@ -92,7 +92,13 @@ export type SpaceServerFrame =
   | { v: SpaceProtocolVersion; t: "full" };
 
 const CLIENT_FRAME_MAX_BYTES = 8 * 1024;
-const SERVER_FRAME_MAX_BYTES = 64 * 1024;
+/**
+ * 클라이언트가 받아주는 서버 프레임 최대 크기. 넘으면 프레임을 버림.
+ *
+ * 서버도 이 값을 봄. 입장 프레임에 대화 기록을 담다가 넘기면 입장이 끝나지 않음.
+ */
+export const SPACE_SERVER_FRAME_MAX_BYTES = 64 * 1024;
+const SERVER_FRAME_MAX_BYTES = SPACE_SERVER_FRAME_MAX_BYTES;
 const UUID_PATTERN = /^[0-9a-f]{8}-[0-9a-f]{4}-[1-8][0-9a-f]{3}-[89ab][0-9a-f]{3}-[0-9a-f]{12}$/i;
 const CLIENT_KEY_PATTERN = /^[A-Za-z0-9_-]{22,128}$/;
 const textEncoder = new TextEncoder();

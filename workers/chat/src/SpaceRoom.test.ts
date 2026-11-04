@@ -3,7 +3,9 @@ import { resolveColorIndexFromClientKey } from "../../../src/entities/space/lib/
 import { decodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapshot";
 import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
 import {
+  parseSpaceServerFrame,
   SPACE_PROTOCOL_VERSION,
+  SPACE_SERVER_FRAME_MAX_BYTES,
   type SpacePeer,
   type SpaceServerFrame,
 } from "../../../src/entities/space/model/spaceProtocol";
@@ -593,6 +595,47 @@ describe("SpaceRoom", () => {
     const errorCountBefore = errorCodes(first).length;
     await say(first, "다시 보냄");
     expect(errorCodes(first)).toHaveLength(errorCountBefore);
+  });
+
+  it("기록이 커도 welcome 은 클라이언트 한도 안에 들도록 오래된 메시지부터 뺀다", async () => {
+    const { join, send } = createRoom();
+    const sender = await join(clientKey(1));
+    // 글자 하나에 결합 문자 30개를 붙여 100자여도 6KB 가 넘는 본문을 만든다.
+    const combiningMarks = Array.from({ length: 30 }, (_, index) =>
+      String.fromCodePoint(0x0300 + index),
+    ).join("");
+    const createHeavyBody = (seed: number): string =>
+      Array.from(
+        { length: 100 },
+        (_, index) => `${String.fromCharCode(97 + ((seed + index) % 26))}${combiningMarks}`,
+      ).join("");
+    let lastBody = "";
+
+    for (let index = 0; index < 50; index += 1) {
+      lastBody = createHeavyBody(index);
+      await send(sender, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "say",
+        rid: crypto.randomUUID(),
+        body: lastBody,
+      });
+      vi.advanceTimersByTime(5000);
+    }
+    const newcomer = await join(clientKey(2));
+    const rawWelcome = newcomer.sent.find(
+      (payload): payload is string =>
+        typeof payload === "string" && JSON.parse(payload).t === "welcome",
+    );
+    const welcome = rawWelcome ? parseSpaceServerFrame(rawWelcome) : null;
+    const messages = welcome?.t === "welcome" ? (welcome.messages ?? []) : [];
+
+    expect(new TextEncoder().encode(rawWelcome).byteLength).toBeLessThanOrEqual(
+      SPACE_SERVER_FRAME_MAX_BYTES,
+    );
+    expect(welcome?.t).toBe("welcome");
+    expect(messages.length).toBeGreaterThan(0);
+    expect(messages.length).toBeLessThan(50);
+    expect(messages.at(-1)?.body.normalize("NFC")).toBe(lastBody.normalize("NFC"));
   });
 
   it("입장하면 최근 대화 50개만 오래된 순으로 welcome 에 담아 받는다", async () => {

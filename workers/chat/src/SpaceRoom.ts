@@ -11,6 +11,7 @@ import {
   SPACE_NETWORK_INTERVAL_MS,
   SPACE_NICKNAME_COOLDOWN_MS,
   SPACE_PROTOCOL_VERSION,
+  SPACE_SERVER_FRAME_MAX_BYTES,
   type SpaceChatMessage,
   type SpaceClientFrame,
   type SpacePeer,
@@ -286,6 +287,27 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     if (hasLoadedHistory) {
       this.chatHistory = [...history, message].slice(-SPACE_CHAT_HISTORY_COUNT);
     }
+  }
+
+  /**
+   * 입장 프레임을 클라이언트 한도 안으로 만든다.
+   *
+   * 메시지는 100자여도 결합 문자·긴 이모지면 수 KB 가 될 수 있음. 50개를 다 담으면
+   * 64KB 를 넘겨 클라이언트가 프레임을 버리고 아무도 입장하지 못함. 넘치면 오래된
+   * 메시지부터 뺌.
+   */
+  private createWelcomePayload(self: SpacePeer, peers: SpacePeer[]): string {
+    const messages = [...this.getChatHistory()];
+    const serialize = (): string =>
+      JSON.stringify({ v: SPACE_PROTOCOL_VERSION, t: "welcome", self, peers, messages } satisfies SpaceServerFrame);
+    let payload = serialize();
+
+    while (messages.length > 0 && textEncoder.encode(payload).byteLength > SPACE_SERVER_FRAME_MAX_BYTES) {
+      messages.shift();
+      payload = serialize();
+    }
+
+    return payload;
   }
 
   private ensureSayLogSchema(): void {
@@ -588,13 +610,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         const currentPeer = this.getJoinedAttachment(candidate)?.peer;
         return candidate !== socket && currentPeer ? [currentPeer] : [];
       });
-      this.sendFrame(socket, {
-        v: SPACE_PROTOCOL_VERSION,
-        t: "welcome",
-        self: peer,
-        peers,
-        messages: this.getChatHistory(),
-      });
+      this.sendPayload(socket, this.createWelcomePayload(peer, peers));
 
       if (this.getJoinedAttachment(socket)) {
         this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer }, socket);

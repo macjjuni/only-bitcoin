@@ -56,6 +56,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
   const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
   const [lastReadMessageID, setLastReadMessageID] = useState<string | null>(null);
+  const hasMarkedInitialHistoryRef = useRef(false);
   /** 단축키 리스너가 메시지마다 다시 붙지 않도록 최신 목록만 참조한다. */
   const messagesRef = useRef(session.messages);
   messagesRef.current = session.messages;
@@ -169,11 +170,26 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
       window.removeEventListener("keydown", onKeyDownWindow);
     };
   }, [isCoarsePointer]);
+
+  /**
+   * 첫 입장 때 받은 대화 기록은 읽은 것으로 침.
+   *
+   * 안 그러면 들어오자마자 배지에 기록 수(최대 50)가 뜸. 입장 프레임이 기록과
+   * online 상태를 한 번에 바꾸므로 online 이 된 첫 렌더의 마지막 메시지를 기준으로 삼음.
+   */
+  const markInitialHistoryAsRead = useCallback((): void => {
+    if (hasMarkedInitialHistoryRef.current || session.presence.status !== "online") {
+      return;
+    }
+    hasMarkedInitialHistoryRef.current = true;
+    setLastReadMessageID(session.messages.at(-1)?.id ?? null);
+  }, [session.presence.status, session.messages]);
   // endregion
 
 
   // region [Life Cycles]
   useEffect(attachChatHotkey, [attachChatHotkey]);
+  useEffect(markInitialHistoryAsRead, [markInitialHistoryAsRead]);
   // endregion
 
 
