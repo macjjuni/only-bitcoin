@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CircleHelp, MessageCircle, Pencil, UserRound } from "lucide-react";
+import { ArrowLeft, CircleHelp, MessageCircle, Pencil, UserRound, Zap } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
@@ -13,15 +13,20 @@ import {
   VirtualJoystick,
 } from "@/features/space-controls";
 import type { SpaceSession } from "@/features/space-session";
+import { env } from "@/shared/config/env";
 import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
 import SpaceAvatarPicker from "./SpaceAvatarPicker";
 import SpaceChatPanel, { SPACE_CHAT_INPUT_ID } from "./SpaceChatPanel";
 import SpaceControlGuide from "./SpaceControlGuide";
+import SpaceDonationDialog from "./SpaceDonationDialog";
 import SpaceNicknameEditor from "./SpaceNicknameEditor";
 import SpacePresenceBadge from "./SpacePresenceBadge";
 
 /** 히스토리가 없을 때(직접 링크 진입) 돌아갈 곳. `/space` 를 노출하는 목록이다. */
 const FALLBACK_BACK_PATH = "/orange";
+
+/** 설정 화면 개발자 후원과 같은 라이트닝 주소. 비어 있으면 후원 버튼을 숨김. */
+const DONATION_LIGHTNING_ADDRESS = env.NEXT_PUBLIC_DONATION_ADDRESS;
 
 const ICON_SIZE = 18;
 const ICON_STROKE_WIDTH = 2;
@@ -55,6 +60,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
   const [isChatOpen, setIsChatOpen] = useState(false);
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
   const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
+  const [isDonationOpen, setIsDonationOpen] = useState(false);
   const [lastReadMessageID, setLastReadMessageID] = useState<string | null>(null);
   const hasMarkedInitialHistoryRef = useRef(false);
   /** 단축키 리스너가 메시지마다 다시 붙지 않도록 최신 목록만 참조한다. */
@@ -78,6 +84,18 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     setIsNicknameEditorOpen(false);
     setIsAvatarPickerOpen(false);
     setIsGuideOpen((previousOpen) => !previousOpen);
+  }, []);
+
+  const onClickOpenDonation = useCallback((): void => {
+    setIsGuideOpen(false);
+    setIsNicknameEditorOpen(false);
+    setIsAvatarPickerOpen(false);
+    setIsDonationOpen(true);
+  }, []);
+
+  const onClickCloseDonation = useCallback((): void => {
+    setIsDonationOpen(false);
+    document.getElementById("space-donation-toggle")?.focus();
   }, []);
 
   const onClickToggleAvatarPicker = useCallback((): void => {
@@ -243,6 +261,16 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
       onClick: onClickToggleAvatarPicker,
     });
 
+    if (DONATION_LIGHTNING_ADDRESS) {
+      actions.push({
+        id: "space-donation-toggle",
+        label: "개발자 후원",
+        icon: <Zap size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+        isActive: isDonationOpen,
+        onClick: onClickOpenDonation,
+      });
+    }
+
     actions.push({
       id: "guide",
       label: "조작 안내",
@@ -259,6 +287,8 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     onClickToggleNicknameEditor,
     isAvatarPickerOpen,
     onClickToggleAvatarPicker,
+    isDonationOpen,
+    onClickOpenDonation,
     isGuideOpen,
     onClickBack,
     onClickToggleGuide,
@@ -300,7 +330,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
    * 언마운트 정리가 눌려 있던 입력까지 0 으로 비운다.
    */
   const shouldRenderTouchControls =
-    isCoarsePointer && !isChatOpen && !isNicknameEditorOpen && !isAvatarPickerOpen;
+    isCoarsePointer && !isChatOpen && !isNicknameEditorOpen && !isAvatarPickerOpen && !isDonationOpen;
   const TouchControlsTemplate =
     shouldRenderTouchControls ? (
       <div className="pointer-events-auto">
@@ -382,6 +412,10 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
       )}
 
       {TouchControlsTemplate}
+
+      {isDonationOpen && (
+        <SpaceDonationDialog lightningAddress={DONATION_LIGHTNING_ADDRESS} onClose={onClickCloseDonation} />
+      )}
 
       {isChatOpen && (
         <SpaceChatPanel
