@@ -131,7 +131,7 @@ function Nameplates({
       {selfNickname !== "" && (
         <group ref={selfGroupRef}>
           <Html center distanceFactor={nameplateDistanceFactor} zIndexRange={[20, 0]}>
-            <span className="whitespace-nowrap rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-medium text-white/90 backdrop-blur-sm">
+            <span className="select-none whitespace-nowrap rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-medium text-white/90 backdrop-blur-sm">
               {selfNickname}
             </span>
           </Html>
@@ -145,7 +145,7 @@ function Nameplates({
           }}
         >
           <Html center distanceFactor={nameplateDistanceFactor} zIndexRange={[20, 0]}>
-            <span className="whitespace-nowrap rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-medium text-white/90 backdrop-blur-sm">
+            <span className="select-none whitespace-nowrap rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-medium text-white/90 backdrop-blur-sm">
               {player.nickname}
             </span>
           </Html>

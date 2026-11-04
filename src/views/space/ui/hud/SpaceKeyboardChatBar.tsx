@@ -106,7 +106,7 @@ function SpaceKeyboardChatBar({ presence, isMessagePending, sendMessage, onCompo
         paddingRight: "calc(0.5rem + env(safe-area-inset-right))",
       }}
     >
-      <SpaceChatComposer presence={presence} isMessagePending={isMessagePending} sendMessage={sendMessage} onFocus={onFocusComposer} onBlur={onBlurComposer} />
+      <SpaceChatComposer presence={presence} isMessagePending={isMessagePending} sendMessage={sendMessage} onFocus={onFocusComposer} onBlur={onBlurComposer} isTouchSized />
     </div>
   );
 }

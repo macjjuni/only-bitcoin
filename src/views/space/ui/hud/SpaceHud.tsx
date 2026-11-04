@@ -1,6 +1,6 @@
 "use client";
 
-import { ArrowLeft, CircleHelp, MessageCircle, Pencil, UserRound, Zap } from "lucide-react";
+import { ArrowLeft, CircleHelp, MessageCircle, Pencil, Share2, UserRound, Zap } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
@@ -22,6 +22,7 @@ import SpaceControlGuide from "./SpaceControlGuide";
 import SpaceDonationDialog from "./SpaceDonationDialog";
 import SpaceKeyboardChatBar from "./SpaceKeyboardChatBar";
 import SpaceNicknameEditor from "./SpaceNicknameEditor";
+import SpaceShareDialog from "./SpaceShareDialog";
 
 /** 히스토리가 없을 때(직접 링크 진입) 돌아갈 곳. `/space` 를 노출하는 목록이다. */
 const FALLBACK_BACK_PATH = "/orange";
@@ -61,6 +62,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
   const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
+  const [isShareOpen, setIsShareOpen] = useState(false);
   /** 손가락 기기에서 키보드 위 입력 막대에 포커스가 있는 동안. */
   const [isComposingChat, setIsComposingChat] = useState(false);
   // endregion
@@ -87,7 +89,22 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     setIsGuideOpen(false);
     setIsNicknameEditorOpen(false);
     setIsAvatarPickerOpen(false);
+    setIsShareOpen(false);
     setIsDonationOpen(true);
+  }, []);
+
+  const onClickOpenShare = useCallback((): void => {
+    setIsGuideOpen(false);
+    setIsNicknameEditorOpen(false);
+    setIsAvatarPickerOpen(false);
+    setIsDonationOpen(false);
+    setIsShareOpen(true);
+  }, []);
+
+  /** 닫은 뒤 포커스를 연 버튼으로 돌려준다. 키보드 사용자가 자리를 잃지 않게. */
+  const onClickCloseShare = useCallback((): void => {
+    setIsShareOpen(false);
+    document.getElementById("space-share-toggle")?.focus();
   }, []);
 
   /**
@@ -150,10 +167,10 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
    *
    * 손가락 기기에는 물리 키보드가 없다. 입력창·버튼에 포커스가 있을 때는
    * 흘려보낸다. 글자를 치는 중이면 그 키는 입력창 몫이고, 버튼이면 브라우저가
-   * 기본 활성화를 처리한다. 후원 모달이 떠 있으면 뒤에 가려진 입력칸으로 들어가지 않게 함.
+   * 기본 활성화를 처리한다. 모달이 떠 있으면 뒤에 가려진 입력칸으로 들어가지 않게 함.
    */
   const attachChatHotkey = useCallback((): (() => void) | undefined => {
-    if (isCoarsePointer || isDonationOpen) {
+    if (isCoarsePointer || isDonationOpen || isShareOpen) {
       return;
     }
 
@@ -179,7 +196,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     return () => {
       window.removeEventListener("keydown", onKeyDownWindow);
     };
-  }, [isCoarsePointer, isDonationOpen]);
+  }, [isCoarsePointer, isDonationOpen, isShareOpen]);
   // endregion
 
 
@@ -223,6 +240,14 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
       onClick: onClickToggleAvatarPicker,
     });
 
+    actions.push({
+      id: "space-share-toggle",
+      label: "공유하기",
+      icon: <Share2 size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+      isActive: isShareOpen,
+      onClick: onClickOpenShare,
+    });
+
     if (DONATION_LIGHTNING_ADDRESS) {
       actions.push({
         id: "space-donation-toggle",
@@ -249,6 +274,8 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     onClickToggleAvatarPicker,
     isDonationOpen,
     onClickOpenDonation,
+    isShareOpen,
+    onClickOpenShare,
     isGuideOpen,
     onClickBack,
     onClickToggleGuide,
@@ -290,7 +317,12 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
    * 언마운트 정리가 눌려 있던 입력까지 0 으로 비운다.
    */
   const shouldRenderTouchControls =
-    isCoarsePointer && !isNicknameEditorOpen && !isAvatarPickerOpen && !isDonationOpen && !isComposingChat;
+    isCoarsePointer &&
+    !isNicknameEditorOpen &&
+    !isAvatarPickerOpen &&
+    !isDonationOpen &&
+    !isShareOpen &&
+    !isComposingChat;
   const TouchControlsTemplate =
     shouldRenderTouchControls ? (
       <div className="pointer-events-auto">
@@ -330,7 +362,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
               sendMessage={session.sendMessage}
               onRetry={session.retry}
               hasComposer={false}
-              height={184}
+              height={128}
               className="w-[min(260px,calc(100vw-5.5rem))]"
             />
           </div>
@@ -379,6 +411,8 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
           onComposingChange={setIsComposingChat}
         />
       )}
+
+      {isShareOpen && <SpaceShareDialog onClose={onClickCloseShare} />}
 
       {isDonationOpen && (
         <SpaceDonationDialog lightningAddress={DONATION_LIGHTNING_ADDRESS} onClose={onClickCloseDonation} />

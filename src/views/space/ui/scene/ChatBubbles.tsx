@@ -109,7 +109,7 @@ function ChatBubbles({ messages, players, self, viewerTransformRef }: ChatBubble
           }
         }}>
           <Html center distanceFactor={18} zIndexRange={[24, 0]} style={{ pointerEvents: "none" }}>
-            <div aria-hidden="true" className="pointer-events-none relative w-max max-w-[220px] rounded-xl border border-white/20 bg-[#121923]/95 px-3 py-2 text-center text-xs leading-relaxed text-white shadow-lg">
+            <div aria-hidden="true" className="pointer-events-none relative w-max max-w-[220px] select-none rounded-xl border border-white/20 bg-[#121923]/95 px-3 py-2 text-center text-xs leading-relaxed text-white shadow-lg">
               <span className="block max-w-full truncate text-[10px] font-semibold text-white/60">{bubble.message.nickname}</span>
               <span className="line-clamp-3 break-words whitespace-pre-wrap [overflow-wrap:anywhere]">{truncateGraphemes(bubble.message.body, 100)}</span>
               <span className="absolute -bottom-1 left-1/2 size-2 -translate-x-1/2 rotate-45 border-b border-r border-white/20 bg-[#121923]" />
