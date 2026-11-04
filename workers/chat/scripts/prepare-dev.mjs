@@ -3,12 +3,7 @@ import { existsSync, readFileSync, realpathSync, writeFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { parseEnv } from "node:util";
 
-const localSecretNames = [
-  "ACTOR_SECRET",
-  "ENFORCEMENT_SECRET",
-  "IP_GUARD_SECRET",
-  "PASS_SIGNING_SECRET",
-];
+const localSecretNames = ["ENFORCEMENT_SECRET", "IP_GUARD_SECRET"];
 const localAllowedOrigins = "http://localhost:3002,http://127.0.0.1:3002";
 const defaultDevVarsPath = fileURLToPath(new URL("../.dev.vars", import.meta.url));
 

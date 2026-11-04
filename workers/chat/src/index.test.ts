@@ -6,14 +6,12 @@ import worker from "./index";
 import type { ChatWorkerEnv } from "./types";
 
 const createIngress = (isRateAllowed = true) => {
-  const chatFetch = vi.fn(async (_request: Request) => new Response("chat"));
   const spaceFetch = vi.fn(async (_request: Request) => new Response("space"));
   const rateLimit = vi.fn(async (_input: { key: string }) => ({ success: isRateAllowed }));
   const env = {
     CHAT_ALLOWED_ORIGINS: "https://www.only-btc.app",
     IP_GUARD_SECRET: "test-ip-guard-secret",
     CHAT_UPGRADE_RATE_LIMITER: { limit: rateLimit },
-    CHAT_ROOM: { idFromName: () => "chat-main", get: () => ({ fetch: chatFetch }) },
     SPACE_ROOM: { idFromName: () => "space-main", get: () => ({ fetch: spaceFetch }) },
   } as unknown as ChatWorkerEnv;
   const request = (path: string, headerOverrides: Record<string, string> = {}) =>
@@ -26,24 +24,22 @@ const createIngress = (isRateAllowed = true) => {
         ...headerOverrides,
       },
     });
-  const fetch = (incomingRequest: Request) =>
-    worker.fetch(incomingRequest, env, {} as ExecutionContext);
+  const fetch = (incomingRequest: Request) => worker.fetch(incomingRequest, env);
 
-  return { chatFetch, spaceFetch, rateLimit, request, fetch };
+  return { spaceFetch, rateLimit, request, fetch };
 };
 
 describe("space WebSocket ingress", () => {
-  it("기존 chat과 새 space를 각 namespace로 보내고 rate key를 경로별로 분리한다", async () => {
+  it("space 경로만 SpaceRoom 으로 보내고 걷어낸 chat 경로는 404 로 끝낸다", async () => {
     const ingress = createIngress();
     const chatResponse = await ingress.fetch(ingress.request("/v1/chat/ws"));
     const spaceResponse = await ingress.fetch(ingress.request("/v1/space/ws"));
 
-    expect(await chatResponse.text()).toBe("chat");
+    expect(chatResponse.status).toBe(404);
     expect(await spaceResponse.text()).toBe("space");
-    expect(ingress.chatFetch).toHaveBeenCalledOnce();
     expect(ingress.spaceFetch).toHaveBeenCalledOnce();
-    expect(ingress.rateLimit.mock.calls[0][0].key).toMatch(/:\/v1\/chat\/ws$/);
-    expect(ingress.rateLimit.mock.calls[1][0].key).toMatch(/:\/v1\/space\/ws$/);
+    expect(ingress.rateLimit).toHaveBeenCalledOnce();
+    expect(ingress.rateLimit.mock.calls[0][0].key).toMatch(/:\/v1\/space\/ws$/);
   });
 
   it("Origin과 업그레이드/IP 검증에 실패한 요청은 Durable Object까지 보내지 않는다", async () => {

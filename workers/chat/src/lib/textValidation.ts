@@ -276,8 +276,3 @@ export const normalizeNickname = (rawNickname: string): string => {
 
   return normalizedNickname;
 };
-
-export const createReplySnippet = (messageBody: string): string => {
-  const singleLineBody = messageBody.replace(/\s+/gu, " ").trim();
-  return splitGraphemes(singleLineBody).slice(0, 36).join("");
-};

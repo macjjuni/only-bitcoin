@@ -6,10 +6,6 @@
   "durable_objects": {
     "bindings": [
       {
-        "name": "CHAT_ROOM",
-        "class_name": "ChatRoom"
-      },
-      {
         "name": "SPACE_ROOM",
         "class_name": "SpaceRoom"
       }
@@ -23,6 +19,11 @@
     {
       "tag": "v2",
       "new_sqlite_classes": ["SpaceRoom"]
+    },
+    {
+      // 익명 공개 채팅 종료. 배포하면 ChatRoom 의 저장 데이터가 영구 삭제됨.
+      "tag": "v3",
+      "deleted_classes": ["ChatRoom"]
     }
   ],
   "ratelimits": [
@@ -43,8 +44,6 @@
     }
   },
   "vars": {
-    "CHAT_ALLOWED_ORIGINS": "https://www.only-btc.app,http://localhost:3002",
-    "TURNSTILE_EXPECTED_HOSTNAME": "www.only-btc.app",
-    "ADMIN_EMAIL_ALLOWLIST": "macjjuni@gmail.com"
+    "CHAT_ALLOWED_ORIGINS": "https://www.only-btc.app,http://localhost:3002"
   }
 }

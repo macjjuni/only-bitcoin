@@ -17,12 +17,7 @@ import { parseEnv } from "node:util";
 import { afterEach, describe, expect, it } from "vitest";
 import { ensureChatDevVars } from "./prepare-dev.mjs";
 
-const secretNames = [
-  "ACTOR_SECRET",
-  "ENFORCEMENT_SECRET",
-  "IP_GUARD_SECRET",
-  "PASS_SIGNING_SECRET",
-];
+const secretNames = ["ENFORCEMENT_SECRET", "IP_GUARD_SECRET"];
 const temporaryDirectories: string[] = [];
 
 const createTemporaryDirectory = (): string => {
@@ -104,7 +99,7 @@ describe("ensureChatDevVars", () => {
     const values = parseEnv(updatedContent);
 
     expect(new Set(addedNames)).toEqual(
-      new Set(["IP_GUARD_SECRET", "PASS_SIGNING_SECRET", "SPACE_DISABLE_IP_CONNECTION_LIMIT"]),
+      new Set(["IP_GUARD_SECRET", "SPACE_DISABLE_IP_CONNECTION_LIMIT"]),
     );
     expect(updatedContent.startsWith(`${originalContent}\n`)).toBe(true);
     expect(values.ACTOR_SECRET).toBe("actor#inside-quotes");
@@ -116,12 +111,9 @@ describe("ensureChatDevVars", () => {
   it("마지막 dotenv 정의가 빈 값이면 앞의 값 대신 새 키를 보충한다", () => {
     const devVarsPath = join(createTemporaryDirectory(), ".dev.vars");
     const originalContent = [
-      "ACTOR_SECRET=earlier-actor-value",
-      'ACTOR_SECRET="" # a comment with "quoted words"',
       "ENFORCEMENT_SECRET=earlier-enforcement-value",
       "ENFORCEMENT_SECRET='last#nonempty-value' # ignored comment",
       "IP_GUARD_SECRET= # blank after trimming the comment",
-      "PASS_SIGNING_SECRET='existing pass value'",
       "CHAT_ALLOWED_ORIGINS='' # defaults required",
     ].join("\n");
     writeFileSync(devVarsPath, originalContent, { mode: 0o600 });
@@ -129,17 +121,10 @@ describe("ensureChatDevVars", () => {
     const values = parseEnv(readFileSync(devVarsPath, "utf8"));
 
     expect(new Set(addedNames)).toEqual(
-      new Set([
-        "ACTOR_SECRET",
-        "IP_GUARD_SECRET",
-        "CHAT_ALLOWED_ORIGINS",
-        "SPACE_DISABLE_IP_CONNECTION_LIMIT",
-      ]),
+      new Set(["IP_GUARD_SECRET", "CHAT_ALLOWED_ORIGINS", "SPACE_DISABLE_IP_CONNECTION_LIMIT"]),
     );
-    expect(values.ACTOR_SECRET).toMatch(/^[a-f0-9]{64}$/);
     expect(values.IP_GUARD_SECRET).toMatch(/^[a-f0-9]{64}$/);
     expect(values.ENFORCEMENT_SECRET).toBe("last#nonempty-value");
-    expect(values.PASS_SIGNING_SECRET).toBe("existing pass value");
     expect(ensureChatDevVars(devVarsPath)).toEqual([]);
   });
 

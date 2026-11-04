@@ -1,7 +1,6 @@
 import { describe, expect, it } from "vitest";
 import {
   ChatValidationError,
-  createReplySnippet,
   filterAdultTerms,
   normalizeChatMessage,
   normalizeNickname,
@@ -29,9 +28,5 @@ describe("chat text validation", () => {
   it("닉네임의 사칭과 emoji를 거부한다", () => {
     expect(() => normalizeNickname("공식운영자")).toThrow(ChatValidationError);
     expect(() => normalizeNickname("사토시🚀")).toThrow(ChatValidationError);
-  });
-
-  it("답글 snippet을 한 줄 36 grapheme으로 제한한다", () => {
-    expect(createReplySnippet(`${"가".repeat(45)}\n나`)).toBe("가".repeat(36));
   });
 });

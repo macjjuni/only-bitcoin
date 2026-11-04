@@ -1,10 +1,8 @@
-import { ChatRoom } from "./ChatRoom";
 import { deriveIpGuardKey } from "./lib/crypto";
-import { authorizeGoogleAdministrator } from "./lib/googleAdministrator";
 import { SpaceRoom } from "./SpaceRoom";
 import type { ChatWorkerEnv } from "./types";
 
-export { ChatRoom, SpaceRoom };
+export { SpaceRoom };
 
 // region [Privates]
 const jsonResponse = (payload: unknown, status: number, headers?: HeadersInit): Response => {
@@ -29,24 +27,10 @@ const getAllowedOrigin = (request: Request, workerEnv: ChatWorkerEnv): string | 
 const createCorsHeaders = (allowedOrigin: string): Headers => {
   return new Headers({
     "Access-Control-Allow-Origin": allowedOrigin,
-    "Access-Control-Allow-Methods": "GET, POST, DELETE, OPTIONS",
-    "Access-Control-Allow-Headers": "Authorization, Content-Type",
+    "Access-Control-Allow-Methods": "GET, OPTIONS",
+    "Access-Control-Allow-Headers": "Content-Type",
     "Access-Control-Max-Age": "86400",
     Vary: "Origin",
-  });
-};
-
-const attachCorsHeaders = (response: Response, allowedOrigin: string): Response => {
-  const responseHeaders = new Headers(response.headers);
-  const corsHeaders = createCorsHeaders(allowedOrigin);
-  corsHeaders.forEach((headerValue, headerName) => {
-    responseHeaders.set(headerName, headerValue);
-  });
-
-  return new Response(response.body, {
-    status: response.status,
-    statusText: response.statusText,
-    headers: responseHeaders,
   });
 };
 
@@ -72,56 +56,6 @@ const normalizeIpGuardPrefix = (ipAddress: string): string => {
   return `${expandIpv6Address(ipAddress).slice(0, 4).join(":")}::/64`;
 };
 
-const getChatRoomStub = (workerEnv: ChatWorkerEnv): DurableObjectStub => {
-  const durableObjectId = workerEnv.CHAT_ROOM.idFromName("main");
-  return workerEnv.CHAT_ROOM.get(durableObjectId, { locationHint: "apac-ne" });
-};
-
-const forwardHttpRequest = async (
-  request: Request,
-  workerEnv: ChatWorkerEnv,
-  allowedOrigin: string,
-): Promise<Response> => {
-  const durableObjectResponse = await getChatRoomStub(workerEnv).fetch(request);
-  return attachCorsHeaders(durableObjectResponse, allowedOrigin);
-};
-
-const handleOnlineRequest = async (
-  request: Request,
-  workerEnv: ChatWorkerEnv,
-  executionContext: ExecutionContext,
-  allowedOrigin: string,
-): Promise<Response> => {
-  const cacheKey = new Request(
-    `https://only-bitcoin-chat-cache.invalid/v1/chat/online/${encodeURIComponent(allowedOrigin)}`,
-    { method: "GET" },
-  );
-  const cachedResponse = await caches.default.match(cacheKey);
-
-  if (cachedResponse) {
-    return cachedResponse;
-  }
-
-  try {
-    const durableObjectResponse = await getChatRoomStub(workerEnv).fetch(request);
-    const responseHeaders = createCorsHeaders(allowedOrigin);
-    responseHeaders.set("Content-Type", "application/json; charset=utf-8");
-    responseHeaders.set("Cache-Control", "public, s-maxage=15");
-    const onlineResponse = new Response(durableObjectResponse.body, {
-      status: durableObjectResponse.status,
-      headers: responseHeaders,
-    });
-
-    if (onlineResponse.ok) {
-      executionContext.waitUntil(caches.default.put(cacheKey, onlineResponse.clone()));
-    }
-
-    return onlineResponse;
-  } catch {
-    return jsonResponse({ error: "ONLINE_UNAVAILABLE" }, 503, createCorsHeaders(allowedOrigin));
-  }
-};
-
 /**
  * 업그레이드 한도를 넘긴 연결을 닫는 코드.
  *
@@ -141,10 +75,9 @@ const createRateLimitedSocketResponse = (): Response => {
   return new Response(null, { status: 101, webSocket: pair[0] });
 };
 
-const handleWebSocketUpgrade = async (
+const handleSpaceWebSocketUpgrade = async (
   request: Request,
   workerEnv: ChatWorkerEnv,
-  room: "chat" | "space" = "chat",
 ): Promise<Response> => {
   if (request.headers.get("Upgrade")?.toLowerCase() !== "websocket") {
     return jsonResponse({ error: "UPGRADE_REQUIRED" }, 426, { Upgrade: "websocket" });
@@ -158,7 +91,7 @@ const handleWebSocketUpgrade = async (
   const normalizedIpPrefix = normalizeIpGuardPrefix(connectingIpAddress);
   const ipGuardKey = await deriveIpGuardKey(workerEnv.IP_GUARD_SECRET, normalizedIpPrefix);
   const rateLimitResult = await workerEnv.CHAT_UPGRADE_RATE_LIMITER.limit({
-    key: `${ipGuardKey}:/v1/${room}/ws`,
+    key: `${ipGuardKey}:/v1/space/ws`,
   });
 
   if (!rateLimitResult.success) {
@@ -169,65 +102,16 @@ const handleWebSocketUpgrade = async (
   forwardedHeaders.set("X-Chat-IP-Guard-Key", ipGuardKey);
   forwardedHeaders.delete("CF-Connecting-IP");
   const forwardedRequest = new Request(request, { headers: forwardedHeaders });
+  const spaceRoomStub = workerEnv.SPACE_ROOM.get(workerEnv.SPACE_ROOM.idFromName("main"), {
+    locationHint: "apac-ne",
+  });
 
-  const roomStub =
-    room === "chat"
-      ? getChatRoomStub(workerEnv)
-      : workerEnv.SPACE_ROOM.get(workerEnv.SPACE_ROOM.idFromName("main"), {
-          locationHint: "apac-ne",
-        });
-
-  return roomStub.fetch(forwardedRequest);
-};
-
-const handleAdminRequest = async (
-  request: Request,
-  workerEnv: ChatWorkerEnv,
-  allowedOrigin: string,
-): Promise<Response> => {
-  const authorizationStatus = await authorizeGoogleAdministrator(
-    request,
-    workerEnv.GOOGLE_OAUTH_CLIENT_ID,
-    workerEnv.ADMIN_EMAIL_ALLOWLIST,
-  );
-
-  if (authorizationStatus === "unauthenticated") {
-    return jsonResponse({ error: "UNAUTHORIZED" }, 401, createCorsHeaders(allowedOrigin));
-  }
-  if (authorizationStatus === "forbidden") {
-    return jsonResponse({ error: "FORBIDDEN" }, 403, createCorsHeaders(allowedOrigin));
-  }
-
-  const requestUrl = new URL(request.url);
-  if (requestUrl.pathname === "/v1/admin/chat/session" && request.method === "POST") {
-    const responseHeaders = createCorsHeaders(allowedOrigin);
-    responseHeaders.set("Cache-Control", "no-store");
-    return jsonResponse({ isAdministrator: true }, 200, responseHeaders);
-  }
-  if (
-    request.method === "POST" &&
-    !request.headers.get("Content-Type")?.toLowerCase().startsWith("application/json")
-  ) {
-    return jsonResponse(
-      { error: "JSON_CONTENT_TYPE_REQUIRED" },
-      415,
-      createCorsHeaders(allowedOrigin),
-    );
-  }
-
-  const forwardedHeaders = new Headers(request.headers);
-  forwardedHeaders.delete("Authorization");
-  const forwardedRequest = new Request(request, { headers: forwardedHeaders });
-  return forwardHttpRequest(forwardedRequest, workerEnv, allowedOrigin);
+  return spaceRoomStub.fetch(forwardedRequest);
 };
 // endregion
 
 export default {
-  async fetch(
-    request: Request,
-    workerEnv: ChatWorkerEnv,
-    executionContext: ExecutionContext,
-  ): Promise<Response> {
+  async fetch(request: Request, workerEnv: ChatWorkerEnv): Promise<Response> {
     const allowedOrigin = getAllowedOrigin(request, workerEnv);
 
     if (!allowedOrigin) {
@@ -238,20 +122,8 @@ export default {
     }
 
     const requestUrl = new URL(request.url);
-    if (requestUrl.pathname === "/v1/chat/ws" && request.method === "GET") {
-      return handleWebSocketUpgrade(request, workerEnv);
-    }
     if (requestUrl.pathname === "/v1/space/ws" && request.method === "GET") {
-      return handleWebSocketUpgrade(request, workerEnv, "space");
-    }
-    if (requestUrl.pathname === "/v1/chat/online" && request.method === "GET") {
-      return handleOnlineRequest(request, workerEnv, executionContext, allowedOrigin);
-    }
-    if (requestUrl.pathname === "/v1/chat/health" && request.method === "GET") {
-      return forwardHttpRequest(request, workerEnv, allowedOrigin);
-    }
-    if (requestUrl.pathname.startsWith("/v1/admin/chat/")) {
-      return handleAdminRequest(request, workerEnv, allowedOrigin);
+      return handleSpaceWebSocketUpgrade(request, workerEnv);
     }
 
     return jsonResponse({ error: "NOT_FOUND" }, 404, createCorsHeaders(allowedOrigin));
