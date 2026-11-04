@@ -112,6 +112,27 @@ const permanentErrorCodes = new Set([
 ]);
 const permanentCloseCodes = new Set([1002, 1003, 1008, 4001]);
 
+/**
+ * 입장 때 받은 기록을 지금 보던 목록에 합친다.
+ *
+ * 재접속이면 이미 본 메시지와 겹친다. id 로 중복을 빼고 시간순으로 다시 세운 뒤
+ * 최근 100개만 남김.
+ */
+const mergeChatHistory = (
+  currentMessages: readonly SpaceChatMessage[],
+  historyMessages: readonly SpaceChatMessage[],
+): SpaceChatMessage[] => {
+  const messagesById = new Map<string, SpaceChatMessage>();
+
+  for (const message of [...historyMessages, ...currentMessages]) {
+    messagesById.set(message.id, message);
+  }
+
+  return Array.from(messagesById.values())
+    .sort((first, second) => first.createdAt - second.createdAt)
+    .slice(-maximumMessageCount);
+};
+
 const hasSameMovement = (first: MovementFrame | null, second: MovementFrame): boolean => {
   return (
     first !== null &&
@@ -573,6 +594,8 @@ export class SpaceSessionController {
           presence: { status: "online", occupantCount: this.peers.size + 1 },
           error: null,
           remotePlayers: this.interpolator.sample(this.options.now()),
+          // 기록은 패널에만 넣음. 지난 말이 말풍선으로 다시 뜨면 안 됨.
+          messages: mergeChatHistory(this.snapshot.messages, frame.messages ?? []),
           bubbleMessages: [],
           rosterRevision: this.snapshot.rosterRevision + 1,
         });

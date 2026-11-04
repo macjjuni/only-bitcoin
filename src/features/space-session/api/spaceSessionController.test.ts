@@ -119,6 +119,35 @@ describe("SpaceSessionController", () => {
     vi.useRealTimers();
   });
 
+  it("welcome 기록은 패널 목록에만 합치고 중복 없이 최근 100개를 유지한다", () => {
+    const { controller, sockets } = createHarness();
+    controller.start();
+    const chatMessage = (index: number) => ({
+      id: `message-${index}`,
+      rid: "33333333-3333-4333-8333-333333333333",
+      seat: 1,
+      nickname: "다른사람",
+      body: `메시지 ${index}`,
+      createdAt: index,
+    });
+    const socket = sockets[0];
+    socket.open();
+
+    // 재접속 전에 이미 본 메시지 70개.
+    for (let index = 0; index < 70; index += 1) {
+      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "say", message: chatMessage(index) });
+    }
+    // 서버 기록은 그중 마지막 20개와 그 뒤 새 메시지 30개.
+    const history = Array.from({ length: 50 }, (_, offset) => chatMessage(50 + offset));
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "welcome", self, peers: [], messages: history });
+
+    const { messages, bubbleMessages } = controller.getSnapshot();
+    expect(messages).toHaveLength(100);
+    expect(messages[0].id).toBe("message-0");
+    expect(messages.at(-1)?.id).toBe("message-99");
+    expect(bubbleMessages).toHaveLength(0);
+  });
+
   it("채팅 URL의 호스트만 재사용하고 경로·쿼리는 공간 엔드포인트로 바꾼다", () => {
     expect(resolveSpaceWebSocketUrl("wss://example.com/v1/chat/ws?token=old#hash")).toBe(
       "wss://example.com/v1/space/ws",

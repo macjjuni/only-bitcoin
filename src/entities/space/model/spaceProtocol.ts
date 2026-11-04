@@ -18,6 +18,8 @@ export const SPACE_PROTOCOL_VERSION = 2;
 export const SPACE_NETWORK_INTERVAL_MS = 100;
 export const SPACE_CHAT_COOLDOWN_MS = 3_000;
 export const SPACE_CHAT_MAX_GRAPHEMES = 100;
+/** 입장할 때 서버가 함께 내려주는 최근 대화 수. */
+export const SPACE_CHAT_HISTORY_COUNT = 50;
 /** 닉네임 변경 간격. 자주 바꾸면 다른 사람이 누가 누군지 못 따라간다. */
 export const SPACE_NICKNAME_COOLDOWN_MS = 10_000;
 
@@ -75,7 +77,14 @@ export type SpaceClientFrame =
   | { v: SpaceProtocolVersion; t: "model"; rid: string; modelIndex: number };
 
 export type SpaceServerFrame =
-  | { v: SpaceProtocolVersion; t: "welcome"; self: SpacePeer; peers: SpacePeer[] }
+  | {
+      v: SpaceProtocolVersion;
+      t: "welcome";
+      self: SpacePeer;
+      peers: SpacePeer[];
+      /** 기록을 모르는 옛 서버는 보내지 않는다. 없으면 빈 기록으로 읽음. */
+      messages?: SpaceChatMessage[];
+    }
   | { v: SpaceProtocolVersion; t: "peer"; peer: SpacePeer }
   | { v: SpaceProtocolVersion; t: "leave"; seat: number }
   | { v: SpaceProtocolVersion; t: "say"; message: SpaceChatMessage }
@@ -147,6 +156,12 @@ const isChatMessage = (value: unknown): value is SpaceChatMessage => {
     isFiniteNumber(value.createdAt) &&
     Number.isSafeInteger(value.createdAt) &&
     value.createdAt >= 0
+  );
+};
+
+const isChatHistory = (value: unknown): value is SpaceChatMessage[] => {
+  return (
+    Array.isArray(value) && value.length <= SPACE_CHAT_HISTORY_COUNT && value.every(isChatMessage)
   );
 };
 
@@ -256,12 +271,14 @@ export const parseSpaceServerFrame = (rawPayload: string): SpaceServerFrame | nu
     case "welcome": {
       const selfPeer = payload.self;
       const peers = payload.peers;
+      const messages = payload.messages;
 
       if (
         !isSpacePeer(selfPeer) ||
         !isPeerArray(peers) ||
         peers.length >= SPACE_MAX_OCCUPANTS ||
-        peers.some((peer) => peer.seat === selfPeer.seat)
+        peers.some((peer) => peer.seat === selfPeer.seat) ||
+        (messages !== undefined && !isChatHistory(messages))
       ) {
         return null;
       }

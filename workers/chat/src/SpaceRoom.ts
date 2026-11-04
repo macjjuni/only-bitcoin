@@ -6,10 +6,12 @@ import { SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "../../../src/entities/space/mo
 import {
   parseSpaceClientFrame,
   SPACE_CHAT_COOLDOWN_MS,
+  SPACE_CHAT_HISTORY_COUNT,
   SPACE_CHAT_MAX_GRAPHEMES,
   SPACE_NETWORK_INTERVAL_MS,
   SPACE_NICKNAME_COOLDOWN_MS,
   SPACE_PROTOCOL_VERSION,
+  type SpaceChatMessage,
   type SpaceClientFrame,
   type SpacePeer,
   type SpaceServerFrame,
@@ -34,6 +36,16 @@ interface SayReceipt {
   id: string;
   bodyHash: string;
   createdAt: number;
+}
+
+interface ChatHistoryRow {
+  [columnName: string]: string | number | ArrayBuffer | null;
+  id: string;
+  rid: string;
+  seat: number;
+  nickname: string;
+  body: string;
+  created_at: number;
 }
 
 interface SpaceSocketAttachment {
@@ -61,6 +73,14 @@ const MAXIMUM_PENDING_CONNECTIONS = 10;
 const MAXIMUM_FRAME_BYTES = 8 * 1024;
 const MAXIMUM_FRAMES_PER_SECOND = 40;
 const MAXIMUM_RECENT_SAY_RECEIPTS = 32;
+/**
+ * IP guard 키 하나가 1분에 보낼 수 있는 메시지 수.
+ *
+ * 연결당 3초 간격만으로는 IP 하나가 연결 2개로 분당 40개를 보낼 수 있음.
+ * 기록 50개가 1분 남짓이면 다 덮여서 IP 단위로 한 번 더 묶음.
+ */
+const MAXIMUM_SAYS_PER_IP_PER_MINUTE = 12;
+const SAY_RATE_WINDOW_MS = 60_000;
 const JOIN_TIMEOUT_MS = 10_000;
 const STALE_CONNECTION_MS = 60_000;
 const PRUNE_INTERVAL_MS = 15_000;
@@ -83,6 +103,9 @@ const textEncoder = new TextEncoder();
 /**
  * 좌석·위치는 WebSocket attachment에만 보관한다. SQL 위치 쓰기나 상시 틱은 없다.
  * 실제 이동이 들어올 때만 100ms 타이머 하나를 만들고 변경 좌석을 한 버퍼로 전송한다.
+ *
+ * SQL은 대화 기록에만 씀. 하이버네이션으로 메모리가 비워져도 입장자가 최근
+ * 대화를 받아야 해서, 말할 때 한 줄 쓰고 깨어난 뒤 첫 입장 때 한 번 읽음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
@@ -94,6 +117,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   private sayingSockets = new Set<WebSocket>();
   private frameRates = new Map<WebSocket, { startedAt: number; count: number }>();
   private lastPrunedAt = 0;
+  private chatHistory: SpaceChatMessage[] | null = null;
+  private isChatHistorySchemaReady = false;
+  private isSayLogSchemaReady = false;
 
   constructor(
     private readonly state: DurableObjectState,
@@ -172,6 +198,148 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       if (socket !== excludedSocket) {
         this.sendPayload(socket, payload);
       }
+    }
+  }
+
+  private ensureChatHistorySchema(): void {
+    if (this.isChatHistorySchemaReady) {
+      return;
+    }
+    this.state.storage.sql.exec(`
+      CREATE TABLE IF NOT EXISTS chat_messages (
+        seq INTEGER PRIMARY KEY AUTOINCREMENT,
+        id TEXT NOT NULL,
+        rid TEXT NOT NULL,
+        seat INTEGER NOT NULL,
+        nickname TEXT NOT NULL,
+        body TEXT NOT NULL,
+        created_at INTEGER NOT NULL
+      )
+    `);
+    this.isChatHistorySchemaReady = true;
+  }
+
+  /** 기록 읽기가 실패해도 입장은 막지 않음. 빈 기록으로 넘김. */
+  private getChatHistory(): SpaceChatMessage[] {
+    if (this.chatHistory) {
+      return this.chatHistory;
+    }
+
+    try {
+      this.ensureChatHistorySchema();
+      this.chatHistory = this.state.storage.sql
+        .exec<ChatHistoryRow>(
+          `SELECT id, rid, seat, nickname, body, created_at
+             FROM chat_messages
+            ORDER BY seq DESC
+            LIMIT ?`,
+          SPACE_CHAT_HISTORY_COUNT,
+        )
+        .toArray()
+        .reverse()
+        .map((row) => ({
+          id: row.id,
+          rid: row.rid,
+          seat: row.seat,
+          nickname: row.nickname,
+          body: row.body,
+          createdAt: row.created_at,
+        }));
+    } catch {
+      return [];
+    }
+
+    return this.chatHistory;
+  }
+
+  /** 저장이 실패해도 방송은 계속함. 기록에서만 빠짐. */
+  private appendChatHistory(message: SpaceChatMessage): void {
+    const history = this.getChatHistory();
+    // 읽기에 실패한 빈 기록을 캐시로 굳히면 옛 대화가 안 보이게 됨.
+    const hasLoadedHistory = this.chatHistory !== null;
+
+    try {
+      this.ensureChatHistorySchema();
+      this.state.storage.sql.exec(
+        `INSERT INTO chat_messages (id, rid, seat, nickname, body, created_at)
+         VALUES (?, ?, ?, ?, ?, ?)`,
+        message.id,
+        message.rid,
+        message.seat,
+        message.nickname,
+        message.body,
+        message.createdAt,
+      );
+      this.state.storage.sql.exec(
+        `DELETE FROM chat_messages
+          WHERE seq NOT IN (
+            SELECT seq FROM chat_messages ORDER BY seq DESC LIMIT ?
+          )`,
+        SPACE_CHAT_HISTORY_COUNT,
+      );
+    } catch {
+      // 다음 입장 때 다시 읽게 캐시를 버림.
+      this.chatHistory = null;
+      return;
+    }
+
+    if (hasLoadedHistory) {
+      this.chatHistory = [...history, message].slice(-SPACE_CHAT_HISTORY_COUNT);
+    }
+  }
+
+  private ensureSayLogSchema(): void {
+    if (this.isSayLogSchemaReady) {
+      return;
+    }
+    this.state.storage.sql.exec(`
+      CREATE TABLE IF NOT EXISTS say_log (
+        ip_guard_key TEXT NOT NULL,
+        created_at INTEGER NOT NULL
+      );
+      CREATE INDEX IF NOT EXISTS say_log_ip_created_at ON say_log (ip_guard_key, created_at);
+    `);
+    this.isSayLogSchemaReady = true;
+  }
+
+  /**
+   * 이 IP 가 최근 1분 동안 보낸 메시지가 한도에 찼는지 봄.
+   *
+   * 메모리에 두면 하이버네이션 뒤 초기화돼서 SQL 에 둠. 읽기가 실패하면 막지
+   * 않고 통과시킴. 연결당 3초 간격은 그대로 걸려 있음.
+   */
+  private isIpSayLimitReached(ipGuardKey: string, now: number): boolean {
+    try {
+      this.ensureSayLogSchema();
+      const row = this.state.storage.sql
+        .exec<{ count: number }>(
+          "SELECT COUNT(*) AS count FROM say_log WHERE ip_guard_key = ? AND created_at > ?",
+          ipGuardKey,
+          now - SAY_RATE_WINDOW_MS,
+        )
+        .toArray()[0];
+
+      return (row?.count ?? 0) >= MAXIMUM_SAYS_PER_IP_PER_MINUTE;
+    } catch {
+      return false;
+    }
+  }
+
+  /** 보낸 기록을 남기고 1분 지난 줄은 지움. 실패해도 방송은 막지 않음. */
+  private recordIpSay(ipGuardKey: string, now: number): void {
+    try {
+      this.ensureSayLogSchema();
+      this.state.storage.sql.exec(
+        "DELETE FROM say_log WHERE created_at <= ?",
+        now - SAY_RATE_WINDOW_MS,
+      );
+      this.state.storage.sql.exec(
+        "INSERT INTO say_log (ip_guard_key, created_at) VALUES (?, ?)",
+        ipGuardKey,
+        now,
+      );
+    } catch {
+      // 한 번 빠져도 다음 메시지부터 다시 셈.
     }
   }
 
@@ -420,7 +588,13 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         const currentPeer = this.getJoinedAttachment(candidate)?.peer;
         return candidate !== socket && currentPeer ? [currentPeer] : [];
       });
-      this.sendFrame(socket, { v: SPACE_PROTOCOL_VERSION, t: "welcome", self: peer, peers });
+      this.sendFrame(socket, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "welcome",
+        self: peer,
+        peers,
+        messages: this.getChatHistory(),
+      });
 
       if (this.getJoinedAttachment(socket)) {
         this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer }, socket);
@@ -627,6 +801,15 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         );
         return;
       }
+      if (this.isIpSayLimitReached(attachment.ipGuardKey, now)) {
+        this.sendError(
+          socket,
+          "RATE_SAY_MINUTE",
+          "잠시 동안 메시지를 너무 많이 보냈어요. 조금 뒤에 다시 보내 주세요.",
+          frame.rid,
+        );
+        return;
+      }
       const message = {
         id: crypto.randomUUID(),
         rid: frame.rid,
@@ -644,6 +827,8 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
           -MAXIMUM_RECENT_SAY_RECEIPTS,
         ),
       } satisfies SpaceSocketAttachment);
+      this.appendChatHistory(message);
+      this.recordIpSay(attachment.ipGuardKey, now);
       this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "say", message });
     } finally {
       this.sayingSockets.delete(socket);

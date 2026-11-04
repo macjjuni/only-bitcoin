@@ -70,11 +70,82 @@ class RoomSocket {
   }
 }
 
+interface ChatHistoryRecord {
+  seq: number;
+  id: string;
+  rid: string;
+  seat: number;
+  nickname: string;
+  body: string;
+  created_at: number;
+}
+
+/** SpaceRoom 이 쓰는 대화 기록 쿼리만 흉내 냄. 다른 쿼리가 오면 바로 실패시킴. */
+class FakeChatHistorySql {
+  rows: ChatHistoryRecord[] = [];
+  sayLog: Array<{ ipGuardKey: string; createdAt: number }> = [];
+  /** 대화 기록 쓰기만 셈. say_log 는 IP 제한용이라 따로 봄. */
+  writeCount = 0;
+  private nextSeq = 1;
+
+  exec = vi.fn((query: string, ...bindings: unknown[]) => {
+    const statement = query.trim();
+
+    if (statement.startsWith("CREATE TABLE IF NOT EXISTS chat_messages")) {
+      return { toArray: () => [] };
+    }
+    if (statement.startsWith("INSERT INTO chat_messages")) {
+      const [id, rid, seat, nickname, body, createdAt] = bindings as [
+        string,
+        string,
+        number,
+        string,
+        string,
+        number,
+      ];
+      this.rows.push({ seq: this.nextSeq, id, rid, seat, nickname, body, created_at: createdAt });
+      this.nextSeq += 1;
+      this.writeCount += 1;
+      return { toArray: () => [] };
+    }
+    if (statement.startsWith("DELETE FROM chat_messages")) {
+      this.rows = this.rows.slice(-(bindings[0] as number));
+      this.writeCount += 1;
+      return { toArray: () => [] };
+    }
+    if (statement.startsWith("SELECT id, rid, seat, nickname, body, created_at")) {
+      const latestRows = [...this.rows].reverse().slice(0, bindings[0] as number);
+      return { toArray: () => latestRows };
+    }
+    if (statement.startsWith("CREATE TABLE IF NOT EXISTS say_log")) {
+      return { toArray: () => [] };
+    }
+    if (statement.startsWith("SELECT COUNT(*) AS count FROM say_log")) {
+      const [ipGuardKey, after] = bindings as [string, number];
+      const count = this.sayLog.filter(
+        (entry) => entry.ipGuardKey === ipGuardKey && entry.createdAt > after,
+      ).length;
+      return { toArray: () => [{ count }] };
+    }
+    if (statement.startsWith("DELETE FROM say_log")) {
+      this.sayLog = this.sayLog.filter((entry) => entry.createdAt > (bindings[0] as number));
+      return { toArray: () => [] };
+    }
+    if (statement.startsWith("INSERT INTO say_log")) {
+      const [ipGuardKey, createdAt] = bindings as [string, number];
+      this.sayLog.push({ ipGuardKey, createdAt });
+      return { toArray: () => [] };
+    }
+
+    throw new Error(`Unexpected SQL: ${statement}`);
+  });
+}
+
 class RoomState {
   sockets: RoomSocket[] = [];
   autoResponses = new Map<WebSocket, Date>();
   setWebSocketAutoResponse = vi.fn();
-  storage = { sql: { exec: vi.fn() } };
+  storage = { sql: new FakeChatHistorySql() };
 
   getWebSockets(): WebSocket[] {
     return this.sockets.map((socket) => socket.asWebSocket());
@@ -95,8 +166,13 @@ const createRoom = (state = new RoomState()) => {
   const room = new SpaceRoom(state.asDurableState(), workerEnv);
   const send = (socket: RoomSocket, frame: unknown) =>
     room.webSocketMessage(socket.asWebSocket(), JSON.stringify(frame));
-  const join = async (clientKey: string, nickname = "참여자", modelIndex = 0) => {
-    const socket = new RoomSocket();
+  const join = async (
+    clientKey: string,
+    nickname = "참여자",
+    modelIndex = 0,
+    ipGuardKey = "test-ip",
+  ) => {
+    const socket = new RoomSocket(ipGuardKey);
     state.sockets.push(socket);
     await send(socket, { v: SPACE_PROTOCOL_VERSION, t: "join", clientKey, nickname, modelIndex });
     return socket;
@@ -143,7 +219,7 @@ describe("SpaceRoom", () => {
     expect(seats.size).toBe(50);
     expect(overflow.frames()).toContainEqual({ v: SPACE_PROTOCOL_VERSION, t: "full" });
     expect(overflow.closeCode).toBe(4003);
-    expect(state.storage.sql.exec).not.toHaveBeenCalled();
+    expect(state.storage.sql.writeCount).toBe(0);
   });
 
   it("스폰 좌표와 색을 clientKey 로 내려 클라이언트 예측과 일치시킨다", async () => {
@@ -333,7 +409,7 @@ describe("SpaceRoom", () => {
     expect(socket.peer()).toMatchObject({ x: SPACE_BOUNDS.maxX, z: SPACE_BOUNDS.minZ });
   });
 
-  it("attachment에서 재구성한 roster는 원래 좌석을 유지하고 SQL을 읽거나 쓰지 않는다", async () => {
+  it("attachment에서 재구성한 roster는 원래 좌석을 유지하고 SQL에 쓰지 않는다", async () => {
     const { join, state } = createRoom();
     const first = await join(clientKey(1));
     const restored = createRoom(state);
@@ -342,7 +418,7 @@ describe("SpaceRoom", () => {
 
     expect(welcome).toMatchObject({ peers: [first.peer()] });
     expect(state.setWebSocketAutoResponse).toHaveBeenCalledTimes(2);
-    expect(state.storage.sql.exec).not.toHaveBeenCalled();
+    expect(state.storage.sql.writeCount).toBe(0);
     expect(vi.getTimerCount()).toBe(0);
   });
 
@@ -466,7 +542,7 @@ describe("SpaceRoom", () => {
     for (let index = 0; index < 36; index += 1) {
       lastRid = crypto.randomUUID();
       await send(sender, { v: SPACE_PROTOCOL_VERSION, t: "say", rid: lastRid, body });
-      vi.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(5000);
     }
     const attachment = sender.deserializeAttachment() as { recentSayReceipts: unknown[] };
     expect(attachment.recentSayReceipts).toHaveLength(32);
@@ -478,6 +554,7 @@ describe("SpaceRoom", () => {
       .frames()
       .filter((frame) => frame.t === "say")
       .at(-1);
+    const writeCountBeforeReplay = state.storage.sql.writeCount;
     await restored.send(sender, { v: SPACE_PROTOCOL_VERSION, t: "say", rid: lastRid, body });
     const repeatedEcho = sender
       .frames()
@@ -485,7 +562,84 @@ describe("SpaceRoom", () => {
       .at(-1);
 
     expect(repeatedEcho).toEqual(previousEcho);
-    expect(state.storage.sql.exec).not.toHaveBeenCalled();
+    // 재전송은 기록에 다시 쓰지 않는다.
+    expect(state.storage.sql.writeCount).toBe(writeCountBeforeReplay);
+  });
+
+  it("IP 하나는 연결을 나눠도 1분에 12개까지만 보내고, 다른 IP 는 영향받지 않는다", async () => {
+    const { join, send } = createRoom();
+    const first = await join(clientKey(1), "첫째", 0, "shared-ip");
+    const second = await join(clientKey(2), "둘째", 0, "shared-ip");
+    const other = await join(clientKey(3), "다른곳", 0, "other-ip");
+    const say = (socket: RoomSocket, body: string) =>
+      send(socket, { v: SPACE_PROTOCOL_VERSION, t: "say", rid: crypto.randomUUID(), body });
+    const errorCodes = (socket: RoomSocket) =>
+      socket.frames().flatMap((frame) => (frame.t === "error" ? [frame.code] : []));
+
+    // 두 연결이 번갈아 6개씩, 3초 간격을 지키며 12개를 채운다.
+    for (let index = 0; index < 6; index += 1) {
+      await say(first, `첫째 ${index}`);
+      await say(second, `둘째 ${index}`);
+      vi.advanceTimersByTime(3000);
+    }
+    await say(first, "열세 번째");
+    await say(other, "다른 IP");
+
+    expect(errorCodes(first)).toContain("RATE_SAY_MINUTE");
+    expect(errorCodes(other)).not.toContain("RATE_SAY_MINUTE");
+
+    // 가장 오래된 메시지가 1분 창을 벗어나면 다시 보낼 수 있다.
+    vi.advanceTimersByTime(60_000);
+    const errorCountBefore = errorCodes(first).length;
+    await say(first, "다시 보냄");
+    expect(errorCodes(first)).toHaveLength(errorCountBefore);
+  });
+
+  it("입장하면 최근 대화 50개만 오래된 순으로 welcome 에 담아 받는다", async () => {
+    const { join, send } = createRoom();
+    const sender = await join(clientKey(1));
+
+    for (let index = 0; index < 55; index += 1) {
+      await send(sender, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "say",
+        rid: crypto.randomUUID(),
+        body: `메시지 ${index}`,
+      });
+      vi.advanceTimersByTime(5000);
+    }
+    const newcomer = await join(clientKey(2));
+    const welcome = newcomer.frames().find((frame) => frame.t === "welcome");
+    const bodies = welcome?.t === "welcome" ? (welcome.messages ?? []).map(({ body }) => body) : [];
+
+    expect(bodies).toHaveLength(50);
+    expect(bodies[0]).toBe("메시지 5");
+    expect(bodies.at(-1)).toBe("메시지 54");
+  });
+
+  it("하이버네이션으로 메모리가 비워져도 기록을 SQL 에서 다시 읽는다", async () => {
+    const { state, join, send } = createRoom();
+    const sender = await join(clientKey(1));
+
+    await send(sender, { v: SPACE_PROTOCOL_VERSION, t: "say", rid: requestId, body: "첫 말" });
+    vi.advanceTimersByTime(3000);
+    await send(sender, {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "say",
+      rid: otherRequestId,
+      body: "둘째 말",
+    });
+
+    const restored = createRoom(state);
+    const newcomer = await restored.join(clientKey(2));
+    const welcome = newcomer.frames().find((frame) => frame.t === "welcome");
+
+    expect(welcome).toMatchObject({
+      messages: [
+        { rid: requestId, body: "첫 말", seat: sender.peer().seat },
+        { rid: otherRequestId, body: "둘째 말", seat: sender.peer().seat },
+      ],
+    });
   });
 
   it("닉네임을 바꾸면 모두에게 새 peer 를 보내고 좌표는 유지한다", async () => {
