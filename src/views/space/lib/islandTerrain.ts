@@ -3,7 +3,6 @@ import { type ExtendedTriangle, MeshBVH } from "three-mesh-bvh";
 import {
   SPACE_AVATAR_COLLISION_HEIGHT,
   SPACE_AVATAR_COLLISION_RADIUS,
-  SPACE_ISLAND,
   SPACE_STEP_HEIGHT,
   type SpaceTerrain,
   type TerrainMoveResult,
