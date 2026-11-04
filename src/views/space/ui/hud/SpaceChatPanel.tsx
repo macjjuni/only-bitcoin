@@ -212,7 +212,7 @@ function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessa
    * 커짐. 화면이 낮거나 키보드가 올라오면 viewport 높이에 맞춰 같이 줄어듦.
    */
   const panelHeight = isBottomSheet
-    ? { height: Math.max(160, Math.min(isExpanded ? 600 : 320, viewport.height - 88)) }
+    ? { height: Math.max(160, Math.min(isExpanded ? 600 : 280, viewport.height - 88)) }
     : { height: Math.max(140, Math.min(isExpanded ? 560 : 360, viewport.height - 96)) };
   const panelStyle = isBottomSheet
     ? {
