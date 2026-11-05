@@ -30,6 +30,7 @@ import {
   formatBillboardUsd,
   resolveBillboardChartEndpoint,
   resolveBillboardOnlineStatus,
+  resolveChangeTone,
 } from "@/views/space/lib/billboardTexture";
 import { loadScreenFonts } from "@/views/space/lib/screenCanvas";
 import {
@@ -189,17 +190,29 @@ function PriceBillboard(): ReactNode {
       krw: formatBillboardKrw(readBillboardPriceMotion(priceMotionsRef.current.krw, nowMs)),
       usd: formatBillboardUsd(readBillboardPriceMotion(priceMotionsRef.current.usd, nowMs)),
     };
+    const { krwChange24h, usdChange24h } = useBitcoinStore.getState().bitcoinPrice;
+    const priceTones = {
+      krw: resolveChangeTone(krwChange24h),
+      usd: resolveChangeTone(usdChange24h),
+    };
 
     for (const currency of ["krw", "usd"] as const) {
       const priceSurface = priceSurfaces[currency];
+      // 숫자가 그대로여도 등락 방향이 바뀌면 글자 색이 바뀌므로 둘을 묶어 비교함.
+      const priceKey = `${priceTexts[currency]}|${priceTones[currency]}`;
 
-      if (!priceSurface.context || priceTexts[currency] === lastPriceTextsRef.current[currency]) {
+      if (!priceSurface.context || priceKey === lastPriceTextsRef.current[currency]) {
         continue;
       }
 
-      drawBillboardPrice(priceSurface.context, priceTexts[currency], currency);
+      drawBillboardPrice(
+        priceSurface.context,
+        priceTexts[currency],
+        currency,
+        priceTones[currency],
+      );
       priceSurface.texture.needsUpdate = true;
-      lastPriceTextsRef.current[currency] = priceTexts[currency];
+      lastPriceTextsRef.current[currency] = priceKey;
     }
   };
 

@@ -20,6 +20,7 @@ import {
   resolveBillboardChartEndpoint,
   resolveBillboardOnlineStatus,
   resolveChangeTone,
+  resolvePriceColor,
   resolveFittedFontSize,
   resolveToneColor,
 } from "@/views/space/lib/billboardTexture";
@@ -125,6 +126,15 @@ describe("resolveChangeTone", () => {
     expect(resolveToneColor("up")).toBe(BILLBOARD_COLORS.up);
     expect(resolveToneColor("down")).toBe(BILLBOARD_COLORS.down);
     expect(resolveToneColor("flat")).toBe(BILLBOARD_COLORS.flat);
+  });
+});
+
+describe("resolvePriceColor", () => {
+  it("오르면 초록, 내리면 빨강, 보합이면 통화 색을 쓴다", () => {
+    expect(resolvePriceColor("krw", "up")).toBe(BILLBOARD_COLORS.up);
+    expect(resolvePriceColor("usd", "down")).toBe(BILLBOARD_COLORS.down);
+    expect(resolvePriceColor("krw", "flat")).toBe(BILLBOARD_COLORS.brand);
+    expect(resolvePriceColor("usd", "flat")).toBe(BILLBOARD_COLORS.label);
   });
 });
 

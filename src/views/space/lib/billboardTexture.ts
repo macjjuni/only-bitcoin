@@ -154,7 +154,7 @@ export const BILLBOARD_PRICE_REGIONS = {
   usd: createBillboardPriceRegion(LAYOUT.rows.usd.centerY),
 } as const;
 
-/** 통화별 가격 색. 원화는 주황, 달러는 크림. */
+/** 등락이 0.0% 일 때의 통화별 가격 색. 원화는 주황, 달러는 크림. */
 const PRICE_COLORS: Record<BillboardCurrency, string> = {
   krw: SCREEN_COLORS.brand,
   usd: SCREEN_COLORS.label,
@@ -220,6 +220,11 @@ export const resolveToneColor = (tone: BillboardTone): string => {
   return BILLBOARD_COLORS[tone];
 };
 
+/** 가격 글자 색. 24시간 등락에 따라 초록·빨강으로 바꾸고, 보합이면 통화 색을 씀. */
+export const resolvePriceColor = (currency: BillboardCurrency, tone: BillboardTone): string => {
+  return tone === "flat" ? PRICE_COLORS[currency] : resolveToneColor(tone);
+};
+
 /**
  * 전광판 접속 표시 기준.
  *
@@ -272,11 +277,11 @@ const resolveBillboardChartGeometry = (state: Pick<BillboardState, "candles" | "
 const drawPriceText = (
   context: CanvasRenderingContext2D,
   priceText: string,
-  currency: BillboardCurrency,
+  color: string,
   x: number,
   y: number,
 ): void => {
-  context.fillStyle = PRICE_COLORS[currency];
+  context.fillStyle = color;
   drawFittedText(context, priceText, {
     x,
     y,
@@ -400,7 +405,13 @@ const drawPriceRow = (
   if (options.shouldDrawPrice) {
     context.textAlign = "left";
     context.textBaseline = "middle";
-    drawPriceText(context, priceText, currency, LAYOUT.rowPrice.x, centerY);
+    drawPriceText(
+      context,
+      priceText,
+      resolvePriceColor(currency, tone),
+      LAYOUT.rowPrice.x,
+      centerY,
+    );
   }
 
   drawChangeBadge(context, centerY, changeText, tone, hasPrice);
@@ -561,11 +572,18 @@ export const drawBillboardPrice = (
   context: CanvasRenderingContext2D,
   priceText: string,
   currency: BillboardCurrency,
+  tone: BillboardTone,
 ): void => {
   context.clearRect(0, 0, context.canvas.width, context.canvas.height);
   context.textAlign = "left";
   context.textBaseline = "middle";
-  drawPriceText(context, priceText, currency, 0, LAYOUT.rowPrice.height / 2);
+  drawPriceText(
+    context,
+    priceText,
+    resolvePriceColor(currency, tone),
+    0,
+    LAYOUT.rowPrice.height / 2,
+  );
 };
 
 /**
