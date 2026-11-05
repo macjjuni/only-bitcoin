@@ -348,7 +348,7 @@ describe("clampCameraPosition", () => {
       {
         x: SPACE_SPAWN_RING.centerX,
         z: SPACE_SPAWN_RING.centerZ,
-        y: SPACE_HALL.floorY,
+        y: SPACE_SPAWN_RING.y,
         yaw: 0,
       },
       { yaw: Math.PI, pitch: SPACE_CAMERA.defaultPitch, distance: SPACE_CAMERA.maxDistance },

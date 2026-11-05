@@ -181,13 +181,17 @@ describe("카메라 범위", () => {
 });
 
 describe("스폰 원", () => {
-  it("출입문 스폰 노드 근처 홀 바닥에 있다", () => {
-    const [doorX, doorY, doorZ] = toWorld(findNode("Spawn_Door").translation);
+  it("라운지 스폰 노드를 감싸는 라운지 바닥 고리다", () => {
+    const [loungeX, loungeY, loungeZ] = toWorld(findNode("Spawn_Lounge").translation);
+    const distance = Math.hypot(
+      SPACE_SPAWN_RING.centerX - loungeX,
+      SPACE_SPAWN_RING.centerZ - loungeZ,
+    );
 
-    expect(SPACE_SPAWN_RING.y).toBe(doorY);
-    expect(
-      Math.hypot(SPACE_SPAWN_RING.centerX - doorX, SPACE_SPAWN_RING.centerZ - doorZ),
-    ).toBeLessThan(SPACE_SPAWN_RING.maxRadius);
+    expect(SPACE_SPAWN_RING.y).toBe(SPACE_HALL.loungeY);
+    expect(loungeY).toBeCloseTo(SPACE_HALL.loungeY, 5);
+    expect(distance).toBeGreaterThanOrEqual(SPACE_SPAWN_RING.minRadius);
+    expect(distance).toBeLessThanOrEqual(SPACE_SPAWN_RING.maxRadius);
   });
 
   it("메인 전광판을 바라보게 되어 있다", () => {

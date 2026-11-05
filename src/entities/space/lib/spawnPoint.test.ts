@@ -64,9 +64,9 @@ describe("createSpawnPoint", () => {
     expect(onScreenSide).toBeLessThan(135);
   });
 
-  it("스폰 좌표의 높이는 홀 바닥이다", () => {
+  it("스폰 좌표의 높이는 라운지 바닥이다", () => {
     // 서버도 같은 함수를 쓰는데 서버에는 지형이 없다. 높이를 추측하지 않고
-    // 홀 바닥으로 고정해야 접속 직후 떨어지거나 파묻히지 않는다.
+    // 라운지 바닥으로 고정해야 접속 직후 떨어지거나 파묻히지 않는다.
     for (const clientKey of createClientKeys(50)) {
       expect(createSpawnPoint(clientKey).y).toBe(SPACE_SPAWN_RING.y);
     }

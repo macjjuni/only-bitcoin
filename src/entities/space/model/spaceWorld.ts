@@ -65,20 +65,21 @@ export const SPACE_CAMERA_BOUNDS = {
 } as const;
 
 /**
- * 스폰 원. 출입문과 라운지 사이 빈 바닥임.
+ * 스폰 고리. 가운데 선큰 라운지의 테이블과 둘레 소파 사이 바닥임.
  *
  * 서버도 같은 함수로 좌석 좌표를 만들고 지형을 모르므로, 소품이 없는 것이
- * 확실한 범위로 묶었음. 충돌 메시로 4,000점 재 보니 (0, 14.5) 반지름 2.8 m
- * 안은 바닥이 평평하고 몸통 높이 0.83 m 안에 아무것도 없음. 반지름 3 m 면
- * 라운지 남쪽 계단(z≈11.3)에 걸렸음.
+ * 확실한 범위로 묶었음. 라운지는 (0, 1.75) 중심 반지름 약 7 m 이고 가운데
+ * 원형 테이블이 반지름 약 2.3 m 를 차지함. 충돌 메시로 6,000점 재 보니
+ * 반지름 3.2~5.6 m 고리는 전부 라운지 바닥(GLB y = −1)이 평평하고, 몸통 높이에서
+ * 가장 가까운 물체까지 0.57 m 떨어져 있음.
  */
 export const SPACE_SPAWN_RING = {
   centerX: 0,
-  centerZ: 14.5,
-  /** 홀 바닥 높이. 스폰 좌표의 `y` 가 됨. */
-  y: SPACE_HALL.floorY,
-  minRadius: 0.5,
-  maxRadius: 2.8,
+  centerZ: 1.75,
+  /** 라운지 바닥 높이. 스폰 좌표의 `y` 가 됨. */
+  y: SPACE_HALL.loungeY,
+  minRadius: 3.2,
+  maxRadius: 5.6,
   /** `x = r·cos(a)`, `z = r·sin(a)` 기준. 반폭 π 라 온전한 원임. */
   arcCenterAngle: -Math.PI / 2,
   arcHalfSpan: Math.PI,
