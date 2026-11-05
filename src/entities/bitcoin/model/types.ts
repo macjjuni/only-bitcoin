@@ -1,6 +1,10 @@
 /** CoinGecko `/global` 응답 타입 */
 export interface CoinGeckoGlobalResponse {
-  data: { market_cap_percentage: Record<string, number> };
+  data: {
+    market_cap_percentage: Record<string, number>;
+    /** 통화별 전체 암호화폐 시가총액. BTC 시총은 여기에 도미넌스를 곱해 얻는다. */
+    total_market_cap: Record<string, number>;
+  };
 }
 
 export interface FearGreedIndexResponseTypes {

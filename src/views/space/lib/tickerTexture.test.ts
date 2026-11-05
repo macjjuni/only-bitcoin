@@ -1,6 +1,7 @@
 import { describe, expect, it } from "vitest";
 import {
   createTickerSignature,
+  formatMarketCapUsd,
   resolveFearGreedTone,
   resolveFearGreedZone,
   resolveTickerItems,
@@ -11,6 +12,7 @@ import {
 
 const createState = (overrides: Partial<TickerState> = {}): TickerState => ({
   dominance: 58.42,
+  marketCapUsd: 1_600_054_222_692,
   premium: 0.42,
   exRate: 1_344.9,
   fearGreed: 72,
@@ -27,6 +29,7 @@ describe("resolveTickerItems", () => {
 
     expect(items.map((item) => `${item.label} ${item.valueText}`)).toEqual([
       "도미넌스 58.4%",
+      "시가총액 $1.60T",
       "김프 +0.42%",
       "USD/KRW 1,345",
       "공포·탐욕 72 탐욕",
@@ -34,10 +37,10 @@ describe("resolveTickerItems", () => {
   });
 
   it("김프 부호에 따라 색을 가른다", () => {
-    expect(resolveTickerItems(createState({ premium: 1.2 }))[1].tone).toBe("up");
-    expect(resolveTickerItems(createState({ premium: -1.2 }))[1].tone).toBe("down");
+    expect(resolveTickerItems(createState({ premium: 1.2 }))[2].tone).toBe("up");
+    expect(resolveTickerItems(createState({ premium: -1.2 }))[2].tone).toBe("down");
     // 역프리미엄 ↔ 프리미엄 전환 구간. 0 도 실제 값이라 자리표시로 덮지 않는다.
-    expect(resolveTickerItems(createState({ premium: 0 }))[1]).toMatchObject({
+    expect(resolveTickerItems(createState({ premium: 0 }))[2]).toMatchObject({
       valueText: "0.00%",
       tone: "flat",
     });
@@ -45,10 +48,29 @@ describe("resolveTickerItems", () => {
 
   it("아직 못 받은 값만 자리표시로 둔다", () => {
     const items = resolveTickerItems(
-      createState({ dominance: null, premium: null, exRate: null, fearGreed: null }),
+      createState({
+        dominance: null,
+        marketCapUsd: null,
+        premium: null,
+        exRate: null,
+        fearGreed: null,
+      }),
     );
 
-    expect(items.map((item) => item.valueText)).toEqual(Array(4).fill(TICKER_PLACEHOLDER));
+    expect(items.map((item) => item.valueText)).toEqual(
+      Array(TICKER_TEXTURE.slotCount).fill(TICKER_PLACEHOLDER),
+    );
+  });
+});
+
+describe("formatMarketCapUsd", () => {
+  it("조 단위는 소수 둘째 자리까지 줄여 쓴다", () => {
+    expect(formatMarketCapUsd(1_600_054_222_692)).toBe("$1.60T");
+    expect(formatMarketCapUsd(2_345_000_000_000)).toBe("$2.35T");
+  });
+
+  it("조에 못 미치면 십억 단위로 쓴다", () => {
+    expect(formatMarketCapUsd(840_500_000_000)).toBe("$840.5B");
   });
 });
 

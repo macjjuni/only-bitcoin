@@ -4,7 +4,11 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { memo, type ReactNode, useEffect, useMemo, useRef } from "react";
 import { CanvasTexture, RepeatWrapping, SRGBColorSpace } from "three";
 import { useBitcoinStore } from "@/entities/bitcoin";
-import { useBitcoinDominanceQuery, useFearGreedIndex } from "@/entities/bitcoin/client";
+import {
+  useBitcoinDominanceQuery,
+  useBitcoinMarketCapQuery,
+  useFearGreedIndex,
+} from "@/entities/bitcoin/client";
 import { SPACE_TICKER_FRAME } from "@/entities/space";
 import { usePrefersReducedMotion } from "@/features/space-controls";
 import { calcPremiumPercent } from "@/shared/utils/calculate";
@@ -17,6 +21,7 @@ import {
   createTickerSignature,
   drawTicker,
   resolveTickerItems,
+  TICKER_SCROLL_SPEED,
   TICKER_TEXTURE,
   type TickerState,
 } from "@/views/space/lib/tickerTexture";
@@ -34,7 +39,7 @@ const createTickerSurface = () => {
   texture.colorSpace = SRGBColorSpace;
   // 한 바퀴(40 m)가 패널(28 m)보다 길다. 남는 만큼은 반복으로 이어 붙여 흘린다.
   texture.wrapS = RepeatWrapping;
-  texture.repeat.set(SPACE_TICKER_FRAME.width / SPACE_TICKER_FRAME.cycleLength, 1);
+  texture.repeat.set(SPACE_TICKER_FRAME.width / TICKER_TEXTURE.cycleLength, 1);
 
   return { texture, context: canvasElement.getContext("2d") };
 };
@@ -58,8 +63,9 @@ function SpaceTicker(): ReactNode {
   const prefersReducedMotion = usePrefersReducedMotion();
   /** 10분에 한 번 바뀌는 값이라 구독해도 리렌더가 거의 없다. */
   const dominance = useBitcoinDominanceQuery();
+  const marketCapUsd = useBitcoinMarketCapQuery();
   const fearGreed = useFearGreedIndex();
-  const macroRef = useRef({ dominance, fearGreed });
+  const macroRef = useRef({ dominance, marketCapUsd, fearGreed });
   const lastSignatureRef = useRef<string>("");
   const elapsedSinceCheckRef = useRef<number>(STATE_CHECK_INTERVAL_SECONDS);
   // endregion
@@ -72,6 +78,7 @@ function SpaceTicker(): ReactNode {
 
     return {
       dominance: macroRef.current.dominance || null,
+      marketCapUsd: macroRef.current.marketCapUsd || null,
       // 환율이 없으면 김프가 100% 로 튄다. 세 값이 다 찬 뒤에만 계산함.
       premium: hasPremiumInput
         ? calcPremiumPercent(bitcoinPrice.krw, bitcoinPrice.usd, exRate.value)
@@ -105,8 +112,8 @@ function SpaceTicker(): ReactNode {
       return;
     }
 
-    // UV 한 바퀴가 월드 40 m 다. 초당 흐를 거리를 그 길이로 나눠 UV 속도로 바꾼다.
-    const uvPerSecond = SPACE_TICKER_FRAME.scrollSpeed / SPACE_TICKER_FRAME.cycleLength;
+    // UV 한 바퀴가 월드 한 사이클이다. 초당 흐를 거리를 그 길이로 나눠 UV 속도로 바꾼다.
+    const uvPerSecond = TICKER_SCROLL_SPEED / TICKER_TEXTURE.cycleLength;
 
     surface.texture.offset.x = (surface.texture.offset.x + uvPerSecond * deltaSeconds) % 1;
   };
@@ -115,9 +122,9 @@ function SpaceTicker(): ReactNode {
 
   // region [Life Cycles]
   useEffect(() => {
-    macroRef.current = { dominance, fearGreed };
+    macroRef.current = { dominance, marketCapUsd, fearGreed };
     lastSignatureRef.current = "";
-  }, [dominance, fearGreed]);
+  }, [dominance, marketCapUsd, fearGreed]);
 
   useEffect(() => {
     // 패널이 가로로 길어 항상 축소되어 그려진다. 기본 이방성(1)이면 글자가 뭉개진다.

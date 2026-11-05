@@ -14,17 +14,24 @@ import {
  * 끝과 처음이 만나는 자리에서도 간격이 어긋나지 않게 함.
  */
 
-/** 한 바퀴 40 m 를 100 px/m 로 구움. 전광판(114 px/m)과 비슷한 밀도임. */
+/** 칸 폭이 같아야 한 바퀴 끝과 처음이 이어 붙는 자리에서 간격이 안 튄다. */
+const SLOT_COUNT = 5;
+const SLOT_WIDTH = 1000;
+/** 100 px/m. 전광판(114 px/m)과 비슷한 밀도임. */
+const PIXELS_PER_METER = 100;
+
 export const TICKER_TEXTURE = {
-  width: 4000,
+  width: SLOT_COUNT * SLOT_WIDTH,
   height: 200,
-  /** 지표 네 칸. 칸 폭이 같아야 이어 붙는 자리에서 간격이 안 튄다. */
-  slotCount: 4,
+  slotCount: SLOT_COUNT,
+  /** 한 바퀴의 월드 길이(m). 패널 폭보다 길어서 화면에는 늘 일부만 보인다. */
+  cycleLength: (SLOT_COUNT * SLOT_WIDTH) / PIXELS_PER_METER,
   /** 칸 안쪽 여백. 값이 길어지면 이 폭에 맞춰 글자가 줄어든다. */
   slotPaddingX: 60,
 } as const;
 
-const SLOT_WIDTH = TICKER_TEXTURE.width / TICKER_TEXTURE.slotCount;
+/** 초당 흐르는 거리(m). 28 m 폭을 한 글자가 지나가는 데 약 25초. */
+export const TICKER_SCROLL_SPEED = 1.1;
 
 const FONT = {
   label: 54,
@@ -41,6 +48,8 @@ export type TickerTone = "up" | "down" | "flat";
 export interface TickerState {
   /** BTC 시가총액 점유율(%). 모르면 `null`. */
   dominance: number | null;
+  /** BTC 시가총액(달러). 모르면 `null`. */
+  marketCapUsd: number | null;
   /** 김치 프리미엄(%). 0 도 실제 값이라 모를 때만 `null`. */
   premium: number | null;
   /** USD/KRW 환율. 모르면 `null`. */
@@ -70,6 +79,23 @@ const PREMIUM_FORMATTER = new Intl.NumberFormat("en-US", {
 
 /** 환율은 소수 자리가 멀리서 안 읽히고 1원 미만은 의미도 없어 정수로 둠. */
 const EXCHANGE_RATE_FORMATTER = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
+
+/**
+ * 시가총액 축약 표기.
+ *
+ * 2조 달러를 자릿수로 적으면 열세 글자라 한 칸에 안 들어감. 기존
+ * `formatUsdVolume` 은 조 단위가 없어 `$1600.1B` 로 나와서 따로 둠.
+ */
+export const formatMarketCapUsd = (marketCapUsd: number): string => {
+  if (marketCapUsd >= 1_000_000_000_000) {
+    return `$${(marketCapUsd / 1_000_000_000_000).toFixed(2)}T`;
+  }
+  if (marketCapUsd >= 1_000_000_000) {
+    return `$${(marketCapUsd / 1_000_000_000).toFixed(1)}B`;
+  }
+
+  return `$${Math.round(marketCapUsd).toLocaleString("en-US")}`;
+};
 
 // region [Privates]
 const isDisplayable = (value: number | null): value is number => {
@@ -127,6 +153,13 @@ export const resolveTickerItems = (state: TickerState): TickerItem[] => {
       label: "도미넌스",
       valueText: isDisplayable(state.dominance)
         ? `${PERCENT_FORMATTER.format(state.dominance)}%`
+        : TICKER_PLACEHOLDER,
+      tone: "flat",
+    },
+    {
+      label: "시가총액",
+      valueText: isDisplayable(state.marketCapUsd)
+        ? formatMarketCapUsd(state.marketCapUsd)
         : TICKER_PLACEHOLDER,
       tone: "flat",
     },
