@@ -16,6 +16,7 @@ import {
   drawBillboard,
   drawBillboardChart,
   formatBillboardChange,
+  formatBillboardExRate,
   formatBillboardKrw,
   formatBillboardUsd,
   resolveBillboardChartEndpoint,
@@ -57,6 +58,7 @@ const createState = (overrides: Partial<BillboardState> = {}): BillboardState =>
   usdChange24h: "1.2",
   isKrwConnected: true,
   isUsdConnected: true,
+  exRate: 1_386.5,
   candles: [],
   ...overrides,
 });
@@ -86,6 +88,19 @@ describe("formatBillboardUsd", () => {
 
   it("값이 없으면 자리표시다", () => {
     expect(formatBillboardUsd(0)).toBe(BILLBOARD_PLACEHOLDER);
+  });
+});
+
+describe("formatBillboardExRate", () => {
+  it("소수 한 자리까지 USD/KRW 로 보여준다", () => {
+    expect(formatBillboardExRate(1_386.52)).toBe("USD/KRW 1,386.5");
+    expect(formatBillboardExRate(1_400)).toBe("USD/KRW 1,400.0");
+  });
+
+  it("쿼리가 꺼진 0 과 비정상 값은 줄 자체를 비운다", () => {
+    expect(formatBillboardExRate(0)).toBe("");
+    expect(formatBillboardExRate(-1)).toBe("");
+    expect(formatBillboardExRate(Number.NaN)).toBe("");
   });
 });
 

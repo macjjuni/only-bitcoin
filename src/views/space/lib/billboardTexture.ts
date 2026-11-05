@@ -88,6 +88,8 @@ export interface BillboardState {
   usdChange24h: string;
   isKrwConnected: boolean;
   isUsdConnected: boolean;
+  /** 네이버 USD/KRW. `isUsdtStandard` 설정이면 쿼리가 꺼져 0 으로 남음. */
+  exRate: number;
   /** 바이낸스 BTCUSDT 30분봉 24시간. 비어 있으면 차트 자리에 안내를 띄움. */
   candles: readonly BtcCandle[];
 }
@@ -129,6 +131,8 @@ const LAYOUT = {
   /** 폰에서도 읽히게 키웠음. `+12.3%` 가 칸에 들어가는 폭임. */
   rowChange: { right: 1516, width: 320, height: 100, radius: 18, fontSize: 60 },
   chartCaption: { x: 84, y: 548, fontSize: 34 },
+  /** 캡션과 같은 줄 오른쪽 끝. 등락 배지와 오른쪽 선을 맞춤. */
+  exRate: { right: 1516, y: 548, fontSize: 34, maxWidth: 520 },
   chart: { left: 84, top: 590, width: 1432, height: 430 } satisfies ChartRect,
   /** 마지막 캔들 오른쪽 여백. 끝점 점에서 퍼지는 링이 칸 밖으로 안 나가게 비워 둠. */
   chartEndGutter: 56,
@@ -191,6 +195,21 @@ export const formatBillboardKrw = (price: number): string => {
 
 export const formatBillboardUsd = (price: number): string => {
   return isDisplayablePrice(price) ? `$${INTEGER_FORMATTER.format(price)}` : BILLBOARD_PLACEHOLDER;
+};
+
+const EXCHANGE_RATE_FORMATTER = new Intl.NumberFormat("en-US", {
+  minimumFractionDigits: 1,
+  maximumFractionDigits: 1,
+});
+
+/**
+ * 환율 한 줄. 값이 없으면 빈 문자열이라 호출부가 줄을 건너뜀.
+ *
+ * 자리표시(`—`)를 두지 않는 이유는 보조 정보라서임. 원화 기준이 아닌 사용자는
+ * 환율 쿼리가 아예 꺼져 있어 평생 `—` 만 보게 됨.
+ */
+export const formatBillboardExRate = (rate: number): string => {
+  return isDisplayablePrice(rate) ? `USD/KRW ${EXCHANGE_RATE_FORMATTER.format(rate)}` : "";
 };
 
 /**
@@ -550,6 +569,27 @@ const drawChartCaption = (context: CanvasRenderingContext2D): void => {
   context.fillText("BTC/USDT · 24h · 30m", LAYOUT.chartCaption.x, LAYOUT.chartCaption.y);
 };
 
+/** 캡션 줄 오른쪽 끝에 붙는 환율. 원화 가격을 어떤 기준으로 환산했는지 알려 줌. */
+const drawExRate = (context: CanvasRenderingContext2D, rate: number): void => {
+  const rateText = formatBillboardExRate(rate);
+
+  if (rateText === "") {
+    return;
+  }
+
+  context.textAlign = "right";
+  context.textBaseline = "middle";
+  context.fillStyle = BILLBOARD_COLORS.labelMuted;
+  drawFittedText(context, rateText, {
+    x: LAYOUT.exRate.right,
+    y: LAYOUT.exRate.y,
+    fontWeight: 500,
+    maxFontSizePx: LAYOUT.exRate.fontSize,
+    maxWidth: LAYOUT.exRate.maxWidth,
+    fontStack: NUMERIC_FONT_STACK,
+  });
+};
+
 /** 차트 본문. 좌표는 전체 텍스처 기준이라 별도 차트 텍스처에서는 원점을 옮겨 부름. */
 const drawChartBody = (
   context: CanvasRenderingContext2D,
@@ -641,6 +681,7 @@ export const drawBillboard = (
   });
 
   drawChartCaption(context);
+  drawExRate(context, state.exRate);
 
   if (shouldDrawChart) {
     drawChartBody(context, state);

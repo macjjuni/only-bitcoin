@@ -26,6 +26,7 @@ import {
   drawBillboardChart,
   drawBillboardPrice,
   formatBillboardChange,
+  formatBillboardExRate,
   formatBillboardKrw,
   formatBillboardUsd,
   resolveBillboardChartEndpoint,
@@ -112,13 +113,17 @@ const createStateSignature = (state: BillboardState): string => {
     formatBillboardChange(state.usdChange24h),
     state.isKrwConnected,
     state.isUsdConnected,
+    // 환율은 1분에 한 번 바뀜. 화면 글자로 비교해야 소수 둘째 자리 때문에 큰
+    // 텍스처를 괜히 다시 올리지 않음.
+    formatBillboardExRate(state.exRate),
   ].join("|");
 };
 
 const readBillboardState = (candles: readonly BtcCandle[]): BillboardState => {
-  const { bitcoinPrice } = useBitcoinStore.getState();
+  const { bitcoinPrice, exRate } = useBitcoinStore.getState();
 
   return {
+    exRate: exRate.value,
     krw: bitcoinPrice.krw,
     usd: bitcoinPrice.usd,
     krwChange24h: bitcoinPrice.krwChange24h,
