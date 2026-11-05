@@ -3,6 +3,7 @@
 import { PerformanceMonitor, type PerformanceMonitorApi } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { NeutralToneMapping } from "three";
 import type { ChatIdentity } from "@/features/chat-session";
 import {
   createSpaceInputSource,
@@ -26,26 +27,18 @@ import SpaceScene from "./scene/SpaceScene";
 /** 컨텍스트 복구를 기다리는 시간. 넘기면 폴백으로 전환한다. */
 const CONTEXT_RESTORE_TIMEOUT_MS = 3_000;
 /**
- * 톤 매핑 노출.
+ * 톤 매핑.
  *
- * 1.0 으로 뒀더니 "눈이 피로하다" 는 말이 나왔다. 섬은 노을 하늘이 화면의
- * 절반을 채우고 복셀 블록도 채도가 높아, 기본 노출에서는 밝은 면이 계속
- * 눈을 때린다. 0.72 까지 내렸다가 너무 어두워 0.9 로 맞췄다.
- *
- * **조명만 줄여서는 안 된다.** 하늘은 배경 텍스처라 광원과 무관하게 그대로
- * 밝다. 노출은 하늘까지 포함해 최종 이미지를 한 번에 내리는 유일한 손잡이다.
+ * 홀은 라이트맵에 색이 구워져 있어서 ACES 를 걸면 램프 톤이 누렇게 뜸. 맵
+ * README 권장대로 Neutral 을 쓰고 노출은 1.0 으로 둠. 섬 시절 0.9 는 밝은 노을
+ * 하늘 때문에 내린 값이었음.
  */
-const SPACE_TONE_MAPPING_EXPOSURE = 0.9;
+const SPACE_TONE_MAPPING = NeutralToneMapping;
+const SPACE_TONE_MAPPING_EXPOSURE = 1;
 
 const CAMERA_NEAR = 0.1;
-/**
- * 원평면.
- *
- * 벙커는 사방이 막혀 220 m 로 충분했다. 섬은 600 m 바다 평면이 깔려 있어서,
- * 안개가 수평선을 다 덮기(320 m) 전에 잘리면 바다가 **싹둑 끊긴 가장자리**로
- * 보인다. 안개 끝보다 넉넉히 뒤에 둔다.
- */
-const CAMERA_FAR = 420;
+/** 원평면. 홀 대각선(약 60 m)에 천장 높이를 더해도 넉넉한 값임. */
+const CAMERA_FAR = 120;
 
 interface SpaceCanvasProps {
   identity: ChatIdentity;
@@ -221,6 +214,7 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
         gl={{
           antialias: true,
           powerPreference: "high-performance",
+          toneMapping: SPACE_TONE_MAPPING,
           toneMappingExposure: SPACE_TONE_MAPPING_EXPOSURE,
         }}
         onCreated={onCreatedCanvas}

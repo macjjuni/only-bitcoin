@@ -345,14 +345,6 @@ describe("우측 상단 접속 배지", () => {
 });
 
 describe("패널 비율", () => {
-  it("텍스처 비율이 맵의 액자 안쪽과 같다", () => {
-    // 16:9 였을 때는 높이에 맞춰 끼우느라 좌우로 0.56 m 씩 빈 홈이 남았다.
-    expect(BILLBOARD_TEXTURE.width / BILLBOARD_TEXTURE.height).toBeCloseTo(
-      SPACE_SCREEN_FRAME.width / SPACE_SCREEN_FRAME.height,
-      6,
-    );
-  });
-
   /**
    * 텍스처와 geometry 의 비율이 어긋나면 글자와 차트가 늘어나거나 눌린다.
    * 둘이 다른 파일(entities / views)에 있어 한쪽만 바꾸기 쉬우므로 묶어 둔다.

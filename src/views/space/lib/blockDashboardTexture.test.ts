@@ -1,6 +1,6 @@
 import { describe, expect, it } from "vitest";
 import type { BlockTypes } from "@/entities/block";
-import { SPACE_SCREEN_FRAME } from "@/entities/space";
+import { SPACE_BLOCK_DASHBOARD } from "@/entities/space";
 import { BILLBOARD_TEXTURE } from "@/views/space/lib/billboardTexture";
 import {
   BLOCK_DASHBOARD_PLACEHOLDER,
@@ -40,10 +40,10 @@ describe("BLOCK_DASHBOARD_TEXTURE", () => {
     expect(BLOCK_DASHBOARD_TEXTURE.paddingX).toBe(BILLBOARD_TEXTURE.paddingX);
   });
 
-  it("비율이 맵의 액자 안쪽과 같다", () => {
-    // 비율이 어긋나면 글자가 늘어나거나 액자에 빈 홈이 남는다.
+  it("비율이 패널 geometry 와 같다", () => {
+    // 비율이 어긋나면 글자가 늘어나거나 눌린다.
     expect(BLOCK_DASHBOARD_TEXTURE.width / BLOCK_DASHBOARD_TEXTURE.height).toBeCloseTo(
-      SPACE_SCREEN_FRAME.width / SPACE_SCREEN_FRAME.height,
+      SPACE_BLOCK_DASHBOARD.width / SPACE_BLOCK_DASHBOARD.height,
       6,
     );
   });

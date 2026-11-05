@@ -1,12 +1,12 @@
 import { BufferAttribute, BufferGeometry } from "three";
 import { describe, expect, it } from "vitest";
 import { SPACE_AVATAR_COLLISION_RADIUS, SPACE_STEP_HEIGHT } from "@/entities/space";
-import { createIslandTerrain } from "@/views/space/lib/islandTerrain";
+import { createHallTerrain } from "@/views/space/lib/hallTerrain";
 
 /**
  * 지형 질의를 **손으로 만든 지오메트리**로 고정한다.
  *
- * 실제 맵(`bitcoin_island_draco.glb`)으로 재면 Draco 디코더를 Node 에서
+ * 실제 맵(`bitcoin_hall_draco.glb`)으로 재면 Draco 디코더를 Node 에서
  * 돌려야 하고, 실패했을 때 "맵이 바뀐 것" 과 "질의가 깨진 것" 을 가를 수 없다.
  * 여기서는 계단 한 칸·벽·천장만 있는 최소 지형을 세워 **규칙 자체**를 본다.
  */
@@ -102,7 +102,7 @@ const createGeometry = (quads: Quad[]): BufferGeometry => {
  * ```
  */
 const createTestTerrain = () => {
-  return createIslandTerrain(
+  return createHallTerrain(
     createGeometry([
       createFloor(0, -10, 12, -10, 10),
       // 걸어서 오를 수 있는 턱(복셀 한 칸)과 그 옆면.

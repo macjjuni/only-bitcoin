@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SPACE_BOUNDS, SPACE_CAMERA_BOUNDS, SPACE_ISLAND } from "@/entities/space";
+import { SPACE_BOUNDS, SPACE_CAMERA_BOUNDS, SPACE_HALL, SPACE_SPAWN_RING } from "@/entities/space";
 import {
   applyCameraDrag,
   applyCameraZoom,
@@ -308,12 +308,12 @@ describe("approachCollisionDistance", () => {
 });
 
 describe("clampCameraPosition", () => {
-  it("수면 아래로 내려가지 않는다", () => {
+  it("가장 낮은 바닥 아래로 내려가지 않는다", () => {
     expect(clampCameraPosition({ x: 0, y: -5, z: 0 }).y).toBe(SPACE_CAMERA.minHeight);
-    expect(SPACE_CAMERA.minHeight).toBeGreaterThan(SPACE_ISLAND.seaY);
+    expect(SPACE_CAMERA.minHeight).toBeGreaterThan(SPACE_HALL.loungeY);
   });
 
-  it("궁전 꼭대기보다 높이 뜨지 않는다", () => {
+  it("천장 근처보다 높이 뜨지 않는다", () => {
     expect(clampCameraPosition({ x: 0, y: 500, z: 0 }).y).toBe(SPACE_CAMERA_BOUNDS.maxY);
   });
 
@@ -327,13 +327,12 @@ describe("clampCameraPosition", () => {
     expect(near.z).toBe(SPACE_CAMERA_BOUNDS.minZ);
   });
 
-  it("카메라 경계가 이동 경계보다 넓다", () => {
-    // 플레이어가 경계에 붙으면 카메라는 그 밖으로 나가야 한다. 이동 경계로
-    // 묶으면 카메라가 캐릭터 위로 올라탄다.
-    expect(SPACE_CAMERA_BOUNDS.maxX).toBeGreaterThan(SPACE_BOUNDS.maxX);
-    expect(SPACE_CAMERA_BOUNDS.minX).toBeLessThan(SPACE_BOUNDS.minX);
-    expect(SPACE_CAMERA_BOUNDS.maxZ).toBeGreaterThan(SPACE_BOUNDS.maxZ);
-    expect(SPACE_CAMERA_BOUNDS.minZ).toBeLessThan(SPACE_BOUNDS.minZ);
+  it("카메라 경계가 홀 외벽 안쪽에 있다", () => {
+    // 실내라 벽 밖으로 나가면 바깥 허공이 비친다.
+    expect(SPACE_CAMERA_BOUNDS.maxX).toBeLessThan(SPACE_BOUNDS.maxX);
+    expect(SPACE_CAMERA_BOUNDS.minX).toBeGreaterThan(SPACE_BOUNDS.minX);
+    expect(SPACE_CAMERA_BOUNDS.maxZ).toBeLessThan(SPACE_BOUNDS.maxZ);
+    expect(SPACE_CAMERA_BOUNDS.minZ).toBeGreaterThan(SPACE_BOUNDS.minZ);
   });
 
   it("월드 안쪽 위치는 그대로 둔다", () => {
@@ -342,11 +341,16 @@ describe("clampCameraPosition", () => {
     expect(clampCameraPosition(inside)).toEqual(inside);
   });
 
-  it("최대 줌으로 궁전 단에 서도 카메라가 상자 안에 남는다", () => {
-    // 섬은 벽이 아니라 지형이 카메라를 막는다(`IslandTerrain`). 이 상자는
-    // 그 바깥에서 카메라가 한없이 멀어지지 않게 하는 마지막 가드다.
+  it("최대 줌으로 스폰 자리에 서도 카메라가 상자 안에 남는다", () => {
+    // 벽은 지형 레이캐스트가 막는다(`HallTerrain`). 이 상자는 그게 비었을 때
+    // 카메라가 홀 밖으로 나가지 않게 하는 마지막 가드다.
     const position = resolveCameraPosition(
-      { x: 0, z: -26.25, y: SPACE_ISLAND.palaceY, yaw: 0 },
+      {
+        x: SPACE_SPAWN_RING.centerX,
+        z: SPACE_SPAWN_RING.centerZ,
+        y: SPACE_HALL.floorY,
+        yaw: 0,
+      },
       { yaw: Math.PI, pitch: SPACE_CAMERA.defaultPitch, distance: SPACE_CAMERA.maxDistance },
     );
 

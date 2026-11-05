@@ -5,6 +5,7 @@ import {
   createLocalPlayerState,
   SPACE_AVATAR_COLLISION_RADIUS,
   SPACE_BOUNDS,
+  SPACE_HALL,
   SPACE_STEP_HEIGHT,
 } from "@/entities/space";
 import {
@@ -222,10 +223,10 @@ describe("stepMovement", () => {
     expect(next.yaw).toBe(1.2);
   });
 
-  it("지형을 넘기지 않으면 광장 높이의 평지로 본다", () => {
+  it("지형을 넘기지 않으면 홀 바닥 높이의 평지로 본다", () => {
     // GLB 가 도착하기 전 한두 프레임이 이 경로를 탄다. 0 으로 떨어뜨리면
-    // 맵이 붙는 순간 광장으로 솟아오른다.
-    expect(stepMovement(createState(), createEmptyMovementInput(), 0).y).toBe(5);
+    // 맵이 붙는 순간 홀 바닥으로 솟아오른다.
+    expect(stepMovement(createState(), createEmptyMovementInput(), 0).y).toBe(SPACE_HALL.floorY);
   });
 });
 

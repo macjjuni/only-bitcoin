@@ -21,15 +21,15 @@ const toRingRadius = (fraction: number): number => {
 };
 
 /**
- * 궁전을 바라보는 yaw.
+ * 메인 전광판을 바라보는 yaw.
  *
  * 아바타의 기본 전방은 `-Z` 이므로, Y축 회전 θ 의 전방 벡터는 `(-sinθ, 0, -cosθ)` 다.
  * 목표 방향 `(dx, dz)` 와 맞추면 `θ = atan2(-dx, -dz)` 가 된다.
  */
-const toPalaceFacingYaw = (x: number, z: number): number => {
-  const [palaceX, , palaceZ] = SPACE_SPAWN_FACING;
+const toScreenFacingYaw = (x: number, z: number): number => {
+  const [screenX, , screenZ] = SPACE_SPAWN_FACING;
 
-  return Math.atan2(-(palaceX - x), -(palaceZ - z));
+  return Math.atan2(-(screenX - x), -(screenZ - z));
 };
 // endregion
 
@@ -38,20 +38,18 @@ const toPalaceFacingYaw = (x: number, z: number): number => {
  *
  * 같은 키는 항상 같은 자리로 돌아오므로 재접속 시 위치가 튀지 않는다.
  *
- * **지형을 묻지 않는다.** 서버도 같은 함수로 좌석 좌표를 만드는데 서버에는
- * 충돌 메시가 없다. 그래서 링을 광장 한가운데(소품이 없는 것이 확실한 반지름
- * 9 m 안)로 묶고 `y` 를 광장 바닥 높이로 고정한다 — 벙커 시절처럼 스폰 뒤에
- * 소품 밖으로 밀어내는 보정이 필요 없다.
+ * **지형을 묻지 않음.** 서버도 같은 함수로 좌석 좌표를 만드는데 서버에는
+ * 충돌 메시가 없음. 그래서 소품이 없는 것이 확실한 원 안으로 묶고 `y` 를 홀
+ * 바닥 높이로 고정했음.
  */
 export const createSpawnPoint = (clientKey: string): PlayerTransform => {
   const { centerX, centerZ, y, arcCenterAngle, arcHalfSpan } = SPACE_SPAWN_RING;
-  // 온전한 원이 아니라 궁전 쪽 반원이다. 이유는 `SPACE_SPAWN_RING` 참고 —
-  // 카메라가 플레이어 뒤 +Z 로 물러나므로 +Z 쪽 스폰은 첫 화면이 나무에 가린다.
+  // 호의 폭은 `SPACE_SPAWN_RING` 이 정함. 지금은 반폭 π 라 온전한 원임.
   const arcFraction = toUnitFraction(hashClientKey(clientKey, 0)) * 2 - 1;
   const angle = arcCenterAngle + arcFraction * arcHalfSpan;
   const radius = toRingRadius(toUnitFraction(hashClientKey(clientKey, RADIUS_SEED)));
   const x = centerX + Math.cos(angle) * radius;
   const z = centerZ + Math.sin(angle) * radius;
 
-  return { x, y, z, yaw: toPalaceFacingYaw(x, z) };
+  return { x, y, z, yaw: toScreenFacingYaw(x, z) };
 };

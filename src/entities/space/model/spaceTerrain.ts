@@ -1,13 +1,13 @@
-import { SPACE_BOUNDS, SPACE_ISLAND } from "./spaceWorld";
+import { SPACE_BOUNDS, SPACE_HALL } from "./spaceWorld";
 
 /**
  * 지형 질의 인터페이스.
  *
  * 벙커 시절에는 바닥이 평평해서 소품 사각형 목록(`SPACE_OBSTACLES`)만으로
- * 충분했다. 섬은 다층이라 "여기서 발이 닿는 높이" 와 "여기로 갈 수 있는지" 를
+ * 충분했다. 지금 맵은 단차가 있어서 "여기서 발이 닿는 높이" 와 "여기로 갈 수 있는지" 를
  * **충돌 메시에 직접 물어봐야** 한다.
  *
- * 그 질의는 three 의 BVH 가 하지만(`views/space/lib/islandTerrain`), 이동
+ * 그 질의는 three 의 BVH 가 하지만(`views/space/lib/hallTerrain`), 이동
  * 적분기(`stepMovement`)까지 three 에 묶으면 테스트에서 GLB 를 로드해야 하고
  * 서버는 아예 쓸 수 없다. 그래서 **질의 모양만 여기서 정하고 구현은 주입**한다.
  *
@@ -32,17 +32,11 @@ export interface SpaceTerrain {
   /**
    * `(x, z)` 에서 발이 닿는 높이.
    *
-   * **`feetY` 아래쪽만 본다.** 머리 위 아치나 다리 상판을 지면으로 잡으면
+   * **`feetY` 아래쪽만 본다.** 머리 위 테이블 상판 같은 것을 지면으로 잡으면
    * 그 밑을 지나갈 수 없다. 오를 수 있는 턱(`stepHeight`)까지는 위도 본다.
    *
-   * 아래에 아무것도 없으면 **`-Infinity`** 를 돌려준다. 발밑이 열린 바다라는
-   * 뜻이고, 적분기는 그대로 떨어뜨린다.
-   *
-   * 전에는 바다 높이(0)를 돌려줬다. 그러면 **수면이 걸어다닐 수 있는 바닥**이
-   * 되어, 한 번 떨어진 사람이 월드 상자 끝까지 물 위를 걷고 돌아오지 못했다 —
-   * 섬 가장자리가 5 m 절벽인데 점프 정점은 1.13 m 다. 새로고침 말고는 복구
-   * 수단이 없는 소프트락이었다. 떨어지게 두고 `SpaceScene` 이 스폰으로
-   * 되돌린다.
+   * 아래에 아무것도 없으면 **`-Infinity`** 를 돌려준다. 맵 밖이라는 뜻이고,
+   * 적분기는 그대로 떨어뜨림. 떨어진 사람은 `SpaceScene` 이 스폰으로 되돌림.
    */
   resolveGroundY(x: number, z: number, feetY: number): number;
 
@@ -71,23 +65,22 @@ export const SPACE_AVATAR_COLLISION_HEIGHT = 1.7;
 /**
  * 걸어서 오를 수 있는 턱 높이(m).
  *
- * 맵의 계단 한 칸이 복셀 한 칸(0.25 m)이다. 그보다 낮게 잡으면 계단마다
- * 막히고, 너무 높게 잡으면 허리 높이 난간을 타고 넘는다. 0.35 는 계단 한 칸에
- * 여유를 준 값이고 두 칸(0.5)은 넘지 못한다.
+ * 홀의 단차는 전부 0.5 m 단위임(라운지 계단, 계단식 소파석). 맵 README 권장
+ * 0.55~0.6 중 낮은 쪽을 써서 한 칸은 오르고 두 칸(1.0)은 못 넘게 했음.
  */
-export const SPACE_STEP_HEIGHT = 0.35;
+export const SPACE_STEP_HEIGHT = 0.55;
 
 /**
  * 지형 없이 도는 평지 구현.
  *
- * GLB 가 도착하기 전 첫 프레임과 단위 테스트가 쓴다. 광장 높이에 평평한 바닥이
- * 하나 있고 벽은 바깥 상자뿐이라고 본다. 짧은 순간이라 그 사이에 광장 밖으로
+ * GLB 가 도착하기 전 첫 프레임과 단위 테스트가 쓴다. 홀 바닥 높이에 평평한 바닥이
+ * 하나 있고 벽은 바깥 상자뿐이라고 본다. 짧은 순간이라 그 사이에 소품 안으로
  * 걸어 나가도 GLB 가 붙는 순간 지형이 다시 잡는다.
  *
  * **지면이 없는 자리를 만들지 않는다.** 맵이 오기 전에 빠질 바다가 없어야
  * 접속 직후 물에 빠졌다고 되돌려지는 일이 없다.
  */
-export const createFlatTerrain = (groundY: number = SPACE_ISLAND.plazaY): SpaceTerrain => ({
+export const createFlatTerrain = (groundY: number = SPACE_HALL.floorY): SpaceTerrain => ({
   resolveGroundY: () => groundY,
   resolveMove: (x, z) => ({
     x: Math.min(Math.max(x, SPACE_BOUNDS.minX), SPACE_BOUNDS.maxX),
