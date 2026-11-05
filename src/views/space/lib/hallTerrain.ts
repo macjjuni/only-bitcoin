@@ -10,19 +10,18 @@ import {
 import type { Vector3Like } from "@/features/space-controls";
 
 /**
- * 충돌 메시(`Collision`, 약 2.7만 tri)에 BVH 를 씌운 지형 질의.
+ * 충돌 메시(`Collision`)에 BVH 를 씌운 지형 질의.
  *
  * 질의는 세 가지뿐이다 — 발밑 높이, 수평 벽, 머리 위 천장. 셋 다 BVH 한 번
  * 조회로 끝나므로 고정 타임스텝(초당 60회)에서도 가볍다.
  *
- * **높이와 수평을 분리**한 이유는 계단이다. 맵의 계단 한 칸은 복셀 한 칸
- * (0.25 m)이고, 캡슐로 수평까지 함께 보면 계단마다 턱에 걸린다. 캡슐 아랫점을
+ * **높이와 수평을 분리**한 이유는 계단이다. 홀의 단차는 0.5 m 단위이고, 캡슐로 수평까지 함께 보면 계단마다 턱에 걸린다. 캡슐 아랫점을
  * 오를 수 있는 턱(`SPACE_STEP_HEIGHT`) 위에서 시작해 낮은 턱은 **아예 보지
  * 않게** 하고, 올라서는 일은 발밑 레이캐스트가 처리한다.
  */
 
-/** 발밑을 훑는 거리(m). 궁전 단(11)에서 바다(0)까지 떨어져도 남는 길이다. */
-const GROUND_PROBE_DISTANCE = 60;
+/** 발밑을 훑는 거리(m). 홀 높이 차가 몇 m 뿐이라 넉넉함. */
+const GROUND_PROBE_DISTANCE = 30;
 
 /** 머리 위를 훑는 거리(m). 이보다 높으면 하늘이라 봐도 소용없다. */
 const CEILING_PROBE_DISTANCE = 6;
@@ -102,7 +101,7 @@ const pushCapsuleOutOfTriangle = (triangle: ExtendedTriangle, radius: number): b
 };
 // endregion
 
-export interface IslandTerrain extends SpaceTerrain {
+export interface HallTerrain extends SpaceTerrain {
   /** 지형을 파고들지 않는 카메라 위치. 주시점 쪽으로 당겨서 돌려준다. */
   resolveCameraPosition(focus: Vector3Like, camera: Vector3Like, margin: number): Vector3Like;
 }
@@ -110,17 +109,17 @@ export interface IslandTerrain extends SpaceTerrain {
 /**
  * 충돌 지오메트리로 지형 질의를 만든다.
  *
- * `geometry` 는 GLB 의 `Collision` 메시다. 그 노드에는 변환이 없어 지오메트리
- * 좌표가 곧 월드 좌표라, 매 질의마다 행렬을 곱하지 않아도 된다.
+ * `geometry` 는 GLB `Collision` 메시를 `mapOffsetY` 만큼 올린 사본임. 지오메트리
+ * 좌표가 곧 월드 좌표라 질의마다 행렬을 곱하지 않음.
  */
-export const createIslandTerrain = (geometry: BufferGeometry): IslandTerrain => {
+export const createHallTerrain = (geometry: BufferGeometry): HallTerrain => {
   const bvh = new MeshBVH(geometry);
 
   /**
    * 발이 닿는 높이.
    *
-   * 오를 수 있는 턱 위에서 아래로 쏜다. 위에서 쏘면 머리 위 아치나 다리
-   * 상판을 지면으로 잡아 그 밑을 지나갈 수 없다.
+   * 오를 수 있는 턱 위에서 아래로 쏜다. 위에서 쏘면 머리 위 테이블 상판 같은
+   * 것을 지면으로 잡아 그 밑을 지나갈 수 없다.
    *
    * `FrontSide` 로 **위를 보는 면만** 맞춘다. 아래로 가는 레이는 상향면의
    * 앞면과 하향면의 뒷면을 만나는데, 하향면(천장·처마 밑)을 지면으로 쓰면
@@ -134,8 +133,7 @@ export const createIslandTerrain = (geometry: BufferGeometry): IslandTerrain => 
 
     const hit = bvh.raycastFirst(ray, FrontSide, 0, GROUND_PROBE_DISTANCE);
 
-    // 아래에 아무것도 없으면 열린 바다다. 수면을 바닥으로 돌려주면 그 위를
-    // 걸어다니게 되고, 섬 가장자리가 5 m 절벽이라 돌아올 수도 없다.
+    // 아래에 아무것도 없으면 맵 밖임. 떨어지게 두고 `SpaceScene` 이 스폰으로 되돌림.
     return hit ? hit.point.y : Number.NEGATIVE_INFINITY;
   };
 
@@ -143,7 +141,7 @@ export const createIslandTerrain = (geometry: BufferGeometry): IslandTerrain => 
    * 수평 충돌.
    *
    * 캡슐 아랫점을 `feetY + 오를 수 있는 턱 + 반지름` 에 둔다. 그보다 낮은
-   * 것(계단 한 칸, 광장 문양 테두리)은 캡슐이 아예 만나지 않아 걸리지 않는다.
+   * 것(계단 한 칸, 러그 테두리)은 캡슐이 아예 만나지 않아 걸리지 않는다.
    */
   const resolveMove = (x: number, z: number, feetY: number): TerrainMoveResult => {
     const { segment, capsuleBox } = scratch;
@@ -214,8 +212,7 @@ export const createIslandTerrain = (geometry: BufferGeometry): IslandTerrain => 
    * 카메라가 지형을 파고들지 않도록 주시점 쪽으로 당긴다.
    *
    * 3인칭 카메라는 플레이어 뒤에 있어서, 벽을 등지거나 계단 아래에 서면 카메라가
-   * 지형 안으로 들어간다. 벙커에서는 방이 사각형이라 상자 클램프로 충분했지만
-   * 섬은 언덕·성벽·아치가 사방에 있어 상자로는 못 막는다.
+   * 지형 안으로 들어간다. 기둥·부스·계단석이 사방에 있어 상자 클램프로는 못 막음.
    *
    * 주시점에서 카메라 쪽으로 레이를 쏴, 먼저 맞은 지점보다 `margin` 만큼
    * 앞에 세운다. 양면(`DoubleSide`)을 보는 이유는 충돌 메시가 닫힌 입체가

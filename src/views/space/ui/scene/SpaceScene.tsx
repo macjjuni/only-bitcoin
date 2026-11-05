@@ -11,16 +11,16 @@ import {
   useRef,
   useState,
 } from "react";
-import type { Group } from "three";
+import { type Group, PerspectiveCamera } from "three";
 import {
   createFlatTerrain,
   createLocalPlayerState,
   createSpawnPoint,
   type LocalPlayerState,
   resolveColorIndexFromClientKey,
-  SPACE_ISLAND,
+  SPACE_HALL,
+  SPACE_MENU_FRAME,
   SPACE_SCREEN_PLACEMENTS,
-  SPACE_SCREEN_SCALE,
   type SpacePeer,
   type SpaceTerrain,
 } from "@/entities/space";
@@ -50,19 +50,19 @@ import {
 import type { SpaceSession } from "@/features/space-session";
 import { spaceConfig } from "@/shared/config/space";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
-import type { LanternAnchor } from "@/views/space/lib/islandModel";
-import type { IslandTerrain } from "@/views/space/lib/islandTerrain";
+import type { LanternAnchor } from "@/views/space/lib/hallModel";
+import type { HallTerrain } from "@/views/space/lib/hallTerrain";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 import { createEmptyAdTextSlot } from "@/views/space/lib/textBannerTexture";
 import BlockDashboard from "./BlockDashboard";
 import ChatBubbles from "./ChatBubbles";
-import Island from "./Island";
+import Hall from "./Hall";
+import MenuGraffiti from "./MenuGraffiti";
 import Nameplates from "./Nameplates";
 import PlayerAvatar from "./PlayerAvatar";
 import PriceBillboard from "./PriceBillboard";
 import RemoteAvatars from "./RemoteAvatars";
-import SceneLighting, { SKY_FALLBACK_COLOR } from "./SceneLighting";
-import SkyBackground from "./SkyBackground";
+import SceneLighting from "./SceneLighting";
 import TextAdBanner from "./TextAdBanner";
 
 interface SpaceSceneProps {
@@ -91,10 +91,11 @@ function SpaceScene({
   // region [Hooks]
   const canvasElement = useThree((rootState) => rootState.gl.domElement);
   const camera = useThree((rootState) => rootState.camera);
+  const viewportSize = useThree((rootState) => rootState.size);
   const prefersReducedMotion = usePrefersReducedMotion();
   const isCoarsePointer = useCoarsePointer();
 
-  /** 손가락 기기는 가장 멀리 물러나 시작해 섬 전체가 한 화면에 들어오게 한다. */
+  /** 손가락 기기는 가장 멀리 물러나 시작해 전광판과 라운지가 한 화면에 들어오게 함. */
   const initialCameraDistance = isCoarsePointer
     ? SPACE_CAMERA.touchInitialDistance
     : SPACE_CAMERA.defaultDistance;
@@ -121,14 +122,14 @@ function SpaceScene({
   /**
    * 지형 질의.
    *
-   * GLB 가 도착하기 전에는 광장 높이의 평지다. 그 사이에도 걸을 수 있고,
+   * GLB 가 도착하기 전에는 홀 바닥 높이의 평지다. 그 사이에도 걸을 수 있고,
    * 맵이 붙는 순간 발밑이 실제 지형으로 바뀐다. 상태가 아니라 ref 인 이유는
    * `useFrame` 안에서만 읽기 때문이다 — 상태로 올리면 맵 도착이 씬 전체
    * 리렌더가 된다.
    */
   const terrainRef = useRef<SpaceTerrain>(createFlatTerrain());
   /** 카메라 충돌용. 지형과 달리 평지 대체본이 없어 도착 전에는 건너뛴다. */
-  const islandTerrainRef = useRef<IslandTerrain | null>(null);
+  const hallTerrainRef = useRef<HallTerrain | null>(null);
   /**
    * 지형이 허용하는 카메라 거리 상한. 막히면 즉시 줄고 풀리면 천천히 는다.
    *
@@ -207,12 +208,10 @@ function SpaceScene({
   };
 
   /**
-   * 바다에 빠진 플레이어를 스폰 지점으로 되돌린다.
+   * 맵 밖으로 빠진 플레이어를 스폰 지점으로 되돌린다.
    *
-   * 지형이 발밑에 아무것도 없다고 하면(`-Infinity`) 그대로 떨어지는데, 수면
-   * 아래로 내려간 순간이 그 신호다. 맵에 뚫린 구멍이 어디든 **한 곳에서 전부
-   * 받아낸다** — 무지개 다리 난간처럼 알려진 자리만 막으면 모르는 구멍이
-   * 남는다.
+   * 지형이 발밑에 아무것도 없다고 하면(`-Infinity`) 그대로 떨어지는데, 라운지
+   * 바닥보다 내려간 순간이 그 신호임. 맵에 뚫린 구멍이 어디든 한 곳에서 받아냄.
    *
    * **`publishMovement` 보다 먼저 돌아야 한다.** 서버는 `y < 0` 을 거절하므로
    * 음수 좌표가 한 번이라도 나가면 이동이 반려되고 화면이 튄다.
@@ -220,8 +219,8 @@ function SpaceScene({
    * 카메라 궤도의 yaw 도 스폰 방향으로 돌린다. 거리·피치는 사용자가 맞춰 둔
    * 값이라 건드리지 않는다.
    */
-  const resolveDrowning = (playerState: LocalPlayerState): LocalPlayerState => {
-    if (playerState.y >= SPACE_ISLAND.seaY) {
+  const resolveFallOut = (playerState: LocalPlayerState): LocalPlayerState => {
+    if (playerState.y >= SPACE_HALL.fallResetY) {
       return playerState;
     }
 
@@ -244,7 +243,7 @@ function SpaceScene({
    * 늦게 따라와서, 벽에 붙는 순간 한 프레임 동안 벽 안이 보인다.
    *
    * 지형이 허용하는 **거리 상한**을 따로 들고 비대칭으로 따라간다. 당길 때는
-   * 즉시, 풀 때는 감쇠다. 광장 소품 옆을 지날 때 카메라가 튕기는 것이
+   * 즉시, 풀 때는 감쇠다. 기둥·부스 옆을 지날 때 카메라가 튕기는 것이
    * 멀미의 주범이라 푸는 쪽만 늦춘다. 사용자가 줌을 바꾼 거리는 이 상한과
    * 무관하게 `Math.min` 으로 그대로 반영된다 — 상한에 감쇠를 걸었다고
    * 줌아웃까지 늦어지면 조작이 둔해진다.
@@ -264,11 +263,8 @@ function SpaceScene({
     }
 
     const blocked =
-      islandTerrainRef.current?.resolveCameraPosition(
-        focus,
-        position,
-        SPACE_CAMERA.boundaryMargin,
-      ) ?? position;
+      hallTerrainRef.current?.resolveCameraPosition(focus, position, SPACE_CAMERA.boundaryMargin) ??
+      position;
     const blockedDistance = Math.hypot(
       blocked.x - focus.x,
       blocked.y - focus.y,
@@ -293,8 +289,8 @@ function SpaceScene({
   // endregion
 
   // region [Events]
-  const onReadyTerrain = useCallback((terrain: IslandTerrain): void => {
-    islandTerrainRef.current = terrain;
+  const onReadyTerrain = useCallback((terrain: HallTerrain): void => {
+    hallTerrainRef.current = terrain;
   }, []);
 
   const onReadyLanterns = useCallback((anchors: readonly LanternAnchor[]): void => {
@@ -313,6 +309,26 @@ function SpaceScene({
     // 브라우저 기본 제스처가 드래그 회전을 가로채지 않게 한다.
     canvasElement.style.touchAction = "none";
   }, [camera, canvasElement, spawnTransform]);
+
+  useLayoutEffect(() => {
+    if (!(camera instanceof PerspectiveCamera)) {
+      return;
+    }
+
+    const { width, height } = viewportSize;
+    const framingShift = isCoarsePointer
+      ? SPACE_CAMERA.touchFramingShift
+      : SPACE_CAMERA.desktopFramingShift;
+
+    // 렌즈를 위로 옮기면 화면 속 아바타가 아래로 내려감. 크기가 바뀔 때마다 다시 맞춤.
+    if (framingShift > 0 && width > 0 && height > 0) {
+      camera.setViewOffset(width, height, 0, -height * framingShift, width, height);
+    } else {
+      camera.clearViewOffset();
+    }
+
+    camera.updateProjectionMatrix();
+  }, [camera, viewportSize, isCoarsePointer]);
 
   useLayoutEffect(() => {
     const self = session.self;
@@ -340,9 +356,9 @@ function SpaceScene({
     const steppedState = advancePlayerState(cameraOrbit.yaw, deltaSeconds);
     applyPlayerTransform(steppedState);
 
-    // 물에 빠졌으면 여기서 스폰으로 되돌아온다. 되돌린 궤도를 쓰려고 아래
+    // 맵 밖으로 빠졌으면 여기서 스폰으로 되돌아온다. 되돌린 궤도를 쓰려고 아래
     // 카메라 계산은 지역 변수가 아니라 ref 를 다시 읽는다.
-    const playerState = resolveDrowning(steppedState);
+    const playerState = resolveFallOut(steppedState);
 
     session.publishMovement(playerState);
 
@@ -371,36 +387,22 @@ function SpaceScene({
       />
 
       {/*
-        360° 파노라마 하늘. 받는 동안에는 단색으로 버틴다 — 맵과 같은
-        경계에 묶으면 하늘 한 장 때문에 섬까지 늦게 뜬다.
-      */}
-      <Suspense fallback={<color attach="background" args={[SKY_FALLBACK_COLOR]} />}>
-        <SkyBackground />
-      </Suspense>
-
-      {/*
-        맵은 따로 매달아 둔다. 0.57 MB 를 받고 Draco 를 푸는 동안 씬 전체가
-        멈추면 아바타도 HUD 뒤 빈 화면도 아무것도 안 보인다. 그 사이 발밑은
-        광장 높이의 평지라 걸어다닐 수는 있다.
+        맵은 따로 매달아 둔다. Draco 를 푸는 동안 씬 전체가 멈추면 아바타도
+        안 보임. 그 사이 발밑은 홀 바닥 높이의 평지라 걸어다닐 수는 있다.
       */}
       <Suspense fallback={null}>
-        <Island
+        <Hall
           terrainRef={terrainRef}
           onReadyTerrain={onReadyTerrain}
           onReadyLanterns={onReadyLanterns}
-          hasRealtimeShadows={hasRealtimeShadows}
         />
       </Suspense>
 
-      {/*
-        광장 양옆 금장 액자에 실시간 패널을 끼운다. 액자 안쪽 홈이 6 × 2.75 라
-        설계 치수(9.6 × 5.4)를 높이에 맞춰 줄인다. 위치·회전은 GLB 의
-        `Screen_*` 쿼드에서 읽은 값이다.
-      */}
+      {/* 메인 전광판 액자(28 × 10.5) 왼쪽 반쪽에 시세판을 끼움. */}
       <group
         position={SPACE_SCREEN_PLACEMENTS.billboard.position}
         rotation={[0, SPACE_SCREEN_PLACEMENTS.billboard.rotationY, 0]}
-        scale={SPACE_SCREEN_SCALE}
+        scale={SPACE_SCREEN_PLACEMENTS.billboard.scale}
       >
         <PriceBillboard />
 
@@ -411,12 +413,18 @@ function SpaceScene({
         {spaceConfig.isAdEnabled && <TextAdBanner slot={textAdSlot} />}
       </group>
 
+      {/* 같은 액자 오른쪽 반쪽에 네트워크 현황판을 끼움. */}
       <group
         position={SPACE_SCREEN_PLACEMENTS.blockDashboard.position}
         rotation={[0, SPACE_SCREEN_PLACEMENTS.blockDashboard.rotationY, 0]}
-        scale={SPACE_SCREEN_SCALE}
+        scale={SPACE_SCREEN_PLACEMENTS.blockDashboard.scale}
       >
         <BlockDashboard />
+      </group>
+
+      {/* 커피 바 메뉴판 자리(6 × 2.5)에 분필 낙서판을 끼움. */}
+      <group position={SPACE_MENU_FRAME.position} rotation={[0, SPACE_MENU_FRAME.rotationY, 0]}>
+        <MenuGraffiti />
       </group>
 
       <group ref={playerGroupRef}>

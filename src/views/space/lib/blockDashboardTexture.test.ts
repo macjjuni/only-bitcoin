@@ -1,20 +1,26 @@
 import { describe, expect, it } from "vitest";
 import type { BlockTypes } from "@/entities/block";
-import { SPACE_SCREEN_FRAME } from "@/entities/space";
+import { SPACE_BLOCK_DASHBOARD } from "@/entities/space";
 import { BILLBOARD_TEXTURE } from "@/views/space/lib/billboardTexture";
 import {
   BLOCK_DASHBOARD_PLACEHOLDER,
   BLOCK_DASHBOARD_TEXTURE,
+  createBlockDashboardSignature,
+  drawBlockDashboard,
   formatBlockHeight,
   formatBlocksToHalving,
   formatElapsed,
   formatHalvingHeight,
   formatHalvingProgress,
+  formatLatestBlockMeta,
   formatPoolName,
   formatSubsidy,
   formatTimeToHalving,
+  HALVING_SEGMENT_COUNT,
   isBlockFeedStale,
+  RECENT_BLOCK_COUNT,
   resolveBlockDashboardState,
+  resolveFilledSegmentCount,
 } from "@/views/space/lib/blockDashboardTexture";
 
 const MINUTE = 60;
@@ -40,10 +46,10 @@ describe("BLOCK_DASHBOARD_TEXTURE", () => {
     expect(BLOCK_DASHBOARD_TEXTURE.paddingX).toBe(BILLBOARD_TEXTURE.paddingX);
   });
 
-  it("비율이 맵의 액자 안쪽과 같다", () => {
-    // 비율이 어긋나면 글자가 늘어나거나 액자에 빈 홈이 남는다.
+  it("비율이 패널 geometry 와 같다", () => {
+    // 비율이 어긋나면 글자가 늘어나거나 눌린다.
     expect(BLOCK_DASHBOARD_TEXTURE.width / BLOCK_DASHBOARD_TEXTURE.height).toBeCloseTo(
-      SPACE_SCREEN_FRAME.width / SPACE_SCREEN_FRAME.height,
+      SPACE_BLOCK_DASHBOARD.width / SPACE_BLOCK_DASHBOARD.height,
       6,
     );
   });
@@ -163,5 +169,111 @@ describe("isBlockFeedStale", () => {
   it("경과를 모르면 오래된 것으로 본다", () => {
     // 데이터가 없는 상태를 초록 점으로 보여주면 살아 있는 것처럼 읽힌다.
     expect(isBlockFeedStale(null)).toBe(true);
+  });
+});
+
+describe("네트워크 현황 파생값", () => {
+  it("최근 블록을 오래된 것부터 최대 4개 늘어놓는다", () => {
+    const blocks = Array.from({ length: 8 }, (_, index) =>
+      createBlock({ height: CURRENT_HEIGHT - index, txCount: 3_000 + index }),
+    );
+    const state = resolveBlockDashboardState(blocks, NOW_MS);
+
+    expect(state.recentBlocks).toHaveLength(RECENT_BLOCK_COUNT);
+    expect(state.recentBlocks.map((block) => block.height)).toEqual([
+      CURRENT_HEIGHT - 3,
+      CURRENT_HEIGHT - 2,
+      CURRENT_HEIGHT - 1,
+      CURRENT_HEIGHT,
+    ]);
+    expect(state.recentBlocks.at(-1)?.txCount).toBe(3_000);
+    expect(state.txCount).toBe(3_000);
+  });
+
+  it("거래 수가 없는 구버전 캐시는 null 로 둔다", () => {
+    const state = resolveBlockDashboardState([createBlock()], NOW_MS);
+
+    expect(state.txCount).toBeNull();
+    expect(state.recentBlocks[0]?.txCount).toBeNull();
+  });
+
+  it("수수료를 채운다", () => {
+    const state = resolveBlockDashboardState([createBlock()], NOW_MS, { halfHourFee: 6 });
+
+    expect(state.feeRate).toBe(6);
+  });
+
+  it("소켓 연결 전에는 네트워크 값도 비운다", () => {
+    const emptyBlock = createBlock({ height: 0, timestamp: 0, poolName: "-", difficulty: 0 });
+    const state = resolveBlockDashboardState([emptyBlock], NOW_MS, { halfHourFee: 0 });
+
+    expect(state.recentBlocks).toEqual([]);
+    expect(state.feeRate).toBeNull();
+  });
+});
+
+describe("네트워크 현황 포맷", () => {
+  it("최신 블록 줄은 아는 항목만 잇는다", () => {
+    const full = resolveBlockDashboardState([createBlock({ txCount: 3_412 })], NOW_MS, {
+      halfHourFee: 6,
+    });
+    const partial = resolveBlockDashboardState([createBlock({ poolName: "-" })], NOW_MS);
+
+    expect(formatLatestBlockMeta(full)).toBe(
+      "12분 전 · 거래 3,412건 · 수수료 6 sat/vB · Foundry USA",
+    );
+    expect(formatLatestBlockMeta(partial)).toBe("12분 전");
+  });
+
+  it("반감기 막대는 진행률만큼 칸을 채우되 0 % 초과면 한 칸은 칠한다", () => {
+    expect(resolveFilledSegmentCount(null)).toBe(0);
+    expect(resolveFilledSegmentCount(0)).toBe(0);
+    expect(resolveFilledSegmentCount(0.1)).toBe(1);
+    expect(resolveFilledSegmentCount(63.5)).toBe(Math.round(0.635 * HALVING_SEGMENT_COUNT));
+    expect(resolveFilledSegmentCount(120)).toBe(HALVING_SEGMENT_COUNT);
+  });
+
+  it("화면 글자가 같으면 서명도 같아 다시 그리지 않는다", () => {
+    // 경과 초가 달라도 분 표시가 같으면 텍스처를 다시 올리지 않는다.
+    const first = resolveBlockDashboardState([createBlock()], NOW_MS);
+    const secondLater = resolveBlockDashboardState([createBlock()], NOW_MS + 5_000);
+    const minuteLater = resolveBlockDashboardState([createBlock()], NOW_MS + 60_000);
+
+    expect(createBlockDashboardSignature(secondLater)).toBe(createBlockDashboardSignature(first));
+    expect(createBlockDashboardSignature(minuteLater)).not.toBe(
+      createBlockDashboardSignature(first),
+    );
+  });
+});
+
+describe("우측 상단 상태 배지", () => {
+  const traceBadgeLabel = (elapsedMinutes: number): string | null => {
+    let label: string | null = null;
+    const ignoredDrawingOperation = (): void => undefined;
+    const canvasProperties: Record<string, unknown> = {
+      measureText: (text: string) => ({ width: text.length * 20 }),
+      createLinearGradient: () => ({ addColorStop: ignoredDrawingOperation }),
+      fillText: (text: string) => {
+        if (text === "LIVE" || text === "DELAYED") {
+          label = text;
+        }
+      },
+    };
+    const context = new Proxy(canvasProperties, {
+      get: (target, property) => Reflect.get(target, property) ?? ignoredDrawingOperation,
+    }) as unknown as CanvasRenderingContext2D;
+    const block = createBlock({ timestamp: NOW_MS / 1000 - elapsedMinutes * MINUTE });
+
+    drawBlockDashboard(context, resolveBlockDashboardState([block], NOW_MS));
+
+    return label;
+  };
+
+  it("블록이 제때 나오면 시세판과 같은 LIVE 배지를 그린다", () => {
+    expect(traceBadgeLabel(5)).toBe("LIVE");
+  });
+
+  it("블록이 20분 넘게 안 나오면 DELAYED 로 바뀐다", () => {
+    expect(traceBadgeLabel(25)).toBe("DELAYED");
   });
 });

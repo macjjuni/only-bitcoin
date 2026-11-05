@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import { SPACE_AVATAR_COLORS, SPACE_ISLAND, SPACE_MAX_OCCUPANTS } from "@/entities/space";
+import { SPACE_AVATAR_COLORS, SPACE_HALL, SPACE_MAX_OCCUPANTS } from "@/entities/space";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 
 describe("createStressDummies", () => {
@@ -64,9 +64,9 @@ describe("advanceStressDummies", () => {
     }
   });
 
-  it("광장 바닥 높이에 선다", () => {
+  it("홀 바닥 높이에 선다", () => {
     for (const dummy of createStressDummies(SPACE_MAX_OCCUPANTS)) {
-      expect(dummy.y).toBe(SPACE_ISLAND.plazaY);
+      expect(dummy.y).toBe(SPACE_HALL.floorY);
     }
   });
 

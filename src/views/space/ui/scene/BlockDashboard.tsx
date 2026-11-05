@@ -5,12 +5,20 @@ import { memo, type ReactNode, useEffect, useMemo, useRef } from "react";
 import { CanvasTexture, SRGBColorSpace } from "three";
 import { useBlockStore } from "@/entities/block";
 import { SPACE_BLOCK_DASHBOARD } from "@/entities/space";
+import { usePrefersReducedMotion } from "@/features/space-controls";
 import {
   BLOCK_DASHBOARD_TEXTURE,
-  type BlockDashboardState,
+  createBlockDashboardSignature,
   drawBlockDashboard,
+  isBlockFeedStale,
   resolveBlockDashboardState,
 } from "@/views/space/lib/blockDashboardTexture";
+import { loadScreenFonts } from "@/views/space/lib/screenCanvas";
+import {
+  resolveScreenMaterialCacheKey,
+  sharpenScreenMapSampling,
+} from "@/views/space/lib/screenMaterial";
+import BillboardOnlinePulse from "./BillboardOnlinePulse";
 
 /**
  * 유휴 상태에서 경과 시간을 다시 보는 간격.
@@ -35,27 +43,10 @@ const createDashboardTexture = (): {
 
   return { texture, context: canvasElement.getContext("2d") };
 };
-
-/** 같은 값이면 다시 칠하지 않는다. 캔버스 갱신이 GPU 업로드를 유발한다. */
-const hasSameState = (left: BlockDashboardState | null, right: BlockDashboardState): boolean => {
-  if (!left) {
-    return false;
-  }
-
-  return (
-    left.height === right.height &&
-    left.poolName === right.poolName &&
-    left.subsidy === right.subsidy &&
-    left.nextHalvingHeight === right.nextHalvingHeight &&
-    left.blocksToHalving === right.blocksToHalving &&
-    // 경과는 분이 바뀔 때만 다시 그린다.
-    Math.floor((left.elapsedSeconds ?? -1) / 60) === Math.floor((right.elapsedSeconds ?? -1) / 60)
-  );
-};
 // endregion
 
 /**
- * 전광판 오른쪽 비트코인 블록 현황판.
+ * 메인 전광판 오른쪽 칸, 비트코인 네트워크 현황판.
  *
  * 데이터는 전역 `Initializer` 가 띄운 mempool.space 소켓이 이미 `blockStore` 에
  * 넣고 있다. 이 패널은 그 스토어를 읽기만 하므로 `/space` 전용 데이터 레이어를
@@ -71,7 +62,10 @@ function BlockDashboard(): ReactNode {
   // region [Hooks]
   const renderer = useThree((rootState) => rootState.gl);
   const surface = useMemo(() => createDashboardTexture(), []);
-  const lastStateRef = useRef<BlockDashboardState | null>(null);
+  const lastSignatureRef = useRef<string>("");
+  /** 블록이 제때 나오는 중이면 `true`. LIVE 점의 확산 링이 이 값을 따름. */
+  const isLiveRef = useRef<boolean>(false);
+  const prefersReducedMotion = usePrefersReducedMotion();
   const elapsedSinceCheckRef = useRef<number>(IDLE_CHECK_INTERVAL_SECONDS);
   /** 소켓 수신 플래그. 다음 프레임에 바로 그린다. */
   const hasPendingUpdateRef = useRef<boolean>(true);
@@ -86,15 +80,18 @@ function BlockDashboard(): ReactNode {
       return;
     }
 
-    const { blockData } = useBlockStore.getState();
-    const nextState = resolveBlockDashboardState(blockData, Date.now());
+    const { blockData, fees } = useBlockStore.getState();
+    const nextState = resolveBlockDashboardState(blockData, Date.now(), fees);
+    const signature = createBlockDashboardSignature(nextState);
 
-    if (hasSameState(lastStateRef.current, nextState)) {
+    // 화면 글자가 그대로면 다시 칠하지 않음. 캔버스 갱신이 GPU 업로드를 부름.
+    if (signature === lastSignatureRef.current) {
       return;
     }
 
     drawBlockDashboard(context, nextState);
-    lastStateRef.current = nextState;
+    lastSignatureRef.current = signature;
+    isLiveRef.current = !isBlockFeedStale(nextState.elapsedSeconds);
     texture.needsUpdate = true;
   };
   // endregion
@@ -110,6 +107,22 @@ function BlockDashboard(): ReactNode {
       surface.texture.dispose();
     };
   }, [surface, renderer]);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    // 웹폰트가 늦게 오면 대체 글꼴로 구운 텍스처를 한 번 다시 그림.
+    loadScreenFonts().then((hasLoaded) => {
+      if (isMounted && hasLoaded) {
+        lastSignatureRef.current = "";
+        hasPendingUpdateRef.current = true;
+      }
+    });
+
+    return () => {
+      isMounted = false;
+    };
+  }, []);
 
   useEffect(() => {
     // 스토어 구독을 훅이 아니라 직접 건다. `useBlockStore()` 로 받으면 블록·
@@ -137,11 +150,21 @@ function BlockDashboard(): ReactNode {
   // 테두리 메시를 두지 않는다. 맵의 금장 액자가 이미 테두리라, 그 안에 또
   // 테두리를 넣으면 액자 안쪽 홈이 두 겹이 된다.
   return (
-    <mesh>
-      <planeGeometry args={[SPACE_BLOCK_DASHBOARD.width, SPACE_BLOCK_DASHBOARD.height]} />
-      {/* 자체 발광으로 그린다. 조명에 맡기면 노을 역광에서 글자가 어두워진다. */}
-      <meshBasicMaterial map={surface.texture} toneMapped={false} />
-    </mesh>
+    <group>
+      <mesh>
+        <planeGeometry args={[SPACE_BLOCK_DASHBOARD.width, SPACE_BLOCK_DASHBOARD.height]} />
+        {/* 자체 발광으로 그린다. 조명에 맡기면 노을 역광에서 글자가 어두워진다. */}
+        <meshBasicMaterial
+          map={surface.texture}
+          toneMapped={false}
+          onBeforeCompile={sharpenScreenMapSampling}
+          customProgramCacheKey={resolveScreenMaterialCacheKey}
+        />
+      </mesh>
+
+      {/* 시세판과 같은 자리·같은 모양의 LIVE 점 확산 링. */}
+      <BillboardOnlinePulse isOnlineRef={isLiveRef} prefersReducedMotion={prefersReducedMotion} />
+    </group>
   );
 }
 // endregion

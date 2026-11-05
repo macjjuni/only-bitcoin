@@ -17,12 +17,13 @@ export default function useMempoolSocket(shouldShowMiningEffects: boolean) {
   const handleMempoolBlocks = useCallback((blocks: MemPoolBlockTypes[]) => {
     const { setBlockData } = useBlockStore.getState();
     const sanitizedBlocks: BlockTypes[] = blocks
-      .map(({ id, height, timestamp, size, difficulty, extras }) => ({
+      .map(({ id, height, timestamp, size, difficulty, tx_count, extras }) => ({
         id,
         height,
         timestamp,
         size,
         difficulty,
+        txCount: tx_count,
         poolName: extras.pool.name,
       }))
       .sort((a, b) => b.height - a.height);
@@ -36,13 +37,14 @@ export default function useMempoolSocket(shouldShowMiningEffects: boolean) {
     const isContained = blockData.some((blockItem) => blockItem.height === block.height);
     if (isContained) return;
 
-    const { id, height, size, timestamp, difficulty, extras } = block;
+    const { id, height, size, timestamp, difficulty, tx_count, extras } = block;
     const sanitizedBlock: BlockTypes = {
       id,
       height,
       size,
       timestamp,
       difficulty,
+      txCount: tx_count,
       poolName: extras.pool.name,
     };
 

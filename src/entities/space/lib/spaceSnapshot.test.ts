@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
 import type { SpaceMotion, SpaceMotionSnapshot } from "../model/spaceProtocol";
 import { SPACE_PROTOCOL_VERSION } from "../model/spaceProtocol";
-import { SPACE_ISLAND, SPACE_MAX_ALTITUDE } from "../model/spaceWorld";
+import { SPACE_HALL, SPACE_MAX_ALTITUDE } from "../model/spaceWorld";
 import { decodeSpaceSnapshot, encodeSpaceSnapshot } from "./spaceSnapshot";
 
 const createMotion = (overrides: Partial<SpaceMotion> = {}): SpaceMotion => ({
@@ -41,9 +41,9 @@ describe("공간 바이너리 스냅샷", () => {
     });
   });
 
-  it("궁전 단 높이를 1 cm 정밀도로 왕복한다", () => {
-    // 1바이트(2.55 m)로는 담기지 않던 높이다. 광장 5, 테라스 7.5, 궁전 11.
-    const heights = [SPACE_ISLAND.plazaY, SPACE_ISLAND.terraceY, SPACE_ISLAND.palaceY, 12.34];
+  it("홀 층 높이를 1 cm 정밀도로 왕복한다", () => {
+    // 라운지 0.5, 홀 바닥 1.5, 계단식 소파석 윗단 2.5, 점프 중 높이.
+    const heights = [SPACE_HALL.loungeY, SPACE_HALL.floorY, 2.5, 12.34];
     const snapshot = {
       timestamp: 1,
       players: heights.map((y, seat) => createMotion({ seat, y })),

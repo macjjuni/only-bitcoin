@@ -40,12 +40,18 @@ describe("resolveColorIndexFromClientKey", () => {
       const spawn = createSpawnPoint(key);
       const colorIndex = resolveColorIndexFromClientKey(key);
       const angles = anglesByColor.get(colorIndex) ?? [];
-      angles.push(Math.atan2(spawn.z, spawn.x));
+      // 호 중심 기준 각도로 펴서 본다. 온전한 원이면 ±π 에서 한 번 끊김.
+      const angle = Math.atan2(
+        spawn.z - SPACE_SPAWN_RING.centerZ,
+        spawn.x - SPACE_SPAWN_RING.centerX,
+      );
+      const offset = angle - SPACE_SPAWN_RING.arcCenterAngle;
+      angles.push(Math.atan2(Math.sin(offset), Math.cos(offset)));
       anglesByColor.set(colorIndex, angles);
     }
 
-    // 스폰이 궁전 쪽 반원으로 좁아져 각도가 가질 수 있는 폭 자체가 π 다.
-    // 상관이 없다면 같은 색이라도 그 폭의 대부분에 흩어져야 한다.
+    // 각도가 가질 수 있는 폭은 호의 폭(2 × 반폭)임. 상관이 없다면 같은
+    // 색이라도 그 폭의 대부분에 흩어져야 함.
     const arcSpan = SPACE_SPAWN_RING.arcHalfSpan * 2;
 
     for (const angles of anglesByColor.values()) {

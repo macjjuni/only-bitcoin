@@ -1,10 +1,10 @@
 import fetcher from "@/shared/utils/fetcher";
-import type { BinanceKline, MarketChartFormattedData } from "../model/market";
+import type { BinanceKline, BtcCandle, MarketChartFormattedData } from "../model/market";
 
 const BINANCE_KLINES_URL = "https://api.binance.com/api/v3/klines";
 const BINANCE_TICKER_24H_URL = "https://api.binance.com/api/v3/ticker/24hr";
 
-export type BinanceInterval = "5m" | "15m" | "1h" | "4h" | "12h" | "1d" | "1w";
+export type BinanceInterval = "5m" | "15m" | "30m" | "1h" | "4h" | "12h" | "1d" | "1w";
 
 /**
  * Binance 24시간 티커 응답 ( 가격·수량 계열 필드는 모두 문자열로 내려온다 )
@@ -58,4 +58,27 @@ export async function fetchBinanceKlines(
     date: data.map((kline) => kline[0]),
     price: data.map((kline) => Math.floor(Number(kline[4]))),
   };
+}
+
+/** BTCUSDT 캔들 조회. 시가·고가·저가·종가와 거래대금까지 씀. */
+export async function fetchBinanceCandles(
+  interval: BinanceInterval,
+  limit: number,
+): Promise<BtcCandle[]> {
+  const searchParams = new URLSearchParams({
+    symbol: "BTCUSDT",
+    interval,
+    limit: limit.toString(),
+  });
+
+  const data = await fetcher<BinanceKline[]>(`${BINANCE_KLINES_URL}?${searchParams.toString()}`);
+
+  return data.map((kline) => ({
+    openTime: kline[0],
+    open: Number(kline[1]),
+    high: Number(kline[2]),
+    low: Number(kline[3]),
+    close: Number(kline[4]),
+    quoteVolume: Number(kline[7]),
+  }));
 }

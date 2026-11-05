@@ -22,6 +22,16 @@ export type BinanceKline = [
   string,
 ];
 
+/** 캔들 한 개. 가격은 USDT, 거래량은 USDT 거래대금임. */
+export interface BtcCandle {
+  openTime: number;
+  open: number;
+  high: number;
+  low: number;
+  close: number;
+  quoteVolume: number;
+}
+
 export interface BlockchainChartResponseData {
   values: Array<{ x: number; y: number }>;
 }

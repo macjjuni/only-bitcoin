@@ -2,7 +2,7 @@ import {
   type RemotePlayer,
   SPACE_AVATAR_COLORS,
   SPACE_AVATAR_MODELS,
-  SPACE_ISLAND,
+  SPACE_HALL,
 } from "@/entities/space";
 import { resolveSpaceAvatarCount } from "./avatarCapacity";
 
@@ -71,8 +71,8 @@ export const createStressDummies = (count: number): StressDummy[] => {
       initialAngle: spiralAngle,
       x: orbitCenterX,
       z: orbitCenterZ,
-      // 광장 바닥에 세운다. 섬은 다층이라 0 은 바다 높이다.
-      y: SPACE_ISLAND.plazaY,
+      // 홀 바닥에 세움. 맵을 1.5 m 올려 써서 0 은 바닥이 아님.
+      y: SPACE_HALL.floorY,
       yaw: 0,
     };
   });

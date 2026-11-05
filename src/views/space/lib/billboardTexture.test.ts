@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { SPACE_BILLBOARD, SPACE_SCREEN_FRAME, SPACE_SCREEN_SCALE } from "@/entities/space";
+import type { BtcCandle } from "@/entities/bitcoin";
+import { SPACE_BILLBOARD, SPACE_SCREEN_HALF, SPACE_SCREEN_SCALE } from "@/entities/space";
 import {
   BILLBOARD_CHART_MARKER,
+  BILLBOARD_CHART_REGION,
   BILLBOARD_COLORS,
   BILLBOARD_COLUMNS,
   BILLBOARD_MIN_FONT_SIZE_PX,
@@ -9,7 +11,9 @@ import {
   BILLBOARD_PLACEHOLDER,
   BILLBOARD_TEXTURE,
   type BillboardChartEndpoint,
+  type BillboardState,
   drawBillboard,
+  drawBillboardChart,
   formatBillboardChange,
   formatBillboardKrw,
   formatBillboardUsd,
@@ -26,6 +30,34 @@ const MONOSPACE_ADVANCE_RATIO = 0.6;
 const measureMonospaceWidth = (text: string, fontSizePx: number): number => {
   return text.length * MONOSPACE_ADVANCE_RATIO * fontSizePx;
 };
+
+/** 30분봉 48개. 완만하게 오르내리는 실제 모양을 흉내 냄. */
+const createCandles = (count = 48): BtcCandle[] => {
+  return Array.from({ length: count }, (_, index) => {
+    const open = 100_000 + Math.sin(index / 6) * 800 + index * 20;
+    const close = open + Math.cos(index / 3) * 250;
+
+    return {
+      openTime: 1_762_000_000_000 + index * 1_800_000,
+      open,
+      high: Math.max(open, close) + 120,
+      low: Math.min(open, close) - 120,
+      close,
+      quoteVolume: 500_000_000 + (index % 7) * 80_000_000,
+    };
+  });
+};
+
+const createState = (overrides: Partial<BillboardState> = {}): BillboardState => ({
+  krw: 150_000_000,
+  usd: 104_280,
+  krwChange24h: "1.2",
+  usdChange24h: "1.2",
+  isKrwConnected: true,
+  isUsdConnected: true,
+  candles: [],
+  ...overrides,
+});
 
 describe("formatBillboardKrw", () => {
   it("천 단위를 끊어 원화 기호와 함께 보여준다", () => {
@@ -56,17 +88,20 @@ describe("formatBillboardUsd", () => {
 });
 
 describe("formatBillboardChange", () => {
-  it("상승은 부호를 붙이고 소수 두 자리로 고정한다", () => {
-    expect(formatBillboardChange("2.4")).toBe("+2.40%");
-    expect(formatBillboardChange(2.415)).toBe("+2.42%");
+  it("상승은 부호를 붙이고 소수 한 자리로 반올림한다", () => {
+    expect(formatBillboardChange("2.4")).toBe("+2.4%");
+    expect(formatBillboardChange(2.46)).toBe("+2.5%");
   });
 
   it("하락은 음수 부호를 유지한다", () => {
-    expect(formatBillboardChange("-1.2")).toBe("-1.20%");
+    expect(formatBillboardChange("-1.24")).toBe("-1.2%");
   });
 
   it("보합은 부호를 붙이지 않는다", () => {
-    expect(formatBillboardChange("0")).toBe("0.00%");
+    expect(formatBillboardChange("0")).toBe("0.0%");
+    // 반올림해서 0 이 되면 부호도 떼고 보합으로 본다.
+    expect(formatBillboardChange("0.04")).toBe("0.0%");
+    expect(resolveChangeTone("0.04")).toBe("flat");
   });
 
   it("해석할 수 없는 값은 자리표시다", () => {
@@ -96,7 +131,7 @@ describe("resolveChangeTone", () => {
 describe("resolveFittedFontSize", () => {
   const PRICE_WIDTH = BILLBOARD_COLUMNS.priceMaxWidth;
   /** `LAYOUT.rowPrice.fontSize` 와 같은 값. 레이아웃은 내보내지 않는다. */
-  const PRICE_FONT_SIZE = 124;
+  const PRICE_FONT_SIZE = 120;
 
   it("가용 폭에 들어가는 문자열은 최대 크기를 유지한다", () => {
     const measuredWidth = measureMonospaceWidth("$108,433", PRICE_FONT_SIZE);
@@ -142,10 +177,10 @@ describe("resolveFittedFontSize", () => {
 
   it("변동률도 자기 칸을 넘지 않는다", () => {
     const changeText = formatBillboardChange("-12.34");
-    const measuredWidth = measureMonospaceWidth(changeText, 68);
+    const measuredWidth = measureMonospaceWidth(changeText, 60);
     const fittedFontSize = resolveFittedFontSize(measuredWidth, {
       maxWidth: BILLBOARD_COLUMNS.changeMaxWidth,
-      maxFontSizePx: 68,
+      maxFontSizePx: 60,
     });
 
     expect(measureMonospaceWidth(changeText, fittedFontSize)).toBeLessThanOrEqual(
@@ -181,33 +216,36 @@ describe("resolveFittedFontSize", () => {
 });
 
 describe("resolveBillboardChartEndpoint", () => {
-  it("선이 그려지지 않는 빈 시계열과 단일 표본에는 끝점 효과를 만들지 않는다", () => {
-    expect(resolveBillboardChartEndpoint({ usdSeries: [], usdChange24h: "1.2" })).toBeNull();
-    expect(resolveBillboardChartEndpoint({ usdSeries: [100_000], usdChange24h: "0" })).toBeNull();
+  it("캔들이 없거나 하나뿐이면 끝점 효과를 만들지 않는다", () => {
+    expect(resolveBillboardChartEndpoint({ candles: [], usdChange24h: "1.2" })).toBeNull();
+    expect(
+      resolveBillboardChartEndpoint({ candles: createCandles(1), usdChange24h: "0" }),
+    ).toBeNull();
   });
 
   it.each([
     { change: "-2.4", expectedColor: BILLBOARD_COLORS.down },
     { change: "0", expectedColor: BILLBOARD_COLORS.up },
-  ])("24시간 변동률 $change에서 실제 차트의 끝점·선 색상을 반환한다", ({
+  ])("24시간 변동률 $change에서 실제 차트의 현재가 점·점선 색을 반환한다", ({
     change,
     expectedColor,
   }) => {
-    const usdSeries = Array.from(
-      { length: 288 },
-      (_, sampleIndex) => 100_000 + Math.sin(sampleIndex / 12) * 500 + sampleIndex * 3,
-    );
-    const endpoint = resolveBillboardChartEndpoint({ usdSeries, usdChange24h: change });
-    const drawingTrace: { endpoint: BillboardChartEndpoint | null; lineColor: string | null } = {
+    const candles = createCandles();
+    const endpoint = resolveBillboardChartEndpoint({ candles, usdChange24h: change });
+    const drawingTrace: { endpoint: BillboardChartEndpoint | null; markerColor: string | null } = {
       endpoint: null,
-      lineColor: null,
+      markerColor: null,
     };
     let currentCircle: { x: number; y: number; radius: number } | null = null;
+    let lineDash: number[] = [];
     const ignoredDrawingOperation = (): void => undefined;
-    // 실제 drawBillboard 호출에서 선과 끝점 그리기만 기록해 레이아웃 상수 복제를 피한다.
+    // 실제 drawBillboard 호출에서 현재가 점선과 점만 기록해 레이아웃 상수 복제를 피한다.
     const canvasProperties: Record<string, unknown> = {
       measureText: (text: string) => ({ width: measureMonospaceWidth(text, 36) }),
       createLinearGradient: () => ({ addColorStop: ignoredDrawingOperation }),
+      setLineDash: (segments: number[]) => {
+        lineDash = segments;
+      },
       beginPath: () => {
         currentCircle = null;
       },
@@ -224,26 +262,33 @@ describe("resolveBillboardChartEndpoint", () => {
         }
       },
       stroke: () => {
-        drawingTrace.lineColor = String(canvasProperties.strokeStyle);
+        if (lineDash.join(",") === "10,10") {
+          drawingTrace.markerColor = String(canvasProperties.strokeStyle);
+        }
       },
     };
     const context = new Proxy(canvasProperties, {
       get: (target, property) => Reflect.get(target, property) ?? ignoredDrawingOperation,
     }) as unknown as CanvasRenderingContext2D;
 
-    drawBillboard(context, {
-      krw: 150_000_000,
-      usd: 999_999,
-      krwChange24h: "1.2",
-      usdChange24h: change,
-      isKrwConnected: true,
-      isUsdConnected: true,
-      usdSeries,
-    });
+    drawBillboard(context, createState({ usd: 999_999, usdChange24h: change, candles }));
 
     expect(endpoint?.color).toBe(expectedColor);
     expect(drawingTrace.endpoint).toEqual(endpoint);
-    expect(drawingTrace.lineColor).toBe(endpoint?.color);
+    expect(drawingTrace.markerColor).toBe(endpoint?.color);
+  });
+
+  /** 펄스 링은 3D 로 겹치므로 패널을 넘으면 허공에 뜬다. */
+  it("현재가 점의 확산 링이 패널 안에 머문다", () => {
+    const endpoint = resolveBillboardChartEndpoint({
+      candles: createCandles(),
+      usdChange24h: "1",
+    });
+
+    expect(endpoint).not.toBeNull();
+    expect((endpoint?.x ?? 0) + BILLBOARD_CHART_MARKER.pulseRadius).toBeLessThanOrEqual(
+      BILLBOARD_TEXTURE.width,
+    );
   });
 });
 
@@ -259,17 +304,7 @@ describe("resolveBillboardOnlineStatus", () => {
     expected,
   }) => {
     // 한쪽만 살아도 온라인이다. 숫자가 바뀌는데 오프라인이라고 적으면 더 혼란스럽다.
-    expect(
-      resolveBillboardOnlineStatus({
-        krw: 0,
-        usd: 0,
-        krwChange24h: "0",
-        usdChange24h: "0",
-        isKrwConnected,
-        isUsdConnected,
-        usdSeries: [],
-      }),
-    ).toBe(expected);
+    expect(resolveBillboardOnlineStatus({ isKrwConnected, isUsdConnected })).toBe(expected);
   });
 });
 
@@ -296,7 +331,7 @@ describe("우측 상단 접속 배지", () => {
         }
       },
       fillText: (text: string) => {
-        if (text === "온라인" || text === "오프라인") {
+        if (text === "LIVE" || text === "OFFLINE") {
           badge.label = text;
         }
       },
@@ -305,30 +340,22 @@ describe("우측 상단 접속 배지", () => {
       get: (target, property) => Reflect.get(target, property) ?? ignoredDrawingOperation,
     }) as unknown as CanvasRenderingContext2D;
 
-    drawBillboard(context, {
-      krw: 150_000_000,
-      usd: 99_999,
-      krwChange24h: "1.2",
-      usdChange24h: "1.2",
-      isKrwConnected,
-      isUsdConnected,
-      usdSeries: [],
-    });
+    drawBillboard(context, createState({ isKrwConnected, isUsdConnected }));
 
     return badge;
   };
 
-  it("접속 중에는 초록 점과 온라인 문구를 그린다", () => {
+  it("접속 중에는 초록 점과 LIVE 문구를 그린다", () => {
     expect(traceBadge(true, true)).toEqual({
       dotColor: BILLBOARD_COLORS.online,
-      label: "온라인",
+      label: "LIVE",
     });
   });
 
-  it("양쪽 피드가 끊기면 빨간 점과 오프라인 문구를 그린다", () => {
+  it("양쪽 피드가 끊기면 빨간 점과 OFFLINE 문구를 그린다", () => {
     expect(traceBadge(false, false)).toEqual({
       dotColor: BILLBOARD_COLORS.offline,
-      label: "오프라인",
+      label: "OFFLINE",
     });
   });
 
@@ -345,14 +372,6 @@ describe("우측 상단 접속 배지", () => {
 });
 
 describe("패널 비율", () => {
-  it("텍스처 비율이 맵의 액자 안쪽과 같다", () => {
-    // 16:9 였을 때는 높이에 맞춰 끼우느라 좌우로 0.56 m 씩 빈 홈이 남았다.
-    expect(BILLBOARD_TEXTURE.width / BILLBOARD_TEXTURE.height).toBeCloseTo(
-      SPACE_SCREEN_FRAME.width / SPACE_SCREEN_FRAME.height,
-      6,
-    );
-  });
-
   /**
    * 텍스처와 geometry 의 비율이 어긋나면 글자와 차트가 늘어나거나 눌린다.
    * 둘이 다른 파일(entities / views)에 있어 한쪽만 바꾸기 쉬우므로 묶어 둔다.
@@ -364,9 +383,8 @@ describe("패널 비율", () => {
     );
   });
 
-  it("액자에 끼운 패널도 텍스처 비율을 유지한다", () => {
-    // 테두리는 맵의 금장 액자가 맡고, 패널은 한 배율로만 줄인다. 폭과 높이를
-    // 따로 맞추면 글자가 늘어난다.
+  it("액자 반쪽에 끼운 패널도 텍스처 비율을 유지한다", () => {
+    // 패널은 한 배율로만 키운다. 폭과 높이를 따로 맞추면 글자가 늘어난다.
     const scaled = {
       width: SPACE_BILLBOARD.width * SPACE_SCREEN_SCALE,
       height: SPACE_BILLBOARD.height * SPACE_SCREEN_SCALE,
@@ -376,7 +394,80 @@ describe("패널 비율", () => {
       BILLBOARD_TEXTURE.width / BILLBOARD_TEXTURE.height,
       6,
     );
-    expect(scaled.width).toBeLessThanOrEqual(SPACE_SCREEN_FRAME.width);
-    expect(scaled.height).toBeLessThanOrEqual(SPACE_SCREEN_FRAME.height);
+    expect(scaled.width).toBeLessThanOrEqual(SPACE_SCREEN_HALF.width + 1e-9);
+    expect(scaled.height).toBeLessThanOrEqual(SPACE_SCREEN_HALF.height + 1e-9);
+  });
+});
+
+describe("별도 차트 텍스처", () => {
+  /** 실제 그리기에서 차트 끝점(현재가 점)이 찍힌 좌표만 기록한다. */
+  const traceEndpointDraws = (draw: (context: CanvasRenderingContext2D) => void) => {
+    const endpoints: { x: number; y: number }[] = [];
+    let currentCircle: { x: number; y: number; radius: number } | null = null;
+    let offset = { x: 0, y: 0 };
+    const ignoredDrawingOperation = (): void => undefined;
+    const canvasProperties: Record<string, unknown> = {
+      canvas: { width: BILLBOARD_CHART_REGION.width, height: BILLBOARD_CHART_REGION.height },
+      measureText: (text: string) => ({ width: measureMonospaceWidth(text, 36) }),
+      createLinearGradient: () => ({ addColorStop: ignoredDrawingOperation }),
+      setTransform: (_a: number, _b: number, _c: number, _d: number, e: number, f: number) => {
+        offset = { x: e, y: f };
+      },
+      beginPath: () => {
+        currentCircle = null;
+      },
+      arc: (x: number, y: number, radius: number) => {
+        currentCircle = { x, y, radius };
+      },
+      fill: () => {
+        if (currentCircle?.radius === BILLBOARD_CHART_MARKER.coreRadius) {
+          endpoints.push({ x: currentCircle.x + offset.x, y: currentCircle.y + offset.y });
+        }
+      },
+    };
+    const context = new Proxy(canvasProperties, {
+      get: (target, property) => Reflect.get(target, property) ?? ignoredDrawingOperation,
+    }) as unknown as CanvasRenderingContext2D;
+
+    draw(context);
+
+    return endpoints;
+  };
+
+  it("차트 칸이 패널 안에 있고 현재가 점을 감싼다", () => {
+    const { x, y, width, height } = BILLBOARD_CHART_REGION;
+    const endpoint = resolveBillboardChartEndpoint({
+      candles: createCandles(),
+      usdChange24h: "1",
+    });
+
+    expect(x).toBeGreaterThanOrEqual(0);
+    expect(y).toBeGreaterThanOrEqual(0);
+    expect(x + width).toBeLessThanOrEqual(BILLBOARD_TEXTURE.width);
+    expect(y + height).toBeLessThanOrEqual(BILLBOARD_TEXTURE.height);
+    expect(endpoint?.x).toBeGreaterThan(x);
+    expect(endpoint?.x).toBeLessThan(x + width);
+  });
+
+  it("큰 텍스처는 차트를 빼고 그릴 수 있다", () => {
+    const candles = createCandles();
+    const endpoints = traceEndpointDraws((context) => {
+      drawBillboard(context, createState({ candles }), { shouldDrawChart: false });
+    });
+
+    expect(endpoints).toEqual([]);
+  });
+
+  it("차트 텍스처에는 칸 원점 기준으로 같은 자리에 점을 찍는다", () => {
+    const candles = createCandles();
+    const endpoint = resolveBillboardChartEndpoint({ candles, usdChange24h: "1" });
+    const endpoints = traceEndpointDraws((context) => {
+      drawBillboardChart(context, { candles, usdChange24h: "1" });
+    });
+
+    // 점은 전체 좌표로 찍히고 변환이 칸 원점만큼 뺀다. 변환을 적용한 위치가 칸 안 좌표다.
+    expect(endpoints).toHaveLength(1);
+    expect(endpoints[0]?.x).toBeCloseTo((endpoint?.x ?? 0) - BILLBOARD_CHART_REGION.x, 6);
+    expect(endpoints[0]?.y).toBeCloseTo((endpoint?.y ?? 0) - BILLBOARD_CHART_REGION.y, 6);
   });
 });
