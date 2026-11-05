@@ -19,6 +19,7 @@ import {
   type LocalPlayerState,
   resolveColorIndexFromClientKey,
   SPACE_HALL,
+  SPACE_MENU_FRAME,
   SPACE_SCREEN_PLACEMENTS,
   type SpacePeer,
   type SpaceTerrain,
@@ -56,6 +57,7 @@ import { createEmptyAdTextSlot } from "@/views/space/lib/textBannerTexture";
 import BlockDashboard from "./BlockDashboard";
 import ChatBubbles from "./ChatBubbles";
 import Hall from "./Hall";
+import MenuGraffiti from "./MenuGraffiti";
 import Nameplates from "./Nameplates";
 import PlayerAvatar from "./PlayerAvatar";
 import PriceBillboard from "./PriceBillboard";
@@ -418,6 +420,11 @@ function SpaceScene({
         scale={SPACE_SCREEN_PLACEMENTS.blockDashboard.scale}
       >
         <BlockDashboard />
+      </group>
+
+      {/* 커피 바 메뉴판 자리(6 × 2.5)에 분필 낙서판을 끼움. */}
+      <group position={SPACE_MENU_FRAME.position} rotation={[0, SPACE_MENU_FRAME.rotationY, 0]}>
+        <MenuGraffiti />
       </group>
 
       <group ref={playerGroupRef}>
