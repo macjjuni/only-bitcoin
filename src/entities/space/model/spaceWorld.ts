@@ -40,13 +40,13 @@ export const SPACE_MAX_ALTITUDE = 18;
 /**
  * 이동 가능 영역의 바깥 상자.
  *
- * 홀 외벽(충돌 메시 범위 x ±21, z ±20)과 같음. 실제 경계는 벽 충돌이 만들고,
+ * 홀 외벽(충돌 메시 범위 x ±21, z −24…20)과 같음. 실제 경계는 벽 충돌이 만들고,
  * 이 값은 서버 검증과 레이캐스트가 비었을 때의 마지막 가드임.
  */
 export const SPACE_BOUNDS = {
   minX: -21,
   maxX: 21,
-  minZ: -20,
+  minZ: -24,
   maxZ: 20,
 } as const;
 
@@ -84,20 +84,20 @@ export const SPACE_SPAWN_RING = {
   arcHalfSpan: Math.PI,
 } as const;
 
-/** 메인 전광판 표시 영역. GLB `Screen_Anchor`(21 × 10.5, +Z 방향)와 같음. */
+/** 메인 전광판 표시 영역. GLB `Screen_Anchor`(28 × 10.5, +Z 방향)와 같음. */
 export const SPACE_SCREEN_FRAME = {
-  width: 21,
+  width: 28,
   height: 10.5,
   /** 앵커 중심. 벽면에서 5 cm 띄웠음. */
-  position: [0, 10.25 + SPACE_HALL.mapOffsetY, -19.96 + 0.05] as const,
+  position: [0, 10.25 + SPACE_HALL.mapOffsetY, -23.96 + 0.05] as const,
   rotationY: 0,
 } as const;
 
-/** 커피 바 메뉴판 자리. GLB `Menu_Anchor`(6 × 1.5, −Z 방향)와 같음. */
+/** 커피 바 메뉴판 자리. GLB `Menu_Anchor`(6 × 2.5, −Z 방향)와 같음. */
 export const SPACE_MENU_FRAME = {
   width: 6,
-  height: 1.5,
-  position: [-14.5, 6.25 + SPACE_HALL.mapOffsetY, 19.96 - 0.05] as const,
+  height: 2.5,
+  position: [-14.5, 6.75 + SPACE_HALL.mapOffsetY, 19.96 - 0.05] as const,
   rotationY: Math.PI,
 } as const;
 
@@ -105,47 +105,59 @@ export const SPACE_MENU_FRAME = {
 export const SPACE_SPAWN_FACING = SPACE_SCREEN_FRAME.position;
 
 /**
- * 패널의 설계 치수. 24:11 이고 텍스처(1920 × 880)와 같은 비율임.
+ * 전광판 한 칸의 설계 치수. 4:3 이고 텍스처(1600 × 1200)와 같은 비율임.
+ *
+ * 메인 액자(28 × 10.5)를 좌우 두 칸(각 14 × 10.5)으로 나눠 왼쪽에 시세,
+ * 오른쪽에 네트워크 현황을 둠. 설계 치수는 텍스처 200 px 당 1 m 로 잡았음.
  */
 export const SPACE_BILLBOARD = {
-  width: 9.6,
-  height: 4.4,
+  width: 8,
+  height: 6,
   /** 가격 숫자 크기 기준 거리. 라운지 건너편에서 보는 거리임. */
   referenceViewDistance: 24,
 } as const;
 
-/** 블록 현황판. 전광판과 같은 규격을 씀. */
+/** 네트워크 현황판. 전광판과 같은 규격을 씀. */
 export const SPACE_BLOCK_DASHBOARD = {
   width: SPACE_BILLBOARD.width,
   height: SPACE_BILLBOARD.height,
+} as const;
+
+/** 메인 액자를 반으로 나눈 한 칸. */
+export const SPACE_SCREEN_HALF = {
+  width: SPACE_SCREEN_FRAME.width / 2,
+  height: SPACE_SCREEN_FRAME.height,
 } as const;
 
 /** 비율을 지킨 채 액자 안에 들어가는 최대 배율. */
 const fitScale = (frame: { width: number; height: number }): number =>
   Math.min(frame.width / SPACE_BILLBOARD.width, frame.height / SPACE_BILLBOARD.height);
 
-/**
- * 시세 전광판을 메인 액자에 맞추는 배율.
- *
- * 액자는 2:1, 패널은 24:11 이라 폭에 맞춰짐(2.1875). 위아래로 0.44 m 씩
- * 어두운 홈이 남음.
- */
-export const SPACE_SCREEN_SCALE = fitScale(SPACE_SCREEN_FRAME);
+/** 전광판 한 칸을 액자 반쪽에 맞추는 배율. 4:3 끼리라 빈틈 없이 꽉 참(1.75). */
+export const SPACE_SCREEN_SCALE = fitScale(SPACE_SCREEN_HALF);
 
-/** 블록 현황판을 메뉴판 자리에 맞추는 배율. 높이에 맞춰짐. */
-export const SPACE_MENU_SCALE = fitScale(SPACE_MENU_FRAME);
+/** 액자 중심에서 반쪽 칸 중심까지 거리(x). */
+const SCREEN_HALF_OFFSET_X = SPACE_SCREEN_HALF.width / 2;
 
-/** 패널 월드 배치. 시세는 메인 전광판, 블록 현황은 커피 바 메뉴판에 둠. */
+/** 패널 월드 배치. 메인 액자 왼쪽 칸에 시세, 오른쪽 칸에 네트워크 현황을 둠. */
 export const SPACE_SCREEN_PLACEMENTS = {
   billboard: {
-    position: SPACE_SCREEN_FRAME.position,
+    position: [
+      SPACE_SCREEN_FRAME.position[0] - SCREEN_HALF_OFFSET_X,
+      SPACE_SCREEN_FRAME.position[1],
+      SPACE_SCREEN_FRAME.position[2],
+    ] as const,
     rotationY: SPACE_SCREEN_FRAME.rotationY,
     scale: SPACE_SCREEN_SCALE,
   },
   blockDashboard: {
-    position: SPACE_MENU_FRAME.position,
-    rotationY: SPACE_MENU_FRAME.rotationY,
-    scale: SPACE_MENU_SCALE,
+    position: [
+      SPACE_SCREEN_FRAME.position[0] + SCREEN_HALF_OFFSET_X,
+      SPACE_SCREEN_FRAME.position[1],
+      SPACE_SCREEN_FRAME.position[2],
+    ] as const,
+    rotationY: SPACE_SCREEN_FRAME.rotationY,
+    scale: SPACE_SCREEN_SCALE,
   },
 } as const;
 
@@ -156,7 +168,7 @@ export const SPACE_SCREEN_PLACEMENTS = {
  * 아바타에만 오렌지 기운을 줌.
  */
 export const SPACE_SCREEN_GLOW_POSITIONS = [
-  [0, SPACE_HALL.floorY + 3, -15],
+  [0, SPACE_HALL.floorY + 3, -19],
 ] as const satisfies readonly (readonly [number, number, number])[];
 
 /**
@@ -166,9 +178,10 @@ export const SPACE_SCREEN_GLOW_POSITIONS = [
  */
 export const SPACE_TEXT_BANNER = {
   width: SPACE_BILLBOARD.width,
-  height: 0.8,
-  /** 패널 윗변(+2.7)에서 0.2 띄우고 배너 반높이(0.4)를 더한 값. */
-  offset: [0, 3.3, 0] as const,
+  /** 텍스처(1440 × 120)와 같은 12:1. */
+  height: SPACE_BILLBOARD.width / 12,
+  /** 패널 윗변에서 0.2 띄우고 배너 반높이를 더한 값. */
+  offset: [0, SPACE_BILLBOARD.height / 2 + 0.2 + SPACE_BILLBOARD.width / 24, 0] as const,
 } as const;
 
 /** 명찰·말풍선 표시 상한. 인원 비례가 아니라 DOM 렌더 비용의 상한이다. */

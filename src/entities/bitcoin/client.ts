@@ -5,6 +5,7 @@ export {
   formatUsdVolume,
   useBinanceTicker24hQuery,
 } from "./api/useBinanceTicker24hQuery";
+export { default as useBtcCandlesQuery } from "./api/useBtcCandlesQuery";
 export { default as useBitcoinDominanceQuery } from "./api/useDominanceQuery";
 export { default as useFearGreedIndex } from "./api/useFearGreedIndexQuery";
 export { default as useMarketChartData } from "./api/useMarketChartQuery";

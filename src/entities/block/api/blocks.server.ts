@@ -68,12 +68,13 @@ export const fetchInitialBlocks = async (
   ]);
 
   const sanitizedBlocks: BlockTypes[] = (blocks ?? [])
-    .map(({ id, height, timestamp, size, difficulty, extras }) => ({
+    .map(({ id, height, timestamp, size, difficulty, tx_count, extras }) => ({
       id,
       height,
       timestamp,
       size,
       difficulty,
+      txCount: tx_count,
       poolName: extras.pool.name,
     }))
     .sort((a, b) => b.height - a.height);

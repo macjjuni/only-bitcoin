@@ -9,9 +9,9 @@ import {
   SPACE_HALL,
   SPACE_MAX_ALTITUDE,
   SPACE_MENU_FRAME,
-  SPACE_MENU_SCALE,
   SPACE_SCREEN_FRAME,
   SPACE_SCREEN_GLOW_POSITIONS,
+  SPACE_SCREEN_HALF,
   SPACE_SCREEN_PLACEMENTS,
   SPACE_SCREEN_SCALE,
   SPACE_SPAWN_FACING,
@@ -213,20 +213,25 @@ describe("메인 전광판", () => {
     expect(SPACE_SCREEN_FRAME.rotationY).toBe(0);
   });
 
-  it("시세 패널이 비율을 지킨 채 액자를 넘지 않는다", () => {
-    expect(SPACE_BILLBOARD.width * SPACE_SCREEN_SCALE).toBeLessThanOrEqual(
-      SPACE_SCREEN_FRAME.width + 1e-9,
-    );
-    expect(SPACE_BILLBOARD.height * SPACE_SCREEN_SCALE).toBeLessThanOrEqual(
-      SPACE_SCREEN_FRAME.height + 1e-9,
-    );
-    // 한 변은 꽉 채운다. 둘 다 남으면 배율을 더 키울 수 있다는 뜻이다.
-    const fillsWidth =
-      Math.abs(SPACE_BILLBOARD.width * SPACE_SCREEN_SCALE - SPACE_SCREEN_FRAME.width) < 1e-9;
-    const fillsHeight =
-      Math.abs(SPACE_BILLBOARD.height * SPACE_SCREEN_SCALE - SPACE_SCREEN_FRAME.height) < 1e-9;
+  it("두 패널이 비율을 지킨 채 액자 반쪽씩을 꽉 채운다", () => {
+    expect(SPACE_SCREEN_HALF.width * 2).toBeCloseTo(SPACE_SCREEN_FRAME.width, 9);
+    expect(SPACE_BILLBOARD.width * SPACE_SCREEN_SCALE).toBeCloseTo(SPACE_SCREEN_HALF.width, 9);
+    expect(SPACE_BILLBOARD.height * SPACE_SCREEN_SCALE).toBeCloseTo(SPACE_SCREEN_HALF.height, 9);
+    expect(SPACE_BLOCK_DASHBOARD.width).toBe(SPACE_BILLBOARD.width);
+    expect(SPACE_BLOCK_DASHBOARD.height).toBe(SPACE_BILLBOARD.height);
+  });
 
-    expect(fillsWidth || fillsHeight).toBe(true);
+  it("시세는 왼쪽 칸, 네트워크 현황은 오른쪽 칸에 선다", () => {
+    const [frameX, frameY, frameZ] = SPACE_SCREEN_FRAME.position;
+    const { billboard, blockDashboard } = SPACE_SCREEN_PLACEMENTS;
+    const halfOffset = SPACE_SCREEN_HALF.width / 2;
+
+    expect([...billboard.position]).toEqual([frameX - halfOffset, frameY, frameZ]);
+    expect([...blockDashboard.position]).toEqual([frameX + halfOffset, frameY, frameZ]);
+    expect(billboard.rotationY).toBe(SPACE_SCREEN_FRAME.rotationY);
+    expect(blockDashboard.rotationY).toBe(SPACE_SCREEN_FRAME.rotationY);
+    expect(billboard.scale).toBe(SPACE_SCREEN_SCALE);
+    expect(blockDashboard.scale).toBe(SPACE_SCREEN_SCALE);
   });
 
   it("바닥 광원이 전광판보다 낮고 홀 쪽에 있다", () => {
@@ -253,22 +258,6 @@ describe("메뉴판", () => {
     expect(SPACE_MENU_FRAME.position[1]).toBeCloseTo(y, 5);
     expect(SPACE_MENU_FRAME.position[2]).toBeCloseTo(z - 0.05, 5);
     expect(SPACE_MENU_FRAME.rotationY).toBeCloseTo(Math.PI, 9);
-  });
-
-  it("블록 현황판이 비율을 지킨 채 메뉴판을 넘지 않는다", () => {
-    expect(SPACE_BLOCK_DASHBOARD.width * SPACE_MENU_SCALE).toBeLessThanOrEqual(
-      SPACE_MENU_FRAME.width + 1e-9,
-    );
-    expect(SPACE_BLOCK_DASHBOARD.height * SPACE_MENU_SCALE).toBeLessThanOrEqual(
-      SPACE_MENU_FRAME.height + 1e-9,
-    );
-  });
-
-  it("패널 배치가 각 액자를 그대로 쓴다", () => {
-    expect(SPACE_SCREEN_PLACEMENTS.billboard.position).toBe(SPACE_SCREEN_FRAME.position);
-    expect(SPACE_SCREEN_PLACEMENTS.billboard.scale).toBe(SPACE_SCREEN_SCALE);
-    expect(SPACE_SCREEN_PLACEMENTS.blockDashboard.position).toBe(SPACE_MENU_FRAME.position);
-    expect(SPACE_SCREEN_PLACEMENTS.blockDashboard.scale).toBe(SPACE_MENU_SCALE);
   });
 });
 

@@ -11,7 +11,7 @@ import {
   useRef,
   useState,
 } from "react";
-import type { Group } from "three";
+import { type Group, PerspectiveCamera } from "three";
 import {
   createFlatTerrain,
   createLocalPlayerState,
@@ -89,6 +89,7 @@ function SpaceScene({
   // region [Hooks]
   const canvasElement = useThree((rootState) => rootState.gl.domElement);
   const camera = useThree((rootState) => rootState.camera);
+  const viewportSize = useThree((rootState) => rootState.size);
   const prefersReducedMotion = usePrefersReducedMotion();
   const isCoarsePointer = useCoarsePointer();
 
@@ -308,6 +309,30 @@ function SpaceScene({
   }, [camera, canvasElement, spawnTransform]);
 
   useLayoutEffect(() => {
+    if (!(camera instanceof PerspectiveCamera)) {
+      return;
+    }
+
+    const { width, height } = viewportSize;
+
+    // 렌즈를 위로 옮기면 화면 속 아바타가 아래로 내려감. 크기가 바뀔 때마다 다시 맞춤.
+    if (isCoarsePointer && width > 0 && height > 0) {
+      camera.setViewOffset(
+        width,
+        height,
+        0,
+        -height * SPACE_CAMERA.touchFramingShift,
+        width,
+        height,
+      );
+    } else {
+      camera.clearViewOffset();
+    }
+
+    camera.updateProjectionMatrix();
+  }, [camera, viewportSize, isCoarsePointer]);
+
+  useLayoutEffect(() => {
     const self = session.self;
 
     if (!self) {
@@ -375,7 +400,7 @@ function SpaceScene({
         />
       </Suspense>
 
-      {/* 메인 전광판 액자(21 × 10.5)에 시세 패널을 폭에 맞춰 끼운다. */}
+      {/* 메인 전광판 액자(28 × 10.5) 왼쪽 반쪽에 시세판을 끼움. */}
       <group
         position={SPACE_SCREEN_PLACEMENTS.billboard.position}
         rotation={[0, SPACE_SCREEN_PLACEMENTS.billboard.rotationY, 0]}
@@ -390,7 +415,7 @@ function SpaceScene({
         {spaceConfig.isAdEnabled && <TextAdBanner slot={textAdSlot} />}
       </group>
 
-      {/* 커피 바 메뉴판 자리(6 × 1.5)에 블록 현황판을 높이에 맞춰 끼운다. */}
+      {/* 같은 액자 오른쪽 반쪽에 네트워크 현황판을 끼움. */}
       <group
         position={SPACE_SCREEN_PLACEMENTS.blockDashboard.position}
         rotation={[0, SPACE_SCREEN_PLACEMENTS.blockDashboard.rotationY, 0]}

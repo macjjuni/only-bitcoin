@@ -1,88 +1,83 @@
-import type { BlockTypes } from "@/entities/block";
+import type { BlockTypes, FeesTypes } from "@/entities/block";
 import {
   calcPercentage,
+  calculateNetworkHashrate,
   getCurrentBlockSubsidy,
   getNextHalvingData,
+  minedPercent,
   TARGET_BLOCK_INTERVAL_SECONDS,
 } from "@/entities/block";
-import { drawBitcoinCoin } from "@/shared/lib/bitcoinIconCanvas";
 import {
-  BILLBOARD_COLORS,
-  BILLBOARD_MIN_FONT_SIZE_PX,
-  BILLBOARD_PLACEHOLDER,
-  resolveFittedFontSize,
-} from "./billboardTexture";
+  BTC_MAX_SUPPLY,
+  drawFittedText,
+  drawScreenCard,
+  drawScreenDivider,
+  NUMERIC_FONT_STACK,
+  resolveFontSpec,
+  SANS_FONT_STACK,
+  SCREEN_COLORS,
+  SCREEN_TEXTURE,
+} from "./screenCanvas";
 
 /**
- * 비트코인 블록 현황판 텍스처.
+ * 메인 전광판 오른쪽 칸, 비트코인 네트워크 현황 텍스처.
  *
- * **전광판과 같은 1600 × 900** 이고 색·여백·행 패널 규격도 전광판에서 그대로
- * 가져온다(`BILLBOARD_COLORS`). 같은 벽에 나란히 걸리는 두 판이 서로 다른
- * 디자인을 쓰면 벽이 두 개로 쪼개져 보인다.
+ * 시안(`assets/screen_A.png`) 오른쪽 판을 옮겼음. 위에서부터 최신 블록 번호,
+ * 최근 블록 6개 체인, 다음 반감기 진행 막대, 해시레이트·난이도·공급량 순.
+ * 왼쪽 시세 판과 같은 카드·팔레트·여백을 써서 액자 안에서 한 벽으로 읽힘.
  */
-/**
- * 텍스처 규격. **전광판과 같은 값**이어야 한다(`BILLBOARD_TEXTURE`).
- *
- * 광장을 사이에 두고 마주 보는 두 판이라 비율이 다르면 한쪽만 액자에 덜
- * 채워진다. 액자 안쪽(6.0 × 2.75 m)과 같은 24:11 이다.
- */
+
+/** 텍스처 규격. 왼쪽 시세 판(`BILLBOARD_TEXTURE`)과 같은 값이어야 함. */
 export const BLOCK_DASHBOARD_TEXTURE = {
-  width: 1920,
-  height: 880,
-  paddingX: 72,
+  width: SCREEN_TEXTURE.width,
+  height: SCREEN_TEXTURE.height,
+  paddingX: SCREEN_TEXTURE.paddingX,
 } as const;
 
-export const BLOCK_DASHBOARD_PLACEHOLDER = BILLBOARD_PLACEHOLDER;
+export const BLOCK_DASHBOARD_PLACEHOLDER = "—";
 
-/** 블록이 이 시간을 넘겨 안 나오면 "지연" 으로 본다. 평균 10분의 두 배. */
+/** 체인에 늘어놓는 최근 블록 수. */
+export const RECENT_BLOCK_COUNT = 6;
+
+/** 반감기 막대의 칸 수. 칸으로 끊어야 멀리서도 진행 정도가 셈처럼 읽힘. */
+export const HALVING_SEGMENT_COUNT = 40;
+
+/** 블록이 이 시간을 넘겨 안 나오면 "지연" 으로 봄. 평균 10분의 두 배. */
 const STALE_BLOCK_SECONDS = 20 * 60;
 
-const SANS_FONT_STACK =
-  '"Pretendard", "Apple SD Gothic Neo", "Malgun Gothic", system-ui, sans-serif';
+const COLORS = SCREEN_COLORS;
 
 /**
- * 전광판 레이아웃을 그대로 따른다.
+ * 1600 × 1200 레이아웃.
  *
- * 헤더·구분선·행 패널의 좌표는 전광판(`billboardTexture.ts` 의 `LAYOUT`)과 같은
- * 값이다. 두 판을 나란히 봤을 때 글자 높이와 패널 선이 어긋나지 않아야 한다.
- */
-/**
- * 1920 × 880 기준 레이아웃. 전광판과 같은 격자를 쓴다.
- *
- * 헤더 높이(126), 행 패널(x 64, 폭 1792, 높이 138, 중심 218·372), 세로 구분선
- * (300·1392)이 전광판과 같은 값이라, 광장에서 두 판을 함께 봤을 때 선과 글자
- * 높이가 어긋나지 않는다.
+ * 세로 예산: 헤더 170 · 최신 블록 270 · 블록 체인 160 · 반감기 300 · 하단 지표
+ * 200. 왼쪽 시세 판의 하단 지표 줄(구분선 1036, 값 1130)과 높이를 맞췄음.
  */
 const LAYOUT = {
-  logo: { centerX: 124, centerY: 78, radius: 46 },
-  title: { x: 198, y: 80, fontSize: 66 },
-  /** 전광판의 `BTC` 알약은 세 글자라 44 px 이 들어가지만 일곱 글자는 넘친다. */
-  badgeText: { x: 622, y: 80, fontSize: 32 },
-  badge: { x: 520, y: 48, width: 204, height: 62, radius: 12 },
-  statusBadge: { x: 1628, y: 48, width: 184, height: 62, radius: 31 },
-  statusDot: { x: 1658, y: 80, radius: 9 },
-  statusText: { x: 1740, y: 80, fontSize: 28 },
-  headerDividerY: 126,
-  rows: {
-    height: { centerY: 218, label: "블록", unit: "HEIGHT" },
-    pool: { centerY: 372, label: "채굴", unit: "POOL" },
-  },
-  rowPanel: { x: 64, width: 1792, height: 138, radius: 16, dividerXs: [300, 1392] },
-  rowLabel: { x: 96, fontSize: 54, offsetY: -18 },
-  rowUnit: { x: 96, fontSize: 30, offsetY: 32 },
-  rowValue: { x: 336, fontSize: 124, maxWidth: 980 },
-  rowAside: { x: 1432, fontSize: 58, maxWidth: 400, offsetY: 14 },
-  rowAsideLabel: { x: 1432, fontSize: 24, offsetY: -42 },
-  sectionTitle: { x: 72, y: 486, fontSize: 40 },
-  sectionSubtitle: { x: 300, y: 489, fontSize: 30 },
-  /** 진행률은 섹션 제목 줄 오른쪽 끝에 붙인다. 바 위에 겹쳐 쓰면 읽기 어렵다. */
-  progressLabel: { x: 1856, y: 486, fontSize: 42 },
-  progressBar: { x: 64, y: 530, width: 1792, height: 28, radius: 14 },
-  /** 반감기 지표 3열. 전광판 차트가 쓰던 아래 영역을 채운다. */
-  metricPanel: { x: 64, top: 596, width: 1792, height: 236, radius: 16, columns: 3 },
-  metricLabel: { fontSize: 30, offsetY: -46 },
-  metricValue: { fontSize: 74, offsetY: 30 },
+  title: { x: 84, y: 124, fontSize: 64 },
+  liveBadge: { x: 1336, y: 92, width: 180, height: 64, radius: 12, fontSize: 36 },
+  latestLabel: { x: 86, y: 226, fontSize: 30 },
+  latestHeight: { x: 84, y: 318, fontSize: 150, maxWidth: 1432 },
+  latestMeta: { x: 86, y: 418, fontSize: 38, maxWidth: 1430 },
+  chain: { top: 480, height: 136, gap: 34, radius: 12, connectorHeight: 8 },
+  chainHeight: { offsetY: 52, fontSize: 38 },
+  chainTx: { offsetY: 98, fontSize: 30 },
+  halvingTitle: { x: 84, y: 708, fontSize: 48 },
+  halvingAside: { x: 1516, y: 712, fontSize: 30 },
+  halvingBar: { top: 756, height: 72, gap: 8 },
+  halvingPercent: { x: 84, y: 896, fontSize: 64 },
+  halvingRemain: { x: 560, y: 900, fontSize: 34 },
+  halvingReward: { x: 1516, y: 900, fontSize: 36 },
+  footerDividerY: 1036,
+  footerLabel: { y: 1078, fontSize: 28 },
+  footerValue: { y: 1130, fontSize: 46 },
 } as const;
+
+export interface RecentBlock {
+  height: number;
+  /** 블록 거래 수. 구버전 캐시처럼 모르면 `null`. */
+  txCount: number | null;
+}
 
 export interface BlockDashboardState {
   /** 최신 블록 높이. 아직 모르면 0. */
@@ -90,6 +85,12 @@ export interface BlockDashboardState {
   /** 채굴 후 경과 초. 모르면 `null`. */
   elapsedSeconds: number | null;
   poolName: string;
+  /** 최신 블록 거래 수. 모르면 `null`. */
+  txCount: number | null;
+  /** 30분 안 확정 수수료(sat/vB). 모르면 `null`. */
+  feeRate: number | null;
+  /** 최근 블록. **오래된 것부터** 최신 순이라 체인 오른쪽 끝이 최신임. */
+  recentBlocks: readonly RecentBlock[];
   /** 현재 블록 보조금(BTC). */
   subsidy: number;
   /** 다음 반감기 블록 높이. 모르면 0. */
@@ -102,45 +103,68 @@ export interface BlockDashboardState {
   blocksToHalving: number | null;
   /** 현재 반감기 구간 진행률(%). 모르면 `null`. */
   halvingProgressPercent: number | null;
+  /** 난이도에서 역산한 해시레이트(H/s). 모르면 0. */
+  hashrate: number;
+  /** 최신 블록 난이도. 모르면 0. */
+  difficulty: number;
+  /** 지금까지 채굴된 BTC. 모르면 0. */
+  minedSupply: number;
 }
 
 // region [Privates]
-const resolveFontSpec = (fontWeight: number, fontSizePx: number): string => {
-  return `${fontWeight} ${fontSizePx}px ${SANS_FONT_STACK}`;
-};
-
 const formatInteger = (value: number): string => {
   return Number.isFinite(value) ? Math.round(value).toLocaleString("en-US") : "";
+};
+
+const isPositiveNumber = (value: unknown): value is number => {
+  return typeof value === "number" && Number.isFinite(value) && value > 0;
 };
 // endregion
 
 /**
  * 스토어 값을 현황판이 그릴 상태로 바꾼다.
  *
- * 높이 0 은 "소켓 연결 전" 이다. 그 상태를 실제 값처럼 그리면 블록이 0번이고
- * 반감기가 코앞인 것처럼 읽힌다. 그래서 높이가 없으면 파생값도 비운다.
+ * 높이 0 은 "소켓 연결 전" 임. 그 상태를 실제 값처럼 그리면 블록이 0번이고
+ * 반감기가 코앞인 것처럼 읽힘. 그래서 높이가 없으면 파생값도 비움.
  */
 export const resolveBlockDashboardState = (
   blocks: readonly BlockTypes[],
   nowMs: number,
+  fees?: Pick<FeesTypes, "halfHourFee">,
 ): BlockDashboardState => {
   const latestBlock = blocks[0];
   const height = latestBlock && latestBlock.height > 0 ? latestBlock.height : 0;
   const timestampMs = latestBlock && latestBlock.timestamp > 0 ? latestBlock.timestamp * 1000 : 0;
   const nextHalving = height > 0 ? getNextHalvingData(height) : null;
   const nextHalvingHeight = nextHalving?.blockHeight ?? 0;
+  const difficulty =
+    height > 0 && isPositiveNumber(latestBlock?.difficulty) ? latestBlock.difficulty : 0;
+  const recentBlocks = blocks
+    .filter((block) => block.height > 0)
+    .slice(0, RECENT_BLOCK_COUNT)
+    .map((block) => ({
+      height: block.height,
+      txCount: isPositiveNumber(block.txCount) ? block.txCount : null,
+    }))
+    .reverse();
 
   return {
     height,
-    // 로컬 시계가 앞서면 음수가 나온다. 0 으로 깎아 "방금" 으로 읽히게 한다.
+    // 로컬 시계가 앞서면 음수가 나옴. 0 으로 깎아 "방금" 으로 읽히게 함.
     elapsedSeconds: timestampMs > 0 ? Math.max(0, Math.floor((nowMs - timestampMs) / 1000)) : null,
     poolName: latestBlock?.poolName && latestBlock.poolName !== "-" ? latestBlock.poolName : "",
+    txCount: height > 0 && isPositiveNumber(latestBlock?.txCount) ? latestBlock.txCount : null,
+    feeRate: isPositiveNumber(fees?.halfHourFee) ? fees.halfHourFee : null,
+    recentBlocks,
     subsidy: height > 0 ? getCurrentBlockSubsidy(height) : 0,
     nextHalvingHeight,
     nextHalvingDate: nextHalving?.date ?? "",
     nextSubsidy: nextHalving ? Number(nextHalving.blockReward) : 0,
     blocksToHalving: nextHalvingHeight > height ? nextHalvingHeight - height : null,
     halvingProgressPercent: height > 0 ? calcPercentage(nextHalvingHeight, height) : null,
+    hashrate: calculateNetworkHashrate(difficulty),
+    difficulty,
+    minedSupply: height > 0 ? (minedPercent(height) / 100) * BTC_MAX_SUPPLY : 0,
   };
 };
 
@@ -148,7 +172,7 @@ export const formatBlockHeight = (height: number): string => {
   return height > 0 ? formatInteger(height) : BLOCK_DASHBOARD_PLACEHOLDER;
 };
 
-/** 경과 시간. 초 단위는 보여주지 않는다 — 1초마다 바뀌면 눈이 따라간다. */
+/** 경과 시간. 초 단위는 보여주지 않음. 1초마다 바뀌면 눈이 따라감. */
 export const formatElapsed = (elapsedSeconds: number | null): string => {
   if (elapsedSeconds === null) {
     return BLOCK_DASHBOARD_PLACEHOLDER;
@@ -168,24 +192,38 @@ export const formatElapsed = (elapsedSeconds: number | null): string => {
   return hours < 24 ? `${hours}시간 전` : `${Math.floor(hours / 24)}일 전`;
 };
 
-/** H/s 를 EH/s·PH/s 로 줄인다. 현재 네트워크는 EH/s 대다. */
+/** H/s 를 ZH/s·EH/s 로 줄임. 1,000 EH/s 를 넘으면 시안처럼 ZH/s 로 씀. */
 export const formatHashrate = (hashrate: number): string => {
   if (!Number.isFinite(hashrate) || hashrate <= 0) {
     return BLOCK_DASHBOARD_PLACEHOLDER;
   }
 
-  const exa = hashrate / 1e18;
+  const zetta = hashrate / 1e21;
 
-  if (exa >= 1) {
-    return `${exa.toFixed(0)} EH/s`;
+  if (zetta >= 1) {
+    return `${zetta.toFixed(2)} ZH/s`;
   }
 
-  const peta = hashrate / 1e15;
+  const exa = hashrate / 1e18;
 
-  return peta >= 1 ? `${peta.toFixed(0)} PH/s` : `${(hashrate / 1e12).toFixed(0)} TH/s`;
+  return exa >= 1 ? `${exa.toFixed(0)} EH/s` : `${(hashrate / 1e15).toFixed(0)} PH/s`;
 };
 
-/** 단위는 라벨에 적는다. 값 칸에 넣으면 숫자 자체가 작아진다. */
+/** 난이도를 조(T) 단위로 줄임. */
+export const formatDifficulty = (difficulty: number): string => {
+  return isPositiveNumber(difficulty)
+    ? `${(difficulty / 1e12).toFixed(1)} T`
+    : BLOCK_DASHBOARD_PLACEHOLDER;
+};
+
+/** `19.96M / 21M`. 소수 둘째 자리라 블록 몇 개로는 글자가 안 바뀜. */
+export const formatMinedSupply = (minedSupply: number): string => {
+  return isPositiveNumber(minedSupply)
+    ? `${(minedSupply / 1e6).toFixed(2)}M / ${BTC_MAX_SUPPLY / 1e6}M`
+    : BLOCK_DASHBOARD_PLACEHOLDER;
+};
+
+/** 보조금. `1.56250000` 같은 꼬리 0 은 `Number` 가 떼어 줌. */
 export const formatSubsidy = (subsidy: number): string => {
   return subsidy > 0 ? `${subsidy} BTC` : BLOCK_DASHBOARD_PLACEHOLDER;
 };
@@ -209,8 +247,8 @@ export const formatHalvingProgress = (halvingProgressPercent: number | null): st
 /**
  * 남은 블록을 시간으로 환산한다.
  *
- * 10분 간격이 전제라 정확한 날짜가 아니다. 그래서 `약` 을 붙이고 단위도 크게
- * 끊는다. "906일" 처럼 적으면 확정된 날짜처럼 읽힌다.
+ * 10분 간격이 전제라 정확한 날짜가 아님. 그래서 `약` 을 붙이고 단위도 크게
+ * 끊음. "906일" 처럼 적으면 확정된 날짜처럼 읽힘.
  */
 export const formatTimeToHalving = (blocksToHalving: number | null): string => {
   if (blocksToHalving === null || blocksToHalving <= 0) {
@@ -235,370 +273,295 @@ export const formatPoolName = (poolName: string): string => {
   return poolName === "" ? BLOCK_DASHBOARD_PLACEHOLDER : poolName;
 };
 
-/** 블록이 평균 간격의 두 배를 넘겨 안 나오면 상태 배지를 회색으로 돌린다. */
+/** 블록이 평균 간격의 두 배를 넘겨 안 나오면 상태 배지를 회색으로 돌림. */
 export const isBlockFeedStale = (elapsedSeconds: number | null): boolean => {
   return elapsedSeconds === null || elapsedSeconds >= STALE_BLOCK_SECONDS;
 };
 
+/** 최신 블록 아래 한 줄. 모르는 항목은 빼고 잇기만 함. */
+export const formatLatestBlockMeta = (state: BlockDashboardState): string => {
+  if (state.height <= 0) {
+    return "멤풀 연결을 기다리는 중";
+  }
+
+  return [
+    formatElapsed(state.elapsedSeconds),
+    state.txCount === null ? null : `거래 ${formatInteger(state.txCount)}건`,
+    state.feeRate === null ? null : `수수료 ${formatInteger(state.feeRate)} sat/vB`,
+    state.poolName === "" ? null : state.poolName,
+  ]
+    .filter((part): part is string => part !== null && part !== BLOCK_DASHBOARD_PLACEHOLDER)
+    .join(" · ");
+};
+
+/** 칸 수 중 채울 칸. 0 % 초과면 최소 한 칸은 칠해 진행 중임을 보여 줌. */
+export const resolveFilledSegmentCount = (percent: number | null): number => {
+  if (percent === null || !Number.isFinite(percent) || percent <= 0) {
+    return 0;
+  }
+
+  return Math.min(
+    HALVING_SEGMENT_COUNT,
+    Math.max(1, Math.round((percent / 100) * HALVING_SEGMENT_COUNT)),
+  );
+};
+
+/**
+ * 다시 그릴지 가리는 서명. 화면에 찍히는 글자만 모았음.
+ *
+ * 값 자체로 비교하면 경과 초가 매초 달라 매번 다시 그림. 표시가 바뀔 때만
+ * 큰 텍스처를 다시 올림.
+ */
+export const createBlockDashboardSignature = (state: BlockDashboardState): string => {
+  return [
+    formatBlockHeight(state.height),
+    formatLatestBlockMeta(state),
+    isBlockFeedStale(state.elapsedSeconds),
+    state.recentBlocks.map((block) => `${block.height}:${block.txCount ?? ""}`).join(","),
+    formatHalvingProgress(state.halvingProgressPercent),
+    formatBlocksToHalving(state.blocksToHalving),
+    formatHashrate(state.hashrate),
+    formatDifficulty(state.difficulty),
+    formatMinedSupply(state.minedSupply),
+  ].join("|");
+};
+
 // region [Privates]
-/** 가용 폭을 넘지 않도록 크기를 줄여 그린다. 폰트 지정은 이 함수만 한다. */
-const drawFittedText = (
-  context: CanvasRenderingContext2D,
-  text: string,
-  options: {
-    x: number;
-    y: number;
-    fontWeight: number;
-    maxFontSizePx: number;
-    maxWidth: number;
-    minFontSizePx?: number;
-  },
-): void => {
-  const { x, y, fontWeight, maxFontSizePx, maxWidth, minFontSizePx } = options;
-
-  context.font = resolveFontSpec(fontWeight, maxFontSizePx);
-
-  const fittedFontSize = resolveFittedFontSize(context.measureText(text).width, {
-    maxWidth,
-    maxFontSizePx,
-    minFontSizePx: minFontSizePx ?? BILLBOARD_MIN_FONT_SIZE_PX,
-  });
-
-  if (fittedFontSize !== maxFontSizePx) {
-    context.font = resolveFontSpec(fontWeight, fittedFontSize);
-  }
-
-  context.fillText(text, x, y);
-};
-
-/** 전광판과 같은 배경·테두리·헤더 구분선. */
-const drawPanelBackground = (context: CanvasRenderingContext2D): void => {
-  const { width, height, paddingX } = BLOCK_DASHBOARD_TEXTURE;
-
-  context.fillStyle = BILLBOARD_COLORS.background;
-  context.fillRect(0, 0, width, height);
-  context.strokeStyle = BILLBOARD_COLORS.panelEdge;
-  context.lineWidth = 4;
-  context.strokeRect(2, 2, width - 4, height - 4);
-
-  context.strokeStyle = BILLBOARD_COLORS.divider;
-  context.lineWidth = 2;
-  context.beginPath();
-  context.moveTo(paddingX, LAYOUT.headerDividerY);
-  context.lineTo(width - paddingX, LAYOUT.headerDividerY);
-  context.stroke();
-};
-
-/**
- * 비트코인 마크.
- *
- * 전광판과 같은 도형이다. `₿`(U+20BF) 글리프가 없는 환경에서 두부가 뜨는 것을
- * 막으려고 도형으로 그린다.
- */
-/** 전광판과 같은 코인 아이콘. 두 판의 마크가 달라 보이면 안 된다. */
-const drawBitcoinMark = (context: CanvasRenderingContext2D): void => {
-  const { centerX, centerY, radius } = LAYOUT.logo;
-
-  drawBitcoinCoin(context, centerX, centerY, radius, BILLBOARD_COLORS.brand, "#ffffff");
-};
-
-/** 우측 상단 채굴 상태 배지. 전광판 접속 배지와 같은 자리·같은 규격이다. */
-const drawStatusBadge = (context: CanvasRenderingContext2D, isStale: boolean): void => {
-  const accentColor = isStale ? BILLBOARD_COLORS.flat : BILLBOARD_COLORS.online;
-
-  context.beginPath();
-  context.roundRect(
-    LAYOUT.statusBadge.x,
-    LAYOUT.statusBadge.y,
-    LAYOUT.statusBadge.width,
-    LAYOUT.statusBadge.height,
-    LAYOUT.statusBadge.radius,
-  );
-  context.fillStyle = BILLBOARD_COLORS.tickerSurface;
-  context.fill();
-
-  context.beginPath();
-  context.arc(LAYOUT.statusDot.x, LAYOUT.statusDot.y, LAYOUT.statusDot.radius, 0, Math.PI * 2);
-  context.fillStyle = accentColor;
-  context.fill();
-
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  context.fillStyle = accentColor;
-  context.font = resolveFontSpec(600, LAYOUT.statusText.fontSize);
-  context.fillText(isStale ? "지연" : "채굴중", LAYOUT.statusText.x, LAYOUT.statusText.y);
-};
-
-const drawHeader = (context: CanvasRenderingContext2D, isStale: boolean): void => {
-  drawBitcoinMark(context);
-
-  context.textAlign = "left";
-  context.textBaseline = "middle";
-  context.fillStyle = BILLBOARD_COLORS.label;
-  context.font = resolveFontSpec(800, LAYOUT.title.fontSize);
-  context.fillText("BLOCK", LAYOUT.title.x, LAYOUT.title.y);
-
-  context.beginPath();
-  context.roundRect(
-    LAYOUT.badge.x,
-    LAYOUT.badge.y,
-    LAYOUT.badge.width,
-    LAYOUT.badge.height,
-    LAYOUT.badge.radius,
-  );
-  context.fillStyle = BILLBOARD_COLORS.tickerSurface;
-  context.fill();
-
-  context.textAlign = "center";
-  context.fillStyle = BILLBOARD_COLORS.tickerText;
-  context.font = resolveFontSpec(600, LAYOUT.badgeText.fontSize);
-  context.fillText("MAINNET", LAYOUT.badgeText.x, LAYOUT.badgeText.y);
-
-  drawStatusBadge(context, isStale);
-};
-
-/** 전광판 가격 행과 같은 표면. 그라데이션·테두리·세로 구분선 규격이 동일하다. */
-const drawRowSurface = (context: CanvasRenderingContext2D, centerY: number): void => {
-  const rowTop = centerY - LAYOUT.rowPanel.height / 2;
-  const gradient = context.createLinearGradient(0, rowTop, 0, rowTop + LAYOUT.rowPanel.height);
-  gradient.addColorStop(0, BILLBOARD_COLORS.rowSurfaceTop);
-  gradient.addColorStop(1, BILLBOARD_COLORS.rowSurfaceBottom);
-
-  context.beginPath();
-  context.roundRect(
-    LAYOUT.rowPanel.x,
-    rowTop,
-    LAYOUT.rowPanel.width,
-    LAYOUT.rowPanel.height,
-    LAYOUT.rowPanel.radius,
-  );
-  context.fillStyle = gradient;
-  context.fill();
-  context.strokeStyle = BILLBOARD_COLORS.rowBorder;
-  context.lineWidth = 1.5;
-  context.stroke();
-
-  context.strokeStyle = BILLBOARD_COLORS.rowDivider;
-  context.lineWidth = 1;
-
-  for (const dividerX of LAYOUT.rowPanel.dividerXs) {
-    context.beginPath();
-    context.moveTo(dividerX, centerY - 36);
-    context.lineTo(dividerX, centerY + 36);
-    context.stroke();
-  }
-};
-
-/** 통화명 자리에 이름·단위 두 줄, 가격 자리에 주 값, 등락 자리에 보조 값을 둔다. */
-const drawRow = (
-  context: CanvasRenderingContext2D,
-  options: {
-    centerY: number;
-    label: string;
-    unit: string;
-    value: string;
-    asideLabel: string;
-    asideValue: string;
-  },
-): void => {
-  const { centerY, label, unit, value, asideLabel, asideValue } = options;
-
-  drawRowSurface(context, centerY);
-
-  context.textAlign = "left";
-  context.textBaseline = "middle";
-
-  context.fillStyle = BILLBOARD_COLORS.label;
-  context.font = resolveFontSpec(700, LAYOUT.rowLabel.fontSize);
-  context.fillText(label, LAYOUT.rowLabel.x, centerY + LAYOUT.rowLabel.offsetY);
-
-  context.fillStyle = BILLBOARD_COLORS.labelMuted;
-  context.font = resolveFontSpec(500, LAYOUT.rowUnit.fontSize);
-  context.fillText(unit, LAYOUT.rowUnit.x, centerY + LAYOUT.rowUnit.offsetY);
-
-  context.fillStyle = BILLBOARD_COLORS.price;
-  drawFittedText(context, value, {
-    x: LAYOUT.rowValue.x,
-    y: centerY,
-    fontWeight: 700,
-    maxFontSizePx: LAYOUT.rowValue.fontSize,
-    maxWidth: LAYOUT.rowValue.maxWidth,
-  });
-
-  context.fillStyle = BILLBOARD_COLORS.labelMuted;
-  context.font = resolveFontSpec(500, LAYOUT.rowAsideLabel.fontSize);
-  context.fillText(asideLabel, LAYOUT.rowAsideLabel.x, centerY + LAYOUT.rowAsideLabel.offsetY);
-
-  context.fillStyle = BILLBOARD_COLORS.tickerText;
-  drawFittedText(context, asideValue, {
-    x: LAYOUT.rowAside.x,
-    y: centerY + LAYOUT.rowAside.offsetY,
-    fontWeight: 700,
-    maxFontSizePx: LAYOUT.rowAside.fontSize,
-    maxWidth: LAYOUT.rowAside.maxWidth,
-    minFontSizePx: 28,
-  });
-};
-
-/**
- * 반감기 진행 바.
- *
- * 전광판이 24시간 차트를 두는 자리라 이 판에도 한 눈에 읽히는 그림이 하나는
- * 필요하다. 숫자만 늘어놓으면 "얼마나 남았는지" 가 감으로 오지 않는다.
- */
-const drawProgressBar = (context: CanvasRenderingContext2D, percent: number | null): void => {
-  const { x, y, width, height, radius } = LAYOUT.progressBar;
+/** 우측 상단 LIVE 배지. 블록이 늦으면 회색 `지연` 으로 바뀜. */
+const drawLiveBadge = (context: CanvasRenderingContext2D, isStale: boolean): void => {
+  const { x, y, width, height, radius, fontSize } = LAYOUT.liveBadge;
 
   context.beginPath();
   context.roundRect(x, y, width, height, radius);
-  context.fillStyle = BILLBOARD_COLORS.rowSurfaceBottom;
+  context.fillStyle = isStale ? COLORS.surface : COLORS.online;
   context.fill();
-  context.strokeStyle = BILLBOARD_COLORS.rowBorder;
-  context.lineWidth = 1.5;
-  context.stroke();
-
-  if (percent === null || percent <= 0) {
-    return;
-  }
-
-  // 반지름보다 짧은 채움은 둥근 끝이 뭉개지므로 최소 폭을 지름으로 둔다.
-  const filledWidth = Math.max(height, (width * Math.min(100, percent)) / 100);
-
-  context.beginPath();
-  context.roundRect(x, y, filledWidth, height, radius);
-  context.fillStyle = BILLBOARD_COLORS.brand;
-  context.fill();
-};
-
-/** 하단 반감기 지표. 전광판의 차트 영역을 격자로 쓴다. */
-const drawMetricPanel = (
-  context: CanvasRenderingContext2D,
-  cells: readonly { label: string; value: string }[],
-): void => {
-  const { x, top, width, height, radius, columns } = LAYOUT.metricPanel;
-  const gradient = context.createLinearGradient(0, top, 0, top + height);
-  gradient.addColorStop(0, BILLBOARD_COLORS.rowSurfaceTop);
-  gradient.addColorStop(1, BILLBOARD_COLORS.rowSurfaceBottom);
-
-  context.beginPath();
-  context.roundRect(x, top, width, height, radius);
-  context.fillStyle = gradient;
-  context.fill();
-  context.strokeStyle = BILLBOARD_COLORS.rowBorder;
-  context.lineWidth = 1.5;
-  context.stroke();
-
-  const rowCount = Math.ceil(cells.length / columns);
-  const columnWidth = width / columns;
-  const rowHeight = height / rowCount;
-
-  context.strokeStyle = BILLBOARD_COLORS.rowDivider;
-  context.lineWidth = 1;
-
-  // 격자선은 패널 안쪽으로 36 px 들여 그린다. 모서리까지 닿으면 테두리와 겹친다.
-  for (let index = 1; index < columns; index += 1) {
-    const dividerX = x + columnWidth * index;
-
-    context.beginPath();
-    context.moveTo(dividerX, top + 36);
-    context.lineTo(dividerX, top + height - 36);
-    context.stroke();
-  }
-
-  for (let index = 1; index < rowCount; index += 1) {
-    const dividerY = top + rowHeight * index;
-
-    context.beginPath();
-    context.moveTo(x + 36, dividerY);
-    context.lineTo(x + width - 36, dividerY);
-    context.stroke();
-  }
 
   context.textAlign = "center";
   context.textBaseline = "middle";
+  context.fillStyle = isStale ? COLORS.labelMuted : COLORS.onAccent;
+  context.font = isStale
+    ? resolveFontSpec(700, fontSize - 4, SANS_FONT_STACK)
+    : resolveFontSpec(800, fontSize, NUMERIC_FONT_STACK);
+  context.fillText(isStale ? "지연" : "LIVE", x + width / 2, y + height / 2 + 2);
+};
+
+const drawLatestBlock = (context: CanvasRenderingContext2D, state: BlockDashboardState): void => {
+  context.textAlign = "left";
+  context.textBaseline = "middle";
+
+  context.fillStyle = COLORS.labelMuted;
+  context.font = resolveFontSpec(500, LAYOUT.latestLabel.fontSize, SANS_FONT_STACK);
+  context.fillText("최신 블록", LAYOUT.latestLabel.x, LAYOUT.latestLabel.y);
+
+  const heightText =
+    state.height > 0 ? `#${formatBlockHeight(state.height)}` : BLOCK_DASHBOARD_PLACEHOLDER;
+
+  context.fillStyle = COLORS.brand;
+  drawFittedText(context, heightText, {
+    x: LAYOUT.latestHeight.x,
+    y: LAYOUT.latestHeight.y,
+    fontWeight: 800,
+    maxFontSizePx: LAYOUT.latestHeight.fontSize,
+    maxWidth: LAYOUT.latestHeight.maxWidth,
+    fontStack: NUMERIC_FONT_STACK,
+  });
+
+  context.fillStyle = COLORS.label;
+  drawFittedText(context, formatLatestBlockMeta(state), {
+    x: LAYOUT.latestMeta.x,
+    y: LAYOUT.latestMeta.y,
+    fontWeight: 600,
+    maxFontSizePx: LAYOUT.latestMeta.fontSize,
+    maxWidth: LAYOUT.latestMeta.maxWidth,
+    fontStack: SANS_FONT_STACK,
+  });
+};
+
+/**
+ * 최근 블록 체인. 오른쪽 끝이 최신이고 주황으로 꽉 채움.
+ *
+ * 블록이 6개보다 적으면(연결 직후) 빈 칸을 흐린 테두리로 남겨 자리가 흔들리지 않게 함.
+ */
+const drawBlockChain = (
+  context: CanvasRenderingContext2D,
+  blocks: readonly RecentBlock[],
+): void => {
+  const { top, height, gap, radius, connectorHeight } = LAYOUT.chain;
+  const left = BLOCK_DASHBOARD_TEXTURE.paddingX;
+  const totalWidth = BLOCK_DASHBOARD_TEXTURE.width - left * 2;
+  const boxWidth = (totalWidth - gap * (RECENT_BLOCK_COUNT - 1)) / RECENT_BLOCK_COUNT;
+  const emptySlots = RECENT_BLOCK_COUNT - blocks.length;
+
+  for (let slot = 0; slot < RECENT_BLOCK_COUNT; slot += 1) {
+    const x = left + (boxWidth + gap) * slot;
+    const block = slot >= emptySlots ? blocks[slot - emptySlots] : undefined;
+    const isLatest = block !== undefined && slot === RECENT_BLOCK_COUNT - 1;
+    const centerX = x + boxWidth / 2;
+
+    if (slot > 0) {
+      context.fillStyle = block ? COLORS.brand : COLORS.segmentEmpty;
+      context.fillRect(x - gap, top + height / 2 - connectorHeight / 2, gap, connectorHeight);
+    }
+
+    context.beginPath();
+    context.roundRect(x, top, boxWidth, height, radius);
+
+    if (isLatest) {
+      context.fillStyle = COLORS.brand;
+      context.fill();
+    } else {
+      context.fillStyle = COLORS.cardBottom;
+      context.fill();
+      context.strokeStyle = block ? COLORS.brand : COLORS.segmentEmpty;
+      context.lineWidth = 3;
+      context.stroke();
+    }
+
+    if (!block) {
+      continue;
+    }
+
+    context.textAlign = "center";
+    context.textBaseline = "middle";
+    context.fillStyle = isLatest ? COLORS.onAccent : COLORS.label;
+    drawFittedText(context, formatInteger(block.height), {
+      x: centerX,
+      y: top + LAYOUT.chainHeight.offsetY,
+      fontWeight: 700,
+      maxFontSizePx: LAYOUT.chainHeight.fontSize,
+      maxWidth: boxWidth - 24,
+      fontStack: NUMERIC_FONT_STACK,
+    });
+
+    context.fillStyle = isLatest ? COLORS.onAccent : COLORS.labelMuted;
+    drawFittedText(
+      context,
+      block.txCount === null ? "— tx" : `${formatInteger(block.txCount)} tx`,
+      {
+        x: centerX,
+        y: top + LAYOUT.chainTx.offsetY,
+        fontWeight: 500,
+        maxFontSizePx: LAYOUT.chainTx.fontSize,
+        maxWidth: boxWidth - 24,
+        fontStack: NUMERIC_FONT_STACK,
+      },
+    );
+  }
+};
+
+/** 칸으로 끊은 반감기 막대. 시안처럼 채운 칸은 주황, 남은 칸은 어두운 갈색. */
+const drawHalvingSegments = (context: CanvasRenderingContext2D, percent: number | null): void => {
+  const { top, height, gap } = LAYOUT.halvingBar;
+  const left = BLOCK_DASHBOARD_TEXTURE.paddingX;
+  const totalWidth = BLOCK_DASHBOARD_TEXTURE.width - left * 2;
+  const segmentWidth = (totalWidth - gap * (HALVING_SEGMENT_COUNT - 1)) / HALVING_SEGMENT_COUNT;
+  const filledCount = resolveFilledSegmentCount(percent);
+
+  for (let index = 0; index < HALVING_SEGMENT_COUNT; index += 1) {
+    context.fillStyle = index < filledCount ? COLORS.brand : COLORS.segmentEmpty;
+    context.fillRect(left + (segmentWidth + gap) * index, top, segmentWidth, height);
+  }
+};
+
+const drawHalving = (context: CanvasRenderingContext2D, state: BlockDashboardState): void => {
+  context.textBaseline = "middle";
+
+  context.textAlign = "left";
+  context.fillStyle = COLORS.label;
+  context.font = resolveFontSpec(800, LAYOUT.halvingTitle.fontSize, SANS_FONT_STACK);
+  context.fillText("다음 반감기", LAYOUT.halvingTitle.x, LAYOUT.halvingTitle.y);
+
+  const asideParts = [
+    state.nextHalvingHeight > 0 ? `블록 ${formatHalvingHeight(state.nextHalvingHeight)}` : null,
+    state.nextHalvingDate === "" ? null : `${state.nextHalvingDate}년 예상`,
+  ].filter((part): part is string => part !== null);
+
+  context.textAlign = "right";
+  context.fillStyle = COLORS.labelMuted;
+  context.font = resolveFontSpec(500, LAYOUT.halvingAside.fontSize, SANS_FONT_STACK);
+  context.fillText(asideParts.join(" · "), LAYOUT.halvingAside.x, LAYOUT.halvingAside.y);
+
+  drawHalvingSegments(context, state.halvingProgressPercent);
+
+  context.textAlign = "left";
+  context.fillStyle = COLORS.brand;
+  context.font = resolveFontSpec(800, LAYOUT.halvingPercent.fontSize, NUMERIC_FONT_STACK);
+  context.fillText(
+    formatHalvingProgress(state.halvingProgressPercent),
+    LAYOUT.halvingPercent.x,
+    LAYOUT.halvingPercent.y,
+  );
+
+  const remainText =
+    state.blocksToHalving === null
+      ? ""
+      : `남은 블록 ${formatBlocksToHalving(state.blocksToHalving)} · ${formatTimeToHalving(state.blocksToHalving)}`;
+
+  context.fillStyle = COLORS.label;
+  context.font = resolveFontSpec(500, LAYOUT.halvingRemain.fontSize, SANS_FONT_STACK);
+  context.fillText(remainText, LAYOUT.halvingRemain.x, LAYOUT.halvingRemain.y);
+
+  const rewardText =
+    state.subsidy > 0 && state.nextSubsidy > 0
+      ? `보상 ${state.subsidy} → ${state.nextSubsidy} BTC`
+      : "";
+
+  context.textAlign = "right";
+  context.font = resolveFontSpec(700, LAYOUT.halvingReward.fontSize, NUMERIC_FONT_STACK);
+  context.fillText(rewardText, LAYOUT.halvingReward.x, LAYOUT.halvingReward.y);
+};
+
+/** 하단 지표 세 칸. 왼쪽 시세 판의 하단 지표와 같은 높이·글꼴임. */
+const drawFooter = (context: CanvasRenderingContext2D, state: BlockDashboardState): void => {
+  const cells = [
+    { label: "해시레이트", value: formatHashrate(state.hashrate) },
+    { label: "난이도", value: formatDifficulty(state.difficulty) },
+    { label: "채굴된 공급량", value: formatMinedSupply(state.minedSupply) },
+  ];
+  const left = BLOCK_DASHBOARD_TEXTURE.paddingX;
+  const columnWidth = (BLOCK_DASHBOARD_TEXTURE.width - left * 2) / cells.length;
+
+  drawScreenDivider(context, LAYOUT.footerDividerY);
+
+  context.textAlign = "left";
+  context.textBaseline = "middle";
 
   cells.forEach((cell, index) => {
-    const columnCenterX = x + columnWidth * ((index % columns) + 0.5);
-    const cellCenterY = top + rowHeight * (Math.floor(index / columns) + 0.5);
+    const x = left + columnWidth * index;
 
-    context.fillStyle = BILLBOARD_COLORS.labelMuted;
-    context.font = resolveFontSpec(500, LAYOUT.metricLabel.fontSize);
-    context.fillText(cell.label, columnCenterX, cellCenterY + LAYOUT.metricLabel.offsetY);
+    context.fillStyle = COLORS.labelMuted;
+    context.font = resolveFontSpec(500, LAYOUT.footerLabel.fontSize, SANS_FONT_STACK);
+    context.fillText(cell.label, x, LAYOUT.footerLabel.y);
 
-    context.fillStyle = BILLBOARD_COLORS.price;
+    context.fillStyle = COLORS.label;
     drawFittedText(context, cell.value, {
-      x: columnCenterX,
-      y: cellCenterY + LAYOUT.metricValue.offsetY,
+      x,
+      y: LAYOUT.footerValue.y,
       fontWeight: 700,
-      maxFontSizePx: LAYOUT.metricValue.fontSize,
-      maxWidth: columnWidth - 64,
-      minFontSizePx: 40,
+      maxFontSizePx: LAYOUT.footerValue.fontSize,
+      maxWidth: columnWidth - 24,
+      fontStack: NUMERIC_FONT_STACK,
     });
   });
 };
 // endregion
 
-/**
- * 현황판 한 장을 그린다.
- *
- * 전광판이 원화·달러 두 행에 가격을 담는 자리에 **현재 블록**(높이·경과·풀·보조금)을
- * 담고, 24시간 차트가 있던 아래 영역을 **반감기**(진행 바 + 지표 3개)에 준다.
- * 수수료·멤풀·해시레이트는 뺐다 — 이 판에서 볼 것은 "지금 몇 번 블록이고 반감기가
- * 얼마나 남았는가" 다. 같은 격자를 쓰므로 두 판을 나란히 봤을 때 선이 맞는다.
- */
+/** 네트워크 현황판 한 장을 그린다. */
 export const drawBlockDashboard = (
   context: CanvasRenderingContext2D,
   state: BlockDashboardState,
 ): void => {
-  drawPanelBackground(context);
-  drawHeader(context, isBlockFeedStale(state.elapsedSeconds));
-
-  drawRow(context, {
-    centerY: LAYOUT.rows.height.centerY,
-    label: LAYOUT.rows.height.label,
-    unit: LAYOUT.rows.height.unit,
-    value: formatBlockHeight(state.height),
-    asideLabel: "채굴 시각",
-    asideValue: formatElapsed(state.elapsedSeconds),
-  });
-
-  drawRow(context, {
-    centerY: LAYOUT.rows.pool.centerY,
-    label: LAYOUT.rows.pool.label,
-    unit: LAYOUT.rows.pool.unit,
-    value: formatPoolName(state.poolName),
-    asideLabel: "블록 보상",
-    asideValue: formatSubsidy(state.subsidy),
-  });
+  drawScreenCard(context);
 
   context.textAlign = "left";
   context.textBaseline = "middle";
-  context.fillStyle = BILLBOARD_COLORS.label;
-  context.font = resolveFontSpec(700, LAYOUT.sectionTitle.fontSize);
-  context.fillText("다음 반감기", LAYOUT.sectionTitle.x, LAYOUT.sectionTitle.y);
+  context.fillStyle = COLORS.label;
+  context.font = resolveFontSpec(800, LAYOUT.title.fontSize, SANS_FONT_STACK);
+  context.fillText("비트코인 네트워크", LAYOUT.title.x, LAYOUT.title.y);
 
-  context.fillStyle = BILLBOARD_COLORS.labelMuted;
-  context.font = resolveFontSpec(500, LAYOUT.sectionSubtitle.fontSize);
-  context.fillText(
-    state.nextHalvingDate === "" ? "" : `${state.nextHalvingDate} 예상`,
-    LAYOUT.sectionSubtitle.x,
-    LAYOUT.sectionSubtitle.y,
-  );
-
-  context.textAlign = "right";
-  context.fillStyle = BILLBOARD_COLORS.brand;
-  context.font = resolveFontSpec(700, LAYOUT.progressLabel.fontSize);
-  context.fillText(
-    formatHalvingProgress(state.halvingProgressPercent),
-    LAYOUT.progressLabel.x,
-    LAYOUT.progressLabel.y,
-  );
-
-  drawProgressBar(context, state.halvingProgressPercent);
-
-  drawMetricPanel(context, [
-    { label: "남은 블록", value: formatBlocksToHalving(state.blocksToHalving) },
-    { label: "예상 소요", value: formatTimeToHalving(state.blocksToHalving) },
-    { label: "반감 후 보조금", value: formatSubsidy(state.nextSubsidy) },
-  ]);
+  drawLiveBadge(context, isBlockFeedStale(state.elapsedSeconds));
+  drawLatestBlock(context, state);
+  drawBlockChain(context, state.recentBlocks);
+  drawHalving(context, state);
+  drawFooter(context, state);
 };

@@ -5,16 +5,24 @@ import { BILLBOARD_TEXTURE } from "@/views/space/lib/billboardTexture";
 import {
   BLOCK_DASHBOARD_PLACEHOLDER,
   BLOCK_DASHBOARD_TEXTURE,
+  createBlockDashboardSignature,
   formatBlockHeight,
   formatBlocksToHalving,
+  formatDifficulty,
   formatElapsed,
   formatHalvingHeight,
   formatHalvingProgress,
+  formatHashrate,
+  formatLatestBlockMeta,
+  formatMinedSupply,
   formatPoolName,
   formatSubsidy,
   formatTimeToHalving,
+  HALVING_SEGMENT_COUNT,
   isBlockFeedStale,
+  RECENT_BLOCK_COUNT,
   resolveBlockDashboardState,
+  resolveFilledSegmentCount,
 } from "@/views/space/lib/blockDashboardTexture";
 
 const MINUTE = 60;
@@ -163,5 +171,100 @@ describe("isBlockFeedStale", () => {
   it("경과를 모르면 오래된 것으로 본다", () => {
     // 데이터가 없는 상태를 초록 점으로 보여주면 살아 있는 것처럼 읽힌다.
     expect(isBlockFeedStale(null)).toBe(true);
+  });
+});
+
+describe("네트워크 현황 파생값", () => {
+  it("최근 블록을 오래된 것부터 최대 6개 늘어놓는다", () => {
+    const blocks = Array.from({ length: 8 }, (_, index) =>
+      createBlock({ height: CURRENT_HEIGHT - index, txCount: 3_000 + index }),
+    );
+    const state = resolveBlockDashboardState(blocks, NOW_MS);
+
+    expect(state.recentBlocks).toHaveLength(RECENT_BLOCK_COUNT);
+    expect(state.recentBlocks.map((block) => block.height)).toEqual([
+      CURRENT_HEIGHT - 5,
+      CURRENT_HEIGHT - 4,
+      CURRENT_HEIGHT - 3,
+      CURRENT_HEIGHT - 2,
+      CURRENT_HEIGHT - 1,
+      CURRENT_HEIGHT,
+    ]);
+    expect(state.recentBlocks.at(-1)?.txCount).toBe(3_000);
+    expect(state.txCount).toBe(3_000);
+  });
+
+  it("거래 수가 없는 구버전 캐시는 null 로 둔다", () => {
+    const state = resolveBlockDashboardState([createBlock()], NOW_MS);
+
+    expect(state.txCount).toBeNull();
+    expect(state.recentBlocks[0]?.txCount).toBeNull();
+  });
+
+  it("수수료·해시레이트·난이도·공급량을 채운다", () => {
+    const state = resolveBlockDashboardState([createBlock()], NOW_MS, { halfHourFee: 6 });
+
+    expect(state.feeRate).toBe(6);
+    expect(state.difficulty).toBe(150_000_000_000_000);
+    expect(state.hashrate).toBeGreaterThan(1e21);
+    expect(state.minedSupply).toBeGreaterThan(19_900_000);
+    expect(state.minedSupply).toBeLessThan(21_000_000);
+  });
+
+  it("소켓 연결 전에는 네트워크 값도 비운다", () => {
+    const emptyBlock = createBlock({ height: 0, timestamp: 0, poolName: "-", difficulty: 0 });
+    const state = resolveBlockDashboardState([emptyBlock], NOW_MS, { halfHourFee: 0 });
+
+    expect(state.recentBlocks).toEqual([]);
+    expect(state.feeRate).toBeNull();
+    expect(state.hashrate).toBe(0);
+    expect(state.minedSupply).toBe(0);
+  });
+});
+
+describe("네트워크 현황 포맷", () => {
+  it("해시레이트는 1,000 EH/s 를 넘으면 ZH/s 로 쓴다", () => {
+    expect(formatHashrate(1.08e21)).toBe("1.08 ZH/s");
+    expect(formatHashrate(650e18)).toBe("650 EH/s");
+    expect(formatHashrate(0)).toBe(BLOCK_DASHBOARD_PLACEHOLDER);
+  });
+
+  it("난이도는 조 단위, 공급량은 백만 단위로 줄인다", () => {
+    expect(formatDifficulty(148.9e12)).toBe("148.9 T");
+    expect(formatDifficulty(0)).toBe(BLOCK_DASHBOARD_PLACEHOLDER);
+    expect(formatMinedSupply(19_962_000)).toBe("19.96M / 21M");
+    expect(formatMinedSupply(0)).toBe(BLOCK_DASHBOARD_PLACEHOLDER);
+  });
+
+  it("최신 블록 줄은 아는 항목만 잇는다", () => {
+    const full = resolveBlockDashboardState([createBlock({ txCount: 3_412 })], NOW_MS, {
+      halfHourFee: 6,
+    });
+    const partial = resolveBlockDashboardState([createBlock({ poolName: "-" })], NOW_MS);
+
+    expect(formatLatestBlockMeta(full)).toBe(
+      "12분 전 · 거래 3,412건 · 수수료 6 sat/vB · Foundry USA",
+    );
+    expect(formatLatestBlockMeta(partial)).toBe("12분 전");
+  });
+
+  it("반감기 막대는 진행률만큼 칸을 채우되 0 % 초과면 한 칸은 칠한다", () => {
+    expect(resolveFilledSegmentCount(null)).toBe(0);
+    expect(resolveFilledSegmentCount(0)).toBe(0);
+    expect(resolveFilledSegmentCount(0.1)).toBe(1);
+    expect(resolveFilledSegmentCount(63.5)).toBe(Math.round(0.635 * HALVING_SEGMENT_COUNT));
+    expect(resolveFilledSegmentCount(120)).toBe(HALVING_SEGMENT_COUNT);
+  });
+
+  it("화면 글자가 같으면 서명도 같아 다시 그리지 않는다", () => {
+    // 경과 초가 달라도 분 표시가 같으면 텍스처를 다시 올리지 않는다.
+    const first = resolveBlockDashboardState([createBlock()], NOW_MS);
+    const secondLater = resolveBlockDashboardState([createBlock()], NOW_MS + 5_000);
+    const minuteLater = resolveBlockDashboardState([createBlock()], NOW_MS + 60_000);
+
+    expect(createBlockDashboardSignature(secondLater)).toBe(createBlockDashboardSignature(first));
+    expect(createBlockDashboardSignature(minuteLater)).not.toBe(
+      createBlockDashboardSignature(first),
+    );
   });
 });
