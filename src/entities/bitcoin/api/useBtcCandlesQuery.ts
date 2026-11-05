@@ -14,15 +14,17 @@ export const BTC_CANDLE_COUNT = 48;
  */
 const REFRESH_TIME_MS = 1000 * 60 * 5;
 
-const EMPTY_CANDLES: BtcCandle[] = [];
+/** 실패하면 지수 백오프로 다시 받는 횟수. 1·2·4·8·16초 뒤에 재시도함. */
+const RETRY_COUNT = 5;
 
-const fetchBtcCandles = async (): Promise<BtcCandle[]> => {
-  try {
-    return await fetchBinanceCandles(BTC_CANDLE_INTERVAL, BTC_CANDLE_COUNT);
-  } catch (error) {
-    console.warn("❌ 바이낸스 캔들 조회 실패", error);
-    return EMPTY_CANDLES;
-  }
+/**
+ * 실패를 삼키지 않고 던짐.
+ *
+ * 빈 배열로 돌려주면 react-query 가 성공으로 보고 재시도를 안 해서, 다음 정기
+ * 조회(5분)까지 차트가 "불러오는 중" 으로 남았음.
+ */
+const fetchBtcCandles = (): Promise<BtcCandle[]> => {
+  return fetchBinanceCandles(BTC_CANDLE_INTERVAL, BTC_CANDLE_COUNT);
 };
 
 /** BTCUSDT 최근 24시간 캔들. 스페이스 전광판 차트에 씀. */
@@ -34,6 +36,8 @@ const useBtcCandlesQuery = () => {
     refetchInterval: REFRESH_TIME_MS,
     refetchOnWindowFocus: false,
     placeholderData: keepPreviousData,
+    retry: RETRY_COUNT,
+    retryDelay: (attempt) => Math.min(1000 * 2 ** attempt, 16_000),
   });
 };
 

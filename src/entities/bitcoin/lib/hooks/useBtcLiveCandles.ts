@@ -30,6 +30,7 @@ const EMPTY_CANDLES: readonly BtcCandle[] = [];
  * 상태로 올리지 않고 ref 로 돌려줌. 2초마다 리렌더하면 씬 전체가 다시 그려짐.
  * 쓰는 쪽(`/space` 전광판)이 사라지면 소켓도 닫힘.
  */
+// biome-ignore format: AGENTS.md requires two blank lines between regions.
 export default function useBtcLiveCandles(): BtcLiveCandles {
   // region [Hooks]
   const { data: history } = useBtcCandlesQuery();
@@ -39,12 +40,14 @@ export default function useBtcLiveCandles(): BtcLiveCandles {
   const liveCandleRef = useRef<BtcCandle | null>(null);
   // endregion
 
+
   // region [Privates]
   const replaceCandles = (nextCandles: readonly BtcCandle[]): void => {
     candlesRef.current = nextCandles;
     versionRef.current += 1;
   };
   // endregion
+
 
   // region [Life Cycles]
   useEffect(() => {
