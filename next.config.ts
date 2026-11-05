@@ -1,10 +1,23 @@
 // next.config.ts
 
+import { createHash } from "node:crypto";
 import { readFileSync } from "node:fs";
 import type { NextConfig } from "next";
 
 const packageJson = JSON.parse(readFileSync("./package.json", "utf-8"));
 const APP_VERSION = `${packageJson.version}`;
+
+/**
+ * 홀 맵 파일 내용 해시. 맵 주소 뒤 `?v=` 로 붙음.
+ *
+ * `/models` 는 30일 캐시라 같은 주소로 맵을 바꾸면 기존 사용자는 옛 맵을 계속
+ * 받음. 그러면 전광판(코드 좌표)과 액자(맵)가 어긋나 보였음. 내용이 바뀔 때만
+ * 주소가 바뀌게 해서 캐시는 살리고 새 맵은 바로 받게 함.
+ */
+const HALL_MODEL_VERSION = createHash("sha256")
+  .update(readFileSync("./public/models/bitcoin_hall_draco.glb"))
+  .digest("hex")
+  .slice(0, 12);
 
 /**
  * 환경변수 URL 에서 CSP 소스로 쓸 origin 만 뽑음.
@@ -98,7 +111,10 @@ const CONTENT_SECURITY_POLICY = [
 ].join("; ");
 
 const nextConfig: NextConfig = {
-  env: { NEXT_PUBLIC_APP_VERSION: APP_VERSION },
+  env: {
+    NEXT_PUBLIC_APP_VERSION: APP_VERSION,
+    NEXT_PUBLIC_HALL_MODEL_VERSION: HALL_MODEL_VERSION,
+  },
   compiler: {
     removeConsole: process.env.NODE_ENV === "production",
   },

@@ -23,7 +23,12 @@ import { SPACE_HALL } from "@/entities/space";
  * `setupHall` 을 옮겨 왔음.
  */
 
-export const HALL_MODEL_URL = "/models/bitcoin_hall_draco.glb";
+/** 빌드 때 맵 파일 해시를 붙임(`next.config.ts`). 맵이 바뀌면 주소가 바뀌어 캐시를 건너뜀. */
+const HALL_MODEL_VERSION = process.env.NEXT_PUBLIC_HALL_MODEL_VERSION;
+
+export const HALL_MODEL_URL = HALL_MODEL_VERSION
+  ? `/models/bitcoin_hall_draco.glb?v=${HALL_MODEL_VERSION}`
+  : "/models/bitcoin_hall_draco.glb";
 
 /**
  * Draco 디코더 경로.
