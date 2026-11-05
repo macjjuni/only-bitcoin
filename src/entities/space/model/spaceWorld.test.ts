@@ -17,6 +17,7 @@ import {
   SPACE_SPAWN_FACING,
   SPACE_SPAWN_RING,
   SPACE_STEP_HEIGHT,
+  SPACE_TICKER_FRAME,
 } from "@/entities/space";
 
 /**
@@ -45,6 +46,7 @@ interface GltfNode {
     lamp?: boolean;
     collision?: boolean;
     screen_anchor?: boolean;
+    ticker_anchor?: boolean;
     menu_anchor?: boolean;
     width_m?: number;
     height_m?: number;
@@ -243,6 +245,32 @@ describe("메인 전광판", () => {
       expect(glowPosition[1]).toBeLessThan(SPACE_SCREEN_FRAME.position[1]);
       expect(glowPosition[2]).toBeGreaterThan(SPACE_SCREEN_FRAME.position[2]);
     }
+  });
+});
+
+describe("티커 테이프", () => {
+  const anchor = findNode("Ticker_Anchor");
+
+  it("띠 치수가 GLB `Ticker_Anchor` 와 같다", () => {
+    expect(anchor.extras?.ticker_anchor).toBe(true);
+    expect(SPACE_TICKER_FRAME.width).toBe(anchor.extras?.width_m);
+    expect(SPACE_TICKER_FRAME.height).toBe(anchor.extras?.height_m);
+  });
+
+  it("앵커 앞 5 cm 에 +Z 방향으로 선다", () => {
+    const [x, y, z] = toWorld(anchor.translation);
+
+    expect(SPACE_TICKER_FRAME.position[0]).toBeCloseTo(x, 5);
+    expect(SPACE_TICKER_FRAME.position[1]).toBeCloseTo(y, 5);
+    expect(SPACE_TICKER_FRAME.position[2]).toBeCloseTo(z + 0.05, 5);
+    expect(SPACE_TICKER_FRAME.rotationY).toBe(0);
+  });
+
+  it("액자 위에 겹치지 않고 얹힌다", () => {
+    const frameTop = SPACE_SCREEN_FRAME.position[1] + SPACE_SCREEN_FRAME.height / 2;
+    const tickerBottom = SPACE_TICKER_FRAME.position[1] - SPACE_TICKER_FRAME.height / 2;
+
+    expect(tickerBottom).toBeGreaterThanOrEqual(frameTop);
   });
 });
 

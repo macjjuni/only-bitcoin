@@ -65,6 +65,5 @@ export {
   SPACE_SCREEN_SCALE,
   SPACE_SPAWN_FACING,
   SPACE_SPAWN_RING,
-  SPACE_TEXT_BANNER,
   SPACE_TICKER_FRAME,
 } from "./model/spaceWorld";

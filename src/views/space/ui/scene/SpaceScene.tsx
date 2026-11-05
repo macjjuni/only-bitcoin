@@ -49,12 +49,10 @@ import {
   type Vector3Like,
 } from "@/features/space-controls";
 import type { SpaceSession } from "@/features/space-session";
-import { spaceConfig } from "@/shared/config/space";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import type { LanternAnchor } from "@/views/space/lib/hallModel";
 import type { HallTerrain } from "@/views/space/lib/hallTerrain";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
-import { createEmptyAdTextSlot } from "@/views/space/lib/textBannerTexture";
 import BlockDashboard from "./BlockDashboard";
 import ChatBubbles from "./ChatBubbles";
 import Hall from "./Hall";
@@ -65,7 +63,6 @@ import PriceBillboard from "./PriceBillboard";
 import RemoteAvatars from "./RemoteAvatars";
 import SceneLighting from "./SceneLighting";
 import SpaceTicker from "./SpaceTicker";
-import TextAdBanner from "./TextAdBanner";
 
 interface SpaceSceneProps {
   inputSource: SpaceInputSource;
@@ -110,7 +107,6 @@ function SpaceScene({
   const dummies = useMemo(() => createStressDummies(dummyCount), [dummyCount]);
   const remotePlayers = dummyCount > 0 ? dummies : session.remotePlayers;
   /** 1단계는 빈 슬롯이다. 3단계에서 라이트닝 결제로 채운다. */
-  const textAdSlot = useMemo(() => createEmptyAdTextSlot(), []);
 
   const playerStateRef = useRef<LocalPlayerState>(createLocalPlayerState(spawnTransform));
   const cameraOrbitRef = useRef<CameraOrbit>(
@@ -416,12 +412,6 @@ function SpaceScene({
         scale={SPACE_SCREEN_PLACEMENTS.billboard.scale}
       >
         <PriceBillboard />
-
-        {/*
-          광고를 끄면 표시 면만 빠진다. 끈 동안에는 배너의 캔버스 텍스처도
-          만들지 않는다.
-        */}
-        {spaceConfig.isAdEnabled && <TextAdBanner slot={textAdSlot} />}
       </group>
 
       {/* 액자 위 가로 띠(28 × 2)에 지표 티커를 흘림. */}

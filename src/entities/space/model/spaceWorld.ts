@@ -185,19 +185,6 @@ export const SPACE_SCREEN_GLOW_POSITIONS = [
   [0, SPACE_HALL.floorY + 3, -19],
 ] as const satisfies readonly (readonly [number, number, number])[];
 
-/**
- * 전광판 위에 얹는 텍스트 전용 광고 배너.
- *
- * 좌표는 전광판 패널 기준 상대값임. 패널과 같은 그룹 안에서 함께 줄어듦.
- */
-export const SPACE_TEXT_BANNER = {
-  width: SPACE_BILLBOARD.width,
-  /** 텍스처(1440 × 120)와 같은 12:1. */
-  height: SPACE_BILLBOARD.width / 12,
-  /** 패널 윗변에서 0.2 띄우고 배너 반높이를 더한 값. */
-  offset: [0, SPACE_BILLBOARD.height / 2 + 0.2 + SPACE_BILLBOARD.width / 24, 0] as const,
-} as const;
-
 /** 명찰·말풍선 표시 상한. 인원 비례가 아니라 DOM 렌더 비용의 상한이다. */
 export const SPACE_OVERLAY_LIMITS = {
   /**
