@@ -3,7 +3,7 @@ import { BITCOIN_COLOR } from "@/shared/config/color";
 /**
  * 메인 전광판 두 칸(시세·네트워크)이 같이 쓰는 캔버스 규격과 그리기 도구.
  *
- * 액자 하나를 반씩 나눠 쓰는 두 판이라 팔레트·카드·글꼴이 하나라도 다르면
+ * 액자 하나를 반씩 나눠 쓰는 두 판이라 팔레트·여백·글꼴이 하나라도 다르면
  * 벽이 두 개로 쪼개져 보임. 그래서 공용 값은 전부 여기서만 정함.
  */
 
@@ -16,23 +16,22 @@ import { BITCOIN_COLOR } from "@/shared/config/color";
 export const SCREEN_TEXTURE = {
   width: 1600,
   height: 1200,
-  /** 카드 안쪽 좌우 여백. */
+  /** 패널 안쪽 좌우 여백. */
   paddingX: 84,
 } as const;
 
-/** 카드 테두리 자리. 두 칸이 맞닿을 때 사이에 어두운 틈이 생기게 안으로 들였음. */
-export const SCREEN_CARD = {
-  inset: 20,
-  radius: 28,
-  borderWidth: 3,
+/** 두 판 사이 이음선. 1 px 가 8.75 mm 라 4 px 면 약 3.5 cm 짜리 얇은 선임. */
+export const SCREEN_SEAM = {
+  lineWidth: 4,
+  /** 위아래 끝까지 긋지 않음. 액자 안쪽 모서리에 선이 닿으면 지저분해 보임. */
+  paddingY: 40,
 } as const;
 
 /** 시안(`assets/screen_A.png`)의 따뜻한 카페 톤을 옮겼음. */
 export const SCREEN_COLORS = {
   backdrop: "#0b0704",
-  cardTop: "#21150b",
-  cardBottom: "#130c06",
-  cardBorder: "#5b3f1d",
+  /** 블록 칸처럼 바탕 위에 한 겹 올리는 면. */
+  surfaceDeep: "#130c06",
   divider: "#33241499",
   grid: "#3a2a17",
   label: "#f3e8d8",
@@ -48,6 +47,8 @@ export const SCREEN_COLORS = {
   online: "#5fd68c",
   offline: "#ef5f4f",
   segmentEmpty: "#3a2a17",
+  /** 두 판을 가르는 이음선. 흰색은 너무 튀어서 한 단계 눌린 회색으로 둠. */
+  seam: "#5e5e5e",
 } as const;
 
 /** 본문용 산세리프. 한글 라벨이 들어가므로 시스템 폰트를 그대로 씀. */
@@ -57,13 +58,16 @@ export const SANS_FONT_STACK =
 /**
  * 숫자용 등폭. 자리수마다 폭이 달라지면 4 Hz 갱신 때 글자가 떰.
  *
- * 앱에 번들된 JetBrains Mono 를 먼저 씀. 시안의 숫자 글꼴과 가장 가까움.
+ * 앱 전체 숫자 서체(`font-number` → `--number-font`)와 같은 Roboto Mono 를 씀.
+ * 전광판만 다른 글꼴을 쓰면 같은 시세가 화면과 공간에서 달라 보임.
+ *
+ * 번들에는 300·400·700 만 있어서 아래 800 요청은 700 면으로 매칭됨. `₩`(U+20A9)
+ * 글리프가 Roboto Mono 에 없어 원화 기호만 뒤쪽 등폭 폴백으로 그려짐.
  */
-export const NUMERIC_FONT_STACK =
-  '"JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
+export const NUMERIC_FONT_STACK = '"Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
 
-/** 캔버스는 웹폰트를 기다려 주지 않아서 먼저 받아 둘 글꼴 목록. */
-const SCREEN_FONT_FACES = ['800 100px "JetBrains Mono"', '700 100px "JetBrains Mono"'] as const;
+/** 캔버스는 웹폰트를 기다려 주지 않아서 먼저 받아 둘 글꼴 목록. 번들에 있는 두 굵기임. */
+const SCREEN_FONT_FACES = ['700 100px "Roboto Mono"', '400 100px "Roboto Mono"'] as const;
 
 /**
  * 글자 크기 하한.
@@ -141,27 +145,36 @@ export const drawFittedText = (
   return context.measureText(text).width;
 };
 
-/** 바깥 어두운 틈 + 둥근 카드 + 금빛 테두리. 두 칸이 같은 함수로 그림. */
-export const drawScreenCard = (context: CanvasRenderingContext2D): void => {
+/**
+ * 바탕 한 겹. 두 칸이 같은 함수로 그림.
+ *
+ * 둥근 카드와 금빛 테두리를 걷어냈음. 맵의 금장 액자가 이미 테두리라 안쪽에
+ * 카드가 또 있으면 홈이 두 겹으로 보였고, 맞닿는 두 판 사이에는 선이 두 줄
+ * 생겼음. 지금은 어두운 바탕만 깔고 가운데 경계는 `drawScreenSeam` 이 한 줄로 맡음.
+ */
+export const drawScreenBackdrop = (context: CanvasRenderingContext2D): void => {
   const { width, height } = SCREEN_TEXTURE;
-  const { inset, radius, borderWidth } = SCREEN_CARD;
-  const gradient = context.createLinearGradient(0, inset, 0, height - inset);
-  gradient.addColorStop(0, SCREEN_COLORS.cardTop);
-  gradient.addColorStop(1, SCREEN_COLORS.cardBottom);
 
   context.fillStyle = SCREEN_COLORS.backdrop;
   context.fillRect(0, 0, width, height);
-
-  context.beginPath();
-  context.roundRect(inset, inset, width - inset * 2, height - inset * 2, radius);
-  context.fillStyle = gradient;
-  context.fill();
-  context.strokeStyle = SCREEN_COLORS.cardBorder;
-  context.lineWidth = borderWidth;
-  context.stroke();
 };
 
-/** 카드 폭을 가로지르는 얇은 구분선. */
+/**
+ * 두 판이 맞닿는 이음선.
+ *
+ * 카드 테두리를 걷어내니 시세판과 네트워크판이 한 장으로 붙어 보여서 가운데에
+ * 선 한 줄을 세웠음. 두 텍스처가 빈틈 없이 맞닿으므로 왼쪽 판만 그려야 한 줄로
+ * 보임. 선 전체가 텍스처 안에 들어오게 오른쪽 끝에서 폭만큼 안으로 들였음.
+ */
+export const drawScreenSeam = (context: CanvasRenderingContext2D): void => {
+  const { width, height } = SCREEN_TEXTURE;
+  const { lineWidth, paddingY } = SCREEN_SEAM;
+
+  context.fillStyle = SCREEN_COLORS.seam;
+  context.fillRect(width - lineWidth, paddingY, lineWidth, height - paddingY * 2);
+};
+
+/** 패널 폭을 가로지르는 얇은 구분선. */
 export const drawScreenDivider = (context: CanvasRenderingContext2D, y: number): void => {
   context.beginPath();
   context.moveTo(SCREEN_TEXTURE.paddingX, y);

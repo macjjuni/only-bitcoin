@@ -382,7 +382,7 @@ function PriceBillboard(): ReactNode {
         />
       </mesh>
 
-      {/* 2초마다 자라는 차트만 따로 올림. 투명이라 아래 카드 배경이 비침. */}
+      {/* 2초마다 자라는 차트만 따로 올림. 투명이라 아래 바탕이 비침. */}
       <mesh position={CHART_PLACEMENT.position}>
         <planeGeometry args={[CHART_PLACEMENT.width, CHART_PLACEMENT.height]} />
         <meshBasicMaterial

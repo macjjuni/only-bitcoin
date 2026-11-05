@@ -3,9 +3,10 @@ import { drawBitcoinCoin } from "@/shared/lib/bitcoinIconCanvas";
 import { type ChartRect, resolveChartScale, resolveTickY } from "./billboardChart";
 import {
   drawFittedText,
-  drawScreenCard,
+  drawScreenBackdrop,
   drawScreenDivider,
   drawScreenLiveBadge,
+  drawScreenSeam,
   NUMERIC_FONT_STACK,
   resolveFontSpec,
   SANS_FONT_STACK,
@@ -600,7 +601,9 @@ export const drawBillboard = (
   const shouldDrawPrices = options.shouldDrawPrices ?? true;
   const shouldDrawChart = options.shouldDrawChart ?? true;
 
-  drawScreenCard(context);
+  drawScreenBackdrop(context);
+  // 오른쪽 네트워크판과 맞닿는 가장자리. 선은 왼쪽 판만 그림.
+  drawScreenSeam(context);
   drawHeader(context, resolveBillboardOnlineStatus(state));
 
   drawPriceRow(context, {

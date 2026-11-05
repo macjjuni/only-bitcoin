@@ -7,7 +7,7 @@ import {
 } from "@/entities/block";
 import {
   drawFittedText,
-  drawScreenCard,
+  drawScreenBackdrop,
   drawScreenLiveBadge,
   NUMERIC_FONT_STACK,
   resolveFontSpec,
@@ -23,7 +23,7 @@ import {
  * 시안(`assets/screen_A.png`) 오른쪽 판을 옮겼음. 위에서부터 최신 블록 번호,
  * 최근 블록 4개 체인, 다음 반감기 진행 막대 순. 하단 지표(해시레이트·난이도·
  * 공급량)는 폰에서 안 읽혀서 빼고 그 자리만큼 체인과 반감기를 키웠음.
- * 왼쪽 시세 판과 같은 카드·팔레트·여백을 써서 액자 안에서 한 벽으로 읽힘.
+ * 왼쪽 시세 판과 같은 바탕·팔레트·여백을 써서 액자 안에서 한 벽으로 읽힘.
  */
 
 /** 텍스처 규격. 왼쪽 시세 판(`BILLBOARD_TEXTURE`)과 같은 값이어야 함. */
@@ -394,7 +394,7 @@ const drawBlockChain = (
       context.fillStyle = COLORS.brand;
       context.fill();
     } else {
-      context.fillStyle = COLORS.cardBottom;
+      context.fillStyle = COLORS.surfaceDeep;
       context.fill();
       context.strokeStyle = block ? ACCENT_WHITE : COLORS.segmentEmpty;
       context.lineWidth = 3;
@@ -508,7 +508,7 @@ export const drawBlockDashboard = (
   context: CanvasRenderingContext2D,
   state: BlockDashboardState,
 ): void => {
-  drawScreenCard(context);
+  drawScreenBackdrop(context);
 
   context.textAlign = "left";
   context.textBaseline = "middle";
