@@ -197,10 +197,8 @@ export const formatBillboardUsd = (price: number): string => {
   return isDisplayablePrice(price) ? `$${INTEGER_FORMATTER.format(price)}` : BILLBOARD_PLACEHOLDER;
 };
 
-const EXCHANGE_RATE_FORMATTER = new Intl.NumberFormat("en-US", {
-  minimumFractionDigits: 1,
-  maximumFractionDigits: 1,
-});
+/** 소수 자리는 멀리서 안 읽히고 1원 미만은 의미도 없음. 티커 표기와 같음. */
+const EXCHANGE_RATE_FORMATTER = new Intl.NumberFormat("en-US", { maximumFractionDigits: 0 });
 
 /**
  * 환율 한 줄. 값이 없으면 빈 문자열이라 호출부가 줄을 건너뜀.

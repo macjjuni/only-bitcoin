@@ -163,6 +163,23 @@ export const SPACE_SCREEN_PLACEMENTS = {
 } as const;
 
 /**
+ * 메인 액자 위 티커 테이프 자리. GLB `Ticker_Anchor`(28 × 2, +Z 방향)와 같음.
+ *
+ * 액자와 같은 벽이라 5 cm 앞으로 띄움. 한 바퀴(`cycleLength`)는 패널 폭보다
+ * 길어서 화면에는 늘 일부만 보이고 나머지는 흘러 들어옴.
+ */
+export const SPACE_TICKER_FRAME = {
+  width: SPACE_SCREEN_FRAME.width,
+  height: 2,
+  position: [0, 17 + SPACE_HALL.mapOffsetY, -23.96 + 0.05] as const,
+  rotationY: 0,
+  /** 지표 네 칸이 한 바퀴를 이루는 길이(m). 칸당 10 m. */
+  cycleLength: 40,
+  /** 초당 흐르는 거리(m). 28 m 폭을 한 글자가 지나가는 데 약 25초. */
+  scrollSpeed: 1.1,
+} as const;
+
+/**
  * 전광판이 아바타를 물들이는 광원 위치.
  *
  * 홀은 라이트맵으로 구워져 실시간 광원을 받지 않음. 이 광원은 전광판 앞에 선

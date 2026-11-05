@@ -64,6 +64,7 @@ import PlayerAvatar from "./PlayerAvatar";
 import PriceBillboard from "./PriceBillboard";
 import RemoteAvatars from "./RemoteAvatars";
 import SceneLighting from "./SceneLighting";
+import SpaceTicker from "./SpaceTicker";
 import TextAdBanner from "./TextAdBanner";
 
 interface SpaceSceneProps {
@@ -422,6 +423,9 @@ function SpaceScene({
         */}
         {spaceConfig.isAdEnabled && <TextAdBanner slot={textAdSlot} />}
       </group>
+
+      {/* 액자 위 가로 띠(28 × 2)에 지표 티커를 흘림. */}
+      <SpaceTicker />
 
       {/* 같은 액자 오른쪽 반쪽에 네트워크 현황판을 끼움. */}
       <group

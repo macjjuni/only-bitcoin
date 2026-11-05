@@ -92,9 +92,9 @@ describe("formatBillboardUsd", () => {
 });
 
 describe("formatBillboardExRate", () => {
-  it("소수 한 자리까지 USD/KRW 로 보여준다", () => {
-    expect(formatBillboardExRate(1_386.52)).toBe("USD/KRW 1,386.5");
-    expect(formatBillboardExRate(1_400)).toBe("USD/KRW 1,400.0");
+  it("정수로 반올림해 USD/KRW 로 보여준다", () => {
+    expect(formatBillboardExRate(1_386.52)).toBe("USD/KRW 1,387");
+    expect(formatBillboardExRate(1_400)).toBe("USD/KRW 1,400");
   });
 
   it("쿼리가 꺼진 0 과 비정상 값은 줄 자체를 비운다", () => {
