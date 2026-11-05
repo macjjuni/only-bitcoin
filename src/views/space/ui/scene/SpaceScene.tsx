@@ -314,17 +314,13 @@ function SpaceScene({
     }
 
     const { width, height } = viewportSize;
+    const framingShift = isCoarsePointer
+      ? SPACE_CAMERA.touchFramingShift
+      : SPACE_CAMERA.desktopFramingShift;
 
     // 렌즈를 위로 옮기면 화면 속 아바타가 아래로 내려감. 크기가 바뀔 때마다 다시 맞춤.
-    if (isCoarsePointer && width > 0 && height > 0) {
-      camera.setViewOffset(
-        width,
-        height,
-        0,
-        -height * SPACE_CAMERA.touchFramingShift,
-        width,
-        height,
-      );
+    if (framingShift > 0 && width > 0 && height > 0) {
+      camera.setViewOffset(width, height, 0, -height * framingShift, width, height);
     } else {
       camera.clearViewOffset();
     }

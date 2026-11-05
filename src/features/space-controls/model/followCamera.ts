@@ -24,6 +24,12 @@ export const SPACE_CAMERA = {
    * 시점 각도는 그대로라 조작감이 바뀌지 않음.
    */
   touchFramingShift: 0.12,
+  /**
+   * 데스크톱에서 화면을 아래로 미는 비율. 가로 화면이라 손가락 기기보다 살짝만 내림.
+   *
+   * 아바타가 한가운데 서면 위쪽 전광판이 덜 보여서 살짝 내렸음.
+   */
+  desktopFramingShift: 0.06,
   /** 휠 deltaY 1 단위당 거리 변화(m). 한 노치(100)에 약 1.2 m. */
   wheelZoomSensitivity: 0.012,
   /** 핀치 1 px 당 거리 변화(m). 200 px 벌리면 약 6 m. */
