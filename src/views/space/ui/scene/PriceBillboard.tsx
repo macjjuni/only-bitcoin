@@ -23,6 +23,7 @@ import {
   type BillboardState,
   drawBillboard,
   drawBillboardPrice,
+  formatBillboardChange,
   formatBillboardKrw,
   formatBillboardUsd,
   resolveBillboardChartEndpoint,
@@ -86,7 +87,9 @@ const PRICE_PLACEMENTS = {
  * 변경 감지용 서명.
  *
  * 캔들은 1분마다 새로 오고 48개라 전부 비교하면 비쌈. 개수와 마지막 캔들만 봐도
- * 갱신 여부를 가릴 수 있음.
+ * 갱신 여부를 가릴 수 있음. 등락률은 화면 글자(소수 한 자리)로 비교함. 원본은
+ * 둘째 자리라 시세마다 바뀌어서, 그대로 비교하면 안 보이는 변화로 큰 텍스처를
+ * 초당 4번까지 다시 올렸음.
  */
 const createStateSignature = (state: BillboardState): string => {
   const lastCandle = state.candles[state.candles.length - 1];
@@ -94,8 +97,8 @@ const createStateSignature = (state: BillboardState): string => {
   return [
     Number.isFinite(state.krw) && state.krw > 0,
     Number.isFinite(state.usd) && state.usd > 0,
-    state.krwChange24h,
-    state.usdChange24h,
+    formatBillboardChange(state.krwChange24h),
+    formatBillboardChange(state.usdChange24h),
     state.isKrwConnected,
     state.isUsdConnected,
     state.candles.length,
