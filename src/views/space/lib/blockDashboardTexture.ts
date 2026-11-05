@@ -47,9 +47,6 @@ const ACCENT_WHITE = "#ffffff";
 /** 블록 안 거래 수·수수료 줄 색. 기본 흐린 글자(`labelMuted`)는 멀리서 안 읽혀서 조금 밝게 씀. */
 const SOFT_LABEL = "#cdbba3";
 
-/** 블록이 이 시간을 넘겨 안 나오면 "지연" 으로 봄. 평균 10분의 두 배. */
-const STALE_BLOCK_SECONDS = 20 * 60;
-
 const COLORS = SCREEN_COLORS;
 
 /**
@@ -91,6 +88,8 @@ export interface RecentBlock {
 }
 
 export interface BlockDashboardState {
+  /** mempool.space 소켓 연결 여부. 상태 배지가 이 값만 봄. */
+  isConnected: boolean;
   /** 최신 블록 높이. 아직 모르면 0. */
   height: number;
   /** 채굴 후 경과 초. 모르면 `null`. */
@@ -136,6 +135,7 @@ export const resolveBlockDashboardState = (
   blocks: readonly BlockTypes[],
   nowMs: number,
   fees?: Partial<Pick<FeesTypes, "fastestFee" | "halfHourFee" | "hourFee">>,
+  isConnected = false,
 ): BlockDashboardState => {
   const latestBlock = blocks[0];
   const height = latestBlock && latestBlock.height > 0 ? latestBlock.height : 0;
@@ -152,6 +152,7 @@ export const resolveBlockDashboardState = (
     .reverse();
 
   return {
+    isConnected,
     height,
     // 로컬 시계가 앞서면 음수가 나옴. 0 으로 깎아 "방금" 으로 읽히게 함.
     elapsedSeconds: timestampMs > 0 ? Math.max(0, Math.floor((nowMs - timestampMs) / 1000)) : null,
@@ -246,9 +247,19 @@ export const formatPoolName = (poolName: string): string => {
   return poolName === "" ? BLOCK_DASHBOARD_PLACEHOLDER : poolName;
 };
 
-/** 블록이 평균 간격의 두 배를 넘겨 안 나오면 상태 배지를 회색으로 돌림. */
-export const isBlockFeedStale = (elapsedSeconds: number | null): boolean => {
-  return elapsedSeconds === null || elapsedSeconds >= STALE_BLOCK_SECONDS;
+/**
+ * 네트워크판 접속 표시 기준. 시세판(`resolveBillboardOnlineStatus`)과 같은 뜻임.
+ *
+ * 블록이 늦는 것과 우리가 끊긴 것은 다른 일임. 블록 간격은 평균 10분이어도
+ * 20분을 넘길 확률이 13% 라, 그걸 배지에 섞으면 네트워크가 멀쩡한데도 하루
+ * 세 시간 넘게 경고가 떠 있었음. 늦는 건 "N분 전" 이 이미 말해 줌.
+ *
+ * 소켓이 붙어도 블록을 한 번도 못 받았으면 보여 줄 게 없어 꺼진 것으로 봄.
+ */
+export const resolveBlockFeedOnlineStatus = (
+  state: Pick<BlockDashboardState, "isConnected" | "height">,
+): boolean => {
+  return state.isConnected && state.height > 0;
 };
 
 /** 최신 블록 아래 한 줄. 모르는 항목은 빼고 잇기만 함. */
@@ -314,7 +325,7 @@ export const createBlockDashboardSignature = (state: BlockDashboardState): strin
     formatBlockHeight(state.height),
     formatLatestBlockMeta(state),
     formatFeeRates(state.feeRates),
-    isBlockFeedStale(state.elapsedSeconds),
+    resolveBlockFeedOnlineStatus(state),
     state.recentBlocks.map((block) => `${block.height}:${block.txCount ?? ""}`).join(","),
     formatHalvingProgress(state.halvingProgressPercent),
     formatBlocksToHalving(state.blocksToHalving),
@@ -516,7 +527,7 @@ export const drawBlockDashboard = (
   context.font = resolveFontSpec(800, LAYOUT.title.fontSize, SANS_FONT_STACK);
   context.fillText("비트코인 네트워크", LAYOUT.title.x, LAYOUT.title.y);
 
-  drawScreenLiveBadge(context, isBlockFeedStale(state.elapsedSeconds) ? "delayed" : "live");
+  drawScreenLiveBadge(context, resolveBlockFeedOnlineStatus(state) ? "live" : "offline");
   drawLatestBlock(context, state);
   drawBlockChain(context, state.recentBlocks);
   drawHalving(context, state);

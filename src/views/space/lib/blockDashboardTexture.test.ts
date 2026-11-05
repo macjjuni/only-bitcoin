@@ -19,9 +19,9 @@ import {
   formatSubsidy,
   formatTimeToHalving,
   HALVING_SEGMENT_COUNT,
-  isBlockFeedStale,
   RECENT_BLOCK_COUNT,
   resolveBlockDashboardState,
+  resolveBlockFeedOnlineStatus,
   resolveFilledSegmentCount,
 } from "@/views/space/lib/blockDashboardTexture";
 
@@ -161,16 +161,34 @@ describe("표시 포맷", () => {
   });
 });
 
-describe("isBlockFeedStale", () => {
-  it("평균 간격의 두 배를 넘기면 오래된 것으로 본다", () => {
-    expect(isBlockFeedStale(5 * MINUTE)).toBe(false);
-    expect(isBlockFeedStale(19 * MINUTE)).toBe(false);
-    expect(isBlockFeedStale(20 * MINUTE)).toBe(true);
+describe("resolveBlockFeedOnlineStatus", () => {
+  it("소켓이 붙어 블록을 받고 있으면 접속으로 본다", () => {
+    expect(resolveBlockFeedOnlineStatus({ isConnected: true, height: CURRENT_HEIGHT })).toBe(true);
   });
 
-  it("경과를 모르면 오래된 것으로 본다", () => {
-    // 데이터가 없는 상태를 초록 점으로 보여주면 살아 있는 것처럼 읽힌다.
-    expect(isBlockFeedStale(null)).toBe(true);
+  it("소켓이 끊겼으면 블록이 남아 있어도 끊긴 것으로 본다", () => {
+    expect(resolveBlockFeedOnlineStatus({ isConnected: false, height: CURRENT_HEIGHT })).toBe(
+      false,
+    );
+  });
+
+  it("아직 블록을 한 번도 못 받았으면 끊긴 것으로 본다", () => {
+    // 보여 줄 값이 없는 상태를 초록 점으로 띄우면 살아 있는 것처럼 읽힌다.
+    expect(resolveBlockFeedOnlineStatus({ isConnected: true, height: 0 })).toBe(false);
+  });
+
+  it("블록이 오래 안 나와도 접속 상태는 그대로 본다", () => {
+    // 블록 간격은 네트워크 사정임. 평균 10분이어도 20분을 넘길 확률이 13% 라
+    // 배지에 섞으면 멀쩡한데도 경고가 자주 떴다. 늦는 건 "N분 전" 이 말해 준다.
+    const state = resolveBlockDashboardState(
+      [createBlock({ timestamp: NOW_MS / 1000 - 90 * MINUTE })],
+      NOW_MS,
+      undefined,
+      true,
+    );
+
+    expect(state.elapsedSeconds).toBe(90 * MINUTE);
+    expect(resolveBlockFeedOnlineStatus(state)).toBe(true);
   });
 });
 
@@ -266,14 +284,14 @@ describe("네트워크 현황 포맷", () => {
 });
 
 describe("우측 상단 상태 배지", () => {
-  const traceBadgeLabel = (elapsedMinutes: number): string | null => {
+  const traceBadgeLabel = (isConnected: boolean): string | null => {
     let label: string | null = null;
     const ignoredDrawingOperation = (): void => undefined;
     const canvasProperties: Record<string, unknown> = {
       measureText: (text: string) => ({ width: text.length * 20 }),
       createLinearGradient: () => ({ addColorStop: ignoredDrawingOperation }),
       fillText: (text: string) => {
-        if (text === "LIVE" || text === "DELAYED") {
+        if (text === "LIVE" || text === "OFFLINE") {
           label = text;
         }
       },
@@ -281,18 +299,21 @@ describe("우측 상단 상태 배지", () => {
     const context = new Proxy(canvasProperties, {
       get: (target, property) => Reflect.get(target, property) ?? ignoredDrawingOperation,
     }) as unknown as CanvasRenderingContext2D;
-    const block = createBlock({ timestamp: NOW_MS / 1000 - elapsedMinutes * MINUTE });
+    const block = createBlock({ timestamp: NOW_MS / 1000 - 5 * MINUTE });
 
-    drawBlockDashboard(context, resolveBlockDashboardState([block], NOW_MS));
+    drawBlockDashboard(
+      context,
+      resolveBlockDashboardState([block], NOW_MS, undefined, isConnected),
+    );
 
     return label;
   };
 
-  it("블록이 제때 나오면 시세판과 같은 LIVE 배지를 그린다", () => {
-    expect(traceBadgeLabel(5)).toBe("LIVE");
+  it("멤풀 소켓이 붙어 있으면 시세판과 같은 LIVE 배지를 그린다", () => {
+    expect(traceBadgeLabel(true)).toBe("LIVE");
   });
 
-  it("블록이 20분 넘게 안 나오면 DELAYED 로 바뀐다", () => {
-    expect(traceBadgeLabel(25)).toBe("DELAYED");
+  it("멤풀 소켓이 끊기면 OFFLINE 으로 바뀐다", () => {
+    expect(traceBadgeLabel(false)).toBe("OFFLINE");
   });
 });

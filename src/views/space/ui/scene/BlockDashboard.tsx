@@ -10,8 +10,8 @@ import {
   BLOCK_DASHBOARD_TEXTURE,
   createBlockDashboardSignature,
   drawBlockDashboard,
-  isBlockFeedStale,
   resolveBlockDashboardState,
+  resolveBlockFeedOnlineStatus,
 } from "@/views/space/lib/blockDashboardTexture";
 import { loadScreenFonts } from "@/views/space/lib/screenCanvas";
 import {
@@ -63,7 +63,7 @@ function BlockDashboard(): ReactNode {
   const renderer = useThree((rootState) => rootState.gl);
   const surface = useMemo(() => createDashboardTexture(), []);
   const lastSignatureRef = useRef<string>("");
-  /** 블록이 제때 나오는 중이면 `true`. LIVE 점의 확산 링이 이 값을 따름. */
+  /** 멤풀 소켓이 붙어 있으면 `true`. LIVE 점의 확산 링이 이 값을 따름. */
   const isLiveRef = useRef<boolean>(false);
   const prefersReducedMotion = usePrefersReducedMotion();
   const elapsedSinceCheckRef = useRef<number>(IDLE_CHECK_INTERVAL_SECONDS);
@@ -80,8 +80,8 @@ function BlockDashboard(): ReactNode {
       return;
     }
 
-    const { blockData, fees } = useBlockStore.getState();
-    const nextState = resolveBlockDashboardState(blockData, Date.now(), fees);
+    const { blockData, fees, isMempoolConnected } = useBlockStore.getState();
+    const nextState = resolveBlockDashboardState(blockData, Date.now(), fees, isMempoolConnected);
     const signature = createBlockDashboardSignature(nextState);
 
     // 화면 글자가 그대로면 다시 칠하지 않음. 캔버스 갱신이 GPU 업로드를 부름.
@@ -91,7 +91,7 @@ function BlockDashboard(): ReactNode {
 
     drawBlockDashboard(context, nextState);
     lastSignatureRef.current = signature;
-    isLiveRef.current = !isBlockFeedStale(nextState.elapsedSeconds);
+    isLiveRef.current = resolveBlockFeedOnlineStatus(nextState);
     texture.needsUpdate = true;
   };
   // endregion

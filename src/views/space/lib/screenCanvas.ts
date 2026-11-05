@@ -238,19 +238,17 @@ export const SCREEN_LIVE_BADGE = {
   marker: { x: 1352, y: 126, coreRadius: 10, pulseRadius: 30 },
 } as const;
 
-/** `live` 일 때만 점이 퍼짐. 시세판은 끊기면 `offline`, 네트워크판은 블록이 늦으면 `delayed`. */
-export type ScreenLiveStatus = "live" | "offline" | "delayed";
+/** `live` 일 때만 점이 퍼짐. 두 판 모두 소켓이 끊기면 `offline`. */
+export type ScreenLiveStatus = "live" | "offline";
 
 const LIVE_BADGE_LABELS: Record<ScreenLiveStatus, string> = {
   live: "LIVE",
   offline: "OFFLINE",
-  delayed: "DELAYED",
 };
 
 const LIVE_BADGE_COLORS: Record<ScreenLiveStatus, string> = {
   live: SCREEN_COLORS.online,
   offline: SCREEN_COLORS.offline,
-  delayed: SCREEN_COLORS.flat,
 };
 
 /** 상태 배지. 알약 바탕 + 상태색 점 + 영문 글자. */

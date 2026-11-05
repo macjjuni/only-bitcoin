@@ -91,6 +91,7 @@ export default function useMempoolSocket(shouldShowMiningEffects: boolean) {
       if (isDev) {
         console.log("✅ Mempool 소켓 연결");
       }
+      useBlockStore.getState().setIsMempoolConnected(true);
       socket.send(JSON.stringify({ action: "want", data: ["blocks", "stats"] }));
     };
 
@@ -116,6 +117,7 @@ export default function useMempoolSocket(shouldShowMiningEffects: boolean) {
     };
 
     socket.onclose = (e) => {
+      useBlockStore.getState().setIsMempoolConnected(false);
       console.warn(`⛔ Mempool 소켓 종료: ${e.code}`);
       if (e.wasClean || e.code === 1000) {
         console.log("🔌 정상 종료(Mempool)");
@@ -130,6 +132,7 @@ export default function useMempoolSocket(shouldShowMiningEffects: boolean) {
   const disconnect = useCallback(() => {
     socketRef.current?.close(1000);
     socketRef.current = null;
+    useBlockStore.getState().setIsMempoolConnected(false);
   }, []);
 
   const reconnect = useCallback(() => {
