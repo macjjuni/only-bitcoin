@@ -1,6 +1,11 @@
 import { describe, expect, it } from "vitest";
 import type { BtcCandle } from "../model/market";
-import { mergeCandleHistory, mergeLiveCandle, parseBinanceKlineMessage } from "./btcCandles";
+import {
+  hasCandleGap,
+  mergeCandleHistory,
+  mergeLiveCandle,
+  parseBinanceKlineMessage,
+} from "./btcCandles";
 
 const HALF_HOUR = 30 * 60 * 1000;
 const START = 1_762_000_000_000;
@@ -74,6 +79,22 @@ describe("mergeLiveCandle", () => {
 
   it("목록이 비어 있으면 그 봉 하나로 시작한다", () => {
     expect(mergeLiveCandle([], createCandle(0), 3)).toEqual([createCandle(0)]);
+  });
+});
+
+describe("hasCandleGap", () => {
+  it("바로 다음 봉이거나 같은 봉이면 벌어지지 않은 것으로 본다", () => {
+    expect(hasCandleGap(history, createCandle(2), HALF_HOUR)).toBe(false);
+    expect(hasCandleGap(history, createCandle(3), HALF_HOUR)).toBe(false);
+  });
+
+  it("한 봉 넘게 건너뛰면 벌어진 것으로 본다", () => {
+    expect(hasCandleGap(history, createCandle(4), HALF_HOUR)).toBe(true);
+    expect(hasCandleGap(history, createCandle(10), HALF_HOUR)).toBe(true);
+  });
+
+  it("지난 봉이 아직 없으면 판단하지 않는다", () => {
+    expect(hasCandleGap([], createCandle(10), HALF_HOUR)).toBe(false);
   });
 });
 

@@ -79,6 +79,27 @@ export const mergeLiveCandle = (
 };
 
 /**
+ * 소켓 봉이 지난 봉 바로 다음 칸이 아닌지 본다.
+ *
+ * x 축이 시간이 아니라 인덱스라서 빠진 봉이 화면에서 안 보임. 몇 시간 비어
+ * 있어도 마지막 한 칸만 뚝 떨어진 그림이 되고, 차트 몸통은 과거에 멈춘 채로
+ * 남음. 벌어진 걸 알면 호출부가 지난 봉을 다시 받아 메움.
+ */
+export const hasCandleGap = (
+  candles: readonly BtcCandle[],
+  liveCandle: BtcCandle,
+  intervalMs: number,
+): boolean => {
+  const lastCandle = candles[candles.length - 1];
+
+  if (!lastCandle) {
+    return false;
+  }
+
+  return liveCandle.openTime - lastCandle.openTime > intervalMs;
+};
+
+/**
  * REST 로 다시 받은 지난 캔들에 소켓이 이미 준 최신 봉을 얹음.
  *
  * REST 응답은 요청 시점 값이라 소켓보다 늦을 수 있음. 소켓 봉이 같거나

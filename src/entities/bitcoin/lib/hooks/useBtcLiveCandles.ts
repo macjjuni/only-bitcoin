@@ -4,13 +4,27 @@ import { isDev } from "@/shared/utils/common";
 import {
   BTC_CANDLE_COUNT,
   BTC_CANDLE_INTERVAL,
+  BTC_CANDLE_INTERVAL_MS,
   default as useBtcCandlesQuery,
 } from "../../api/useBtcCandlesQuery";
 import type { BtcCandle } from "../../model/market";
-import { mergeCandleHistory, mergeLiveCandle, parseBinanceKlineMessage } from "../btcCandles";
+import {
+  hasCandleGap,
+  mergeCandleHistory,
+  mergeLiveCandle,
+  parseBinanceKlineMessage,
+} from "../btcCandles";
 
 /** 진행 중 봉을 2초마다 밀어 주는 바이낸스 kline 스트림. */
 const BINANCE_KLINE_URL = `wss://stream.binance.com:9443/ws/btcusdt@kline_${BTC_CANDLE_INTERVAL}`;
+
+/**
+ * 구멍을 메우려고 지난 봉을 다시 받는 최소 간격.
+ *
+ * 소켓은 같은 봉을 2초마다 보냄. 응답이 아직 안 왔거나 거래소가 늦어 구멍이
+ * 남아 있으면 2초마다 다시 받게 되므로 묶어 둠.
+ */
+const HISTORY_REFETCH_COOLDOWN_MS = 30_000;
 
 export interface BtcLiveCandles {
   /** 최신 캔들 목록. 프레임 루프에서 읽어서 상태가 아니라 ref 임. */
@@ -33,11 +47,14 @@ const EMPTY_CANDLES: readonly BtcCandle[] = [];
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 export default function useBtcLiveCandles(): BtcLiveCandles {
   // region [Hooks]
-  const { data: history } = useBtcCandlesQuery();
+  const { data: history, refetch } = useBtcCandlesQuery();
   const candlesRef = useRef<readonly BtcCandle[]>(EMPTY_CANDLES);
   const versionRef = useRef<number>(0);
   /** 소켓이 마지막으로 준 봉. REST 가 다시 와도 이 값으로 덮어 차트가 뒤로 안 튐. */
   const liveCandleRef = useRef<BtcCandle | null>(null);
+  /** 소켓 핸들러는 한 번만 붙으므로 최신 `refetch` 를 ref 로 들고 씀. */
+  const refetchRef = useRef(refetch);
+  const lastHistoryRefetchAtRef = useRef<number>(Number.NEGATIVE_INFINITY);
   // endregion
 
 
@@ -46,10 +63,36 @@ export default function useBtcLiveCandles(): BtcLiveCandles {
     candlesRef.current = nextCandles;
     versionRef.current += 1;
   };
+
+  /**
+   * 지난 봉과 소켓 봉 사이가 벌어졌으면 지난 봉을 다시 받는다.
+   *
+   * 탭이 숨거나 노트북이 자는 동안에는 `refetchInterval` 타이머가 멈춰서 몇
+   * 시간 전 24시간이 그대로 남음. 그 뒤 소켓이 현재 봉을 뒤에 붙이면 마지막
+   * 한 칸만 가격이 뚝 끊긴 채 차트 몸통은 과거에 머묾.
+   */
+  const refetchStaleHistory = (liveCandle: BtcCandle): void => {
+    const now = Date.now();
+
+    if (
+      !hasCandleGap(candlesRef.current, liveCandle, BTC_CANDLE_INTERVAL_MS) ||
+      now - lastHistoryRefetchAtRef.current < HISTORY_REFETCH_COOLDOWN_MS
+    ) {
+      return;
+    }
+
+    lastHistoryRefetchAtRef.current = now;
+    if (isDev) console.log("↻ 캔들 사이가 벌어져 지난 봉을 다시 받음");
+    refetchRef.current();
+  };
   // endregion
 
 
   // region [Life Cycles]
+  useEffect(() => {
+    refetchRef.current = refetch;
+  }, [refetch]);
+
   useEffect(() => {
     if (!history || history.length === 0) {
       return;
@@ -82,6 +125,7 @@ export default function useBtcLiveCandles(): BtcLiveCandles {
         liveCandleRef.current = liveCandle;
         // 지난 캔들이 아직 없으면 붙이지 않음. 봉 하나짜리 차트가 잠깐 뜨면 어색함.
         if (candlesRef.current.length > 0) {
+          refetchStaleHistory(liveCandle);
           replaceCandles(mergeLiveCandle(candlesRef.current, liveCandle, BTC_CANDLE_COUNT));
         }
       } catch (error) {
