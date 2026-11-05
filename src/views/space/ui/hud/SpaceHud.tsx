@@ -22,6 +22,7 @@ import SpaceControlGuide from "./SpaceControlGuide";
 import SpaceDonationDialog from "./SpaceDonationDialog";
 import SpaceKeyboardChatBar from "./SpaceKeyboardChatBar";
 import SpaceNicknameEditor from "./SpaceNicknameEditor";
+import SpaceOccupantBadge from "./SpaceOccupantBadge";
 import SpaceShareDialog from "./SpaceShareDialog";
 
 /** 히스토리가 없을 때(직접 링크 진입) 돌아갈 곳. `/space` 를 노출하는 목록이다. */
@@ -353,6 +354,9 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
           top: "calc(1rem + env(safe-area-inset-top))",
         }}
       >
+        {/* 데스크톱은 같은 자리에 인원수만 띄움. 대화 내역은 좌측 하단에 있음. */}
+        {!isCoarsePointer && <SpaceOccupantBadge presence={session.presence} />}
+
         {/* 손가락 기기는 접속 표시를 겸한 대화 내역을 좌측 상단에 늘 띄움. 오류도 그 안에서 보여줌. */}
         {isCoarsePointer && (
           <div>

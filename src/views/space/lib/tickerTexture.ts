@@ -16,7 +16,8 @@ import {
 
 /** 칸 폭이 같아야 한 바퀴 끝과 처음이 이어 붙는 자리에서 간격이 안 튄다. */
 const SLOT_COUNT = 5;
-const SLOT_WIDTH = 1000;
+/** 칸 폭 = 지표 사이 간격. 1000 px(10 m)는 지표끼리 너무 떨어져 보였음. */
+const SLOT_WIDTH = 900;
 /** 100 px/m. 전광판(114 px/m)과 비슷한 밀도임. */
 const PIXELS_PER_METER = 100;
 
