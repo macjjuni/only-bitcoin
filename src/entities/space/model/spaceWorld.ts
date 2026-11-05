@@ -90,7 +90,7 @@ export const SPACE_SCREEN_FRAME = {
   width: 28,
   height: 10.5,
   /** 앵커 중심. 벽면에서 5 cm 띄웠음. */
-  position: [0, 10.25 + SPACE_HALL.mapOffsetY, -23.96 + 0.05] as const,
+  position: [0, 8.25 + SPACE_HALL.mapOffsetY, -23.96 + 0.05] as const,
   rotationY: 0,
 } as const;
 
