@@ -4,8 +4,11 @@ import { ChevronUp } from "lucide-react";
 import { memo, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import type { SpaceInputSource } from "../model/spaceInputSource";
 
-const BUTTON_DIAMETER = 72;
-const ICON_SIZE = 28;
+/** 72 px 에서 20% 줄였음. 엄지 자리를 덜 차지하고 화면을 덜 가림. */
+const BUTTON_DIAMETER = 58;
+const ICON_SIZE = 22;
+/** 줄어든 지름의 절반. 위치를 이만큼 안쪽으로 밀어 버튼 중심을 원래 자리에 둠. */
+const CENTER_KEEP_OFFSET = (72 - BUTTON_DIAMETER) / 2;
 const ICON_STROKE_WIDTH = 2.5;
 
 interface JumpButtonProps {
@@ -94,8 +97,8 @@ function JumpButton({ inputSource }: JumpButtonProps): ReactNode {
       style={{
         width: BUTTON_DIAMETER,
         height: BUTTON_DIAMETER,
-        right: "calc(1.5rem + env(safe-area-inset-right))",
-        bottom: "calc(4.5rem + env(safe-area-inset-bottom))",
+        right: `calc(1.5rem + ${CENTER_KEEP_OFFSET}px + env(safe-area-inset-right))`,
+        bottom: `calc(4.5rem + ${CENTER_KEEP_OFFSET}px + env(safe-area-inset-bottom))`,
       }}
       onPointerDown={onPointerDownJump}
       onPointerUp={onPointerUpJump}

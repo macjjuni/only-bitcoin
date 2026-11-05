@@ -30,18 +30,28 @@ interface SpaceActionBarProps {
    * 쓴다. 정렬만 다르다.
    */
   align?: "start" | "end";
+  /** 버튼 크기. 엄지로 자주 누르는 모바일 채팅 버튼만 `large`(48 px)를 씀. */
+  size?: "default" | "large";
 }
 
 const BASE_BUTTON_CLASS =
-  "relative flex size-10 items-center justify-center rounded-full backdrop-blur-sm transition-colors duration-150 disabled:opacity-40";
+  "relative flex items-center justify-center rounded-full backdrop-blur-sm transition-colors duration-150 disabled:opacity-40";
+
+const BUTTON_SIZE_CLASS = {
+  default: "size-10",
+  large: "size-12",
+} as const;
 
 // region [Privates]
-const resolveButtonClassName = (action: SpaceHudAction): string => {
+const resolveButtonClassName = (
+  action: SpaceHudAction,
+  size: keyof typeof BUTTON_SIZE_CLASS,
+): string => {
   const toneClassName = action.isActive
     ? "bg-bitcoin text-black"
     : "bg-black/55 text-white/85 hover:bg-black/70";
 
-  return `${BASE_BUTTON_CLASS} ${toneClassName}`;
+  return `${BASE_BUTTON_CLASS} ${BUTTON_SIZE_CLASS[size]} ${toneClassName}`;
 };
 
 const resolveBadgeLabel = (badgeCount: number): string => {
@@ -50,7 +60,11 @@ const resolveBadgeLabel = (badgeCount: number): string => {
 // endregion
 
 /** 버튼 묶음. 항목이 늘어나면 세로로 쌓인다. */
-function SpaceActionBar({ actions, align = "end" }: SpaceActionBarProps): ReactNode {
+function SpaceActionBar({
+  actions,
+  align = "end",
+  size = "default",
+}: SpaceActionBarProps): ReactNode {
   if (actions.length === 0) {
     return null;
   }
@@ -67,7 +81,7 @@ function SpaceActionBar({ actions, align = "end" }: SpaceActionBarProps): ReactN
           aria-pressed={action.isActive}
           disabled={action.isDisabled}
           onClick={action.onClick}
-          className={resolveButtonClassName(action)}
+          className={resolveButtonClassName(action, size)}
         >
           {action.icon}
 

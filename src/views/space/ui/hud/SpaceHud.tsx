@@ -32,6 +32,8 @@ const DONATION_LIGHTNING_ADDRESS = env.NEXT_PUBLIC_DONATION_ADDRESS;
 
 const ICON_SIZE = 18;
 const ICON_STROKE_WIDTH = 2;
+/** 모바일 채팅 버튼 아이콘. 버튼을 48 px 로 키운 만큼 같이 키웠음. */
+const MOBILE_CHAT_ICON_SIZE = 22;
 
 interface SpaceHudProps {
   inputSource: SpaceInputSource;
@@ -210,7 +212,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     return {
       id: "space-chat-compose",
       label: "메시지 입력",
-      icon: <MessageCircle size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+      icon: <MessageCircle size={MOBILE_CHAT_ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
       onClick: onClickComposeChat,
     };
   }, [onClickComposeChat]);
@@ -399,7 +401,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
             bottom: "calc(4.5rem + env(safe-area-inset-bottom))",
           }}
         >
-          <SpaceActionBar actions={[mobileChatAction]} align="start" />
+          <SpaceActionBar actions={[mobileChatAction]} align="start" size="large" />
         </div>
       )}
 

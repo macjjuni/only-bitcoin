@@ -84,8 +84,17 @@ function VirtualJoystick({ inputSource }: VirtualJoystickProps): ReactNode {
   // region [Events]
   const onPointerDownJoystickBase = useCallback(
     (pointerEvent: React.PointerEvent<HTMLDivElement>): void => {
-      if (activePointerIdRef.current !== null) {
-        return;
+      const activePointerId = activePointerIdRef.current;
+
+      if (activePointerId !== null) {
+        // 진짜로 누르고 있는 손가락은 캡처를 쥐고 있음. 캡처가 없으면 떼는 이벤트를
+        // 놓쳐 남은 기록이라 새 터치가 넘겨받음. 안 그러면 마지막 방향으로 계속 걷고
+        // 다시 눌러도 안 풀렸음.
+        if (pointerEvent.currentTarget.hasPointerCapture(activePointerId)) {
+          return;
+        }
+
+        resetJoystickInput();
       }
 
       activePointerIdRef.current = pointerEvent.pointerId;
@@ -95,7 +104,7 @@ function VirtualJoystick({ inputSource }: VirtualJoystickProps): ReactNode {
       setKnobOffset(offset);
       applyJoystickInput(offset);
     },
-    [applyJoystickInput, resolveKnobOffset],
+    [applyJoystickInput, resolveKnobOffset, resetJoystickInput],
   );
 
   const onPointerMoveJoystickBase = useCallback(
@@ -124,18 +133,51 @@ function VirtualJoystick({ inputSource }: VirtualJoystickProps): ReactNode {
   // endregion
 
   // region [Privates]
+  /**
+   * 조이스틱 밖에서 끝난 손가락도 잡아냄.
+   *
+   * 모바일 브라우저(특히 iOS Safari)는 가장자리 스와이프·알림·캡처 상실 때 떼는
+   * 이벤트를 조이스틱에 안 보내기도 함. 창 전체에서 같은 손가락이 끝나면 풂.
+   */
+  const onPointerEndWindow = useCallback(
+    (pointerEvent: PointerEvent): void => {
+      if (pointerEvent.pointerId === activePointerIdRef.current) {
+        resetJoystickInput();
+      }
+    },
+    [resetJoystickInput],
+  );
+
+  /** 화면에 남은 손가락이 하나도 없는데 조이스틱이 눌린 채면 무조건 풂. 마지막 안전망임. */
+  const onTouchEndWindow = useCallback(
+    (touchEvent: TouchEvent): void => {
+      if (touchEvent.touches.length === 0 && activePointerIdRef.current !== null) {
+        resetJoystickInput();
+      }
+    },
+    [resetJoystickInput],
+  );
+
   const attachJoystickResetEvents = useCallback((): (() => void) => {
     window.addEventListener("blur", resetJoystickInput);
     document.addEventListener("visibilitychange", resetJoystickInput);
+    window.addEventListener("pointerup", onPointerEndWindow, true);
+    window.addEventListener("pointercancel", onPointerEndWindow, true);
+    window.addEventListener("touchend", onTouchEndWindow, true);
+    window.addEventListener("touchcancel", onTouchEndWindow, true);
     return () => {
       window.removeEventListener("blur", resetJoystickInput);
       document.removeEventListener("visibilitychange", resetJoystickInput);
+      window.removeEventListener("pointerup", onPointerEndWindow, true);
+      window.removeEventListener("pointercancel", onPointerEndWindow, true);
+      window.removeEventListener("touchend", onTouchEndWindow, true);
+      window.removeEventListener("touchcancel", onTouchEndWindow, true);
       activePointerIdRef.current = null;
       inputSource.joystick.forward = 0;
       inputSource.joystick.strafe = 0;
       inputSource.joystick.isRunning = false;
     };
-  }, [inputSource, resetJoystickInput]);
+  }, [inputSource, resetJoystickInput, onPointerEndWindow, onTouchEndWindow]);
   // endregion
 
   // region [Life Cycles]
