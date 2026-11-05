@@ -10,6 +10,8 @@ import {
   formatBlockHeight,
   formatBlocksToHalving,
   formatElapsed,
+  formatFeeRate,
+  formatFeeRates,
   formatHalvingHeight,
   formatHalvingProgress,
   formatLatestBlockMeta,
@@ -197,10 +199,14 @@ describe("네트워크 현황 파생값", () => {
     expect(state.recentBlocks[0]?.txCount).toBeNull();
   });
 
-  it("수수료를 채운다", () => {
-    const state = resolveBlockDashboardState([createBlock()], NOW_MS, { halfHourFee: 6 });
+  it("수수료를 3단계로 채운다", () => {
+    const state = resolveBlockDashboardState([createBlock()], NOW_MS, {
+      fastestFee: 9,
+      halfHourFee: 6,
+      hourFee: 3,
+    });
 
-    expect(state.feeRate).toBe(6);
+    expect(state.feeRates).toEqual({ fastest: 9, halfHour: 6, hour: 3 });
   });
 
   it("소켓 연결 전에는 네트워크 값도 비운다", () => {
@@ -208,21 +214,34 @@ describe("네트워크 현황 파생값", () => {
     const state = resolveBlockDashboardState([emptyBlock], NOW_MS, { halfHourFee: 0 });
 
     expect(state.recentBlocks).toEqual([]);
-    expect(state.feeRate).toBeNull();
+    expect(state.feeRates).toEqual({ fastest: null, halfHour: null, hour: null });
   });
 });
 
 describe("네트워크 현황 포맷", () => {
   it("최신 블록 줄은 아는 항목만 잇는다", () => {
-    const full = resolveBlockDashboardState([createBlock({ txCount: 3_412 })], NOW_MS, {
-      halfHourFee: 6,
-    });
+    const full = resolveBlockDashboardState([createBlock({ txCount: 3_412 })], NOW_MS);
     const partial = resolveBlockDashboardState([createBlock({ poolName: "-" })], NOW_MS);
 
-    expect(formatLatestBlockMeta(full)).toBe(
-      "12분 전 · 거래 3,412건 · 수수료 6 sat/vB · Foundry USA",
-    );
+    expect(formatLatestBlockMeta(full)).toBe("12분 전 · 거래 3,412건 · Foundry USA");
     expect(formatLatestBlockMeta(partial)).toBe("12분 전");
+  });
+
+  it("수수료 줄은 아는 단계만 잇고 하나도 없으면 비운다", () => {
+    expect(formatFeeRates({ fastest: 9, halfHour: 6, hour: 3 })).toBe(
+      "수수료  빠름 9 · 보통 6 · 느림 3 sat/vB",
+    );
+    expect(formatFeeRates({ fastest: 9, halfHour: null, hour: 3 })).toBe(
+      "수수료  빠름 9 · 느림 3 sat/vB",
+    );
+    expect(formatFeeRates({ fastest: null, halfHour: null, hour: null })).toBe("");
+  });
+
+  it("수수료가 1 sat/vB 아래면 소수 한 자리까지 쓴다", () => {
+    expect(formatFeeRate(0.5)).toBe("0.5");
+    expect(formatFeeRate(1.04)).toBe("1");
+    expect(formatFeeRate(2.36)).toBe("2.4");
+    expect(formatFeeRate(12.6)).toBe("13");
   });
 
   it("반감기 막대는 진행률만큼 칸을 채우되 0 % 초과면 한 칸은 칠한다", () => {

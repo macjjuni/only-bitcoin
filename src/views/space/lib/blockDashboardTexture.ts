@@ -41,6 +41,12 @@ export const RECENT_BLOCK_COUNT = 4;
 /** 반감기 막대의 칸 수. 칸으로 끊어야 멀리서도 진행 정도가 셈처럼 읽힘. */
 export const HALVING_SEGMENT_COUNT = 40;
 
+/** 블록 테두리·연결선·반감기 막대·진행률에 쓰는 흰색. 주황만 쓰면 강조가 묻혀서 바꿈. */
+const ACCENT_WHITE = "#ffffff";
+
+/** 블록 안 거래 수·수수료 줄 색. 기본 흐린 글자(`labelMuted`)는 멀리서 안 읽혀서 조금 밝게 씀. */
+const SOFT_LABEL = "#cdbba3";
+
 /** 블록이 이 시간을 넘겨 안 나오면 "지연" 으로 봄. 평균 10분의 두 배. */
 const STALE_BLOCK_SECONDS = 20 * 60;
 
@@ -56,10 +62,12 @@ const LAYOUT = {
   title: { x: 84, y: 124, fontSize: 64 },
   /** 시세판 원화 가격 줄(중심 290)과 높이를 맞췄음. 두 판의 큰 숫자가 한 줄로 읽힘. */
   latestHeight: { x: 84, y: 290, fontSize: SCREEN_HEADLINE_FONT_SIZE_PX, maxWidth: 1432 },
-  latestMeta: { x: 86, y: 410, fontSize: 40, maxWidth: 1430 },
-  chain: { top: 488, height: 210, gap: 56, radius: 16, connectorHeight: 10 },
-  chainHeight: { offsetY: 82, fontSize: 64 },
-  chainTx: { offsetY: 150, fontSize: 46 },
+  latestMeta: { x: 86, y: 392, fontSize: 40, maxWidth: 1430 },
+  /** 수수료 3단계 줄. 메타 줄에 같이 넣으면 너무 길어져 따로 뺐음. */
+  feeRates: { x: 86, y: 448, fontSize: 40, maxWidth: 1430 },
+  chain: { top: 502, height: 200, gap: 56, radius: 16, connectorHeight: 4 },
+  chainHeight: { offsetY: 78, fontSize: 64 },
+  chainTx: { offsetY: 143, fontSize: 46 },
   halvingTitle: { x: 84, y: 790, fontSize: 52 },
   halvingAside: { x: 1516, y: 794, fontSize: 36 },
   halvingBar: { top: 840, height: 92, gap: 8 },
@@ -68,6 +76,13 @@ const LAYOUT = {
   /** 진행률 줄 아래 따로 둠. 한 줄에 셋을 넣으면 글자를 키울 수 없었음. */
   halvingRemain: { x: 86, y: 1098, fontSize: 42, maxWidth: 1430 },
 } as const;
+
+/** mempool.space 추천 수수료 3단계. 빠름은 다음 블록, 보통은 30분, 느림은 1시간 안 확정. */
+export interface BlockFeeRates {
+  fastest: number | null;
+  halfHour: number | null;
+  hour: number | null;
+}
 
 export interface RecentBlock {
   height: number;
@@ -83,8 +98,8 @@ export interface BlockDashboardState {
   poolName: string;
   /** 최신 블록 거래 수. 모르면 `null`. */
   txCount: number | null;
-  /** 30분 안 확정 수수료(sat/vB). 모르면 `null`. */
-  feeRate: number | null;
+  /** 확정 속도별 수수료(sat/vB). 모르는 단계는 `null`. */
+  feeRates: BlockFeeRates;
   /** 최근 블록. **오래된 것부터** 최신 순이라 체인 오른쪽 끝이 최신임. */
   recentBlocks: readonly RecentBlock[];
   /** 현재 블록 보조금(BTC). */
@@ -120,7 +135,7 @@ const isPositiveNumber = (value: unknown): value is number => {
 export const resolveBlockDashboardState = (
   blocks: readonly BlockTypes[],
   nowMs: number,
-  fees?: Pick<FeesTypes, "halfHourFee">,
+  fees?: Partial<Pick<FeesTypes, "fastestFee" | "halfHourFee" | "hourFee">>,
 ): BlockDashboardState => {
   const latestBlock = blocks[0];
   const height = latestBlock && latestBlock.height > 0 ? latestBlock.height : 0;
@@ -142,7 +157,11 @@ export const resolveBlockDashboardState = (
     elapsedSeconds: timestampMs > 0 ? Math.max(0, Math.floor((nowMs - timestampMs) / 1000)) : null,
     poolName: latestBlock?.poolName && latestBlock.poolName !== "-" ? latestBlock.poolName : "",
     txCount: height > 0 && isPositiveNumber(latestBlock?.txCount) ? latestBlock.txCount : null,
-    feeRate: isPositiveNumber(fees?.halfHourFee) ? fees.halfHourFee : null,
+    feeRates: {
+      fastest: isPositiveNumber(fees?.fastestFee) ? fees.fastestFee : null,
+      halfHour: isPositiveNumber(fees?.halfHourFee) ? fees.halfHourFee : null,
+      hour: isPositiveNumber(fees?.hourFee) ? fees.hourFee : null,
+    },
     recentBlocks,
     subsidy: height > 0 ? getCurrentBlockSubsidy(height) : 0,
     nextHalvingHeight,
@@ -241,11 +260,35 @@ export const formatLatestBlockMeta = (state: BlockDashboardState): string => {
   return [
     formatElapsed(state.elapsedSeconds),
     state.txCount === null ? null : `거래 ${formatInteger(state.txCount)}건`,
-    state.feeRate === null ? null : `수수료 ${formatInteger(state.feeRate)} sat/vB`,
     state.poolName === "" ? null : state.poolName,
   ]
     .filter((part): part is string => part !== null && part !== BLOCK_DASHBOARD_PLACEHOLDER)
     .join(" · ");
+};
+
+/**
+ * 수수료 한 단계 값.
+ *
+ * 요즘은 1 sat/vB 아래(0.5 등)도 와서 정수로 깎으면 "0" 이 찍혔음. 10 미만은
+ * 소수 한 자리까지 쓰고, 끝이 .0 이면 뗌.
+ */
+export const formatFeeRate = (feeRate: number): string => {
+  if (feeRate >= 10) {
+    return formatInteger(Math.round(feeRate));
+  }
+
+  return String(Number(feeRate.toFixed(1)));
+};
+
+/** 수수료 줄. 모르는 단계는 빼고, 하나도 없으면 빈 문자열. */
+export const formatFeeRates = (feeRates: BlockFeeRates): string => {
+  const parts = [
+    feeRates.fastest === null ? null : `빠름 ${formatFeeRate(feeRates.fastest)}`,
+    feeRates.halfHour === null ? null : `보통 ${formatFeeRate(feeRates.halfHour)}`,
+    feeRates.hour === null ? null : `느림 ${formatFeeRate(feeRates.hour)}`,
+  ].filter((part): part is string => part !== null);
+
+  return parts.length === 0 ? "" : `수수료  ${parts.join(" · ")} sat/vB`;
 };
 
 /** 칸 수 중 채울 칸. 0 % 초과면 최소 한 칸은 칠해 진행 중임을 보여 줌. */
@@ -270,6 +313,7 @@ export const createBlockDashboardSignature = (state: BlockDashboardState): strin
   return [
     formatBlockHeight(state.height),
     formatLatestBlockMeta(state),
+    formatFeeRates(state.feeRates),
     isBlockFeedStale(state.elapsedSeconds),
     state.recentBlocks.map((block) => `${block.height}:${block.txCount ?? ""}`).join(","),
     formatHalvingProgress(state.halvingProgressPercent),
@@ -304,6 +348,17 @@ const drawLatestBlock = (context: CanvasRenderingContext2D, state: BlockDashboar
     maxWidth: LAYOUT.latestMeta.maxWidth,
     fontStack: SANS_FONT_STACK,
   });
+
+  // 소켓 연결 전에는 수수료도 의미가 없어 비워 둠.
+  context.fillStyle = SOFT_LABEL;
+  drawFittedText(context, state.height > 0 ? formatFeeRates(state.feeRates) : "", {
+    x: LAYOUT.feeRates.x,
+    y: LAYOUT.feeRates.y,
+    fontWeight: 600,
+    maxFontSizePx: LAYOUT.feeRates.fontSize,
+    maxWidth: LAYOUT.feeRates.maxWidth,
+    fontStack: SANS_FONT_STACK,
+  });
 };
 
 /**
@@ -328,7 +383,7 @@ const drawBlockChain = (
     const centerX = x + boxWidth / 2;
 
     if (slot > 0) {
-      context.fillStyle = block ? COLORS.brand : COLORS.segmentEmpty;
+      context.fillStyle = block ? ACCENT_WHITE : COLORS.segmentEmpty;
       context.fillRect(x - gap, top + height / 2 - connectorHeight / 2, gap, connectorHeight);
     }
 
@@ -341,7 +396,7 @@ const drawBlockChain = (
     } else {
       context.fillStyle = COLORS.cardBottom;
       context.fill();
-      context.strokeStyle = block ? COLORS.brand : COLORS.segmentEmpty;
+      context.strokeStyle = block ? ACCENT_WHITE : COLORS.segmentEmpty;
       context.lineWidth = 3;
       context.stroke();
     }
@@ -362,7 +417,7 @@ const drawBlockChain = (
       fontStack: NUMERIC_FONT_STACK,
     });
 
-    context.fillStyle = isLatest ? COLORS.onAccent : COLORS.labelMuted;
+    context.fillStyle = isLatest ? COLORS.onAccent : SOFT_LABEL;
     drawFittedText(
       context,
       block.txCount === null ? "— tx" : `${formatInteger(block.txCount)} tx`,
@@ -378,7 +433,7 @@ const drawBlockChain = (
   }
 };
 
-/** 칸으로 끊은 반감기 막대. 시안처럼 채운 칸은 주황, 남은 칸은 어두운 갈색. */
+/** 칸으로 끊은 반감기 막대. 채운 칸은 흰색, 남은 칸은 어두운 갈색. */
 const drawHalvingSegments = (context: CanvasRenderingContext2D, percent: number | null): void => {
   const { top, height, gap } = LAYOUT.halvingBar;
   const left = BLOCK_DASHBOARD_TEXTURE.paddingX;
@@ -387,7 +442,7 @@ const drawHalvingSegments = (context: CanvasRenderingContext2D, percent: number 
   const filledCount = resolveFilledSegmentCount(percent);
 
   for (let index = 0; index < HALVING_SEGMENT_COUNT; index += 1) {
-    context.fillStyle = index < filledCount ? COLORS.brand : COLORS.segmentEmpty;
+    context.fillStyle = index < filledCount ? ACCENT_WHITE : COLORS.segmentEmpty;
     context.fillRect(left + (segmentWidth + gap) * index, top, segmentWidth, height);
   }
 };
@@ -413,7 +468,7 @@ const drawHalving = (context: CanvasRenderingContext2D, state: BlockDashboardSta
   drawHalvingSegments(context, state.halvingProgressPercent);
 
   context.textAlign = "left";
-  context.fillStyle = COLORS.brand;
+  context.fillStyle = ACCENT_WHITE;
   context.font = resolveFontSpec(800, LAYOUT.halvingPercent.fontSize, NUMERIC_FONT_STACK);
   context.fillText(
     formatHalvingProgress(state.halvingProgressPercent),
