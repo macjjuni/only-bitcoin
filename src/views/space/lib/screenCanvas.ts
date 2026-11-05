@@ -196,3 +196,61 @@ export const loadScreenFonts = async (): Promise<boolean> => {
  * 액자 안에 나란히 걸려서 크기가 다르면 한쪽만 튀어 보임. 한 값으로 묶었음.
  */
 export const SCREEN_HEADLINE_FONT_SIZE_PX = 120;
+
+/**
+ * 우측 상단 상태 배지 자리. 두 판이 같은 자리·같은 모양을 씀.
+ *
+ * 점의 확산 링은 텍스처가 아니라 `BillboardOnlinePulse` 가 3D 로 겹침. 베이스
+ * 텍스처는 상태가 바뀔 때만 다시 올려서 프레임마다 커지는 원을 구울 수 없음.
+ */
+export const SCREEN_LIVE_BADGE = {
+  x: 1316,
+  y: 94,
+  width: 200,
+  height: 64,
+  radius: 32,
+  /** 점 오른쪽 남은 폭의 가운데. 글자 길이가 달라도 좌우 여백이 맞음. */
+  textX: 1446,
+  fontSize: 30,
+  marker: { x: 1352, y: 126, coreRadius: 10, pulseRadius: 30 },
+} as const;
+
+/** `live` 일 때만 점이 퍼짐. 시세판은 끊기면 `offline`, 네트워크판은 블록이 늦으면 `delayed`. */
+export type ScreenLiveStatus = "live" | "offline" | "delayed";
+
+const LIVE_BADGE_LABELS: Record<ScreenLiveStatus, string> = {
+  live: "LIVE",
+  offline: "OFFLINE",
+  delayed: "DELAYED",
+};
+
+const LIVE_BADGE_COLORS: Record<ScreenLiveStatus, string> = {
+  live: SCREEN_COLORS.online,
+  offline: SCREEN_COLORS.offline,
+  delayed: SCREEN_COLORS.flat,
+};
+
+/** 상태 배지. 알약 바탕 + 상태색 점 + 영문 글자. */
+export const drawScreenLiveBadge = (
+  context: CanvasRenderingContext2D,
+  status: ScreenLiveStatus,
+): void => {
+  const { x, y, width, height, radius, textX, fontSize, marker } = SCREEN_LIVE_BADGE;
+  const accentColor = LIVE_BADGE_COLORS[status];
+
+  context.beginPath();
+  context.roundRect(x, y, width, height, radius);
+  context.fillStyle = SCREEN_COLORS.surface;
+  context.fill();
+
+  context.beginPath();
+  context.arc(marker.x, marker.y, marker.coreRadius, 0, Math.PI * 2);
+  context.fillStyle = accentColor;
+  context.fill();
+
+  context.textAlign = "center";
+  context.textBaseline = "middle";
+  context.fillStyle = accentColor;
+  context.font = resolveFontSpec(800, fontSize, NUMERIC_FONT_STACK);
+  context.fillText(LIVE_BADGE_LABELS[status], textX, y + height / 2 + 1);
+};

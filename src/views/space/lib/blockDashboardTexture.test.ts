@@ -6,6 +6,7 @@ import {
   BLOCK_DASHBOARD_PLACEHOLDER,
   BLOCK_DASHBOARD_TEXTURE,
   createBlockDashboardSignature,
+  drawBlockDashboard,
   formatBlockHeight,
   formatBlocksToHalving,
   formatElapsed,
@@ -242,5 +243,37 @@ describe("네트워크 현황 포맷", () => {
     expect(createBlockDashboardSignature(minuteLater)).not.toBe(
       createBlockDashboardSignature(first),
     );
+  });
+});
+
+describe("우측 상단 상태 배지", () => {
+  const traceBadgeLabel = (elapsedMinutes: number): string | null => {
+    let label: string | null = null;
+    const ignoredDrawingOperation = (): void => undefined;
+    const canvasProperties: Record<string, unknown> = {
+      measureText: (text: string) => ({ width: text.length * 20 }),
+      createLinearGradient: () => ({ addColorStop: ignoredDrawingOperation }),
+      fillText: (text: string) => {
+        if (text === "LIVE" || text === "DELAYED") {
+          label = text;
+        }
+      },
+    };
+    const context = new Proxy(canvasProperties, {
+      get: (target, property) => Reflect.get(target, property) ?? ignoredDrawingOperation,
+    }) as unknown as CanvasRenderingContext2D;
+    const block = createBlock({ timestamp: NOW_MS / 1000 - elapsedMinutes * MINUTE });
+
+    drawBlockDashboard(context, resolveBlockDashboardState([block], NOW_MS));
+
+    return label;
+  };
+
+  it("블록이 제때 나오면 시세판과 같은 LIVE 배지를 그린다", () => {
+    expect(traceBadgeLabel(5)).toBe("LIVE");
+  });
+
+  it("블록이 20분 넘게 안 나오면 DELAYED 로 바뀐다", () => {
+    expect(traceBadgeLabel(25)).toBe("DELAYED");
   });
 });

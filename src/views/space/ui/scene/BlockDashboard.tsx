@@ -5,10 +5,12 @@ import { memo, type ReactNode, useEffect, useMemo, useRef } from "react";
 import { CanvasTexture, SRGBColorSpace } from "three";
 import { useBlockStore } from "@/entities/block";
 import { SPACE_BLOCK_DASHBOARD } from "@/entities/space";
+import { usePrefersReducedMotion } from "@/features/space-controls";
 import {
   BLOCK_DASHBOARD_TEXTURE,
   createBlockDashboardSignature,
   drawBlockDashboard,
+  isBlockFeedStale,
   resolveBlockDashboardState,
 } from "@/views/space/lib/blockDashboardTexture";
 import { loadScreenFonts } from "@/views/space/lib/screenCanvas";
@@ -16,6 +18,7 @@ import {
   resolveScreenMaterialCacheKey,
   sharpenScreenMapSampling,
 } from "@/views/space/lib/screenMaterial";
+import BillboardOnlinePulse from "./BillboardOnlinePulse";
 
 /**
  * 유휴 상태에서 경과 시간을 다시 보는 간격.
@@ -60,6 +63,9 @@ function BlockDashboard(): ReactNode {
   const renderer = useThree((rootState) => rootState.gl);
   const surface = useMemo(() => createDashboardTexture(), []);
   const lastSignatureRef = useRef<string>("");
+  /** 블록이 제때 나오는 중이면 `true`. LIVE 점의 확산 링이 이 값을 따름. */
+  const isLiveRef = useRef<boolean>(false);
+  const prefersReducedMotion = usePrefersReducedMotion();
   const elapsedSinceCheckRef = useRef<number>(IDLE_CHECK_INTERVAL_SECONDS);
   /** 소켓 수신 플래그. 다음 프레임에 바로 그린다. */
   const hasPendingUpdateRef = useRef<boolean>(true);
@@ -85,6 +91,7 @@ function BlockDashboard(): ReactNode {
 
     drawBlockDashboard(context, nextState);
     lastSignatureRef.current = signature;
+    isLiveRef.current = !isBlockFeedStale(nextState.elapsedSeconds);
     texture.needsUpdate = true;
   };
   // endregion
@@ -143,16 +150,21 @@ function BlockDashboard(): ReactNode {
   // 테두리 메시를 두지 않는다. 맵의 금장 액자가 이미 테두리라, 그 안에 또
   // 테두리를 넣으면 액자 안쪽 홈이 두 겹이 된다.
   return (
-    <mesh>
-      <planeGeometry args={[SPACE_BLOCK_DASHBOARD.width, SPACE_BLOCK_DASHBOARD.height]} />
-      {/* 자체 발광으로 그린다. 조명에 맡기면 노을 역광에서 글자가 어두워진다. */}
-      <meshBasicMaterial
-        map={surface.texture}
-        toneMapped={false}
-        onBeforeCompile={sharpenScreenMapSampling}
-        customProgramCacheKey={resolveScreenMaterialCacheKey}
-      />
-    </mesh>
+    <group>
+      <mesh>
+        <planeGeometry args={[SPACE_BLOCK_DASHBOARD.width, SPACE_BLOCK_DASHBOARD.height]} />
+        {/* 자체 발광으로 그린다. 조명에 맡기면 노을 역광에서 글자가 어두워진다. */}
+        <meshBasicMaterial
+          map={surface.texture}
+          toneMapped={false}
+          onBeforeCompile={sharpenScreenMapSampling}
+          customProgramCacheKey={resolveScreenMaterialCacheKey}
+        />
+      </mesh>
+
+      {/* 시세판과 같은 자리·같은 모양의 LIVE 점 확산 링. */}
+      <BillboardOnlinePulse isOnlineRef={isLiveRef} prefersReducedMotion={prefersReducedMotion} />
+    </group>
   );
 }
 // endregion

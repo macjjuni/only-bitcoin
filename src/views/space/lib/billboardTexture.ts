@@ -5,11 +5,13 @@ import {
   drawFittedText,
   drawScreenCard,
   drawScreenDivider,
+  drawScreenLiveBadge,
   NUMERIC_FONT_STACK,
   resolveFontSpec,
   SANS_FONT_STACK,
   SCREEN_COLORS,
   SCREEN_HEADLINE_FONT_SIZE_PX,
+  SCREEN_LIVE_BADGE,
   SCREEN_MIN_FONT_SIZE_PX,
   SCREEN_TEXTURE,
 } from "./screenCanvas";
@@ -47,12 +49,7 @@ export const BILLBOARD_CHART_MARKER = {
  * 베이스 텍스처는 상태가 바뀔 때만 다시 올리므로 프레임마다 커지는 원을 구울
  * 수 없음. 두 쪽이 같은 자리에 붙어야 하므로 좌표를 여기서 한 번만 정함.
  */
-export const BILLBOARD_ONLINE_MARKER = {
-  x: 1352,
-  y: 126,
-  coreRadius: 10,
-  pulseRadius: 30,
-} as const;
+export const BILLBOARD_ONLINE_MARKER = SCREEN_LIVE_BADGE.marker;
 
 /** 가격·등락률 칸의 최대 폭. 넘으면 글자를 줄임. */
 export const BILLBOARD_COLUMNS = {
@@ -105,9 +102,6 @@ const LAYOUT = {
   logo: { centerX: 138, centerY: 126, radius: 54 },
   title: { x: 216, y: 108, fontSize: 56 },
   subtitle: { x: 218, y: 164, fontSize: 34 },
-  statusBadge: { x: 1316, y: 94, width: 200, height: 64, radius: 32 },
-  /** 점 오른쪽 남은 폭의 가운데. 글자 길이가 달라도 좌우 여백이 맞음. */
-  statusBadgeText: { x: 1446, y: 127, fontSize: 30 },
   rows: {
     krw: { centerY: 290 },
     usd: { centerY: 450 },
@@ -141,6 +135,18 @@ const createBillboardPriceRegion = (centerY: number): BillboardPriceRegion => ({
   width: LAYOUT.rowPrice.maxWidth,
   height: LAYOUT.rowPrice.height,
 });
+
+/**
+ * 별도 차트 텍스처가 덮는 칸. 캔들·거래대금 막대·현재가 점선과 점이 다 들어감.
+ *
+ * 캡션은 바뀌지 않아서 큰 텍스처에 남김.
+ */
+export const BILLBOARD_CHART_REGION: BillboardPriceRegion = {
+  x: LAYOUT.chart.left - 20,
+  y: LAYOUT.chart.top - 20,
+  width: LAYOUT.chart.width + 40,
+  height: LAYOUT.volume.top + LAYOUT.volume.height - LAYOUT.chart.top + 40,
+};
 
 /** 기본 전광판과 별도 가격 텍스처가 같은 칸을 쓰도록 레이아웃에서 계산함. */
 export const BILLBOARD_PRICE_REGIONS = {
@@ -217,7 +223,7 @@ export const resolveToneColor = (tone: BillboardTone): string => {
 /**
  * 전광판 접속 표시 기준.
  *
- * 한쪽 피드만 살아 있어도 온라인으로 봄. 숫자가 눈앞에서 바뀌는데 "오프라인"
+ * 한쪽 피드만 살아 있어도 LIVE 로 봄. 숫자가 눈앞에서 바뀌는데 "OFFLINE"
  * 이라고 적혀 있으면 더 혼란스러움.
  */
 export const resolveBillboardOnlineStatus = (
@@ -301,39 +307,7 @@ const drawHeader = (context: CanvasRenderingContext2D, isOnline: boolean): void 
   context.font = resolveFontSpec(500, LAYOUT.subtitle.fontSize, SANS_FONT_STACK);
   context.fillText("실시간 시세 · 24시간 변동", LAYOUT.subtitle.x, LAYOUT.subtitle.y);
 
-  drawOnlineBadge(context, isOnline);
-};
-
-/** 우측 상단 접속 배지. 점의 확산 효과는 `BillboardOnlinePulse` 가 겹쳐 그림. */
-const drawOnlineBadge = (context: CanvasRenderingContext2D, isOnline: boolean): void => {
-  const accentColor = isOnline ? BILLBOARD_COLORS.online : BILLBOARD_COLORS.offline;
-  const { x, y, width, height, radius } = LAYOUT.statusBadge;
-
-  context.beginPath();
-  context.roundRect(x, y, width, height, radius);
-  context.fillStyle = BILLBOARD_COLORS.surface;
-  context.fill();
-
-  context.beginPath();
-  context.arc(
-    BILLBOARD_ONLINE_MARKER.x,
-    BILLBOARD_ONLINE_MARKER.y,
-    BILLBOARD_ONLINE_MARKER.coreRadius,
-    0,
-    Math.PI * 2,
-  );
-  context.fillStyle = accentColor;
-  context.fill();
-
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  context.fillStyle = accentColor;
-  context.font = resolveFontSpec(700, LAYOUT.statusBadgeText.fontSize, SANS_FONT_STACK);
-  context.fillText(
-    isOnline ? "온라인" : "오프라인",
-    LAYOUT.statusBadgeText.x,
-    LAYOUT.statusBadgeText.y,
-  );
+  drawScreenLiveBadge(context, isOnline ? "live" : "offline");
 };
 
 /** 상승·하락 삼각형. 글리프 대신 도형이라 폰트에 기대지 않음. */
@@ -542,13 +516,19 @@ const drawCurrentPriceMarker = (
   context.fill();
 };
 
-const drawChartSection = (context: CanvasRenderingContext2D, state: BillboardState): void => {
+const drawChartCaption = (context: CanvasRenderingContext2D): void => {
   context.textAlign = "left";
   context.textBaseline = "middle";
   context.fillStyle = BILLBOARD_COLORS.labelMuted;
   context.font = resolveFontSpec(500, LAYOUT.chartCaption.fontSize, SANS_FONT_STACK);
   context.fillText("최근 24시간 · BTC/USDT 30분봉", LAYOUT.chartCaption.x, LAYOUT.chartCaption.y);
+};
 
+/** 차트 본문. 좌표는 전체 텍스처 기준이라 별도 차트 텍스처에서는 원점을 옮겨 부름. */
+const drawChartBody = (
+  context: CanvasRenderingContext2D,
+  state: Pick<BillboardState, "candles" | "usdChange24h">,
+): void => {
   const geometry = resolveBillboardChartGeometry(state);
 
   if (!geometry) {
@@ -597,9 +577,10 @@ export const drawBillboardPrice = (
 export const drawBillboard = (
   context: CanvasRenderingContext2D,
   state: BillboardState,
-  options: { shouldDrawPrices?: boolean } = {},
+  options: { shouldDrawPrices?: boolean; shouldDrawChart?: boolean } = {},
 ): void => {
   const shouldDrawPrices = options.shouldDrawPrices ?? true;
+  const shouldDrawChart = options.shouldDrawChart ?? true;
 
   drawScreenCard(context);
   drawHeader(context, resolveBillboardOnlineStatus(state));
@@ -624,5 +605,28 @@ export const drawBillboard = (
     shouldDrawPrice: shouldDrawPrices,
   });
 
-  drawChartSection(context, state);
+  drawChartCaption(context);
+
+  if (shouldDrawChart) {
+    drawChartBody(context, state);
+  }
+};
+
+/**
+ * 별도 차트 텍스처에 차트만 그림.
+ *
+ * 캔들은 2초마다 자라는데 큰 텍스처(1600 × 1200)를 매번 다시 올리면 모바일에서
+ * 무거움. 차트 칸만 떼어 투명 텍스처로 겹치고 이것만 다시 올림.
+ */
+export const drawBillboardChart = (
+  context: CanvasRenderingContext2D,
+  state: Pick<BillboardState, "candles" | "usdChange24h">,
+): void => {
+  const { x, y } = BILLBOARD_CHART_REGION;
+
+  context.setTransform(1, 0, 0, 1, 0, 0);
+  context.clearRect(0, 0, context.canvas.width, context.canvas.height);
+  context.setTransform(1, 0, 0, 1, -x, -y);
+  drawChartBody(context, state);
+  context.setTransform(1, 0, 0, 1, 0, 0);
 };

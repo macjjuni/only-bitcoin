@@ -8,6 +8,7 @@ import {
 import {
   drawFittedText,
   drawScreenCard,
+  drawScreenLiveBadge,
   NUMERIC_FONT_STACK,
   resolveFontSpec,
   SANS_FONT_STACK,
@@ -53,7 +54,6 @@ const COLORS = SCREEN_COLORS;
  */
 const LAYOUT = {
   title: { x: 84, y: 124, fontSize: 64 },
-  liveBadge: { x: 1336, y: 92, width: 180, height: 64, radius: 12, fontSize: 36 },
   /** 시세판 원화 가격 줄(중심 290)과 높이를 맞췄음. 두 판의 큰 숫자가 한 줄로 읽힘. */
   latestHeight: { x: 84, y: 290, fontSize: SCREEN_HEADLINE_FONT_SIZE_PX, maxWidth: 1432 },
   latestMeta: { x: 86, y: 410, fontSize: 40, maxWidth: 1430 },
@@ -278,24 +278,6 @@ export const createBlockDashboardSignature = (state: BlockDashboardState): strin
 };
 
 // region [Privates]
-/** 우측 상단 LIVE 배지. 블록이 늦으면 회색 `지연` 으로 바뀜. */
-const drawLiveBadge = (context: CanvasRenderingContext2D, isStale: boolean): void => {
-  const { x, y, width, height, radius, fontSize } = LAYOUT.liveBadge;
-
-  context.beginPath();
-  context.roundRect(x, y, width, height, radius);
-  context.fillStyle = isStale ? COLORS.surface : COLORS.online;
-  context.fill();
-
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  context.fillStyle = isStale ? COLORS.labelMuted : COLORS.onAccent;
-  context.font = isStale
-    ? resolveFontSpec(700, fontSize - 4, SANS_FONT_STACK)
-    : resolveFontSpec(800, fontSize, NUMERIC_FONT_STACK);
-  context.fillText(isStale ? "지연" : "LIVE", x + width / 2, y + height / 2 + 2);
-};
-
 const drawLatestBlock = (context: CanvasRenderingContext2D, state: BlockDashboardState): void => {
   context.textAlign = "left";
   context.textBaseline = "middle";
@@ -479,7 +461,7 @@ export const drawBlockDashboard = (
   context.font = resolveFontSpec(800, LAYOUT.title.fontSize, SANS_FONT_STACK);
   context.fillText("비트코인 네트워크", LAYOUT.title.x, LAYOUT.title.y);
 
-  drawLiveBadge(context, isBlockFeedStale(state.elapsedSeconds));
+  drawScreenLiveBadge(context, isBlockFeedStale(state.elapsedSeconds) ? "delayed" : "live");
   drawLatestBlock(context, state);
   drawBlockChain(context, state.recentBlocks);
   drawHalving(context, state);
