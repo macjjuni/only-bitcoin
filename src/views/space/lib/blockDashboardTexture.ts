@@ -1,21 +1,18 @@
 import type { BlockTypes, FeesTypes } from "@/entities/block";
 import {
   calcPercentage,
-  calculateNetworkHashrate,
   getCurrentBlockSubsidy,
   getNextHalvingData,
-  minedPercent,
   TARGET_BLOCK_INTERVAL_SECONDS,
 } from "@/entities/block";
 import {
-  BTC_MAX_SUPPLY,
   drawFittedText,
   drawScreenCard,
-  drawScreenDivider,
   NUMERIC_FONT_STACK,
   resolveFontSpec,
   SANS_FONT_STACK,
   SCREEN_COLORS,
+  SCREEN_HEADLINE_FONT_SIZE_PX,
   SCREEN_TEXTURE,
 } from "./screenCanvas";
 
@@ -23,7 +20,8 @@ import {
  * 메인 전광판 오른쪽 칸, 비트코인 네트워크 현황 텍스처.
  *
  * 시안(`assets/screen_A.png`) 오른쪽 판을 옮겼음. 위에서부터 최신 블록 번호,
- * 최근 블록 6개 체인, 다음 반감기 진행 막대, 해시레이트·난이도·공급량 순.
+ * 최근 블록 4개 체인, 다음 반감기 진행 막대 순. 하단 지표(해시레이트·난이도·
+ * 공급량)는 폰에서 안 읽혀서 빼고 그 자리만큼 체인과 반감기를 키웠음.
  * 왼쪽 시세 판과 같은 카드·팔레트·여백을 써서 액자 안에서 한 벽으로 읽힘.
  */
 
@@ -36,8 +34,8 @@ export const BLOCK_DASHBOARD_TEXTURE = {
 
 export const BLOCK_DASHBOARD_PLACEHOLDER = "—";
 
-/** 체인에 늘어놓는 최근 블록 수. */
-export const RECENT_BLOCK_COUNT = 6;
+/** 체인에 늘어놓는 최근 블록 수. 6개면 칸이 작아 폰에서 숫자가 안 읽혔음. */
+export const RECENT_BLOCK_COUNT = 4;
 
 /** 반감기 막대의 칸 수. 칸으로 끊어야 멀리서도 진행 정도가 셈처럼 읽힘. */
 export const HALVING_SEGMENT_COUNT = 40;
@@ -50,28 +48,25 @@ const COLORS = SCREEN_COLORS;
 /**
  * 1600 × 1200 레이아웃.
  *
- * 세로 예산: 헤더 170 · 최신 블록 270 · 블록 체인 160 · 반감기 300 · 하단 지표
- * 200. 왼쪽 시세 판의 하단 지표 줄(구분선 1036, 값 1130)과 높이를 맞췄음.
+ * 세로 예산: 헤더 170 · 최신 블록 280 · 블록 체인 240 · 반감기 470.
+ * 반감기 아래는 진행률·보상 한 줄, 남은 블록 한 줄로 나눠 글자를 키웠음.
  */
 const LAYOUT = {
   title: { x: 84, y: 124, fontSize: 64 },
   liveBadge: { x: 1336, y: 92, width: 180, height: 64, radius: 12, fontSize: 36 },
-  latestLabel: { x: 86, y: 224, fontSize: 36 },
-  latestHeight: { x: 84, y: 318, fontSize: 150, maxWidth: 1432 },
-  latestMeta: { x: 86, y: 418, fontSize: 38, maxWidth: 1430 },
-  chain: { top: 480, height: 136, gap: 34, radius: 12, connectorHeight: 8 },
-  chainHeight: { offsetY: 52, fontSize: 38 },
-  chainTx: { offsetY: 98, fontSize: 34 },
-  halvingTitle: { x: 84, y: 708, fontSize: 48 },
-  halvingAside: { x: 1516, y: 712, fontSize: 34 },
-  halvingBar: { top: 756, height: 72, gap: 8 },
-  halvingPercent: { x: 84, y: 896, fontSize: 64 },
-  /** 진행률 숫자와 보상 사이 칸. 폭을 넘으면 글자를 줄여 보상과 겹치지 않게 함. */
-  halvingRemain: { x: 330, y: 900, fontSize: 38, maxWidth: 640 },
-  halvingReward: { x: 1516, y: 900, fontSize: 38 },
-  footerDividerY: 1036,
-  footerLabel: { y: 1074, fontSize: 34 },
-  footerValue: { y: 1132, fontSize: 52 },
+  /** 시세판 원화 가격 줄(중심 290)과 높이를 맞췄음. 두 판의 큰 숫자가 한 줄로 읽힘. */
+  latestHeight: { x: 84, y: 290, fontSize: SCREEN_HEADLINE_FONT_SIZE_PX, maxWidth: 1432 },
+  latestMeta: { x: 86, y: 410, fontSize: 40, maxWidth: 1430 },
+  chain: { top: 488, height: 210, gap: 56, radius: 16, connectorHeight: 10 },
+  chainHeight: { offsetY: 82, fontSize: 64 },
+  chainTx: { offsetY: 150, fontSize: 46 },
+  halvingTitle: { x: 84, y: 790, fontSize: 52 },
+  halvingAside: { x: 1516, y: 794, fontSize: 36 },
+  halvingBar: { top: 840, height: 92, gap: 8 },
+  halvingPercent: { x: 84, y: 1012, fontSize: 80 },
+  halvingReward: { x: 1516, y: 1016, fontSize: 46 },
+  /** 진행률 줄 아래 따로 둠. 한 줄에 셋을 넣으면 글자를 키울 수 없었음. */
+  halvingRemain: { x: 86, y: 1098, fontSize: 42, maxWidth: 1430 },
 } as const;
 
 export interface RecentBlock {
@@ -104,12 +99,6 @@ export interface BlockDashboardState {
   blocksToHalving: number | null;
   /** 현재 반감기 구간 진행률(%). 모르면 `null`. */
   halvingProgressPercent: number | null;
-  /** 난이도에서 역산한 해시레이트(H/s). 모르면 0. */
-  hashrate: number;
-  /** 최신 블록 난이도. 모르면 0. */
-  difficulty: number;
-  /** 지금까지 채굴된 BTC. 모르면 0. */
-  minedSupply: number;
 }
 
 // region [Privates]
@@ -138,8 +127,6 @@ export const resolveBlockDashboardState = (
   const timestampMs = latestBlock && latestBlock.timestamp > 0 ? latestBlock.timestamp * 1000 : 0;
   const nextHalving = height > 0 ? getNextHalvingData(height) : null;
   const nextHalvingHeight = nextHalving?.blockHeight ?? 0;
-  const difficulty =
-    height > 0 && isPositiveNumber(latestBlock?.difficulty) ? latestBlock.difficulty : 0;
   const recentBlocks = blocks
     .filter((block) => block.height > 0)
     .slice(0, RECENT_BLOCK_COUNT)
@@ -163,9 +150,6 @@ export const resolveBlockDashboardState = (
     nextSubsidy: nextHalving ? Number(nextHalving.blockReward) : 0,
     blocksToHalving: nextHalvingHeight > height ? nextHalvingHeight - height : null,
     halvingProgressPercent: height > 0 ? calcPercentage(nextHalvingHeight, height) : null,
-    hashrate: calculateNetworkHashrate(difficulty),
-    difficulty,
-    minedSupply: height > 0 ? (minedPercent(height) / 100) * BTC_MAX_SUPPLY : 0,
   };
 };
 
@@ -191,37 +175,6 @@ export const formatElapsed = (elapsedSeconds: number | null): string => {
   const hours = Math.floor(minutes / 60);
 
   return hours < 24 ? `${hours}시간 전` : `${Math.floor(hours / 24)}일 전`;
-};
-
-/** H/s 를 ZH/s·EH/s 로 줄임. 1,000 EH/s 를 넘으면 시안처럼 ZH/s 로 씀. */
-export const formatHashrate = (hashrate: number): string => {
-  if (!Number.isFinite(hashrate) || hashrate <= 0) {
-    return BLOCK_DASHBOARD_PLACEHOLDER;
-  }
-
-  const zetta = hashrate / 1e21;
-
-  if (zetta >= 1) {
-    return `${zetta.toFixed(2)} ZH/s`;
-  }
-
-  const exa = hashrate / 1e18;
-
-  return exa >= 1 ? `${exa.toFixed(0)} EH/s` : `${(hashrate / 1e15).toFixed(0)} PH/s`;
-};
-
-/** 난이도를 조(T) 단위로 줄임. */
-export const formatDifficulty = (difficulty: number): string => {
-  return isPositiveNumber(difficulty)
-    ? `${(difficulty / 1e12).toFixed(1)} T`
-    : BLOCK_DASHBOARD_PLACEHOLDER;
-};
-
-/** `19.96M / 21M`. 소수 둘째 자리라 블록 몇 개로는 글자가 안 바뀜. */
-export const formatMinedSupply = (minedSupply: number): string => {
-  return isPositiveNumber(minedSupply)
-    ? `${(minedSupply / 1e6).toFixed(2)}M / ${BTC_MAX_SUPPLY / 1e6}M`
-    : BLOCK_DASHBOARD_PLACEHOLDER;
 };
 
 /** 보조금. `1.56250000` 같은 꼬리 0 은 `Number` 가 떼어 줌. */
@@ -321,9 +274,6 @@ export const createBlockDashboardSignature = (state: BlockDashboardState): strin
     state.recentBlocks.map((block) => `${block.height}:${block.txCount ?? ""}`).join(","),
     formatHalvingProgress(state.halvingProgressPercent),
     formatBlocksToHalving(state.blocksToHalving),
-    formatHashrate(state.hashrate),
-    formatDifficulty(state.difficulty),
-    formatMinedSupply(state.minedSupply),
   ].join("|");
 };
 
@@ -349,10 +299,6 @@ const drawLiveBadge = (context: CanvasRenderingContext2D, isStale: boolean): voi
 const drawLatestBlock = (context: CanvasRenderingContext2D, state: BlockDashboardState): void => {
   context.textAlign = "left";
   context.textBaseline = "middle";
-
-  context.fillStyle = COLORS.labelMuted;
-  context.font = resolveFontSpec(500, LAYOUT.latestLabel.fontSize, SANS_FONT_STACK);
-  context.fillText("최신 블록", LAYOUT.latestLabel.x, LAYOUT.latestLabel.y);
 
   const heightText =
     state.height > 0 ? `#${formatBlockHeight(state.height)}` : BLOCK_DASHBOARD_PLACEHOLDER;
@@ -518,39 +464,6 @@ const drawHalving = (context: CanvasRenderingContext2D, state: BlockDashboardSta
   context.fillText(rewardText, LAYOUT.halvingReward.x, LAYOUT.halvingReward.y);
 };
 
-/** 하단 지표 세 칸. 왼쪽 시세 판의 하단 지표와 같은 높이·글꼴임. */
-const drawFooter = (context: CanvasRenderingContext2D, state: BlockDashboardState): void => {
-  const cells = [
-    { label: "해시레이트", value: formatHashrate(state.hashrate) },
-    { label: "난이도", value: formatDifficulty(state.difficulty) },
-    { label: "채굴된 공급량", value: formatMinedSupply(state.minedSupply) },
-  ];
-  const left = BLOCK_DASHBOARD_TEXTURE.paddingX;
-  const columnWidth = (BLOCK_DASHBOARD_TEXTURE.width - left * 2) / cells.length;
-
-  drawScreenDivider(context, LAYOUT.footerDividerY);
-
-  context.textAlign = "left";
-  context.textBaseline = "middle";
-
-  cells.forEach((cell, index) => {
-    const x = left + columnWidth * index;
-
-    context.fillStyle = COLORS.labelMuted;
-    context.font = resolveFontSpec(500, LAYOUT.footerLabel.fontSize, SANS_FONT_STACK);
-    context.fillText(cell.label, x, LAYOUT.footerLabel.y);
-
-    context.fillStyle = COLORS.label;
-    drawFittedText(context, cell.value, {
-      x,
-      y: LAYOUT.footerValue.y,
-      fontWeight: 700,
-      maxFontSizePx: LAYOUT.footerValue.fontSize,
-      maxWidth: columnWidth - 24,
-      fontStack: NUMERIC_FONT_STACK,
-    });
-  });
-};
 // endregion
 
 /** 네트워크 현황판 한 장을 그린다. */
@@ -570,5 +483,4 @@ export const drawBlockDashboard = (
   drawLatestBlock(context, state);
   drawBlockChain(context, state.recentBlocks);
   drawHalving(context, state);
-  drawFooter(context, state);
 };

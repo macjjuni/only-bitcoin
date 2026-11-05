@@ -8,13 +8,10 @@ import {
   createBlockDashboardSignature,
   formatBlockHeight,
   formatBlocksToHalving,
-  formatDifficulty,
   formatElapsed,
   formatHalvingHeight,
   formatHalvingProgress,
-  formatHashrate,
   formatLatestBlockMeta,
-  formatMinedSupply,
   formatPoolName,
   formatSubsidy,
   formatTimeToHalving,
@@ -175,7 +172,7 @@ describe("isBlockFeedStale", () => {
 });
 
 describe("네트워크 현황 파생값", () => {
-  it("최근 블록을 오래된 것부터 최대 6개 늘어놓는다", () => {
+  it("최근 블록을 오래된 것부터 최대 4개 늘어놓는다", () => {
     const blocks = Array.from({ length: 8 }, (_, index) =>
       createBlock({ height: CURRENT_HEIGHT - index, txCount: 3_000 + index }),
     );
@@ -183,8 +180,6 @@ describe("네트워크 현황 파생값", () => {
 
     expect(state.recentBlocks).toHaveLength(RECENT_BLOCK_COUNT);
     expect(state.recentBlocks.map((block) => block.height)).toEqual([
-      CURRENT_HEIGHT - 5,
-      CURRENT_HEIGHT - 4,
       CURRENT_HEIGHT - 3,
       CURRENT_HEIGHT - 2,
       CURRENT_HEIGHT - 1,
@@ -201,14 +196,10 @@ describe("네트워크 현황 파생값", () => {
     expect(state.recentBlocks[0]?.txCount).toBeNull();
   });
 
-  it("수수료·해시레이트·난이도·공급량을 채운다", () => {
+  it("수수료를 채운다", () => {
     const state = resolveBlockDashboardState([createBlock()], NOW_MS, { halfHourFee: 6 });
 
     expect(state.feeRate).toBe(6);
-    expect(state.difficulty).toBe(150_000_000_000_000);
-    expect(state.hashrate).toBeGreaterThan(1e21);
-    expect(state.minedSupply).toBeGreaterThan(19_900_000);
-    expect(state.minedSupply).toBeLessThan(21_000_000);
   });
 
   it("소켓 연결 전에는 네트워크 값도 비운다", () => {
@@ -217,25 +208,10 @@ describe("네트워크 현황 파생값", () => {
 
     expect(state.recentBlocks).toEqual([]);
     expect(state.feeRate).toBeNull();
-    expect(state.hashrate).toBe(0);
-    expect(state.minedSupply).toBe(0);
   });
 });
 
 describe("네트워크 현황 포맷", () => {
-  it("해시레이트는 1,000 EH/s 를 넘으면 ZH/s 로 쓴다", () => {
-    expect(formatHashrate(1.08e21)).toBe("1.08 ZH/s");
-    expect(formatHashrate(650e18)).toBe("650 EH/s");
-    expect(formatHashrate(0)).toBe(BLOCK_DASHBOARD_PLACEHOLDER);
-  });
-
-  it("난이도는 조 단위, 공급량은 백만 단위로 줄인다", () => {
-    expect(formatDifficulty(148.9e12)).toBe("148.9 T");
-    expect(formatDifficulty(0)).toBe(BLOCK_DASHBOARD_PLACEHOLDER);
-    expect(formatMinedSupply(19_962_000)).toBe("19.96M / 21M");
-    expect(formatMinedSupply(0)).toBe(BLOCK_DASHBOARD_PLACEHOLDER);
-  });
-
   it("최신 블록 줄은 아는 항목만 잇는다", () => {
     const full = resolveBlockDashboardState([createBlock({ txCount: 3_412 })], NOW_MS, {
       halfHourFee: 6,

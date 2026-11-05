@@ -190,23 +190,9 @@ export const loadScreenFonts = async (): Promise<boolean> => {
   }
 };
 
-/** BTC 총량. 공급량 표시와 시가총액 계산에 씀. */
-export const BTC_MAX_SUPPLY = 21_000_000;
-
-/** 달러 금액을 `$2.07T`, `$38.2B` 처럼 줄인다. */
-export const formatCompactUsd = (value: number): string | null => {
-  if (!Number.isFinite(value) || value <= 0) {
-    return null;
-  }
-  if (value >= 1e12) {
-    return `$${(value / 1e12).toFixed(2)}T`;
-  }
-  if (value >= 1e9) {
-    return `$${(value / 1e9).toFixed(1)}B`;
-  }
-  if (value >= 1e6) {
-    return `$${(value / 1e6).toFixed(1)}M`;
-  }
-
-  return `$${Math.round(value).toLocaleString("en-US")}`;
-};
+/**
+ * 두 판의 주인공 숫자(시세판 가격, 네트워크판 최신 블록 번호) 글자 크기.
+ *
+ * 액자 안에 나란히 걸려서 크기가 다르면 한쪽만 튀어 보임. 한 값으로 묶었음.
+ */
+export const SCREEN_HEADLINE_FONT_SIZE_PX = 120;

@@ -16,7 +16,6 @@ import {
   formatBillboardKrw,
   formatBillboardUsd,
   resolveBillboardChartEndpoint,
-  resolveBillboardFooter,
   resolveBillboardOnlineStatus,
   resolveChangeTone,
   resolveFittedFontSize,
@@ -55,10 +54,6 @@ const createState = (overrides: Partial<BillboardState> = {}): BillboardState =>
   isKrwConnected: true,
   isUsdConnected: true,
   candles: [],
-  highUsd: 105_120,
-  lowUsd: 101_870,
-  quoteVolumeUsd: 38_200_000_000,
-  circulatingSupply: 19_960_000,
   ...overrides,
 });
 
@@ -91,17 +86,20 @@ describe("formatBillboardUsd", () => {
 });
 
 describe("formatBillboardChange", () => {
-  it("상승은 부호를 붙이고 소수 두 자리로 고정한다", () => {
-    expect(formatBillboardChange("2.4")).toBe("+2.40%");
-    expect(formatBillboardChange(2.415)).toBe("+2.42%");
+  it("상승은 부호를 붙이고 소수 한 자리로 반올림한다", () => {
+    expect(formatBillboardChange("2.4")).toBe("+2.4%");
+    expect(formatBillboardChange(2.46)).toBe("+2.5%");
   });
 
   it("하락은 음수 부호를 유지한다", () => {
-    expect(formatBillboardChange("-1.2")).toBe("-1.20%");
+    expect(formatBillboardChange("-1.24")).toBe("-1.2%");
   });
 
   it("보합은 부호를 붙이지 않는다", () => {
-    expect(formatBillboardChange("0")).toBe("0.00%");
+    expect(formatBillboardChange("0")).toBe("0.0%");
+    // 반올림해서 0 이 되면 부호도 떼고 보합으로 본다.
+    expect(formatBillboardChange("0.04")).toBe("0.0%");
+    expect(resolveChangeTone("0.04")).toBe("flat");
   });
 
   it("해석할 수 없는 값은 자리표시다", () => {
@@ -131,7 +129,7 @@ describe("resolveChangeTone", () => {
 describe("resolveFittedFontSize", () => {
   const PRICE_WIDTH = BILLBOARD_COLUMNS.priceMaxWidth;
   /** `LAYOUT.rowPrice.fontSize` 와 같은 값. 레이아웃은 내보내지 않는다. */
-  const PRICE_FONT_SIZE = 132;
+  const PRICE_FONT_SIZE = 120;
 
   it("가용 폭에 들어가는 문자열은 최대 크기를 유지한다", () => {
     const measuredWidth = measureMonospaceWidth("$108,433", PRICE_FONT_SIZE);
@@ -177,10 +175,10 @@ describe("resolveFittedFontSize", () => {
 
   it("변동률도 자기 칸을 넘지 않는다", () => {
     const changeText = formatBillboardChange("-12.34");
-    const measuredWidth = measureMonospaceWidth(changeText, 42);
+    const measuredWidth = measureMonospaceWidth(changeText, 60);
     const fittedFontSize = resolveFittedFontSize(measuredWidth, {
       maxWidth: BILLBOARD_COLUMNS.changeMaxWidth,
-      maxFontSizePx: 42,
+      maxFontSizePx: 60,
     });
 
     expect(measureMonospaceWidth(changeText, fittedFontSize)).toBeLessThanOrEqual(
@@ -289,25 +287,6 @@ describe("resolveBillboardChartEndpoint", () => {
     expect((endpoint?.x ?? 0) + BILLBOARD_CHART_MARKER.pulseRadius).toBeLessThanOrEqual(
       BILLBOARD_TEXTURE.width,
     );
-  });
-});
-
-describe("resolveBillboardFooter", () => {
-  it("고가·저가·거래대금·시가총액을 순서대로 만든다", () => {
-    expect(resolveBillboardFooter(createState())).toEqual([
-      { label: "고가", value: "$105,120" },
-      { label: "저가", value: "$101,870" },
-      { label: "거래대금", value: "$38.2B" },
-      { label: "시가총액", value: "$2.08T" },
-    ]);
-  });
-
-  it("모르는 값은 자리표시로 둔다", () => {
-    const footer = resolveBillboardFooter(
-      createState({ usd: 0, highUsd: 0, lowUsd: 0, quoteVolumeUsd: 0, circulatingSupply: 0 }),
-    );
-
-    expect(footer.every((cell) => cell.value === BILLBOARD_PLACEHOLDER)).toBe(true);
   });
 });
 

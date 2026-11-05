@@ -4,12 +4,7 @@ import { useFrame, useThree } from "@react-three/fiber";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef } from "react";
 import { CanvasTexture, LinearFilter, SRGBColorSpace } from "three";
 import { type BtcCandle, useBitcoinStore } from "@/entities/bitcoin";
-import {
-  type Btc24hStats,
-  useBinanceTicker24hQuery,
-  useBtcCandlesQuery,
-} from "@/entities/bitcoin/client";
-import { minedPercent, useBlockStore } from "@/entities/block";
+import { useBtcCandlesQuery } from "@/entities/bitcoin/client";
 import { SPACE_BILLBOARD } from "@/entities/space";
 import { usePrefersReducedMotion } from "@/features/space-controls";
 import useSettingStore from "@/shared/stores/settingStore";
@@ -31,10 +26,9 @@ import {
   formatBillboardKrw,
   formatBillboardUsd,
   resolveBillboardChartEndpoint,
-  resolveBillboardFooter,
   resolveBillboardOnlineStatus,
 } from "@/views/space/lib/billboardTexture";
-import { BTC_MAX_SUPPLY, loadScreenFonts } from "@/views/space/lib/screenCanvas";
+import { loadScreenFonts } from "@/views/space/lib/screenCanvas";
 import {
   resolveScreenMaterialCacheKey,
   sharpenScreenMapSampling,
@@ -92,7 +86,7 @@ const PRICE_PLACEMENTS = {
  * 변경 감지용 서명.
  *
  * 캔들은 1분마다 새로 오고 48개라 전부 비교하면 비쌈. 개수와 마지막 캔들만 봐도
- * 갱신 여부를 가릴 수 있음. 하단 지표는 화면 글자로 비교함.
+ * 갱신 여부를 가릴 수 있음.
  */
 const createStateSignature = (state: BillboardState): string => {
   const lastCandle = state.candles[state.candles.length - 1];
@@ -108,23 +102,10 @@ const createStateSignature = (state: BillboardState): string => {
     lastCandle
       ? `${lastCandle.openTime}:${lastCandle.high}:${lastCandle.low}:${lastCandle.close}`
       : "",
-    resolveBillboardFooter(state)
-      .map((cell) => cell.value)
-      .join(","),
   ].join("|");
 };
 
-/** 지금까지 채굴된 BTC. 블록 소켓이 붙기 전이면 0. */
-const readCirculatingSupply = (): number => {
-  const latestHeight = useBlockStore.getState().blockData[0]?.height ?? 0;
-
-  return latestHeight > 0 ? (minedPercent(latestHeight) / 100) * BTC_MAX_SUPPLY : 0;
-};
-
-const readBillboardState = (
-  candles: readonly BtcCandle[],
-  stats: Btc24hStats | null,
-): BillboardState => {
+const readBillboardState = (candles: readonly BtcCandle[]): BillboardState => {
   const { bitcoinPrice } = useBitcoinStore.getState();
 
   return {
@@ -135,10 +116,6 @@ const readBillboardState = (
     isKrwConnected: bitcoinPrice.isKrwConnected ?? false,
     isUsdConnected: bitcoinPrice.isUsdConnected ?? false,
     candles,
-    highUsd: stats?.highPriceUsd ?? 0,
-    lowUsd: stats?.lowPriceUsd ?? 0,
-    quoteVolumeUsd: stats?.quoteVolumeUsd ?? 0,
-    circulatingSupply: readCirculatingSupply(),
   };
 };
 
@@ -164,7 +141,6 @@ function PriceBillboard(): ReactNode {
     [],
   );
   const { data: candles } = useBtcCandlesQuery();
-  const { data: stats24h } = useBinanceTicker24hQuery();
   const prefersReducedMotion = usePrefersReducedMotion();
   const isCountUp = useSettingStore((state) => state.setting.isCountUp);
   const lastSampledAtRef = useRef<number>(Number.NEGATIVE_INFINITY);
@@ -179,12 +155,10 @@ function PriceBillboard(): ReactNode {
   const needsPriceRedrawRef = useRef<boolean>(true);
   const chartEndpointRef = useRef<BillboardChartEndpoint | null>(null);
   const isOnlineRef = useRef<boolean>(false);
-  /** 프레임 루프에서 읽어야 해서 ref 로 둠. 캔들은 1분, 24시간 통계는 30초마다 갱신됨. */
+  /** 프레임 루프에서 읽어야 해서 ref 로 둠. 캔들은 1분마다 갱신됨. */
   const candlesRef = useRef<readonly BtcCandle[]>(EMPTY_CANDLES);
-  const stats24hRef = useRef<Btc24hStats | null>(null);
 
   candlesRef.current = candles ?? EMPTY_CANDLES;
-  stats24hRef.current = stats24h ?? null;
   // endregion
 
 
@@ -218,7 +192,7 @@ function PriceBillboard(): ReactNode {
   };
 
   const sampleBillboard = (nowMs: number, shouldSnap: boolean): void => {
-    const state = readBillboardState(candlesRef.current, stats24hRef.current);
+    const state = readBillboardState(candlesRef.current);
     updateBillboardPriceMotion(priceMotionsRef.current.krw, state.krw, nowMs, shouldSnap);
     updateBillboardPriceMotion(priceMotionsRef.current.usd, state.usd, nowMs, shouldSnap);
 

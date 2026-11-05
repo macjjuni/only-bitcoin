@@ -5,11 +5,11 @@ import {
   drawFittedText,
   drawScreenCard,
   drawScreenDivider,
-  formatCompactUsd,
   NUMERIC_FONT_STACK,
   resolveFontSpec,
   SANS_FONT_STACK,
   SCREEN_COLORS,
+  SCREEN_HEADLINE_FONT_SIZE_PX,
   SCREEN_MIN_FONT_SIZE_PX,
   SCREEN_TEXTURE,
 } from "./screenCanvas";
@@ -21,8 +21,9 @@ export { resolveFittedFontSize, type TextFitOptions } from "./screenCanvas";
  *
  * 시안(`assets/screen_A.png`)은 달러 하나만 크게 띄웠는데 원화도 같은 무게로
  * 보여야 해서 가격을 두 줄로 나눴음. 원화는 브랜드 주황, 달러는 크림색으로 갈라
- * 멀리서도 어느 줄이 어느 통화인지 색으로 먼저 읽힘. 그 아래는 30분봉 캔들과
- * 거래대금, 맨 아래는 24시간 고가·저가·거래대금·시가총액.
+ * 멀리서도 어느 줄이 어느 통화인지 색으로 먼저 읽힘. 통화 꼬리표(KRW·USD)는
+ * 폰에서 안 읽혀서 뺐고, ₩·$ 기호와 색으로 구분함. 그 아래는 30분봉 캔들과
+ * 거래대금 막대가 패널 아래쪽을 채움.
  */
 
 export const BILLBOARD_TEXTURE = {
@@ -55,8 +56,8 @@ export const BILLBOARD_ONLINE_MARKER = {
 
 /** 가격·등락률 칸의 최대 폭. 넘으면 글자를 줄임. */
 export const BILLBOARD_COLUMNS = {
-  priceMaxWidth: 960,
-  changeMaxWidth: 200,
+  priceMaxWidth: 1080,
+  changeMaxWidth: 240,
 } as const;
 
 export const BILLBOARD_MIN_FONT_SIZE_PX = SCREEN_MIN_FONT_SIZE_PX;
@@ -79,12 +80,6 @@ export interface BillboardState {
   isUsdConnected: boolean;
   /** 바이낸스 BTCUSDT 30분봉 24시간. 비어 있으면 차트 자리에 안내를 띄움. */
   candles: readonly BtcCandle[];
-  /** 24시간 고가·저가·거래대금(USD). 모르면 0. */
-  highUsd: number;
-  lowUsd: number;
-  quoteVolumeUsd: number;
-  /** 지금까지 채굴된 BTC. 시가총액 계산에 씀. 모르면 0. */
-  circulatingSupply: number;
 }
 
 export interface BillboardChartEndpoint {
@@ -98,9 +93,10 @@ const INTEGER_FORMATTER = new Intl.NumberFormat("en-US", { maximumFractionDigits
 /**
  * 1600 × 1200 레이아웃.
  *
- * 세로 예산: 헤더 200 · 가격 두 줄 340 · 차트 470 · 하단 지표 140. 가격 두 줄이
- * 같은 크기라 원화가 열두 글자(₩145,230,000)여도 960 px 칸에 들어가게 132 px 로
- * 잡았음.
+ * 세로 예산: 헤더 200 · 가격 두 줄 340 · 차트 620. 하단 지표(고가·저가 등)는
+ * 빼고 그 자리까지 차트를 키웠음. 가격 두 줄이
+ * 같은 크기라 원화가 열두 글자(₩145,230,000)여도 1,080 px 칸에 들어감. 132 px 는
+ * 너무 커 보여서 120 px(`SCREEN_HEADLINE_FONT_SIZE_PX`)까지 줄였음.
  *
  * 라벨은 34 px 아래로 두지 않음. 폰에서는 패널이 600 px 안팎으로 줄어 28 px
  * 라벨이 7 px 로 보여 못 읽었음.
@@ -113,21 +109,23 @@ const LAYOUT = {
   /** 점 오른쪽 남은 폭의 가운데. 글자 길이가 달라도 좌우 여백이 맞음. */
   statusBadgeText: { x: 1446, y: 127, fontSize: 30 },
   rows: {
-    krw: { centerY: 290, unit: "KRW" },
-    usd: { centerY: 450, unit: "USD" },
+    krw: { centerY: 290 },
+    usd: { centerY: 450 },
   },
   rowDividerY: 370,
-  rowTag: { x: 84, width: 128, height: 64, radius: 14, fontSize: 32 },
-  rowPrice: { x: 236, fontSize: 132, maxWidth: BILLBOARD_COLUMNS.priceMaxWidth, height: 160 },
-  rowChange: { right: 1516, width: 280, height: 80, radius: 16, fontSize: 42 },
+  rowPrice: {
+    x: 84,
+    fontSize: SCREEN_HEADLINE_FONT_SIZE_PX,
+    maxWidth: BILLBOARD_COLUMNS.priceMaxWidth,
+    height: 160,
+  },
+  /** 폰에서도 읽히게 키웠음. `+12.3%` 가 칸에 들어가는 폭임. */
+  rowChange: { right: 1516, width: 320, height: 100, radius: 18, fontSize: 60 },
   chartCaption: { x: 84, y: 548, fontSize: 34 },
-  chart: { left: 84, top: 590, width: 1432, height: 300 } satisfies ChartRect,
+  chart: { left: 84, top: 590, width: 1432, height: 430 } satisfies ChartRect,
   /** 끝점 점과 펄스가 앉을 오른쪽 여백. 캔들은 이 앞에서 끝남. */
   chartEndGutter: 56,
-  volume: { top: 910, height: 90 },
-  footerDividerY: 1036,
-  footerLabel: { y: 1074, fontSize: 34 },
-  footerValue: { y: 1132, fontSize: 52 },
+  volume: { top: 1040, height: 110 },
 } as const;
 
 export interface BillboardPriceRegion {
@@ -176,22 +174,34 @@ export const formatBillboardUsd = (price: number): string => {
   return isDisplayablePrice(price) ? `$${INTEGER_FORMATTER.format(price)}` : BILLBOARD_PLACEHOLDER;
 };
 
-/** 소수 두 자리로 고정함. 자리수가 흔들리면 4 Hz 갱신 때 글자가 떰. */
-export const formatBillboardChange = (change: string | number): string => {
+/**
+ * 소수 첫째 자리까지 반올림한 등락률.
+ *
+ * 전광판에서는 둘째 자리가 멀리서 안 읽혀서 한 자리로 줄였음. 자리수를 고정해야
+ * 4 Hz 갱신 때 글자가 안 떪.
+ */
+const roundChange = (change: string | number): number | null => {
   const parsed = parseChange(change);
 
-  if (parsed === null) {
-    return BILLBOARD_PLACEHOLDER;
-  }
-  if (parsed === 0) {
-    return "0.00%";
-  }
-
-  return `${parsed > 0 ? "+" : "-"}${Math.abs(parsed).toFixed(2)}%`;
+  return parsed === null ? null : Math.round(parsed * 10) / 10;
 };
 
+export const formatBillboardChange = (change: string | number): string => {
+  const rounded = roundChange(change);
+
+  if (rounded === null) {
+    return BILLBOARD_PLACEHOLDER;
+  }
+  if (rounded === 0) {
+    return "0.0%";
+  }
+
+  return `${rounded > 0 ? "+" : "-"}${Math.abs(rounded).toFixed(1)}%`;
+};
+
+/** 표시값 기준 톤. `0.0%` 인데 화살표가 오르내리면 어색해서 반올림한 값으로 가름. */
 export const resolveChangeTone = (change: string | number): BillboardTone => {
-  const parsed = parseChange(change);
+  const parsed = roundChange(change);
 
   if (parsed === null || parsed === 0) {
     return "flat";
@@ -202,29 +212,6 @@ export const resolveChangeTone = (change: string | number): BillboardTone => {
 
 export const resolveToneColor = (tone: BillboardTone): string => {
   return BILLBOARD_COLORS[tone];
-};
-
-/**
- * 하단 지표 네 칸의 글자.
- *
- * 베이스 텍스처 변경 감지에도 이 글자를 씀. 시가총액은 시세가 바뀔 때마다 값이
- * 달라지지만 표시(`$2.07T`)는 거의 그대로라, 글자로 비교해야 250ms 마다 큰
- * 텍스처를 다시 올리지 않음.
- */
-export const resolveBillboardFooter = (
-  state: Pick<
-    BillboardState,
-    "usd" | "highUsd" | "lowUsd" | "quoteVolumeUsd" | "circulatingSupply"
-  >,
-): readonly { label: string; value: string }[] => {
-  const marketCap = isDisplayablePrice(state.usd) ? state.usd * state.circulatingSupply : 0;
-
-  return [
-    { label: "고가", value: formatBillboardUsd(state.highUsd) },
-    { label: "저가", value: formatBillboardUsd(state.lowUsd) },
-    { label: "거래대금", value: formatCompactUsd(state.quoteVolumeUsd) ?? BILLBOARD_PLACEHOLDER },
-    { label: "시가총액", value: formatCompactUsd(marketCap) ?? BILLBOARD_PLACEHOLDER },
-  ];
 };
 
 /**
@@ -375,31 +362,6 @@ const drawToneTriangle = (
   context.fill();
 };
 
-/** 통화 꼬리표. 원화는 주황 테두리, 달러는 크림 테두리라 가격 색과 짝이 맞음. */
-const drawCurrencyTag = (
-  context: CanvasRenderingContext2D,
-  centerY: number,
-  unit: string,
-  currency: BillboardCurrency,
-): void => {
-  const { x, width, height, radius, fontSize } = LAYOUT.rowTag;
-  const color = PRICE_COLORS[currency];
-
-  context.beginPath();
-  context.roundRect(x, centerY - height / 2, width, height, radius);
-  context.fillStyle = BILLBOARD_COLORS.surface;
-  context.fill();
-  context.strokeStyle = color;
-  context.lineWidth = 2;
-  context.stroke();
-
-  context.textAlign = "center";
-  context.textBaseline = "middle";
-  context.fillStyle = color;
-  context.font = resolveFontSpec(800, fontSize, NUMERIC_FONT_STACK);
-  context.fillText(unit, x + width / 2, centerY + 2);
-};
-
 /** 등락 배지. 시안처럼 색 바탕에 어두운 글자를 얹음. */
 const drawChangeBadge = (
   context: CanvasRenderingContext2D,
@@ -455,13 +417,11 @@ const drawPriceRow = (
   },
 ): void => {
   const { currency, priceText } = options;
-  const { centerY, unit } = LAYOUT.rows[currency];
+  const { centerY } = LAYOUT.rows[currency];
   // 시세가 아직 없으면 변동률 0.00% 도 의미가 없음. 같이 비워 둠.
   const hasPrice = priceText !== BILLBOARD_PLACEHOLDER;
   const tone = hasPrice ? options.tone : "flat";
   const changeText = hasPrice ? options.changeText : BILLBOARD_PLACEHOLDER;
-
-  drawCurrencyTag(context, centerY, unit, currency);
 
   if (options.shouldDrawPrice) {
     context.textAlign = "left";
@@ -601,35 +561,6 @@ const drawChartSection = (context: CanvasRenderingContext2D, state: BillboardSta
   drawCurrentPriceMarker(context, geometry.endpoint, geometry.tone);
 };
 
-/** 하단 지표 네 칸. 라벨은 흐리게, 값은 등폭 숫자로. */
-const drawFooter = (context: CanvasRenderingContext2D, state: BillboardState): void => {
-  const cells = resolveBillboardFooter(state);
-  const left = BILLBOARD_TEXTURE.paddingX;
-  const columnWidth = (BILLBOARD_TEXTURE.width - left * 2) / cells.length;
-
-  drawScreenDivider(context, LAYOUT.footerDividerY);
-
-  context.textAlign = "left";
-  context.textBaseline = "middle";
-
-  cells.forEach((cell, index) => {
-    const x = left + columnWidth * index;
-
-    context.fillStyle = BILLBOARD_COLORS.labelMuted;
-    context.font = resolveFontSpec(500, LAYOUT.footerLabel.fontSize, SANS_FONT_STACK);
-    context.fillText(cell.label, x, LAYOUT.footerLabel.y);
-
-    context.fillStyle = BILLBOARD_COLORS.label;
-    drawFittedText(context, cell.value, {
-      x,
-      y: LAYOUT.footerValue.y,
-      fontWeight: 700,
-      maxFontSizePx: LAYOUT.footerValue.fontSize,
-      maxWidth: columnWidth - 24,
-      fontStack: NUMERIC_FONT_STACK,
-    });
-  });
-};
 // endregion
 
 /** 실제 차트의 현재가 점 좌표와 색. 그릴 캔들이 없으면 효과도 띄우지 않음. */
@@ -694,5 +625,4 @@ export const drawBillboard = (
   });
 
   drawChartSection(context, state);
-  drawFooter(context, state);
 };
