@@ -107,6 +107,26 @@ function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessa
 
   // region [Life Cycles]
   useEffect(followLatestMessages, [messages, isLogHidden, followLatestMessages]);
+
+  useEffect(() => {
+    const logElement = logRef.current;
+    const listElement = logElement?.querySelector("ol");
+    if (!logElement || typeof ResizeObserver === "undefined") {
+      return;
+    }
+
+    // 오류·재연결 줄이 붙거나 글꼴이 늦게 와서 칸·내용 높이가 바뀌면 다시 바닥에 붙임.
+    // 메시지 변경만 보면 기록을 받은 뒤 칸이 줄어든 만큼 위에 멈춰 있었음.
+    const resizeObserver = new ResizeObserver(followLatestMessages);
+    resizeObserver.observe(logElement);
+    if (listElement) {
+      resizeObserver.observe(listElement);
+    }
+
+    return () => {
+      resizeObserver.disconnect();
+    };
+  }, [isLogHidden, followLatestMessages]);
   useEffect(captureInitialHiddenBaseline, [captureInitialHiddenBaseline]);
   // endregion
 
