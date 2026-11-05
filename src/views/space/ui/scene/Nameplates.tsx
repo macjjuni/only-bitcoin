@@ -48,6 +48,7 @@ function Nameplates({
   const remoteGroupRefs = useRef(new Map<number, Group>());
   const lastSelectedAtRef = useRef<number>(0);
   const [visibleSeats, setVisibleSeats] = useState<number[]>([]);
+  const [isSelfReady, setIsSelfReady] = useState<boolean>(false);
   // endregion
 
   // region [Privates]
@@ -102,6 +103,21 @@ function Nameplates({
     group.position.set(player.x, player.y + NAMEPLATE_LIFT_Y, player.z);
     remoteGroupRefs.current.set(player.seat, group);
   };
+
+  /**
+   * 내 명찰 그룹이 붙는 즉시 내 위치로 보냄.
+   *
+   * 원점에서 마운트되면 `<Html>` 이 그 프레임에 공간 중앙 좌표로 한 번 그림.
+   */
+  const attachSelfGroup = (group: Group | null): void => {
+    selfGroupRef.current = group;
+
+    const viewer = viewerTransformRef.current;
+
+    if (group && viewer) {
+      group.position.set(viewer.x, viewer.y + NAMEPLATE_LIFT_Y, viewer.z);
+    }
+  };
   // endregion
 
   // region [Life Cycles]
@@ -110,6 +126,13 @@ function Nameplates({
 
     if (!viewer) {
       return;
+    }
+
+    // 첫 렌더에 같이 붙은 `<Html>` 은 페이지를 나갔다 오면 DOM 에 안 붙고 끝나는
+    // 경우가 있었음(다른 사람 명찰처럼 프레임이 돈 뒤 붙이면 안 생김). 그래서
+    // 첫 프레임 뒤에 마운트함.
+    if (!isSelfReady) {
+      setIsSelfReady(true);
     }
 
     selfGroupRef.current?.position.set(viewer.x, viewer.y + NAMEPLATE_LIFT_Y, viewer.z);
@@ -128,8 +151,8 @@ function Nameplates({
   return (
     <>
       {/* 이름이 비면 글자 없는 검은 알약만 뜬다. 그릴 것이 없으면 그리지 않는다. */}
-      {selfNickname !== "" && (
-        <group ref={selfGroupRef}>
+      {isSelfReady && selfNickname !== "" && (
+        <group ref={attachSelfGroup}>
           <Html center distanceFactor={nameplateDistanceFactor} zIndexRange={[20, 0]}>
             <span className="select-none whitespace-nowrap rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-medium text-white/90 backdrop-blur-sm">
               {selfNickname}
