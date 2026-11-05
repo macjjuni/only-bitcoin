@@ -30,6 +30,17 @@ import {
 const STATE_CHECK_INTERVAL_SECONDS = 1;
 
 // region [Privates]
+/**
+ * 패널에 한 번에 비치는 가로 비율.
+ *
+ * 흐를 때는 한 바퀴(50 m)의 28 m 만 보이고 나머지는 흘러 들어온다. 멈춰 있을
+ * 때 그렇게 두면 화면 밖 칸을 영영 못 보므로, 한 바퀴를 통째로 눌러 담는다.
+ * 글자는 그만큼 작아지지만 다섯 지표가 모두 보인다.
+ */
+const resolveRepeatX = (prefersReducedMotion: boolean): number => {
+  return prefersReducedMotion ? 1 : SPACE_TICKER_FRAME.width / TICKER_TEXTURE.cycleLength;
+};
+
 const createTickerSurface = () => {
   const canvasElement = document.createElement("canvas");
   canvasElement.width = TICKER_TEXTURE.width;
@@ -37,9 +48,8 @@ const createTickerSurface = () => {
 
   const texture = new CanvasTexture(canvasElement);
   texture.colorSpace = SRGBColorSpace;
-  // 한 바퀴(40 m)가 패널(28 m)보다 길다. 남는 만큼은 반복으로 이어 붙여 흘린다.
+  // 한 바퀴가 패널보다 길다. 남는 만큼은 반복으로 이어 붙여 흘린다.
   texture.wrapS = RepeatWrapping;
-  texture.repeat.set(SPACE_TICKER_FRAME.width / TICKER_TEXTURE.cycleLength, 1);
 
   return { texture, context: canvasElement.getContext("2d") };
 };
@@ -136,6 +146,15 @@ function SpaceTicker(): ReactNode {
       surface.texture.dispose();
     };
   }, [renderer, surface]);
+
+  useEffect(() => {
+    // 멈춘 동안에는 한 바퀴를 통째로 보여 줘야 해서 배율과 시작 위치를 되돌린다.
+    surface.texture.repeat.setX(resolveRepeatX(prefersReducedMotion));
+
+    if (prefersReducedMotion) {
+      surface.texture.offset.x = 0;
+    }
+  }, [surface, prefersReducedMotion]);
 
   useEffect(() => {
     let isMounted = true;

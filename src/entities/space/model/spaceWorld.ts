@@ -171,7 +171,7 @@ export const SPACE_SCREEN_PLACEMENTS = {
 export const SPACE_TICKER_FRAME = {
   width: SPACE_SCREEN_FRAME.width,
   height: 2,
-  position: [0, 17 + SPACE_HALL.mapOffsetY, -23.96 + 0.05] as const,
+  position: [0, 15.5 + SPACE_HALL.mapOffsetY, -23.96 + 0.05] as const,
   rotationY: 0,
 } as const;
 

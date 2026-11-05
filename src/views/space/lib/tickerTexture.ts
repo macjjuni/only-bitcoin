@@ -1,6 +1,6 @@
 import {
-  drawFittedText,
   NUMERIC_FONT_STACK,
+  resolveFittedFontSize,
   resolveFontSpec,
   SANS_FONT_STACK,
   SCREEN_COLORS,
@@ -9,7 +9,7 @@ import {
 /**
  * 메인 액자 위 티커 테이프 텍스처.
  *
- * 시세판·네트워크판과 달리 한 바퀴(40 m)가 패널 폭(28 m)보다 길다. 텍스처를
+ * 시세판·네트워크판과 달리 한 바퀴(50 m)가 패널 폭(28 m)보다 길다. 텍스처를
  * `RepeatWrapping` 으로 걸고 `offset.x` 만 밀어 흘리므로, 칸 폭을 똑같이 나눠
  * 끝과 처음이 만나는 자리에서도 간격이 어긋나지 않게 함.
  */
@@ -38,6 +38,8 @@ const FONT = {
   value: 90,
   /** 라벨과 값 사이. 글자 크기가 달라 24 px 로는 한 덩어리처럼 붙어 보였음. */
   gap: 48,
+  /** 값과 꼬리말 사이. 같은 값을 설명하는 말이라 라벨 간격보다 좁게 붙임. */
+  suffixGap: 20,
 } as const;
 
 /** 칸 경계마다 찍는 점. 글자만 흐르면 어디서 끊기는지 안 보임. */
@@ -62,6 +64,14 @@ export interface TickerItem {
   label: string;
   valueText: string;
   tone: TickerTone;
+  /**
+   * 값 뒤에 붙는 한글 꼬리말.
+   *
+   * 숫자 글꼴(Roboto Mono·JetBrains Mono)에는 한글 글리프가 없어서 값에 한글을
+   * 섞으면 그 글자만 시스템 폰트로 떨어진다. 등폭과 비례폭이 한 줄에 섞여
+   * 세로 중심선까지 어긋나므로, 한글은 라벨과 같은 산세리프로 따로 그린다.
+   */
+  suffix?: string;
 }
 
 /** 값이 아직 없을 때. 칸을 비우면 간격이 어긋나므로 자리는 지킨다. */
@@ -146,7 +156,7 @@ export const resolveFearGreedTone = (index: number): TickerTone => {
   return index >= 55 ? "up" : "flat";
 };
 
-/** 한 바퀴에 들어가는 네 칸. 순서는 고정이라 늘 같은 자리에서 같은 지표가 지나감. */
+/** 한 바퀴에 들어가는 칸들. 순서는 고정이라 늘 같은 자리에서 같은 지표가 지나감. */
 export const resolveTickerItems = (state: TickerState): TickerItem[] => {
   return [
     {
@@ -180,16 +190,19 @@ export const resolveTickerItems = (state: TickerState): TickerItem[] => {
     {
       label: "공포·탐욕",
       valueText: isDisplayable(state.fearGreed)
-        ? `${Math.round(state.fearGreed)} ${resolveFearGreedZone(state.fearGreed)}`
+        ? String(Math.round(state.fearGreed))
         : TICKER_PLACEHOLDER,
       tone: isDisplayable(state.fearGreed) ? resolveFearGreedTone(state.fearGreed) : "flat",
+      suffix: isDisplayable(state.fearGreed) ? resolveFearGreedZone(state.fearGreed) : undefined,
     },
   ];
 };
 
 /** 다시 구울지 가리는 서명. 화면에 찍히는 글자만 모았음. */
 export const createTickerSignature = (items: readonly TickerItem[]): string => {
-  return items.map((item) => `${item.label}:${item.valueText}:${item.tone}`).join("|");
+  return items
+    .map((item) => `${item.label}:${item.valueText}:${item.suffix ?? ""}:${item.tone}`)
+    .join("|");
 };
 
 const resolveToneColor = (tone: TickerTone): string => {
@@ -197,44 +210,102 @@ const resolveToneColor = (tone: TickerTone): string => {
 };
 
 // region [Privates]
+/**
+ * 글자 잉크 상자의 세로 가운데를 띠 중심에 맞추는 기준선 y.
+ *
+ * `textBaseline = "middle"` 은 글리프가 아니라 폰트 em 박스를 반으로 가른다.
+ * 라벨(한글 산세리프 54 px)과 값(등폭 숫자 90 px)은 em 박스 안에서 글자가
+ * 차지하는 위치가 서로 달라, 같은 `middle` 로 그려도 눈에는 어긋나 보였다.
+ * 실제로 칠해지는 상자를 재서 그 중심을 맞춘다.
+ */
+const resolveCenteredBaselineY = (
+  context: CanvasRenderingContext2D,
+  text: string,
+  centerY: number,
+): number => {
+  const { actualBoundingBoxAscent: ascent, actualBoundingBoxDescent: descent } =
+    context.measureText(text);
+
+  // 잉크 상자를 안 주는 환경에서는 기준선을 그대로 둔다.
+  if (!Number.isFinite(ascent) || !Number.isFinite(descent)) {
+    return centerY;
+  }
+
+  return centerY + (ascent - descent) / 2;
+};
+
 /** 라벨 + 값을 한 덩어리로 묶어 칸 가운데에 놓는다. */
 const drawSlot = (context: CanvasRenderingContext2D, item: TickerItem, slotIndex: number): void => {
   const slotCenterX = SLOT_WIDTH * (slotIndex + 0.5);
   const centerY = TICKER_TEXTURE.height / 2;
   const maxWidth = SLOT_WIDTH - TICKER_TEXTURE.slotPaddingX * 2;
 
-  context.textBaseline = "middle";
+  const labelFont = resolveFontSpec(500, FONT.label, SANS_FONT_STACK);
+  const suffixFont = resolveFontSpec(600, FONT.label, SANS_FONT_STACK);
+
+  // 잉크 상자를 재려면 기준선이 글리프 아래쪽(알파벳 베이스라인)이어야 한다.
+  context.textBaseline = "alphabetic";
   context.textAlign = "left";
 
-  context.font = resolveFontSpec(500, FONT.label, SANS_FONT_STACK);
+  context.font = labelFont;
   const labelWidth = context.measureText(item.label).width;
 
-  context.font = resolveFontSpec(700, FONT.value, NUMERIC_FONT_STACK);
-  // 가운데 정렬과 실제 그리기가 같은 폭 예산을 써야 값이 길 때도 덩어리가 안 밀린다.
-  const valueMaxWidth = maxWidth - labelWidth - FONT.gap;
-  const valueWidth = Math.min(context.measureText(item.valueText).width, valueMaxWidth);
-  const contentLeft = slotCenterX - (labelWidth + FONT.gap + valueWidth) / 2;
+  context.font = suffixFont;
+  const suffixWidth = item.suffix ? FONT.suffixGap + context.measureText(item.suffix).width : 0;
 
-  context.fillStyle = SCREEN_COLORS.labelMuted;
-  context.font = resolveFontSpec(500, FONT.label, SANS_FONT_STACK);
-  context.fillText(item.label, contentLeft, centerY + 2);
+  // 가운데 정렬과 실제 그리기가 같은 폭 예산을 써야 값이 길 때도 덩어리가 안 밀린다.
+  const valueMaxWidth = maxWidth - labelWidth - FONT.gap - suffixWidth;
+
+  context.font = resolveFontSpec(700, FONT.value, NUMERIC_FONT_STACK);
+  const valueFontSize = resolveFittedFontSize(context.measureText(item.valueText).width, {
+    maxWidth: valueMaxWidth,
+    maxFontSizePx: FONT.value,
+  });
+
+  context.font = resolveFontSpec(700, valueFontSize, NUMERIC_FONT_STACK);
+
+  const valueWidth = context.measureText(item.valueText).width;
+  const contentLeft = slotCenterX - (labelWidth + FONT.gap + valueWidth + suffixWidth) / 2;
+  const valueLeft = contentLeft + labelWidth + FONT.gap;
 
   context.fillStyle = resolveToneColor(item.tone);
-  drawFittedText(context, item.valueText, {
-    x: contentLeft + labelWidth + FONT.gap,
-    y: centerY,
-    fontWeight: 700,
-    maxFontSizePx: FONT.value,
-    maxWidth: valueMaxWidth,
-    fontStack: NUMERIC_FONT_STACK,
-  });
+  context.fillText(
+    item.valueText,
+    valueLeft,
+    resolveCenteredBaselineY(context, item.valueText, centerY),
+  );
+
+  context.font = labelFont;
+  context.fillStyle = SCREEN_COLORS.labelMuted;
+  context.fillText(item.label, contentLeft, resolveCenteredBaselineY(context, item.label, centerY));
+
+  if (item.suffix) {
+    context.font = suffixFont;
+    context.fillText(
+      item.suffix,
+      valueLeft + valueWidth + FONT.suffixGap,
+      resolveCenteredBaselineY(context, item.suffix, centerY),
+    );
+  }
 };
 
+/**
+ * 칸 경계 점.
+ *
+ * 맨 앞(x = 0) 점은 왼쪽 절반이 텍스처 밖으로 잘린다. 텍스처가 반복될 때 그
+ * 절반은 오른쪽 끝에서 이어져야 하므로 같은 점을 끝에도 한 번 더 찍는다.
+ */
 const drawDivider = (context: CanvasRenderingContext2D, slotIndex: number): void => {
-  context.beginPath();
-  context.arc(SLOT_WIDTH * slotIndex, TICKER_TEXTURE.height / 2, DIVIDER.radius, 0, Math.PI * 2);
+  const centerX = SLOT_WIDTH * slotIndex;
+  const centerY = TICKER_TEXTURE.height / 2;
+
   context.fillStyle = DIVIDER.color;
-  context.fill();
+
+  for (const x of slotIndex === 0 ? [centerX, TICKER_TEXTURE.width] : [centerX]) {
+    context.beginPath();
+    context.arc(x, centerY, DIVIDER.radius, 0, Math.PI * 2);
+    context.fill();
+  }
 };
 // endregion
 

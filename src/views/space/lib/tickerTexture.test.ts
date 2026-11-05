@@ -32,7 +32,7 @@ describe("resolveTickerItems", () => {
       "시가총액 $1.60T",
       "김프 +0.42%",
       "USD/KRW 1,345",
-      "공포·탐욕 72 탐욕",
+      "공포·탐욕 72",
     ]);
   });
 
@@ -44,6 +44,13 @@ describe("resolveTickerItems", () => {
       valueText: "0.00%",
       tone: "flat",
     });
+  });
+
+  it("한글 구간 이름은 값이 아니라 꼬리말로 넘긴다", () => {
+    // 숫자 글꼴에 한글 글리프가 없어 값에 섞으면 그 글자만 폴백으로 떨어진다.
+    const items = resolveTickerItems(createState({ fearGreed: 20 }));
+
+    expect(items[4]).toMatchObject({ valueText: "20", suffix: "극단적 공포", tone: "down" });
   });
 
   it("아직 못 받은 값만 자리표시로 둔다", () => {
@@ -106,6 +113,14 @@ describe("resolveFearGreedTone", () => {
 });
 
 describe("createTickerSignature", () => {
+  it("꼬리말만 바뀌어도 다시 굽는다", () => {
+    // 54 와 56 은 둘 다 "공포·탐욕 5x" 라 숫자만 비교하면 중립↔탐욕 전환을 놓친다.
+    const neutral = resolveTickerItems(createState({ fearGreed: 54 }));
+    const greed = resolveTickerItems(createState({ fearGreed: 56 }));
+
+    expect(createTickerSignature(neutral)).not.toBe(createTickerSignature(greed));
+  });
+
   it("글자가 그대로면 같은 서명을 돌려준다", () => {
     const first = resolveTickerItems(createState());
     const almostSame = resolveTickerItems(createState({ dominance: 58.44 }));
