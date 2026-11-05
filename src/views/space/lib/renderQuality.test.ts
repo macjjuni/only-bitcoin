@@ -1,6 +1,8 @@
 import { describe, expect, it } from "vitest";
 import {
   resolveDprFromPerformanceFactor,
+  resolveDprPolicy,
+  SPACE_DPR_POLICY,
   SPACE_INITIAL_DPR,
   SPACE_MAX_DPR,
   SPACE_MIN_DPR,
@@ -39,5 +41,32 @@ describe("resolveDprFromPerformanceFactor", () => {
 
   it("지표를 읽지 못하면 시작 해상도로 둔다", () => {
     expect(resolveDprFromPerformanceFactor(Number.NaN)).toBe(SPACE_INITIAL_DPR);
+  });
+});
+
+describe("resolveDprPolicy", () => {
+  it("데스크톱은 기존 범위를 그대로 쓴다", () => {
+    expect(resolveDprPolicy(false, 3)).toEqual(SPACE_DPR_POLICY.desktop);
+  });
+
+  it("모바일은 시작 2, 상한 2.5 로 데스크톱보다 높게 그린다", () => {
+    expect(resolveDprPolicy(true, 3)).toEqual({ min: 1, initial: 2, max: 2.5 });
+  });
+
+  it("모바일도 기기 dpr 을 넘겨 그리지 않는다", () => {
+    expect(resolveDprPolicy(true, 2)).toEqual({ min: 1, initial: 2, max: 2 });
+    expect(resolveDprPolicy(true, 1.5)).toEqual({ min: 1, initial: 1.5, max: 1.5 });
+  });
+
+  it("기기 dpr 을 못 읽으면 모바일 기본 범위로 둔다", () => {
+    expect(resolveDprPolicy(true, Number.NaN)).toEqual(SPACE_DPR_POLICY.mobile);
+  });
+
+  it("성능 지표가 모바일 범위 안에서 움직인다", () => {
+    const policy = resolveDprPolicy(true, 3);
+
+    expect(resolveDprFromPerformanceFactor(1, policy)).toBe(2.5);
+    expect(resolveDprFromPerformanceFactor(0, policy)).toBe(1);
+    expect(resolveDprFromPerformanceFactor(Number.NaN, policy)).toBe(2);
   });
 });

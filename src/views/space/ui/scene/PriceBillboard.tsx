@@ -35,6 +35,10 @@ import {
   resolveBillboardOnlineStatus,
 } from "@/views/space/lib/billboardTexture";
 import { BTC_MAX_SUPPLY, loadScreenFonts } from "@/views/space/lib/screenCanvas";
+import {
+  resolveScreenMaterialCacheKey,
+  sharpenScreenMapSampling,
+} from "@/views/space/lib/screenMaterial";
 import BillboardChartPulse from "./BillboardChartPulse";
 import BillboardOnlinePulse from "./BillboardOnlinePulse";
 
@@ -342,7 +346,12 @@ function PriceBillboard(): ReactNode {
       {/* 자체 발광 패널이라 조명 영향을 받지 않는 기본 재질을 쓴다. */}
       <mesh>
         <planeGeometry args={[SPACE_BILLBOARD.width, SPACE_BILLBOARD.height]} />
-        <meshBasicMaterial map={surface.texture} toneMapped={false} />
+        <meshBasicMaterial
+          map={surface.texture}
+          toneMapped={false}
+          onBeforeCompile={sharpenScreenMapSampling}
+          customProgramCacheKey={resolveScreenMaterialCacheKey}
+        />
       </mesh>
 
       <mesh position={PRICE_PLACEMENTS.krw.position}>

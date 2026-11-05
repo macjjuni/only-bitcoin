@@ -56,21 +56,22 @@ const COLORS = SCREEN_COLORS;
 const LAYOUT = {
   title: { x: 84, y: 124, fontSize: 64 },
   liveBadge: { x: 1336, y: 92, width: 180, height: 64, radius: 12, fontSize: 36 },
-  latestLabel: { x: 86, y: 226, fontSize: 30 },
+  latestLabel: { x: 86, y: 224, fontSize: 36 },
   latestHeight: { x: 84, y: 318, fontSize: 150, maxWidth: 1432 },
   latestMeta: { x: 86, y: 418, fontSize: 38, maxWidth: 1430 },
   chain: { top: 480, height: 136, gap: 34, radius: 12, connectorHeight: 8 },
   chainHeight: { offsetY: 52, fontSize: 38 },
-  chainTx: { offsetY: 98, fontSize: 30 },
+  chainTx: { offsetY: 98, fontSize: 34 },
   halvingTitle: { x: 84, y: 708, fontSize: 48 },
-  halvingAside: { x: 1516, y: 712, fontSize: 30 },
+  halvingAside: { x: 1516, y: 712, fontSize: 34 },
   halvingBar: { top: 756, height: 72, gap: 8 },
   halvingPercent: { x: 84, y: 896, fontSize: 64 },
-  halvingRemain: { x: 560, y: 900, fontSize: 34 },
-  halvingReward: { x: 1516, y: 900, fontSize: 36 },
+  /** 진행률 숫자와 보상 사이 칸. 폭을 넘으면 글자를 줄여 보상과 겹치지 않게 함. */
+  halvingRemain: { x: 330, y: 900, fontSize: 38, maxWidth: 640 },
+  halvingReward: { x: 1516, y: 900, fontSize: 38 },
   footerDividerY: 1036,
-  footerLabel: { y: 1078, fontSize: 28 },
-  footerValue: { y: 1130, fontSize: 46 },
+  footerLabel: { y: 1074, fontSize: 34 },
+  footerValue: { y: 1132, fontSize: 52 },
 } as const;
 
 export interface RecentBlock {
@@ -498,8 +499,14 @@ const drawHalving = (context: CanvasRenderingContext2D, state: BlockDashboardSta
       : `남은 블록 ${formatBlocksToHalving(state.blocksToHalving)} · ${formatTimeToHalving(state.blocksToHalving)}`;
 
   context.fillStyle = COLORS.label;
-  context.font = resolveFontSpec(500, LAYOUT.halvingRemain.fontSize, SANS_FONT_STACK);
-  context.fillText(remainText, LAYOUT.halvingRemain.x, LAYOUT.halvingRemain.y);
+  drawFittedText(context, remainText, {
+    x: LAYOUT.halvingRemain.x,
+    y: LAYOUT.halvingRemain.y,
+    fontWeight: 500,
+    maxFontSizePx: LAYOUT.halvingRemain.fontSize,
+    maxWidth: LAYOUT.halvingRemain.maxWidth,
+    fontStack: SANS_FONT_STACK,
+  });
 
   const rewardText =
     state.subsidy > 0 && state.nextSubsidy > 0

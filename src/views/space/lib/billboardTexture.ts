@@ -101,14 +101,17 @@ const INTEGER_FORMATTER = new Intl.NumberFormat("en-US", { maximumFractionDigits
  * 세로 예산: 헤더 200 · 가격 두 줄 340 · 차트 470 · 하단 지표 140. 가격 두 줄이
  * 같은 크기라 원화가 열두 글자(₩145,230,000)여도 960 px 칸에 들어가게 132 px 로
  * 잡았음.
+ *
+ * 라벨은 34 px 아래로 두지 않음. 폰에서는 패널이 600 px 안팎으로 줄어 28 px
+ * 라벨이 7 px 로 보여 못 읽었음.
  */
 const LAYOUT = {
   logo: { centerX: 138, centerY: 126, radius: 54 },
   title: { x: 216, y: 108, fontSize: 56 },
-  subtitle: { x: 218, y: 162, fontSize: 28 },
+  subtitle: { x: 218, y: 164, fontSize: 34 },
   statusBadge: { x: 1316, y: 94, width: 200, height: 64, radius: 32 },
   /** 점 오른쪽 남은 폭의 가운데. 글자 길이가 달라도 좌우 여백이 맞음. */
-  statusBadgeText: { x: 1446, y: 127, fontSize: 28 },
+  statusBadgeText: { x: 1446, y: 127, fontSize: 30 },
   rows: {
     krw: { centerY: 290, unit: "KRW" },
     usd: { centerY: 450, unit: "USD" },
@@ -117,14 +120,14 @@ const LAYOUT = {
   rowTag: { x: 84, width: 128, height: 64, radius: 14, fontSize: 32 },
   rowPrice: { x: 236, fontSize: 132, maxWidth: BILLBOARD_COLUMNS.priceMaxWidth, height: 160 },
   rowChange: { right: 1516, width: 280, height: 80, radius: 16, fontSize: 42 },
-  chartCaption: { x: 84, y: 548, fontSize: 28 },
+  chartCaption: { x: 84, y: 548, fontSize: 34 },
   chart: { left: 84, top: 590, width: 1432, height: 300 } satisfies ChartRect,
   /** 끝점 점과 펄스가 앉을 오른쪽 여백. 캔들은 이 앞에서 끝남. */
   chartEndGutter: 56,
   volume: { top: 910, height: 90 },
   footerDividerY: 1036,
-  footerLabel: { y: 1078, fontSize: 28 },
-  footerValue: { y: 1130, fontSize: 46 },
+  footerLabel: { y: 1074, fontSize: 34 },
+  footerValue: { y: 1132, fontSize: 52 },
 } as const;
 
 export interface BillboardPriceRegion {

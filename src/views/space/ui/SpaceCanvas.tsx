@@ -2,7 +2,7 @@
 
 import { PerformanceMonitor, type PerformanceMonitorApi } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { NeutralToneMapping } from "three";
 import type { ChatIdentity } from "@/features/chat-session";
 import {
@@ -15,9 +15,10 @@ import {
 import { useSpaceSession } from "@/features/space-session";
 import { isAndroidDevice, isIOSDevice } from "@/shared/utils/device";
 import {
+  type DprPolicy,
   resolveDprFromPerformanceFactor,
-  SPACE_INITIAL_DPR,
-  SPACE_MIN_DPR,
+  resolveDprPolicy,
+  SPACE_DPR_POLICY,
 } from "@/views/space/lib/renderQuality";
 import SpaceHud from "./hud/SpaceHud";
 import SpaceFallback, { type SpaceFallbackReason } from "./SpaceFallback";
@@ -69,7 +70,9 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   const [isSupportProbed, setIsSupportProbed] = useState<boolean>(false);
   const [hasRealtimeShadows, setHasRealtimeShadows] = useState<boolean>(false);
   const [frameloop, setFrameloop] = useState<"always" | "never">("always");
-  const [renderDpr, setRenderDpr] = useState<number>(SPACE_INITIAL_DPR);
+  const [renderDpr, setRenderDpr] = useState<number>(SPACE_DPR_POLICY.desktop.initial);
+  /** 기기별 해상도 범위. 성능 콜백에서 읽어서 ref 로 둠. */
+  const dprPolicyRef = useRef<DprPolicy>(SPACE_DPR_POLICY.desktop);
   /**
    * 계측 패널 표시 여부.
    *
@@ -150,14 +153,14 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
    * 프레임 측정값에 따라 렌더 해상도를 올리고 내린다.
    *
    * 기기 dpr 이 3 인 폰에서 1.5 로 그리면 같은 화면의 DOM HUD 보다 눈에 띄게
-   * 흐리다. 여유가 있으면 2 까지 올리고, 모자라면 다시 내린다.
+   * 흐림. 여유가 있으면 기기별 상한(모바일 2.5)까지 올리고, 모자라면 다시 내림.
    */
   const onChangePerformance = useCallback(({ factor }: PerformanceMonitorApi): void => {
-    setRenderDpr(resolveDprFromPerformanceFactor(factor));
+    setRenderDpr(resolveDprFromPerformanceFactor(factor, dprPolicyRef.current));
   }, []);
 
   const onFallbackPerformance = useCallback((): void => {
-    setRenderDpr(SPACE_MIN_DPR);
+    setRenderDpr(dprPolicyRef.current.min);
   }, []);
 
   const onClickRetryFallback = useCallback((): void => {
@@ -174,6 +177,10 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
 
   // region [Life Cycles]
   useEffect(() => {
+    const dprPolicy = resolveDprPolicy(isIOSDevice() || isAndroidDevice(), window.devicePixelRatio);
+
+    dprPolicyRef.current = dprPolicy;
+    setRenderDpr(dprPolicy.initial);
     setHasRealtimeShadows(hasRealtimeShadowBudget());
     setFallbackReason(hasWebGL2Support() ? null : "unsupported");
     setIsSupportProbed(true);

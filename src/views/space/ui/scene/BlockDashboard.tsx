@@ -12,6 +12,10 @@ import {
   resolveBlockDashboardState,
 } from "@/views/space/lib/blockDashboardTexture";
 import { loadScreenFonts } from "@/views/space/lib/screenCanvas";
+import {
+  resolveScreenMaterialCacheKey,
+  sharpenScreenMapSampling,
+} from "@/views/space/lib/screenMaterial";
 
 /**
  * 유휴 상태에서 경과 시간을 다시 보는 간격.
@@ -142,7 +146,12 @@ function BlockDashboard(): ReactNode {
     <mesh>
       <planeGeometry args={[SPACE_BLOCK_DASHBOARD.width, SPACE_BLOCK_DASHBOARD.height]} />
       {/* 자체 발광으로 그린다. 조명에 맡기면 노을 역광에서 글자가 어두워진다. */}
-      <meshBasicMaterial map={surface.texture} toneMapped={false} />
+      <meshBasicMaterial
+        map={surface.texture}
+        toneMapped={false}
+        onBeforeCompile={sharpenScreenMapSampling}
+        customProgramCacheKey={resolveScreenMaterialCacheKey}
+      />
     </mesh>
   );
 }
