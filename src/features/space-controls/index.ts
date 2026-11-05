@@ -11,6 +11,7 @@ export {
   createDefaultCameraOrbit,
   dampVector,
   resolveCameraFocus,
+  resolveCameraLookTarget,
   resolveCameraPosition,
   resolveDampFactor,
   resolveFollowDamping,

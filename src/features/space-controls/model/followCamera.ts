@@ -23,20 +23,36 @@ export const SPACE_CAMERA = {
    * 아바타를 가림. 렌즈만 위로 옮겨(view offset) 아바타를 아래로 내림. 궤도·
    * 시점 각도는 그대로라 조작감이 바뀌지 않음.
    */
-  touchFramingShift: 0.12,
+  touchFramingShift: 0.07,
   /**
    * 데스크톱에서 화면을 아래로 미는 비율. 가로 화면이라 손가락 기기보다 살짝만 내림.
    *
-   * 아바타가 한가운데 서면 위쪽 전광판이 덜 보여서 살짝 내렸음.
+   * 고개 들기로 전광판을 볼 수 있게 되면서 12%·6% 에서 7%·3% 로 줄였음. 많이 내리면
+   * 캐릭터가 화면 아래에 붙어 어색했음.
    */
-  desktopFramingShift: 0.06,
+  desktopFramingShift: 0.03,
   /** 휠 deltaY 1 단위당 거리 변화(m). 한 노치(100)에 약 1.2 m. */
   wheelZoomSensitivity: 0.012,
   /** 핀치 1 px 당 거리 변화(m). 200 px 벌리면 약 6 m. */
   pinchZoomSensitivity: 0.03,
   defaultPitch: toRadians(-12),
   minPitch: toRadians(-35),
-  maxPitch: toRadians(5),
+  /**
+   * 위로 올려다볼 수 있는 한계. 전광판(높이 7~17 m)을 정면으로 보려면 많이 들어야 함.
+   *
+   * `orbitMaxPitch` 를 넘는 몫은 카메라를 내리지 않고 시선만 듦. 그래서 크게
+   * 열어도 카메라가 바닥에 닿지 않음. 25° 는 천장이 화면을 덮어서 전광판이
+   * 화면 가운데 오는 12° 로 잡았음.
+   */
+  maxPitch: toRadians(12),
+  /**
+   * 카메라가 궤도를 따라 내려가는 마지막 각도.
+   *
+   * 이보다 위를 보면 카메라 높이는 멈추고 시선만 위로 듦(고개 들기). 궤도대로
+   * 계속 내려가면 라운지 둘레 소파·턱에 걸려 카메라가 앞으로 당겨지면서 확대돼
+   * 보였음.
+   */
+  orbitMaxPitch: toRadians(-5),
   /** 드래그 1 px 당 yaw 회전량(라디안). */
   dragSensitivity: toRadians(0.25),
   /** 키보드 전용 시야 회전 속도(라디안/초). */
@@ -179,6 +195,56 @@ export const clampCameraPosition = (position: Vector3Like): Vector3Like => {
   };
 };
 
+/** 카메라 위치를 정하는 각도. 고개 들기 몫을 뺀 값임. */
+export const resolveOrbitPitch = (pitch: number): number => {
+  return Math.min(pitch, SPACE_CAMERA.orbitMaxPitch);
+};
+
+/** 궤도 한계를 넘어 고개만 든 각도. 한계 아래면 0. */
+export const resolveLookUpPitch = (pitch: number): number => {
+  return Math.max(0, pitch - SPACE_CAMERA.orbitMaxPitch);
+};
+
+/** 시선이 수직에 가까워지면 화면이 뒤집히므로 올려다보는 각도를 여기서 막음. */
+const MAX_LOOK_ELEVATION = toRadians(80);
+
+/**
+ * 카메라가 실제로 바라볼 지점.
+ *
+ * 고개를 안 들었으면 주시점(머리) 그대로라 지금까지와 같음. 고개를 들면 카메라
+ * 자리는 두고, 카메라에서 본 주시점의 올려본 각도에 그 몫을 더한 방향으로 시선을
+ * 옮김. 주시점과 같은 수평 거리 위에서 높이만 올리므로 좌우는 흔들리지 않음.
+ *
+ * @param cameraPosition 충돌·감쇠를 거친 실제 카메라 위치
+ */
+export const resolveCameraLookTarget = (
+  focus: Vector3Like,
+  cameraPosition: Vector3Like,
+  pitch: number,
+): Vector3Like => {
+  const lookUpPitch = resolveLookUpPitch(pitch);
+
+  if (lookUpPitch <= 0) {
+    return focus;
+  }
+
+  const horizontalDistance = Math.hypot(focus.x - cameraPosition.x, focus.z - cameraPosition.z);
+
+  // 카메라가 주시점 바로 위·아래면 방향을 정할 수 없어 그대로 둠.
+  if (horizontalDistance < 1e-6) {
+    return focus;
+  }
+
+  const focusElevation = Math.atan2(focus.y - cameraPosition.y, horizontalDistance);
+  const lookElevation = Math.min(focusElevation + lookUpPitch, MAX_LOOK_ELEVATION);
+
+  return {
+    x: focus.x,
+    y: cameraPosition.y + horizontalDistance * Math.tan(lookElevation),
+    z: focus.z,
+  };
+};
+
 /**
  * 궤도상의 카메라 목표 위치.
  *
@@ -188,9 +254,11 @@ export const clampCameraPosition = (position: Vector3Like): Vector3Like => {
  */
 export const resolveCameraPosition = (player: PlayerTransform, orbit: CameraOrbit): Vector3Like => {
   const focus = resolveCameraFocus(player);
-  const cosPitch = Math.cos(orbit.pitch);
+  // 고개 드는 몫은 위치에 넣지 않음. 카메라는 `orbitMaxPitch` 높이에서 멈춤.
+  const orbitPitch = resolveOrbitPitch(orbit.pitch);
+  const cosPitch = Math.cos(orbitPitch);
   const forwardX = -Math.sin(orbit.yaw) * cosPitch;
-  const forwardY = Math.sin(orbit.pitch);
+  const forwardY = Math.sin(orbitPitch);
   const forwardZ = -Math.cos(orbit.yaw) * cosPitch;
 
   return clampCameraPosition({

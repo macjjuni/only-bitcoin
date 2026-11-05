@@ -36,6 +36,7 @@ import {
   dampVector,
   planFixedSteps,
   resolveCameraFocus,
+  resolveCameraLookTarget,
   resolveCameraPosition,
   resolveFollowDamping,
   resolveMergedMovementInput,
@@ -303,9 +304,14 @@ function SpaceScene({
     // 첫 프레임이 원점에서 날아오지 않도록 카메라를 스폰 지점 궤도에 미리 둔다.
     const initialPosition = smoothedCameraRef.current;
     const initialFocus = resolveCameraFocus(spawnTransform);
+    const initialLookTarget = resolveCameraLookTarget(
+      initialFocus,
+      initialPosition,
+      cameraOrbitRef.current.pitch,
+    );
 
     camera.position.set(initialPosition.x, initialPosition.y, initialPosition.z);
-    camera.lookAt(initialFocus.x, initialFocus.y, initialFocus.z);
+    camera.lookAt(initialLookTarget.x, initialLookTarget.y, initialLookTarget.z);
     // 브라우저 기본 제스처가 드래그 회전을 가로채지 않게 한다.
     canvasElement.style.touchAction = "none";
   }, [camera, canvasElement, spawnTransform]);
@@ -374,7 +380,11 @@ function SpaceScene({
 
     const safePosition = resolveSafeCameraPosition(focus, dampedPosition, deltaSeconds);
     camera.position.set(safePosition.x, safePosition.y, safePosition.z);
-    camera.lookAt(focus.x, focus.y, focus.z);
+
+    // 궤도 한계보다 위를 보면 카메라는 멈추고 시선만 듦. 벽 충돌은 위에서 머리
+    // 기준으로 이미 끝났으니 바라보는 방향만 바꿈.
+    const lookTarget = resolveCameraLookTarget(focus, safePosition, cameraOrbitRef.current.pitch);
+    camera.lookAt(lookTarget.x, lookTarget.y, lookTarget.z);
   }, SPACE_FRAME_PRIORITY.simulation);
   // endregion
 

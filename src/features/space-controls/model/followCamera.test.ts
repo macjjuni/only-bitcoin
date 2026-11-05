@@ -11,6 +11,7 @@ import {
   createDefaultCameraOrbit,
   dampVector,
   resolveCameraFocus,
+  resolveCameraLookTarget,
   resolveCameraPosition,
   resolveDampFactor,
   resolveFollowDamping,
@@ -357,5 +358,58 @@ describe("clampCameraPosition", () => {
     expect(position.z).toBeLessThanOrEqual(SPACE_CAMERA_BOUNDS.maxZ);
     expect(position.z).toBeGreaterThanOrEqual(SPACE_CAMERA_BOUNDS.minZ);
     expect(position.y).toBeLessThanOrEqual(SPACE_CAMERA_BOUNDS.maxY);
+  });
+});
+
+describe("고개 들기", () => {
+  const PLAYER = { x: 0, z: 0, y: SPACE_HALL.loungeY, yaw: 0 };
+  const createOrbit = (pitchDegrees: number) => ({
+    yaw: 0,
+    pitch: (pitchDegrees * Math.PI) / 180,
+    distance: SPACE_CAMERA.maxDistance,
+  });
+
+  it("궤도 한계보다 위를 봐도 카메라 위치는 더 내려가지 않는다", () => {
+    const atLimit = resolveCameraPosition(PLAYER, {
+      ...createOrbit(0),
+      pitch: SPACE_CAMERA.orbitMaxPitch,
+    });
+    const lookingUp = resolveCameraPosition(PLAYER, {
+      ...createOrbit(0),
+      pitch: SPACE_CAMERA.maxPitch,
+    });
+
+    expect(lookingUp).toEqual(atLimit);
+  });
+
+  it("궤도 한계 아래에서는 시선이 머리를 그대로 본다", () => {
+    const orbit = createOrbit(-12);
+    const focus = resolveCameraFocus(PLAYER);
+    const position = resolveCameraPosition(PLAYER, orbit);
+
+    expect(resolveCameraLookTarget(focus, position, orbit.pitch)).toEqual(focus);
+  });
+
+  it("한계를 넘긴 만큼 시선만 위로 든다", () => {
+    const orbit = { ...createOrbit(0), pitch: SPACE_CAMERA.orbitMaxPitch + Math.PI / 18 };
+    const focus = resolveCameraFocus(PLAYER);
+    const position = resolveCameraPosition(PLAYER, orbit);
+    const target = resolveCameraLookTarget(focus, position, orbit.pitch);
+    const horizontal = Math.hypot(focus.x - position.x, focus.z - position.z);
+    const focusElevation = Math.atan2(focus.y - position.y, horizontal);
+    const targetElevation = Math.atan2(target.y - position.y, horizontal);
+
+    expect(target.x).toBe(focus.x);
+    expect(target.z).toBe(focus.z);
+    expect(targetElevation - focusElevation).toBeCloseTo(Math.PI / 18, 9);
+  });
+
+  it("끝까지 올려도 시선이 수직으로 뒤집히지 않는다", () => {
+    const focus = resolveCameraFocus(PLAYER);
+    const position = { x: 0, y: focus.y, z: 0.5 };
+    const target = resolveCameraLookTarget(focus, position, SPACE_CAMERA.maxPitch * 10);
+
+    expect(Number.isFinite(target.y)).toBe(true);
+    expect(Math.atan2(target.y - position.y, 0.5)).toBeLessThanOrEqual((80 * Math.PI) / 180 + 1e-9);
   });
 });
