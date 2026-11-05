@@ -171,12 +171,6 @@ export const BILLBOARD_PRICE_REGIONS = {
   usd: createBillboardPriceRegion(LAYOUT.rows.usd.centerY),
 } as const;
 
-/** 등락이 0.0% 일 때의 통화별 가격 색. 원화는 주황, 달러는 크림. */
-const PRICE_COLORS: Record<BillboardCurrency, string> = {
-  krw: SCREEN_COLORS.brand,
-  usd: SCREEN_COLORS.label,
-};
-
 // region [Privates]
 /** 시세는 스토어 초기값이 0 이므로 0 과 비유한 값을 모두 미표시로 봄. */
 const isDisplayablePrice = (price: number): boolean => {
@@ -246,13 +240,15 @@ export const resolveChangeTone = (change: string | number): BillboardTone => {
   return parsed > 0 ? "up" : "down";
 };
 
+/**
+ * 등락 색. 가격 글자·등락 배지·캔들이 모두 이 한 곳을 본다.
+ *
+ * 가격만 원화 주황·달러 크림으로 통화를 가르던 때가 있었는데, 보합 한순간에만
+ * 색이 갈려서 규칙으로 안 읽혔음. 지금은 세 색이 등락만 뜻하고 통화 구분은
+ * ₩·$ 기호가 맡음.
+ */
 export const resolveToneColor = (tone: BillboardTone): string => {
   return BILLBOARD_COLORS[tone];
-};
-
-/** 가격 글자 색. 24시간 등락에 따라 초록·빨강으로 바꾸고, 보합이면 통화 색을 씀. */
-export const resolvePriceColor = (currency: BillboardCurrency, tone: BillboardTone): string => {
-  return tone === "flat" ? PRICE_COLORS[currency] : resolveToneColor(tone);
 };
 
 /**
@@ -437,13 +433,7 @@ const drawPriceRow = (
   if (options.shouldDrawPrice) {
     context.textAlign = "left";
     context.textBaseline = "middle";
-    drawPriceText(
-      context,
-      priceText,
-      resolvePriceColor(currency, tone),
-      LAYOUT.rowPrice.x,
-      centerY,
-    );
+    drawPriceText(context, priceText, resolveToneColor(tone), LAYOUT.rowPrice.x, centerY);
   }
 
   drawChangeBadge(context, centerY, changeText, tone, hasPrice);
@@ -624,19 +614,12 @@ export const resolveBillboardChartEndpoint = (
 export const drawBillboardPrice = (
   context: CanvasRenderingContext2D,
   priceText: string,
-  currency: BillboardCurrency,
   tone: BillboardTone,
 ): void => {
   context.clearRect(0, 0, context.canvas.width, context.canvas.height);
   context.textAlign = "left";
   context.textBaseline = "middle";
-  drawPriceText(
-    context,
-    priceText,
-    resolvePriceColor(currency, tone),
-    0,
-    LAYOUT.rowPrice.height / 2,
-  );
+  drawPriceText(context, priceText, resolveToneColor(tone), 0, LAYOUT.rowPrice.height / 2);
 };
 
 /**

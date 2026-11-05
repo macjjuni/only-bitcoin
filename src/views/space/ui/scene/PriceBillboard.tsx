@@ -210,12 +210,7 @@ function PriceBillboard(): ReactNode {
         continue;
       }
 
-      drawBillboardPrice(
-        priceSurface.context,
-        priceTexts[currency],
-        currency,
-        priceTones[currency],
-      );
+      drawBillboardPrice(priceSurface.context, priceTexts[currency], priceTones[currency]);
       priceSurface.texture.needsUpdate = true;
       lastPriceTextsRef.current[currency] = priceKey;
     }

@@ -41,11 +41,12 @@ export const SCREEN_COLORS = {
   brand: BITCOIN_COLOR,
   /** 강조 배경 위에 얹는 어두운 글자. */
   onAccent: "#160d05",
-  up: "#5fd68c",
-  down: "#ef5f4f",
-  flat: "#a8927a",
-  online: "#5fd68c",
-  offline: "#ef5f4f",
+  up: "#2ebd85",
+  down: "#f6465d",
+  /** 보합. 오르지도 내리지도 않았음을 흰색으로 둔다. */
+  flat: "#ffffff",
+  online: "#2ebd85",
+  offline: "#f6465d",
   segmentEmpty: "#3a2a17",
   /** 두 판을 가르는 이음선. 흰색은 너무 튀어서 한 단계 눌린 회색으로 둠. */
   seam: "#5e5e5e",

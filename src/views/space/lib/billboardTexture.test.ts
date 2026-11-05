@@ -23,7 +23,6 @@ import {
   resolveBillboardOnlineStatus,
   resolveChangeTone,
   resolveFittedFontSize,
-  resolvePriceColor,
   resolveToneColor,
 } from "@/views/space/lib/billboardTexture";
 
@@ -141,16 +140,9 @@ describe("resolveChangeTone", () => {
   it("톤 색은 프로젝트 팔레트를 따른다", () => {
     expect(resolveToneColor("up")).toBe(BILLBOARD_COLORS.up);
     expect(resolveToneColor("down")).toBe(BILLBOARD_COLORS.down);
+    // 보합은 흰색. 가격 글자도 통화와 무관하게 같은 색을 쓴다.
     expect(resolveToneColor("flat")).toBe(BILLBOARD_COLORS.flat);
-  });
-});
-
-describe("resolvePriceColor", () => {
-  it("오르면 초록, 내리면 빨강, 보합이면 통화 색을 쓴다", () => {
-    expect(resolvePriceColor("krw", "up")).toBe(BILLBOARD_COLORS.up);
-    expect(resolvePriceColor("usd", "down")).toBe(BILLBOARD_COLORS.down);
-    expect(resolvePriceColor("krw", "flat")).toBe(BILLBOARD_COLORS.brand);
-    expect(resolvePriceColor("usd", "flat")).toBe(BILLBOARD_COLORS.label);
+    expect(BILLBOARD_COLORS.flat).toBe("#ffffff");
   });
 });
 
