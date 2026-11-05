@@ -37,6 +37,18 @@ export const BILLBOARD_TEXTURE = {
   paddingX: SCREEN_TEXTURE.paddingX,
 } as const;
 
+/**
+ * 현재가 가로 점선.
+ *
+ * 2 px 는 라운지 건너편(약 30 m)에서 선이 끊겨 보여서 굵혔음. 굵어진 만큼 눈금도
+ * 같이 키워야 점선이 점선으로 읽힘.
+ */
+export const BILLBOARD_PRICE_LINE = {
+  lineWidth: 4,
+  dashSegments: [14, 12],
+  alpha: 0.6,
+} as const;
+
 /** 멀리서도 끝점이 보이도록 점과 확산 범위를 한 곳에서 관리함. */
 export const BILLBOARD_CHART_MARKER = {
   coreRadius: 12,
@@ -118,7 +130,7 @@ const LAYOUT = {
   rowChange: { right: 1516, width: 320, height: 100, radius: 18, fontSize: 60 },
   chartCaption: { x: 84, y: 548, fontSize: 34 },
   chart: { left: 84, top: 590, width: 1432, height: 430 } satisfies ChartRect,
-  /** 끝점 점과 펄스가 앉을 오른쪽 여백. 캔들은 이 앞에서 끝남. */
+  /** 마지막 캔들 오른쪽 여백. 끝점 점에서 퍼지는 링이 칸 밖으로 안 나가게 비워 둠. */
   chartEndGutter: 56,
   volume: { top: 1040, height: 110 },
 } as const;
@@ -271,7 +283,9 @@ const resolveBillboardChartGeometry = (state: Pick<BillboardState, "candles" | "
     toY,
     slotWidth,
     tone,
-    endpoint: { x: rect.left + rect.width - LAYOUT.chartEndGutter / 2, y: toY(lastCandle.close) },
+    // 점은 진행 중인 마지막 캔들 위에 앉아야 함. 오른쪽 거터로 밀면 아직 없는
+    // 다음 봉 자리를 가리켜서 한 칸 앞선 값처럼 읽힘.
+    endpoint: { x: rect.left + slotWidth * (candles.length - 0.5), y: toY(lastCandle.close) },
   };
 };
 
@@ -511,10 +525,10 @@ const drawCurrentPriceMarker = (
 ): void => {
   const color = resolveChartLineColor(tone);
 
-  context.setLineDash([10, 10]);
+  context.setLineDash([...BILLBOARD_PRICE_LINE.dashSegments]);
   context.strokeStyle = color;
-  context.globalAlpha = 0.6;
-  context.lineWidth = 2;
+  context.globalAlpha = BILLBOARD_PRICE_LINE.alpha;
+  context.lineWidth = BILLBOARD_PRICE_LINE.lineWidth;
   context.beginPath();
   context.moveTo(LAYOUT.chart.left, endpoint.y);
   context.lineTo(endpoint.x, endpoint.y);
@@ -533,7 +547,7 @@ const drawChartCaption = (context: CanvasRenderingContext2D): void => {
   context.textBaseline = "middle";
   context.fillStyle = BILLBOARD_COLORS.labelMuted;
   context.font = resolveFontSpec(500, LAYOUT.chartCaption.fontSize, SANS_FONT_STACK);
-  context.fillText("최근 24시간 · BTC/USDT 30분봉", LAYOUT.chartCaption.x, LAYOUT.chartCaption.y);
+  context.fillText("BTC/USDT · 24h · 30m", LAYOUT.chartCaption.x, LAYOUT.chartCaption.y);
 };
 
 /** 차트 본문. 좌표는 전체 텍스처 기준이라 별도 차트 텍스처에서는 원점을 옮겨 부름. */

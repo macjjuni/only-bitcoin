@@ -9,6 +9,7 @@ import {
   BILLBOARD_MIN_FONT_SIZE_PX,
   BILLBOARD_ONLINE_MARKER,
   BILLBOARD_PLACEHOLDER,
+  BILLBOARD_PRICE_LINE,
   BILLBOARD_TEXTURE,
   type BillboardChartEndpoint,
   type BillboardState,
@@ -20,8 +21,8 @@ import {
   resolveBillboardChartEndpoint,
   resolveBillboardOnlineStatus,
   resolveChangeTone,
-  resolvePriceColor,
   resolveFittedFontSize,
+  resolvePriceColor,
   resolveToneColor,
 } from "@/views/space/lib/billboardTexture";
 
@@ -272,7 +273,7 @@ describe("resolveBillboardChartEndpoint", () => {
         }
       },
       stroke: () => {
-        if (lineDash.join(",") === "10,10") {
+        if (lineDash.join(",") === BILLBOARD_PRICE_LINE.dashSegments.join(",")) {
           drawingTrace.markerColor = String(canvasProperties.strokeStyle);
         }
       },
