@@ -58,16 +58,26 @@ export const SANS_FONT_STACK =
 /**
  * 숫자용 등폭. 자리수마다 폭이 달라지면 4 Hz 갱신 때 글자가 떰.
  *
- * 앱 전체 숫자 서체(`font-number` → `--number-font`)와 같은 Roboto Mono 를 씀.
+ * 앱 전체 숫자 서체(`font-number` → `--number-font`)와 같은 Roboto Mono 를 먼저 씀.
  * 전광판만 다른 글꼴을 쓰면 같은 시세가 화면과 공간에서 달라 보임.
  *
- * 번들에는 300·400·700 만 있어서 아래 800 요청은 700 면으로 매칭됨. `₩`(U+20A9)
- * 글리프가 Roboto Mono 에 없어 원화 기호만 뒤쪽 등폭 폴백으로 그려짐.
+ * 번들된 Roboto Mono(`public/font/robotoMono`)는 `$0123456789` 12 글리프짜리
+ * 서브셋임. 쉼표·마침표·`%`·영문·`—` 가 없어서 JetBrains Mono 를 바로 뒤에 둠.
+ * 둘 다 전진폭이 0.6 em 이라 섞여도 등폭 격자가 안 깨짐. `₩`(U+20A9)는 두 글꼴
+ * 모두 없어 시스템 등폭으로 떨어짐.
+ *
+ * 두 번들 모두 300·400·700 만 있어서 코드의 800 요청은 700 면으로 매칭됨.
  */
-export const NUMERIC_FONT_STACK = '"Roboto Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
+export const NUMERIC_FONT_STACK =
+  '"Roboto Mono", "JetBrains Mono", ui-monospace, SFMono-Regular, Menlo, monospace';
 
-/** 캔버스는 웹폰트를 기다려 주지 않아서 먼저 받아 둘 글꼴 목록. 번들에 있는 두 굵기임. */
-const SCREEN_FONT_FACES = ['700 100px "Roboto Mono"', '400 100px "Roboto Mono"'] as const;
+/** 캔버스는 웹폰트를 기다려 주지 않아서 먼저 받아 둘 글꼴 목록. 번들에 있는 굵기만 적음. */
+const SCREEN_FONT_FACES = [
+  '700 100px "Roboto Mono"',
+  '400 100px "Roboto Mono"',
+  '700 100px "JetBrains Mono"',
+  '400 100px "JetBrains Mono"',
+] as const;
 
 /**
  * 글자 크기 하한.

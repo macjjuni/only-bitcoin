@@ -536,7 +536,7 @@ const drawCandles = (
   });
 };
 
-/** 현재가 점선과 오른쪽 끝 점. 펄스 링은 `BillboardChartPulse` 가 같은 자리에 겹침. */
+/** 현재가 점선과 마지막 캔들 위 점. 펄스 링은 `BillboardChartPulse` 가 같은 자리에 겹침. */
 const drawCurrentPriceMarker = (
   context: CanvasRenderingContext2D,
   endpoint: { x: number; y: number },
