@@ -112,11 +112,17 @@ function SpaceLoadingOverlay({ stages, isHardTimedOut }: SpaceLoadingOverlayProp
         <li key={key} className="flex items-center justify-between gap-6 text-xs">
           <span className={status === "pending" ? "text-white/80" : "text-white/40"}>{label}</span>
           <span className={`font-semibold tabular-nums ${STAGE_STATUS_CLASS_NAME[status]}`}>
-            {status === "pending" ? (
+            {status === "pending" && (
               <span className="inline-block size-1.5 animate-pulse rounded-full bg-white/60" />
-            ) : (
-              STAGE_STATUS_TEXT[status]
             )}
+            {/* 끝나면 같은 자리의 점을 초록으로 바꿈. 글자는 화면 낭독기에만 남김. */}
+            {status === "done" && (
+              <>
+                <span aria-hidden="true" className="inline-block size-1.5 rounded-full bg-emerald-400" />
+                <span className="sr-only">{STAGE_STATUS_TEXT.done}</span>
+              </>
+            )}
+            {(status === "failed" || status === "skipped") && STAGE_STATUS_TEXT[status]}
           </span>
         </li>
       );
