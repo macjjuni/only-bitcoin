@@ -18,6 +18,7 @@ import {
   SPACE_DEFAULT_AVATAR_MODEL_INDEX,
   type SpaceAvatarModel,
 } from "@/entities/space";
+import { toVersionedModelUrl } from "./modelAssetUrl";
 
 /**
  * 아바타 모델 로더.
@@ -147,8 +148,9 @@ const createWalkTexture = (buffer: ArrayBuffer, model: SpaceAvatarModel): Textur
  * `NEAREST` 확대 필터가 함께 따라와야 픽셀 아트가 뭉개지지 않는다.
  */
 export const useCrewModel = (model: SpaceAvatarModel): CrewModelParts => {
-  const { scene } = useGLTF(model.modelUrl);
-  const walkBuffer = useLoader(FileLoader, model.walkUrl, (loader) => {
+  // 다시 구운 모델이 30일 캐시에 막히지 않게 내용 해시를 붙여 받음.
+  const { scene } = useGLTF(toVersionedModelUrl(model.modelUrl));
+  const walkBuffer = useLoader(FileLoader, toVersionedModelUrl(model.walkUrl), (loader) => {
     loader.setResponseType("arraybuffer");
   }) as unknown as ArrayBuffer;
   const walkTexture = useMemo(() => createWalkTexture(walkBuffer, model), [walkBuffer, model]);
@@ -168,4 +170,6 @@ export const useCrewModel = (model: SpaceAvatarModel): CrewModelParts => {
 };
 
 // 기본 모델만 미리 받는다. 나머지는 쓰는 아바타가 생길 때 로드된다.
-useGLTF.preload(SPACE_AVATAR_MODELS[SPACE_DEFAULT_AVATAR_MODEL_INDEX].modelUrl);
+useGLTF.preload(
+  toVersionedModelUrl(SPACE_AVATAR_MODELS[SPACE_DEFAULT_AVATAR_MODEL_INDEX].modelUrl),
+);

@@ -13,6 +13,7 @@ import {
 import { DRACOLoader } from "three/examples/jsm/loaders/DRACOLoader.js";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { SPACE_HALL } from "@/entities/space";
+import { toVersionedModelUrl } from "./modelAssetUrl";
 
 /**
  * 비트코인 홀 맵 로더.
@@ -24,11 +25,7 @@ import { SPACE_HALL } from "@/entities/space";
  */
 
 /** 빌드 때 맵 파일 해시를 붙임(`next.config.ts`). 맵이 바뀌면 주소가 바뀌어 캐시를 건너뜀. */
-const HALL_MODEL_VERSION = process.env.NEXT_PUBLIC_HALL_MODEL_VERSION;
-
-export const HALL_MODEL_URL = HALL_MODEL_VERSION
-  ? `/models/bitcoin_hall_draco.glb?v=${HALL_MODEL_VERSION}`
-  : "/models/bitcoin_hall_draco.glb";
+export const HALL_MODEL_URL = toVersionedModelUrl("/models/bitcoin_hall_draco.glb");
 
 /**
  * Draco 디코더 경로.
