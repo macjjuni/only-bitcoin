@@ -129,6 +129,25 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     walkFrameCount: 40,
     triangleCount: 3202,
   },
+  {
+    id: "vitalik",
+    label: "빚탈릭",
+    swatchColor: "#8b5cf6",
+    modelUrl: "/models/vitalik.glb",
+    walkUrl: "/models/vitalik-walk.bin",
+    bodyMeshName: "vitalik_body",
+    // 티셔츠 몸판·양 소매·목 테두리가 플레이어 색을 받음. 가슴 이더리움 아이콘은
+    // 따로 붙은 메시라 몸통에 남아 색이 바뀌어도 그대로 보임. 등 똥 아이콘은
+    // `remove-poop-from-vitalik.py` 로 지웠음.
+    accentMeshName: "vitalik_accent",
+    // 눈이 머리 메시의 픽셀이라 떼어 낼 눈동자 메시가 없음.
+    pupilGlintMeshName: null,
+    height: 1.8,
+    headCenterY: 1.4606,
+    // 본 20개라 2칸을 항등 행렬로 채웠음.
+    walkFrameCount: 40,
+    triangleCount: 1522,
+  },
 ] as const;
 
 export const SPACE_DEFAULT_AVATAR_MODEL_INDEX = 0;
