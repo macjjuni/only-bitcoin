@@ -838,6 +838,9 @@ describe("SpaceRoom", () => {
     };
     const kickFrames = (socket: RoomSocket) =>
       socket.frames().filter((frame) => frame.t === "kick");
+    /** 실제로 맞힌 발차기만. 판정에 실패하면 허공 차기(`to` 없음)로 알림. */
+    const hitFrames = (socket: RoomSocket) =>
+      kickFrames(socket).filter((frame) => frame.t === "kick" && frame.to !== undefined);
 
     it("입장 응답에 지원 기능을 실어 보냄", async () => {
       const { join } = createRoom();
@@ -869,13 +872,22 @@ describe("SpaceRoom", () => {
       ).toBeCloseTo(budgetBefore + 2);
     });
 
-    it("멀리 있는 상대는 못 참", async () => {
+    it("멀리 있는 상대는 못 맞히고 허공 차기로 알림", async () => {
+      const { send, kicker, target } = await setUpPair(4);
+
+      await send(kicker, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
+
+      expect(hitFrames(target)).toHaveLength(0);
+      // 다른 사람도 찬 동작은 봐야 함.
+      expect(kickFrames(target)).toEqual([expect.objectContaining({ from: kicker.peer().seat })]);
+    });
+
+    it("보간 지연만큼 멀어진 상대(3 m)는 서버가 맞힌 것으로 봄", async () => {
       const { send, kicker, target } = await setUpPair(3);
 
       await send(kicker, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
 
-      expect(kickFrames(kicker)).toHaveLength(0);
-      expect(kickFrames(target)).toHaveLength(0);
+      expect(hitFrames(target)).toHaveLength(1);
     });
 
     it("쿨다운 5초 안에 다시 찬 건 버리고 지나면 받음", async () => {
@@ -909,11 +921,12 @@ describe("SpaceRoom", () => {
       await send(kicker, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
       vi.advanceTimersByTime(1_000);
       await send(third, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
-      expect(kickFrames(target)).toHaveLength(1);
+      expect(hitFrames(target)).toHaveLength(1);
 
-      vi.advanceTimersByTime(1_000);
+      // 무적 중이라 허공 차기로 처리됐고 셋째 쿨다운(5초)도 씀. 지나면 무적도 풀려 있음.
+      vi.advanceTimersByTime(5_000);
       await send(third, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
-      expect(kickFrames(target)).toHaveLength(2);
+      expect(hitFrames(target)).toHaveLength(2);
     });
 
     it("발차기를 모르는 옛 클라이언트에는 보내지 않음", async () => {

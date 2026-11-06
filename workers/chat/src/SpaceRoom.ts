@@ -735,15 +735,55 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   /**
    * 발차기를 판정하고 아는 클라이언트에 알림.
    *
-   * 조건이 안 맞으면 오류 없이 버림. 클라이언트도 같은 조건으로 먼저 걸러서, 여기서
-   * 걸리는 건 지연으로 생긴 경계 상황뿐이라 알려 줄 게 없음.
-   * - 쿨다운: 찬 사람은 `cooldownMs` 에 한 번.
+   * - 쿨다운: 찬 사람은 `cooldownMs` 에 한 번. 쿨다운 중이면 연출까지 통째로 버림.
+   * - 무적·거리 조건이 안 맞으면 허공 차기로 바꿔 알림. 오류는 안 보냄. 클라이언트도
+   *   같은 조건으로 먼저 걸러서 여기서 걸리는 건 지연으로 생긴 경계 상황뿐임.
    * - 무적: 맞은 사람은 `immunityMs` 동안 다시 안 맞음.
    * - 거리: 서버가 아는 최신 위치로 `serverReachMeters` 안, 높이 차 `maxHeightGap` 안.
    *
    * 맞은 사람에게는 이동 예산을 더 얹음. 밀리는 동안 순간 속도가 상한을 넘어도
    * 순간이동으로 보고 되돌리지 않게 함.
    */
+  /**
+   * 맞힌 대상과 밀 방향. 조건이 안 맞으면 `null` 이고 그때는 허공에 찬 것으로 봄.
+   */
+  private resolveKickHit(
+    kicker: SpacePeer,
+    targetSeat: number | undefined,
+    now: number,
+  ): { socket: WebSocket; attachment: SpaceSocketAttachment; seat: number; dirX: number; dirZ: number } | null {
+    if (targetSeat === undefined || targetSeat === kicker.seat) {
+      return null;
+    }
+    const targetSocket = this.socketsBySeat.get(targetSeat);
+    const targetAttachment = targetSocket ? this.getJoinedAttachment(targetSocket) : null;
+    const target = targetAttachment?.peer;
+
+    if (!targetSocket || !targetAttachment || !target) {
+      return null;
+    }
+    if (targetAttachment.lastKickedAt !== undefined && now - targetAttachment.lastKickedAt < SPACE_KICK.immunityMs) {
+      return null;
+    }
+    const gapX = target.x - kicker.x;
+    const gapZ = target.z - kicker.z;
+    const distance = Math.hypot(gapX, gapZ);
+
+    if (distance > SPACE_KICK.serverReachMeters || Math.abs(target.y - kicker.y) > SPACE_KICK.maxHeightGap) {
+      return null;
+    }
+    // 겹쳐 서 있으면 방향을 못 구해서 찬 사람이 보는 쪽으로 밈.
+    const isOverlapping = distance <= 0.01;
+
+    return {
+      socket: targetSocket,
+      attachment: targetAttachment,
+      seat: target.seat,
+      dirX: isOverlapping ? -Math.sin(kicker.yaw) : gapX / distance,
+      dirZ: isOverlapping ? -Math.cos(kicker.yaw) : gapZ / distance,
+    };
+  }
+
   private handleKick(socket: WebSocket, frame: Extract<SpaceClientFrame, { t: "kick" }>): void {
     const attachment = this.getJoinedAttachment(socket);
     const kicker = attachment?.peer;
@@ -759,38 +799,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     }
     const facingX = -Math.sin(kicker.yaw);
     const facingZ = -Math.cos(kicker.yaw);
-    let hit: { socket: WebSocket; attachment: SpaceSocketAttachment; dirX: number; dirZ: number } | null =
-      null;
-
-    if (frame.target !== undefined && frame.target !== kicker.seat) {
-      const targetSocket = this.socketsBySeat.get(frame.target);
-      const targetAttachment = targetSocket ? this.getJoinedAttachment(targetSocket) : null;
-      const target = targetAttachment?.peer;
-
-      if (!targetSocket || !targetAttachment || !target) {
-        return;
-      }
-      if (
-        targetAttachment.lastKickedAt !== undefined &&
-        now - targetAttachment.lastKickedAt < SPACE_KICK.immunityMs
-      ) {
-        return;
-      }
-      const gapX = target.x - kicker.x;
-      const gapZ = target.z - kicker.z;
-      const distance = Math.hypot(gapX, gapZ);
-
-      if (distance > SPACE_KICK.serverReachMeters || Math.abs(target.y - kicker.y) > SPACE_KICK.maxHeightGap) {
-        return;
-      }
-      // 겹쳐 서 있으면 방향을 못 구해서 찬 사람이 보는 쪽으로 밈.
-      hit = {
-        socket: targetSocket,
-        attachment: targetAttachment,
-        dirX: distance > 0.01 ? gapX / distance : facingX,
-        dirZ: distance > 0.01 ? gapZ / distance : facingZ,
-      };
-    }
+    // 대상이 조건에 안 맞아도 버리지 않고 허공 차기로 알림. 버리면 찬 사람 화면에만
+    // 발차기가 나가고 다른 사람은 아무것도 못 봄.
+    const hit = this.resolveKickHit(kicker, frame.target, now);
 
     socket.serializeAttachment({ ...attachment, lastKickAt: now } satisfies SpaceSocketAttachment);
     if (hit) {
@@ -808,7 +819,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       v: SPACE_PROTOCOL_VERSION,
       t: "kick",
       from: kicker.seat,
-      ...(hit ? { to: hit.attachment.peer?.seat } : {}),
+      ...(hit ? { to: hit.seat } : {}),
       dirX: hit ? hit.dirX : facingX,
       dirZ: hit ? hit.dirZ : facingZ,
     } satisfies SpaceServerFrame);
