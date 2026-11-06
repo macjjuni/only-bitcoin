@@ -37,8 +37,9 @@ function SpaceAvatarPicker({ modelIndex, onChangeModel, onClose }: SpaceAvatarPi
   };
   // endregion
 
+  // 화면 위 6rem 에 뜸. 가로로 든 폰처럼 낮은 화면에서 잘리지 않게 목록만 스크롤함.
   return (
-    <div className="pointer-events-auto w-56 rounded-xl border border-white/15 bg-[#10151f]/95 p-3 shadow-lg backdrop-blur-xl">
+    <div className="pointer-events-auto flex max-h-[calc(100dvh-7rem)] w-56 flex-col rounded-xl border border-white/15 bg-[#10151f]/95 p-3 shadow-lg backdrop-blur-xl">
       <div className="mb-2 flex items-center justify-between">
         <span className="text-xs font-semibold text-white/85">아바타</span>
         <button
@@ -50,7 +51,7 @@ function SpaceAvatarPicker({ modelIndex, onChangeModel, onClose }: SpaceAvatarPi
         </button>
       </div>
 
-      <div className="flex flex-col gap-1.5">
+      <div className="flex min-h-0 flex-col gap-1.5 overflow-y-auto">
         {SPACE_AVATAR_MODELS.map((model, index) => {
           const isSelected = index === modelIndex;
 
