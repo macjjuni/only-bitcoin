@@ -190,6 +190,18 @@ describe("createSpaceInterpolator", () => {
     expect(interpolator.sample(1300)).not.toBe(expandedPlayers);
   });
 
+  it("움직이는 중 이름·모델이 바뀌어도 서버 현재 좌표로 튀지 않음", () => {
+    const interpolator = createSpaceInterpolator();
+    interpolator.setPeers([createPeer()]);
+    push(interpolator, 1000, [createMotion(0, 10)]);
+    push(interpolator, 1100, [createMotion(0, 20)]);
+    expect(interpolator.sample(1250)[0].x).toBe(15);
+    interpolator.upsertPeer(createPeer(0, { nickname: "새 이름", modelIndex: 1, x: 20 }));
+    const [player] = interpolator.sample(1260);
+    expect(player.x).toBe(16);
+    expect(player).toMatchObject({ nickname: "새 이름", modelIndex: 1 });
+  });
+
   it("늦게 도착한 서버 시각·역행한 로컬 시각은 버리고 uint32 wrap은 허용함", () => {
     const interpolator = createSpaceInterpolator();
     interpolator.setPeers([createPeer()]);

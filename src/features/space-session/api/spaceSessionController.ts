@@ -762,9 +762,14 @@ export class SpaceSessionController {
 
     if (this.sendFrame({ v: SPACE_PROTOCOL_VERSION, t: "move", ...movement })) {
       this.lastSentMovement = { ...movement };
-      // 계속 움직이는 중이면 예정 시각을 누적함. 쉬다 다시 보내면 지금부터 셈.
-      const isOnCadence = now - this.lastMovementSentAt < movementIntervalMs * 2;
-      this.lastMovementSentAt = isOnCadence ? this.lastMovementSentAt + movementIntervalMs : now;
+      // 예정 시각을 누적해 평균 100 ms 로 맞춤. 한 칸 넘게 쉬었으면 지금부터 다시 셈.
+      // 잠깐 멈췄다 보낼 때도 여유 이상은 당기지 않음. 서버가 50 ms 안에 붙어 온
+      // 이동을 버려서 마지막 위치가 사라질 수 있음.
+      const scheduledAt = this.lastMovementSentAt + movementIntervalMs;
+      this.lastMovementSentAt =
+        scheduledAt < now - movementIntervalMs
+          ? now
+          : Math.max(scheduledAt, now - movementSendToleranceMs);
     }
   }
 

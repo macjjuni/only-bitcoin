@@ -216,6 +216,34 @@ describe("SpaceSessionController", () => {
     controller.stop();
   });
 
+  it("잠깐 멈췄다 다시 움직여도 전송 간격이 서버 최소 간격(50ms)보다 붙지 않음", () => {
+    const { controller, welcome } = createHarness();
+    controller.start();
+    const socket = welcome();
+    const startedAt = Date.now();
+    const sentAt: number[] = [];
+    const publishAt = (offset: number, x: number): void => {
+      vi.setSystemTime(startedAt + offset);
+      const before = sentFrames(socket, "move").length;
+      controller.publishMovement(movement(x));
+      if (sentFrames(socket, "move").length > before) {
+        sentAt.push(offset);
+      }
+    };
+
+    publishAt(0, 1);
+    publishAt(100, 2);
+    // 150 ms 멈춤. 같은 위치는 안 보냄.
+    publishAt(200, 2);
+    publishAt(250, 2);
+    for (let offset = 260; offset <= 500; offset += 10) {
+      publishAt(offset, offset);
+    }
+    const gaps = sentAt.slice(1).map((offset, index) => offset - sentAt[index]);
+    expect(gaps.every((gap) => gap >= 84)).toBe(true);
+    controller.stop();
+  });
+
   it("서버 자기 좌표 보정은 self를 갱신하고 과거 위치를 자동으로 재송신하지 않는다", () => {
     const { controller, welcome } = createHarness();
     controller.start();

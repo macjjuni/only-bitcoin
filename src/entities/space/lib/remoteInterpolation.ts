@@ -90,17 +90,27 @@ export const createSpaceInterpolator = (): SpaceInterpolator => {
     renderedPlayers = [...peersBySeat.values()].sort((first, second) => first.seat - second.seat);
   };
 
+  /**
+   * 이동 기록이 있는 좌석은 이름·색·모델만 바꿈. `peer` 프레임 좌표는 서버의 현재
+   * 위치라 그대로 덮으면 재생 지연(200 ms+)만큼 앞으로 튐. 위치는 스냅샷이 맡음.
+   */
   const applyPeer = (peer: SpacePeer): void => {
     const currentPeer = peersBySeat.get(peer.seat);
 
-    if (currentPeer) {
-      Object.assign(currentPeer, peer);
-    } else {
+    if (!currentPeer) {
       peersBySeat.set(peer.seat, { ...peer });
+      historyBySeat.delete(peer.seat);
       rebuildRoster();
+      return;
+    }
+    if (historyBySeat.has(peer.seat)) {
+      currentPeer.nickname = peer.nickname;
+      currentPeer.colorIndex = peer.colorIndex;
+      currentPeer.modelIndex = peer.modelIndex;
+      return;
     }
 
-    historyBySeat.delete(peer.seat);
+    Object.assign(currentPeer, peer);
   };
 
   const applyMotion = (player: SpacePeer, motion: SpaceMotion): void => {
