@@ -4,15 +4,15 @@ import { Footprints } from "lucide-react";
 import { memo, type ReactNode, useCallback, useEffect, useState } from "react";
 import { SPACE_KICK } from "@/entities/space";
 import type { SpaceInputSource } from "../model/spaceInputSource";
+import {
+  KICK_BUTTON_POSITION,
+  TOUCH_BUTTON_DIAMETER,
+  TOUCH_BUTTON_ICON_SIZE,
+} from "./touchButtonLayout";
 
-/** 점프 버튼과 같은 크기. 엄지로 둘을 오가기 쉽게 맞춤. */
-const BUTTON_DIAMETER = 58;
-const ICON_SIZE = 22;
 const ICON_STROKE_WIDTH = 2.25;
-/** 점프 버튼 오른쪽 여백(1.5rem + 7px) + 지름 + 간격. 점프 버튼 바로 왼쪽에 놓임. */
-const RIGHT_OFFSET = "calc(1.5rem + 7px + 58px + 14px + env(safe-area-inset-right))";
-const BOTTOM_OFFSET = "calc(4.5rem + 7px + env(safe-area-inset-bottom))";
-const RING_RADIUS = 27;
+/** 테두리 안쪽에 그림. 선 굵기(2.5)만큼 지름에서 뺌. */
+const RING_RADIUS = TOUCH_BUTTON_DIAMETER / 2 - 2;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
 /** 남은 비율을 이 단위로 끊어 상태를 바꿈. 매 프레임 리렌더하지 않게 함. */
 const RING_STEPS = 60;
@@ -79,15 +79,14 @@ function KickButton({ inputSource }: KickButtonProps): ReactNode {
         isCoolingDown ? "border-white/10 bg-white/5" : "border-white/20 bg-white/10 active:border-bitcoin/70 active:bg-bitcoin/35"
       }`}
       style={{
-        width: BUTTON_DIAMETER,
-        height: BUTTON_DIAMETER,
-        right: RIGHT_OFFSET,
-        bottom: BOTTOM_OFFSET,
+        width: TOUCH_BUTTON_DIAMETER,
+        height: TOUCH_BUTTON_DIAMETER,
+        ...KICK_BUTTON_POSITION,
       }}
       onPointerDown={onPointerDownKick}
     >
       <Footprints
-        size={ICON_SIZE}
+        size={TOUCH_BUTTON_ICON_SIZE}
         strokeWidth={ICON_STROKE_WIDTH}
         className={isCoolingDown ? "text-white/35" : "text-white/85"}
         aria-hidden="true"
@@ -96,11 +95,11 @@ function KickButton({ inputSource }: KickButtonProps): ReactNode {
         <svg
           aria-hidden="true"
           className="pointer-events-none absolute inset-0 -rotate-90"
-          viewBox={`0 0 ${BUTTON_DIAMETER} ${BUTTON_DIAMETER}`}
+          viewBox={`0 0 ${TOUCH_BUTTON_DIAMETER} ${TOUCH_BUTTON_DIAMETER}`}
         >
           <circle
-            cx={BUTTON_DIAMETER / 2}
-            cy={BUTTON_DIAMETER / 2}
+            cx={TOUCH_BUTTON_DIAMETER / 2}
+            cy={TOUCH_BUTTON_DIAMETER / 2}
             r={RING_RADIUS}
             fill="none"
             stroke="rgb(var(--bitcoin-rgb))"

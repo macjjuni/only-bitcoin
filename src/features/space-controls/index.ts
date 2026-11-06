@@ -51,4 +51,10 @@ export { default as usePointerDrag } from "./model/usePointerDrag";
 export { default as usePrefersReducedMotion } from "./model/usePrefersReducedMotion";
 export { default as JumpButton } from "./ui/JumpButton";
 export { default as KickButton } from "./ui/KickButton";
+export {
+  TOUCH_BUTTON_BOTTOM_OFFSET,
+  TOUCH_BUTTON_DIAMETER,
+  TOUCH_BUTTON_EDGE,
+  TOUCH_BUTTON_ICON_SIZE,
+} from "./ui/touchButtonLayout";
 export { default as VirtualJoystick } from "./ui/VirtualJoystick";

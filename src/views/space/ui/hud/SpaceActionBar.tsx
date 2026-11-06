@@ -30,7 +30,10 @@ interface SpaceActionBarProps {
    * 쓴다. 정렬만 다르다.
    */
   align?: "start" | "end";
-  /** 버튼 크기. 엄지로 자주 누르는 모바일 채팅 버튼만 `large`(48 px)를 씀. */
+  /**
+   * 버튼 크기. 엄지로 자주 누르는 모바일 채팅 버튼만 `large` 를 씀.
+   * 점프·발차기와 같은 52 px(`TOUCH_BUTTON_DIAMETER`)라 바꾸면 같이 바꿔야 함.
+   */
   size?: "default" | "large";
 }
 
@@ -39,7 +42,7 @@ const BASE_BUTTON_CLASS =
 
 const BUTTON_SIZE_CLASS = {
   default: "size-10",
-  large: "size-12",
+  large: "size-[52px]",
 } as const;
 
 // region [Privates]

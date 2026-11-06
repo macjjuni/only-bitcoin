@@ -10,6 +10,9 @@ import {
   KickButton,
   type SpaceInputSource,
   shouldIgnoreSpaceHotkey,
+  TOUCH_BUTTON_BOTTOM_OFFSET,
+  TOUCH_BUTTON_EDGE,
+  TOUCH_BUTTON_ICON_SIZE,
   useCoarsePointer,
   VirtualJoystick,
 } from "@/features/space-controls";
@@ -34,8 +37,8 @@ const DONATION_LIGHTNING_ADDRESS = env.NEXT_PUBLIC_DONATION_ADDRESS;
 
 const ICON_SIZE = 18;
 const ICON_STROKE_WIDTH = 2;
-/** 모바일 채팅 버튼 아이콘. 버튼을 48 px 로 키운 만큼 같이 키웠음. */
-const MOBILE_CHAT_ICON_SIZE = 22;
+/** 모바일 채팅 버튼 아이콘. 점프·발차기 버튼 아이콘과 같은 크기. */
+const MOBILE_CHAT_ICON_SIZE = TOUCH_BUTTON_ICON_SIZE;
 
 interface SpaceHudProps {
   inputSource: SpaceInputSource;
@@ -402,8 +405,8 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
         <div
           className="pointer-events-auto absolute"
           style={{
-            left: "calc(1.5rem + env(safe-area-inset-left))",
-            bottom: "calc(4.5rem + env(safe-area-inset-bottom))",
+            left: `calc(${TOUCH_BUTTON_EDGE} + env(safe-area-inset-left))`,
+            bottom: TOUCH_BUTTON_BOTTOM_OFFSET,
           }}
         >
           <SpaceActionBar actions={[mobileChatAction]} align="start" size="large" />
