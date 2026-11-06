@@ -18,7 +18,7 @@ import {
   useSkinnedCrewMaterial,
 } from "@/views/space/lib/crewSkinning";
 import { createShadowBlobTexture } from "@/views/space/lib/shadowBlobTexture";
-import { useWrench } from "@/views/space/lib/wrenchModel";
+import { useWeapon } from "@/views/space/lib/weaponModel";
 
 /** 그림자 블롭이 바닥 격자와 겹쳐 지저분해지지 않도록 살짝 띄움. */
 const SHADOW_LIFT_Y = 0.02;
@@ -53,8 +53,8 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
   const avatarColor = useMemo(() => resolveAvatarColor(colorIndex), [colorIndex]);
   const model = resolveAvatarModel(modelIndex);
   const crew = useCrewModel(model);
-  /** 렌치 공격 때만 손에서 펼쳐지는 렌치. 평소에는 손 한 점으로 접혀 안 보임. */
-  const wrench = useWrench(model.handPivot, 1, crew.walkTexture, crew.kickTexture);
+  /** 공격 때만 손에서 펼쳐지는 무기(렌치, 머슼크는 도지코인). 평소에는 손 한 점으로 접혀 안 보임. */
+  const weapon = useWeapon(model.weapon, model.handPivot, 1, crew.walkTexture, crew.kickTexture);
   const bodyMaterial = useSkinnedCrewMaterial(crew.bodyMaterial, crew.walkTexture, crew.kickTexture);
   const pupilGlintMaterial = useSkinnedCrewMaterial(crew.pupilGlintMaterial, crew.walkTexture, crew.kickTexture);
   const body = useMemo(() => createCrewInstanceGeometry(crew.bodyGeometry, 1), [crew.bodyGeometry]);
@@ -78,7 +78,7 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
   const bodyMeshRef = useRef<InstancedMesh>(null);
   const pupilGlintMeshRef = useRef<InstancedMesh>(null);
   const accentMeshRef = useRef<InstancedMesh>(null);
-  const wrenchMeshRef = useRef<InstancedMesh>(null);
+  const weaponMeshRef = useRef<InstancedMesh>(null);
   // endregion
 
 
@@ -97,7 +97,7 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
     const step = deltaSeconds / CREW_WALK.blendSeconds;
     const blend = body.blend.getX(0) + (speed > MOVING_SPEED_THRESHOLD ? step : -step);
 
-    for (const buffers of [body, accent, pupilGlint, wrench.buffers]) {
+    for (const buffers of [body, accent, pupilGlint, weapon.buffers]) {
       if (!buffers) {
         continue;
       }
@@ -109,7 +109,7 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
     }
   };
 
-  /** 공격 진행도를 모든 메시에 같이 넣음. 한 메시만 늦으면 눈·앞판·렌치가 따로 놂. */
+  /** 공격 진행도를 모든 메시에 같이 넣음. 한 메시만 늦으면 눈·앞판·무기가 따로 놂. */
   const advanceKick = (): void => {
     const kick = resolveKickPose(
       kickStartedAtRef.current,
@@ -118,7 +118,7 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
       CREW_KICK.blendInRatio,
     );
 
-    for (const buffers of [body, accent, pupilGlint, wrench.buffers]) {
+    for (const buffers of [body, accent, pupilGlint, weapon.buffers]) {
       if (!buffers) {
         continue;
       }
@@ -134,7 +134,7 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
   const resetInstanceMatrix = (): void => {
     const identity = new Object3D();
     identity.updateMatrix();
-    for (const meshRef of [bodyMeshRef, accentMeshRef, pupilGlintMeshRef, wrenchMeshRef]) {
+    for (const meshRef of [bodyMeshRef, accentMeshRef, pupilGlintMeshRef, weaponMeshRef]) {
       meshRef.current?.setMatrixAt(0, identity.matrix);
       if (meshRef.current) {
         meshRef.current.instanceMatrix.needsUpdate = true;
@@ -193,8 +193,8 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
       />
 
       <instancedMesh
-        ref={wrenchMeshRef}
-        args={[wrench.buffers.geometry, wrench.material, 1]}
+        ref={weaponMeshRef}
+        args={[weapon.buffers.geometry, weapon.material, 1]}
         count={1}
         castShadow={hasRealtimeShadows}
         frustumCulled={false}

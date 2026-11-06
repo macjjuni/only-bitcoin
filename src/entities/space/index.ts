@@ -14,6 +14,7 @@ export {
   SPACE_AVATAR_MODELS,
   SPACE_DEFAULT_AVATAR_MODEL_INDEX,
   type SpaceAvatarModel,
+  type SpaceWeaponId,
 } from "./model/avatarModel";
 export { SPACE_FEATURE_KICK, SPACE_KICK } from "./model/kick";
 export {

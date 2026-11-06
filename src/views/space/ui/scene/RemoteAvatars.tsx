@@ -22,7 +22,7 @@ import {
   useSkinnedCrewMaterial,
 } from "@/views/space/lib/crewSkinning";
 import { createShadowBlobTexture } from "@/views/space/lib/shadowBlobTexture";
-import { useWrench } from "@/views/space/lib/wrenchModel";
+import { useWeapon } from "@/views/space/lib/weaponModel";
 
 const SHADOW_LIFT_Y = 0.02;
 /** 이보다 느리면 멈춘 것으로 보고 레스트 포즈로 돌림. */
@@ -60,12 +60,12 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
   const bodyMeshRef = useRef<InstancedMesh>(null);
   const accentMeshRef = useRef<InstancedMesh>(null);
   const pupilGlintMeshRef = useRef<InstancedMesh>(null);
-  const wrenchMeshRef = useRef<InstancedMesh>(null);
+  const weaponMeshRef = useRef<InstancedMesh>(null);
   const shadowMeshRef = useRef<InstancedMesh>(null);
   const shadowTexture = useMemo(() => createShadowBlobTexture(), []);
   const crew = useCrewModel(model);
-  /** 렌치 공격 때만 손에서 펼쳐지는 렌치. 그룹당 드로우 콜 하나가 늘어남. */
-  const wrench = useWrench(model.handPivot, SPACE_MAX_OCCUPANTS, crew.walkTexture, crew.kickTexture);
+  /** 공격 때만 손에서 펼쳐지는 무기(렌치, 머슼크는 도지코인). 그룹당 드로우 콜 하나가 늘어남. */
+  const weapon = useWeapon(model.weapon, model.handPivot, SPACE_MAX_OCCUPANTS, crew.walkTexture, crew.kickTexture);
   const bodyMaterial = useSkinnedCrewMaterial(crew.bodyMaterial, crew.walkTexture, crew.kickTexture);
   const pupilGlintMaterial = useSkinnedCrewMaterial(crew.pupilGlintMaterial, crew.walkTexture, crew.kickTexture);
 
@@ -184,9 +184,9 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
       body.kickBlend.setX(instanceIndex, kick.blend);
     });
 
-    // 앞판·눈·렌치는 몸통과 같은 위상이어야 따로 안 놂. 복사를 먼저 안 하면 한 프레임
+    // 앞판·눈·무기는 몸통과 같은 위상이어야 따로 안 놂. 복사를 먼저 안 하면 한 프레임
     // 뒤처진 값이 올라감.
-    for (const part of [accent, pupilGlint, wrench.buffers]) {
+    for (const part of [accent, pupilGlint, weapon.buffers]) {
       if (!part) {
         continue;
       }
@@ -208,10 +208,10 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
       pupilGlint?.blend,
       pupilGlint?.kickPhase,
       pupilGlint?.kickBlend,
-      wrench.buffers.phase,
-      wrench.buffers.blend,
-      wrench.buffers.kickPhase,
-      wrench.buffers.kickBlend,
+      weapon.buffers.phase,
+      weapon.buffers.blend,
+      weapon.buffers.kickPhase,
+      weapon.buffers.kickBlend,
     ]) {
       if (attribute) {
         attribute.needsUpdate = true;
@@ -228,7 +228,7 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
       bodyMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
       accentMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
       pupilGlintMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
-      wrenchMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
+      weaponMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
 
       // 그림자 평면은 눕혀야 하므로 회전을 따로 줌. 높이는 **발밑 기준**임.
       // 상수만 넣으면 바닥이 0 이던 벙커 기준이 되어, 광장(5)·테라스(7.5)·궁전(11)
@@ -240,7 +240,7 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
       shadowMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
     });
 
-    for (const meshRef of [bodyMeshRef, accentMeshRef, pupilGlintMeshRef, wrenchMeshRef, shadowMeshRef]) {
+    for (const meshRef of [bodyMeshRef, accentMeshRef, pupilGlintMeshRef, weaponMeshRef, shadowMeshRef]) {
       if (meshRef.current) {
         meshRef.current.instanceMatrix.needsUpdate = true;
       }
@@ -298,9 +298,9 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
       />
 
       <instancedMesh
-        ref={wrenchMeshRef}
+        ref={weaponMeshRef}
         count={renderedPlayers.length}
-        args={[wrench.buffers.geometry, wrench.material, SPACE_MAX_OCCUPANTS]}
+        args={[weapon.buffers.geometry, weapon.material, SPACE_MAX_OCCUPANTS]}
         frustumCulled={false}
       />
 

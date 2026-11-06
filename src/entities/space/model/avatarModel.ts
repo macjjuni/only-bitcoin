@@ -10,6 +10,13 @@
  *
  * 에셋은 `scripts/blender/process-voxel-character.py` 가 `.blend` 에서 구움.
  */
+/** 아바타별 무기. 기본은 렌치이고 머슼크만 도지코인. */
+export type SpaceWeaponId =
+  /** 기본 무기. 비트코인 밈 "$5 렌치 공격". */
+  | "wrench"
+  /** 머슼크 전용. 막대 끝 도지코인. */
+  | "dogeCoin";
+
 export interface SpaceAvatarModel {
   id: string;
   /** 선택 UI 에 보이는 이름. */
@@ -45,6 +52,12 @@ export interface SpaceAvatarModel {
    */
   handPivot: readonly [number, number, number];
   /**
+   * 공격할 때 손에 나타나는 무기. 모양만 다르고 사거리·넉백·쿨다운은 모두 같음.
+   *
+   * 성능이 다르면 다들 센 아바타만 고름. 모양은 `views/space/lib/weaponModel.ts`.
+   */
+  weapon: SpaceWeaponId;
+  /**
    * Walk `.bin` 의 프레임 수. 가공 스크립트의 `[export] 프레임=` 값.
    *
    * 로더가 `.bin` 크기를 이 값으로 검증하고 텍스처 높이로 씀. 틀리면 셰이더가
@@ -73,6 +86,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     height: 1.81,
     headCenterY: 1.484,
     handPivot: [0.2719, 0.7603, 0],
+    weapon: "wrench",
     walkFrameCount: 40,
     triangleCount: 1240,
   },
@@ -89,6 +103,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     height: 1.81,
     headCenterY: 1.4758,
     handPivot: [0.2717, 0.7596, 0],
+    weapon: "wrench",
     walkFrameCount: 40,
     triangleCount: 1504,
   },
@@ -105,6 +120,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     height: 1.81,
     headCenterY: 1.4638,
     handPivot: [0.2645, 0.7397, 0],
+    weapon: "wrench",
     // Walk 가 48프레임임. 셰이더는 텍스처 높이에서 읽어서 그대로 씀.
     walkFrameCount: 48,
     triangleCount: 1972,
@@ -124,6 +140,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     height: 1.6,
     headCenterY: 1.3303,
     handPivot: [0.25, 0.565, 0],
+    weapon: "wrench",
     // 원본 본은 20개라 가공 스크립트가 남는 2칸을 항등 행렬로 채웠음.
     walkFrameCount: 40,
     triangleCount: 1286,
@@ -143,6 +160,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     height: 1.8,
     headCenterY: 1.4771,
     handPivot: [0.31, 0.68, 0],
+    weapon: "dogeCoin",
     // 본 20개라 페페처럼 2칸을 항등 행렬로 채웠음.
     walkFrameCount: 40,
     triangleCount: 3202,
@@ -164,6 +182,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     height: 1.8,
     headCenterY: 1.4606,
     handPivot: [0.1693, 0.7025, 0],
+    weapon: "wrench",
     // 본 20개라 2칸을 항등 행렬로 채웠음.
     walkFrameCount: 40,
     triangleCount: 1522,
