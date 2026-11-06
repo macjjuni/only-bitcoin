@@ -487,7 +487,7 @@ describe("발차기 넉백", () => {
 
   describe("같은 순간 여러 명에게 맞을 때(다구리)", () => {
     /** 차는 사람 쪽에서 맞은 사람 쪽으로의 방향들을 같은 프레임에 모두 맞고 2초 적분함. */
-    const settleAfterHits = (directions: readonly [number, number][]) => {
+    const settleAfterHits = (directions: readonly (readonly [number, number])[]) => {
       let state = createState();
       for (const [x, z] of directions) {
         state = applyKnockback(state, x, z);
