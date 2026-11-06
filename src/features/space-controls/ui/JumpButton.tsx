@@ -18,12 +18,12 @@ interface JumpButtonProps {
 /**
  * 손가락 기기 전용 점프 버튼.
  *
- * 조이스틱은 2축이라 점프를 실을 자리가 없다. 조이스틱과 같은 `joystick` 채널에
- * 쓰지만 건드리는 필드가 `isJumping` 하나뿐이라 두 입력이 서로 값을 덮지 않는다.
+ * 조이스틱은 2축이라 점프를 실을 자리가 없음. 조이스틱과 같은 `joystick` 채널에
+ * 쓰지만 건드리는 필드가 `isJumping` 하나뿐이라 두 입력이 서로 값을 덮지 않음.
  *
- * 누르고 있으면 착지할 때마다 다시 뛴다. 데스크톱 `Space` 와 같은 동작이며,
- * 점프 상태는 프레임 루프가 매 프레임 읽으므로 React 상태로 들고 있지 않는다.
- * 눌린 모양만 상태로 둔다.
+ * 누르고 있으면 착지할 때마다 다시 뜀. 데스크톱 `Space` 와 같은 동작이며,
+ * 점프 상태는 프레임 루프가 매 프레임 읽으므로 React 상태로 들고 있지 않음.
+ * 눌린 모양만 상태로 둠.
  */
 function JumpButton({ inputSource }: JumpButtonProps): ReactNode {
   // region [Hooks]
@@ -32,7 +32,7 @@ function JumpButton({ inputSource }: JumpButtonProps): ReactNode {
   // endregion
 
   // region [Privates]
-  /** 손가락을 떼거나 입력이 끊겼을 때 점프를 멈춘다. */
+  /** 손가락을 떼거나 입력이 끊겼을 때 점프를 멈춤. */
   const releaseJumpInput = useCallback((): void => {
     activePointerIdRef.current = null;
     inputSource.joystick.isJumping = false;
@@ -48,7 +48,7 @@ function JumpButton({ inputSource }: JumpButtonProps): ReactNode {
       }
 
       activePointerIdRef.current = pointerEvent.pointerId;
-      // 손가락이 버튼 밖으로 미끄러져도 떼는 순간을 받는다.
+      // 손가락이 버튼 밖으로 미끄러져도 떼는 순간을 받음.
       pointerEvent.currentTarget.setPointerCapture(pointerEvent.pointerId);
       inputSource.joystick.isJumping = true;
       setIsPressed(true);
@@ -69,7 +69,7 @@ function JumpButton({ inputSource }: JumpButtonProps): ReactNode {
   // endregion
 
   // region [Privates]
-  /** 창을 벗어나거나 탭이 숨으면 눌린 점프가 남지 않게 비운다. */
+  /** 창을 벗어나거나 탭이 숨으면 눌린 점프가 남지 않게 비움. */
   const attachJumpResetEvents = useCallback((): (() => void) => {
     window.addEventListener("blur", releaseJumpInput);
     document.addEventListener("visibilitychange", releaseJumpInput);

@@ -20,10 +20,13 @@ export const TOUCH_BUTTON_BOTTOM = "4.5rem";
  *
  * 이동 조이스틱이 화면 가로 가운데(지름 120 px)라 360 px 폭 폰에서는 오른쪽 끝에서
  * 120 px 부터 조이스틱임. 정사각 대각선(48·48)이면 발차기 왼쪽 끝이 124 px 까지 와서
- * 겹쳤음. 왼쪽 36 px 로 줄여 오른쪽 112 px 안에 둠(조이스틱과 8 px 띄움).
+ * 겹쳤음. 위로는 크게(58) 옮겨 점프와 안 겹치게 하고 왼쪽은 조금만 옮김.
  */
 const KICK_SHIFT_LEFT = 36;
 const KICK_SHIFT_UP = 58;
+/** 조이스틱 반지름(`VirtualJoystick`)과 발차기와 띄울 간격(px). */
+const JOYSTICK_RADIUS = 60;
+const JOYSTICK_CLEARANCE = 6;
 
 const withSafeArea = (base: string, offset: number, side: "right" | "bottom"): string => {
   return `calc(${base} + ${offset}px + env(safe-area-inset-${side}))`;
@@ -36,7 +39,14 @@ export const JUMP_BUTTON_POSITION = {
   bottom: TOUCH_BUTTON_BOTTOM_OFFSET,
 } as const;
 
+/**
+ * 좁은 폰에서는 왼쪽 이동을 줄임. 발차기 왼쪽 끝이 조이스틱 오른쪽 끝(화면 가운데 +
+ * 반지름)에서 `JOYSTICK_CLEARANCE` 만큼 떨어지는 자리까지만 감. 320 px 폰에서 고정
+ * 36 px 로 두면 12 px 겹쳤음.
+ */
+const KICK_RIGHT_LIMIT = `50vw - ${JOYSTICK_RADIUS + JOYSTICK_CLEARANCE + TOUCH_BUTTON_DIAMETER}px`;
+
 export const KICK_BUTTON_POSITION = {
-  right: withSafeArea(TOUCH_BUTTON_EDGE, KICK_SHIFT_LEFT, "right"),
+  right: `calc(min(${TOUCH_BUTTON_EDGE} + ${KICK_SHIFT_LEFT}px, ${KICK_RIGHT_LIMIT}) + env(safe-area-inset-right))`,
   bottom: withSafeArea(TOUCH_BUTTON_BOTTOM, KICK_SHIFT_UP, "bottom"),
 } as const;

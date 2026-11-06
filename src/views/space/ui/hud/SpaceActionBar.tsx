@@ -6,17 +6,17 @@ import { memo, type ReactNode } from "react";
  * HUD 버튼 하나.
  *
  * 버튼이 늘어나도 배치·크기·접근성 처리를 각자 다시 쓰지 않도록 모양을
- * 여기서만 정의한다. 추가할 때는 이 타입을 만족하는 항목을 배열에 넣으면 된다.
+ * 여기서만 정의함. 추가할 때는 이 타입을 만족하는 항목을 배열에 넣으면 됨.
  */
 export interface SpaceHudAction {
   id: string;
-  /** 스크린리더 이름이자 툴팁. 아이콘만으로는 뜻이 전달되지 않는다. */
+  /** 스크린리더 이름이자 툴팁. 아이콘만으로는 뜻이 전달되지 않음. */
   label: string;
   icon: ReactNode;
-  /** 토글 버튼이 켜진 상태인지. 누르면 상태가 바뀌는 버튼에만 준다. */
+  /** 토글 버튼이 켜진 상태인지. 누르면 상태가 바뀌는 버튼에만 줌. */
   isActive?: boolean;
   isDisabled?: boolean;
-  /** 읽지 않은 수 같은 숫자 배지. 0 이면 표시하지 않는다. */
+  /** 읽지 않은 수 같은 숫자 배지. 0 이면 표시하지 않음. */
   badgeCount?: number;
   onClick: () => void;
 }
@@ -24,10 +24,10 @@ export interface SpaceHudAction {
 interface SpaceActionBarProps {
   actions: readonly SpaceHudAction[];
   /**
-   * 가로 정렬. 우측 상단 묶음은 오른쪽, 좌측 하단 버튼은 왼쪽에 붙인다.
+   * 가로 정렬. 우측 상단 묶음은 오른쪽, 좌측 하단 버튼은 왼쪽에 붙임.
    *
    * 버튼 모양·배지·접근성 처리를 한 곳에 두려고 좌측 하단 버튼도 이 컴포넌트를
-   * 쓴다. 정렬만 다르다.
+   * 씀. 정렬만 다름.
    */
   align?: "start" | "end";
   /**
@@ -62,7 +62,7 @@ const resolveBadgeLabel = (badgeCount: number): string => {
 };
 // endregion
 
-/** 버튼 묶음. 항목이 늘어나면 세로로 쌓인다. */
+/** 버튼 묶음. 항목이 늘어나면 세로로 쌓임. */
 function SpaceActionBar({
   actions,
   align = "end",
