@@ -485,6 +485,105 @@ describe("발차기 넉백", () => {
     expect(runSteps(ganged, createInput(), 0, 120).x).toBeGreaterThan(alone.x * 1.5);
   });
 
+  describe("같은 순간 여러 명에게 맞을 때(다구리)", () => {
+    /** 차는 사람 쪽에서 맞은 사람 쪽으로의 방향들을 같은 프레임에 모두 맞고 2초 적분함. */
+    const settleAfterHits = (directions: readonly [number, number][]) => {
+      let state = createState();
+      for (const [x, z] of directions) {
+        state = applyKnockback(state, x, z);
+      }
+      const hit = state;
+      let peakY = 0;
+      for (let index = 0; index < 120; index += 1) {
+        state = stepMovement(state, createInput(), 0, undefined, GROUND);
+        peakY = Math.max(peakY, state.y);
+      }
+      return { hit, distance: Math.hypot(state.x, state.z), peakY };
+    };
+    const diagonal = Math.SQRT1_2;
+
+    it.each([
+      ["1명", [[1, 0]], 1],
+      [
+        "같은 쪽 2명",
+        [
+          [1, 0],
+          [1, 0],
+        ],
+        2,
+      ],
+      [
+        "같은 쪽 3명(상한)",
+        [
+          [1, 0],
+          [1, 0],
+          [1, 0],
+        ],
+        2,
+      ],
+      [
+        "직각 2명",
+        [
+          [1, 0],
+          [0, 1],
+        ],
+        Math.SQRT2,
+      ],
+      [
+        "같은 쪽 2명 + 반대쪽 1명",
+        [
+          [1, 0],
+          [1, 0],
+          [-1, 0],
+        ],
+        1,
+      ],
+    ] as const)("%s → 약 %s 배 거리", (_label, directions, expectedMeters) => {
+      const { distance } = settleAfterHits(directions);
+      // 혼자 맞을 때 거리를 1 로 본 배율. 적분 오차 5% 안.
+      const single = settleAfterHits([[1, 0]]).distance;
+
+      expect(distance / single).toBeCloseTo(expectedMeters, 1);
+    });
+
+    it.each([
+      [
+        "마주 보고 2명",
+        [
+          [1, 0],
+          [-1, 0],
+        ],
+      ],
+      [
+        "세 방향 고르게 3명",
+        [
+          [1, 0],
+          [-0.5, Math.sqrt(3) / 2],
+          [-0.5, -Math.sqrt(3) / 2],
+        ],
+      ],
+    ] as const)("%s → 제자리, 살짝 뜨고 조작은 안 막힘", (_label, directions) => {
+      const { hit, distance, peakY } = settleAfterHits(directions);
+
+      expect(distance).toBeLessThan(0.01);
+      expect(peakY).toBeGreaterThan(0.1);
+      expect(Math.hypot(hit.knockbackX, hit.knockbackZ)).toBeLessThan(
+        SPACE_KICK.knockbackControlResumeSpeed,
+      );
+    });
+
+    it("몇 명이 몰아 차도 한 번만 뜸", () => {
+      const once = settleAfterHits([[1, 0]]).peakY;
+      const ganged = settleAfterHits([
+        [1, 0],
+        [diagonal, diagonal],
+        [diagonal, -diagonal],
+      ]).peakY;
+
+      expect(ganged).toBeCloseTo(once, 5);
+    });
+  });
+
   it("공중에서 맞으면 수직 속도를 더하지 않음", () => {
     const airborne = createState({ y: 0.5, velocityY: -1, isGrounded: false });
 
