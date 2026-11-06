@@ -112,8 +112,12 @@ const CONTENT_SECURITY_POLICY = [
     "wss://mempool.space",
   ].join(" "),
   "frame-src 'self' https://googleads.g.doubleclick.net https://tpc.googlesyndication.com",
-  // blob: 은 SRT 를 VTT 로 변환해 만든 자막 트랙 URL 에 필요.
-  "media-src 'self' blob: https://image-store-one.vercel.app",
+  [
+    // blob: 은 SRT 를 VTT 로 변환해 만든 자막 트랙 URL 에 필요.
+    "media-src 'self' blob: https://image-store-one.vercel.app",
+    // 스페이스 배경음악(`spaceBgmTrack.ts`)을 배포본 밖 GitHub raw 에서 받아옴.
+    "https://raw.githubusercontent.com",
+  ].join(" "),
   "manifest-src 'self'",
   "worker-src 'self' blob:",
 ].join("; ");

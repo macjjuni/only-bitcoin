@@ -1,10 +1,21 @@
 "use client";
 
-import { ArrowLeft, CircleHelp, MessageCircle, Pencil, Share2, UserRound, Zap } from "lucide-react";
+import {
+  ArrowLeft,
+  CircleHelp,
+  MessageCircle,
+  Music,
+  Pencil,
+  Share2,
+  UserRound,
+  VolumeX,
+  Zap,
+} from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { saveChatNickname } from "@/features/chat-session";
+import { useSpaceBgm } from "@/features/space-bgm";
 import {
   JumpButton,
   KickButton,
@@ -66,6 +77,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
   const router = useTransitionRouter();
   const pathname = usePathname();
   const isCoarsePointer = useCoarsePointer();
+  const bgm = useSpaceBgm();
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
   const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
@@ -290,6 +302,21 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
       onClick: onClickOpenShare,
     });
 
+    // 음원을 못 받는 환경에서는 눌러도 소리가 나지 않으므로 버튼을 내림.
+    if (!bgm.isUnavailable) {
+      actions.push({
+        id: "space-bgm-toggle",
+        label: bgm.isPlaying ? "배경음악 끄기" : "배경음악 켜기",
+        icon: bgm.isPlaying ? (
+          <Music size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />
+        ) : (
+          <VolumeX size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />
+        ),
+        isActive: bgm.isPlaying,
+        onClick: bgm.toggle,
+      });
+    }
+
     actions.push({
       id: "guide",
       label: "조작 안내",
@@ -311,6 +338,9 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     isGuideOpen,
     onClickBack,
     onClickToggleGuide,
+    bgm.isPlaying,
+    bgm.isUnavailable,
+    bgm.toggle,
   ]);
 
   const NicknameEditorTemplate = isNicknameEditorOpen ? (
