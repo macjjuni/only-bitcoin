@@ -31,7 +31,7 @@ import {
  * 여기서는 그중 하나를 받아 three 객체로 바꾸는 일만 한다.
  */
 export const CREW_MODEL = {
-  /** 발바닥이 원점이라 아바타를 `(x, 0, z)` 에 그대로 둔다. 두 모델 공통. */
+  /** 기본 키(m). 발바닥이 원점이라 `(x, 0, z)` 에 그대로 둠. 모델별 키는 레지스트리 `height`. */
   height: 1.81,
   /** 정점마다 따라갈 본 번호. glTF 의 `_BONEINDEX` 를 three 가 소문자로 바꾼다. */
   boneIndexAttribute: "_boneindex",

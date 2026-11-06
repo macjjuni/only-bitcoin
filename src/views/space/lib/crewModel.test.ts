@@ -290,6 +290,6 @@ describe.each(
     const [, maxY] = position.max ?? [];
 
     expect(minY).toBeCloseTo(0, 2);
-    expect((maxY ?? 0) - (minY ?? 0)).toBeCloseTo(CREW_MODEL.height, 2);
+    expect((maxY ?? 0) - (minY ?? 0)).toBeCloseTo(model.height, 2);
   });
 });

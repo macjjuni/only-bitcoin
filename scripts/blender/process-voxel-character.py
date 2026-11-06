@@ -19,6 +19,9 @@
   blender --background assets/avatars/voxel-bull.blend \
       --python scripts/blender/process-voxel-character.py -- public/models bull \
       burgundy_waistcoat_front l_bull_eye_dark_pixel,r_bull_eye_dark_pixel
+  blender --background assets/avatars/voxel-pepe.blend       --python scripts/blender/process-voxel-character.py -- public/models pepe       Shirt_main_cuboid,Sleeve_L,Sleeve_R --height=1.6
+
+`--height=<m>` 로 키를 바꿈. 생략하면 1.81 m. 위치와 상관없이 받음.
 
 편집 원본(`.blend`, 변형 `.glb`)은 `assets/avatars/` 에 있고 런타임은 읽지
 않는다. `public/` 에 두면 4 MB 가 아무도 안 받는 채로 배포된다.
@@ -32,7 +35,10 @@ import sys
 from mathutils import Matrix
 
 # `--` 뒤 인자만 받는다. 블렌더가 앞쪽 인자를 전부 먹는다.
-ARGS = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
+RAW_ARGS = sys.argv[sys.argv.index("--") + 1 :] if "--" in sys.argv else []
+# 옵션은 빼고 나머지만 위치 인자로 씀. 눈동자 인자를 비워도 키를 줄 수 있게 함.
+OPTIONS = dict(arg[2:].split("=", 1) for arg in RAW_ARGS if arg.startswith("--") and "=" in arg)
+ARGS = [arg for arg in RAW_ARGS if not arg.startswith("--")]
 OUT = ARGS[0] if ARGS else "public/models"
 # 출력 파일과 메시 이름의 접두사. 런타임 상수(`crewModel.ts`)와 같아야 한다.
 PREFIX = ARGS[1] if len(ARGS) > 1 else "crew"
@@ -51,7 +57,9 @@ PUPIL_NAMES = (
     if len(ARGS) > 3
     else ()
 )
-HEIGHT = 1.81
+DEFAULT_HEIGHT = 1.81
+# 모델 키(m). 크루·곰·황소는 1.81, 페페는 원본대로 1.6.
+HEIGHT = float(OPTIONS.get("height", DEFAULT_HEIGHT))
 WALK_ACTION = "Walk"
 # 셰이더 텍셀 조회 폭. 런타임 `CREW_WALK.boneCount` 와 같아야 함.
 # 본이 적은 모델(페페 20개)은 남는 칸을 항등 행렬로 채움. 아무 정점도 안 씀.
@@ -329,7 +337,9 @@ with open(bin_path, "wb") as handle:
     handle.write(struct.pack(f"<{len(matrix_rows)}f", *matrix_rows))
 
 tri = sum(len(p.vertices) - 2 for o in exported for p in o.data.polygons)
-head = [v.co.z for v in body_obj.data.vertices if 1.40 < v.co.z < 1.56]
+# 머리 띠는 1.81 m 기준으로 잡은 값이라 키에 맞춰 늘이고 줄임.
+head_scale = HEIGHT / DEFAULT_HEIGHT
+head = [v.co.z for v in body_obj.data.vertices if 1.40 * head_scale < v.co.z < 1.56 * head_scale]
 print(f"[export] {PREFIX}.glb {os.path.getsize(glb_path)/1024:.0f} KB | 삼각형={tri} | 50명={tri*50:,}")
 print(f"[export] {PREFIX}-walk.bin {os.path.getsize(bin_path)/1024:.0f} KB | "
       f"프레임={len(frames)} 본={len(bones)}(+{BONE_SLOTS - len(bones)} 패딩)")

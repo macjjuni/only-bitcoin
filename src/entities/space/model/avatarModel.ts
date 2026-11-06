@@ -26,6 +26,12 @@ export interface SpaceAvatarModel {
    * 떼어 단색 발광 재질을 입힌다. 곰은 눈동자 메시가 따로 없어 `null`.
    */
   pupilGlintMeshName: string | null;
+  /**
+   * 모델 키(m). 가공 스크립트의 `--height` 값. 생략하면 1.81.
+   *
+   * 발바닥이 원점이라 런타임은 이 값으로 배치하지 않음. glb 를 검증하는 데 씀.
+   */
+  height: number;
   /** 명찰·말풍선이 매달리는 머리 중심. 가공 스크립트의 `[anchor]` 값. */
   headCenterY: number;
   /**
@@ -52,6 +58,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     bodyMeshName: "crew_body",
     accentMeshName: "crew_accent",
     pupilGlintMeshName: "crew_pupil_glint",
+    height: 1.81,
     headCenterY: 1.484,
     walkFrameCount: 40,
     triangleCount: 1240,
@@ -64,6 +71,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     bodyMeshName: "bear_body",
     accentMeshName: "bear_accent",
     pupilGlintMeshName: null,
+    height: 1.81,
     headCenterY: 1.4758,
     walkFrameCount: 40,
     triangleCount: 1504,
@@ -76,6 +84,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     bodyMeshName: "bull_body",
     accentMeshName: "bull_accent",
     pupilGlintMeshName: "bull_pupil_glint",
+    height: 1.81,
     headCenterY: 1.4638,
     // Walk 가 48프레임이다. 셰이더는 텍스처 높이에서 읽으므로 그대로 쓴다.
     walkFrameCount: 48,
@@ -90,7 +99,9 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     // 셔츠 몸판과 양 소매가 플레이어 색을 받음. 앞판만 따로 떼면 소매만 파랗게 남음.
     accentMeshName: "pepe_accent",
     pupilGlintMeshName: null,
-    headCenterY: 1.5049,
+    // 원본 키 그대로 둠. 다른 모델보다 작음.
+    height: 1.6,
+    headCenterY: 1.3303,
     // 원본 본은 20개라 가공 스크립트가 남는 2칸을 항등 행렬로 채웠음.
     walkFrameCount: 40,
     triangleCount: 1286,
