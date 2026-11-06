@@ -1,7 +1,7 @@
 /**
  * 고를 수 있는 아바타 모델.
  *
- * 세 모델은 **본 22개**를 공유한다. 본 수가 셰이더의 텍셀 조회 폭을 정하므로
+ * 모든 모델의 Walk `.bin` 은 **본 22칸** 폭이다. 본 수가 셰이더의 텍셀 조회 폭을 정하므로
  * 이것만은 반드시 같아야 한다 — 어긋나면 엉뚱한 텍셀을 읽어 아바타가 터진다.
  *
  * **Walk 프레임 수는 모델마다 다를 수 있다**(크루·곰 40, 황소 48). 셰이더가
@@ -80,6 +80,20 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     // Walk 가 48프레임이다. 셰이더는 텍스처 높이에서 읽으므로 그대로 쓴다.
     walkFrameCount: 48,
     triangleCount: 1972,
+  },
+  {
+    id: "pepe",
+    label: "페페",
+    modelUrl: "/models/pepe.glb",
+    walkUrl: "/models/pepe-walk.bin",
+    bodyMeshName: "pepe_body",
+    // 셔츠 몸판과 양 소매가 플레이어 색을 받음. 앞판만 따로 떼면 소매만 파랗게 남음.
+    accentMeshName: "pepe_accent",
+    pupilGlintMeshName: null,
+    headCenterY: 1.5049,
+    // 원본 본은 20개라 가공 스크립트가 남는 2칸을 항등 행렬로 채웠음.
+    walkFrameCount: 40,
+    triangleCount: 1286,
   },
 ] as const;
 

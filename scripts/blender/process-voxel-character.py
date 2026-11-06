@@ -53,6 +53,9 @@ PUPIL_NAMES = (
 )
 HEIGHT = 1.81
 WALK_ACTION = "Walk"
+# 셰이더 텍셀 조회 폭. 런타임 `CREW_WALK.boneCount` 와 같아야 함.
+# 본이 적은 모델(페페 20개)은 남는 칸을 항등 행렬로 채움. 아무 정점도 안 씀.
+BONE_SLOTS = 22
 
 # 플레이어 색을 받는 **앞면 한 조각만** 뺀다(§6 B안).
 #
@@ -241,6 +244,9 @@ def bake_walk_matrices(armature, transform):
     # 마지막 프레임은 첫 프레임과 같은 포즈라(루프) 빼야 한 박자 쉬지 않는다.
     frames = list(range(start, end))
     bones = [b.name for b in armature.data.bones]
+    if len(bones) > BONE_SLOTS:
+        raise SystemExit(f"[error] 본 {len(bones)}개 — 셰이더 폭 {BONE_SLOTS}개를 넘음.")
+    padding = Matrix.Identity(4)
     to_model = transform @ armature.matrix_world
     rows = []
 
@@ -252,6 +258,8 @@ def bake_walk_matrices(armature, transform):
             # 모델 공간에서의 스키닝 행렬. 좌우 변환으로 감싸 정점과 같은 공간에 둔다.
             skin = YUP @ to_model @ (pose @ rest.inverted()) @ to_model.inverted() @ YUP.inverted()
             rows.extend(skin[0][:] + skin[1][:] + skin[2][:])
+        for _ in range(BONE_SLOTS - len(bones)):
+            rows.extend(padding[0][:] + padding[1][:] + padding[2][:])
 
     # 지오메트리는 레스트 포즈로 굽는다. 본에 물린 메시는 `matrix_world` 가
     # 포즈를 따라가므로, 켜 둔 채 합치면 Walk 한 프레임이 모델에 굳는다.
@@ -324,5 +332,5 @@ tri = sum(len(p.vertices) - 2 for o in exported for p in o.data.polygons)
 head = [v.co.z for v in body_obj.data.vertices if 1.40 < v.co.z < 1.56]
 print(f"[export] {PREFIX}.glb {os.path.getsize(glb_path)/1024:.0f} KB | 삼각형={tri} | 50명={tri*50:,}")
 print(f"[export] {PREFIX}-walk.bin {os.path.getsize(bin_path)/1024:.0f} KB | "
-      f"프레임={len(frames)} 본={len(bones)} 길이={len(frames)/24:.2f}초")
+      f"프레임={len(frames)} 본={len(bones)}(+{BONE_SLOTS - len(bones)} 패딩)")
 print(f"[anchor] headCenterY={sum(head)/len(head):.4f}")
