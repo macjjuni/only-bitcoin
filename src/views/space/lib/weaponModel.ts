@@ -65,13 +65,16 @@ const POOP_DARK = "#6e4520";
 /**
  * 빚탈릭 손에 쥔 💩. "똥코인" 개그.
  *
- * 손이 밑단을 쥐고 소용돌이 끝이 팔 방향으로 뻗음. 머리 위로 들면 똑바로 선 똥이 됨.
+ * 소용돌이 끝이 팔 방향으로 뻗어 머리 위로 들면 똑바로 선 똥이 됨. 손 바깥쪽(+X)으로
+ * 비켜 붙여 손이 밑단 옆을 쥐는 모양임. 손 한가운데 꽂으면 팔이 똥 꽂은 막대처럼 보였음.
+ * 손바닥 쪽(-X)은 머리 위로 들 때 머리와 겹쳐서 안 씀.
  * 단마다 상자 둘을 십자로 겹쳐 둥글게 보이게 함. 눈·입은 앞뒤 양쪽에 붙여
  * 앞사람에게도, 뒤따르는 카메라에도 얼굴이 보임.
  */
-const POOP_PARTS: readonly WeaponPart[] = [
-  // 주먹 안에 들어가는 밑동. 손과 똥이 떠 보이지 않게 이어 줌.
-  { center: [0, -0.02, 0], size: [0.07, 0.06, 0.07], color: POOP_DARK },
+const POOP_SCALE = 0.7;
+const POOP_SHIFT_X = 0.09;
+
+const POOP_SHAPE: readonly WeaponPart[] = [
   // 밑단·가운데단·윗단·끝. 아래(-Y)로 갈수록 좁아짐.
   { center: [0, -0.08, 0], size: [0.34, 0.12, 0.24], color: POOP_BROWN },
   { center: [0, -0.08, 0], size: [0.24, 0.12, 0.34], color: POOP_BROWN },
@@ -91,6 +94,13 @@ const POOP_PARTS: readonly WeaponPart[] = [
     { center: [0, -0.09, side * 0.18], size: [0.12, 0.02, 0.01], color: "#ffffff" },
   ]),
 ];
+
+/** 모양은 원래 크기로 적고 줄여서 손 바깥쪽으로 비킴. */
+const POOP_PARTS: readonly WeaponPart[] = POOP_SHAPE.map(({ center, size, color }) => ({
+  center: [center[0] * POOP_SCALE + POOP_SHIFT_X, center[1] * POOP_SCALE, center[2] * POOP_SCALE],
+  size: [size[0] * POOP_SCALE, size[1] * POOP_SCALE, size[2] * POOP_SCALE],
+  color,
+}));
 
 /**
  * 손에 쥔 큰 도지코인. 손이 동전 윗테를 잡음.

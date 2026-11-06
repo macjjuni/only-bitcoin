@@ -33,7 +33,8 @@ describe.each(WEAPONS)("createWeaponGeometry(%s)", (weapon) => {
       lowestY = Math.min(lowestY, offsets.getY(index));
     }
 
-    expect(lowestY).toBeLessThan(-0.4);
+    // 똥은 0.7 배로 줄여 가장 짧음(약 0.31 m).
+    expect(lowestY).toBeLessThan(-0.28);
   });
 
   it("손이 쥐는 부분이 손 위치 가까이 있음", () => {
