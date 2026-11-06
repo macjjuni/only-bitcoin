@@ -30,7 +30,18 @@ const BGM_SOURCE_REF = "main";
  * 약관(플레이어 노출 요구)에 걸리고, 권리사가 임베드를 막은 영상은 재생 자체가
  * 실패한다.
  */
-export const SPACE_BGM_TRACK_SRC = `https://cdn.jsdelivr.net/gh/macjjuni/only-bitcoin@${BGM_SOURCE_REF}/media/MONKEY_BGM.mp3`;
+const BGM_BASE_URL = `https://cdn.jsdelivr.net/gh/macjjuni/only-bitcoin@${BGM_SOURCE_REF}/media`;
+
+export const SPACE_BGM_TRACK_SRC = `${BGM_BASE_URL}/MONKEY_BGM.mp3`;
+
+/**
+ * 급등락 중에 까는 교체 트랙.
+ *
+ * 등락 방향은 가리지 않고 한 곡을 공용으로 씀(`priceSurge.ts`).
+ * 기본 트랙과 달리 이벤트 때만 잠깐 틀어서 미리 받아 두지 않음. 켜는 사람만
+ * 받는 기본 트랙보다도 드물게 쓰여 요청을 아끼는 쪽이 맞음.
+ */
+export const SPACE_BGM_SURGE_TRACK_SRC = `${BGM_BASE_URL}/nervous.mp3`;
 
 /**
  * 기본 음량.
