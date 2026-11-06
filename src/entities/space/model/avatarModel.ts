@@ -202,15 +202,16 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     // 정장 안 와이셔츠가 플레이어 색을 받음. 원본이 흰색(#f1efe9)이라 어떤 색도 제대로 올라옴.
     // 원본은 몸이 메시 하나라 `split-saylor-parts.py` 가 UV 타일로 셔츠를 떼어 냄.
     accentMeshName: "saylor_accent",
-    // 레이저아이. 눈이 아틀라스의 `eye` 타일을 보는 면 12개라 같은 스크립트가 떼어 냄.
+    // 레이저아이. 눈동자(`eye`)에 흰자(`eye_w`)까지 묶어 눈 전체를 발광시킴.
+    // 눈동자만 6면이라 추종 카메라 거리에서 빛이 안 보였음.
     pupilGlintMeshName: "saylor_pupil_glint",
     height: 1.8,
-    headCenterY: 1.4687,
-    handPivot: [0.2768, 0.7739, 0],
+    headCenterY: 1.4502,
+    handPivot: [0.2793, 0.781, 0],
     weapon: "bitcoinCoin",
     // 황소처럼 Walk 가 48프레임임. 본은 22개를 꽉 써서 패딩이 없음.
     walkFrameCount: 48,
-    triangleCount: 1876,
+    triangleCount: 3392,
   },
 ] as const;
 
