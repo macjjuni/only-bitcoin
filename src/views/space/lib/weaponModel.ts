@@ -3,10 +3,13 @@ import {
   BoxGeometry,
   type BufferGeometry,
   Color,
+  CylinderGeometry,
   Float32BufferAttribute,
   type Material,
   MeshStandardMaterial,
+  SRGBColorSpace,
   type Texture,
+  TextureLoader,
 } from "three";
 import { mergeGeometries } from "three/examples/jsm/utils/BufferGeometryUtils.js";
 import type { SpaceWeaponId } from "@/entities/space";
@@ -16,12 +19,13 @@ import {
   type CrewInstanceGeometry,
   createCrewInstanceGeometry,
 } from "./crewSkinning";
+import { toVersionedModelUrl } from "./modelAssetUrl";
 
 /**
  * 공격할 때 손에 나타나는 무기. 기본은 렌치, 머슼크만 도지코인.
  *
- * 모델 파일에 넣지 않고 복셀 상자 몇 개로 코드에서 만듦. 모든 아바타 모델이 오른손을 같은
- * 본 번호(13)로 가져서, 정점을 그 본에 묶으면 걷기·공격 행렬을 그대로 따라 움직임.
+ * 모델 파일에 넣지 않고 코드에서 만듦. 모든 아바타 모델이 오른손을 같은 본 번호(13)로
+ * 가져서, 정점을 그 본에 묶으면 걷기·공격 행렬을 그대로 따라 움직임.
  * 크기는 모델 좌표(m, 배율 전)이고 아바타 배율은 그릴 때 같이 곱해짐.
  *
  * 팔 방향의 연장선으로 붙임(레스트에서 손 아래로 뻗음). 팔이 머리 위로 가면 머리 뒤로
@@ -44,54 +48,49 @@ interface WeaponPart {
 
 const STEEL_HANDLE = "#8f98a3";
 const STEEL_HEAD = "#c9d1da";
-const DOGE_GOLD = "#c2a633";
-const DOGE_MARK = "#7a6414";
+
+/** 렌치. 강철 손잡이·스패너 머리에 비트코인 주황 그립. 첫 상자는 손이 쥐는 그립. */
+const WRENCH_PARTS: readonly WeaponPart[] = [
+  { center: [0, -0.02, 0], size: [0.06, 0.12, 0.06], color: "#f7931a" },
+  { center: [0, -0.2, 0], size: [0.045, 0.26, 0.045], color: STEEL_HANDLE },
+  // 머리 뒤판. 앞쪽(-Z)으로 두 갈래가 벌어짐.
+  { center: [0, -0.37, 0.015], size: [0.06, 0.09, 0.05], color: STEEL_HEAD },
+  { center: [0, -0.42, -0.035], size: [0.06, 0.03, 0.07], color: STEEL_HEAD },
+  { center: [0, -0.33, -0.035], size: [0.06, 0.03, 0.07], color: STEEL_HEAD },
+];
 
 /**
- * 무기별 상자 목록. 첫 상자는 손이 쥐는 그립이고 손보다 살짝 두꺼워 주먹 밖으로 보임.
+ * 손에 쥔 큰 도지코인. 손이 동전 윗테를 잡음.
+ *
+ * 면이 앞뒤(±Z)를 봐서 뒤따르는 카메라에 내 동전 얼굴이 보임.
+ * 앞뒷면에 `scripts/bake-doge-coin.mjs` 가 구운 시바 동전 이미지를 입힘.
  */
-const WEAPON_PARTS: Record<SpaceWeaponId, readonly WeaponPart[]> = {
-  /** 강철 손잡이·스패너 머리에 비트코인 주황 그립. */
-  wrench: [
-    { center: [0, -0.02, 0], size: [0.06, 0.12, 0.06], color: "#f7931a" },
-    { center: [0, -0.2, 0], size: [0.045, 0.26, 0.045], color: STEEL_HANDLE },
-    // 머리 뒤판. 앞쪽(-Z)으로 두 갈래가 벌어짐.
-    { center: [0, -0.37, 0.015], size: [0.06, 0.09, 0.05], color: STEEL_HEAD },
-    { center: [0, -0.42, -0.035], size: [0.06, 0.03, 0.07], color: STEEL_HEAD },
-    { center: [0, -0.33, -0.035], size: [0.06, 0.03, 0.07], color: STEEL_HEAD },
-  ],
-  /**
-   * 막대 끝에 세운 금색 도지코인. 옆에서 보면 동전 면이 보임.
-   *
-   * 납작한 상자 둘을 십자로 겹쳐 팔각형으로 둥글게 보이게 함. 면에는 "Ð" 를 진한 금색으로
-   * 새김(세로 줄기 + 가로줄 + 앞쪽으로 닫힌 둥근 쪽).
-   */
-  dogeCoin: [
-    { center: [0, -0.02, 0], size: [0.06, 0.12, 0.06], color: "#6b4f2a" },
-    { center: [0, -0.2, 0], size: [0.045, 0.24, 0.045], color: STEEL_HANDLE },
-    { center: [0, -0.45, 0], size: [0.035, 0.27, 0.18], color: DOGE_GOLD },
-    { center: [0, -0.45, 0], size: [0.035, 0.18, 0.27], color: DOGE_GOLD },
-    // "Ð" 줄기·가로줄·위아래·앞쪽 둥근 면. 동전보다 살짝 두꺼워 양면에 보임.
-    { center: [0, -0.45, 0.04], size: [0.045, 0.15, 0.03], color: DOGE_MARK },
-    { center: [0, -0.45, 0.04], size: [0.045, 0.025, 0.08], color: DOGE_MARK },
-    { center: [0, -0.385, 0.0], size: [0.045, 0.025, 0.08], color: DOGE_MARK },
-    { center: [0, -0.515, 0.0], size: [0.045, 0.025, 0.08], color: DOGE_MARK },
-    { center: [0, -0.45, -0.05], size: [0.045, 0.11, 0.025], color: DOGE_MARK },
-  ],
+export const DOGE_COIN = {
+  radius: 0.22,
+  thickness: 0.04,
+  /** 손 위치 기준 동전 가운데 높이. 윗테가 손에 살짝 걸침. */
+  centerY: -0.2,
+  segments: 40,
+  textureUrl: "/models/doge-coin.webp",
+  /** 옆면이 읽는 텍스처 좌표. 이미지 맨 위 가운데 테두리 색. */
+  edgeUv: [0.5, 0.99],
+} as const;
+
+const WEAPON_TEXTURE_URLS: Partial<Record<SpaceWeaponId, string>> = {
+  dogeCoin: DOGE_COIN.textureUrl,
 };
 
-/**
- * 모델 하나의 무기 지오메트리.
- *
- * 걷기 셰이더가 쓰는 본 번호 속성과, 손 위치에서의 거리(`aWeaponOffset`)를 같이 담음.
- * 셰이더는 공격 진행도만큼 이 거리를 펼쳐 무기가 손에서 자라나듯 보이게 함.
- */
-export const createWeaponGeometry = (
-  weapon: SpaceWeaponId,
-  handPivot: readonly [number, number, number],
-): BufferGeometry => {
+const WEAPON_SURFACES: Record<SpaceWeaponId, { roughness: number; metalness: number }> = {
+  wrench: { roughness: 0.42, metalness: 0.55 },
+  // 금속감을 낮춰야 환경광 없이도 그림이 어둡게 묻히지 않음.
+  dogeCoin: { roughness: 0.4, metalness: 0.25 },
+};
+
+// region [Privates]
+/** 상자 목록을 정점 색이 든 지오메트리 하나로 합침. */
+const createPartsGeometry = (parts: readonly WeaponPart[]): BufferGeometry => {
   const color = new Color();
-  const parts = WEAPON_PARTS[weapon].map(({ center, size, color: hex }) => {
+  const boxes = parts.map(({ center, size, color: hex }) => {
     const box = new BoxGeometry(size[0], size[1], size[2]).toNonIndexed();
     box.translate(center[0], center[1], center[2]);
 
@@ -106,11 +105,80 @@ export const createWeaponGeometry = (
 
     return box;
   });
-  const geometry = mergeGeometries(parts);
+  const geometry = mergeGeometries(boxes);
 
   if (!geometry) {
-    throw new Error(`무기(${weapon}) 지오메트리를 합치지 못했습니다.`);
+    throw new Error("무기 상자 지오메트리를 합치지 못했습니다.");
   }
+
+  return geometry;
+};
+
+/**
+ * 도지코인 원기둥. 앞뒷면은 이미지가 똑바로 보이게 UV 를 다시 매기고 옆면은 테두리 색 한 점을 읽음.
+ *
+ * 앞(-Z)에서 보면 화면 오른쪽이 -X, 뒤(+Z)에서 보면 +X 라 면마다 u 방향을 뒤집음.
+ * 정점 색은 흰색이라 텍스처 색이 그대로 나옴.
+ */
+const createCoinGeometry = (): BufferGeometry => {
+  const { radius, thickness, centerY, segments, edgeUv } = DOGE_COIN;
+  const coin = new CylinderGeometry(radius, radius, thickness, segments).toNonIndexed();
+  coin.rotateX(Math.PI / 2);
+  coin.translate(0, centerY, 0);
+
+  const positions = coin.getAttribute("position");
+  const normals = coin.getAttribute("normal");
+  const uvs = new Float32Array(positions.count * 2);
+  for (let index = 0; index < positions.count; index += 1) {
+    const normalZ = normals.getZ(index);
+    if (Math.abs(normalZ) < 0.5) {
+      uvs.set(edgeUv, index * 2);
+      continue;
+    }
+    const side = Math.sign(normalZ);
+    uvs[index * 2] = 0.5 + (side * positions.getX(index)) / (2 * radius);
+    uvs[index * 2 + 1] = 0.5 + (positions.getY(index) - centerY) / (2 * radius);
+  }
+  coin.setAttribute("uv", new Float32BufferAttribute(uvs, 2));
+  coin.setAttribute(
+    "color",
+    new Float32BufferAttribute(new Float32Array(positions.count * 3).fill(1), 3),
+  );
+  coin.clearGroups();
+
+  return coin;
+};
+
+/** 무기 텍스처. 주소마다 한 장만 불러 내 아바타·남 아바타가 같이 씀. 정리하지 않음. */
+const weaponTextures = new Map<string, Texture>();
+
+const loadWeaponTexture = (url: string): Texture => {
+  const cached = weaponTextures.get(url);
+  if (cached) {
+    return cached;
+  }
+
+  // 불러오는 동안은 빈 텍스처라 동전이 잠깐 검게 보일 수 있음. 휘두를 때만 보여 그대로 둠.
+  const texture = new TextureLoader().load(toVersionedModelUrl(url));
+  texture.colorSpace = SRGBColorSpace;
+  texture.anisotropy = 4;
+  weaponTextures.set(url, texture);
+
+  return texture;
+};
+// endregion
+
+/**
+ * 모델 하나의 무기 지오메트리.
+ *
+ * 걷기 셰이더가 쓰는 본 번호 속성과, 손 위치에서의 거리(`aWeaponOffset`)를 같이 담음.
+ * 셰이더는 공격 진행도만큼 이 거리를 펼쳐 무기가 손에서 자라나듯 보이게 함.
+ */
+export const createWeaponGeometry = (
+  weapon: SpaceWeaponId,
+  handPivot: readonly [number, number, number],
+): BufferGeometry => {
+  const geometry = weapon === "dogeCoin" ? createCoinGeometry() : createPartsGeometry(WRENCH_PARTS);
 
   // 지금 위치가 곧 손에서의 거리임. 손 위치로 옮기기 전에 떠 둠.
   const offsets = (geometry.getAttribute("position").array as Float32Array).slice();
@@ -129,8 +197,8 @@ export const createWeaponGeometry = (
 /**
  * 무기 인스턴스 버퍼와 재질. 내 아바타(1칸)와 남 아바타 묶음(50칸)이 같이 씀.
  *
- * 재질은 정점 색을 쓰는 금속 재질에 걷기·공격 셰이더를 심고 무기 접기(`isWeapon`)를 켬.
- * 언마운트·모델 변경 때 직접 만든 버퍼와 재질을 정리함.
+ * 재질은 정점 색(+도지코인은 이미지)을 쓰는 금속 재질에 걷기·공격 셰이더를 심고
+ * 무기 접기(`isWeapon`)를 켬. 언마운트·모델 변경 때 직접 만든 버퍼와 재질을 정리함.
  */
 export const useWeapon = (
   weapon: SpaceWeaponId,
@@ -147,14 +215,15 @@ export const useWeapon = (
     return instance;
   }, [weapon, pivotX, pivotY, pivotZ, capacity]);
   const material = useMemo(() => {
+    const textureUrl = WEAPON_TEXTURE_URLS[weapon];
     const weaponMaterial = new MeshStandardMaterial({
       vertexColors: true,
-      roughness: 0.42,
-      metalness: 0.55,
+      map: textureUrl ? loadWeaponTexture(textureUrl) : null,
+      ...WEAPON_SURFACES[weapon],
     });
     applyCrewSkinning(weaponMaterial, walkTexture, kickTexture, true);
     return weaponMaterial;
-  }, [walkTexture, kickTexture]);
+  }, [weapon, walkTexture, kickTexture]);
 
   useEffect(() => {
     return () => {

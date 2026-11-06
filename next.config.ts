@@ -17,7 +17,7 @@ const APP_VERSION = `${packageJson.version}`;
  */
 const MODEL_ASSET_VERSIONS = Object.fromEntries(
   readdirSync("./public/models")
-    .filter((fileName) => /\.(glb|bin)$/.test(fileName))
+    .filter((fileName) => /\.(glb|bin|webp)$/.test(fileName))
     .map((fileName) => [
       fileName,
       createHash("sha256")

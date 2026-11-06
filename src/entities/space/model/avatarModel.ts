@@ -14,7 +14,7 @@
 export type SpaceWeaponId =
   /** 기본 무기. 비트코인 밈 "$5 렌치 공격". */
   | "wrench"
-  /** 머슼크 전용. 막대 끝 도지코인. */
+  /** 머슼크 전용. 손에 쥔 큰 도지코인(시바 이미지). */
   | "dogeCoin";
 
 export interface SpaceAvatarModel {
