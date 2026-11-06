@@ -1,13 +1,12 @@
 "use client";
 
 import { memo, type ReactNode, useState } from "react";
-import { resolveAvatarColor, SPACE_AVATAR_MODELS } from "@/entities/space";
+import { SPACE_AVATAR_MODELS } from "@/entities/space";
 
 interface SpaceAvatarPickerProps {
-  /** 지금 쓰는 모델 번호. 서버가 확정한 값이다. */
+  /** 지금 쓰는 모델 번호. 서버가 확정한 값임. */
   modelIndex: number;
-  colorIndex: number;
-  /** 저장·서버 전파까지 호출부가 맡는다. */
+  /** 저장·서버 전파까지 호출부가 맡음. */
   onChangeModel: (modelIndex: number) => Promise<boolean>;
   onClose: () => void;
 }
@@ -15,12 +14,12 @@ interface SpaceAvatarPickerProps {
 /**
  * 아바타 모델 선택 패널.
  *
- * 모델이 둘뿐이라 목록이 아니라 버튼 두 개로 둔다. 미리보기 3D 를 띄우지 않는
- * 이유는, 그러려면 패널 안에 별도 캔버스를 만들어야 하고 그 비용이 선택 한 번에
- * 비해 과하다. 대신 바꾸면 **화면의 내 아바타가 바로 바뀐다** — 그게 미리보기다.
+ * 모델마다 버튼 하나씩 세로로 둠. 미리보기 3D 는 띄우지 않음. 패널 안에 캔버스를
+ * 따로 만드는 비용이 선택 한 번에 비해 과함. 대신 바꾸면 **화면의 내 아바타가
+ * 바로 바뀜** — 그게 미리보기임.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SpaceAvatarPicker({ modelIndex, colorIndex, onChangeModel, onClose }: SpaceAvatarPickerProps): ReactNode {
+function SpaceAvatarPicker({ modelIndex, onChangeModel, onClose }: SpaceAvatarPickerProps): ReactNode {
   // region [Hooks]
   const [pendingIndex, setPendingIndex] = useState<number | null>(null);
   // endregion
@@ -70,11 +69,11 @@ function SpaceAvatarPicker({ modelIndex, colorIndex, onChangeModel, onClose }: S
                   : "border-white/10 bg-white/5 hover:bg-white/10"
               }`}
             >
-              {/* 앞치마 색은 모델과 무관하게 서버가 준 색이다. 같은 색으로 보여준다. */}
+              {/* 모델마다 고정 색. 플레이어 색은 모델에 입혀지므로 여기선 모델을 구분하는 데만 씀. */}
               <span
                 aria-hidden="true"
                 className="size-4 shrink-0 rounded-full border border-black/30"
-                style={{ backgroundColor: resolveAvatarColor(colorIndex) }}
+                style={{ backgroundColor: model.swatchColor }}
               />
               <span className="min-w-0 flex-1 text-sm font-medium text-white/90">
                 {model.label}

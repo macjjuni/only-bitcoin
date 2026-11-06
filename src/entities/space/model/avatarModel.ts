@@ -1,19 +1,21 @@
 /**
  * 고를 수 있는 아바타 모델.
  *
- * 모든 모델의 Walk `.bin` 은 **본 22칸** 폭이다. 본 수가 셰이더의 텍셀 조회 폭을 정하므로
- * 이것만은 반드시 같아야 한다 — 어긋나면 엉뚱한 텍셀을 읽어 아바타가 터진다.
+ * 모든 모델의 Walk `.bin` 은 **본 22칸** 폭임. 본 수가 셰이더의 텍셀 조회 폭을 정해서
+ * 이것만은 꼭 같아야 함. 어긋나면 엉뚱한 텍셀을 읽어 아바타가 터짐.
  *
- * **Walk 프레임 수는 모델마다 다를 수 있다**(크루·곰 40, 황소 48). 셰이더가
- * 프레임 수를 상수로 박지 않고 본 행렬 텍스처의 높이에서 읽기 때문이다.
- * 지오메트리·아틀라스·눈 글린트 유무도 모델마다 다르다.
+ * **Walk 프레임 수는 모델마다 다를 수 있음**(크루·곰 40, 황소 48). 셰이더가
+ * 프레임 수를 상수로 박지 않고 본 행렬 텍스처 높이에서 읽어서임.
+ * 지오메트리·아틀라스·눈 글린트 유무도 모델마다 다름.
  *
- * 에셋은 `scripts/blender/process-voxel-character.py` 가 `.blend` 에서 굽는다.
+ * 에셋은 `scripts/blender/process-voxel-character.py` 가 `.blend` 에서 구움.
  */
 export interface SpaceAvatarModel {
   id: string;
   /** 선택 UI 에 보이는 이름. */
   label: string;
+  /** 선택 UI 이름 옆 색 점. 플레이어 색과 무관하게 모델마다 고정. */
+  swatchColor: string;
   modelUrl: string;
   walkUrl: string;
   bodyMeshName: string;
@@ -22,8 +24,8 @@ export interface SpaceAvatarModel {
    * 붉게 발광하는 눈동자 메시.
    *
    * 크루는 `apply-laser-eyes-to-crew.py` 가 레이저아이 변형 glb 에서 UV·발광
-   * 마스크를 옮겨 만든다. 황소는 변형본이 없어 가공 스크립트가 눈동자 메시를
-   * 떼어 단색 발광 재질을 입힌다. 곰은 눈동자 메시가 따로 없어 `null`.
+   * 마스크를 옮겨 만듦. 황소는 변형본이 없어 가공 스크립트가 눈동자 메시를
+   * 떼어 단색 발광 재질을 입힘. 곰은 눈동자 메시가 따로 없어 `null`.
    */
   pupilGlintMeshName: string | null;
   /**
@@ -37,14 +39,14 @@ export interface SpaceAvatarModel {
   /**
    * Walk `.bin` 의 프레임 수. 가공 스크립트의 `[export] 프레임=` 값.
    *
-   * 로더가 `.bin` 크기를 이 값으로 검증하고 텍스처 높이로 쓴다. 틀리면 셰이더가
-   * 엉뚱한 텍셀을 읽는다.
+   * 로더가 `.bin` 크기를 이 값으로 검증하고 텍스처 높이로 씀. 틀리면 셰이더가
+   * 엉뚱한 텍셀을 읽음.
    */
   walkFrameCount: number;
   /**
-   * glb 의 삼각형 수. 예산 계산에 쓴다(§8).
+   * glb 의 삼각형 수. 예산 계산에 씀(§8).
    *
-   * 접지 그림자 평면(2 tri)은 모델 밖이라 포함하지 않는다.
+   * 접지 그림자 평면(2 tri)은 모델 밖이라 뺌.
    */
   triangleCount: number;
 }
@@ -53,6 +55,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
   {
     id: "crew",
     label: "맥시크루",
+    swatchColor: "#f7931a",
     modelUrl: "/models/crew.glb",
     walkUrl: "/models/crew-walk.bin",
     bodyMeshName: "crew_body",
@@ -66,6 +69,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
   {
     id: "bear",
     label: "숏베어",
+    swatchColor: "#3b82f6",
     modelUrl: "/models/bear.glb",
     walkUrl: "/models/bear-walk.bin",
     bodyMeshName: "bear_body",
@@ -79,6 +83,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
   {
     id: "bull",
     label: "풀롱불",
+    swatchColor: "#ef4444",
     modelUrl: "/models/bull.glb",
     walkUrl: "/models/bull-walk.bin",
     bodyMeshName: "bull_body",
@@ -86,13 +91,14 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     pupilGlintMeshName: "bull_pupil_glint",
     height: 1.81,
     headCenterY: 1.4638,
-    // Walk 가 48프레임이다. 셰이더는 텍스처 높이에서 읽으므로 그대로 쓴다.
+    // Walk 가 48프레임임. 셰이더는 텍스처 높이에서 읽어서 그대로 씀.
     walkFrameCount: 48,
     triangleCount: 1972,
   },
   {
     id: "pepe",
     label: "코인충",
+    swatchColor: "#22c55e",
     modelUrl: "/models/pepe.glb",
     walkUrl: "/models/pepe-walk.bin",
     bodyMeshName: "pepe_body",
@@ -106,15 +112,32 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     walkFrameCount: 40,
     triangleCount: 1286,
   },
+  {
+    id: "elon",
+    label: "머슼크",
+    swatchColor: "#ef4444",
+    modelUrl: "/models/elon.glb",
+    walkUrl: "/models/elon-walk.bin",
+    bodyMeshName: "elon_body",
+    // 연 재킷 안 티셔츠가 플레이어 색을 받음. 재킷은 원래대로 검정.
+    accentMeshName: "elon_accent",
+    // 눈이 머리 메시의 픽셀이라 떼어 낼 눈동자 메시가 없음.
+    pupilGlintMeshName: null,
+    height: 1.8,
+    headCenterY: 1.4771,
+    // 본 20개라 페페처럼 2칸을 항등 행렬로 채웠음.
+    walkFrameCount: 40,
+    triangleCount: 3202,
+  },
 ] as const;
 
 export const SPACE_DEFAULT_AVATAR_MODEL_INDEX = 0;
 
 /**
- * 모델 번호를 목록 범위로 접는다.
+ * 모델 번호를 목록 범위로 접음.
  *
- * 서버가 보낸 번호나 저장소에 남은 옛 번호가 범위를 벗어날 수 있다. 그때
- * 아바타를 안 그리는 대신 기본 모델로 떨어뜨린다 — 사람이 사라지는 쪽이 더 나쁘다.
+ * 서버가 보낸 번호나 저장소에 남은 옛 번호가 범위를 벗어날 수 있음. 그때
+ * 아바타를 안 그리는 대신 기본 모델로 떨어뜨림. 사람이 사라지는 쪽이 더 나쁨.
  */
 export const resolveAvatarModel = (modelIndex: number): SpaceAvatarModel => {
   const isValid =
@@ -123,7 +146,7 @@ export const resolveAvatarModel = (modelIndex: number): SpaceAvatarModel => {
   return SPACE_AVATAR_MODELS[isValid ? modelIndex : SPACE_DEFAULT_AVATAR_MODEL_INDEX];
 };
 
-/** 프로토콜로 받은 값을 그대로 쓸 수 있는지. 서버·클라이언트가 같은 판정을 쓴다. */
+/** 프로토콜로 받은 값을 그대로 쓸 수 있는지. 서버·클라이언트가 같은 판정을 씀. */
 export const isAvatarModelIndex = (value: unknown): value is number => {
   return (
     typeof value === "number" &&

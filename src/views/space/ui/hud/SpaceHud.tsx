@@ -300,7 +300,6 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     <div className="pointer-events-auto absolute right-12 top-24">
       <SpaceAvatarPicker
         modelIndex={modelIndex}
-        colorIndex={session.self?.colorIndex ?? 0}
         onChangeModel={onChangeModel}
         onClose={onClickCloseAvatarPicker}
       />
