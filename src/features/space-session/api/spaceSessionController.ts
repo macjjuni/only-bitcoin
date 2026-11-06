@@ -41,7 +41,7 @@ export interface SpaceSessionSocket {
 
 interface SpaceSessionControllerOptions {
   identity: SpaceSessionIdentity;
-  /** 입장할 때 보낼 아바타 모델. 저장소에서 읽은 값을 그대로 받는다. */
+  /** 입장할 때 보낼 아바타 모델. 저장소에서 읽은 값을 그대로 받음. */
   modelIndex: number;
   webSocketUrl: string;
   createSocket?: (url: string) => SpaceSessionSocket;
@@ -75,6 +75,11 @@ interface PendingModel extends PendingMessage {
 const socketOpenState = 1;
 const socketClosingState = 2;
 const movementIntervalMs = 100;
+/**
+ * 송신 박자 여유. 30 fps 면 프레임이 100 ms 에 딱 안 맞아 133 ms 마다 보내게 됐음.
+ * 예정 시각보다 이만큼 이르면 보내고 예정 시각을 누적해 평균 100 ms 로 맞춤.
+ */
+const movementSendToleranceMs = 8;
 const heartbeatIntervalMs = 15_000;
 const heartbeatTimeoutMs = 45_000;
 const connectionTimeoutMs = 10_000;
@@ -83,17 +88,17 @@ const messageTimeoutMs = 10_000;
  * 업그레이드 한도를 넘겼다고 서버가 알려주는 종료 코드.
  *
  * 핸드셰이크 429는 브라우저가 JS 에 숨기므로 Worker 가 101 로 받은 뒤 이 코드로
- * 닫는다. 영구 오류가 아니다 — 창이 지나면 다시 들어갈 수 있다.
+ * 닫음. 영구 오류 아님. 창이 지나면 다시 들어갈 수 있음.
  */
 const rateLimitCloseCode = 4010;
-/** 한도를 맞은 뒤 쉬는 시간. 서버 리미터 창(60초)과 같게 둔다. */
+/** 한도를 맞은 뒤 쉬는 시간. 서버 리미터 창(60초)과 같게 둠. */
 const rateLimitCooldownMs = 60_000;
 /**
  * 수동 재시도의 최소 간격.
  *
- * 재시도 버튼은 백오프를 0으로 되돌리고 바로 올라간다. 연타하면 그대로
+ * 재시도 버튼은 백오프를 0으로 되돌리고 바로 올라감. 연타하면 그대로
  * 업그레이드 요청이 되어 IP당 30회/60초 한도를 태우고, 거절된 요청도 창에
- * 쌓이므로 눌러서 고치려는 행동이 장애를 분 단위로 늘린다.
+ * 쌓여서 눌러 고치려다 장애가 분 단위로 늘어남.
  */
 const retryThrottleMs = 5_000;
 const maximumBufferedBytes = 16_384;
@@ -113,9 +118,9 @@ const permanentErrorCodes = new Set([
 const permanentCloseCodes = new Set([1002, 1003, 1008, 4001]);
 
 /**
- * 입장 때 받은 기록을 지금 보던 목록에 합친다.
+ * 입장 때 받은 기록을 지금 보던 목록에 합침.
  *
- * 재접속이면 이미 본 메시지와 겹친다. id 로 중복을 빼고 시간순으로 다시 세운 뒤
+ * 재접속이면 이미 본 메시지와 겹침. id 로 중복을 빼고 시간순으로 다시 세운 뒤
  * 최근 100개만 남김.
  */
 const mergeChatHistory = (
@@ -144,14 +149,14 @@ const hasSameMovement = (first: MovementFrame | null, second: MovementFrame): bo
   );
 };
 
-/** 서버 스냅샷과 같은 cm·8비트 방향으로 접어 미세한 부동소수점 흔들림을 보내지 않는다. */
+/** 서버 스냅샷과 같은 cm·8비트 방향으로 접어 미세한 부동소수점 흔들림은 안 보냄. */
 const quantizeMovement = (state: MovementFrame): MovementFrame => {
   const normalizedYaw = ((state.yaw % fullTurn) + fullTurn) % fullTurn;
   const yawStep = Math.round((normalizedYaw / fullTurn) * yawSteps) % yawSteps;
 
   return {
     x: Math.round(state.x * 100) / 100,
-    // 스냅샷이 1 cm 1바이트로 담으므로 같은 정밀도로 접는다.
+    // 스냅샷이 1 cm 정밀도라 같은 정밀도로 접음.
     y: Math.round(state.y * 100) / 100,
     z: Math.round(state.z * 100) / 100,
     yaw: (yawStep / yawSteps) * fullTurn,
@@ -160,10 +165,10 @@ const quantizeMovement = (state: MovementFrame): MovementFrame => {
 };
 
 /**
- * 소켓과 타이머를 소유하며 위치 프레임은 React 상태 밖에서 처리한다.
+ * 소켓·타이머를 소유하고 위치 프레임은 React 상태 밖에서 처리함.
  *
- * roster가 바뀔 때만 원격 배열을 교체하고, 프레임별 보간은 같은 배열의 좌표를 갱신한다.
- * 세대 번호로 이전 연결의 지연 이벤트를 무시해 재연결 뒤 상태가 되돌아가지 않게 한다.
+ * roster가 바뀔 때만 원격 배열을 교체하고, 프레임별 보간은 같은 배열의 좌표만 갱신함.
+ * 세대 번호로 이전 연결의 늦은 이벤트를 무시해 재연결 뒤 상태가 되돌아가지 않게 함.
  */
 export class SpaceSessionController {
   private readonly options: Required<SpaceSessionControllerOptions>;
@@ -201,9 +206,9 @@ export class SpaceSessionController {
     isNicknamePending: false,
   };
 
-  /** 재접속 시 보낼 닉네임. 변경이 확정되면 갱신한다. */
+  /** 재접속 시 보낼 닉네임. 변경이 확정되면 갱신함. */
   private nickname: string;
-  /** 고른 아바타 모델. 재접속할 때 입장 프레임에 다시 실어 보낸다. */
+  /** 고른 아바타 모델. 재접속할 때 입장 프레임에 다시 실어 보냄. */
   private modelIndex: number;
 
   constructor(options: SpaceSessionControllerOptions) {
@@ -256,7 +261,7 @@ export class SpaceSessionController {
     this.detachSocket();
     this.clearRoster();
 
-    // 한도를 맞은 직후라면 눌러도 올라가지 않는다. 다시 때리면 창만 길어진다.
+    // 한도를 맞은 직후면 눌러도 안 올라감. 다시 때리면 창만 길어짐.
     if (now < this.rateLimitedUntil) {
       this.updateSnapshot({
         presence: createOfflinePresence(),
@@ -341,10 +346,10 @@ export class SpaceSessionController {
   };
 
   /**
-   * 닉네임을 바꾼다.
+   * 닉네임을 바꿈.
    *
-   * 서버가 정규화한 뒤 `peer` 프레임으로 되돌려줘야 성공으로 본다. 길이·금지어
-   * 판정은 서버가 하므로 여기서는 비어 있는지만 본다.
+   * 서버가 정규화한 뒤 `peer` 프레임으로 되돌려줘야 성공으로 봄. 길이·금지어
+   * 판정은 서버가 해서 여기선 비었는지만 봄.
    */
   changeNickname = (nickname: string): Promise<boolean> => {
     const trimmedNickname = nickname.trim();
@@ -383,13 +388,13 @@ export class SpaceSessionController {
   };
 
   /**
-   * 아바타 모델을 바꾼다.
+   * 아바타 모델을 바꿈.
    *
-   * 닉네임과 같은 흐름이다 — 서버가 `peer` 프레임으로 되돌려줘야 성공으로 본다.
-   * 연결 전이라면 보낼 곳이 없으므로 저장만 하고(호출부가 한다) 거짓을 돌려준다.
+   * 닉네임과 같은 흐름. 서버가 `peer` 프레임으로 되돌려줘야 성공으로 봄.
+   * 연결 전이면 보낼 곳이 없어 저장만 하고(호출부 몫) 거짓을 돌려줌.
    */
   changeModel = (modelIndex: number): Promise<boolean> => {
-    // 연결 전에도 선택은 유지돼야 한다. 다음 입장 프레임에 실어 보낸다.
+    // 연결 전에도 선택은 유지해야 함. 다음 입장 프레임에 실어 보냄.
     this.modelIndex = modelIndex;
 
     if (
@@ -439,7 +444,7 @@ export class SpaceSessionController {
     this.pendingNickname = null;
     clearTimeout(pending.timeout);
     if (hasSucceeded) {
-      // 재접속할 때도 바뀐 이름으로 들어가야 한다.
+      // 재접속할 때도 바뀐 이름으로 들어가야 함.
       this.nickname = pending.nickname;
     }
     this.updateSnapshot({ isNicknamePending: false });
@@ -462,7 +467,7 @@ export class SpaceSessionController {
       return;
     }
 
-    // 탭 복귀처럼 백오프를 거치지 않는 경로도 쉬는 시간은 지켜야 한다.
+    // 탭 복귀처럼 백오프를 안 거치는 경로도 쉬는 시간은 지켜야 함.
     if (this.options.now() < this.rateLimitedUntil) {
       this.scheduleReconnect();
       return;
@@ -607,8 +612,8 @@ export class SpaceSessionController {
           return;
         }
         if (frame.peer.seat === this.snapshot.self.seat) {
-          // 닉네임만 바뀐 프레임에 위치를 되감으면 캐릭터가 뒤로 튄다.
-          // 서버가 이동을 거절했을 때만 좌표가 실제로 달라진다.
+          // 닉네임만 바뀐 프레임에 위치를 되감으면 캐릭터가 뒤로 튐.
+          // 서버가 이동을 거절했을 때만 좌표가 실제로 달라짐.
           if (!hasSameMovement(this.lastSentMovement, quantizeMovement(frame.peer))) {
             this.setAuthoritativeMovement(frame.peer);
           }
@@ -659,15 +664,15 @@ export class SpaceSessionController {
         return;
       }
       case "error": {
-        // 좌석을 잃었다는 뜻이라 rid 가 붙어 있어도 연결을 다시 세운다.
+        // 좌석을 잃었다는 뜻이라 rid 가 붙어 있어도 연결을 다시 세움.
         if (frame.code === "JOIN_REQUIRED") {
           this.handleDisconnected(frame.message);
           return;
         }
-        // rid 가 붙은 오류는 한 요청에 대한 답이다. 연결을 끊을 이유가 없다.
-        // 같은 코드라도 입장 때 오면(rid 없음) 영구 오류로 다뤄야 한다. 예를
+        // rid 가 붙은 오류는 한 요청에 대한 답임. 연결을 끊을 이유 없음.
+        // 같은 코드라도 입장 때 오면(rid 없음) 영구 오류로 다룸. 예를
         // 들어 닉네임 거절은 입장이면 재시도해도 소용없지만, 이름 변경이면
-        // 입력만 고쳐 다시 보내면 된다.
+        // 입력만 고쳐 다시 보내면 됨.
         if (frame.rid) {
           if (this.pendingMessage?.requestId === frame.rid) {
             this.finishPendingMessage(false);
@@ -685,7 +690,7 @@ export class SpaceSessionController {
           this.stopAutomaticRetry(frame.message);
           return;
         }
-        // 입장 중 오류는 연결을 다시 세운다.
+        // 입장 중 오류는 연결을 다시 세움.
         if (this.snapshot.presence.status === "connecting") {
           this.handleDisconnected(frame.message);
           return;
@@ -748,7 +753,7 @@ export class SpaceSessionController {
       !movement ||
       !this.isVisible ||
       this.snapshot.presence.status !== "online" ||
-      now - this.lastMovementSentAt < movementIntervalMs ||
+      now - this.lastMovementSentAt < movementIntervalMs - movementSendToleranceMs ||
       hasSameMovement(this.lastSentMovement, movement) ||
       (this.socket?.bufferedAmount ?? 0) > maximumBufferedBytes
     ) {
@@ -757,7 +762,9 @@ export class SpaceSessionController {
 
     if (this.sendFrame({ v: SPACE_PROTOCOL_VERSION, t: "move", ...movement })) {
       this.lastSentMovement = { ...movement };
-      this.lastMovementSentAt = now;
+      // 계속 움직이는 중이면 예정 시각을 누적함. 쉬다 다시 보내면 지금부터 셈.
+      const isOnCadence = now - this.lastMovementSentAt < movementIntervalMs * 2;
+      this.lastMovementSentAt = isOnCadence ? this.lastMovementSentAt + movementIntervalMs : now;
     }
   }
 
@@ -832,7 +839,7 @@ export class SpaceSessionController {
     const baseDelayMs = Math.min(1_000 * 2 ** exponent, 30_000);
     const randomValue = Math.min(Math.max(this.options.random(), 0), 1);
     const backoffDelayMs = Math.min(Math.round(baseDelayMs * (0.75 + randomValue * 0.5)), 30_000);
-    // 쉬는 시간이 남아 있으면 백오프보다 그쪽을 따른다. 먼저 올라가면 창만 길어진다.
+    // 쉬는 시간이 남았으면 백오프보다 그쪽을 따름. 먼저 올라가면 창만 길어짐.
     const delayMs = Math.max(backoffDelayMs, this.rateLimitedUntil - this.options.now());
     this.retryAttempt += 1;
     this.reconnectTimer = setTimeout(() => {

@@ -202,6 +202,20 @@ describe("SpaceSessionController", () => {
     controller.stop();
   });
 
+  it("30fps 프레임에서도 평균 100ms 박자로 보냄", () => {
+    const { controller, welcome } = createHarness();
+    controller.start();
+    const socket = welcome();
+    const startedAt = Date.now();
+
+    for (let frameIndex = 0; frameIndex < 90; frameIndex += 1) {
+      vi.setSystemTime(startedAt + Math.round((frameIndex * 1000) / 30));
+      controller.publishMovement(movement(frameIndex + 1));
+    }
+    expect(sentFrames(socket, "move")).toHaveLength(30);
+    controller.stop();
+  });
+
   it("서버 자기 좌표 보정은 self를 갱신하고 과거 위치를 자동으로 재송신하지 않는다", () => {
     const { controller, welcome } = createHarness();
     controller.start();
@@ -250,7 +264,8 @@ describe("SpaceSessionController", () => {
     const players = controller.getSnapshot().remotePlayers;
     socket.receive(encodeSpaceSnapshot({ timestamp: 100, players: [{ ...remote, x: 7 }] }));
     expect(onChange).not.toHaveBeenCalled();
-    expect(controller.sampleRemotePlayers(Date.now() + 100)).toBe(players);
+    // 재생 지연이 2칸(200 ms)이라 그만큼 지나야 도착 위치에 닿음.
+    expect(controller.sampleRemotePlayers(Date.now() + 200)).toBe(players);
     expect(players[0].x).toBe(7);
     controller.stop();
   });
@@ -325,7 +340,7 @@ describe("SpaceSessionController", () => {
     });
 
     expect(await failed).toBe(false);
-    // 메시지 한 번 실패한 대가로 재접속·리스폰까지 하면 안 된다.
+    // 메시지 한 번 실패했다고 재접속·리스폰까지 하면 안 됨.
     expect(controller.getSnapshot().presence.status).toBe("online");
     expect(controller.getSnapshot().self).not.toBeNull();
     vi.advanceTimersByTime(30_000);
@@ -347,7 +362,7 @@ describe("SpaceSessionController", () => {
     expect(unavailable.sockets).toHaveLength(2);
     unavailable.controller.stop();
 
-    // 서버가 좌석을 모른다고 하면 rid 가 붙어 있어도 연결을 다시 세워야 한다.
+    // 서버가 좌석을 모른다고 하면 rid 가 붙어 있어도 연결을 다시 세워야 함.
     const joinRequired = createHarness();
     joinRequired.controller.start();
     joinRequired.welcome();
@@ -463,10 +478,10 @@ describe("SpaceSessionController", () => {
     welcome().emitClose(4010);
     expect(controller.getSnapshot().error).toContain("접속 요청이 많아요");
 
-    // 백오프(최대 30초)가 먼저 깨워도 창이 남아 있는 동안은 소켓을 만들지 않는다.
+    // 백오프(최대 30초)가 먼저 깨워도 창이 남은 동안은 소켓을 안 만듦.
     vi.advanceTimersByTime(59_000);
     expect(sockets).toHaveLength(1);
-    // 창이 남아 있으면 재시도 버튼도 올라가지 않는다. 다시 때리면 창만 길어진다.
+    // 창이 남았으면 재시도 버튼도 안 올라감. 다시 때리면 창만 길어짐.
     controller.retry();
     expect(sockets).toHaveLength(1);
 
@@ -603,7 +618,7 @@ describe("SpaceSessionController", () => {
     expect(await changed).toBe(true);
     expect(controller.getSnapshot().self?.modelIndex).toBe(1);
 
-    // 끊겼다 다시 들어갈 때 옛 모델로 입장하면 바꾼 의미가 없다.
+    // 끊겼다 다시 들어갈 때 옛 모델로 입장하면 바꾼 의미가 없음.
     socket.emitClose();
     vi.advanceTimersByTime(750);
     sockets[1].open();
@@ -625,8 +640,8 @@ describe("SpaceSessionController", () => {
     const socket = welcome();
 
     const changed = controller.changeModel(1);
-    // 구 버전 서버는 모르는 프레임을 받으면 연결을 끊는다. 보류가 남으면
-    // 타임아웃이 뜰 때까지 다음 시도가 조용히 막힌다.
+    // 구 버전 서버는 모르는 프레임을 받으면 연결을 끊음. 보류가 남으면
+    // 타임아웃이 뜰 때까지 다음 시도가 조용히 막힘.
     socket.emitClose();
     expect(await changed).toBe(false);
 
@@ -662,7 +677,7 @@ describe("SpaceSessionController", () => {
     expect(await changed).toBe(false);
     expect(controller.getSnapshot().presence.status).toBe("online");
     expect(controller.getSnapshot().self?.modelIndex).toBe(0);
-    // 보류가 비었으니 같은 연결에서 바로 다시 보낼 수 있다.
+    // 보류가 비어 같은 연결에서 바로 다시 보낼 수 있음.
     expect(controller.changeModel(2)).toBeInstanceOf(Promise);
     expect(sentFrames(socket, "model")).toHaveLength(2);
     controller.stop();
@@ -684,7 +699,7 @@ describe("SpaceSessionController", () => {
     expect(controller.getSnapshot().self?.nickname).toBe("새이름");
     expect(controller.getSnapshot().isNicknamePending).toBe(false);
 
-    // 끊겼다 다시 들어갈 때 옛 이름으로 입장하면 바꾼 의미가 없다.
+    // 끊겼다 다시 들어갈 때 옛 이름으로 입장하면 바꾼 의미가 없음.
     socket.emitClose();
     vi.advanceTimersByTime(750);
     sockets[1].open();
@@ -714,7 +729,7 @@ describe("SpaceSessionController", () => {
     });
 
     expect(await rejected).toBe(false);
-    // 입장 때 같은 코드가 오면 영구 오류지만, 이름 변경이면 입력만 고치면 된다.
+    // 입장 때 같은 코드면 영구 오류지만 이름 변경이면 입력만 고치면 됨.
     expect(controller.getSnapshot().presence.status).toBe("online");
     expect(controller.getSnapshot().self?.nickname).toBe("익명");
     vi.advanceTimersByTime(30_000);
@@ -729,7 +744,7 @@ describe("SpaceSessionController", () => {
     controller.publishMovement(movement(4));
     const beforeMoves = sentFrames(socket, "move").length;
 
-    // 서버는 이름만 바뀌어도 현재 좌표를 그대로 담아 보낸다.
+    // 서버는 이름만 바뀌어도 현재 좌표를 그대로 담아 보냄.
     socket.receive({
       v: SPACE_PROTOCOL_VERSION,
       t: "peer",
@@ -738,7 +753,7 @@ describe("SpaceSessionController", () => {
     vi.advanceTimersByTime(200);
     controller.publishMovement(movement(4));
 
-    // 되감으면 같은 자리를 한 번 더 보낸다.
+    // 되감으면 같은 자리를 한 번 더 보냄.
     expect(sentFrames(socket, "move").length).toBe(beforeMoves);
     controller.stop();
   });
