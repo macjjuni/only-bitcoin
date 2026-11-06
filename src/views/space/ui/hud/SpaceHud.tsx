@@ -7,6 +7,7 @@ import { memo, type ReactNode, useCallback, useEffect, useMemo, useState } from 
 import { saveChatNickname } from "@/features/chat-session";
 import {
   JumpButton,
+  KickButton,
   type SpaceInputSource,
   shouldIgnoreSpaceHotkey,
   useCoarsePointer,
@@ -25,7 +26,7 @@ import SpaceNicknameEditor from "./SpaceNicknameEditor";
 import SpaceOccupantBadge from "./SpaceOccupantBadge";
 import SpaceShareDialog from "./SpaceShareDialog";
 
-/** 히스토리가 없을 때(직접 링크 진입) 돌아갈 곳. `/space` 를 노출하는 목록이다. */
+/** 히스토리가 없을 때(직접 링크 진입) 돌아갈 곳. `/space` 를 노출하는 목록임. */
 const FALLBACK_BACK_PATH = "/orange";
 
 /** 설정 화면 개발자 후원과 같은 라이트닝 주소. 비어 있으면 후원 버튼을 숨김. */
@@ -40,7 +41,7 @@ interface SpaceHudProps {
   inputSource: SpaceInputSource;
   session: SpaceSession;
   nickname: string;
-  /** 지금 쓰는 아바타 모델. 서버가 확정한 값이 우선한다. */
+  /** 지금 쓰는 아바타 모델. 서버가 확정한 값이 우선함. */
   modelIndex: number;
   onChangeModel: (modelIndex: number) => Promise<boolean>;
 }
@@ -48,12 +49,12 @@ interface SpaceHudProps {
 /**
  * 캔버스 위에 떠 있는 2D 조작 레이어.
  *
- * 접속 표시는 대화 내역 맨 위 줄에 함께 둠(모바일 좌측 상단, 데스크톱 좌측 하단). 우측 상단은 버튼 묶음이다. 안내와 상태를 DOM 으로
- * 제공한다. 캔버스 안 텍스트에만 의존하면 확대·스크린리더·WebGL 실패 상황에서
- * 모두 읽히지 않는다.
+ * 접속 표시는 대화 내역 맨 위 줄에 함께 둠(모바일 좌측 상단, 데스크톱 좌측 하단). 우측 상단은 버튼 묶음임. 안내와 상태를 DOM 으로
+ * 제공함. 캔버스 안 텍스트에만 의존하면 확대·스크린리더·WebGL 실패 상황에서
+ * 모두 읽히지 않음.
  *
- * 노치와 둥근 모서리를 피하려고 `safe-area-inset` 만큼 안쪽으로 들인다.
- * 전체 화면 3D 페이지라 브라우저가 대신 비켜주지 않는다.
+ * 노치와 둥근 모서리를 피하려고 `safe-area-inset` 만큼 안쪽으로 들임.
+ * 전체 화면 3D 페이지라 브라우저가 대신 비켜주지 않음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }: SpaceHudProps): ReactNode {
@@ -73,7 +74,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
 
   // region [Events]
   const onClickBack = useCallback((): void => {
-    // 직접 링크로 들어온 경우 뒤로 갈 곳이 없어 빈 화면에 남는다.
+    // 직접 링크로 들어온 경우 뒤로 갈 곳이 없어 빈 화면에 남음.
     if (window.history.length > 1) {
       router.back();
       return;
@@ -104,7 +105,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     setIsShareOpen(true);
   }, []);
 
-  /** 닫은 뒤 포커스를 연 버튼으로 돌려준다. 키보드 사용자가 자리를 잃지 않게. */
+  /** 닫은 뒤 포커스를 연 버튼으로 돌려줌. 키보드 사용자가 자리를 잃지 않게. */
   const onClickCloseShare = useCallback((): void => {
     setIsShareOpen(false);
     document.getElementById("space-share-toggle")?.focus();
@@ -148,7 +149,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     document.getElementById("space-nickname-toggle")?.focus();
   }, []);
 
-  /** 서버가 받아들인 이름만 저장한다. 채팅 위젯과 같은 저장소를 쓴다. */
+  /** 서버가 받아들인 이름만 저장함. 채팅 위젯과 같은 저장소를 씀. */
   const onSubmitNickname = useCallback(
     async (nickname: string): Promise<boolean> => {
       const wasAccepted = await session.changeNickname(nickname);
@@ -166,11 +167,11 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
 
   // region [Privates]
   /**
-   * 데스크톱에서 Enter 로 대화 입력칸에 들어간다.
+   * 데스크톱에서 Enter 로 대화 입력칸에 들어감.
    *
-   * 손가락 기기에는 물리 키보드가 없다. 입력창·버튼에 포커스가 있을 때는
-   * 흘려보낸다. 글자를 치는 중이면 그 키는 입력창 몫이고, 버튼이면 브라우저가
-   * 기본 활성화를 처리한다. 모달이 떠 있으면 뒤에 가려진 입력칸으로 들어가지 않게 함.
+   * 손가락 기기에는 물리 키보드가 없음. 입력창·버튼에 포커스가 있을 때는
+   * 흘려보냄. 글자를 치는 중이면 그 키는 입력창 몫이고, 버튼이면 브라우저가
+   * 기본 활성화를 처리함. 모달이 떠 있으면 뒤에 가려진 입력칸으로 들어가지 않게 함.
    */
   const attachChatHotkey = useCallback((): (() => void) | undefined => {
     if (isCoarsePointer || isDonationOpen || isShareOpen) {
@@ -313,10 +314,10 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
   ) : null;
 
   /**
-   * 조이스틱과 점프 버튼은 손가락 기기에만 띄운다. 마우스 환경에는 WASD·Space 가 있다.
+   * 조이스틱과 점프 버튼은 손가락 기기에만 띄움. 마우스 환경에는 WASD·Space 가 있음.
    *
-   * 채팅이나 닉네임 입력 중에는 둘 다 내려 키보드와 조작이 겹치지 않게 한다.
-   * 언마운트 정리가 눌려 있던 입력까지 0 으로 비운다.
+   * 채팅이나 닉네임 입력 중에는 둘 다 내려 키보드와 조작이 겹치지 않게 함.
+   * 언마운트 정리가 눌려 있던 입력까지 0 으로 비움.
    */
   const shouldRenderTouchControls =
     isCoarsePointer &&
@@ -330,11 +331,12 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
       <div className="pointer-events-auto">
         <VirtualJoystick inputSource={inputSource} />
         <JumpButton inputSource={inputSource} />
+        <KickButton inputSource={inputSource} />
       </div>
     ) : null;
   // endregion
 
-  // 경로가 바뀌는 동안에도 HUD 가 남지 않도록 현재 경로를 키로 쓴다.
+  // 경로가 바뀌는 동안에도 HUD 가 남지 않도록 현재 경로를 키로 씀.
   return (
     <div
       key={pathname}
@@ -389,13 +391,13 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
 
         {AvatarPickerTemplate}
 
-        {/* 안내는 읽기 전용이다. 터치를 막으면 열어둔 동안 그 영역의 시야 조작이 죽는다. */}
+        {/* 안내는 읽기 전용임. 터치를 막으면 열어둔 동안 그 영역의 시야 조작이 죽음. */}
         {GuidePanelTemplate}
       </div>
 
       {TouchControlsTemplate}
 
-      {/* 손가락 기기 전용 좌측 하단 채팅 버튼. 조이스틱 반대쪽 엄지 자리다. */}
+      {/* 손가락 기기 전용 좌측 하단 채팅 버튼. 조이스틱 반대쪽 엄지 자리임. */}
       {shouldRenderTouchControls && (
         <div
           className="pointer-events-auto absolute"

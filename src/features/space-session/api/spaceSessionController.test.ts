@@ -81,9 +81,19 @@ const createHarness = (webSocketUrl = "wss://example.com/v1/space/ws") => {
     createRequestId: () => requestId,
   });
 
-  const welcome = (socket = sockets[sockets.length - 1], peers: SpacePeer[] = []) => {
+  const welcome = (
+    socket = sockets[sockets.length - 1],
+    peers: SpacePeer[] = [],
+    features?: string[],
+  ) => {
     socket.open();
-    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "welcome", self, peers });
+    socket.receive({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "welcome",
+      self,
+      peers,
+      ...(features ? { features } : {}),
+    });
     return socket;
   };
 
@@ -100,6 +110,8 @@ const movement = (x: number, y = 0): LocalPlayerState => ({
   velocityZ: 0,
   velocityY: 0,
   isRunning: false,
+  knockbackX: 0,
+  knockbackZ: 0,
 });
 
 const sentFrames = (socket: FakeSocket, type: string) =>
@@ -162,7 +174,7 @@ describe("SpaceSessionController", () => {
     const socket = welcome(sockets[0], [remote]);
 
     expect(sentFrames(socket, "join")).toEqual([
-      { v: SPACE_PROTOCOL_VERSION, t: "join", ...identity, modelIndex: 0 },
+      { v: SPACE_PROTOCOL_VERSION, t: "join", ...identity, modelIndex: 0, features: ["kick"] },
     ]);
     expect(socket.binaryType).toBe("arraybuffer");
     expect(controller.getSnapshot().presence).toEqual({ status: "online", occupantCount: 2 });
@@ -657,6 +669,7 @@ describe("SpaceSessionController", () => {
         clientKey: identity.clientKey,
         nickname: identity.nickname,
         modelIndex: 1,
+        features: ["kick"],
       },
     ]);
     controller.stop();
@@ -738,6 +751,7 @@ describe("SpaceSessionController", () => {
         clientKey: identity.clientKey,
         nickname: "새이름",
         modelIndex: 0,
+        features: ["kick"],
       },
     ]);
     controller.stop();
@@ -799,5 +813,62 @@ describe("SpaceSessionController", () => {
 
     expect(sentFrames(socket, "move").length).toBeGreaterThan(beforeMoves);
     controller.stop();
+  });
+
+  describe("발차기", () => {
+    it("입장 때 발차기를 안다고 알리고 서버가 지원해야 canKick 이 켜짐", () => {
+      const { controller, welcome } = createHarness();
+      controller.start();
+      const oldServer = welcome();
+
+      expect(sentFrames(oldServer, "join")[0]).toMatchObject({ features: ["kick"] });
+      expect(controller.getSnapshot().canKick).toBe(false);
+      expect(controller.sendKick(1)).toBe(false);
+      controller.stop();
+
+      const next = createHarness();
+      next.controller.start();
+      const socket = next.welcome(undefined, [remote], ["kick"]);
+
+      expect(next.controller.getSnapshot().canKick).toBe(true);
+      expect(next.controller.sendKick(1)).toBe(true);
+      expect(next.controller.sendKick(null)).toBe(true);
+      expect(sentFrames(socket, "kick")).toEqual([
+        { v: SPACE_PROTOCOL_VERSION, t: "kick", target: 1 },
+        { v: SPACE_PROTOCOL_VERSION, t: "kick" },
+      ]);
+      next.controller.stop();
+    });
+
+    it("받은 발차기를 큐에 쌓고 꺼내면 비움. React 스냅샷은 안 건드림", () => {
+      const { controller, welcome } = createHarness();
+      controller.start();
+      const socket = welcome(undefined, [remote], ["kick"]);
+      const onChange = vi.fn();
+      controller.subscribe(onChange);
+
+      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, to: 0, dirX: -1, dirZ: 0 });
+      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, dirX: 0, dirZ: 1 });
+
+      expect(onChange).not.toHaveBeenCalled();
+      expect(controller.drainKickEvents()).toEqual([
+        { from: 1, to: 0, dirX: -1, dirZ: 0 },
+        { from: 1, dirX: 0, dirZ: 1 },
+      ]);
+      expect(controller.drainKickEvents()).toEqual([]);
+      controller.stop();
+    });
+
+    it("모르는 새 서버 프레임은 끊지 않고 무시함", () => {
+      const { controller, welcome } = createHarness();
+      controller.start();
+      const socket = welcome();
+
+      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "dance", seat: 1 });
+
+      expect(controller.getSnapshot().presence.status).toBe("online");
+      expect(controller.getSnapshot().error).toBeNull();
+      controller.stop();
+    });
   });
 });

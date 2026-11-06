@@ -19,6 +19,7 @@ import {
   type LocalPlayerState,
   resolveColorIndexFromClientKey,
   SPACE_HALL,
+  SPACE_KICK,
   SPACE_MENU_FRAME,
   SPACE_SCREEN_PLACEMENTS,
   type SpacePeer,
@@ -28,6 +29,7 @@ import {
   applyCameraDrag,
   applyCameraZoom,
   applyKeyboardYaw,
+  applyKnockback,
   approachCollisionDistance,
   type CameraOrbit,
   consumePendingDrag,
@@ -52,6 +54,7 @@ import type { SpaceSession } from "@/features/space-session";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import type { LanternAnchor } from "@/views/space/lib/hallModel";
 import type { HallTerrain } from "@/views/space/lib/hallTerrain";
+import { selectKickTarget } from "@/views/space/lib/kickTarget";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 import BlockDashboard from "./BlockDashboard";
 import ChatBubbles from "./ChatBubbles";
@@ -68,11 +71,11 @@ interface SpaceSceneProps {
   inputSource: SpaceInputSource;
   clientKey: string;
   nickname: string;
-  /** 접속 전에 보여줄 모델. 서버가 확정하면 그 값이 우선한다. */
+  /** 접속 전에 보여줄 모델. 서버가 확정하면 그 값이 우선함. */
   modelIndex: number;
   session: SpaceSession;
   hasRealtimeShadows: boolean;
-  /** 개발 전용 더미 아바타 수. 더미 측정 중에는 실제 공간 소켓을 열지 않는다. */
+  /** 개발 전용 더미 아바타 수. 더미 측정 중에는 실제 공간 소켓을 열지 않음. */
   dummyCount: number;
   /** 맵 지형이 잡혔을 때. 입장 로딩 오버레이가 기다림. */
   onReadyMap?: () => void;
@@ -108,11 +111,11 @@ function SpaceScene({
   const spawnTransform = useMemo(() => createSpawnPoint(clientKey), [clientKey]);
   const colorIndex = useMemo(() => resolveColorIndexFromClientKey(clientKey), [clientKey]);
   const avatarColorIndex = session.self?.colorIndex ?? colorIndex;
-  /** 서버가 확정한 모델을 쓴다. 접속 전에는 저장된 선택으로 보여준다. */
+  /** 서버가 확정한 모델을 씀. 접속 전에는 저장된 선택으로 보여줌. */
   const avatarModelIndex = session.self?.modelIndex ?? modelIndex;
   const dummies = useMemo(() => createStressDummies(dummyCount), [dummyCount]);
   const remotePlayers = dummyCount > 0 ? dummies : session.remotePlayers;
-  /** 1단계는 빈 슬롯이다. 3단계에서 라이트닝 결제로 채운다. */
+  /** 1단계는 빈 슬롯임. 3단계에서 라이트닝 결제로 채움. */
 
   const playerStateRef = useRef<LocalPlayerState>(createLocalPlayerState(spawnTransform));
   const cameraOrbitRef = useRef<CameraOrbit>(
@@ -123,29 +126,33 @@ function SpaceScene({
   );
   const accumulatedSecondsRef = useRef<number>(0);
   const playerGroupRef = useRef<Group>(null);
+  /** 내가 발차기를 시작한 시각. 아바타가 이걸로 동작을 재생함. */
+  const kickStartedAtRef = useRef<number | undefined>(undefined);
+  /** 다른 사람이 발차기를 시작한 시각(좌석별). 끝난 건 지움. */
+  const remoteKickStartsRef = useRef(new Map<number, number>());
   /**
    * 지형 질의.
    *
-   * GLB 가 도착하기 전에는 홀 바닥 높이의 평지다. 그 사이에도 걸을 수 있고,
-   * 맵이 붙는 순간 발밑이 실제 지형으로 바뀐다. 상태가 아니라 ref 인 이유는
-   * `useFrame` 안에서만 읽기 때문이다 — 상태로 올리면 맵 도착이 씬 전체
-   * 리렌더가 된다.
+   * GLB 가 도착하기 전에는 홀 바닥 높이의 평지임. 그 사이에도 걸을 수 있고,
+   * 맵이 붙는 순간 발밑이 실제 지형으로 바뀜. 상태가 아니라 ref 인 이유는
+   * `useFrame` 안에서만 읽기 때문임 — 상태로 올리면 맵 도착이 씬 전체
+   * 리렌더가 됨.
    */
   const terrainRef = useRef<SpaceTerrain>(createFlatTerrain());
-  /** 카메라 충돌용. 지형과 달리 평지 대체본이 없어 도착 전에는 건너뛴다. */
+  /** 카메라 충돌용. 지형과 달리 평지 대체본이 없어 도착 전에는 건너뜀. */
   const hallTerrainRef = useRef<HallTerrain | null>(null);
   /**
-   * 지형이 허용하는 카메라 거리 상한. 막히면 즉시 줄고 풀리면 천천히 는다.
+   * 지형이 허용하는 카메라 거리 상한. 막히면 즉시 줄고 풀리면 천천히 늚.
    *
-   * 최대 거리로 시작한다. 0 으로 두면 첫 프레임에 카메라가 머리에 붙었다가
-   * 밀려 나오는 것이 보인다.
+   * 최대 거리로 시작함. 0 으로 두면 첫 프레임에 카메라가 머리에 붙었다가
+   * 밀려 나오는 것이 보임.
    */
   const allowedCameraDistanceRef = useRef<number>(SPACE_CAMERA.maxDistance);
   /**
    * 랜턴 자리.
    *
-   * 조명 컴포넌트가 `props` 로 받아야 해서 여기서는 상태로 둔다. 맵이 도착할
-   * 때 한 번만 바뀌고, 그 한 번은 조명이 실제로 다시 그려져야 하는 순간이다.
+   * 조명 컴포넌트가 `props` 로 받아야 해서 여기서는 상태로 둠. 맵이 도착할
+   * 때 한 번만 바뀌고, 그 한 번은 조명이 실제로 다시 그려져야 하는 순간임.
    */
   const [lanternAnchors, setLanternAnchors] =
     useState<readonly LanternAnchor[]>(EMPTY_LANTERN_ANCHORS);
@@ -153,7 +160,7 @@ function SpaceScene({
   usePointerDrag(inputSource, canvasElement);
   // endregion
 
-  /** 서버 보정으로 볼 최소 거리(m). 좌표를 1 cm 로 접어 보내므로 그보다 크게 잡는다. */
+  /** 서버 보정으로 볼 최소 거리(m). 좌표를 1 cm 로 접어 보내므로 그보다 크게 잡음. */
   const SERVER_CORRECTION_THRESHOLD = 0.05;
 
   // region [Privates]
@@ -161,7 +168,7 @@ function SpaceScene({
     playerStateRef.current = createLocalPlayerState(peer);
     accumulatedSecondsRef.current = 0;
     smoothedCameraRef.current = resolveCameraPosition(peer, cameraOrbitRef.current);
-    // 순간이동 뒤에는 옛 상한에서 천천히 풀릴 이유가 없다.
+    // 순간이동 뒤에는 옛 상한에서 천천히 풀릴 이유가 없음.
     allowedCameraDistanceRef.current = SPACE_CAMERA.maxDistance;
     playerGroupRef.current?.position.set(peer.x, peer.y, peer.z);
     playerGroupRef.current?.rotation.set(0, peer.yaw, 0);
@@ -200,6 +207,52 @@ function SpaceScene({
     return nextState;
   };
 
+  /**
+   * 받은 발차기를 처리함. 이동 적분 **전에** 돌아야 맞은 프레임부터 밀림.
+   *
+   * 내가 찬 건 누른 순간 이미 재생해서 서버가 되돌려준 건 무시함. 서버가 쿨다운
+   * 등으로 버리면 재생만 되고 아무도 안 밀리는데, 클라이언트가 같은 규칙으로 먼저
+   * 걸러서 거의 없음.
+   */
+  const applyReceivedKicks = (now: number): void => {
+    const selfSeat = session.self?.seat;
+
+    for (const event of session.drainKickEvents()) {
+      if (event.from !== selfSeat) {
+        remoteKickStartsRef.current.set(event.from, now);
+      }
+      if (selfSeat !== undefined && event.to === selfSeat) {
+        playerStateRef.current = applyKnockback(playerStateRef.current, event.dirX, event.dirZ);
+      }
+    }
+
+    const animationMs = SPACE_KICK.animationSeconds * 1000;
+    for (const [seat, startedAt] of remoteKickStartsRef.current) {
+      if (now - startedAt > animationMs) {
+        remoteKickStartsRef.current.delete(seat);
+      }
+    }
+  };
+
+  /**
+   * 발차기 입력을 처리함. 쿨다운이면 버림. 대상이 없으면 허공에 참.
+   *
+   * 누른 순간 내 화면에서 바로 재생함. 서버 왕복을 기다리면 조작이 굼떠 보임.
+   */
+  const handleKickInput = (now: number, playerState: LocalPlayerState): void => {
+    if (!inputSource.isKickRequested) {
+      return;
+    }
+    inputSource.isKickRequested = false;
+
+    if (now < inputSource.kickCooldownUntil) {
+      return;
+    }
+    inputSource.kickCooldownUntil = now + SPACE_KICK.cooldownMs;
+    kickStartedAtRef.current = now;
+    session.sendKick(selectKickTarget(remotePlayers, playerState));
+  };
+
   const applyPlayerTransform = (playerState: LocalPlayerState): void => {
     const playerGroup = playerGroupRef.current;
 
@@ -212,16 +265,16 @@ function SpaceScene({
   };
 
   /**
-   * 맵 밖으로 빠진 플레이어를 스폰 지점으로 되돌린다.
+   * 맵 밖으로 빠진 플레이어를 스폰 지점으로 되돌림.
    *
    * 지형이 발밑에 아무것도 없다고 하면(`-Infinity`) 그대로 떨어지는데, 라운지
    * 바닥보다 내려간 순간이 그 신호임. 맵에 뚫린 구멍이 어디든 한 곳에서 받아냄.
    *
-   * **`publishMovement` 보다 먼저 돌아야 한다.** 서버는 `y < 0` 을 거절하므로
-   * 음수 좌표가 한 번이라도 나가면 이동이 반려되고 화면이 튄다.
+   * **`publishMovement` 보다 먼저 돌아야 함.** 서버는 `y < 0` 을 거절하므로
+   * 음수 좌표가 한 번이라도 나가면 이동이 반려되고 화면이 튐.
    *
-   * 카메라 궤도의 yaw 도 스폰 방향으로 돌린다. 거리·피치는 사용자가 맞춰 둔
-   * 값이라 건드리지 않는다.
+   * 카메라 궤도의 yaw 도 스폰 방향으로 돌림. 거리·피치는 사용자가 맞춰 둔
+   * 값이라 건드리지 않음.
    */
   const resolveFallOut = (playerState: LocalPlayerState): LocalPlayerState => {
     if (playerState.y >= SPACE_HALL.fallResetY) {
@@ -243,14 +296,14 @@ function SpaceScene({
   /**
    * 지형을 파고들지 않는 카메라 위치.
    *
-   * 감쇠 **뒤에** 건다. 감쇠 전에 걸면 목표만 당겨지고 실제 카메라는 한 박자
-   * 늦게 따라와서, 벽에 붙는 순간 한 프레임 동안 벽 안이 보인다.
+   * 감쇠 **뒤에** 걺. 감쇠 전에 걸면 목표만 당겨지고 실제 카메라는 한 박자
+   * 늦게 따라와서, 벽에 붙는 순간 한 프레임 동안 벽 안이 보임.
    *
-   * 지형이 허용하는 **거리 상한**을 따로 들고 비대칭으로 따라간다. 당길 때는
-   * 즉시, 풀 때는 감쇠다. 기둥·부스 옆을 지날 때 카메라가 튕기는 것이
-   * 멀미의 주범이라 푸는 쪽만 늦춘다. 사용자가 줌을 바꾼 거리는 이 상한과
-   * 무관하게 `Math.min` 으로 그대로 반영된다 — 상한에 감쇠를 걸었다고
-   * 줌아웃까지 늦어지면 조작이 둔해진다.
+   * 지형이 허용하는 **거리 상한**을 따로 들고 비대칭으로 따라감. 당길 때는
+   * 즉시, 풀 때는 감쇠임. 기둥·부스 옆을 지날 때 카메라가 튕기는 것이
+   * 멀미의 주범이라 푸는 쪽만 늦춤. 사용자가 줌을 바꾼 거리는 이 상한과
+   * 무관하게 `Math.min` 으로 그대로 반영됨 — 상한에 감쇠를 걸었다고
+   * 줌아웃까지 늦어지면 조작이 둔해짐.
    */
   const resolveSafeCameraPosition = (
     focus: Vector3Like,
@@ -308,7 +361,7 @@ function SpaceScene({
 
   // region [Life Cycles]
   useLayoutEffect(() => {
-    // 첫 프레임이 원점에서 날아오지 않도록 카메라를 스폰 지점 궤도에 미리 둔다.
+    // 첫 프레임이 원점에서 날아오지 않도록 카메라를 스폰 지점 궤도에 미리 둠.
     const initialPosition = smoothedCameraRef.current;
     const initialFocus = resolveCameraFocus(spawnTransform);
     const initialLookTarget = resolveCameraLookTarget(
@@ -319,7 +372,7 @@ function SpaceScene({
 
     camera.position.set(initialPosition.x, initialPosition.y, initialPosition.z);
     camera.lookAt(initialLookTarget.x, initialLookTarget.y, initialLookTarget.z);
-    // 브라우저 기본 제스처가 드래그 회전을 가로채지 않게 한다.
+    // 브라우저 기본 제스처가 드래그 회전을 가로채지 않게 함.
     canvasElement.style.touchAction = "none";
   }, [camera, canvasElement, spawnTransform]);
 
@@ -349,8 +402,8 @@ function SpaceScene({
     if (!self) {
       return;
     }
-    // 닉네임만 바뀐 peer 프레임에 위치를 되감으면 캐릭터가 뒤로 튄다. 서버가
-    // 이동을 거절했을 때만 좌표가 실제로 달라지므로 양자화 오차로 가른다.
+    // 닉네임만 바뀐 peer 프레임에 위치를 되감으면 캐릭터가 뒤로 튐. 서버가
+    // 이동을 거절했을 때만 좌표가 실제로 달라지므로 양자화 오차로 가름.
     const state = playerStateRef.current;
     const gap = Math.hypot(self.x - state.x, self.y - state.y, self.z - state.z);
 
@@ -365,12 +418,16 @@ function SpaceScene({
       advanceStressDummies(dummies, clock.elapsedTime);
     }
 
+    const now = performance.now();
+    applyReceivedKicks(now);
+
     const cameraOrbit = advanceCameraOrbit(deltaSeconds);
     const steppedState = advancePlayerState(cameraOrbit.yaw, deltaSeconds);
+    handleKickInput(now, steppedState);
     applyPlayerTransform(steppedState);
 
-    // 맵 밖으로 빠졌으면 여기서 스폰으로 되돌아온다. 되돌린 궤도를 쓰려고 아래
-    // 카메라 계산은 지역 변수가 아니라 ref 를 다시 읽는다.
+    // 맵 밖으로 빠졌으면 여기서 스폰으로 되돌아옴. 되돌린 궤도를 쓰려고 아래
+    // 카메라 계산은 지역 변수가 아니라 ref 를 다시 읽음.
     const playerState = resolveFallOut(steppedState);
 
     session.publishMovement(playerState);
@@ -452,6 +509,7 @@ function SpaceScene({
             modelIndex={avatarModelIndex}
             hasRealtimeShadows={hasRealtimeShadows}
             playerStateRef={playerStateRef}
+            kickStartedAtRef={kickStartedAtRef}
             onReady={onReadyAvatar}
           />
         </Suspense>
@@ -461,6 +519,7 @@ function SpaceScene({
         players={remotePlayers}
         rosterRevision={session.rosterRevision}
         terrainRef={terrainRef}
+        kickStartsRef={remoteKickStartsRef}
       />
       <Nameplates
         players={remotePlayers}

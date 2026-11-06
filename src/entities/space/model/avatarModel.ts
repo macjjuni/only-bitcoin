@@ -18,6 +18,8 @@ export interface SpaceAvatarModel {
   swatchColor: string;
   modelUrl: string;
   walkUrl: string;
+  /** 발차기 본 행렬. 프레임 수는 모든 모델이 같음(`CREW_KICK.frameCount`). */
+  kickUrl: string;
   bodyMeshName: string;
   accentMeshName: string;
   /**
@@ -58,6 +60,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     swatchColor: "#f7931a",
     modelUrl: "/models/crew.glb",
     walkUrl: "/models/crew-walk.bin",
+    kickUrl: "/models/crew-kick.bin",
     bodyMeshName: "crew_body",
     accentMeshName: "crew_accent",
     pupilGlintMeshName: "crew_pupil_glint",
@@ -72,6 +75,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     swatchColor: "#3b82f6",
     modelUrl: "/models/bear.glb",
     walkUrl: "/models/bear-walk.bin",
+    kickUrl: "/models/bear-kick.bin",
     bodyMeshName: "bear_body",
     accentMeshName: "bear_accent",
     pupilGlintMeshName: null,
@@ -86,6 +90,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     swatchColor: "#ef4444",
     modelUrl: "/models/bull.glb",
     walkUrl: "/models/bull-walk.bin",
+    kickUrl: "/models/bull-kick.bin",
     bodyMeshName: "bull_body",
     accentMeshName: "bull_accent",
     pupilGlintMeshName: "bull_pupil_glint",
@@ -101,6 +106,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     swatchColor: "#22c55e",
     modelUrl: "/models/pepe.glb",
     walkUrl: "/models/pepe-walk.bin",
+    kickUrl: "/models/pepe-kick.bin",
     bodyMeshName: "pepe_body",
     // 셔츠 몸판과 양 소매가 플레이어 색을 받음. 앞판만 따로 떼면 소매만 파랗게 남음.
     accentMeshName: "pepe_accent",
@@ -118,6 +124,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     swatchColor: "#ef4444",
     modelUrl: "/models/elon.glb",
     walkUrl: "/models/elon-walk.bin",
+    kickUrl: "/models/elon-kick.bin",
     bodyMeshName: "elon_body",
     // 연 재킷 안 티셔츠가 플레이어 색을 받음. 재킷은 원래대로 검정.
     accentMeshName: "elon_accent",
@@ -135,6 +142,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     swatchColor: "#8b5cf6",
     modelUrl: "/models/vitalik.glb",
     walkUrl: "/models/vitalik-walk.bin",
+    kickUrl: "/models/vitalik-kick.bin",
     bodyMeshName: "vitalik_body",
     // 티셔츠 몸판·양 소매·목 테두리가 플레이어 색을 받음. 가슴 이더리움 아이콘은
     // 따로 붙은 메시라 몸통에 남아 색이 바뀌어도 그대로 보임. 등 똥 아이콘은

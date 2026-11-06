@@ -1,4 +1,5 @@
 export type {
+  SpaceKickEvent,
   SpaceSessionIdentity,
   SpaceSessionSnapshot,
 } from "./api/spaceSessionController";

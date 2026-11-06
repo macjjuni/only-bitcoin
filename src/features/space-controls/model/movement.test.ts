@@ -6,9 +6,11 @@ import {
   SPACE_AVATAR_COLLISION_RADIUS,
   SPACE_BOUNDS,
   SPACE_HALL,
+  SPACE_KICK,
   SPACE_STEP_HEIGHT,
 } from "@/entities/space";
 import {
+  applyKnockback,
   createEmptyMovementInput,
   type MovementInput,
   planFixedSteps,
@@ -20,8 +22,8 @@ import {
  * 해발 0 의 평지.
  *
  * `stepMovement` 의 기본 지형은 광장 높이(5 m)라 그대로 쓰면 모든 기대값에
- * 5 를 더해야 한다. 이동·점프 적분 자체를 보는 테스트는 0 에서 재는 쪽이
- * 읽기 쉽다.
+ * 5 를 더해야 함. 이동·점프 적분 자체를 보는 테스트는 0 에서 재는 쪽이
+ * 읽기 쉬움.
  */
 const GROUND = createFlatTerrain(0);
 
@@ -37,9 +39,9 @@ interface Platform {
  * 해발 0 평지 위에 네모난 단 하나를 올린 지형.
  *
  * 실제 지형(`createIslandTerrain`)은 BVH 레이캐스트라 테스트에서 GLB 를 띄워야
- * 한다. 적분기가 지형에 **무엇을 묻고 어떻게 쓰는지**만 보면 되므로, 같은
- * 규칙을 따르는 최소 구현을 세운다 — 오를 수 있는 턱 이하는 막지 않고 올려
- * 주고, 그보다 높으면 벽처럼 민다.
+ * 함. 적분기가 지형에 **무엇을 묻고 어떻게 쓰는지**만 보면 되므로, 같은
+ * 규칙을 따르는 최소 구현을 세움 — 오를 수 있는 턱 이하는 막지 않고 올려
+ * 주고, 그보다 높으면 벽처럼 밂.
  */
 const createPlatformTerrain = (platform: Platform): SpaceTerrain => {
   const isOver = (x: number, z: number): boolean => {
@@ -66,7 +68,7 @@ const createPlatformTerrain = (platform: Platform): SpaceTerrain => {
         return { x, z, pushX: 0, pushZ: 0 };
       }
 
-      // 얕게 파고든 축으로 민다. 깊은 축으로 밀면 단을 가로질러 반대편에 선다.
+      // 얕게 파고든 축으로 밂. 깊은 축으로 밀면 단을 가로질러 반대편에 섬.
       const centerX = (platform.minX + platform.maxX) / 2;
       const centerZ = (platform.minZ + platform.maxZ) / 2;
 
@@ -104,7 +106,7 @@ const createInput = (overrides: Partial<MovementInput> = {}): MovementInput => (
   ...overrides,
 });
 
-/** 입력을 유지한 채 고정 타임스텝으로 여러 번 적분한다. */
+/** 입력을 유지한 채 고정 타임스텝으로 여러 번 적분함. */
 const runSteps = (
   state: LocalPlayerState,
   input: MovementInput,
@@ -224,8 +226,8 @@ describe("stepMovement", () => {
   });
 
   it("지형을 넘기지 않으면 홀 바닥 높이의 평지로 본다", () => {
-    // GLB 가 도착하기 전 한두 프레임이 이 경로를 탄다. 0 으로 떨어뜨리면
-    // 맵이 붙는 순간 홀 바닥으로 솟아오른다.
+    // GLB 가 도착하기 전 한두 프레임이 이 경로를 탐. 0 으로 떨어뜨리면
+    // 맵이 붙는 순간 홀 바닥으로 솟아오름.
     expect(stepMovement(createState(), createEmptyMovementInput(), 0).y).toBe(SPACE_HALL.floorY);
   });
 });
@@ -258,7 +260,7 @@ describe("planFixedSteps", () => {
 });
 
 describe("점프", () => {
-  /** 입력을 바꿔 가며 적분하고 매 스텝의 높이를 모은다. */
+  /** 입력을 바꿔 가며 적분하고 매 스텝의 높이를 모음. */
   const runJump = (
     stepCount: number,
     isJumpingAt: (step: number) => boolean,
@@ -288,7 +290,7 @@ describe("점프", () => {
   });
 
   it("뛰면 올라갔다 정확히 바닥으로 돌아온다", () => {
-    // 체공 2v/g = 0.75 초라 60 스텝(1초) 안에 착지가 끝난다.
+    // 체공 2v/g = 0.75 초라 60 스텝(1초) 안에 착지가 끝남.
     const heights = runJump(60, (step) => step === 0);
     const apex = Math.max(...heights);
 
@@ -298,7 +300,7 @@ describe("점프", () => {
   });
 
   it("공중에서 다시 누르거나 떼도 궤적이 바뀌지 않는다", () => {
-    // 중력만 받는 포물선이어야 한다. 공중 조작을 허용하면 높이가 튄다.
+    // 중력만 받는 포물선이어야 함. 공중 조작을 허용하면 높이가 튐.
     const held = runJump(45, () => true);
     const tapped = runJump(45, (step) => step === 0);
 
@@ -314,7 +316,7 @@ describe("점프", () => {
   });
 
   it("천장에 닿으면 상승이 끊긴다", () => {
-    // 궁전 안에서 뛰어 지붕 위로 빠져나가면 내려올 길이 없어 갇힌다.
+    // 궁전 안에서 뛰어 지붕 위로 빠져나가면 내려올 길이 없어 갇힘.
     const ceilingY = 0.4;
     const lowRoom: SpaceTerrain = { ...GROUND, resolveCeilingY: () => ceilingY };
     const heights = runJump(60, (step) => step === 0, lowRoom);
@@ -325,15 +327,15 @@ describe("점프", () => {
 });
 
 describe("지형 위 걷기", () => {
-  /** 걸어서 오를 수 있는 턱. 맵의 계단 한 칸(0.25 m)을 대표한다. */
+  /** 걸어서 오를 수 있는 턱. 맵의 계단 한 칸(0.25 m)을 대표함. */
   const STEP = createPlatformTerrain({ minX: 1, maxX: 10, minZ: -10, maxZ: 10, top: 0.25 });
   /** 점프로도 못 오르는 벽. */
   const WALL = createPlatformTerrain({ minX: 1, maxX: 10, minZ: -10, maxZ: 10, top: 3 });
 
   it("높은 지면에 서 있어도 접지로 본다", () => {
-    // 걷기 모션이 이 값으로 다리를 멈춘다. 전에는 `y <= 0` 으로 접지를 봤는데,
+    // 걷기 모션이 이 값으로 다리를 멈춤. 전에는 `y <= 0` 으로 접지를 봤는데,
     // 섬은 광장이 5·테라스가 7.5·궁전이 11 이라 서 있어도 거짓이 되어
-    // 걷기 모션이 통째로 멈춰 있었다.
+    // 걷기 모션이 통째로 멈춰 있었음.
     const plaza = createFlatTerrain(5);
     const next = runSteps(createState({ y: 5 }), createInput({ forward: 1 }), 0, 30, plaza);
 
@@ -370,7 +372,7 @@ describe("지형 위 걷기", () => {
   });
 
   it("벽을 비스듬히 밀면 벽을 따라 미끄러진다", () => {
-    // 법선 성분만 지운다. 둘 다 지우면 벽에 닿는 순간 그 자리에 선다.
+    // 법선 성분만 지움. 둘 다 지우면 벽에 닿는 순간 그 자리에 섬.
     const next = runSteps(createState(), createInput({ forward: 1, strafe: 1 }), 0, 60, WALL);
 
     expect(next.x).toBeCloseTo(1 - SPACE_AVATAR_COLLISION_RADIUS, 6);
@@ -379,8 +381,8 @@ describe("지형 위 걷기", () => {
   });
 
   it("지면이 없으면 수면 아래로 계속 떨어진다", () => {
-    // `SpaceScene` 이 이 신호를 받아 스폰으로 되돌린다. 여기서 바닥을
-    // 만들어 주면 물 위에 서게 되고, 그게 소프트락의 원인이었다.
+    // `SpaceScene` 이 이 신호를 받아 스폰으로 되돌림. 여기서 바닥을
+    // 만들어 주면 물 위에 서게 되고, 그게 소프트락의 원인이었음.
     const openWater: SpaceTerrain = {
       ...GROUND,
       resolveGroundY: () => Number.NEGATIVE_INFINITY,
@@ -392,7 +394,7 @@ describe("지형 위 걷기", () => {
   });
 
   it("평지 대체본은 지면 없는 자리를 만들지 않는다", () => {
-    // 맵이 오기 전에 빠질 바다가 있으면 접속 직후 되돌려진다.
+    // 맵이 오기 전에 빠질 바다가 있으면 접속 직후 되돌려짐.
     expect(Number.isFinite(createFlatTerrain().resolveGroundY(999, 999, 0))).toBe(true);
   });
 
@@ -402,5 +404,71 @@ describe("지형 위 걷기", () => {
 
     expect(next.x).toBeGreaterThan(10);
     expect(next.y).toBe(0);
+  });
+});
+
+describe("발차기 넉백", () => {
+  it("맞으면 약 1 m 밀리고 살짝 떴다가 내려옴", () => {
+    const hit = applyKnockback(createState(), 1, 0);
+    let peakY = 0;
+    let current = hit;
+
+    for (let index = 0; index < 120; index += 1) {
+      current = stepMovement(current, createInput(), 0, undefined, GROUND);
+      peakY = Math.max(peakY, current.y);
+    }
+
+    expect(current.x).toBeGreaterThan(0.85);
+    expect(current.x).toBeLessThan(1.05);
+    expect(current.z).toBeCloseTo(0, 6);
+    expect(peakY).toBeGreaterThan(0.1);
+    expect(peakY).toBeLessThan(0.3);
+    expect(current.y).toBe(0);
+    expect(current.knockbackX).toBe(0);
+  });
+
+  it("세게 밀리는 동안만 조작을 무시하고 곧 다시 걸을 수 있음", () => {
+    const forward = createInput({ forward: 1 });
+    // 넉백은 +x, 입력은 화면 앞(-z).
+    const staggered = stepMovement(
+      applyKnockback(createState(), 1, 0),
+      forward,
+      0,
+      undefined,
+      GROUND,
+    );
+
+    expect(staggered.velocityZ).toBe(0);
+
+    const recovered = runSteps(applyKnockback(createState(), 1, 0), forward, 0, 30);
+
+    expect(recovered.velocityZ).toBeLessThan(-1);
+  });
+
+  it("밀리는 방향으로 몸을 돌리지 않음", () => {
+    const hit = applyKnockback(createState({ yaw: 1.2 }), 1, 0);
+
+    expect(runSteps(hit, createInput(), 0, 30).yaw).toBe(1.2);
+  });
+
+  it("벽으로 밀리면 벽 안쪽으로 파고들지 않음", () => {
+    const wall = createPlatformTerrain({ minX: 0.6, maxX: 3, minZ: -3, maxZ: 3, top: 2 });
+    const pushed = runSteps(applyKnockback(createState(), 1, 0), createInput(), 0, 120, wall);
+
+    expect(pushed.x).toBeLessThanOrEqual(0.6 - SPACE_AVATAR_COLLISION_RADIUS + 1e-6);
+  });
+
+  it("방향이 0 이거나 숫자가 아니면 그대로 둠", () => {
+    const state = createState();
+
+    expect(applyKnockback(state, 0, 0)).toBe(state);
+    expect(applyKnockback(state, Number.NaN, 1)).toBe(state);
+  });
+
+  it("공중에서 맞으면 수직 속도를 더하지 않음", () => {
+    const airborne = createState({ y: 0.5, velocityY: -1, isGrounded: false });
+
+    expect(applyKnockback(airborne, 0, 1).velocityY).toBe(-1);
+    expect(Math.hypot(applyKnockback(airborne, 0, 1).knockbackZ)).toBe(SPACE_KICK.knockbackSpeed);
   });
 });

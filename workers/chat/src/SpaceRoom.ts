@@ -3,6 +3,7 @@ import { resolveColorIndexFromClientKey } from "../../../src/entities/space/lib/
 import { encodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapshot";
 import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
 import { SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "../../../src/entities/space/model/avatarModel";
+import { SPACE_FEATURE_KICK, SPACE_KICK } from "../../../src/entities/space/model/kick";
 import {
   parseSpaceClientFrame,
   SPACE_CHAT_COOLDOWN_MS,
@@ -68,6 +69,12 @@ interface SpaceSocketAttachment {
   lastSayAt: number | null;
   lastNickAt?: number | null;
   recentSayReceipts: SayReceipt[];
+  /** 입장 때 클라이언트가 안다고 한 기능. 모르는 기능 프레임은 안 보냄. */
+  features?: string[];
+  /** 마지막으로 찬 시각. 쿨다운 판정용. */
+  lastKickAt?: number;
+  /** 마지막으로 맞은 시각. 무적 판정용. */
+  lastKickedAt?: number;
 }
 
 const MAXIMUM_PENDING_CONNECTIONS = 10;
@@ -85,6 +92,8 @@ const SAY_RATE_WINDOW_MS = 60_000;
 const JOIN_TIMEOUT_MS = 10_000;
 const STALE_CONNECTION_MS = 60_000;
 const PRUNE_INTERVAL_MS = 15_000;
+/** 이 서버가 지원하는 기능. 입장 응답에 실어 보냄. */
+const SERVER_FEATURES = [SPACE_FEATURE_KICK];
 /** 마지막 이동 뒤 더 보내는 빈 틱 수. 클라이언트의 정지 판정용. */
 const TRAILING_SNAPSHOT_TICKS = 2;
 /** 클라이언트 달리기 8 m/s에 전송·적분 오차 여유만 더함. */
@@ -303,7 +312,14 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   private createWelcomePayload(self: SpacePeer, peers: SpacePeer[]): string {
     const messages = [...this.getChatHistory()];
     const serialize = (): string =>
-      JSON.stringify({ v: SPACE_PROTOCOL_VERSION, t: "welcome", self, peers, messages } satisfies SpaceServerFrame);
+      JSON.stringify({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "welcome",
+        self,
+        peers,
+        messages,
+        features: SERVER_FEATURES,
+      } satisfies SpaceServerFrame);
     let payload = serialize();
 
     while (messages.length > 0 && textEncoder.encode(payload).byteLength > SPACE_SERVER_FRAME_MAX_BYTES) {
@@ -639,6 +655,10 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         movementBudget: previousAttachment?.movementBudget ?? 0.5,
         lastSayAt: previousAttachment?.lastSayAt ?? null,
         recentSayReceipts: previousAttachment?.recentSayReceipts ?? [],
+        // 서버가 아는 기능만 남김. 탭을 바꿔 들어와도 쿨다운은 이어 감.
+        features: (frame.features ?? []).filter((feature) => SERVER_FEATURES.includes(feature)),
+        lastKickAt: previousAttachment?.lastKickAt,
+        lastKickedAt: previousAttachment?.lastKickedAt,
       } satisfies SpaceSocketAttachment);
       this.socketsBySeat.set(seat, socket);
       this.clearJoinDeadline(socket);
@@ -710,6 +730,94 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     } satisfies SpaceSocketAttachment);
     this.dirtySeats.add(peer.seat);
     this.scheduleSnapshot();
+  }
+
+  /**
+   * 발차기를 판정하고 아는 클라이언트에 알림.
+   *
+   * 조건이 안 맞으면 오류 없이 버림. 클라이언트도 같은 조건으로 먼저 걸러서, 여기서
+   * 걸리는 건 지연으로 생긴 경계 상황뿐이라 알려 줄 게 없음.
+   * - 쿨다운: 찬 사람은 `cooldownMs` 에 한 번.
+   * - 무적: 맞은 사람은 `immunityMs` 동안 다시 안 맞음.
+   * - 거리: 서버가 아는 최신 위치로 `serverReachMeters` 안, 높이 차 `maxHeightGap` 안.
+   *
+   * 맞은 사람에게는 이동 예산을 더 얹음. 밀리는 동안 순간 속도가 상한을 넘어도
+   * 순간이동으로 보고 되돌리지 않게 함.
+   */
+  private handleKick(socket: WebSocket, frame: Extract<SpaceClientFrame, { t: "kick" }>): void {
+    const attachment = this.getJoinedAttachment(socket);
+    const kicker = attachment?.peer;
+
+    if (!attachment || !kicker) {
+      this.sendError(socket, "JOIN_REQUIRED", "먼저 공간에 입장해 주세요.");
+      return;
+    }
+    const now = Date.now();
+
+    if (attachment.lastKickAt !== undefined && now - attachment.lastKickAt < SPACE_KICK.cooldownMs) {
+      return;
+    }
+    const facingX = -Math.sin(kicker.yaw);
+    const facingZ = -Math.cos(kicker.yaw);
+    let hit: { socket: WebSocket; attachment: SpaceSocketAttachment; dirX: number; dirZ: number } | null =
+      null;
+
+    if (frame.target !== undefined && frame.target !== kicker.seat) {
+      const targetSocket = this.socketsBySeat.get(frame.target);
+      const targetAttachment = targetSocket ? this.getJoinedAttachment(targetSocket) : null;
+      const target = targetAttachment?.peer;
+
+      if (!targetSocket || !targetAttachment || !target) {
+        return;
+      }
+      if (
+        targetAttachment.lastKickedAt !== undefined &&
+        now - targetAttachment.lastKickedAt < SPACE_KICK.immunityMs
+      ) {
+        return;
+      }
+      const gapX = target.x - kicker.x;
+      const gapZ = target.z - kicker.z;
+      const distance = Math.hypot(gapX, gapZ);
+
+      if (distance > SPACE_KICK.serverReachMeters || Math.abs(target.y - kicker.y) > SPACE_KICK.maxHeightGap) {
+        return;
+      }
+      // 겹쳐 서 있으면 방향을 못 구해서 찬 사람이 보는 쪽으로 밈.
+      hit = {
+        socket: targetSocket,
+        attachment: targetAttachment,
+        dirX: distance > 0.01 ? gapX / distance : facingX,
+        dirZ: distance > 0.01 ? gapZ / distance : facingZ,
+      };
+    }
+
+    socket.serializeAttachment({ ...attachment, lastKickAt: now } satisfies SpaceSocketAttachment);
+    if (hit) {
+      hit.socket.serializeAttachment({
+        ...hit.attachment,
+        lastKickedAt: now,
+        movementBudget: Math.min(
+          MAXIMUM_MOVEMENT_BUDGET,
+          hit.attachment.movementBudget + SPACE_KICK.knockbackBudgetMeters,
+        ),
+      } satisfies SpaceSocketAttachment);
+    }
+
+    const payload = JSON.stringify({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "kick",
+      from: kicker.seat,
+      ...(hit ? { to: hit.attachment.peer?.seat } : {}),
+      dirX: hit ? hit.dirX : facingX,
+      dirZ: hit ? hit.dirZ : facingZ,
+    } satisfies SpaceServerFrame);
+
+    for (const candidate of this.socketsBySeat.values()) {
+      if (this.getJoinedAttachment(candidate)?.features?.includes(SPACE_FEATURE_KICK)) {
+        this.sendPayload(candidate, payload);
+      }
+    }
   }
 
   /**
@@ -981,6 +1089,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
           break;
         case "model":
           await this.handleModel(socket, frame);
+          break;
+        case "kick":
+          this.handleKick(socket, frame);
           break;
         default:
           throw new Error("Unsupported space frame");

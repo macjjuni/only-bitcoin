@@ -7,7 +7,7 @@ import {
   SPACE_MAX_OCCUPANTS,
   type SpaceAvatarModel,
 } from "@/entities/space";
-import { CREW_MODEL, CREW_WALK } from "./crewModel";
+import { CREW_KICK, CREW_MODEL, CREW_WALK } from "./crewModel";
 
 const CREW = SPACE_AVATAR_MODELS[0];
 
@@ -53,7 +53,7 @@ interface GltfJson {
 }
 
 // region [Privates]
-/** GLB 의 JSON 청크만 읽는다. three 를 띄우지 않고 규격을 확인하기 위함이다. */
+/** GLB 의 JSON 청크만 읽음. three 를 띄우지 않고 규격을 확인하기 위함임. */
 const readGlbJson = (modelUrl: string = CREW.modelUrl): GltfJson => {
   const buffer = readFileSync(resolve(process.cwd(), `public${modelUrl}`));
 
@@ -73,7 +73,7 @@ const findMesh = (gltf: GltfJson, name: string) => {
   return mesh;
 };
 
-/** 모델 하나의 메시 이름 목록. 글린트가 없는 모델(곰)은 두 개다. */
+/** 모델 하나의 메시 이름 목록. 글린트가 없는 모델(곰)은 두 개임. */
 const meshNamesOf = (model: SpaceAvatarModel): string[] => {
   return [model.bodyMeshName, model.accentMeshName, model.pupilGlintMeshName].filter(
     (name): name is string => name !== null,
@@ -89,15 +89,15 @@ const countTriangles = (gltf: GltfJson): number => {
 
 /**
  * 모델은 `scripts/blender/process-voxel-character.py` 가 원본 `voxel-crew.glb` 에서
- * 만든다. 원본은 메시 97개에 스킨·애니메이션이 붙어 있어 그대로 쓸 수 없다.
- * 여기서는 가공 결과가 런타임이 기대하는 규격인지만 고정한다.
+ * 만듦. 원본은 메시 97개에 스킨·애니메이션이 붙어 있어 그대로 쓸 수 없음.
+ * 여기서는 가공 결과가 런타임이 기대하는 규격인지만 고정함.
  */
 describe("크루 모델 규격", () => {
   it("흰자는 몸통에 남기고 눈동자만 별도 메시로 분리한다", () => {
     const gltf = readGlbJson();
     const nodeNames = gltf.nodes.map((node) => node.name);
 
-    // 병합하지 않으면 아바타 한 명이 부위 수만큼 드로우 콜을 쓴다.
+    // 병합하지 않으면 아바타 한 명이 부위 수만큼 드로우 콜을 씀.
     expect(gltf.meshes).toHaveLength(3);
     expect(nodeNames).toContain(CREW.bodyMeshName);
     expect(nodeNames).toContain(CREW.accentMeshName);
@@ -130,7 +130,7 @@ describe("크루 모델 규격", () => {
   it("스킨과 애니메이션이 제거돼 있다", () => {
     const gltf = readGlbJson();
 
-    // 스킨드 메시는 인스턴싱이 안 돼 50명이면 드로우 콜 예산을 넘긴다.
+    // 스킨드 메시는 인스턴싱이 안 돼 50명이면 드로우 콜 예산을 넘김.
     expect(gltf.skins ?? []).toHaveLength(0);
     expect(gltf.animations ?? []).toHaveLength(0);
   });
@@ -139,7 +139,7 @@ describe("크루 모델 규격", () => {
     const gltf = readGlbJson();
 
     expect(gltf.images ?? []).toHaveLength(MAXIMUM_IMAGE_COUNT);
-    // 9728 = NEAREST. LINEAR 로 바뀌면 픽셀 아트가 뭉개진다.
+    // 9728 = NEAREST. LINEAR 로 바뀌면 픽셀 아트가 뭉개짐.
     for (const sampler of gltf.samplers ?? []) {
       expect(sampler.magFilter).toBe(9728);
     }
@@ -149,9 +149,9 @@ describe("크루 모델 규격", () => {
     const gltf = readGlbJson();
     const body = findMesh(gltf, CREW.bodyMeshName).primitives[0];
 
-    // 몸통 배색은 텍스처에 있다. UV 가 없으면 아틀라스를 못 읽는다.
+    // 몸통 배색은 텍스처에 있음. UV 가 없으면 아틀라스를 못 읽음.
     expect(Object.keys(body.attributes)).toContain("TEXCOORD_0");
-    // 여분 UV 셋은 아틀라스 하나만 쓰는 모델에 불필요한 용량이다.
+    // 여분 UV 셋은 아틀라스 하나만 쓰는 모델에 불필요한 용량임.
     expect(Object.keys(body.attributes)).not.toContain("TEXCOORD_1");
   });
 
@@ -168,7 +168,7 @@ describe("크루 모델 규격", () => {
     const [, minY] = position.min ?? [];
     const [, maxY] = position.max ?? [];
 
-    // 발바닥이 원점이라 아바타를 (x, 0, z) 에 그대로 둔다.
+    // 발바닥이 원점이라 아바타를 (x, 0, z) 에 그대로 둠.
     expect(minY).toBeCloseTo(0, 4);
     expect(maxY).toBeCloseTo(CREW_MODEL.height, 3);
     expect(CREW_MODEL.height).toBe(SPACE_AVATAR.height);
@@ -181,7 +181,7 @@ describe("크루 모델 규격", () => {
     const minZ = (position.min ?? [])[2] ?? 0;
     const maxZ = (position.max ?? [])[2] ?? 0;
 
-    // 원본은 +Z 를 본다. 가공에서 돌리지 않으면 아바타가 등을 보인 채 걷는다.
+    // 원본은 +Z 를 봄. 가공에서 돌리지 않으면 아바타가 등을 보인 채 걸음.
     expect(Math.abs(minZ)).toBeGreaterThan(Math.abs(maxZ));
   });
 
@@ -190,7 +190,7 @@ describe("크루 모델 규격", () => {
     const body = findMesh(gltf, CREW.bodyMeshName).primitives[0];
     const maxY = (gltf.accessors[body.attributes.POSITION].max ?? [])[1] ?? 0;
 
-    // 모델을 바꾸면 가공 스크립트의 [anchor] 값을 SPACE_AVATAR 에 옮겨 적어야 한다.
+    // 모델을 바꾸면 가공 스크립트의 [anchor] 값을 SPACE_AVATAR 에 옮겨 적어야 함.
     expect(SPACE_AVATAR.headCenterY).toBeLessThan(maxY);
     expect(SPACE_AVATAR.headCenterY).toBeGreaterThan(maxY * 0.7);
   });
@@ -202,7 +202,7 @@ describe("크루 모델 규격", () => {
     const maxZ = (position.max ?? [])[2] ?? 0;
     const maxY = (position.max ?? [])[1] ?? 0;
 
-    // 앞판이 뒤로 가면 플레이어 색이 정면에서 보이지 않는다.
+    // 앞판이 뒤로 가면 플레이어 색이 정면에서 보이지 않음.
     expect(maxZ).toBeLessThan(0);
     expect(maxY).toBeLessThan(SPACE_AVATAR.headCenterY);
   });
@@ -212,7 +212,7 @@ describe("크루 모델 규격", () => {
  * 고를 수 있는 모든 모델에 적용되는 규격.
  *
  * 두 모델이 같은 셰이더·같은 걷기 상수를 쓰므로, 한쪽만 규격을 어겨도 그 모델을
- * 고른 사람의 아바타가 조용히 터진다. 모델을 추가하면 이 블록이 자동으로 검사한다.
+ * 고른 사람의 아바타가 조용히 터짐. 모델을 추가하면 이 블록이 자동으로 검사함.
  */
 describe.each(
   SPACE_AVATAR_MODELS.map((model) => [model.id, model] as const),
@@ -222,7 +222,7 @@ describe.each(
     const nodeNames = gltf.nodes.map((node) => node.name);
     const expectedNames = meshNamesOf(model);
 
-    // 병합하지 않으면 아바타 한 명이 부위 수만큼 드로우 콜을 쓴다.
+    // 병합하지 않으면 아바타 한 명이 부위 수만큼 드로우 콜을 씀.
     expect(gltf.meshes).toHaveLength(expectedNames.length);
     for (const name of expectedNames) {
       expect(nodeNames).toContain(name);
@@ -239,10 +239,10 @@ describe.each(
   it("메시마다 primitive 가 하나뿐이다", () => {
     /*
      * glTF 는 재질마다 primitive 를 쪼개고, three 는 primitive 가 둘 이상인
-     * 메시를 **Mesh 가 아니라 Group** 으로 만든다. 런타임은 Mesh 를 찾아
-     * 인스턴싱하므로 Group 이 오면 "메시가 없습니다" 로 터진다.
-     * (황소의 금색 단추 재질이 이 경우였다 — 같은 아틀라스를 쓰고 metallic 만
-     * 달라, 가공 스크립트가 재질을 하나로 합치게 했다.)
+     * 메시를 **Mesh 가 아니라 Group** 으로 만듦. 런타임은 Mesh 를 찾아
+     * 인스턴싱하므로 Group 이 오면 "메시가 없습니다" 로 터짐.
+     * (황소의 금색 단추 재질이 이 경우였음 — 같은 아틀라스를 쓰고 metallic 만
+     * 달라, 가공 스크립트가 재질을 하나로 합치게 했음.)
      */
     const gltf = readGlbJson(model.modelUrl);
 
@@ -254,7 +254,7 @@ describe.each(
   it("모든 메시가 본 번호를 들고 있다", () => {
     const gltf = readGlbJson(model.modelUrl);
 
-    // 셰이더가 이 번호로 본 행렬 텍스처를 조회한다. 없으면 걷기가 죽는다.
+    // 셰이더가 이 번호로 본 행렬 텍스처를 조회함. 없으면 걷기가 죽음.
     for (const name of meshNamesOf(model)) {
       for (const primitive of findMesh(gltf, name).primitives) {
         expect(Object.keys(primitive.attributes)).toContain("_BONEINDEX");
@@ -271,8 +271,30 @@ describe.each(
       4 *
       Float32Array.BYTES_PER_ELEMENT;
 
-    // 크기가 어긋나면 셰이더가 엉뚱한 텍셀을 읽어 아바타가 터진다.
+    // 크기가 어긋나면 셰이더가 엉뚱한 텍셀을 읽어 아바타가 터짐.
     expect(buffer.byteLength).toBe(expected);
+  });
+
+  it("발차기 행렬 파일이 셰이더가 기대하는 크기이고 첫·끝 프레임이 레스트 포즈임", () => {
+    const buffer = readFileSync(resolve(process.cwd(), `public${model.kickUrl}`));
+    const floatsPerFrame = CREW_WALK.boneCount * CREW_WALK.rowsPerBone * 4;
+
+    expect(buffer.byteLength).toBe(
+      CREW_KICK.frameCount * floatsPerFrame * Float32Array.BYTES_PER_ELEMENT,
+    );
+
+    // 첫·끝이 레스트(단위 행렬)라야 걷기에서 넘어가고 돌아올 때 안 튐.
+    const data = new Float32Array(buffer.buffer, buffer.byteOffset, buffer.byteLength / 4);
+    const identityRow = [1, 0, 0, 0, 0, 1, 0, 0, 0, 0, 1, 0];
+    for (const frame of [0, CREW_KICK.frameCount - 1]) {
+      for (let bone = 0; bone < CREW_WALK.boneCount; bone += 1) {
+        const start = frame * floatsPerFrame + bone * 12;
+        const row = Array.from(data.slice(start, start + 12));
+        row.forEach((value, index) => {
+          expect(value).toBeCloseTo(identityRow[index], 4);
+        });
+      }
+    }
   });
 
   it("삼각형 수가 상수와 맞고 50명이 예산 안에 들어온다", () => {

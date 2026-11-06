@@ -243,4 +243,54 @@ describe("모델 선택 전 버전과의 호환", () => {
 
     expect(parsed).toBeNull();
   });
+
+  describe("발차기 프레임", () => {
+    it("대상이 있거나 없는 발차기 요청을 받고 좌석이 틀리면 거절함", () => {
+      expect(
+        parseSpaceClientFrame(JSON.stringify({ v: SPACE_PROTOCOL_VERSION, t: "kick", target: 3 })),
+      ).toEqual({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "kick",
+        target: 3,
+      });
+      expect(
+        parseSpaceClientFrame(JSON.stringify({ v: SPACE_PROTOCOL_VERSION, t: "kick" })),
+      ).not.toBeNull();
+      expect(
+        parseSpaceClientFrame(JSON.stringify({ v: SPACE_PROTOCOL_VERSION, t: "kick", target: -1 })),
+      ).toBeNull();
+    });
+
+    it("입장 요청의 기능 목록은 짧은 문자열 배열만 받음", () => {
+      const join = { v: SPACE_PROTOCOL_VERSION, t: "join", clientKey, nickname: "비트코인" };
+
+      expect(parseSpaceClientFrame(JSON.stringify({ ...join, features: ["kick"] }))).not.toBeNull();
+      expect(parseSpaceClientFrame(JSON.stringify({ ...join, features: "kick" }))).toBeNull();
+      expect(
+        parseSpaceClientFrame(JSON.stringify({ ...join, features: ["x".repeat(33)] })),
+      ).toBeNull();
+    });
+
+    it("발차기 이벤트는 좌석·방향 범위를 보고 자기 자신을 찬 건 거절함", () => {
+      const kick = { v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, to: 2, dirX: 0.6, dirZ: 0.8 };
+
+      expect(parseSpaceServerFrame(JSON.stringify(kick))).toEqual(kick);
+      expect(parseSpaceServerFrame(JSON.stringify({ ...kick, to: undefined }))).not.toBeNull();
+      expect(parseSpaceServerFrame(JSON.stringify({ ...kick, to: 1 }))).toBeNull();
+      expect(parseSpaceServerFrame(JSON.stringify({ ...kick, dirX: 3 }))).toBeNull();
+      expect(parseSpaceServerFrame(JSON.stringify({ ...kick, from: 99 }))).toBeNull();
+    });
+
+    it("모르는 종류는 끊지 않고 ignored 로 읽음. 아는 종류가 깨진 건 그대로 거절함", () => {
+      expect(
+        parseSpaceServerFrame(JSON.stringify({ v: SPACE_PROTOCOL_VERSION, t: "dance" })),
+      ).toEqual({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "ignored",
+      });
+      expect(
+        parseSpaceServerFrame(JSON.stringify({ v: SPACE_PROTOCOL_VERSION, t: "leave", seat: -1 })),
+      ).toBeNull();
+    });
+  });
 });

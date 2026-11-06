@@ -6,6 +6,7 @@ import {
   type LocalPlayerState,
   parseSpaceServerFrame,
   type RemotePlayer,
+  SPACE_FEATURE_KICK,
   SPACE_PROTOCOL_VERSION,
   type SpaceChatMessage,
   type SpacePeer,
@@ -28,6 +29,16 @@ export interface SpaceSessionSnapshot {
   remotePlayers: RemotePlayer[];
   rosterRevision: number;
   isMessagePending: boolean;
+  /** 서버가 발차기를 지원하는지. 옛 서버면 버튼을 숨김. */
+  canKick: boolean;
+}
+
+/** 받은 발차기 하나. `to` 가 없으면 허공에 찬 것. */
+export interface SpaceKickEvent {
+  from: number;
+  to?: number;
+  dirX: number;
+  dirZ: number;
 }
 
 export interface SpaceSessionSocket {
@@ -103,6 +114,8 @@ const rateLimitCooldownMs = 60_000;
 const retryThrottleMs = 5_000;
 const maximumBufferedBytes = 16_384;
 const maximumMessageCount = 100;
+const maximumKickEventCount = 32;
+const EMPTY_KICK_EVENTS: SpaceKickEvent[] = [];
 const fullTurn = Math.PI * 2;
 const yawSteps = 256;
 const permanentErrorCodes = new Set([
@@ -204,7 +217,13 @@ export class SpaceSessionController {
     rosterRevision: 0,
     isMessagePending: false,
     isNicknamePending: false,
+    canKick: false,
   };
+  /**
+   * 아직 씬이 안 꺼내 간 발차기. React 상태로 두면 매번 리렌더가 나서 큐로 둠.
+   * 씬이 매 프레임 `drainKickEvents` 로 비움.
+   */
+  private kickEvents: SpaceKickEvent[] = [];
 
   /** 재접속 시 보낼 닉네임. 변경이 확정되면 갱신함. */
   private nickname: string;
@@ -313,6 +332,35 @@ export class SpaceSessionController {
 
     this.latestMovement = quantizeMovement(state);
     this.flushMovement();
+  };
+
+  /**
+   * 발차기를 보냄. `targetSeat` 가 `null` 이면 허공에 참.
+   *
+   * 판정은 서버가 함. 보냈는지만 돌려줌. 쿨다운은 호출부(씬)가 먼저 걸러서 여기서는
+   * 안 봄. 서버가 같은 규칙으로 한 번 더 막음.
+   */
+  sendKick = (targetSeat: number | null): boolean => {
+    if (!this.snapshot.canKick || this.snapshot.presence.status !== "online") {
+      return false;
+    }
+
+    return this.sendFrame({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "kick",
+      ...(targetSeat === null ? {} : { target: targetSeat }),
+    });
+  };
+
+  /** 쌓인 발차기를 꺼내고 비움. 씬이 매 프레임 부름. */
+  drainKickEvents = (): SpaceKickEvent[] => {
+    if (this.kickEvents.length === 0) {
+      return EMPTY_KICK_EVENTS;
+    }
+    const events = this.kickEvents;
+    this.kickEvents = [];
+
+    return events;
   };
 
   sampleRemotePlayers = (now: number): RemotePlayer[] => {
@@ -512,6 +560,7 @@ export class SpaceSessionController {
         clientKey: this.options.identity.clientKey,
         nickname: this.nickname,
         modelIndex: this.modelIndex,
+        features: [SPACE_FEATURE_KICK],
       });
     });
     socket.addEventListener("message", (event) => {
@@ -603,7 +652,9 @@ export class SpaceSessionController {
           messages: mergeChatHistory(this.snapshot.messages, frame.messages ?? []),
           bubbleMessages: [],
           rosterRevision: this.snapshot.rosterRevision + 1,
+          canKick: frame.features?.includes(SPACE_FEATURE_KICK) ?? false,
         });
+        this.kickEvents = [];
         this.startHeartbeat();
         return;
       }
@@ -706,6 +757,20 @@ export class SpaceSessionController {
         this.stopAutomaticRetry("지금은 빈자리가 없어요. 잠시 후 다시 접속해 주세요.");
         return;
       }
+      case "kick": {
+        if (!this.snapshot.self) {
+          return;
+        }
+        // 한 프레임에 수십 개 쌓일 일은 없지만 탭이 멈춰 있으면 끝없이 쌓여서 자름.
+        const event: SpaceKickEvent = { from: frame.from, dirX: frame.dirX, dirZ: frame.dirZ };
+        if (frame.to !== undefined) {
+          event.to = frame.to;
+        }
+        this.kickEvents = [...this.kickEvents, event].slice(-maximumKickEventCount);
+        return;
+      }
+      case "ignored":
+        return;
       default: {
         const unreachableFrame: never = frame;
         throw new Error(`지원하지 않는 공간 프레임: ${String(unreachableFrame)}`);
@@ -734,6 +799,7 @@ export class SpaceSessionController {
   }
 
   private clearRoster(): void {
+    this.kickEvents = [];
     this.peers.clear();
     this.interpolator.clear();
     this.latestMovement = null;

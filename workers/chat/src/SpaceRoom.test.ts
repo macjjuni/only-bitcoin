@@ -173,10 +173,18 @@ const createRoom = (state = new RoomState()) => {
     nickname = "참여자",
     modelIndex = 0,
     ipGuardKey = "test-ip",
+    features?: string[],
   ) => {
     const socket = new RoomSocket(ipGuardKey);
     state.sockets.push(socket);
-    await send(socket, { v: SPACE_PROTOCOL_VERSION, t: "join", clientKey, nickname, modelIndex });
+    await send(socket, {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "join",
+      clientKey,
+      nickname,
+      modelIndex,
+      ...(features ? { features } : {}),
+    });
     return socket;
   };
 
@@ -806,5 +814,134 @@ describe("SpaceRoom", () => {
     expect(socket.frames()).toContainEqual(
       expect.objectContaining({ t: "error", code: "INVALID_NICKNAME", rid: requestId }),
     );
+  });
+
+  describe("발차기", () => {
+    /** 둘 다 발차기를 아는 클라이언트로 입장시키고 두 번째를 첫 번째 옆(+x 쪽)에 세움. */
+    const setUpPair = async (gap = 1) => {
+      const room = createRoom();
+      const kicker = await room.join(clientKey(1), "찬사람", 0, "ip-1", ["kick"]);
+      const target = await room.join(clientKey(2), "맞은사람", 0, "ip-2", ["kick"]);
+      vi.advanceTimersByTime(3000);
+      const origin = kicker.peer();
+      await room.send(target, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "move",
+        ...target.peer(),
+        x: origin.x + gap,
+        y: origin.y,
+        z: origin.z,
+      });
+      kicker.sent = [];
+      target.sent = [];
+      return { ...room, kicker, target };
+    };
+    const kickFrames = (socket: RoomSocket) =>
+      socket.frames().filter((frame) => frame.t === "kick");
+
+    it("입장 응답에 지원 기능을 실어 보냄", async () => {
+      const { join } = createRoom();
+      const socket = await join(clientKey(1), "참여자", 0, "test-ip", ["kick"]);
+
+      expect(socket.frames().find((frame) => frame.t === "welcome")).toMatchObject({
+        features: ["kick"],
+      });
+    });
+
+    it("가까운 상대를 차면 둘 다에게 방향과 함께 알리고 맞은 쪽 이동 예산을 늘림", async () => {
+      const { send, kicker, target } = await setUpPair(1);
+      const budgetBefore = (target.deserializeAttachment() as { movementBudget: number })
+        .movementBudget;
+
+      await send(kicker, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
+
+      const expected = {
+        t: "kick",
+        from: kicker.peer().seat,
+        to: target.peer().seat,
+        dirX: 1,
+        dirZ: 0,
+      };
+      expect(kickFrames(kicker)).toEqual([expect.objectContaining(expected)]);
+      expect(kickFrames(target)).toEqual([expect.objectContaining(expected)]);
+      expect(
+        (target.deserializeAttachment() as { movementBudget: number }).movementBudget,
+      ).toBeCloseTo(budgetBefore + 2);
+    });
+
+    it("멀리 있는 상대는 못 참", async () => {
+      const { send, kicker, target } = await setUpPair(3);
+
+      await send(kicker, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
+
+      expect(kickFrames(kicker)).toHaveLength(0);
+      expect(kickFrames(target)).toHaveLength(0);
+    });
+
+    it("쿨다운 5초 안에 다시 찬 건 버리고 지나면 받음", async () => {
+      const { send, kicker, target } = await setUpPair(1);
+      const kick = { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat };
+
+      await send(kicker, kick);
+      vi.advanceTimersByTime(4_999);
+      await send(kicker, kick);
+      expect(kickFrames(target)).toHaveLength(1);
+
+      vi.advanceTimersByTime(1);
+      await send(kicker, kick);
+      expect(kickFrames(target)).toHaveLength(2);
+    });
+
+    it("맞은 사람은 2초 동안 다른 사람에게도 안 맞음", async () => {
+      const { join, send, kicker, target } = await setUpPair(1);
+      const third = await join(clientKey(3), "셋째", 0, "ip-3", ["kick"]);
+      vi.advanceTimersByTime(1_000);
+      await send(third, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "move",
+        ...third.peer(),
+        x: target.peer().x,
+        y: target.peer().y,
+        z: target.peer().z - 1,
+      });
+      target.sent = [];
+
+      await send(kicker, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
+      vi.advanceTimersByTime(1_000);
+      await send(third, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
+      expect(kickFrames(target)).toHaveLength(1);
+
+      vi.advanceTimersByTime(1_000);
+      await send(third, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
+      expect(kickFrames(target)).toHaveLength(2);
+    });
+
+    it("발차기를 모르는 옛 클라이언트에는 보내지 않음", async () => {
+      const { join, send } = createRoom();
+      const kicker = await join(clientKey(1), "찬사람", 0, "ip-1", ["kick"]);
+      const oldClient = await join(clientKey(2), "옛탭", 0, "ip-2");
+      oldClient.sent = [];
+
+      await send(kicker, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+
+      expect(kickFrames(kicker)).toHaveLength(1);
+      expect(kickFrames(oldClient)).toHaveLength(0);
+      expect(oldClient.closeCode).toBeNull();
+    });
+
+    it("대상 없이 차면 보는 방향으로 연출만 알림", async () => {
+      const { send, kicker } = await setUpPair(1);
+      const yaw = kicker.peer().yaw;
+
+      await send(kicker, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+
+      const [frame] = kickFrames(kicker);
+      expect(frame).not.toHaveProperty("to");
+      expect(frame).toMatchObject({ from: kicker.peer().seat });
+      if (frame?.t === "kick") {
+        expect(frame.dirX).toBeCloseTo(-Math.sin(yaw));
+        expect(frame.dirZ).toBeCloseTo(-Math.cos(yaw));
+      }
+    });
   });
 });

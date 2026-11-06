@@ -6,22 +6,22 @@ import { SpaceSessionController, type SpaceSessionIdentity } from "../api/spaceS
 
 export interface UseSpaceSessionOptions {
   identity: SpaceSessionIdentity;
-  /** 입장할 때 보낼 아바타 모델. 바꿀 때는 `changeModel` 을 쓴다. */
+  /** 입장할 때 보낼 아바타 모델. 바꿀 때는 `changeModel` 을 씀. */
   modelIndex: number;
   enabled: boolean;
 }
 
 export type SpaceSession = ReturnType<typeof useSpaceSession>;
 
-/** 브라우저와 PWA에서 같은 공간 세션을 사용하며 DOM 수명에 맞춰 연결을 정리한다. */
+/** 브라우저와 PWA에서 같은 공간 세션을 사용하며 DOM 수명에 맞춰 연결을 정리함. */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 export const useSpaceSession = ({ identity, modelIndex, enabled }: UseSpaceSessionOptions) => {
   // region [Hooks]
   /**
-   * 닉네임은 의존성에 넣지 않는다.
+   * 닉네임은 의존성에 넣지 않음.
    *
    * 넣으면 이름을 바꿀 때마다 컨트롤러가 새로 만들어져 연결이 끊기고 좌석과
-   * 위치를 잃는다. 변경은 `changeNickname` 이 `nick` 프레임으로 처리한다.
+   * 위치를 잃음. 변경은 `changeNickname` 이 `nick` 프레임으로 처리함.
    * 아바타 모델도 같은 이유로 의존성에서 뺀다(`changeModel`).
    */
   const controller = useMemo(
@@ -87,6 +87,8 @@ export const useSpaceSession = ({ identity, modelIndex, enabled }: UseSpaceSessi
     isConnectionConfigured: spaceConfig.isConnectionConfigured,
     publishMovement: controller.publishMovement,
     sampleRemotePlayers: controller.sampleRemotePlayers,
+    sendKick: controller.sendKick,
+    drainKickEvents: controller.drainKickEvents,
     sendMessage: controller.sendMessage,
     changeNickname: controller.changeNickname,
     changeModel: controller.changeModel,

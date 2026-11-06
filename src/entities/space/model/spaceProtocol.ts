@@ -62,6 +62,8 @@ export type SpaceClientFrame =
       clientKey: string;
       nickname: string;
       modelIndex?: number;
+      /** 이 클라이언트가 아는 기능. 서버는 아는 쪽에만 그 기능 프레임을 보냄. */
+      features?: string[];
     }
   | {
       v: SpaceProtocolVersion;
@@ -74,7 +76,9 @@ export type SpaceClientFrame =
     }
   | { v: SpaceProtocolVersion; t: "say"; rid: string; body: string }
   | { v: SpaceProtocolVersion; t: "nick"; rid: string; nickname: string }
-  | { v: SpaceProtocolVersion; t: "model"; rid: string; modelIndex: number };
+  | { v: SpaceProtocolVersion; t: "model"; rid: string; modelIndex: number }
+  /** `target` 이 없으면 허공에 참. 연출만 퍼짐. */
+  | { v: SpaceProtocolVersion; t: "kick"; target?: number };
 
 export type SpaceServerFrame =
   | {
@@ -84,12 +88,28 @@ export type SpaceServerFrame =
       peers: SpacePeer[];
       /** 기록을 모르는 옛 서버는 안 보냄. 없으면 빈 기록으로 읽음. */
       messages?: SpaceChatMessage[];
+      /** 서버가 지원하는 기능. 없으면 발차기 버튼을 숨김. */
+      features?: string[];
     }
   | { v: SpaceProtocolVersion; t: "peer"; peer: SpacePeer }
   | { v: SpaceProtocolVersion; t: "leave"; seat: number }
   | { v: SpaceProtocolVersion; t: "say"; message: SpaceChatMessage }
   | { v: SpaceProtocolVersion; t: "error"; code: string; message: string; rid?: string }
-  | { v: SpaceProtocolVersion; t: "full" };
+  | { v: SpaceProtocolVersion; t: "full" }
+  /**
+   * `from` 이 찼음. `to` 가 있으면 맞은 사람이고 `dirX/dirZ` 는 찬 사람에서 맞은
+   * 사람 쪽 단위 방향. 맞은 사람만 이 방향으로 밀림.
+   */
+  | {
+      v: SpaceProtocolVersion;
+      t: "kick";
+      from: number;
+      to?: number;
+      dirX: number;
+      dirZ: number;
+    }
+  /** 이 클라이언트가 모르는 새 종류. 끊지 않고 버림. */
+  | { v: SpaceProtocolVersion; t: "ignored" };
 
 const CLIENT_FRAME_MAX_BYTES = 8 * 1024;
 /**
@@ -124,6 +144,20 @@ const isSeat = (value: unknown): value is number => {
   return (
     isFiniteNumber(value) && Number.isInteger(value) && value >= 0 && value < SPACE_MAX_OCCUPANTS
   );
+};
+
+/** 기능 이름 목록. 이름은 짧은 문자열이고 개수도 제한함. */
+const isFeatureList = (value: unknown): value is string[] => {
+  return (
+    Array.isArray(value) &&
+    value.length <= 8 &&
+    value.every((feature) => isBoundedString(feature, 32))
+  );
+};
+
+/** 넉백 방향. 서버가 정규화해 보내지만 크기가 1 을 넘지 않는지만 봄. */
+const isKickDirection = (x: unknown, z: unknown): boolean => {
+  return isFiniteNumber(x) && isFiniteNumber(z) && Math.hypot(x, z) <= 1.001;
 };
 
 const isTransform = (value: Record<string, unknown>): boolean => {
@@ -240,7 +274,8 @@ export const parseSpaceClientFrame = (rawPayload: string): SpaceClientFrame | nu
         CLIENT_KEY_PATTERN.test(payload.clientKey) &&
         isBoundedString(payload.nickname, 128) &&
         // 모델 선택 전에 배포된 클라이언트는 이 값을 안 보냄.
-        (payload.modelIndex === undefined || isAvatarModelIndex(payload.modelIndex))
+        (payload.modelIndex === undefined || isAvatarModelIndex(payload.modelIndex)) &&
+        (payload.features === undefined || isFeatureList(payload.features))
         ? (payload as SpaceClientFrame)
         : null;
     case "move":
@@ -257,6 +292,10 @@ export const parseSpaceClientFrame = (rawPayload: string): SpaceClientFrame | nu
         : null;
     case "model":
       return isUuid(payload.rid) && isAvatarModelIndex(payload.modelIndex)
+        ? (payload as SpaceClientFrame)
+        : null;
+    case "kick":
+      return payload.target === undefined || isSeat(payload.target)
         ? (payload as SpaceClientFrame)
         : null;
     default:
@@ -295,7 +334,8 @@ export const parseSpaceServerFrame = (rawPayload: string): SpaceServerFrame | nu
         !isPeerArray(peers) ||
         peers.length >= SPACE_MAX_OCCUPANTS ||
         peers.some((peer) => peer.seat === selfPeer.seat) ||
-        (messages !== undefined && !isChatHistory(messages))
+        (messages !== undefined && !isChatHistory(messages)) ||
+        (payload.features !== undefined && !isFeatureList(payload.features))
       ) {
         return null;
       }
@@ -322,7 +362,16 @@ export const parseSpaceServerFrame = (rawPayload: string): SpaceServerFrame | nu
         : null;
     case "full":
       return payload as SpaceServerFrame;
+    case "kick":
+      return isSeat(payload.from) &&
+        (payload.to === undefined || isSeat(payload.to)) &&
+        payload.to !== payload.from &&
+        isKickDirection(payload.dirX, payload.dirZ)
+        ? (payload as SpaceServerFrame)
+        : null;
     default:
-      return null;
+      // 모르는 종류는 새 서버가 보낸 새 기능임. 끊으면 배포 때마다 새로고침 안 한
+      // 탭이 떨어짐. 아는 종류가 깨져 온 경우만 위에서 null 로 끊음.
+      return { v: SPACE_PROTOCOL_VERSION, t: "ignored" };
   }
 };

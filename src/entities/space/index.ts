@@ -15,6 +15,7 @@ export {
   SPACE_DEFAULT_AVATAR_MODEL_INDEX,
   type SpaceAvatarModel,
 } from "./model/avatarModel";
+export { SPACE_FEATURE_KICK, SPACE_KICK } from "./model/kick";
 export {
   createLocalPlayerState,
   createOfflinePresence,
