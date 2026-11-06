@@ -35,4 +35,4 @@ export const SPACE_BGM_TRACK_SRC = `https://cdn.jsdelivr.net/gh/macjjuni/only-bi
  * 1.0 은 다른 탭 소리를 덮는다. 전광판을 보며 머무는 공간의 배경음이라
  * 대화·알림을 가리지 않는 선으로 낮춰 둔다.
  */
-export const SPACE_BGM_VOLUME = 0.2;
+export const SPACE_BGM_VOLUME = 0.15;
