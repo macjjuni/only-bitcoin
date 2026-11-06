@@ -1,6 +1,5 @@
 "use client";
 
-import { Footprints } from "lucide-react";
 import { memo, type ReactNode, useCallback, useEffect, useState } from "react";
 import { SPACE_KICK } from "@/entities/space";
 import type { SpaceInputSource } from "../model/spaceInputSource";
@@ -11,6 +10,39 @@ import {
 } from "./touchButtonLayout";
 
 const ICON_STROKE_WIDTH = 2.25;
+
+interface KickIconProps {
+  className: string;
+}
+
+/**
+ * 차는 부츠 아이콘. 앞으로 기운 부츠 뒤에 속도선을 붙였음.
+ *
+ * 아이콘 세트에 발차기·부츠가 없어 직접 그림. 전에 쓴 발자국(Footprints)은 걷기로
+ * 읽혔음. 다른 버튼 아이콘(lucide)과 같은 24 격자·선 굵기·둥근 끝으로 맞춤.
+ */
+function KickIcon({ className }: KickIconProps): ReactNode {
+  return (
+    <svg
+      aria-hidden="true"
+      width={TOUCH_BUTTON_ICON_SIZE}
+      height={TOUCH_BUTTON_ICON_SIZE}
+      viewBox="0 0 24 24"
+      fill="none"
+      stroke="currentColor"
+      strokeWidth={ICON_STROKE_WIDTH}
+      strokeLinecap="round"
+      strokeLinejoin="round"
+      className={className}
+    >
+      <g transform="rotate(-28 13 12)">
+        <path d="M10 3h5v8.5l4.2 2.1a2 2 0 0 1 1.1 1.8V18H10z" />
+        <path d="M10 15h4" />
+      </g>
+      <path d="M2.5 9.5h3.5M2 13.5h4.5M3 17.5h3" />
+    </svg>
+  );
+}
 /** 테두리 안쪽에 그림. 선 굵기(2.5)만큼 지름에서 뺌. */
 const RING_RADIUS = TOUCH_BUTTON_DIAMETER / 2 - 2;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
@@ -85,12 +117,7 @@ function KickButton({ inputSource }: KickButtonProps): ReactNode {
       }}
       onPointerDown={onPointerDownKick}
     >
-      <Footprints
-        size={TOUCH_BUTTON_ICON_SIZE}
-        strokeWidth={ICON_STROKE_WIDTH}
-        className={isCoolingDown ? "text-white/35" : "text-white/85"}
-        aria-hidden="true"
-      />
+      <KickIcon className={isCoolingDown ? "text-white/35" : "text-white/85"} />
       {isCoolingDown && (
         <svg
           aria-hidden="true"
