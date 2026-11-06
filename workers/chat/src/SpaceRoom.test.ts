@@ -229,8 +229,8 @@ describe("SpaceRoom", () => {
     const socket = await join(clientKey(7));
     const welcome = socket.frames().find((frame) => frame.t === "welcome");
 
-    // 클라이언트는 비밀키를 모르므로 stableActorKey 로 파생하면 예측할 수 없다.
-    // 두 값이 어긋나면 입장 직후 아바타가 순간이동하고 색이 바뀐다.
+    // 클라이언트는 비밀키를 몰라서 stableActorKey 로 파생하면 예측 못 함.
+    // 두 값이 어긋나면 입장 직후 아바타가 순간이동하고 색이 바뀜.
     expect(welcome).toMatchObject({
       self: {
         ...createSpawnPoint(clientKey(7)),
@@ -249,7 +249,7 @@ describe("SpaceRoom", () => {
       v: SPACE_PROTOCOL_VERSION,
       t: "move",
       x: original.x + 0.5,
-      // 광장 높이에서 출발한다. 0 으로 두면 5 m 수직 순간이동이라 거절된다.
+      // 광장 높이에서 출발함. 0 으로 두면 5 m 수직 순간이동이라 거절됨.
       y: original.y,
       z: original.z,
       yaw: 0,
@@ -382,9 +382,51 @@ describe("SpaceRoom", () => {
       0, 1,
     ]);
     expect(second.sent[0]).toBe(firstSnapshot);
+    // 멈춘 뒤 빈 꼬리 틱 2개를 같은 박자로 더 보내고 끝냄.
+    vi.advanceTimersByTime(100);
+    vi.advanceTimersByTime(100);
+    const trailingSnapshots = first.sent
+      .slice(1)
+      .map((payload) => decodeSpaceSnapshot(payload as ArrayBuffer));
+    const firstTimestamp = decodeSpaceSnapshot(firstSnapshot)?.timestamp ?? 0;
+    expect(trailingSnapshots.map((snapshot) => snapshot?.players.length)).toEqual([0, 0]);
+    expect(trailingSnapshots.map((snapshot) => snapshot?.timestamp)).toEqual([
+      firstTimestamp + 100,
+      firstTimestamp + 200,
+    ]);
+    vi.advanceTimersByTime(100);
     expect(vi.getTimerCount()).toBe(0);
     vi.advanceTimersByTime(10_000);
-    expect(first.sent).toHaveLength(1);
+    expect(first.sent).toHaveLength(3);
+  });
+
+  it("계속 움직이면 이동 도착 시점과 무관하게 100ms 박자를 지킴", async () => {
+    const { join, send } = createRoom();
+    const first = await join(clientKey(1));
+    first.sent = [];
+    vi.advanceTimersByTime(100);
+    const timestamps: number[] = [];
+
+    for (let step = 1; step <= 5; step += 1) {
+      await send(first, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "move",
+        ...first.peer(),
+        x: first.peer().x + 0.3,
+      });
+      // 이동이 틱 사이 아무 때나 도착해도 다음 틱은 밀리지 않음.
+      vi.advanceTimersByTime(step % 2 === 0 ? 100 : 60);
+      vi.advanceTimersByTime(step % 2 === 0 ? 0 : 40);
+    }
+    for (const payload of first.sent) {
+      const snapshot = decodeSpaceSnapshot(payload as ArrayBuffer);
+      if (snapshot) {
+        timestamps.push(snapshot.timestamp);
+      }
+    }
+    expect(timestamps.length).toBeGreaterThanOrEqual(5);
+    const gaps = timestamps.slice(1).map((timestamp, index) => timestamp - timestamps[index]);
+    expect(gaps.every((gap) => gap === 100)).toBe(true);
   });
 
   it("순간이동은 거절해 서버 위치로 보정하고 긴 백그라운드 간격의 정상 이동은 허용한다", async () => {
@@ -503,7 +545,7 @@ describe("SpaceRoom", () => {
     }
     expect(flooder.closeCode).toBe(4008);
     const incompatible = await join(clientKey(2));
-    // 벙커 시절 버전. `y` 의 의미가 달라 그대로 받으면 안 된다.
+    // 벙커 시절 버전. `y` 의미가 달라 그대로 받으면 안 됨.
     await send(incompatible, { v: 1, t: "move", ...incompatible.peer() });
     expect(incompatible.closeCode).toBe(4002);
   });
@@ -564,7 +606,7 @@ describe("SpaceRoom", () => {
       .at(-1);
 
     expect(repeatedEcho).toEqual(previousEcho);
-    // 재전송은 기록에 다시 쓰지 않는다.
+    // 재전송은 기록에 다시 안 씀.
     expect(state.storage.sql.writeCount).toBe(writeCountBeforeReplay);
   });
 
@@ -578,7 +620,7 @@ describe("SpaceRoom", () => {
     const errorCodes = (socket: RoomSocket) =>
       socket.frames().flatMap((frame) => (frame.t === "error" ? [frame.code] : []));
 
-    // 두 연결이 번갈아 6개씩, 3초 간격을 지키며 12개를 채운다.
+    // 두 연결이 번갈아 6개씩, 3초 간격을 지키며 12개를 채움.
     for (let index = 0; index < 6; index += 1) {
       await say(first, `첫째 ${index}`);
       await say(second, `둘째 ${index}`);
@@ -590,7 +632,7 @@ describe("SpaceRoom", () => {
     expect(errorCodes(first)).toContain("RATE_SAY_MINUTE");
     expect(errorCodes(other)).not.toContain("RATE_SAY_MINUTE");
 
-    // 가장 오래된 메시지가 1분 창을 벗어나면 다시 보낼 수 있다.
+    // 가장 오래된 메시지가 1분 창을 벗어나면 다시 보낼 수 있음.
     vi.advanceTimersByTime(60_000);
     const errorCountBefore = errorCodes(first).length;
     await say(first, "다시 보냄");
@@ -600,7 +642,7 @@ describe("SpaceRoom", () => {
   it("기록이 커도 welcome 은 클라이언트 한도 안에 들도록 오래된 메시지부터 뺀다", async () => {
     const { join, send } = createRoom();
     const sender = await join(clientKey(1));
-    // 글자 하나에 결합 문자 30개를 붙여 100자여도 6KB 가 넘는 본문을 만든다.
+    // 글자 하나에 결합 문자 30개를 붙여 100자여도 6KB 가 넘는 본문을 만듦.
     const combiningMarks = Array.from({ length: 30 }, (_, index) =>
       String.fromCodePoint(0x0300 + index),
     ).join("");
@@ -694,7 +736,7 @@ describe("SpaceRoom", () => {
     await send(mover, { v: SPACE_PROTOCOL_VERSION, t: "nick", rid: requestId, nickname: "새이름" });
 
     expect(mover.peer()).toMatchObject({ nickname: "새이름", x: before.x, z: before.z });
-    // 좌표를 함께 담아야 수신 쪽이 위치를 되감지 않는다.
+    // 좌표를 함께 담아야 수신 쪽이 위치를 되감지 않음.
     expect(observer.frames()).toContainEqual({
       v: SPACE_PROTOCOL_VERSION,
       t: "peer",
@@ -738,7 +780,7 @@ describe("SpaceRoom", () => {
     const { join, send } = createRoom();
     const socket = await join(clientKey(1));
 
-    // 8 grapheme 한도를 넘는다. 프레임 자체는 멀쩡하므로 정규화에서 걸린다.
+    // 8 grapheme 한도를 넘음. 프레임은 멀쩡해서 정규화에서 걸림.
     await send(socket, {
       v: SPACE_PROTOCOL_VERSION,
       t: "nick",
