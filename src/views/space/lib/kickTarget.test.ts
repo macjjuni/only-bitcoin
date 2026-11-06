@@ -24,7 +24,7 @@ describe("selectKickTarget", () => {
 
   it("등 뒤·너무 먼·높이 차가 큰 사람은 안 고름", () => {
     expect(selectKickTarget([createPlayer(1, 0, 1)], self)).toBeNull();
-    expect(selectKickTarget([createPlayer(1, 0, -1.3)], self)).toBeNull();
+    expect(selectKickTarget([createPlayer(1, 0, -1.6)], self)).toBeNull();
     expect(selectKickTarget([createPlayer(1, 0, -1, 1.5)], self)).toBeNull();
   });
 

@@ -1,6 +1,10 @@
 import { BufferAttribute, BufferGeometry } from "three";
 import { describe, expect, it } from "vitest";
-import { SPACE_AVATAR_COLLISION_RADIUS, SPACE_STEP_HEIGHT } from "@/entities/space";
+import {
+  SPACE_AVATAR_COLLISION_HEIGHT,
+  SPACE_AVATAR_COLLISION_RADIUS,
+  SPACE_STEP_HEIGHT,
+} from "@/entities/space";
 import { createHallTerrain } from "@/views/space/lib/hallTerrain";
 
 /**
@@ -94,7 +98,7 @@ const createGeometry = (quads: Quad[]): BufferGeometry => {
  * 테스트 지형.
  *
  * ```text
- *        천장 2.0 ────────── (x 6~12)
+ *        천장 2.5 ────────── (x 6~12)
  *   벽 3.0 ┃
  *          ┃ 턱 0.25
  *   ───────┸───────────────── 바닥 0
@@ -110,7 +114,7 @@ const createTestTerrain = () => {
       createWallAtX(2, 0, 0.25, -10, 10),
       // 점프로도 못 넘는 벽.
       createWallAtX(6, 0, 3, -10, 10),
-      createCeiling(2, 6, 12, -10, 10),
+      createCeiling(2.5, 6, 12, -10, 10),
     ]),
   );
 };
@@ -138,7 +142,7 @@ describe("resolveGroundY", () => {
   });
 
   it("머리 위 천장을 지면으로 잡지 않는다", () => {
-    // 위에서 아래로 훑으면 천장(2.0)이 먼저 걸린다. 그 밑을 지나갈 수 없게 된다.
+    // 위에서 아래로 훑으면 천장(2.5)이 먼저 걸린다. 그 밑을 지나갈 수 없게 된다.
     expect(terrain.resolveGroundY(9, 0, 0)).toBe(0);
   });
 
@@ -197,8 +201,8 @@ describe("resolveCeilingY", () => {
   });
 
   it("천장 높이에서 아바타 키를 뺀 값이 발바닥 상한이다", () => {
-    // 천장 2.0, 충돌 캡슐 높이 1.7 → 발바닥은 0.3 까지만 오를 수 있다.
-    expect(terrain.resolveCeilingY(9, 0, 0)).toBeCloseTo(0.3, 6);
+    // 천장 2.5 에서 충돌 캡슐 높이(1.7 × 그리기 배율)를 뺀 데까지만 발바닥이 오를 수 있음.
+    expect(terrain.resolveCeilingY(9, 0, 0)).toBeCloseTo(2.5 - SPACE_AVATAR_COLLISION_HEIGHT, 6);
   });
 
   it("서 있는 바닥을 천장으로 세지 않는다", () => {

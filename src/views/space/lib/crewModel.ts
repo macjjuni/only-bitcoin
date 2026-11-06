@@ -14,6 +14,7 @@ import {
   type Texture,
 } from "three";
 import {
+  SPACE_AVATAR,
   SPACE_AVATAR_MODELS,
   SPACE_DEFAULT_AVATAR_MODEL_INDEX,
   type SpaceAvatarModel,
@@ -58,9 +59,9 @@ export const CREW_WALK = {
    *
    * 걸은 거리에 비례해 사이클을 돌려 발이 안 미끄러지게 함. 실제 보폭(약 0.52 m x 2
    * 걸음)보다 길게 잡았음. 보폭 그대로 쓰면 4.5 m/s 에서 초당 4.3 사이클이 되어
-   * 다리가 과하게 빨라짐.
+   * 다리가 과하게 빨라짐. 그리기 배율만큼 보폭이 길어져 같이 곱함.
    */
-  metersPerCycle: 1.9,
+  metersPerCycle: 1.9 * SPACE_AVATAR.scale,
   /** 멈출 때 레스트 포즈로 돌아가는 시간(초). */
   blendSeconds: 0.12,
 } as const;

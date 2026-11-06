@@ -1,4 +1,4 @@
-import { type PlayerTransform, SPACE_CAMERA_BOUNDS } from "@/entities/space";
+import { type PlayerTransform, SPACE_AVATAR, SPACE_CAMERA_BOUNDS } from "@/entities/space";
 
 const toRadians = (degrees: number): number => (degrees * Math.PI) / 180;
 
@@ -88,8 +88,8 @@ export const SPACE_CAMERA = {
   collisionReleaseDamping: 6,
 } as const;
 
-/** 카메라가 바라보는 지점의 높이. 아바타 머리(약 1.81) 근처다. */
-export const SPACE_CAMERA_FOCUS_HEIGHT = 1.75;
+/** 카메라가 바라보는 지점의 높이. 아바타 머리(배율 전 약 1.81) 근처 1.75 에 그리기 배율을 곱함. */
+export const SPACE_CAMERA_FOCUS_HEIGHT = 1.75 * SPACE_AVATAR.scale;
 
 export interface CameraOrbit {
   yaw: number;

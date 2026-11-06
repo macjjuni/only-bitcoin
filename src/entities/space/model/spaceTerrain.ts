@@ -1,3 +1,4 @@
+import { SPACE_AVATAR } from "./avatar";
 import { SPACE_BOUNDS, SPACE_HALL } from "./spaceWorld";
 
 /**
@@ -56,11 +57,14 @@ export interface SpaceTerrain {
   resolveCeilingY(x: number, z: number, feetY: number): number;
 }
 
-/** 아바타를 원기둥으로 보고 쓰는 반지름. 어깨 폭(약 0.6)의 절반보다 조금 작다. */
-export const SPACE_AVATAR_COLLISION_RADIUS = 0.28;
+/**
+ * 아바타를 원기둥으로 보고 쓰는 반지름. 어깨 폭(약 0.6)의 절반보다 조금 작은 0.28 에
+ * 그리기 배율을 곱함. 안 곱하면 커진 몸이 벽에 파묻힘.
+ */
+export const SPACE_AVATAR_COLLISION_RADIUS = 0.28 * SPACE_AVATAR.scale;
 
-/** 충돌 캡슐 높이. 아바타 키(1.81)에서 머리 윗점만 조금 깎았다. */
-export const SPACE_AVATAR_COLLISION_HEIGHT = 1.7;
+/** 충돌 캡슐 높이. 아바타 키(1.81)에서 머리 윗점만 조금 깎은 1.7 에 배율을 곱함. */
+export const SPACE_AVATAR_COLLISION_HEIGHT = 1.7 * SPACE_AVATAR.scale;
 
 /**
  * 걸어서 오를 수 있는 턱 높이(m).

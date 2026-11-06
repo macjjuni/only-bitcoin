@@ -1,4 +1,4 @@
-import { resolveAvatarModel } from "@/entities/space";
+import { resolveAvatarModel, SPACE_AVATAR } from "@/entities/space";
 
 /**
  * 명찰·말풍선 배치 값.
@@ -24,7 +24,7 @@ export const BUBBLE_TAIL_PX = 6;
 
 /** 모델 머리 위 명찰 기준점 높이(m). 페페처럼 키가 작은 모델은 낮게 뜸. */
 export const resolveNameplateLiftY = (modelIndex: number): number => {
-  return resolveAvatarModel(modelIndex).headCenterY + NAMEPLATE_HEAD_OFFSET_Y;
+  return resolveAvatarModel(modelIndex).headCenterY * SPACE_AVATAR.scale + NAMEPLATE_HEAD_OFFSET_Y;
 };
 
 export const resolveNameplateDistanceFactor = (isCoarsePointer: boolean): number => {

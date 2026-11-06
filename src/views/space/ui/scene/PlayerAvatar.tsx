@@ -165,7 +165,8 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
   // endregion
 
   return (
-    <>
+    // 모델 파일은 그대로 두고 그릴 때만 키움. 그림자도 같이 커짐.
+    <group scale={SPACE_AVATAR.scale}>
       {/* `dispose={null}` 로 useGLTF 캐시의 공유 머티리얼이 해제되지 않게 막음. */}
       <instancedMesh
         ref={bodyMeshRef}
@@ -200,7 +201,7 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
         <planeGeometry args={[SPACE_AVATAR.shadowRadius * 2, SPACE_AVATAR.shadowRadius * 2]} />
         <meshBasicMaterial map={shadowTexture} transparent depthWrite={false} />
       </mesh>
-    </>
+    </group>
   );
 }
 

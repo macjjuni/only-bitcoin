@@ -89,7 +89,12 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
   }, [crew.walkTexture, crew.kickTexture]);
 
   /** 행렬 계산용 임시 객체. 프레임마다 새로 만들면 GC 부하가 측정값에 섞임. */
-  const transformProxy = useMemo(() => new Object3D(), []);
+  const transformProxy = useMemo(() => {
+    const proxy = new Object3D();
+    // 모델 파일은 그대로 두고 그릴 때만 키움. 몸과 그림자 행렬에 같이 들어감.
+    proxy.scale.setScalar(SPACE_AVATAR.scale);
+    return proxy;
+  }, []);
   const colorProxy = useMemo(() => new Color(), []);
   /** 좌석별 직전 좌표. 이동 거리로 걷기 사이클을 돌림. */
   const lastPositions = useRef(new Map<number, { x: number; z: number }>());
