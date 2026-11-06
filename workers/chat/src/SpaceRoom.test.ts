@@ -883,8 +883,8 @@ describe("SpaceRoom", () => {
       expect(kickFrames(target)).toEqual([expect.objectContaining({ from: kicker.peer().seat })]);
     });
 
-    it("보간 지연만큼 멀어진 상대(3 m)는 서버가 맞힌 것으로 봄", async () => {
-      const { send, kicker, target } = await setUpPair(3);
+    it("보간 지연만큼 멀어진 상대(2.5 m)는 서버가 맞힌 것으로 봄", async () => {
+      const { send, kicker, target } = await setUpPair(2.5);
 
       await send(kicker, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
 

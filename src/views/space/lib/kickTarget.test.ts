@@ -17,20 +17,20 @@ const self = { x: 0, y: 0, z: 0, yaw: 0 };
 
 describe("selectKickTarget", () => {
   it("정면 거리 안에서 가장 가까운 사람을 고름", () => {
-    const players = [createPlayer(1, 0, -1.4), createPlayer(2, 0.2, -0.8)];
+    const players = [createPlayer(1, 0, -1.1), createPlayer(2, 0.2, -0.8)];
 
     expect(selectKickTarget(players, self)).toBe(2);
   });
 
   it("등 뒤·너무 먼·높이 차가 큰 사람은 안 고름", () => {
     expect(selectKickTarget([createPlayer(1, 0, 1)], self)).toBeNull();
-    expect(selectKickTarget([createPlayer(1, 0, -1.7)], self)).toBeNull();
+    expect(selectKickTarget([createPlayer(1, 0, -1.3)], self)).toBeNull();
     expect(selectKickTarget([createPlayer(1, 0, -1, 1.5)], self)).toBeNull();
   });
 
-  it("옆쪽은 정면 78° 안까지만 고름", () => {
-    expect(selectKickTarget([createPlayer(1, -1, -0.3)], self)).toBe(1);
-    expect(selectKickTarget([createPlayer(1, -1, 0)], self)).toBeNull();
+  it("옆쪽은 정면 60° 안까지만 고름", () => {
+    expect(selectKickTarget([createPlayer(1, -0.5, -0.6)], self)).toBe(1);
+    expect(selectKickTarget([createPlayer(1, -0.8, -0.3)], self)).toBeNull();
   });
 
   it("바라보는 방향을 따름", () => {
