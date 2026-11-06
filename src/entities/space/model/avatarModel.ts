@@ -39,6 +39,12 @@ export interface SpaceAvatarModel {
   /** 명찰·말풍선이 매달리는 머리 중심. 가공 스크립트의 `[anchor]` 값. */
   headCenterY: number;
   /**
+   * 렌치를 붙이는 오른손 위치(모델 좌표, 배율 전). 가공 스크립트의 `[anchor] handPivot` 값.
+   *
+   * 손 본의 머리·꼬리 가운데임. 크루·곰·황소는 팔이 한 덩어리라 손 정점이 없어 본으로 잼.
+   */
+  handPivot: readonly [number, number, number];
+  /**
    * Walk `.bin` 의 프레임 수. 가공 스크립트의 `[export] 프레임=` 값.
    *
    * 로더가 `.bin` 크기를 이 값으로 검증하고 텍스처 높이로 씀. 틀리면 셰이더가
@@ -66,6 +72,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     pupilGlintMeshName: "crew_pupil_glint",
     height: 1.81,
     headCenterY: 1.484,
+    handPivot: [0.2719, 0.7603, 0],
     walkFrameCount: 40,
     triangleCount: 1240,
   },
@@ -81,6 +88,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     pupilGlintMeshName: null,
     height: 1.81,
     headCenterY: 1.4758,
+    handPivot: [0.2717, 0.7596, 0],
     walkFrameCount: 40,
     triangleCount: 1504,
   },
@@ -96,6 +104,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     pupilGlintMeshName: "bull_pupil_glint",
     height: 1.81,
     headCenterY: 1.4638,
+    handPivot: [0.2645, 0.7397, 0],
     // Walk 가 48프레임임. 셰이더는 텍스처 높이에서 읽어서 그대로 씀.
     walkFrameCount: 48,
     triangleCount: 1972,
@@ -114,6 +123,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     // 원본 키 그대로 둠. 다른 모델보다 작음.
     height: 1.6,
     headCenterY: 1.3303,
+    handPivot: [0.25, 0.565, 0],
     // 원본 본은 20개라 가공 스크립트가 남는 2칸을 항등 행렬로 채웠음.
     walkFrameCount: 40,
     triangleCount: 1286,
@@ -132,6 +142,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     pupilGlintMeshName: null,
     height: 1.8,
     headCenterY: 1.4771,
+    handPivot: [0.31, 0.68, 0],
     // 본 20개라 페페처럼 2칸을 항등 행렬로 채웠음.
     walkFrameCount: 40,
     triangleCount: 3202,
@@ -152,6 +163,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     pupilGlintMeshName: null,
     height: 1.8,
     headCenterY: 1.4606,
+    handPivot: [0.1693, 0.7025, 0],
     // 본 20개라 2칸을 항등 행렬로 채웠음.
     walkFrameCount: 40,
     triangleCount: 1522,

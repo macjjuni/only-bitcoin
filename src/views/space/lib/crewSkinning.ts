@@ -32,6 +32,9 @@ const VERTEX_DECLARATIONS = /* glsl */ `
   uniform vec2 uWalkTextureSize;
   uniform sampler2D uKickTexture;
   uniform vec2 uKickTextureSize;
+  #ifdef CREW_WRENCH
+  attribute vec3 aWrenchOffset;
+  #endif
 
   mat4 readBoneMatrix(sampler2D boneTexture, vec2 textureSize, float boneIndex, float frame) {
     float column = boneIndex * ${CREW_WALK.rowsPerBone}.0;
@@ -90,12 +93,17 @@ const resolveTextureSize = (texture: Texture): Vector2 => {
  * 머티리얼에 인스턴스 스키닝을 심음.
  *
  * 멈춰 있을 때는 레스트 포즈로 섞음. `Idle` 클립에 움직임이 없어(전 본 0°) 서 있는
- * 자세는 모델 그대로가 정답임. 발차기는 그 결과 위에 한 번 더 섞음.
+ * 자세는 모델 그대로가 정답임. 공격(kick 텍스처, 지금은 렌치 내려치기)은 그 결과 위에 한
+ * 번 더 섞음.
+ *
+ * `isWrench` 면 정점을 손 위치 쪽으로 `aWrenchOffset × (1 - 공격 비율)` 만큼 접은 뒤 같은
+ * 행렬을 곱함. 공격하지 않을 때는 손 한 점으로 모여 안 보이고, 휘두를 때만 펼쳐짐.
  */
 export const applyCrewSkinning = (
   material: Material,
   walkTexture: Texture,
   kickTexture: Texture,
+  isWrench = false,
 ): void => {
   material.onBeforeCompile = (shader) => {
     shader.uniforms.uWalkTexture = { value: walkTexture };
@@ -125,14 +133,19 @@ export const applyCrewSkinning = (
         "#include <begin_vertex>",
         /* glsl */ `
         #include <begin_vertex>
+        vec3 skinSource = position;
+        #ifdef CREW_WRENCH
+        skinSource -= aWrenchOffset * (1.0 - ${KICK_BLEND_ATTRIBUTE});
+        transformed = skinSource;
+        #endif
         vec3 walkPosition = mix(
-          (walkBoneA * vec4(position, 1.0)).xyz,
-          (walkBoneB * vec4(position, 1.0)).xyz,
+          (walkBoneA * vec4(skinSource, 1.0)).xyz,
+          (walkBoneB * vec4(skinSource, 1.0)).xyz,
           walkLerp
         );
         vec3 kickPosition = mix(
-          (kickBoneA * vec4(position, 1.0)).xyz,
-          (kickBoneB * vec4(position, 1.0)).xyz,
+          (kickBoneA * vec4(skinSource, 1.0)).xyz,
+          (kickBoneB * vec4(skinSource, 1.0)).xyz,
           kickLerp
         );
         transformed = mix(
@@ -143,8 +156,12 @@ export const applyCrewSkinning = (
         `,
       );
   };
+  if (isWrench) {
+    material.defines = { ...material.defines, CREW_WRENCH: "" };
+  }
   // 패치는 프로그램을 새로 만들게 함. 캐시 키를 바꿔야 반영됨.
-  material.customProgramCacheKey = () => "crew-skinning-kick";
+  material.customProgramCacheKey = () =>
+    isWrench ? "crew-skinning-kick-wrench" : "crew-skinning-kick";
   material.needsUpdate = true;
 };
 

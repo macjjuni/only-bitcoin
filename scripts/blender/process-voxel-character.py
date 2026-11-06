@@ -11,7 +11,8 @@
 출력 (`<prefix>` 기본값 `crew`)
   <prefix>.glb        메시 2~3개로 병합한 지오메트리(애니메이션 제거)
   <prefix>-walk.bin   Walk 한 사이클의 본 스키닝 행렬(Float32)
-  <prefix>-kick.bin   발차기 한 번의 본 스키닝 행렬(Float32, `KICK_FRAMES` 프레임)
+  <prefix>-kick.bin   렌치 공격 한 번의 본 스키닝 행렬(Float32, `KICK_FRAMES` 프레임).
+                      처음엔 발차기였어서 파일·플래그 이름이 kick 으로 남아 있음
 
 실행 — `<prefix>`, 색을 받을 메시, 발광시킬 눈동자 메시를 쉼표로 구분해 넘김
   blender --background assets/avatars/voxel-crew.blend \
@@ -28,7 +29,7 @@
 `--height=<m>` 로 키를 바꿈. 생략하면 1.81 m. 위치와 상관없이 받음.
 
 `--kick-only` 를 주면 glb·walk 는 건드리지 않고 `<prefix>-kick.bin` 만 구움. 이미 구운
-모델에 발차기를 붙일 때 씀. 이때 Walk 도 메모리에서 다시 계산해 기존 `-walk.bin`
+모델에 공격 동작을 붙일 때 씀. 이때 Walk 도 메모리에서 다시 계산해 기존 `-walk.bin`
 과 비교함. 같으면 좌표 변환이 기존 에셋과 맞는다는 뜻임.
 
 편집 원본(`.blend`, 변형 `.glb`)은 `assets/avatars/` 에 있고 런타임은 안 읽음.
@@ -85,18 +86,17 @@ WALK_ACTION = "Walk"
 # 본이 적은 모델(페페 20개)은 남는 칸을 항등 행렬로 채움. 아무 정점도 안 씀.
 BONE_SLOTS = 22
 
-# 발차기 프레임 수. 런타임 `CREW_KICK.frameCount` 와 같아야 함. 재생 시간은 런타임이 정함.
+# 공격 프레임 수. 런타임 `CREW_KICK.frameCount` 와 같아야 함. 재생 시간은 런타임이 정함.
 KICK_FRAMES = 16
-# 발차기 키 포즈 시점(0~1)과 각도(도). 다리 회전축은 모델마다 Walk 에서 뽑음.
-KICK_WINDUP_AT = 0.32
-KICK_STRIKE_AT = 0.58
-KICK_THIGH_WINDUP_DEG = -28.0
-KICK_THIGH_STRIKE_DEG = 82.0
-KICK_KNEE_WINDUP_DEG = 75.0
-KICK_KNEE_STRIKE_DEG = 4.0
-# 차는 동안 팔을 걷기보다 크게 흔들어 균형 잡는 느낌을 줌.
-KICK_ARM_SCALE = 1.6
-KICK_ARM_BONES = ("upper_arm.L", "upper_arm.R", "forearm.L", "forearm.R")
+# 렌치 내려치기 키 포즈 시점(0~1)과 각도(도). 팔 회전축은 모델마다 Walk 에서 뽑음.
+# 곧은 팔을 머리 위로 넘겼다가 앞쪽 아래로 내려침. 팔꿈치는 안 굽힘. 크루·곰·황소는
+# 팔이 위팔 본에만 묶인 한 덩어리라 굽히면 팔은 곧은데 손에 붙은 렌치만 꺾여 떨어짐.
+SWING_WINDUP_AT = 0.36
+SWING_STRIKE_AT = 0.58
+SWING_ARM_WINDUP_DEG = 170.0
+SWING_ARM_STRIKE_DEG = 60.0
+# 렌치를 붙일 손 본. 모든 모델에서 13번이라 런타임이 렌치 정점을 이 번호로 묶음.
+HAND_BONE = "hand.R"
 
 # glTF 는 Y-up, Blender 는 Z-up 임. 지오메트리는 익스포터가 바꿔 주지만 본 행렬은
 # 직접 같은 변환을 해 줘야 셰이더에서 정점과 맞음.
@@ -335,69 +335,55 @@ def rotation_axis(quaternion, fallback):
     return axis.copy() if angle > math.radians(1.0) else fallback
 
 
-def sample_walk_extremes(armature):
+def sample_walk_arm(armature):
     """
-    Walk 에서 오른발이 가장 앞·뒤로 간 프레임의 본 회전과, 무릎이 가장 굽은 회전.
+    Walk 에서 오른손이 가장 앞으로 간 프레임의 오른 위팔 회전.
 
-    본 방향이 모델마다 달라 "다리를 앞으로 드는 축"을 숫자로 정할 수 없음. 걷기에서
-    오른 허벅지가 앞으로 간 회전의 축이 곧 그 모델의 앞차기 축임.
+    본 방향이 모델마다 달라 "팔을 앞으로 드는 축"을 숫자로 정할 수 없음. 걷기에서 오른
+    위팔이 앞으로 간 회전의 축이 곧 그 모델의 팔 들기 축임.
     """
     action = use_walk_action(armature)
     start, end = (int(round(v)) for v in action.frame_range)
-    foot = armature.pose.bones["foot.R"]
-    shin = armature.pose.bones["shin.R"]
-    best = {"forward": None, "backward": None, "knee": None}
+    hand = armature.pose.bones[HAND_BONE]
+    best = None
 
     for frame in range(start, end):
         bpy.context.scene.frame_set(frame)
         # Blender 정면이 -Y 라 y 가 작을수록 앞임.
-        forward = -(armature.matrix_world @ foot.head).y
-        knee_angle = shin.matrix_basis.to_quaternion().angle
-        rotations = {b.name: b.matrix_basis.to_quaternion() for b in armature.pose.bones}
-        if best["forward"] is None or forward > best["forward"][0]:
-            best["forward"] = (forward, rotations)
-        if best["backward"] is None or forward < best["backward"][0]:
-            best["backward"] = (forward, rotations)
-        if best["knee"] is None or knee_angle > best["knee"][0]:
-            best["knee"] = (knee_angle, rotations)
+        forward = -(armature.matrix_world @ hand.head).y
+        if best is None or forward > best[0]:
+            best = (forward, armature.pose.bones["upper_arm.R"].matrix_basis.to_quaternion())
 
     release_pose(armature)
 
-    return best["forward"][1], best["backward"][1], best["knee"][1]
+    return best[1]
 
 
-def scale_rotation(quaternion, factor):
-    axis, angle = quaternion.to_axis_angle()
+def resolve_hand_pivot(armature, transform):
+    """
+    렌치를 붙일 손 위치(glTF 모델 좌표, 배율 전). 손 본의 머리와 꼬리 가운데.
 
-    return Quaternion(axis, angle * factor)
+    정점으로 재면 팔이 한 덩어리인 모델(크루 등)은 손 정점이 없어 못 잼. 본은 모든
+    모델에 있음.
+    """
+    bone = armature.data.bones[HAND_BONE]
+    middle = (bone.head_local + bone.tail_local) / 2
+    point = YUP @ transform @ armature.matrix_world @ middle
+
+    return point.x, point.y, point.z
 
 
 def build_kick_keys(armature):
     """
-    발차기 키 포즈 네 개(레스트 → 당김 → 차기 → 레스트).
+    렌치 내려치기 키 포즈 네 개(레스트 → 머리 위로 들기 → 내려치기 → 레스트).
 
-    오른다리만 크게 움직이고 팔은 걷기의 같은 시점 자세를 키워 균형을 잡음. 왼다리와
-    몸통은 레스트에 둠. 디딤발이 흔들리면 미끄러져 보임.
+    오른 위팔만 돌림. 다리·몸통·아래팔은 레스트에 둠. 디딤발이 흔들리면 미끄러져 보임.
     """
-    forward, backward, knee = sample_walk_extremes(armature)
-    lateral = Vector((1, 0, 0))
-    thigh_axis = rotation_axis(forward["thigh.R"], lateral)
-    knee_axis = rotation_axis(knee["shin.R"], lateral)
+    arm_axis = rotation_axis(sample_walk_arm(armature), Vector((1, 0, 0)))
+    windup = {"upper_arm.R": Quaternion(arm_axis, math.radians(SWING_ARM_WINDUP_DEG))}
+    strike = {"upper_arm.R": Quaternion(arm_axis, math.radians(SWING_ARM_STRIKE_DEG))}
 
-    windup = {
-        "thigh.R": Quaternion(thigh_axis, math.radians(KICK_THIGH_WINDUP_DEG)),
-        "shin.R": Quaternion(knee_axis, math.radians(KICK_KNEE_WINDUP_DEG)),
-    }
-    strike = {
-        "thigh.R": Quaternion(thigh_axis, math.radians(KICK_THIGH_STRIKE_DEG)),
-        "shin.R": Quaternion(knee_axis, math.radians(KICK_KNEE_STRIKE_DEG)),
-    }
-    for name in KICK_ARM_BONES:
-        if name in backward:
-            windup[name] = backward[name].copy()
-            strike[name] = scale_rotation(forward[name], KICK_ARM_SCALE)
-
-    return ((0.0, {}), (KICK_WINDUP_AT, windup), (KICK_STRIKE_AT, strike), (1.0, {}))
+    return ((0.0, {}), (SWING_WINDUP_AT, windup), (SWING_STRIKE_AT, strike), (1.0, {}))
 
 
 def smoothstep(t):
@@ -419,7 +405,7 @@ def resolve_kick_pose(keys, t):
 
 
 def bake_kick_matrices(armature, transform):
-    """발차기 `KICK_FRAMES` 프레임의 본 스키닝 행렬을 구움. 첫·끝 프레임은 레스트."""
+    """공격 `KICK_FRAMES` 프레임의 본 스키닝 행렬을 구움. 첫·끝 프레임은 레스트."""
     keys = build_kick_keys(armature)
     bones = [b.name for b in armature.data.bones]
     rows = []
@@ -477,6 +463,7 @@ if KICK_ONLY:
     kick_rows = bake_kick_matrices(armature, transform)
     write_rows(kick_path, kick_rows)
     print(f"[check] 기존 {PREFIX}-walk.bin 과 최대 차이 = {walk_gap}")
+    print("[anchor] handPivot=(%.4f, %.4f, %.4f)" % resolve_hand_pivot(armature, transform))
     print(f"[export] {PREFIX}-kick.bin {os.path.getsize(kick_path)/1024:.0f} KB | "
           f"프레임={KICK_FRAMES} 본={len(bones)}(+{BONE_SLOTS - len(bones)} 패딩)")
     sys.exit(0)
@@ -536,3 +523,4 @@ print(f"[export] {PREFIX}-walk.bin {os.path.getsize(walk_path)/1024:.0f} KB | "
       f"프레임={len(frames)} 본={len(bones)}(+{BONE_SLOTS - len(bones)} 패딩)")
 print(f"[export] {PREFIX}-kick.bin {os.path.getsize(kick_path)/1024:.0f} KB | 프레임={KICK_FRAMES}")
 print(f"[anchor] headCenterY={sum(head)/len(head):.4f}")
+print("[anchor] handPivot=(%.4f, %.4f, %.4f)" % resolve_hand_pivot(armature, transform))

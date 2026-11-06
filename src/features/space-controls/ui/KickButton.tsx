@@ -1,5 +1,6 @@
 "use client";
 
+import { Wrench } from "lucide-react";
 import { memo, type ReactNode, useCallback, useEffect, useState } from "react";
 import { SPACE_KICK } from "@/entities/space";
 import type { SpaceInputSource } from "../model/spaceInputSource";
@@ -11,38 +12,6 @@ import {
 
 const ICON_STROKE_WIDTH = 2.25;
 
-interface KickIconProps {
-  className: string;
-}
-
-/**
- * 차는 부츠 아이콘. 앞으로 기운 부츠 뒤에 속도선을 붙였음.
- *
- * 아이콘 세트에 발차기·부츠가 없어 직접 그림. 전에 쓴 발자국(Footprints)은 걷기로
- * 읽혔음. 다른 버튼 아이콘(lucide)과 같은 24 격자·선 굵기·둥근 끝으로 맞춤.
- */
-function KickIcon({ className }: KickIconProps): ReactNode {
-  return (
-    <svg
-      aria-hidden="true"
-      width={TOUCH_BUTTON_ICON_SIZE}
-      height={TOUCH_BUTTON_ICON_SIZE}
-      viewBox="0 0 24 24"
-      fill="none"
-      stroke="currentColor"
-      strokeWidth={ICON_STROKE_WIDTH}
-      strokeLinecap="round"
-      strokeLinejoin="round"
-      className={className}
-    >
-      <g transform="rotate(-28 13 12)">
-        <path d="M10 3h5v8.5l4.2 2.1a2 2 0 0 1 1.1 1.8V18H10z" />
-        <path d="M10 15h4" />
-      </g>
-      <path d="M2.5 9.5h3.5M2 13.5h4.5M3 17.5h3" />
-    </svg>
-  );
-}
 /** 테두리 안쪽에 그림. 선 굵기(2.5)만큼 지름에서 뺌. */
 const RING_RADIUS = TOUCH_BUTTON_DIAMETER / 2 - 2;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
@@ -54,7 +23,10 @@ interface KickButtonProps {
 }
 
 /**
- * 손가락 기기 전용 발차기 버튼.
+ * 손가락 기기 전용 렌치 공격 버튼.
+ *
+ * 처음엔 발차기였어서 코드·프로토콜 이름은 kick 으로 남아 있음. 이름을 바꾸면 배포된
+ * 클라이언트·서버와 서로 못 알아들어 그대로 둠.
  *
  * 누른 순간 요청 한 번만 남김. 쿨다운·대상 판정은 씬이 함. 버튼은 씬이 정한
  * `kickCooldownUntil` 을 읽어 남은 시간을 테두리로 그림. 키보드(F)로 찬 경우에도
@@ -105,7 +77,7 @@ function KickButton({ inputSource }: KickButtonProps): ReactNode {
   return (
     <button
       type="button"
-      aria-label={isCoolingDown ? "발차기 준비 중" : "발차기"}
+      aria-label={isCoolingDown ? "렌치 공격 준비 중" : "렌치 공격"}
       aria-disabled={isCoolingDown}
       className={`absolute flex items-center justify-center rounded-full border backdrop-blur-sm touch-none select-none transition-colors ${
         isCoolingDown ? "border-white/10 bg-white/5" : "border-white/20 bg-white/10 active:border-bitcoin/70 active:bg-bitcoin/35"
@@ -117,7 +89,12 @@ function KickButton({ inputSource }: KickButtonProps): ReactNode {
       }}
       onPointerDown={onPointerDownKick}
     >
-      <KickIcon className={isCoolingDown ? "text-white/35" : "text-white/85"} />
+      <Wrench
+        size={TOUCH_BUTTON_ICON_SIZE}
+        strokeWidth={ICON_STROKE_WIDTH}
+        className={isCoolingDown ? "text-white/35" : "text-white/85"}
+        aria-hidden="true"
+      />
       {isCoolingDown && (
         <svg
           aria-hidden="true"
