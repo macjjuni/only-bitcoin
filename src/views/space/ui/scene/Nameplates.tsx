@@ -4,21 +4,16 @@ import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { memo, type ReactNode, useMemo, useRef, useState } from "react";
 import type { Group } from "three";
-import {
-  type PlayerTransform,
-  type RemotePlayer,
-  resolveAvatarModel,
-  SPACE_OVERLAY_LIMITS,
-} from "@/entities/space";
+import { type PlayerTransform, type RemotePlayer, SPACE_OVERLAY_LIMITS } from "@/entities/space";
 import { selectNearestVisible } from "@/views/space/lib/avatarCulling";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
+import {
+  resolveNameplateDistanceFactor,
+  resolveNameplateLiftY,
+} from "@/views/space/lib/overlayLayout";
 
 /** 명찰 선별 주기. 매 프레임 고르면 React 상태가 60 Hz 로 갱신된다. */
 const SELECTION_INTERVAL_MS = 200;
-/** 머리 중심에서 명찰까지 띄우는 높이(m). */
-const NAMEPLATE_HEAD_OFFSET_Y = 0.55;
-const DESKTOP_NAMEPLATE_DISTANCE_FACTOR = 18;
-const TOUCH_NAMEPLATE_DISTANCE_FACTOR = 12;
 
 interface NameplatesProps {
   players: readonly RemotePlayer[];
@@ -56,14 +51,7 @@ function Nameplates({
   // endregion
 
   // region [Privates]
-  /** 모델 머리 위 명찰 높이. 페페처럼 키가 작은 모델은 낮게 뜸. */
-  const resolveNameplateLiftY = (modelIndex: number): number => {
-    return resolveAvatarModel(modelIndex).headCenterY + NAMEPLATE_HEAD_OFFSET_Y;
-  };
-
-  const nameplateDistanceFactor = isCoarsePointer
-    ? TOUCH_NAMEPLATE_DISTANCE_FACTOR
-    : DESKTOP_NAMEPLATE_DISTANCE_FACTOR;
+  const nameplateDistanceFactor = resolveNameplateDistanceFactor(isCoarsePointer);
   const playersBySeat = useMemo(() => {
     return new Map(players.map((player) => [player.seat, player]));
   }, [players, rosterRevision]);
@@ -167,7 +155,7 @@ function Nameplates({
       {isSelfReady && selfNickname !== "" && (
         <group ref={attachSelfGroup}>
           <Html center distanceFactor={nameplateDistanceFactor} zIndexRange={[20, 0]}>
-            <span className="select-none whitespace-nowrap rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-medium text-white/90 backdrop-blur-sm">
+            <span className="flex h-5 w-max select-none items-center whitespace-nowrap rounded-full bg-black/65 px-2 text-[11px] font-medium leading-none text-white/90 backdrop-blur-sm">
               {selfNickname}
             </span>
           </Html>
@@ -181,7 +169,7 @@ function Nameplates({
           }}
         >
           <Html center distanceFactor={nameplateDistanceFactor} zIndexRange={[20, 0]}>
-            <span className="select-none whitespace-nowrap rounded-full bg-black/65 px-2 py-0.5 text-[11px] font-medium text-white/90 backdrop-blur-sm">
+            <span className="flex h-5 w-max select-none items-center whitespace-nowrap rounded-full bg-black/65 px-2 text-[11px] font-medium leading-none text-white/90 backdrop-blur-sm">
               {player.nickname}
             </span>
           </Html>

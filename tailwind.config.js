@@ -110,6 +110,14 @@ export default {
           "0%, 100%": { opacity: "0" },
           "50%": { opacity: "1" },
         },
+        // 스페이스 말풍선 한 생애. 5초 기준 퍼센트라 TTL 을 바꾸면 같이 봐야 함.
+        // 0~3.6%(180ms) 튀어나옴, 93%(4.65s)부터 흐려짐.
+        spaceBubbleLife: {
+          "0%": { opacity: "0", transform: "translateY(6px) scale(0.86)" },
+          "3.6%": { opacity: "1", transform: "translateY(0) scale(1)" },
+          "93%": { opacity: "1", transform: "translateY(0) scale(1)" },
+          "100%": { opacity: "0", transform: "translateY(-4px) scale(0.97)" },
+        },
         chatPanelIn: {
           "0%": { opacity: "0", transform: "translateY(10px) scale(0.92)" },
           "60%": { opacity: "1" },
@@ -192,6 +200,7 @@ export default {
         "surge-ember": "surgeEmberRise 2.8s ease-in infinite",
         "surge-text-flicker": "surgeTextFlicker 2.2s ease-in-out infinite",
         "chat-panel-in": "chatPanelIn 0.28s cubic-bezier(0.16, 1, 0.3, 1)",
+        "space-bubble-life": "spaceBubbleLife 5s cubic-bezier(0.16, 1, 0.3, 1) both",
         "chat-panel-out": "chatPanelOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards",
         "chat-backdrop-out": "fadeOut 0.2s ease-in-out forwards",
         "price-live-pulse": "priceLivePulse 1.9s ease-out infinite",

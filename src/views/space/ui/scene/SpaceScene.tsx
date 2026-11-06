@@ -472,6 +472,7 @@ function SpaceScene({
       />
       <ChatBubbles
         messages={session.bubbleMessages}
+        isCoarsePointer={isCoarsePointer}
         players={remotePlayers}
         self={session.self}
         viewerTransformRef={playerStateRef}
