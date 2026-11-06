@@ -75,6 +75,23 @@ const createRateLimitedSocketResponse = (): Response => {
   return new Response(null, { status: 101, webSocket: pair[0] });
 };
 
+/**
+ * 접속자 IP. 운영에서는 Cloudflare 가 늘 `CF-Connecting-IP` 를 붙여 줌.
+ *
+ * 로컬 `wrangler dev` 는 이 헤더를 안 붙여서 모든 접속이 `IP_UNAVAILABLE` 로 막혔음.
+ * `pnpm chat:dev` 가 넣는 로컬 전용 설정(`SPACE_DISABLE_IP_CONNECTION_LIMIT`)이 켜져
+ * 있을 때만 루프백으로 봄. 운영에서는 이 값이 없어 헤더 없는 요청은 그대로 거절함.
+ */
+const resolveConnectingIpAddress = (request: Request, workerEnv: ChatWorkerEnv): string | null => {
+  const headerIpAddress = request.headers.get("CF-Connecting-IP");
+
+  if (headerIpAddress) {
+    return headerIpAddress;
+  }
+
+  return workerEnv.SPACE_DISABLE_IP_CONNECTION_LIMIT === "true" ? "127.0.0.1" : null;
+};
+
 const handleSpaceWebSocketUpgrade = async (
   request: Request,
   workerEnv: ChatWorkerEnv,
@@ -83,7 +100,7 @@ const handleSpaceWebSocketUpgrade = async (
     return jsonResponse({ error: "UPGRADE_REQUIRED" }, 426, { Upgrade: "websocket" });
   }
 
-  const connectingIpAddress = request.headers.get("CF-Connecting-IP");
+  const connectingIpAddress = resolveConnectingIpAddress(request, workerEnv);
   if (!connectingIpAddress) {
     return jsonResponse({ error: "IP_UNAVAILABLE" }, 403);
   }

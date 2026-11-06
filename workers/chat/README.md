@@ -11,7 +11,7 @@ pnpm install
 pnpm chat:dev
 ```
 
-`pnpm chat:dev`는 `workers/chat/.dev.vars`의 빠진 로컬 키 두 개(`ENFORCEMENT_SECRET`, `IP_GUARD_SECRET`)와 localhost/127.0.0.1 Origin, 로컬 공간 IP 연결 제한 해제 설정을 자동으로 준비합니다. 기존 설정과 키는 유지하고, 생성한 파일은 Git에서 제외합니다. 이 준비 과정은 배포 명령에는 실행되지 않습니다.
+`pnpm chat:dev`는 `workers/chat/.dev.vars`의 빠진 로컬 키 두 개(`ENFORCEMENT_SECRET`, `IP_GUARD_SECRET`)와 localhost/127.0.0.1 Origin, 로컬 공간 IP 연결 제한 해제 설정을 자동으로 준비합니다. 로컬 `wrangler dev` 는 `CF-Connecting-IP` 를 안 붙여서, 이 설정이 켜져 있으면 헤더 없는 요청을 루프백(127.0.0.1)으로 봅니다. 기존 설정과 키는 유지하고, 생성한 파일은 Git에서 제외합니다. 이 준비 과정은 배포 명령에는 실행되지 않습니다.
 
 프론트엔드 `.env.local`에 다음 공개 URL을 설정하고 개발 서버를 재시작합니다.
 

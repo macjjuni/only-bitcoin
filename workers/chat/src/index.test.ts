@@ -5,7 +5,7 @@ vi.mock("cloudflare:workers", () => ({ DurableObject: class {} }));
 import worker from "./index";
 import type { ChatWorkerEnv } from "./types";
 
-const createIngress = (isRateAllowed = true) => {
+const createIngress = (isRateAllowed = true, envOverrides: Record<string, string> = {}) => {
   const spaceFetch = vi.fn(async (_request: Request) => new Response("space"));
   const rateLimit = vi.fn(async (_input: { key: string }) => ({ success: isRateAllowed }));
   const env = {
@@ -13,6 +13,7 @@ const createIngress = (isRateAllowed = true) => {
     IP_GUARD_SECRET: "test-ip-guard-secret",
     CHAT_UPGRADE_RATE_LIMITER: { limit: rateLimit },
     SPACE_ROOM: { idFromName: () => "space-main", get: () => ({ fetch: spaceFetch }) },
+    ...envOverrides,
   } as unknown as ChatWorkerEnv;
   const request = (path: string, headerOverrides: Record<string, string> = {}) =>
     new Request(`https://worker.test${path}`, {
@@ -57,6 +58,15 @@ describe("space WebSocket ingress", () => {
     expect(missingIp.status).toBe(403);
     expect(ingress.spaceFetch).not.toHaveBeenCalled();
     expect(ingress.rateLimit).not.toHaveBeenCalled();
+  });
+
+  it("로컬 개발 설정이 켜져 있을 때만 IP 헤더 없는 요청을 루프백으로 받음", async () => {
+    // wrangler dev 는 CF-Connecting-IP 를 안 붙임. 운영에서는 이 설정이 없음.
+    const local = createIngress(true, { SPACE_DISABLE_IP_CONNECTION_LIMIT: "true" });
+    const response = await local.fetch(local.request("/v1/space/ws", { "CF-Connecting-IP": "" }));
+
+    expect(await response.text()).toBe("space");
+    expect(local.spaceFetch).toHaveBeenCalledOnce();
   });
 
   it("30/min IP upgrade 제한을 통과하지 못하면 101로 받은 뒤 4010으로 닫는다", async () => {
