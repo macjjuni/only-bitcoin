@@ -787,7 +787,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     }
     const now = Date.now();
 
-    if (attachment.lastKickAt !== undefined && now - attachment.lastKickAt < SPACE_KICK.cooldownMs) {
+    if (attachment.lastKickAt !== undefined && now - attachment.lastKickAt < SPACE_KICK.cooldownMs - SPACE_KICK.serverCooldownToleranceMs) {
       return;
     }
     const facingX = -Math.sin(kicker.yaw);

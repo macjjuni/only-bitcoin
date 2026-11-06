@@ -2,6 +2,7 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import { resolveColorIndexFromClientKey } from "../../../src/entities/space/lib/clientKeyHash";
 import { decodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapshot";
 import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
+import { SPACE_KICK } from "../../../src/entities/space/model/kick";
 import {
   parseSpaceServerFrame,
   SPACE_PROTOCOL_VERSION,
@@ -890,12 +891,13 @@ describe("SpaceRoom", () => {
       expect(hitFrames(target)).toHaveLength(1);
     });
 
-    it("쿨다운 5초 안에 다시 찬 건 버리고 지나면 받음", async () => {
+    it("쿨다운 안에 다시 찬 건 버리되 도착 지연을 감안해 0.5초 일찍부터 받음", async () => {
       const { send, kicker, target } = await setUpPair(1);
       const kick = { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat };
+      const serverCooldown = SPACE_KICK.cooldownMs - SPACE_KICK.serverCooldownToleranceMs;
 
       await send(kicker, kick);
-      vi.advanceTimersByTime(4_999);
+      vi.advanceTimersByTime(serverCooldown - 1);
       await send(kicker, kick);
       expect(kickFrames(target)).toHaveLength(1);
 

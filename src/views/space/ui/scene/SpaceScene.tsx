@@ -304,6 +304,8 @@ function SpaceScene({
 
     const respawned = createLocalPlayerState(spawnTransform);
 
+    // 떨어지기 전에 맞아 기다리던 넉백이 스폰 직후 걸리지 않게 비움.
+    pendingKnockbacksRef.current = [];
     playerStateRef.current = respawned;
     accumulatedSecondsRef.current = 0;
     cameraOrbitRef.current = { ...cameraOrbitRef.current, yaw: spawnTransform.yaw };

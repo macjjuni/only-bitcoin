@@ -2,11 +2,12 @@
 
 import { memo, type ReactNode } from "react";
 
-/** 데스크톱·모바일 조작을 함께 적는다. 기기마다 다른 안내를 띄우면 관리가 갈린다. */
+/** 데스크톱·모바일 조작을 같이 적음. 기기마다 다른 안내를 띄우면 관리가 갈림. */
 const CONTROL_GUIDE = [
   { action: "이동", desktop: "W A S D", mobile: "조이스틱" },
   { action: "달리기", desktop: "Shift", mobile: "끝까지 밀기" },
   { action: "점프", desktop: "Space", mobile: "우측 하단 버튼" },
+  { action: "발차기", desktop: "F", mobile: "점프 왼쪽 버튼" },
   { action: "시야 회전", desktop: "드래그 · Q E", mobile: "화면 드래그" },
   { action: "줌", desktop: "휠", mobile: "두 손가락" },
   { action: "채팅", desktop: "Enter", mobile: "좌측 하단 버튼" },
