@@ -4,17 +4,7 @@ import type { BinanceKline, BtcCandle, MarketChartFormattedData } from "../model
 const BINANCE_KLINES_URL = "https://api.binance.com/api/v3/klines";
 const BINANCE_TICKER_24H_URL = "https://api.binance.com/api/v3/ticker/24hr";
 
-// `1m` 은 스페이스 배경음악이 급등락 판정 창(15분)을 즉시 채우는 데만 씀.
-export type BinanceInterval =
-  | "1m"
-  | "5m"
-  | "15m"
-  | "30m"
-  | "1h"
-  | "4h"
-  | "12h"
-  | "1d"
-  | "1w";
+export type BinanceInterval = "5m" | "15m" | "30m" | "1h" | "4h" | "12h" | "1d" | "1w";
 
 /**
  * Binance 24시간 티커 응답 ( 가격·수량 계열 필드는 모두 문자열로 내려온다 )
