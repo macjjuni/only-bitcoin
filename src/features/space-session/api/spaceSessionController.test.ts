@@ -216,7 +216,7 @@ describe("SpaceSessionController", () => {
     controller.stop();
   });
 
-  it("잠깐 멈췄다 다시 움직여도 전송 간격이 서버 최소 간격(50ms)보다 붙지 않음", () => {
+  it("잠깐 멈췄다 다시 움직여도 전송 간격이 84ms보다 붙지 않음", () => {
     const { controller, welcome } = createHarness();
     controller.start();
     const socket = welcome();

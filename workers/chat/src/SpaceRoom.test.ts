@@ -400,6 +400,19 @@ describe("SpaceRoom", () => {
     expect(first.sent).toHaveLength(3);
   });
 
+  it("붙어 도착한 정상 이동도 버리지 않아 마지막 위치가 남음", async () => {
+    const { join, send } = createRoom();
+    const socket = await join(clientKey(1));
+    vi.advanceTimersByTime(170);
+    const original = socket.peer();
+    await send(socket, { v: SPACE_PROTOCOL_VERSION, t: "move", ...original, x: original.x + 0.8 });
+    vi.advanceTimersByTime(30);
+    await send(socket, { v: SPACE_PROTOCOL_VERSION, t: "move", ...original, x: original.x + 1.6 });
+
+    expect(socket.peer().x).toBeCloseTo(original.x + 1.6);
+    expect(socket.frames().some((frame) => frame.t === "error")).toBe(false);
+  });
+
   it("계속 움직이면 이동 도착 시점과 무관하게 100ms 박자를 지킴", async () => {
     const { join, send } = createRoom();
     const first = await join(clientKey(1));

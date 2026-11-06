@@ -85,8 +85,6 @@ const SAY_RATE_WINDOW_MS = 60_000;
 const JOIN_TIMEOUT_MS = 10_000;
 const STALE_CONNECTION_MS = 60_000;
 const PRUNE_INTERVAL_MS = 15_000;
-/** 모바일 상향 지터로 두 이동이 붙어 와도 마지막 위치를 버리지 않게 넉넉히 낮춤. */
-const MINIMUM_MOVE_INTERVAL_MS = 50;
 /** 마지막 이동 뒤 더 보내는 빈 틱 수. 클라이언트의 정지 판정용. */
 const TRAILING_SNAPSHOT_TICKS = 2;
 /** 클라이언트 달리기 8 m/s에 전송·적분 오차 여유만 더함. */
@@ -667,11 +665,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       return;
     }
     const now = Date.now();
+    // 최소 간격 검사는 뺐음. 도착 시각 기준이라 모바일에서 붙어 온 정상 이동(특히
+    // 마지막 위치)을 버렸음. 속도는 거리 예산이, 도배는 초당 프레임 제한이 막음.
     const elapsed = Math.max(0, now - attachment.lastMoveAt);
-
-    if (elapsed < MINIMUM_MOVE_INTERVAL_MS) {
-      return;
-    }
     const availableDistance = Math.min(
       MAXIMUM_MOVEMENT_BUDGET,
       attachment.movementBudget + (elapsed / 1000) * MAXIMUM_SPEED_METERS_PER_SECOND,
