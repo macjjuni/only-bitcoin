@@ -859,6 +859,19 @@ describe("SpaceSessionController", () => {
       controller.stop();
     });
 
+    it("탭이 멈춰 있던 동안 쌓인 1초 넘은 발차기는 버림", () => {
+      const { controller, welcome } = createHarness();
+      controller.start();
+      const socket = welcome(undefined, [remote], ["kick"]);
+
+      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, to: 0, dirX: -1, dirZ: 0 });
+      vi.advanceTimersByTime(5_000);
+      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, dirX: 0, dirZ: 1 });
+
+      expect(controller.drainKickEvents()).toEqual([{ from: 1, dirX: 0, dirZ: 1 }]);
+      controller.stop();
+    });
+
     it("모르는 새 서버 프레임은 끊지 않고 무시함", () => {
       const { controller, welcome } = createHarness();
       controller.start();

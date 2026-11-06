@@ -115,6 +115,8 @@ const retryThrottleMs = 5_000;
 const maximumBufferedBytes = 16_384;
 const maximumMessageCount = 100;
 const maximumKickEventCount = 32;
+/** 이보다 오래 큐에 있던 발차기는 버림. 연출(0.55 초)이 이미 끝났을 시간. */
+const maximumKickEventAgeMs = 1_000;
 const EMPTY_KICK_EVENTS: SpaceKickEvent[] = [];
 const fullTurn = Math.PI * 2;
 const yawSteps = 256;
@@ -223,7 +225,7 @@ export class SpaceSessionController {
    * 아직 씬이 안 꺼내 간 발차기. React 상태로 두면 매번 리렌더가 나서 큐로 둠.
    * 씬이 매 프레임 `drainKickEvents` 로 비움.
    */
-  private kickEvents: SpaceKickEvent[] = [];
+  private kickEvents: { event: SpaceKickEvent; receivedAt: number }[] = [];
 
   /** 재접속 시 보낼 닉네임. 변경이 확정되면 갱신함. */
   private nickname: string;
@@ -352,12 +354,21 @@ export class SpaceSessionController {
     });
   };
 
-  /** 쌓인 발차기를 꺼내고 비움. 씬이 매 프레임 부름. */
+  /**
+   * 쌓인 발차기를 꺼내고 비움. 씬이 매 프레임 부름.
+   *
+   * `maximumKickEventAgeMs` 보다 오래된 건 버림. 탭을 내리면 프레임 루프가 멈춰 큐에
+   * 쌓이기만 하는데, 돌아왔을 때 한꺼번에 꺼내면 지난 넉백이 다 더해져 캐릭터가
+   * 갑자기 날아가고 남들 발차기도 한꺼번에 재생됐음.
+   */
   drainKickEvents = (): SpaceKickEvent[] => {
     if (this.kickEvents.length === 0) {
       return EMPTY_KICK_EVENTS;
     }
-    const events = this.kickEvents;
+    const now = this.options.now();
+    const events = this.kickEvents
+      .filter(({ receivedAt }) => now - receivedAt <= maximumKickEventAgeMs)
+      .map(({ event }) => event);
     this.kickEvents = [];
 
     return events;
@@ -766,7 +777,9 @@ export class SpaceSessionController {
         if (frame.to !== undefined) {
           event.to = frame.to;
         }
-        this.kickEvents = [...this.kickEvents, event].slice(-maximumKickEventCount);
+        this.kickEvents = [...this.kickEvents, { event, receivedAt: this.options.now() }].slice(
+          -maximumKickEventCount,
+        );
         return;
       }
       case "ignored":
