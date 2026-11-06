@@ -50,9 +50,12 @@ const resolveButtonClassName = (
   action: SpaceHudAction,
   size: keyof typeof BUTTON_SIZE_CLASS,
 ): string => {
-  const toneClassName = action.isActive
-    ? "bg-bitcoin text-black"
-    : "bg-black/55 text-white/85 hover:bg-black/70";
+  // 큰 버튼(모바일 채팅)은 같은 줄의 점프·발차기와 같은 반투명 흰색으로 맞춤.
+  const idleClassName =
+    size === "large"
+      ? "border border-white/20 bg-white/10 text-white/85 active:border-bitcoin/70 active:bg-bitcoin/35"
+      : "bg-black/55 text-white/85 hover:bg-black/70";
+  const toneClassName = action.isActive ? "bg-bitcoin text-black" : idleClassName;
 
   return `${BASE_BUTTON_CLASS} ${BUTTON_SIZE_CLASS[size]} ${toneClassName}`;
 };
