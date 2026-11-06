@@ -22,7 +22,7 @@ import {
 import { toVersionedModelUrl } from "./modelAssetUrl";
 
 /**
- * 공격할 때 손에 나타나는 무기. 기본은 렌치, 머슼크만 도지코인.
+ * 공격할 때 손에 나타나는 무기. 기본은 렌치, 머슼크는 도지코인, 빚탈릭은 똥.
  *
  * 모델 파일에 넣지 않고 코드에서 만듦. 모든 아바타 모델이 오른손을 같은 본 번호(13)로
  * 가져서, 정점을 그 본에 묶으면 걷기·공격 행렬을 그대로 따라 움직임.
@@ -59,6 +59,39 @@ const WRENCH_PARTS: readonly WeaponPart[] = [
   { center: [0, -0.33, -0.035], size: [0.06, 0.03, 0.07], color: STEEL_HEAD },
 ];
 
+const POOP_BROWN = "#8a5a2b";
+const POOP_DARK = "#6e4520";
+
+/**
+ * 빚탈릭 손에 쥔 💩. "똥코인" 개그.
+ *
+ * 손이 밑단을 쥐고 소용돌이 끝이 팔 방향으로 뻗음. 머리 위로 들면 똑바로 선 똥이 됨.
+ * 단마다 상자 둘을 십자로 겹쳐 둥글게 보이게 함. 눈·입은 앞뒤 양쪽에 붙여
+ * 앞사람에게도, 뒤따르는 카메라에도 얼굴이 보임.
+ */
+const POOP_PARTS: readonly WeaponPart[] = [
+  // 주먹 안에 들어가는 밑동. 손과 똥이 떠 보이지 않게 이어 줌.
+  { center: [0, -0.02, 0], size: [0.07, 0.06, 0.07], color: POOP_DARK },
+  // 밑단·가운데단·윗단·끝. 아래(-Y)로 갈수록 좁아짐.
+  { center: [0, -0.08, 0], size: [0.34, 0.12, 0.24], color: POOP_BROWN },
+  { center: [0, -0.08, 0], size: [0.24, 0.12, 0.34], color: POOP_BROWN },
+  { center: [0, -0.19, 0], size: [0.26, 0.11, 0.18], color: POOP_DARK },
+  { center: [0, -0.19, 0], size: [0.18, 0.11, 0.26], color: POOP_DARK },
+  { center: [0, -0.29, 0], size: [0.18, 0.1, 0.12], color: POOP_BROWN },
+  { center: [0, -0.29, 0], size: [0.12, 0.1, 0.18], color: POOP_BROWN },
+  { center: [0, -0.37, 0], size: [0.08, 0.07, 0.08], color: POOP_DARK },
+  { center: [0.025, -0.42, 0], size: [0.04, 0.05, 0.04], color: POOP_DARK },
+  ...[-1, 1].flatMap((side): WeaponPart[] => [
+    // 흰자·눈동자(가운데단), 웃는 입·이(밑단).
+    { center: [-0.05, -0.19, side * 0.135], size: [0.06, 0.06, 0.01], color: "#ffffff" },
+    { center: [0.05, -0.19, side * 0.135], size: [0.06, 0.06, 0.01], color: "#ffffff" },
+    { center: [-0.05, -0.2, side * 0.142], size: [0.03, 0.03, 0.01], color: "#1b1b1b" },
+    { center: [0.05, -0.2, side * 0.142], size: [0.03, 0.03, 0.01], color: "#1b1b1b" },
+    { center: [0, -0.1, side * 0.175], size: [0.16, 0.05, 0.01], color: "#2b1a0c" },
+    { center: [0, -0.09, side * 0.18], size: [0.12, 0.02, 0.01], color: "#ffffff" },
+  ]),
+];
+
 /**
  * 손에 쥔 큰 도지코인. 손이 동전 윗테를 잡음.
  *
@@ -84,6 +117,7 @@ const WEAPON_SURFACES: Record<SpaceWeaponId, { roughness: number; metalness: num
   wrench: { roughness: 0.42, metalness: 0.55 },
   // 금속감을 낮춰야 환경광 없이도 그림이 어둡게 묻히지 않음.
   dogeCoin: { roughness: 0.4, metalness: 0.25 },
+  poop: { roughness: 0.75, metalness: 0 },
 };
 
 // region [Privates]
@@ -178,7 +212,10 @@ export const createWeaponGeometry = (
   weapon: SpaceWeaponId,
   handPivot: readonly [number, number, number],
 ): BufferGeometry => {
-  const geometry = weapon === "dogeCoin" ? createCoinGeometry() : createPartsGeometry(WRENCH_PARTS);
+  const geometry =
+    weapon === "dogeCoin"
+      ? createCoinGeometry()
+      : createPartsGeometry(weapon === "poop" ? POOP_PARTS : WRENCH_PARTS);
 
   // 지금 위치가 곧 손에서의 거리임. 손 위치로 옮기기 전에 떠 둠.
   const offsets = (geometry.getAttribute("position").array as Float32Array).slice();

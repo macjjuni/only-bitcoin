@@ -4,7 +4,7 @@ import { CREW_MODEL } from "./crewModel";
 import { createWeaponGeometry, DOGE_COIN, WEAPON } from "./weaponModel";
 
 const PIVOT = [0.27, 0.76, 0] as const;
-const WEAPONS: readonly SpaceWeaponId[] = ["wrench", "dogeCoin"];
+const WEAPONS: readonly SpaceWeaponId[] = ["wrench", "dogeCoin", "poop"];
 
 describe.each(WEAPONS)("createWeaponGeometry(%s)", (weapon) => {
   const geometry = createWeaponGeometry(weapon, PIVOT);
@@ -50,7 +50,7 @@ describe.each(WEAPONS)("createWeaponGeometry(%s)", (weapon) => {
 });
 
 describe("아바타별 무기", () => {
-  it("머슼크만 도지코인이고 나머지는 렌치", () => {
+  it("머슼크는 도지코인, 빚탈릭은 똥, 나머지는 렌치", () => {
     const weapons = Object.fromEntries(SPACE_AVATAR_MODELS.map(({ id, weapon }) => [id, weapon]));
 
     expect(weapons).toEqual({
@@ -59,7 +59,7 @@ describe("아바타별 무기", () => {
       bull: "wrench",
       pepe: "wrench",
       elon: "dogeCoin",
-      vitalik: "wrench",
+      vitalik: "poop",
     });
   });
 

@@ -10,12 +10,14 @@
  *
  * 에셋은 `scripts/blender/process-voxel-character.py` 가 `.blend` 에서 구움.
  */
-/** 아바타별 무기. 기본은 렌치이고 머슼크만 도지코인. */
+/** 아바타별 무기. 기본은 렌치, 머슼크는 도지코인, 빚탈릭은 똥. */
 export type SpaceWeaponId =
   /** 기본 무기. 비트코인 밈 "$5 렌치 공격". */
   | "wrench"
   /** 머슼크 전용. 손에 쥔 큰 도지코인(시바 이미지). */
-  | "dogeCoin";
+  | "dogeCoin"
+  /** 빚탈릭 전용. 손에 쥔 💩. "똥코인" 개그. */
+  | "poop";
 
 export interface SpaceAvatarModel {
   id: string;
@@ -182,7 +184,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     height: 1.8,
     headCenterY: 1.4606,
     handPivot: [0.1693, 0.7025, 0],
-    weapon: "wrench",
+    weapon: "poop",
     // 본 20개라 2칸을 항등 행렬로 채웠음.
     walkFrameCount: 40,
     triangleCount: 1522,
