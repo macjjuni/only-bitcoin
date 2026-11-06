@@ -10,12 +10,14 @@
  *
  * 에셋은 `scripts/blender/process-voxel-character.py` 가 `.blend` 에서 구움.
  */
-/** 아바타별 무기. 기본은 렌치, 머슼크는 도지코인, 빚탈릭은 똥. */
+/** 아바타별 무기. 기본은 렌치, 머슼크는 도지코인, 빚탈릭은 똥, 세일러문은 비트코인 동전. */
 export type SpaceWeaponId =
   /** 기본 무기. 비트코인 밈 "$5 렌치 공격". */
   | "wrench"
   /** 머슼크 전용. 손에 쥔 큰 도지코인(시바 이미지). */
   | "dogeCoin"
+  /** 세일러문 전용. 손에 쥔 큰 비트코인 동전(₿). */
+  | "bitcoinCoin"
   /** 빚탈릭 전용. 손에 쥔 💩. "똥코인" 개그. */
   | "poop";
 
@@ -188,6 +190,27 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     // 본 20개라 2칸을 항등 행렬로 채웠음.
     walkFrameCount: 40,
     triangleCount: 1522,
+  },
+  {
+    id: "saylor",
+    label: "세일러문",
+    swatchColor: "#eab308",
+    modelUrl: "/models/saylor.glb",
+    walkUrl: "/models/saylor-walk.bin",
+    kickUrl: "/models/saylor-kick.bin",
+    bodyMeshName: "saylor_body",
+    // 정장 안 와이셔츠가 플레이어 색을 받음. 원본이 흰색(#f1efe9)이라 어떤 색도 제대로 올라옴.
+    // 원본은 몸이 메시 하나라 `split-saylor-parts.py` 가 UV 타일로 셔츠를 떼어 냄.
+    accentMeshName: "saylor_accent",
+    // 레이저아이. 눈이 아틀라스의 `eye` 타일을 보는 면 12개라 같은 스크립트가 떼어 냄.
+    pupilGlintMeshName: "saylor_pupil_glint",
+    height: 1.8,
+    headCenterY: 1.4687,
+    handPivot: [0.2768, 0.7739, 0],
+    weapon: "bitcoinCoin",
+    // 황소처럼 Walk 가 48프레임임. 본은 22개를 꽉 써서 패딩이 없음.
+    walkFrameCount: 48,
+    triangleCount: 1876,
   },
 ] as const;
 

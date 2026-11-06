@@ -51,7 +51,7 @@ describe.each(WEAPONS)("createWeaponGeometry(%s)", (weapon) => {
 });
 
 describe("아바타별 무기", () => {
-  it("머슼크는 도지코인, 빚탈릭은 똥, 나머지는 렌치", () => {
+  it("머슼크는 도지코인, 빚탈릭은 똥, 세일러문은 비트코인 동전, 나머지는 렌치", () => {
     const weapons = Object.fromEntries(SPACE_AVATAR_MODELS.map(({ id, weapon }) => [id, weapon]));
 
     expect(weapons).toEqual({
@@ -61,6 +61,7 @@ describe("아바타별 무기", () => {
       pepe: "wrench",
       elon: "dogeCoin",
       vitalik: "poop",
+      saylor: "bitcoinCoin",
     });
   });
 

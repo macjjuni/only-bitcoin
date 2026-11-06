@@ -22,7 +22,8 @@ import {
 import { toVersionedModelUrl } from "./modelAssetUrl";
 
 /**
- * 공격할 때 손에 나타나는 무기. 기본은 렌치, 머슼크는 도지코인, 빚탈릭은 똥.
+ * 공격할 때 손에 나타나는 무기. 기본은 렌치, 머슼크는 도지코인, 빚탈릭은 똥,
+ * 세일러문은 비트코인 동전.
  *
  * 모델 파일에 넣지 않고 코드에서 만듦. 모든 아바타 모델이 오른손을 같은 본 번호(13)로
  * 가져서, 정점을 그 본에 묶으면 걷기·공격 행렬을 그대로 따라 움직임.
@@ -107,25 +108,53 @@ const POOP_PARTS: readonly WeaponPart[] = POOP_SHAPE.map(({ center, size, color 
  * 면이 앞뒤(±Z)를 봐서 뒤따르는 카메라에 내 동전 얼굴이 보임.
  * 앞뒷면에 `scripts/bake-doge-coin.mjs` 가 구운 시바 동전 이미지를 입힘.
  */
-export const DOGE_COIN = {
+export interface CoinSpec {
+  radius: number;
+  thickness: number;
+  /** 손 위치 기준 동전 가운데 높이. 윗테가 손에 살짝 걸침. */
+  centerY: number;
+  segments: number;
+  textureUrl: string;
+  /** 옆면이 읽는 텍스처 좌표. 이미지 맨 위 가운데 테두리 색. */
+  edgeUv: readonly [number, number];
+}
+
+export const DOGE_COIN: CoinSpec = {
   radius: 0.22,
   thickness: 0.04,
-  /** 손 위치 기준 동전 가운데 높이. 윗테가 손에 살짝 걸침. */
   centerY: -0.2,
   segments: 40,
   textureUrl: "/models/doge-coin.webp",
-  /** 옆면이 읽는 텍스처 좌표. 이미지 맨 위 가운데 테두리 색. */
   edgeUv: [0.5, 0.99],
-} as const;
+};
+
+/**
+ * 세일러문 손에 쥔 비트코인 동전.
+ *
+ * 도지코인과 같은 규격임. 앞뒷면 그림만 `scripts/bake-bitcoin-coin.mjs` 가 구운
+ * ₿ 동전으로 다름. 크기가 같아야 둘 중 뭘 들어도 사거리가 같아 보임.
+ */
+export const BITCOIN_COIN: CoinSpec = {
+  ...DOGE_COIN,
+  textureUrl: "/models/bitcoin-coin.webp",
+};
+
+/** 원기둥으로 그리는 무기. 여기 없는 무기는 상자를 쌓아 만듦. */
+const COIN_SPECS: Partial<Record<SpaceWeaponId, CoinSpec>> = {
+  dogeCoin: DOGE_COIN,
+  bitcoinCoin: BITCOIN_COIN,
+};
 
 const WEAPON_TEXTURE_URLS: Partial<Record<SpaceWeaponId, string>> = {
   dogeCoin: DOGE_COIN.textureUrl,
+  bitcoinCoin: BITCOIN_COIN.textureUrl,
 };
 
 const WEAPON_SURFACES: Record<SpaceWeaponId, { roughness: number; metalness: number }> = {
   wrench: { roughness: 0.42, metalness: 0.55 },
   // 금속감을 낮춰야 환경광 없이도 그림이 어둡게 묻히지 않음.
   dogeCoin: { roughness: 0.4, metalness: 0.25 },
+  bitcoinCoin: { roughness: 0.4, metalness: 0.25 },
   poop: { roughness: 0.75, metalness: 0 },
 };
 
@@ -163,8 +192,8 @@ const createPartsGeometry = (parts: readonly WeaponPart[]): BufferGeometry => {
  * 앞(-Z)에서 보면 화면 오른쪽이 -X, 뒤(+Z)에서 보면 +X 라 면마다 u 방향을 뒤집음.
  * 정점 색은 흰색이라 텍스처 색이 그대로 나옴.
  */
-const createCoinGeometry = (): BufferGeometry => {
-  const { radius, thickness, centerY, segments, edgeUv } = DOGE_COIN;
+const createCoinGeometry = (spec: CoinSpec): BufferGeometry => {
+  const { radius, thickness, centerY, segments, edgeUv } = spec;
   const coin = new CylinderGeometry(radius, radius, thickness, segments).toNonIndexed();
   coin.rotateX(Math.PI / 2);
   coin.translate(0, centerY, 0);
@@ -221,10 +250,10 @@ export const createWeaponGeometry = (
   weapon: SpaceWeaponId,
   handPivot: readonly [number, number, number],
 ): BufferGeometry => {
-  const geometry =
-    weapon === "dogeCoin"
-      ? createCoinGeometry()
-      : createPartsGeometry(weapon === "poop" ? POOP_PARTS : WRENCH_PARTS);
+  const coinSpec = COIN_SPECS[weapon];
+  const geometry = coinSpec
+    ? createCoinGeometry(coinSpec)
+    : createPartsGeometry(weapon === "poop" ? POOP_PARTS : WRENCH_PARTS);
 
   // 지금 위치가 곧 손에서의 거리임. 손 위치로 옮기기 전에 떠 둠.
   const offsets = (geometry.getAttribute("position").array as Float32Array).slice();
