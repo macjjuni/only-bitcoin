@@ -130,6 +130,8 @@ function SpaceScene({
   const kickStartedAtRef = useRef<number | undefined>(undefined);
   /** 다른 사람이 발차기를 시작한 시각(좌석별). 끝난 건 지움. */
   const remoteKickStartsRef = useRef(new Map<number, number>());
+  /** 내가 맞았지만 아직 발이 안 닿아 기다리는 넉백. `at` 은 `performance.now()` 시각. */
+  const pendingKnockbacksRef = useRef<{ at: number; dirX: number; dirZ: number }[]>([]);
   /**
    * 지형 질의.
    *
@@ -210,6 +212,9 @@ function SpaceScene({
   /**
    * 받은 발차기를 처리함. 이동 적분 **전에** 돌아야 맞은 프레임부터 밀림.
    *
+   * 내가 맞았으면 바로 밀지 않고 상대 다리가 닿는 시점(`impactSeconds`)까지 기다림.
+   * 상대 동작도 이벤트를 받은 순간부터 재생해서 둘이 같은 시계로 맞물림.
+   *
    * 내가 찬 건 누른 순간 이미 재생해서 서버가 되돌려준 건 무시함. 서버가 쿨다운
    * 등으로 버리면 재생만 되고 아무도 안 밀리는데, 클라이언트가 같은 규칙으로 먼저
    * 걸러서 거의 없음.
@@ -222,7 +227,23 @@ function SpaceScene({
         remoteKickStartsRef.current.set(event.from, now);
       }
       if (selfSeat !== undefined && event.to === selfSeat) {
-        playerStateRef.current = applyKnockback(playerStateRef.current, event.dirX, event.dirZ);
+        pendingKnockbacksRef.current.push({
+          at: now + SPACE_KICK.impactSeconds * 1000,
+          dirX: event.dirX,
+          dirZ: event.dirZ,
+        });
+      }
+    }
+
+    if (pendingKnockbacksRef.current.length > 0) {
+      const due = pendingKnockbacksRef.current.filter(({ at }) => at <= now);
+      pendingKnockbacksRef.current = pendingKnockbacksRef.current.filter(({ at }) => at > now);
+      for (const knockback of due) {
+        playerStateRef.current = applyKnockback(
+          playerStateRef.current,
+          knockback.dirX,
+          knockback.dirZ,
+        );
       }
     }
 
