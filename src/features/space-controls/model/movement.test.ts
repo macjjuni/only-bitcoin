@@ -465,6 +465,26 @@ describe("발차기 넉백", () => {
     expect(applyKnockback(state, Number.NaN, 1)).toBe(state);
   });
 
+  it("밀리는 중에 또 맞으면 넉백이 더해지고 상한에서 잘림", () => {
+    const once = applyKnockback(createState(), 1, 0);
+    const twice = applyKnockback(once, 1, 0);
+    const thrice = applyKnockback(twice, 1, 0);
+
+    expect(twice.knockbackX).toBe(SPACE_KICK.knockbackMaxSpeed);
+    expect(thrice.knockbackX).toBe(SPACE_KICK.knockbackMaxSpeed);
+    // 양쪽에서 차면 상쇄됨.
+    expect(applyKnockback(once, -1, 0).knockbackX).toBeCloseTo(0, 10);
+  });
+
+  it("세 명이 같은 방향으로 몰아 차면 혼자 맞을 때보다 멀리 밀림", () => {
+    const alone = runSteps(applyKnockback(createState(), 1, 0), createInput(), 0, 120);
+    let ganged = applyKnockback(createState(), 1, 0);
+    ganged = applyKnockback(ganged, 0.8, 0.6);
+    ganged = applyKnockback(ganged, 0.8, -0.6);
+
+    expect(runSteps(ganged, createInput(), 0, 120).x).toBeGreaterThan(alone.x * 1.5);
+  });
+
   it("공중에서 맞으면 수직 속도를 더하지 않음", () => {
     const airborne = createState({ y: 0.5, velocityY: -1, isGrounded: false });
 

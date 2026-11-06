@@ -73,8 +73,6 @@ interface SpaceSocketAttachment {
   features?: string[];
   /** 마지막으로 찬 시각. 쿨다운 판정용. */
   lastKickAt?: number;
-  /** 마지막으로 맞은 시각. 무적 판정용. */
-  lastKickedAt?: number;
 }
 
 const MAXIMUM_PENDING_CONNECTIONS = 10;
@@ -658,7 +656,6 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         // 서버가 아는 기능만 남김. 탭을 바꿔 들어와도 쿨다운은 이어 감.
         features: (frame.features ?? []).filter((feature) => SERVER_FEATURES.includes(feature)),
         lastKickAt: previousAttachment?.lastKickAt,
-        lastKickedAt: previousAttachment?.lastKickedAt,
       } satisfies SpaceSocketAttachment);
       this.socketsBySeat.set(seat, socket);
       this.clearJoinDeadline(socket);
@@ -736,9 +733,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
    * 발차기를 판정하고 아는 클라이언트에 알림.
    *
    * - 쿨다운: 찬 사람은 `cooldownMs` 에 한 번. 쿨다운 중이면 연출까지 통째로 버림.
-   * - 무적·거리 조건이 안 맞으면 허공 차기로 바꿔 알림. 오류는 안 보냄. 클라이언트도
-   *   같은 조건으로 먼저 걸러서 여기서 걸리는 건 지연으로 생긴 경계 상황뿐임.
-   * - 무적: 맞은 사람은 `immunityMs` 동안 다시 안 맞음.
+   * - 거리 조건이 안 맞으면 허공 차기로 바꿔 알림. 오류는 안 보냄. 클라이언트도 같은
+   *   조건으로 먼저 걸러서 여기서 걸리는 건 지연으로 생긴 경계 상황뿐임.
+   * - 맞는 쪽 무적은 없음. 여럿이 몰려 차면(다구리) 다 맞음.
    * - 거리: 서버가 아는 최신 위치로 `serverReachMeters` 안, 높이 차 `maxHeightGap` 안.
    *
    * 맞은 사람에게는 이동 예산을 더 얹음. 밀리는 동안 순간 속도가 상한을 넘어도
@@ -750,7 +747,6 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   private resolveKickHit(
     kicker: SpacePeer,
     targetSeat: number | undefined,
-    now: number,
   ): { socket: WebSocket; attachment: SpaceSocketAttachment; seat: number; dirX: number; dirZ: number } | null {
     if (targetSeat === undefined || targetSeat === kicker.seat) {
       return null;
@@ -760,9 +756,6 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     const target = targetAttachment?.peer;
 
     if (!targetSocket || !targetAttachment || !target) {
-      return null;
-    }
-    if (targetAttachment.lastKickedAt !== undefined && now - targetAttachment.lastKickedAt < SPACE_KICK.immunityMs) {
       return null;
     }
     const gapX = target.x - kicker.x;
@@ -801,13 +794,12 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     const facingZ = -Math.cos(kicker.yaw);
     // 대상이 조건에 안 맞아도 버리지 않고 허공 차기로 알림. 버리면 찬 사람 화면에만
     // 발차기가 나가고 다른 사람은 아무것도 못 봄.
-    const hit = this.resolveKickHit(kicker, frame.target, now);
+    const hit = this.resolveKickHit(kicker, frame.target);
 
     socket.serializeAttachment({ ...attachment, lastKickAt: now } satisfies SpaceSocketAttachment);
     if (hit) {
       hit.socket.serializeAttachment({
         ...hit.attachment,
-        lastKickedAt: now,
         movementBudget: Math.min(
           MAXIMUM_MOVEMENT_BUDGET,
           hit.attachment.movementBudget + SPACE_KICK.knockbackBudgetMeters,

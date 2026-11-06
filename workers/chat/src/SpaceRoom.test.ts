@@ -904,7 +904,7 @@ describe("SpaceRoom", () => {
       expect(kickFrames(target)).toHaveLength(2);
     });
 
-    it("맞은 사람은 2초 동안 다른 사람에게도 안 맞음", async () => {
+    it("여럿이 몰려 차면(다구리) 무적 없이 다 맞음", async () => {
       const { join, send, kicker, target } = await setUpPair(1);
       const third = await join(clientKey(3), "셋째", 0, "ip-3", ["kick"]);
       vi.advanceTimersByTime(1_000);
@@ -919,14 +919,12 @@ describe("SpaceRoom", () => {
       target.sent = [];
 
       await send(kicker, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
-      vi.advanceTimersByTime(1_000);
       await send(third, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
-      expect(hitFrames(target)).toHaveLength(1);
 
-      // 무적 중이라 허공 차기로 처리됐고 셋째 쿨다운(5초)도 씀. 지나면 무적도 풀려 있음.
-      vi.advanceTimersByTime(5_000);
-      await send(third, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
-      expect(hitFrames(target)).toHaveLength(2);
+      expect(hitFrames(target).map((frame) => frame.t === "kick" && frame.from)).toEqual([
+        kicker.peer().seat,
+        third.peer().seat,
+      ]);
     });
 
     it("발차기를 모르는 옛 클라이언트에는 보내지 않음", async () => {

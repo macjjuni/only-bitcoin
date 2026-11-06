@@ -323,6 +323,9 @@ export const stepMovement = (
  * `directionX/Z` 는 찬 사람에서 맞은 사람 쪽 방향이고 서버가 정규화해 보냄. 땅에
  * 서 있으면 살짝 띄움. 이미 공중이면 수직 속도는 건드리지 않음(점프 중에 맞아도
  * 갑자기 더 높이 뜨지 않게).
+ *
+ * 아직 밀리는 중이면 넉백을 **더함**. 여럿이 몰아 차면 합쳐진 방향으로 더 멀리
+ * 밀리고, 양쪽에서 차면 상쇄됨. 크기는 `knockbackMaxSpeed` 로 자름.
  */
 export const applyKnockback = (
   state: LocalPlayerState,
@@ -335,10 +338,16 @@ export const applyKnockback = (
     return state;
   }
 
+  const addedX = state.knockbackX + (directionX / length) * SPACE_KICK.knockbackSpeed;
+  const addedZ = state.knockbackZ + (directionZ / length) * SPACE_KICK.knockbackSpeed;
+  const addedSpeed = Math.hypot(addedX, addedZ);
+  const scale =
+    addedSpeed > SPACE_KICK.knockbackMaxSpeed ? SPACE_KICK.knockbackMaxSpeed / addedSpeed : 1;
+
   return {
     ...state,
-    knockbackX: (directionX / length) * SPACE_KICK.knockbackSpeed,
-    knockbackZ: (directionZ / length) * SPACE_KICK.knockbackSpeed,
+    knockbackX: addedX * scale,
+    knockbackZ: addedZ * scale,
     velocityY: state.isGrounded ? SPACE_KICK.knockbackHopSpeed : state.velocityY,
     isGrounded: false,
   };
