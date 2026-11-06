@@ -12,6 +12,9 @@ const BGM_SOURCE_REF = "main";
  * 배경음악 음원.
  *
  * 배포본 용량에서 13 MB 음원을 빼기 위해 저장소 파일을 그대로 CDN 으로 받는다.
+ * 그래서 음원은 `public/` 이 아니라 `media/` 에 둔다. `public/` 로 옮기면 쓰지도
+ * 않는 13 MB 가 배포본에 다시 실린다. 커밋은 되어 있어야 CDN 이 받아갈 수 있다.
+ *
  * 단지 사진이 쓰는 raw.githubusercontent.com 을 쓰지 않는 이유가 둘 있다.
  * 1. raw 는 `.mp3` 를 `application/octet-stream` 으로 내리고 `nosniff` 까지 붙여
  *    미디어 Content-Type 을 따지는 브라우저에서 재생이 막힌다. jsDelivr 는
@@ -27,7 +30,7 @@ const BGM_SOURCE_REF = "main";
  * 약관(플레이어 노출 요구)에 걸리고, 권리사가 임베드를 막은 영상은 재생 자체가
  * 실패한다.
  */
-export const SPACE_BGM_TRACK_SRC = `https://cdn.jsdelivr.net/gh/macjjuni/only-bitcoin@${BGM_SOURCE_REF}/public/audio/MONKEY_BGM.mp3`;
+export const SPACE_BGM_TRACK_SRC = `https://cdn.jsdelivr.net/gh/macjjuni/only-bitcoin@${BGM_SOURCE_REF}/media/MONKEY_BGM.mp3`;
 
 /**
  * 기본 음량.
