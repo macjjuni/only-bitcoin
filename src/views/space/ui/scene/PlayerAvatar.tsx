@@ -29,6 +29,8 @@ interface PlayerAvatarProps {
   hasRealtimeShadows: boolean;
   /** 걷기 사이클 속도. 매 프레임 바뀌므로 ref 로 받는다. */
   playerStateRef: RefObject<LocalPlayerState>;
+  /** 모델을 받아 처음 그려질 때. 모델을 바꿔 다시 올라와도 또 부름. */
+  onReady?: () => void;
 }
 
 /**
@@ -40,7 +42,7 @@ interface PlayerAvatarProps {
  * 그대로 둔다.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateRef }: PlayerAvatarProps): ReactNode {
+function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateRef, onReady }: PlayerAvatarProps): ReactNode {
   // region [Hooks]
   const shadowTexture = useMemo(() => createShadowBlobTexture(), []);
   const avatarColor = useMemo(() => resolveAvatarColor(colorIndex), [colorIndex]);
@@ -114,6 +116,11 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
 
   // region [Life Cycles]
   useEffect(resetInstanceMatrix, []);
+
+  // 훅이 서스펜드하지 않고 여기까지 왔으면 모델이 다 받아진 것임.
+  useEffect(() => {
+    onReady?.();
+  }, [crew, onReady]);
 
   useEffect(() => {
     return () => {

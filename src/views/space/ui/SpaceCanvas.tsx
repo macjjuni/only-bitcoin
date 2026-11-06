@@ -2,7 +2,16 @@
 
 import { PerformanceMonitor, type PerformanceMonitorApi } from "@react-three/drei";
 import { Canvas } from "@react-three/fiber";
-import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import {
+  memo,
+  type ReactNode,
+  Suspense,
+  useCallback,
+  useEffect,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { NeutralToneMapping } from "three";
 import type { ChatIdentity } from "@/features/chat-session";
 import {
@@ -20,8 +29,14 @@ import {
   resolveDprPolicy,
   SPACE_DPR_POLICY,
 } from "@/views/space/lib/renderQuality";
+import {
+  resolveServerLoadStage,
+  SPACE_LOADING,
+  type SpaceLoadStages,
+} from "@/views/space/lib/spaceLoading";
 import SpaceHud from "./hud/SpaceHud";
 import SpaceFallback, { type SpaceFallbackReason } from "./SpaceFallback";
+import SpaceLoadingOverlay from "./SpaceLoadingOverlay";
 import SpacePerformanceStats from "./SpacePerformanceStats";
 import SpaceScene from "./scene/SpaceScene";
 
@@ -101,6 +116,11 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
     modelIndex: localModelIndex,
     enabled: isSupportProbed && !fallbackReason && dummyCount === 0,
   });
+  /** 입장 로딩 신호. 한 번 켜지면 끄지 않음 — 모델을 바꿔도 오버레이를 다시 띄우지 않음. */
+  const [isMapReady, setIsMapReady] = useState<boolean>(false);
+  const [isAvatarReady, setIsAvatarReady] = useState<boolean>(false);
+  const [isServerTimedOut, setIsServerTimedOut] = useState<boolean>(false);
+  const [isLoadingHardTimedOut, setIsLoadingHardTimedOut] = useState<boolean>(false);
   const nickname = session.self?.nickname ?? identity.nickname;
   const modelIndex = session.self?.modelIndex ?? localModelIndex;
 
@@ -146,6 +166,21 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
       canvasElement.removeEventListener("webglcontextrestored", onContextRestored);
     };
   }, []);
+
+  /** 서버 대기와 전체 상한 타이머를 걺. 지원 확인이 끝난 뒤부터 잼. */
+  const startLoadingTimers = (): (() => void) => {
+    const serverTimeoutId = window.setTimeout(() => {
+      setIsServerTimedOut(true);
+    }, SPACE_LOADING.serverTimeoutInMilliseconds);
+    const hardTimeoutId = window.setTimeout(() => {
+      setIsLoadingHardTimedOut(true);
+    }, SPACE_LOADING.hardTimeoutInMilliseconds);
+
+    return () => {
+      window.clearTimeout(serverTimeoutId);
+      window.clearTimeout(hardTimeoutId);
+    };
+  };
   // endregion
 
   // region [Events]
@@ -163,6 +198,14 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
     setRenderDpr(dprPolicyRef.current.min);
   }, []);
 
+  const onReadyMap = useCallback((): void => {
+    setIsMapReady(true);
+  }, []);
+
+  const onReadyAvatar = useCallback((): void => {
+    setIsAvatarReady(true);
+  }, []);
+
   const onClickRetryFallback = useCallback((): void => {
     window.location.reload();
   }, []);
@@ -176,6 +219,14 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   // endregion
 
   // region [Life Cycles]
+  useEffect(() => {
+    if (!isSupportProbed) {
+      return;
+    }
+
+    return startLoadingTimers();
+  }, [isSupportProbed]);
+
   useEffect(() => {
     const dprPolicy = resolveDprPolicy(isIOSDevice() || isAndroidDevice(), window.devicePixelRatio);
 
@@ -202,6 +253,29 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   // endregion
 
   // region [Templates]
+  const loadStages = useMemo<SpaceLoadStages>(
+    () => ({
+      map: isMapReady ? "done" : "pending",
+      avatar: isAvatarReady ? "done" : "pending",
+      server: resolveServerLoadStage({
+        presenceStatus: session.presence.status,
+        hasSessionError: session.error !== null,
+        isConnectionConfigured: session.isConnectionConfigured,
+        isDummyMode: dummyCount > 0,
+        isServerTimedOut,
+      }),
+    }),
+    [
+      isMapReady,
+      isAvatarReady,
+      session.presence.status,
+      session.error,
+      session.isConnectionConfigured,
+      dummyCount,
+      isServerTimedOut,
+    ],
+  );
+
   if (!isSupportProbed) {
     return <div className="h-full w-full bg-[#06080e]" />;
   }
@@ -232,15 +306,24 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
           flipflops={3}
         />
 
-        <SpaceScene
-          inputSource={inputSource}
-          clientKey={identity.clientKey}
-          modelIndex={modelIndex}
-          nickname={nickname}
-          session={session}
-          hasRealtimeShadows={hasRealtimeShadows}
-          dummyCount={dummyCount}
-        />
+        {/*
+          씬 서스펜드를 캔버스 안에서 막음. 경계가 없으면 R3F 가 바깥 트리로 넘겨
+          `next/dynamic` 폴백이 화면을 덮고, 돌아올 때 로딩 오버레이가 새로 마운트돼
+          두 번 뜸. 주소로 바로 들어와 모델이 아직 캐시에 없을 때 생겼음.
+        */}
+        <Suspense fallback={null}>
+          <SpaceScene
+            inputSource={inputSource}
+            clientKey={identity.clientKey}
+            modelIndex={modelIndex}
+            nickname={nickname}
+            session={session}
+            hasRealtimeShadows={hasRealtimeShadows}
+            dummyCount={dummyCount}
+            onReadyMap={onReadyMap}
+            onReadyAvatar={onReadyAvatar}
+          />
+        </Suspense>
         {hasPerformanceStats && <SpacePerformanceStats dummyCount={dummyCount} />}
       </Canvas>
 
@@ -251,6 +334,8 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
         modelIndex={modelIndex}
         onChangeModel={onChangeModel}
       />
+
+      <SpaceLoadingOverlay stages={loadStages} isHardTimedOut={isLoadingHardTimedOut} />
     </div>
   );
 }

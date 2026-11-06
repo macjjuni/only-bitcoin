@@ -74,6 +74,10 @@ interface SpaceSceneProps {
   hasRealtimeShadows: boolean;
   /** 개발 전용 더미 아바타 수. 더미 측정 중에는 실제 공간 소켓을 열지 않는다. */
   dummyCount: number;
+  /** 맵 지형이 잡혔을 때. 입장 로딩 오버레이가 기다림. */
+  onReadyMap?: () => void;
+  /** 내 캐릭터 모델이 올라왔을 때. 입장 로딩 오버레이가 기다림. */
+  onReadyAvatar?: () => void;
 }
 
 const EMPTY_LANTERN_ANCHORS: readonly LanternAnchor[] = [];
@@ -86,6 +90,8 @@ function SpaceScene({
   session,
   hasRealtimeShadows,
   dummyCount,
+  onReadyMap,
+  onReadyAvatar,
 }: SpaceSceneProps): ReactNode {
   // region [Hooks]
   const canvasElement = useThree((rootState) => rootState.gl.domElement);
@@ -287,9 +293,13 @@ function SpaceScene({
   // endregion
 
   // region [Events]
-  const onReadyTerrain = useCallback((terrain: HallTerrain): void => {
-    hallTerrainRef.current = terrain;
-  }, []);
+  const onReadyTerrain = useCallback(
+    (terrain: HallTerrain): void => {
+      hallTerrainRef.current = terrain;
+      onReadyMap?.();
+    },
+    [onReadyMap],
+  );
 
   const onReadyLanterns = useCallback((anchors: readonly LanternAnchor[]): void => {
     setLanternAnchors(anchors);
@@ -432,12 +442,19 @@ function SpaceScene({
       </group>
 
       <group ref={playerGroupRef}>
-        <PlayerAvatar
-          colorIndex={avatarColorIndex}
-          modelIndex={avatarModelIndex}
-          hasRealtimeShadows={hasRealtimeShadows}
-          playerStateRef={playerStateRef}
-        />
+        {/*
+          아바타를 처음 받는 모델로 바꾸면 여기서 서스펜드함. 경계가 없으면 씬
+          전체가 비고, 있으면 아바타만 잠깐 빠짐.
+        */}
+        <Suspense fallback={null}>
+          <PlayerAvatar
+            colorIndex={avatarColorIndex}
+            modelIndex={avatarModelIndex}
+            hasRealtimeShadows={hasRealtimeShadows}
+            playerStateRef={playerStateRef}
+            onReady={onReadyAvatar}
+          />
+        </Suspense>
       </group>
 
       <RemoteAvatars
