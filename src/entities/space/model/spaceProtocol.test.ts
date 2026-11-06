@@ -1,4 +1,5 @@
 import { describe, expect, it } from "vitest";
+import { resolveAvatarModel, SPACE_AVATAR_MODELS } from "./avatarModel";
 import {
   parseSpaceClientFrame,
   parseSpaceServerFrame,
@@ -165,7 +166,7 @@ describe("parseSpaceServerFrame", () => {
         createdAt: -1,
       },
     },
-    // 벙커 시절 버전. `y` 의 의미가 달라 호환되지 않으므로 거절해야 한다.
+    // 벙커 시절 버전. `y` 의미가 달라 호환이 안 돼서 거절해야 함.
     { v: 1, t: "full" },
   ])("좌석 중복·상한·잘못된 서버 payload를 거절한다", (frame) => {
     expect(parseSpaceServerFrame(JSON.stringify(frame))).toBeNull();
@@ -174,15 +175,15 @@ describe("parseSpaceServerFrame", () => {
 
 describe("모델 선택 전 버전과의 호환", () => {
   it("modelIndex 없는 join 을 받아들인다", () => {
-    // 프런트가 먼저 배포되기 전의 클라이언트는 이 값을 보내지 않는다.
+    // 프런트가 먼저 배포되기 전의 클라이언트는 이 값을 안 보냄.
     const frame = { v: SPACE_PROTOCOL_VERSION, t: "join", clientKey, nickname: "비트코인" };
 
     expect(parseSpaceClientFrame(JSON.stringify(frame))).toEqual(frame);
   });
 
   it("modelIndex 없는 welcome 의 peer 에 기본 모델을 채운다", () => {
-    // Worker 가 먼저 배포되기 전의 서버는 이 값을 보내지 않는다. 거절하면
-    // 배포 창 동안 접속이 전부 막힌다.
+    // Worker 가 먼저 배포되기 전의 서버는 이 값을 안 보냄. 거절하면
+    // 배포 창 동안 접속이 전부 막힘.
     const { modelIndex: _self, ...selfWithoutModel } = createPeer(0);
     const { modelIndex: _other, ...peerWithoutModel } = createPeer(1);
     const parsed = parseSpaceServerFrame(
@@ -214,13 +215,29 @@ describe("모델 선택 전 버전과의 호환", () => {
     expect(parsed.peer.modelIndex).toBe(0);
   });
 
-  it("범위를 벗어난 modelIndex 는 거절한다", () => {
-    // 관용은 "없는 것" 까지다. 모르는 번호는 아바타를 못 그린다.
+  it("목록에 없는 새 modelIndex 도 받고 기본 모델로 그림", () => {
+    // 모델을 추가해 배포할 때 새로고침 안 한 탭이 끊기지 않아야 함.
     const parsed = parseSpaceServerFrame(
       JSON.stringify({
         v: SPACE_PROTOCOL_VERSION,
         t: "peer",
         peer: { ...createPeer(0), modelIndex: 99 },
+      }),
+    );
+
+    if (parsed?.t !== "peer") {
+      throw new Error("peer 프레임이어야 함");
+    }
+    expect(parsed.peer.modelIndex).toBe(99);
+    expect(resolveAvatarModel(parsed.peer.modelIndex)).toBe(SPACE_AVATAR_MODELS[0]);
+  });
+
+  it.each([-1, 256, 1.5, "1"])("범위·형식이 틀린 modelIndex(%s)는 거절함", (modelIndex) => {
+    const parsed = parseSpaceServerFrame(
+      JSON.stringify({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "peer",
+        peer: { ...createPeer(0), modelIndex },
       }),
     );
 

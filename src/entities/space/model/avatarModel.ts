@@ -146,7 +146,7 @@ export const resolveAvatarModel = (modelIndex: number): SpaceAvatarModel => {
   return SPACE_AVATAR_MODELS[isValid ? modelIndex : SPACE_DEFAULT_AVATAR_MODEL_INDEX];
 };
 
-/** 프로토콜로 받은 값을 그대로 쓸 수 있는지. 서버·클라이언트가 같은 판정을 씀. */
+/** 지금 목록에 있는 모델 번호인지. 서버의 요청 검사·저장값 복원에 씀. 서버가 보낸 값은 범위만 봄(`spaceProtocol`). */
 export const isAvatarModelIndex = (value: unknown): value is number => {
   return (
     typeof value === "number" &&
