@@ -7,7 +7,7 @@ import type { Group } from "three";
 import {
   type PlayerTransform,
   type RemotePlayer,
-  SPACE_AVATAR,
+  resolveAvatarModel,
   SPACE_OVERLAY_LIMITS,
 } from "@/entities/space";
 import { selectNearestVisible } from "@/views/space/lib/avatarCulling";
@@ -15,13 +15,16 @@ import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 
 /** 명찰 선별 주기. 매 프레임 고르면 React 상태가 60 Hz 로 갱신된다. */
 const SELECTION_INTERVAL_MS = 200;
-const NAMEPLATE_LIFT_Y = SPACE_AVATAR.headCenterY + 0.55;
+/** 머리 중심에서 명찰까지 띄우는 높이(m). */
+const NAMEPLATE_HEAD_OFFSET_Y = 0.55;
 const DESKTOP_NAMEPLATE_DISTANCE_FACTOR = 18;
 const TOUCH_NAMEPLATE_DISTANCE_FACTOR = 12;
 
 interface NameplatesProps {
   players: readonly RemotePlayer[];
   selfNickname: string;
+  /** 내 아바타 모델 번호. 모델마다 키가 달라 명찰 높이가 달라짐. */
+  selfModelIndex: number;
   isCoarsePointer: boolean;
   /** 같은 배열의 닉네임 갱신에도 memo가 다시 렌더되게 한다. */
   rosterRevision?: number;
@@ -39,6 +42,7 @@ interface NameplatesProps {
 function Nameplates({
   players,
   selfNickname,
+  selfModelIndex,
   isCoarsePointer,
   rosterRevision,
   viewerTransformRef,
@@ -52,6 +56,11 @@ function Nameplates({
   // endregion
 
   // region [Privates]
+  /** 모델 머리 위 명찰 높이. 페페처럼 키가 작은 모델은 낮게 뜸. */
+  const resolveNameplateLiftY = (modelIndex: number): number => {
+    return resolveAvatarModel(modelIndex).headCenterY + NAMEPLATE_HEAD_OFFSET_Y;
+  };
+
   const nameplateDistanceFactor = isCoarsePointer
     ? TOUCH_NAMEPLATE_DISTANCE_FACTOR
     : DESKTOP_NAMEPLATE_DISTANCE_FACTOR;
@@ -83,7 +92,7 @@ function Nameplates({
     for (const player of visiblePlayers) {
       remoteGroupRefs.current
         .get(player.seat)
-        ?.position.set(player.x, player.y + NAMEPLATE_LIFT_Y, player.z);
+        ?.position.set(player.x, player.y + resolveNameplateLiftY(player.modelIndex), player.z);
     }
   };
 
@@ -100,7 +109,7 @@ function Nameplates({
       return;
     }
 
-    group.position.set(player.x, player.y + NAMEPLATE_LIFT_Y, player.z);
+    group.position.set(player.x, player.y + resolveNameplateLiftY(player.modelIndex), player.z);
     remoteGroupRefs.current.set(player.seat, group);
   };
 
@@ -115,7 +124,7 @@ function Nameplates({
     const viewer = viewerTransformRef.current;
 
     if (group && viewer) {
-      group.position.set(viewer.x, viewer.y + NAMEPLATE_LIFT_Y, viewer.z);
+      group.position.set(viewer.x, viewer.y + resolveNameplateLiftY(selfModelIndex), viewer.z);
     }
   };
   // endregion
@@ -135,7 +144,11 @@ function Nameplates({
       setIsSelfReady(true);
     }
 
-    selfGroupRef.current?.position.set(viewer.x, viewer.y + NAMEPLATE_LIFT_Y, viewer.z);
+    selfGroupRef.current?.position.set(
+      viewer.x,
+      viewer.y + resolveNameplateLiftY(selfModelIndex),
+      viewer.z,
+    );
 
     const nowMs = clock.elapsedTime * 1000;
 

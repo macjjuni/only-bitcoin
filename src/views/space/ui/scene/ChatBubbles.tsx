@@ -16,7 +16,7 @@ import type { Group } from "three";
 import {
   type PlayerTransform,
   type RemotePlayer,
-  SPACE_AVATAR,
+  resolveAvatarModel,
   type SpaceChatMessage,
   type SpacePeer,
 } from "@/entities/space";
@@ -27,6 +27,14 @@ import {
   type SpaceChatBubble,
   selectSpaceChatBubbles,
 } from "../../lib/chatBubbles";
+
+/** 머리 중심에서 말풍선까지 띄우는 높이(m). */
+const BUBBLE_HEAD_OFFSET_Y = 1.25;
+
+/** 모델 머리 위 말풍선 높이. 모델마다 키가 달라 따로 구함. */
+const resolveBubbleLiftY = (modelIndex: number): number => {
+  return resolveAvatarModel(modelIndex).headCenterY + BUBBLE_HEAD_OFFSET_Y;
+};
 
 interface ChatBubblesProps {
   messages: readonly SpaceChatMessage[];
@@ -72,7 +80,7 @@ function ChatBubbles({ messages, players, self, viewerTransformRef }: ChatBubble
       if (group) {
         group.visible = Boolean(player);
         if (player) {
-          group.position.set(player.x, player.y + SPACE_AVATAR.headCenterY + 1.25, player.z);
+          group.position.set(player.x, player.y + resolveBubbleLiftY(bubble.modelIndex), player.z);
         }
       }
     }
@@ -101,7 +109,7 @@ function ChatBubbles({ messages, players, self, viewerTransformRef }: ChatBubble
   return (
     <>
       {activeBubbles.map((bubble) => (
-        <group key={bubble.message.id} position={[bubble.x, bubble.y + SPACE_AVATAR.headCenterY + 1.25, bubble.z]} ref={(group) => {
+        <group key={bubble.message.id} position={[bubble.x, bubble.y + resolveBubbleLiftY(bubble.modelIndex), bubble.z]} ref={(group) => {
           if (group) {
             groupRefs.current.set(bubble.message.id, group);
           } else {
