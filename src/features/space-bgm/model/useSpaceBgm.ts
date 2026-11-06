@@ -48,6 +48,30 @@ const SURGE_TICK_MS = 5 * 1000;
 const SEED_CANDLE_COUNT = 18;
 
 /**
+ * `?surge=1` 강제 모드에서 트랙을 뒤집는 주기.
+ *
+ * 들어가고 나오는 전환을 둘 다 들어야 하는데, 실제 기준으로는 최소 2분을 유지하고
+ * 쿨다운이 10분이라 한 번 확인하는 데 12분이 걸린다. 강제 모드는 상태기계를
+ * 건너뛰므로 유지·쿨다운에 묶이지 않는다.
+ */
+const SURGE_DEBUG_CYCLE_MS = 20 * 1000;
+
+/**
+ * `?surge=1` 이면 시세와 무관하게 교체 트랙을 강제로 돌린다.
+ *
+ * 개발 환경에서만 동작한다. 실제 기준(15분 ±1%)은 하루 한 번꼴이라 눈앞에서
+ * 확인할 수가 없다. 더미 아바타(`?dummies=`)와 같은 방침으로, 운영에서 임의로
+ * 음악이 바뀌면 안 되므로 빌드에서 꺼 둔다.
+ */
+const resolveForcedSurgeFromLocation = (): boolean => {
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
+
+  return new URLSearchParams(window.location.search).get("surge") === "1";
+};
+
+/**
  * 공간 배경음악.
  *
  * `HTMLAudioElement` 를 직접 들고 있다. three 씬 안의 소리가 아니라 화면 전체에
@@ -307,6 +331,25 @@ const useSpaceBgm = (): SpaceBgm => {
   useEffect(() => {
     if (!isPlaying) {
       return;
+    }
+
+    // 강제 모드는 시세를 보지 않는다. 구독도 창도 두지 않고 트랙만 번갈아 바꾼다.
+    if (resolveForcedSurgeFromLocation()) {
+      let isSurgeTrackOn = false;
+      const flipTimer = setInterval(() => {
+        isSurgeTrackOn = !isSurgeTrackOn;
+
+        if (isSurgeTrackOn) {
+          enterSurgeTrack();
+          return;
+        }
+
+        leaveSurgeTrack();
+      }, SURGE_DEBUG_CYCLE_MS);
+
+      return () => {
+        clearInterval(flipTimer);
+      };
     }
 
     surgeStateRef.current = createSurgeState();
