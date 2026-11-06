@@ -52,7 +52,7 @@ export interface SpaceAvatarModel {
 export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
   {
     id: "crew",
-    label: "크루",
+    label: "맥시크루",
     modelUrl: "/models/crew.glb",
     walkUrl: "/models/crew-walk.bin",
     bodyMeshName: "crew_body",
@@ -65,7 +65,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
   },
   {
     id: "bear",
-    label: "곰",
+    label: "숏베어",
     modelUrl: "/models/bear.glb",
     walkUrl: "/models/bear-walk.bin",
     bodyMeshName: "bear_body",
@@ -78,7 +78,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
   },
   {
     id: "bull",
-    label: "황소",
+    label: "풀롱불",
     modelUrl: "/models/bull.glb",
     walkUrl: "/models/bull-walk.bin",
     bodyMeshName: "bull_body",
@@ -92,7 +92,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
   },
   {
     id: "pepe",
-    label: "페페",
+    label: "코인충",
     modelUrl: "/models/pepe.glb",
     walkUrl: "/models/pepe-walk.bin",
     bodyMeshName: "pepe_body",
