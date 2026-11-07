@@ -214,6 +214,38 @@ describe("SpaceSessionController", () => {
     controller.stop();
   });
 
+  it("탭이 1분 넘게 숨어 있으면 연결을 끊고 다시 보이면 새로 접속함", () => {
+    const { controller, sockets, welcome } = createHarness();
+    controller.start();
+    const socket = welcome();
+    // 숨은 탭도 서버 pong 은 계속 받음. heartbeat 타임아웃과 섞이지 않게 흉내 냄.
+    const advanceWithPong = (ms: number): void => {
+      for (let elapsed = 0; elapsed < ms; elapsed += 10_000) {
+        vi.advanceTimersByTime(Math.min(10_000, ms - elapsed));
+        if (socket.readyState === 1) {
+          socket.receive("pong");
+        }
+      }
+    };
+
+    controller.setVisibility(false);
+    advanceWithPong(59_000);
+    expect(socket.readyState).toBe(1);
+    controller.setVisibility(true);
+    controller.setVisibility(false);
+    advanceWithPong(59_000);
+    expect(socket.readyState).toBe(1);
+
+    advanceWithPong(1_000);
+    expect(socket.readyState).toBe(3);
+    expect(controller.getSnapshot().presence.status).toBe("offline");
+    expect(sockets).toHaveLength(1);
+
+    controller.setVisibility(true);
+    expect(sockets).toHaveLength(2);
+    controller.stop();
+  });
+
   it("30fps 프레임에서도 평균 100ms 박자로 보냄", () => {
     const { controller, welcome } = createHarness();
     controller.start();

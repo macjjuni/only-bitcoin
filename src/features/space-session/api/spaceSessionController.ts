@@ -94,6 +94,14 @@ const movementSendToleranceMs = 8;
 const heartbeatIntervalMs = 15_000;
 const heartbeatTimeoutMs = 45_000;
 const connectionTimeoutMs = 10_000;
+/**
+ * 탭이 숨은 뒤 연결을 끊기까지 기다리는 시간.
+ *
+ * 숨은 탭도 heartbeat ping 은 계속 보내서 서버는 접속 중으로 봄. 그런데 이동·넉백은
+ * 멈춰 있어 다른 사람 화면에는 차도 반응 없는 아바타가 계속 서 있게 됨. 잠깐 다른
+ * 탭을 보는 정도는 자리를 지키고, 이보다 오래 숨으면 나간 것으로 처리함.
+ */
+const hiddenDisconnectDelayMs = 60_000;
 const messageTimeoutMs = 10_000;
 /**
  * 업그레이드 한도를 넘겼다고 서버가 알려주는 종료 코드.
@@ -200,6 +208,7 @@ export class SpaceSessionController {
   private reconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private connectionTimer: ReturnType<typeof setTimeout> | null = null;
   private heartbeatTimer: ReturnType<typeof setInterval> | null = null;
+  private hiddenDisconnectTimer: ReturnType<typeof setTimeout> | null = null;
   private pendingMessage: PendingMessage | null = null;
   private pendingNickname: PendingNickname | null = null;
   private pendingModel: PendingModel | null = null;
@@ -264,6 +273,7 @@ export class SpaceSessionController {
   stop(): void {
     this.isStarted = false;
     this.clearReconnectTimer();
+    this.clearHiddenDisconnectTimer();
     this.detachSocket();
     this.clearRoster();
     this.updateSnapshot({ presence: createOfflinePresence(), self: null });
@@ -301,8 +311,10 @@ export class SpaceSessionController {
 
     if (!isVisible) {
       this.clearReconnectTimer();
+      this.scheduleHiddenDisconnect();
       return;
     }
+    this.clearHiddenDisconnectTimer();
 
     if (this.socket && this.options.now() - this.lastReceivedAt > heartbeatTimeoutMs) {
       this.handleDisconnected("연결이 지연되어 다시 접속합니다.");
@@ -946,6 +958,31 @@ export class SpaceSessionController {
 
     if (socket && socket.readyState < socketClosingState) {
       socket.close(1000, "space session closed");
+    }
+  }
+
+  private scheduleHiddenDisconnect(): void {
+    if (this.hiddenDisconnectTimer) {
+      return;
+    }
+
+    this.hiddenDisconnectTimer = setTimeout(() => {
+      this.hiddenDisconnectTimer = null;
+
+      if (this.isVisible) {
+        return;
+      }
+      // 다시 보이면 `setVisibility(true)` 가 새로 접속함. 숨은 동안은 재접속하지 않음.
+      this.detachSocket();
+      this.clearRoster();
+      this.updateSnapshot({ presence: createOfflinePresence(), self: null });
+    }, hiddenDisconnectDelayMs);
+  }
+
+  private clearHiddenDisconnectTimer(): void {
+    if (this.hiddenDisconnectTimer) {
+      clearTimeout(this.hiddenDisconnectTimer);
+      this.hiddenDisconnectTimer = null;
     }
   }
 
