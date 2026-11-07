@@ -94,7 +94,7 @@ const resolveForcedSurgeFromLocation = (): boolean => {
  * 프레임 리스너를 갱신하는 비용만 더해진다.
  *
  * 요소는 처음 켤 때 만든다. 미리 만들어 두면 배경음악을 켜지 않는 사람도 음원
- * 요청 비용을 낸다. 급등락 트랙은 한 번 더 미뤄 실제로 바뀔 때 만든다.
+ * 요청 비용을 낸다. 급등락 트랙은 한 번 더 미뤄 변동이 기준에 다가갈 때 만든다.
  */
 const useSpaceBgm = (): SpaceBgm => {
   // region [Hooks]
@@ -110,6 +110,13 @@ const useSpaceBgm = (): SpaceBgm => {
    */
   const { data: candles } = useBtcCandlesQuery();
   const candlesRef = useRef<readonly BtcCandle[]>(EMPTY_CANDLES);
+  /**
+   * 지금(끈 상태면 끄기 직전) 깔린 쪽이 급등락 트랙인지.
+   *
+   * 끌 때 지우지 않는다. 급등락 중에 껐다 켜면 기본 트랙을 다시 들려줄 이유가
+   * 없어서, 다시 켤 때 이 값을 보고 급등락 트랙으로 바로 들어간다.
+   */
+  const isOnSurgeTrackRef = useRef<boolean>(false);
   /** 재생을 시작한 시각. 켜자마자 교체되지 않게 유예를 재는 데 쓴다. */
   const playbackStartedAtRef = useRef<number>(0);
   const [isPlaying, setIsPlaying] = useState<boolean>(false);
@@ -226,41 +233,93 @@ const useSpaceBgm = (): SpaceBgm => {
     surgeAudio.currentTime = 0;
     surgeAudio.volume = 0;
     crossfade(baseAudioRef.current, surgeAudio, SPACE_BGM_SURGE_VOLUME);
+    isOnSurgeTrackRef.current = true;
     setIsSurging(true);
   }, [crossfade, resolveSurgeAudio]);
 
   const leaveSurgeTrack = useCallback((): void => {
     crossfade(surgeAudioRef.current, resolveBaseAudio(), SPACE_BGM_VOLUME);
+    isOnSurgeTrackRef.current = false;
     setIsSurging(false);
   }, [crossfade, resolveBaseAudio]);
+
+  /**
+   * 다시 켤 때 급등락 트랙으로 바로 들어갈지.
+   *
+   * 끄기 직전이 급등락 트랙이었고 지금도 급등락 중일 때만 그렇다. 끈 동안은 시세를
+   * 안 모아서, 지금 시세를 한 점 넣고 상태기계를 한 번 돌려 본다. 그사이 가라앉았으면
+   * 여기서 해제돼 쿨다운도 이어진다. 강제 모드는 시세를 안 보므로 끄기 직전 트랙을 따른다.
+   */
+  const resolveShouldResumeSurge = useCallback((): boolean => {
+    if (!isOnSurgeTrackRef.current) {
+      return false;
+    }
+
+    if (resolveForcedSurgeFromLocation()) {
+      return true;
+    }
+
+    const nowMs = Date.now();
+    const { usd } = useBitcoinStore.getState().bitcoinPrice;
+    const sampled = appendPriceSample(surgeStateRef.current, usd, nowMs);
+
+    surgeStateRef.current = stepSurgeState(
+      sampled,
+      resolveReferencePrice(candlesRef.current, nowMs),
+      nowMs,
+    );
+
+    return surgeStateRef.current.isSurging;
+  }, []);
 
   /**
    * 재생을 시작하고 성공 여부를 돌려준다.
    *
    * 사용자 조작 없이 호출하면 브라우저가 `NotAllowedError` 로 거부한다. 거부는
    * 오류가 아니라 "아직 조작이 없었다" 는 신호이므로 호출한 쪽이 판단하게 한다.
+   *
+   * 급등락 중에 껐다 켠 거면 유예 없이 급등락 트랙을 멈춘 자리에서 이어 튼다.
+   * 유예는 기본 트랙을 들어 본 적 없는 사람에게 전환을 들려주려는 것이라
+   * 이미 듣던 사람에게는 필요 없다.
    */
   const startPlayback = useCallback(async (): Promise<boolean> => {
-    const baseAudio = resolveBaseAudio();
+    const shouldResumeSurge = resolveShouldResumeSurge();
+    const audio = shouldResumeSurge ? resolveSurgeAudio() : resolveBaseAudio();
 
     try {
-      baseAudio.volume = SPACE_BGM_VOLUME;
-      await baseAudio.play();
+      audio.volume = shouldResumeSurge ? SPACE_BGM_SURGE_VOLUME : SPACE_BGM_VOLUME;
+      await audio.play();
+      isOnSurgeTrackRef.current = shouldResumeSurge;
       playbackStartedAtRef.current = Date.now();
       setIsPlaying(true);
+      setIsSurging(shouldResumeSurge);
 
       return true;
     } catch (error) {
       setIsPlaying(false);
 
+      const isBlockedByAutoplay = (error as DOMException).name === "NotAllowedError";
+
+      // 급등락 트랙만 못 트는 거면 기본 트랙으로 다시 켠다. 배경음 전체를 내리면 안 된다.
+      if (shouldResumeSurge && !isBlockedByAutoplay) {
+        isOnSurgeTrackRef.current = false;
+        surgeStateRef.current = {
+          ...surgeStateRef.current,
+          isSurging: false,
+          endedAtMs: Date.now(),
+        };
+
+        return startPlayback();
+      }
+
       // 자동재생 차단이 아니면 음원 자체를 쓸 수 없다는 뜻이다.
-      if ((error as DOMException).name !== "NotAllowedError") {
+      if (!isBlockedByAutoplay) {
         setIsUnavailable(true);
       }
 
       return false;
     }
-  }, [resolveBaseAudio]);
+  }, [resolveBaseAudio, resolveShouldResumeSurge, resolveSurgeAudio]);
 
   const stopPlayback = useCallback((): void => {
     stopFade();
@@ -366,15 +425,19 @@ const useSpaceBgm = (): SpaceBgm => {
     if (resolveForcedSurgeFromLocation()) {
       let scriptTimer: ReturnType<typeof setTimeout> | null = null;
 
+      const scheduleLeave = (): void => {
+        scriptTimer = setTimeout(() => {
+          if (isDev) console.log("🎵 [surge=1] 기본 트랙으로 돌아옴");
+          leaveSurgeTrack();
+          scheduleEnter();
+        }, SURGE_DEBUG_SCRIPT.holdMs);
+      };
+
       const scheduleEnter = (): void => {
         scriptTimer = setTimeout(() => {
           if (isDev) console.log("🎵 [surge=1] 급등락 트랙으로 바꿈");
           enterSurgeTrack();
-          scriptTimer = setTimeout(() => {
-            if (isDev) console.log("🎵 [surge=1] 기본 트랙으로 돌아옴");
-            leaveSurgeTrack();
-            scheduleEnter();
-          }, SURGE_DEBUG_SCRIPT.holdMs);
+          scheduleLeave();
         }, SURGE_DEBUG_SCRIPT.enterAfterMs);
       };
 
@@ -383,7 +446,13 @@ const useSpaceBgm = (): SpaceBgm => {
         resolveSurgeAudio();
       }, SURGE_DEBUG_SCRIPT.prefetchAfterMs);
 
-      scheduleEnter();
+      // 급등락 트랙으로 다시 켜졌으면 유지 시간부터 이어 감.
+      if (isOnSurgeTrackRef.current) {
+        if (isDev) console.log("🎵 [surge=1] 급등락 트랙으로 바로 다시 켬");
+        scheduleLeave();
+      } else {
+        scheduleEnter();
+      }
 
       return () => {
         clearTimeout(prefetchTimer);
@@ -393,8 +462,7 @@ const useSpaceBgm = (): SpaceBgm => {
       };
     }
 
-    surgeStateRef.current = createSurgeState();
-
+    // 상태를 새로 만들지 않음. 껐다 켜도 급등락 중이면 그 판정과 쿨다운을 이어 가야 함.
     const collectPriceSample = (): void => {
       const { usd } = useBitcoinStore.getState().bitcoinPrice;
 
