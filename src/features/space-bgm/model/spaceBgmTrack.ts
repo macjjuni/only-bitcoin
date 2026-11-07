@@ -1,17 +1,21 @@
 /**
- * 배경음악을 읽어올 GitHub ref.
+ * 음원을 읽어올 GitHub 커밋.
  *
- * 단지 사진( `apartmentImage.ts` )과 같은 방침이다. 파일이 아직 머지되지 않은
- * 브랜치에만 있으면 주소가 404 가 되므로, 그동안은 이 값만 작업 브랜치명으로
- * 바꿔 쓴다. 음원을 교체할 때는 파일명을 바꾸거나 이 값을 태그로 고정해야 한다.
- * 브랜치 주소는 edge 12 시간·브라우저 7 일 캐시가 걸려 바로 갈리지 않는다.
+ * **브랜치명(`main`)을 쓰면 안 된다.** jsDelivr 는 `@main` → 커밋 매핑을 12 시간
+ * 캐시하고, 이 매핑은 경로 퍼지(`purge.jsdelivr.net`)로도 지워지지 않는다.
+ * 실제로 음원을 교체해 푸시하고 퍼지까지 했는데 옛 파일이 계속 내려왔다.
+ *
+ * 커밋을 박으면 즉시 반영되고 `immutable` 1 년 캐시까지 받는다(브랜치는 7 일).
+ *
+ * **음원을 추가·교체하면 그 파일이 든 커밋 해시로 이 값을 바꿔야 한다.**
+ * 바꾸지 않으면 옛 커밋의 음원이 계속 나온다.
  */
-const BGM_SOURCE_REF = "main";
+const BGM_SOURCE_REF = "d5ca1aa3444e7c95ed5e249c4aa16e4fb00a056c";
 
 /**
  * 배경음악 음원.
  *
- * 배포본 용량에서 13 MB 음원을 빼기 위해 저장소 파일을 그대로 CDN 으로 받는다.
+ * 배포본 용량에서 음원을 빼기 위해 저장소 파일을 그대로 CDN 으로 받는다.
  * 그래서 음원은 `public/` 이 아니라 `media/` 에 둔다. `public/` 로 옮기면 쓰지도
  * 않는 13 MB 가 배포본에 다시 실린다. 커밋은 되어 있어야 CDN 이 받아갈 수 있다.
  *
@@ -30,7 +34,18 @@ const BGM_SOURCE_REF = "main";
  * 약관(플레이어 노출 요구)에 걸리고, 권리사가 임베드를 막은 영상은 재생 자체가
  * 실패한다.
  */
-export const SPACE_BGM_TRACK_SRC = `https://cdn.jsdelivr.net/gh/macjjuni/only-bitcoin@${BGM_SOURCE_REF}/media/MONKEY_BGM.mp3`;
+const BGM_BASE_URL = `https://cdn.jsdelivr.net/gh/macjjuni/only-bitcoin@${BGM_SOURCE_REF}/media`;
+
+export const SPACE_BGM_TRACK_SRC = `${BGM_BASE_URL}/MONKEY_BGM.mp3`;
+
+/**
+ * 급등락 중에 까는 교체 트랙.
+ *
+ * 등락 방향은 가리지 않고 한 곡을 공용으로 씀(`priceSurge.ts`).
+ * 기본 트랙과 달리 이벤트 때만 잠깐 틀어서 미리 받아 두지 않음. 켜는 사람만
+ * 받는 기본 트랙보다도 드물게 쓰여 요청을 아끼는 쪽이 맞음.
+ */
+export const SPACE_BGM_SURGE_TRACK_SRC = `${BGM_BASE_URL}/nervous.mp3`;
 
 /**
  * 기본 음량.

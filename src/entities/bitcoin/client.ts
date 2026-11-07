@@ -8,6 +8,7 @@ export {
 export {
   BTC_CANDLE_COUNT,
   BTC_CANDLE_INTERVAL,
+  BTC_CANDLE_INTERVAL_MS,
   default as useBtcCandlesQuery,
 } from "./api/useBtcCandlesQuery";
 export {

@@ -3,6 +3,7 @@
 import {
   ArrowLeft,
   CircleHelp,
+  Flame,
   MessageCircle,
   Music,
   Pencil,
@@ -15,7 +16,7 @@ import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { saveChatNickname } from "@/features/chat-session";
-import { useSpaceBgm } from "@/features/space-bgm";
+import { type SpaceBgm, useSpaceBgm } from "@/features/space-bgm";
 import {
   JumpButton,
   KickButton,
@@ -51,6 +52,32 @@ const ICON_SIZE = 18;
 const ICON_STROKE_WIDTH = 2;
 /** 모바일 채팅 버튼 아이콘. 점프·발차기 버튼 아이콘과 같은 크기. */
 const MOBILE_CHAT_ICON_SIZE = TOUCH_BUTTON_ICON_SIZE;
+
+/**
+ * 배경음악 버튼의 라벨.
+ *
+ * 급등락 트랙은 사용자가 아무것도 안 했는데 곡이 바뀌는 연출이라, 눌러 보면
+ * 왜 바뀌었는지 알 수 있게 버튼이 이유를 들고 있음.
+ */
+const resolveBgmLabel = (bgm: SpaceBgm): string => {
+  if (!bgm.isPlaying) {
+    return "배경음악 켜기";
+  }
+
+  return bgm.isSurging ? "배경음악 끄기 (급등락 중)" : "배경음악 끄기";
+};
+
+const resolveBgmIcon = (bgm: SpaceBgm): ReactNode => {
+  if (!bgm.isPlaying) {
+    return <VolumeX size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />;
+  }
+
+  return bgm.isSurging ? (
+    <Flame size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />
+  ) : (
+    <Music size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />
+  );
+};
 
 interface SpaceHudProps {
   inputSource: SpaceInputSource;
@@ -306,12 +333,9 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     if (!bgm.isUnavailable) {
       actions.push({
         id: "space-bgm-toggle",
-        label: bgm.isPlaying ? "배경음악 끄기" : "배경음악 켜기",
-        icon: bgm.isPlaying ? (
-          <Music size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />
-        ) : (
-          <VolumeX size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />
-        ),
+        // 급등락 트랙이 깔린 동안에는 왜 곡이 바뀌었는지 버튼이 설명해 줌.
+        label: resolveBgmLabel(bgm),
+        icon: resolveBgmIcon(bgm),
         isActive: bgm.isPlaying,
         onClick: bgm.toggle,
       });
@@ -340,6 +364,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     onClickToggleGuide,
     bgm.isPlaying,
     bgm.isUnavailable,
+    bgm.isSurging,
     bgm.toggle,
   ]);
 
