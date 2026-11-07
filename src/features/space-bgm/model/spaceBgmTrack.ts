@@ -42,8 +42,8 @@ export const SPACE_BGM_TRACK_SRC = `${BGM_BASE_URL}/MONKEY_BGM.mp3`;
  * 급등락 중에 까는 교체 트랙.
  *
  * 등락 방향은 가리지 않고 한 곡을 공용으로 씀(`priceSurge.ts`).
- * 기본 트랙과 달리 이벤트 때만 잠깐 틀어서 미리 받아 두지 않음. 켜는 사람만
- * 받는 기본 트랙보다도 드물게 쓰여 요청을 아끼는 쪽이 맞음.
+ * 이벤트 때만 잠깐 틀어서 처음부터 받아 두지는 않음. 변동이 기준에 다가가면
+ * (`SPACE_BGM_SURGE.prefetchPercent`) 그때 받기 시작함.
  */
 export const SPACE_BGM_SURGE_TRACK_SRC = `${BGM_BASE_URL}/nervous.mp3`;
 
@@ -51,6 +51,14 @@ export const SPACE_BGM_SURGE_TRACK_SRC = `${BGM_BASE_URL}/nervous.mp3`;
  * 기본 음량.
  *
  * 1.0 은 다른 탭 소리를 덮는다. 전광판을 보며 머무는 공간의 배경음이라
- * 대화·알림을 가리지 않는 선으로 낮춰 둔다.
+ * 대화·알림을 가리지 않는 선으로 낮춰 둔다. 0.15 도 오래 듣기엔 커서 0.12 로 낮춤.
  */
-export const SPACE_BGM_VOLUME = 0.15;
+export const SPACE_BGM_VOLUME = 0.12;
+
+/**
+ * 급등락 트랙 음량.
+ *
+ * 기본 트랙을 낮출 때 같이 낮추지 않고 0.15 로 둠. 잠깐 틀리는 연출이라
+ * 바뀐 게 조금 더 크게 들리는 편이 낫다.
+ */
+export const SPACE_BGM_SURGE_VOLUME = 0.15;

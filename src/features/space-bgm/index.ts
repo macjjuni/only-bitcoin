@@ -12,6 +12,7 @@ export {
 } from "./model/priceSurge";
 export {
   SPACE_BGM_SURGE_TRACK_SRC,
+  SPACE_BGM_SURGE_VOLUME,
   SPACE_BGM_TRACK_SRC,
   SPACE_BGM_VOLUME,
 } from "./model/spaceBgmTrack";

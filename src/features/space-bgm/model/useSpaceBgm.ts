@@ -3,15 +3,23 @@
 import { useCallback, useEffect, useRef, useState } from "react";
 import { type BtcCandle, useBitcoinStore } from "@/entities/bitcoin";
 import { useBtcCandlesQuery } from "@/entities/bitcoin/client";
+import { isDev } from "@/shared/utils/common";
 import { loadBgmEnabled, saveBgmEnabled } from "./bgmPreferenceStore";
 import {
   appendPriceSample,
   createSurgeState,
+  readCandleChangePercent,
   resolveReferencePrice,
+  SPACE_BGM_SURGE,
   type SurgeState,
   stepSurgeState,
 } from "./priceSurge";
-import { SPACE_BGM_SURGE_TRACK_SRC, SPACE_BGM_TRACK_SRC, SPACE_BGM_VOLUME } from "./spaceBgmTrack";
+import {
+  SPACE_BGM_SURGE_TRACK_SRC,
+  SPACE_BGM_SURGE_VOLUME,
+  SPACE_BGM_TRACK_SRC,
+  SPACE_BGM_VOLUME,
+} from "./spaceBgmTrack";
 
 export interface SpaceBgm {
   isPlaying: boolean;
@@ -47,13 +55,21 @@ const SURGE_TICK_MS = 5 * 1000;
 const EMPTY_CANDLES: readonly BtcCandle[] = [];
 
 /**
- * `?surge=1` 강제 모드에서 트랙을 뒤집는 주기.
+ * `?surge=1` 강제 모드의 각본.
  *
- * 들어가고 나오는 전환을 둘 다 들어야 하는데, 실제 기준으로는 최소 2분을 유지하고
- * 쿨다운이 10분이라 한 번 확인하는 데 12분이 걸린다. 강제 모드는 상태기계를
- * 건너뛰므로 유지·쿨다운에 묶이지 않는다.
+ * 실제 급등락과 같은 순서로 재현함. 변동이 0.4% 에 닿아 트랙을 미리 받고, 0.6% 에
+ * 닿아 바뀌고, 가라앉아 돌아옴. 실제 기준으로는 최소 2분을 유지하고 쿨다운이
+ * 10분이라 한 번 확인하는 데 12분이 걸려서 시간만 줄임. 돌아온 뒤 같은 순서를
+ * 되풀이해 들어가는 전환과 나오는 전환을 몇 번이고 들어 볼 수 있음.
  */
-const SURGE_DEBUG_CYCLE_MS = 20 * 1000;
+const SURGE_DEBUG_SCRIPT = {
+  /** 재생을 켠 뒤 미리 받기 시작하는 시각. */
+  prefetchAfterMs: 5 * 1000,
+  /** 재생을 켠 뒤(또는 돌아온 뒤) 교체 트랙으로 바꾸는 시각. */
+  enterAfterMs: 10 * 1000,
+  /** 교체 트랙을 유지하는 시간. */
+  holdMs: 30 * 1000,
+} as const;
 
 /**
  * `?surge=1` 이면 시세와 무관하게 교체 트랙을 강제로 돌린다.
@@ -130,6 +146,8 @@ const useSpaceBgm = (): SpaceBgm => {
       const audioElement = new Audio(SPACE_BGM_SURGE_TRACK_SRC);
       audioElement.loop = true;
       audioElement.volume = 0;
+      // 미리 받을 때 메타데이터만 받고 멈추지 않게 함.
+      audioElement.preload = "auto";
       surgeAudioRef.current = audioElement;
     }
 
@@ -146,27 +164,30 @@ const useSpaceBgm = (): SpaceBgm => {
     }
   }, []);
 
-  const runFade = useCallback((from: HTMLAudioElement | null, to: HTMLAudioElement): void => {
-    const startedAtMs = Date.now();
-    const fromStartVolume = from?.volume ?? 0;
+  const runFade = useCallback(
+    (from: HTMLAudioElement | null, to: HTMLAudioElement, toVolume: number): void => {
+      const startedAtMs = Date.now();
+      const fromStartVolume = from?.volume ?? 0;
 
-    fadeTimerRef.current = setInterval(() => {
-      const progress = Math.min((Date.now() - startedAtMs) / CROSSFADE_MS, 1);
+      fadeTimerRef.current = setInterval(() => {
+        const progress = Math.min((Date.now() - startedAtMs) / CROSSFADE_MS, 1);
 
-      to.volume = SPACE_BGM_VOLUME * progress;
-      if (from) {
-        from.volume = fromStartVolume * (1 - progress);
-      }
+        to.volume = toVolume * progress;
+        if (from) {
+          from.volume = fromStartVolume * (1 - progress);
+        }
 
-      if (progress < 1) {
-        return;
-      }
+        if (progress < 1) {
+          return;
+        }
 
-      clearInterval(fadeTimerRef.current ?? undefined);
-      fadeTimerRef.current = null;
-      from?.pause();
-    }, CROSSFADE_STEP_MS);
-  }, []);
+        clearInterval(fadeTimerRef.current ?? undefined);
+        fadeTimerRef.current = null;
+        from?.pause();
+      }, CROSSFADE_STEP_MS);
+    },
+    [],
+  );
 
   /**
    * 한 트랙을 줄이면서 다른 트랙을 키움.
@@ -179,7 +200,7 @@ const useSpaceBgm = (): SpaceBgm => {
    * 기다리는 사이 다른 전환이나 끄기가 끼어들면 늦게 온 결과는 버린다.
    */
   const crossfade = useCallback(
-    (from: HTMLAudioElement | null, to: HTMLAudioElement): void => {
+    (from: HTMLAudioElement | null, to: HTMLAudioElement, toVolume: number): void => {
       stopFade();
 
       const fadeId = fadeIdRef.current;
@@ -188,7 +209,7 @@ const useSpaceBgm = (): SpaceBgm => {
         .play()
         .then(() => {
           if (fadeId === fadeIdRef.current) {
-            runFade(from, to);
+            runFade(from, to, toVolume);
           }
         })
         .catch(() => {
@@ -204,12 +225,12 @@ const useSpaceBgm = (): SpaceBgm => {
     // 이벤트마다 곡 처음부터. 지난 이벤트가 끊긴 자리에서 이어지면 어색하다.
     surgeAudio.currentTime = 0;
     surgeAudio.volume = 0;
-    crossfade(baseAudioRef.current, surgeAudio);
+    crossfade(baseAudioRef.current, surgeAudio, SPACE_BGM_SURGE_VOLUME);
     setIsSurging(true);
   }, [crossfade, resolveSurgeAudio]);
 
   const leaveSurgeTrack = useCallback((): void => {
-    crossfade(surgeAudioRef.current, resolveBaseAudio());
+    crossfade(surgeAudioRef.current, resolveBaseAudio(), SPACE_BGM_VOLUME);
     setIsSurging(false);
   }, [crossfade, resolveBaseAudio]);
 
@@ -341,22 +362,34 @@ const useSpaceBgm = (): SpaceBgm => {
       return;
     }
 
-    // 강제 모드는 시세를 보지 않는다. 구독도 창도 두지 않고 트랙만 번갈아 바꾼다.
+    // 강제 모드는 시세를 보지 않는다. 구독도 창도 두지 않고 각본대로 트랙만 바꾼다.
     if (resolveForcedSurgeFromLocation()) {
-      let isSurgeTrackOn = false;
-      const flipTimer = setInterval(() => {
-        isSurgeTrackOn = !isSurgeTrackOn;
+      let scriptTimer: ReturnType<typeof setTimeout> | null = null;
 
-        if (isSurgeTrackOn) {
+      const scheduleEnter = (): void => {
+        scriptTimer = setTimeout(() => {
+          if (isDev) console.log("🎵 [surge=1] 급등락 트랙으로 바꿈");
           enterSurgeTrack();
-          return;
-        }
+          scriptTimer = setTimeout(() => {
+            if (isDev) console.log("🎵 [surge=1] 기본 트랙으로 돌아옴");
+            leaveSurgeTrack();
+            scheduleEnter();
+          }, SURGE_DEBUG_SCRIPT.holdMs);
+        }, SURGE_DEBUG_SCRIPT.enterAfterMs);
+      };
 
-        leaveSurgeTrack();
-      }, SURGE_DEBUG_CYCLE_MS);
+      const prefetchTimer = setTimeout(() => {
+        if (isDev) console.log("🎵 [surge=1] 급등락 트랙 미리 받기 시작");
+        resolveSurgeAudio();
+      }, SURGE_DEBUG_SCRIPT.prefetchAfterMs);
+
+      scheduleEnter();
 
       return () => {
-        clearInterval(flipTimer);
+        clearTimeout(prefetchTimer);
+        if (scriptTimer) {
+          clearTimeout(scriptTimer);
+        }
       };
     }
 
@@ -374,11 +407,14 @@ const useSpaceBgm = (): SpaceBgm => {
     const tickTimer = setInterval(() => {
       const nowMs = Date.now();
       const previous = surgeStateRef.current;
-      const next = stepSurgeState(
-        previous,
-        resolveReferencePrice(candlesRef.current, nowMs),
-        nowMs,
-      );
+      const referencePrice = resolveReferencePrice(candlesRef.current, nowMs);
+      const next = stepSurgeState(previous, referencePrice, nowMs);
+      const change = readCandleChangePercent(previous, referencePrice, nowMs);
+
+      // 기준에 다가가면 교체 트랙을 미리 받아 둠. 요소를 만들면 받기 시작하고 한 번만 만듦.
+      if (change !== null && Math.abs(change) >= SPACE_BGM_SURGE.prefetchPercent) {
+        resolveSurgeAudio();
+      }
 
       surgeStateRef.current = next;
 
@@ -404,7 +440,7 @@ const useSpaceBgm = (): SpaceBgm => {
       unsubscribe();
       clearInterval(tickTimer);
     };
-  }, [isPlaying, enterSurgeTrack, leaveSurgeTrack]);
+  }, [isPlaying, enterSurgeTrack, leaveSurgeTrack, resolveSurgeAudio]);
   // endregion
 
   return { isPlaying, isUnavailable, isSurging, toggle: onClickToggleBgm };
