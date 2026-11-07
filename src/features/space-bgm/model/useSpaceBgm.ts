@@ -85,6 +85,8 @@ const useSpaceBgm = (): SpaceBgm => {
   const baseAudioRef = useRef<HTMLAudioElement | null>(null);
   const surgeAudioRef = useRef<HTMLAudioElement | null>(null);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
+  /** 전환마다 오름. `play()` 를 기다리던 전환이 그새 낡았는지 가린다. */
+  const fadeIdRef = useRef<number>(0);
   const surgeStateRef = useRef<SurgeState>(createSurgeState());
   /**
    * 기준가를 고를 전광판 30분봉. 전광판과 같은 조회라 캐시를 같이 씀.
@@ -134,11 +136,36 @@ const useSpaceBgm = (): SpaceBgm => {
     return surgeAudioRef.current;
   }, []);
 
+  /** 진행 중인 페이드와 아직 `play()` 를 기다리는 전환을 함께 무른다. */
   const stopFade = useCallback((): void => {
+    fadeIdRef.current += 1;
+
     if (fadeTimerRef.current) {
       clearInterval(fadeTimerRef.current);
       fadeTimerRef.current = null;
     }
+  }, []);
+
+  const runFade = useCallback((from: HTMLAudioElement | null, to: HTMLAudioElement): void => {
+    const startedAtMs = Date.now();
+    const fromStartVolume = from?.volume ?? 0;
+
+    fadeTimerRef.current = setInterval(() => {
+      const progress = Math.min((Date.now() - startedAtMs) / CROSSFADE_MS, 1);
+
+      to.volume = SPACE_BGM_VOLUME * progress;
+      if (from) {
+        from.volume = fromStartVolume * (1 - progress);
+      }
+
+      if (progress < 1) {
+        return;
+      }
+
+      clearInterval(fadeTimerRef.current ?? undefined);
+      fadeTimerRef.current = null;
+      from?.pause();
+    }, CROSSFADE_STEP_MS);
   }, []);
 
   /**
@@ -146,39 +173,29 @@ const useSpaceBgm = (): SpaceBgm => {
    *
    * 물러나는 쪽은 `pause()` 만 하고 재생 위치를 건드리지 않는다. 기본 트랙이
    * 멈췄던 자리에서 이어져야 돌아왔을 때 처음부터 다시 시작하지 않는다.
+   *
+   * 페이드는 `play()` 가 실제로 시작된 뒤에 건다. 급등락 트랙은 처음 바뀔 때
+   * 받기 시작해서, 먼저 줄이면 받는 동안 원래 곡만 꺼져 소리가 빈다.
+   * 기다리는 사이 다른 전환이나 끄기가 끼어들면 늦게 온 결과는 버린다.
    */
   const crossfade = useCallback(
     (from: HTMLAudioElement | null, to: HTMLAudioElement): void => {
       stopFade();
 
-      const startedAtMs = Date.now();
-      const fromStartVolume = from?.volume ?? 0;
+      const fadeId = fadeIdRef.current;
 
-      void to.play().catch(() => {
-        // 교체 트랙을 못 틀면 원래 트랙을 그대로 둔다. 배경음이 사라지는 게 더 나쁘다.
-        stopFade();
-        if (from) {
-          from.volume = fromStartVolume;
-        }
-      });
-
-      fadeTimerRef.current = setInterval(() => {
-        const progress = Math.min((Date.now() - startedAtMs) / CROSSFADE_MS, 1);
-
-        to.volume = SPACE_BGM_VOLUME * progress;
-        if (from) {
-          from.volume = fromStartVolume * (1 - progress);
-        }
-
-        if (progress < 1) {
-          return;
-        }
-
-        stopFade();
-        from?.pause();
-      }, CROSSFADE_STEP_MS);
+      void to
+        .play()
+        .then(() => {
+          if (fadeId === fadeIdRef.current) {
+            runFade(from, to);
+          }
+        })
+        .catch(() => {
+          // 교체 트랙을 못 틀면 원래 트랙을 그대로 둔다. 배경음이 사라지는 게 더 나쁘다.
+        });
     },
-    [stopFade],
+    [runFade, stopFade],
   );
 
   /** 급등락 트랙으로. 돌아올 기본 트랙은 위치를 지킨 채 멈춘다. */
