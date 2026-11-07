@@ -315,6 +315,22 @@ export const resolveFilledSegmentCount = (percent: number | null): number => {
 };
 
 /**
+ * 반감기 막대 한 칸의 텍스처 좌표.
+ *
+ * 텍스처 그리기와 끝 칸 깜빡임(`HalvingSegmentBlink`)이 같은 자리를 쓰게 한 곳에서 계산함.
+ */
+export const resolveHalvingSegmentRect = (
+  index: number,
+): { x: number; y: number; width: number; height: number } => {
+  const { top, height, gap } = LAYOUT.halvingBar;
+  const left = BLOCK_DASHBOARD_TEXTURE.paddingX;
+  const totalWidth = BLOCK_DASHBOARD_TEXTURE.width - left * 2;
+  const segmentWidth = (totalWidth - gap * (HALVING_SEGMENT_COUNT - 1)) / HALVING_SEGMENT_COUNT;
+
+  return { x: left + (segmentWidth + gap) * index, y: top, width: segmentWidth, height };
+};
+
+/**
  * 다시 그릴지 가리는 서명. 화면에 찍히는 글자만 모았음.
  *
  * 값 자체로 비교하면 경과 초가 매초 달라 매번 다시 그림. 표시가 바뀔 때만
@@ -446,15 +462,13 @@ const drawBlockChain = (
 
 /** 칸으로 끊은 반감기 막대. 채운 칸은 흰색, 남은 칸은 어두운 갈색. */
 const drawHalvingSegments = (context: CanvasRenderingContext2D, percent: number | null): void => {
-  const { top, height, gap } = LAYOUT.halvingBar;
-  const left = BLOCK_DASHBOARD_TEXTURE.paddingX;
-  const totalWidth = BLOCK_DASHBOARD_TEXTURE.width - left * 2;
-  const segmentWidth = (totalWidth - gap * (HALVING_SEGMENT_COUNT - 1)) / HALVING_SEGMENT_COUNT;
   const filledCount = resolveFilledSegmentCount(percent);
 
   for (let index = 0; index < HALVING_SEGMENT_COUNT; index += 1) {
+    const { x, y, width, height } = resolveHalvingSegmentRect(index);
+
     context.fillStyle = index < filledCount ? ACCENT_WHITE : COLORS.segmentEmpty;
-    context.fillRect(left + (segmentWidth + gap) * index, top, segmentWidth, height);
+    context.fillRect(x, y, width, height);
   }
 };
 

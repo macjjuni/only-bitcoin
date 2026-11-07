@@ -12,6 +12,7 @@ import {
   drawBlockDashboard,
   resolveBlockDashboardState,
   resolveBlockFeedOnlineStatus,
+  resolveFilledSegmentCount,
 } from "@/views/space/lib/blockDashboardTexture";
 import { loadScreenFonts } from "@/views/space/lib/screenCanvas";
 import {
@@ -19,6 +20,7 @@ import {
   sharpenScreenMapSampling,
 } from "@/views/space/lib/screenMaterial";
 import BillboardOnlinePulse from "./BillboardOnlinePulse";
+import HalvingSegmentBlink from "./HalvingSegmentBlink";
 
 /**
  * 유휴 상태에서 경과 시간을 다시 보는 간격.
@@ -65,6 +67,8 @@ function BlockDashboard(): ReactNode {
   const lastSignatureRef = useRef<string>("");
   /** 멤풀 소켓이 붙어 있으면 `true`. LIVE 점의 확산 링이 이 값을 따름. */
   const isLiveRef = useRef<boolean>(false);
+  /** 텍스처에 칠한 반감기 칸 수. 끝 칸 깜빡임이 이 값을 따름. */
+  const filledSegmentCountRef = useRef<number>(0);
   const prefersReducedMotion = usePrefersReducedMotion();
   const elapsedSinceCheckRef = useRef<number>(IDLE_CHECK_INTERVAL_SECONDS);
   /** 소켓 수신 플래그. 다음 프레임에 바로 그린다. */
@@ -92,6 +96,7 @@ function BlockDashboard(): ReactNode {
     drawBlockDashboard(context, nextState);
     lastSignatureRef.current = signature;
     isLiveRef.current = resolveBlockFeedOnlineStatus(nextState);
+    filledSegmentCountRef.current = resolveFilledSegmentCount(nextState.halvingProgressPercent);
     texture.needsUpdate = true;
   };
   // endregion
@@ -164,6 +169,12 @@ function BlockDashboard(): ReactNode {
 
       {/* 시세판과 같은 자리·같은 모양의 LIVE 점 확산 링. */}
       <BillboardOnlinePulse isOnlineRef={isLiveRef} prefersReducedMotion={prefersReducedMotion} />
+
+      {/* 반감기 막대에서 마지막으로 채운 칸이 깜빡임. 진행 중임을 보여 줌. */}
+      <HalvingSegmentBlink
+        filledCountRef={filledSegmentCountRef}
+        prefersReducedMotion={prefersReducedMotion}
+      />
     </group>
   );
 }

@@ -23,6 +23,7 @@ import {
   resolveBlockDashboardState,
   resolveBlockFeedOnlineStatus,
   resolveFilledSegmentCount,
+  resolveHalvingSegmentRect,
 } from "@/views/space/lib/blockDashboardTexture";
 
 const MINUTE = 60;
@@ -268,6 +269,19 @@ describe("네트워크 현황 포맷", () => {
     expect(resolveFilledSegmentCount(0.1)).toBe(1);
     expect(resolveFilledSegmentCount(63.5)).toBe(Math.round(0.635 * HALVING_SEGMENT_COUNT));
     expect(resolveFilledSegmentCount(120)).toBe(HALVING_SEGMENT_COUNT);
+  });
+
+  it("반감기 칸 좌표는 좌우 여백 안에서 같은 폭으로 이어진다", () => {
+    // 끝 칸 깜빡임 판이 텍스처의 칸과 어긋나면 흰 테두리가 비친다.
+    const first = resolveHalvingSegmentRect(0);
+    const second = resolveHalvingSegmentRect(1);
+    const last = resolveHalvingSegmentRect(HALVING_SEGMENT_COUNT - 1);
+
+    expect(first.x).toBe(BLOCK_DASHBOARD_TEXTURE.paddingX);
+    expect(second.width).toBeCloseTo(first.width);
+    expect(last.x + last.width).toBeCloseTo(
+      BLOCK_DASHBOARD_TEXTURE.width - BLOCK_DASHBOARD_TEXTURE.paddingX,
+    );
   });
 
   it("화면 글자가 같으면 서명도 같아 다시 그리지 않는다", () => {
