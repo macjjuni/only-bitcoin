@@ -264,12 +264,18 @@ export const resolveBillboardOnlineStatus = (
 };
 
 // region [Privates]
-const resolveChartLineColor = (tone: BillboardTone): string => {
-  return resolveToneColor(tone === "flat" ? "up" : tone);
+/**
+ * 캔들 한 개의 색. 시가 이상으로 닫혔으면 상승으로 봄.
+ *
+ * 현재가 점선·점과 펄스 링도 마지막 캔들의 이 색을 씀. 24시간 등락으로 칠하면
+ * 하루 기준은 플러스인데 지금 봉이 빠지는 순간 빨간 봉 위에 초록 점이 앉음.
+ */
+const resolveCandleColor = (candle: Pick<BtcCandle, "open" | "close">): string => {
+  return candle.close >= candle.open ? BILLBOARD_COLORS.up : BILLBOARD_COLORS.down;
 };
 
 /** 차트 본문과 별도 끝점 효과가 같은 스케일·좌표를 쓰게 한 곳에서 계산함. */
-const resolveBillboardChartGeometry = (state: Pick<BillboardState, "candles" | "usdChange24h">) => {
+const resolveBillboardChartGeometry = (state: Pick<BillboardState, "candles">) => {
   const candles = state.candles.filter(
     (candle) =>
       Number.isFinite(candle.high) && Number.isFinite(candle.low) && candle.high >= candle.low,
@@ -288,14 +294,13 @@ const resolveBillboardChartGeometry = (state: Pick<BillboardState, "candles" | "
   };
   const slotWidth = (rect.width - LAYOUT.chartEndGutter) / candles.length;
   const lastCandle = candles[candles.length - 1];
-  const tone = resolveChangeTone(state.usdChange24h);
 
   return {
     candles,
     scale,
     toY,
     slotWidth,
-    tone,
+    endpointColor: resolveCandleColor(lastCandle),
     // 점은 진행 중인 마지막 캔들 위에 앉아야 함. 오른쪽 거터로 밀면 아직 없는
     // 다음 봉 자리를 가리켜서 한 칸 앞선 값처럼 읽힘.
     endpoint: { x: rect.left + slotWidth * (candles.length - 0.5), y: toY(lastCandle.close) },
@@ -489,8 +494,7 @@ const drawCandles = (
 
   candles.forEach((candle, index) => {
     const centerX = rect.left + slotWidth * (index + 0.5);
-    const isUp = candle.close >= candle.open;
-    const color = isUp ? BILLBOARD_COLORS.up : BILLBOARD_COLORS.down;
+    const color = resolveCandleColor(candle);
     const bodyTop = toY(Math.max(candle.open, candle.close));
     const bodyBottom = toY(Math.min(candle.open, candle.close));
 
@@ -528,10 +532,8 @@ const drawCandles = (
 const drawCurrentPriceMarker = (
   context: CanvasRenderingContext2D,
   endpoint: { x: number; y: number },
-  tone: BillboardTone,
+  color: string,
 ): void => {
-  const color = resolveChartLineColor(tone);
-
   context.setLineDash([...BILLBOARD_PRICE_LINE.dashSegments]);
   context.strokeStyle = color;
   context.globalAlpha = BILLBOARD_PRICE_LINE.alpha;
@@ -581,7 +583,7 @@ const drawExRate = (context: CanvasRenderingContext2D, rate: number): void => {
 /** 차트 본문. 좌표는 전체 텍스처 기준이라 별도 차트 텍스처에서는 원점을 옮겨 부름. */
 const drawChartBody = (
   context: CanvasRenderingContext2D,
-  state: Pick<BillboardState, "candles" | "usdChange24h">,
+  state: Pick<BillboardState, "candles">,
 ): void => {
   const geometry = resolveBillboardChartGeometry(state);
 
@@ -592,14 +594,14 @@ const drawChartBody = (
 
   drawChartGrid(context, geometry.scale);
   drawCandles(context, geometry);
-  drawCurrentPriceMarker(context, geometry.endpoint, geometry.tone);
+  drawCurrentPriceMarker(context, geometry.endpoint, geometry.endpointColor);
 };
 
 // endregion
 
 /** 실제 차트의 현재가 점 좌표와 색. 그릴 캔들이 없으면 효과도 띄우지 않음. */
 export const resolveBillboardChartEndpoint = (
-  state: Pick<BillboardState, "candles" | "usdChange24h">,
+  state: Pick<BillboardState, "candles">,
 ): BillboardChartEndpoint | null => {
   const geometry = resolveBillboardChartGeometry(state);
 
@@ -607,7 +609,7 @@ export const resolveBillboardChartEndpoint = (
     return null;
   }
 
-  return { ...geometry.endpoint, color: resolveChartLineColor(geometry.tone) };
+  return { ...geometry.endpoint, color: geometry.endpointColor };
 };
 
 /** 투명한 가격 전용 텍스처에 숫자만 그림. 배경 전광판과 글꼴·자동 축소를 공유함. */
@@ -677,7 +679,7 @@ export const drawBillboard = (
  */
 export const drawBillboardChart = (
   context: CanvasRenderingContext2D,
-  state: Pick<BillboardState, "candles" | "usdChange24h">,
+  state: Pick<BillboardState, "candles">,
 ): void => {
   const { x, y } = BILLBOARD_CHART_REGION;
 

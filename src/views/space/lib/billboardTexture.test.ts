@@ -235,21 +235,24 @@ describe("resolveFittedFontSize", () => {
 
 describe("resolveBillboardChartEndpoint", () => {
   it("캔들이 없거나 하나뿐이면 끝점 효과를 만들지 않는다", () => {
-    expect(resolveBillboardChartEndpoint({ candles: [], usdChange24h: "1.2" })).toBeNull();
-    expect(
-      resolveBillboardChartEndpoint({ candles: createCandles(1), usdChange24h: "0" }),
-    ).toBeNull();
+    expect(resolveBillboardChartEndpoint({ candles: [] })).toBeNull();
+    expect(resolveBillboardChartEndpoint({ candles: createCandles(1) })).toBeNull();
   });
 
+  // 24시간 변동과 마지막 봉 방향을 일부러 엇갈려, 색이 봉만 따르는지 본다.
   it.each([
-    { change: "-2.4", expectedColor: BILLBOARD_COLORS.down },
-    { change: "0", expectedColor: BILLBOARD_COLORS.up },
-  ])("24시간 변동률 $change에서 실제 차트의 현재가 점·점선 색을 반환한다", ({
+    { change: "2.4", lastCloseOffset: -50, expectedColor: BILLBOARD_COLORS.down },
+    { change: "-2.4", lastCloseOffset: 50, expectedColor: BILLBOARD_COLORS.up },
+    { change: "1", lastCloseOffset: 0, expectedColor: BILLBOARD_COLORS.up },
+  ])("마지막 캔들(종가-시가 $lastCloseOffset) 색을 현재가 점·점선 색으로 반환한다", ({
     change,
+    lastCloseOffset,
     expectedColor,
   }) => {
     const candles = createCandles();
-    const endpoint = resolveBillboardChartEndpoint({ candles, usdChange24h: change });
+    const lastCandle = candles[candles.length - 1];
+    candles[candles.length - 1] = { ...lastCandle, close: lastCandle.open + lastCloseOffset };
+    const endpoint = resolveBillboardChartEndpoint({ candles });
     const drawingTrace: { endpoint: BillboardChartEndpoint | null; markerColor: string | null } = {
       endpoint: null,
       markerColor: null,
@@ -298,10 +301,7 @@ describe("resolveBillboardChartEndpoint", () => {
 
   /** 펄스 링은 3D 로 겹치므로 패널을 넘으면 허공에 뜬다. */
   it("현재가 점의 확산 링이 패널 안에 머문다", () => {
-    const endpoint = resolveBillboardChartEndpoint({
-      candles: createCandles(),
-      usdChange24h: "1",
-    });
+    const endpoint = resolveBillboardChartEndpoint({ candles: createCandles() });
 
     expect(endpoint).not.toBeNull();
     expect((endpoint?.x ?? 0) + BILLBOARD_CHART_MARKER.pulseRadius).toBeLessThanOrEqual(
@@ -454,10 +454,7 @@ describe("별도 차트 텍스처", () => {
 
   it("차트 칸이 패널 안에 있고 현재가 점을 감싼다", () => {
     const { x, y, width, height } = BILLBOARD_CHART_REGION;
-    const endpoint = resolveBillboardChartEndpoint({
-      candles: createCandles(),
-      usdChange24h: "1",
-    });
+    const endpoint = resolveBillboardChartEndpoint({ candles: createCandles() });
 
     expect(x).toBeGreaterThanOrEqual(0);
     expect(y).toBeGreaterThanOrEqual(0);
@@ -478,9 +475,9 @@ describe("별도 차트 텍스처", () => {
 
   it("차트 텍스처에는 칸 원점 기준으로 같은 자리에 점을 찍는다", () => {
     const candles = createCandles();
-    const endpoint = resolveBillboardChartEndpoint({ candles, usdChange24h: "1" });
+    const endpoint = resolveBillboardChartEndpoint({ candles });
     const endpoints = traceEndpointDraws((context) => {
-      drawBillboardChart(context, { candles, usdChange24h: "1" });
+      drawBillboardChart(context, { candles });
     });
 
     // 점은 전체 좌표로 찍히고 변환이 칸 원점만큼 뺀다. 변환을 적용한 위치가 칸 안 좌표다.

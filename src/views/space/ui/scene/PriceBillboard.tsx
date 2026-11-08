@@ -216,21 +216,20 @@ function PriceBillboard(): ReactNode {
     }
   };
 
-  /** 캔들이나 차트 색(24시간 방향)이 바뀌었을 때만, 최대 2 Hz 로 차트 칸을 다시 그림. */
+  /** 캔들이 바뀌었을 때만, 최대 2 Hz 로 차트 칸을 다시 그림. 점·펄스 색도 마지막 캔들을 따름. */
   const redrawChartIfChanged = (nowMs: number, isForced: boolean): void => {
     if (!chartSurface.context) {
       return;
     }
 
-    const { usdChange24h } = useBitcoinStore.getState().bitcoinPrice;
-    const chartKey = `${candlesVersionRef.current}|${formatBillboardChange(usdChange24h)}`;
+    const chartKey = String(candlesVersionRef.current);
     const isThrottled = nowMs - lastChartDrawnAtRef.current < CHART_MIN_REDRAW_INTERVAL_MS;
 
     if (chartKey === lastChartKeyRef.current || (isThrottled && !isForced)) {
       return;
     }
 
-    const chartState = { candles: candlesRef.current, usdChange24h };
+    const chartState = { candles: candlesRef.current };
 
     drawBillboardChart(chartSurface.context, chartState);
     chartSurface.texture.needsUpdate = true;
