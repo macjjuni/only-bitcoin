@@ -73,6 +73,7 @@ const CONTENT_SECURITY_POLICY = [
     "https://raw.githubusercontent.com",
     "https://image-store-one.vercel.app",
     "https://alternative.me",
+    "https://companiesmarketcap.com",
     "https://*.googlesyndication.com",
     "https://*.doubleclick.net",
     "https://*.googleusercontent.com",

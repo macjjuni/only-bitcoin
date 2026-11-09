@@ -66,6 +66,7 @@ const BANNER_CONFIGS: BannerConfig[] = [
         "/m2btc",
         "/etf",
         "/treasury",
+        "/asset-ranking",
         "/cagr",
         "/meme",
         "/btc2apartment",

@@ -1,7 +1,7 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { Gamepad2, HandCoins, Swords, TableProperties } from "lucide-react";
+import { Gamepad2, HandCoins, Swords, TableProperties, Trophy } from "lucide-react";
 import type { ReactNode } from "react";
 import { useHasUnseenIncident } from "@/entities/incident";
 import {
@@ -66,6 +66,11 @@ const UTILITY_LINKS: OrangeLink[] = [
     title: "트레저리",
     icon: <TreasuryIcon size={28} className={ICON_CLASS} />,
     href: "/treasury",
+  },
+  {
+    title: "자산 랭킹",
+    icon: <Trophy size={28} strokeWidth={1.8} className={ICON_CLASS} />,
+    href: "/asset-ranking",
   },
   {
     title: "월별 등락률",

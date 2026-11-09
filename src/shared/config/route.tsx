@@ -1,3 +1,4 @@
+import { Trophy } from "lucide-react";
 import type { ReactNode } from "react";
 import {
   BanknoteIcon,
@@ -119,6 +120,13 @@ const clientRoutes: ClientRoute[] = [
     isNav: false,
     isFavorite: false,
     icon: <EagleIcon size={24} />,
+  },
+  {
+    title: "자산 랭킹",
+    path: "/asset-ranking",
+    isNav: false,
+    isFavorite: false,
+    icon: <Trophy size={24} />,
   },
   {
     title: "출금 수수료",

@@ -29,6 +29,7 @@ const LIVE_ROUTES = [
   "/premium",
   "/treasury",
   "/etf",
+  "/asset-ranking",
   "/withdraw-fee",
 ] as const;
 
