@@ -9,10 +9,13 @@ const priceFormatter = new Intl.NumberFormat("en-US", {
   currency: "USD",
   maximumFractionDigits: 2,
 });
-const collectedAtFormatter = new Intl.DateTimeFormat("ko-KR", {
+const collectedAtFormatter = new Intl.DateTimeFormat("en-CA", {
   timeZone: "Asia/Seoul",
-  dateStyle: "short",
-  timeStyle: "short",
+  year: "numeric",
+  month: "2-digit",
+  day: "2-digit",
+  hour: "2-digit",
+  minute: "2-digit",
   hourCycle: "h23",
 });
 
@@ -33,5 +36,20 @@ export const formatDailyChange = (dailyChangePercent: number | null): string => 
 };
 
 export const formatCollectedAt = (fetchedAt: string): string => {
-  return `${collectedAtFormatter.format(new Date(fetchedAt))} KST`;
+  const collectedAt = new Date(fetchedAt);
+  if (Number.isNaN(collectedAt.getTime())) {
+    return "—";
+  }
+
+  const dateTimeParts = collectedAtFormatter.formatToParts(collectedAt);
+  const findDateTimePart = (partType: Intl.DateTimeFormatPartTypes): string => {
+    return dateTimeParts.find((part) => part.type === partType)?.value ?? "00";
+  };
+  const year = findDateTimePart("year");
+  const month = findDateTimePart("month");
+  const day = findDateTimePart("day");
+  const hour = findDateTimePart("hour");
+  const minute = findDateTimePart("minute");
+
+  return `${year}.${month}.${day} · ${hour}:${minute} KST`;
 };

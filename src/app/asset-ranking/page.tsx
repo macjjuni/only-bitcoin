@@ -1,6 +1,7 @@
 import { Suspense } from "react";
 import { ASSET_RANKING_SOURCE_URL } from "@/entities/asset-ranking";
 import { createPageMetadata } from "@/shared/config/metadata";
+import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import { AssetRankingScreen } from "@/views/asset-ranking";
 import AssetRankingLoading from "./loading";
@@ -18,6 +19,11 @@ export const maxDuration = 30;
 export default function AssetRankingPage() {
   return (
     <PageLayout className="gap-2.5 font-pretendard">
+      <PageTitle
+        label="Global Asset Ranking"
+        title="전 세계 자산 랭킹"
+        description="기업·귀금속·암호화폐·ETF 시가총액 상위 100개"
+      />
       <Suspense fallback={<AssetRankingLoading />}>
         <AssetRankingScreen />
       </Suspense>

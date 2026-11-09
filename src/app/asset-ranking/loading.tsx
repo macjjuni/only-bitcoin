@@ -6,14 +6,17 @@ export default function AssetRankingLoading() {
       role="status"
       aria-busy="true"
       aria-label="자산 랭킹 불러오는 중"
-      className="flex animate-pulse flex-col gap-3 p-3"
+      className="flex animate-pulse flex-col gap-2.5"
     >
-      <div className="h-6 w-48 rounded bg-foreground/10" />
       <div className="h-36 rounded-xl bg-foreground/10" />
-      <div className="h-10 rounded-lg bg-foreground/10" />
-      {SKELETON_ROWS.map((rowID) => (
-        <div key={rowID} className="h-14 rounded bg-foreground/10" />
-      ))}
+      <div className="h-10 rounded-xl bg-foreground/10" />
+      <div className="space-y-3 rounded-xl border border-border p-4">
+        <div className="h-6 w-32 rounded bg-foreground/10" />
+        <div className="h-10 rounded-lg bg-foreground/10" />
+        {SKELETON_ROWS.map((rowID) => (
+          <div key={rowID} className="h-20 rounded bg-foreground/10" />
+        ))}
+      </div>
     </div>
   );
 }
