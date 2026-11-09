@@ -102,7 +102,9 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
         {/* 헤더: 로고 + QR */}
         <div className="mb-3 flex items-start gap-2 min-h-[60px]">
           <div className="flex items-center gap-2">
-            <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={38} />
+            <div className="flex justify-center items-center bg-white rounded-full p-[1px]">
+              <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={38} />
+            </div>
             <BtcTextLogo color="#fff" height={36} width={156} />
           </div>
           <ShareCardQr className="ml-auto" id={SHARE_QR_CANVAS_ID} value={shareUrl} />

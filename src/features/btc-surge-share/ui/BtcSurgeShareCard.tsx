@@ -157,8 +157,10 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
       {/* 상단 헤더: 브랜드 로고 + 상태 뱃지 */}
       <div className="relative z-10 flex items-center justify-between mb-5">
         <div className="flex items-center gap-2">
-          <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={38} />
-          <BtcTextLogo color="#fff" height={36} width={156} />
+          <div className="flex justify-center items-center bg-white rounded-full p-[1px]">
+            <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={34} />
+          </div>
+          <BtcTextLogo color="#fff" height={38} width={160} />
         </div>
 
         <div className="flex items-center gap-1 bg-black/40 backdrop-blur-md p-1 rounded-full border border-white/10">
