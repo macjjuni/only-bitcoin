@@ -8,8 +8,5 @@ export const TREASURY_SORT_OPTIONS: Array<SegmentedControlOption<TreasurySortKey
   { label: "발행량 비중", value: "supplyShare" },
 ];
 
-/** 처음 보여줄 기업 수. 목록이 200곳을 넘어 전부 그리면 첫 페인트가 무거워진다. */
-export const INITIAL_VISIBLE_COMPANY_COUNT = 20;
-
-/** "더 보기" 를 누를 때마다 추가로 보여줄 기업 수. */
-export const LOAD_MORE_COMPANY_COUNT = 20;
+/** 처음 보여줄 기업 수. 상위 10곳만 먼저 보여 주고 나머지는 "전체보기" 로 한 번에 펼침. */
+export const INITIAL_VISIBLE_COMPANY_COUNT = 10;

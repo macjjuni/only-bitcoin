@@ -16,11 +16,7 @@ import {
   sortCompaniesBySortKey,
   type TreasurySortKey,
 } from "../lib/sortCompanies";
-import {
-  INITIAL_VISIBLE_COMPANY_COUNT,
-  LOAD_MORE_COMPANY_COUNT,
-  TREASURY_SORT_OPTIONS,
-} from "../model/constants";
+import { INITIAL_VISIBLE_COMPANY_COUNT, TREASURY_SORT_OPTIONS } from "../model/constants";
 import TreasuryCompanyRow from "./TreasuryCompanyRow";
 
 const DEFAULT_SORT_KEY: TreasurySortKey = "holdings";
@@ -33,7 +29,7 @@ export default function TreasuryCompanyListCard({ companies }: TreasuryCompanyLi
   // region [Hooks]
   const [sortKey, setSortKey] = useState<TreasurySortKey>(DEFAULT_SORT_KEY);
   const [searchKeyword, setSearchKeyword] = useState("");
-  const [visibleCompanyCount, setVisibleCompanyCount] = useState(INITIAL_VISIBLE_COMPANY_COUNT);
+  const [isExpanded, setIsExpanded] = useState(false);
   // endregion
 
   // region [Privates]
@@ -42,33 +38,38 @@ export default function TreasuryCompanyListCard({ companies }: TreasuryCompanyLi
   }, [companies, searchKeyword, sortKey]);
 
   const visibleCompanies = useMemo(() => {
-    return filteredCompanies.slice(0, visibleCompanyCount);
-  }, [filteredCompanies, visibleCompanyCount]);
+    return isExpanded
+      ? filteredCompanies
+      : filteredCompanies.slice(0, INITIAL_VISIBLE_COMPANY_COUNT);
+  }, [filteredCompanies, isExpanded]);
 
-  /** 정렬·검색이 바뀌면 위에서부터 다시 보여줘야 순위가 어긋나지 않는다. */
-  const resetVisibleCompanyCount = () => {
-    setVisibleCompanyCount(INITIAL_VISIBLE_COMPANY_COUNT);
+  /** 정렬·검색이 바뀌면 다시 접어서 위에서부터 보여 줌. 펼친 채면 바뀐 순위를 놓치기 쉬움. */
+  const collapseCompanyList = () => {
+    setIsExpanded(false);
   };
   // endregion
 
   // region [Events]
   const onChangeSortKey = (nextSortKey: TreasurySortKey) => {
     setSortKey(nextSortKey);
-    resetVisibleCompanyCount();
+    collapseCompanyList();
   };
 
   const onChangeSearchKeywordInput = (event: ChangeEvent<HTMLInputElement>) => {
     setSearchKeyword(event.target.value);
-    resetVisibleCompanyCount();
+    collapseCompanyList();
   };
 
-  const onClickLoadMoreButton = () => {
-    setVisibleCompanyCount((previousCount) => previousCount + LOAD_MORE_COMPANY_COUNT);
+  const onClickToggleExpandButton = () => {
+    setIsExpanded((previousIsExpanded) => !previousIsExpanded);
   };
   // endregion
 
   // region [Templates]
-  const hasMoreCompanies = visibleCompanyCount < filteredCompanies.length;
+  const hiddenCompanyCount = Math.max(0, filteredCompanies.length - INITIAL_VISIBLE_COMPANY_COUNT);
+  const expandButtonLabel = isExpanded
+    ? "접기"
+    : `전체보기 (${filteredCompanies.length.toLocaleString("ko-KR")}곳)`;
   const hasNoSearchResult = filteredCompanies.length === 0;
 
   const CompanyListTemplate = useMemo(() => {
@@ -127,13 +128,14 @@ export default function TreasuryCompanyListCard({ companies }: TreasuryCompanyLi
 
         {CompanyListTemplate}
 
-        {hasMoreCompanies && (
+        {hiddenCompanyCount > 0 && (
           <button
             type="button"
+            aria-expanded={isExpanded}
             className="h-10 rounded-lg bg-neutral-200/70 text-sm font-bold text-foreground transition-colors active:scale-[0.97] dark:bg-neutral-800"
-            onClick={onClickLoadMoreButton}
+            onClick={onClickToggleExpandButton}
           >
-            더 보기
+            {expandButtonLabel}
           </button>
         )}
       </CardContent>
