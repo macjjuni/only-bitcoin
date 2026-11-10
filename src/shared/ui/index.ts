@@ -54,4 +54,8 @@ export {
   type ShareCardQrProps,
 } from "./ShareCardQr";
 export { default as TransitionLink } from "./TransitionLink";
+export {
+  default as UpdatedAtBar,
+  type UpdatedAtBarProps,
+} from "./UpdatedAtBar";
 export { default as UpdownIcon } from "./UpdownIcon";

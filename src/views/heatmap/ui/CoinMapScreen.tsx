@@ -1,10 +1,9 @@
 import { COIN_MARKET_TOP_COUNT } from "@/entities/coin-market";
 import { fetchCoinMarketSnapshot } from "@/entities/coin-market/server";
 import { HeatmapShareDialog } from "@/features/heatmap-share";
-import { Card, CardContent } from "@/shared/ui";
+import { Card, CardContent, UpdatedAtBar } from "@/shared/ui";
 import { buildCoinMapSummary } from "../lib/buildCoinMapSummary";
 import { buildHeatmapShareData } from "../lib/buildHeatmapShareData";
-import CoinMapCollectedAt from "./CoinMapCollectedAt";
 import CoinShareListCard from "./CoinShareListCard";
 import CoinTreemapCard from "./CoinTreemapCard";
 
@@ -38,7 +37,7 @@ export default async function CoinMapScreen() {
   return (
     <>
       <CoinTreemapCard tiles={summary.tiles} topCount={COIN_MARKET_TOP_COUNT} />
-      <CoinMapCollectedAt fetchedAt={snapshot.fetchedAt} />
+      <UpdatedAtBar updatedAt={snapshot.fetchedAt} />
       <CoinShareListCard tiles={summary.tiles} />
       {/* 공유 카드는 이 화면이 이미 가진 스냅샷을 그대로 씀. 여는 버튼은 플로팅 배너에 있음. */}
       <HeatmapShareDialog data={shareData} />

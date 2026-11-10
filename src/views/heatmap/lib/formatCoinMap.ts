@@ -21,28 +21,3 @@ export const formatDailyChange = (dailyChangePercent: number | null): string => 
   const sign = dailyChangePercent > 0 ? "+" : "";
   return `${sign}${dailyChangePercent.toFixed(2)}%`;
 };
-
-const collectedAtFormatter = new Intl.DateTimeFormat("en-CA", {
-  timeZone: "Asia/Seoul",
-  year: "numeric",
-  month: "2-digit",
-  day: "2-digit",
-  hour: "2-digit",
-  minute: "2-digit",
-  hourCycle: "h23",
-});
-
-/** 자산 랭킹과 같은 `2026.11.10 · 11:36 KST` 형식. */
-export const formatCollectedAt = (fetchedAt: string): string => {
-  const collectedAt = new Date(fetchedAt);
-  if (Number.isNaN(collectedAt.getTime())) {
-    return "—";
-  }
-
-  const dateTimeParts = collectedAtFormatter.formatToParts(collectedAt);
-  const findDateTimePart = (partType: Intl.DateTimeFormatPartTypes): string => {
-    return dateTimeParts.find((part) => part.type === partType)?.value ?? "00";
-  };
-
-  return `${findDateTimePart("year")}.${findDateTimePart("month")}.${findDateTimePart("day")} · ${findDateTimePart("hour")}:${findDateTimePart("minute")} KST`;
-};

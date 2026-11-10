@@ -4,7 +4,6 @@ import {
   formatEtfAumInUsd,
   formatEtfDate,
   formatEtfHoldingsInBtc,
-  formatEtfUpdatedAt,
   formatSignedEtfFlowInKrw,
   formatSignedEtfFlowInUsd,
 } from "../lib/formatEtf";
@@ -12,18 +11,12 @@ import {
 interface EtfSummaryHeroProps {
   summary: BitcoinEtfSummary;
   dailyFlows: BitcoinEtfDailyFlow[];
-  sourceUpdatedAt: string;
   usdExRate: number;
 }
 
 const PANEL_CLASS_NAME = "rounded-xl border border-border bg-background/55 glass-bg";
 
-export default function EtfSummaryHero({
-  summary,
-  dailyFlows,
-  sourceUpdatedAt,
-  usdExRate,
-}: EtfSummaryHeroProps) {
+export default function EtfSummaryHero({ summary, dailyFlows, usdExRate }: EtfSummaryHeroProps) {
   // region [Privates]
   const sevenTradingDayNetFlowInUsd = dailyFlows
     .slice(-7)
@@ -35,7 +28,6 @@ export default function EtfSummaryHero({
   const isLatestSourceDatePartiallyReported = summary.latestSourceDate !== summary.referenceDate;
   const isReferenceDatePartiallyReported = !summary.isFullCoverage;
   const hasExcludedFlow = summary.excludedFlowCount > 0;
-  const formattedUpdatedAt = formatEtfUpdatedAt(sourceUpdatedAt);
   const updateStatusLabel = isReferenceDatePartiallyReported ? "집계 중" : "최신 업데이트";
   const updateStatusClassName = isReferenceDatePartiallyReported
     ? "bg-bitcoin/10 text-bitcoin"
@@ -72,9 +64,6 @@ export default function EtfSummaryHero({
           </span>
           <p className="mt-2 text-xs text-muted-foreground">
             {summary.validFlowFundCount}/{summary.trackedFundCount}개 ETF 흐름 반영
-          </p>
-          <p className="mt-1 text-[11px] text-muted-foreground">
-            데이터 업데이트 · {formattedUpdatedAt}
           </p>
         </div>
 

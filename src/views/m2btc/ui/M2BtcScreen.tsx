@@ -1,5 +1,6 @@
 import { getBtcMonthlyUsdMap } from "@/entities/bitcoin/server";
 import { getUsM2MonthlyObservations } from "@/entities/money-supply/server";
+import { UpdatedAtBar } from "@/shared/ui";
 import { buildM2BtcSeries } from "../lib/buildM2BtcSeries";
 import M2BtcChart from "./M2BtcChart";
 import M2FetchFailedCard from "./M2FetchFailedCard";
@@ -24,6 +25,8 @@ export default async function M2BtcScreen() {
   const chartPoints = buildM2BtcSeries(bitcoinMonthlyUsdMap, usM2MonthlyObservations);
   const currentMonthKey = new Date().toISOString().slice(0, 7);
   const hasUsM2Data = usM2MonthlyObservations.length > 0;
+  // 원천이 수집 시각을 따로 안 줘서 이 화면을 만든 시각을 씀. ISR · 원천 캐시가 같은 4시간 주기라 거의 같음.
+  const generatedAt = new Date().toISOString();
   // endregion
 
   return (
@@ -31,6 +34,9 @@ export default async function M2BtcScreen() {
       {!hasUsM2Data && <M2FetchFailedCard hasBitcoinFallback={chartPoints.length > 0} />}
 
       <M2BtcChart chartPoints={chartPoints} currentMonthKey={currentMonthKey} />
+
+      {/* M2 조회가 실패한 화면에 초록 업데이트 표시가 붙으면 거짓이라 성공했을 때만 그림. */}
+      {hasUsM2Data && <UpdatedAtBar updatedAt={generatedAt} />}
 
       <M2GuideArticle />
 

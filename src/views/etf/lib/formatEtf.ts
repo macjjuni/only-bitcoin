@@ -100,31 +100,6 @@ export const formatEtfDate = (isoDate: string): string => {
   return isoDate.replaceAll("-", ".");
 };
 
-/** ISO 시각을 한국 시간 기준 `YYYY.MM.DD HH:mm` 형식으로 표시한다. */
-export const formatEtfUpdatedAt = (isoTimestamp: string): string => {
-  const timestamp = new Date(isoTimestamp);
-
-  if (Number.isNaN(timestamp.getTime())) {
-    return "-";
-  }
-
-  const dateTimeParts = Object.fromEntries(
-    new Intl.DateTimeFormat(KOREAN_LOCALE, {
-      timeZone: "Asia/Seoul",
-      year: "numeric",
-      month: "2-digit",
-      day: "2-digit",
-      hour: "2-digit",
-      minute: "2-digit",
-      hourCycle: "h23",
-    })
-      .formatToParts(timestamp)
-      .map(({ type, value }) => [type, value]),
-  );
-
-  return `${dateTimeParts.year}.${dateTimeParts.month}.${dateTimeParts.day} ${dateTimeParts.hour}:${dateTimeParts.minute}`;
-};
-
 /** ISO 날짜를 차트 축의 `M/D` 형태로 줄인다. */
 export const formatEtfChartDate = (isoDate: string): string => {
   const [, month, day] = isoDate.split("-");

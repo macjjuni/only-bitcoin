@@ -49,13 +49,18 @@ function getCurrentDateKST(): string {
 }
 
 /**
- * KST(Asia/Seoul) 기준 현재 시각을 "YYYY.MM.DD · HH:mm KST" 형식으로 반환한다.
+ * 시각을 KST(Asia/Seoul) 기준 "YYYY.MM.DD · HH:mm KST" 형식으로 바꾼다.
  *
  * `Date` 의 getFullYear/getHours 계열은 실행 환경의 로컬 타임존을 따르므로, 해외 사용자
- * 브라우저에서는 KST 가 아닌 시각에 "KST" 라벨이 붙는다. SNS 공유 이미지처럼 시각이
- * 그대로 박제되는 화면에서는 반드시 이 함수를 사용한다.
+ * 브라우저나 UTC 서버에서는 KST 가 아닌 시각에 "KST" 라벨이 붙는다. 그래서 타임존을 고정한다.
+ * 해석할 수 없는 값은 "—" 로 돌려준다.
  */
-function getCurrentDateTimeKST(): string {
+function formatDateTimeKST(value: Date | string | number): string {
+  const date = new Date(value);
+  if (Number.isNaN(date.getTime())) {
+    return "—";
+  }
+
   const dateTimeParts = new Intl.DateTimeFormat("en-CA", {
     timeZone: "Asia/Seoul",
     year: "numeric",
@@ -64,7 +69,7 @@ function getCurrentDateTimeKST(): string {
     hour: "2-digit",
     minute: "2-digit",
     hourCycle: "h23",
-  }).formatToParts(new Date());
+  }).formatToParts(date);
 
   const findDateTimePartValue = (partType: Intl.DateTimeFormatPartTypes): string => {
     return dateTimeParts.find((part) => part.type === partType)?.value ?? "00";
@@ -79,12 +84,22 @@ function getCurrentDateTimeKST(): string {
   return `${year}.${month}.${day} · ${hour}:${minute} KST`;
 }
 
+/**
+ * KST(Asia/Seoul) 기준 현재 시각을 "YYYY.MM.DD · HH:mm KST" 형식으로 반환한다.
+ *
+ * SNS 공유 이미지처럼 시각이 그대로 박제되는 화면에서는 반드시 이 함수를 사용한다.
+ */
+function getCurrentDateTimeKST(): string {
+  return formatDateTimeKST(new Date());
+}
+
 export {
   calcCurrentDateDifference,
   calcDate,
   convertToTimestamp,
   formatConfig,
   formatDate,
+  formatDateTimeKST,
   getCurrentDate,
   getCurrentDateKST,
   getCurrentDateTimeKST,

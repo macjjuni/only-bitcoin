@@ -1,11 +1,7 @@
 import type { HeatmapShareData, HeatmapShareTone } from "@/features/heatmap-share";
+import { formatDateTimeKST } from "@/shared/lib/date";
 import type { CoinMapTile } from "./buildCoinMapSummary";
-import {
-  formatCollectedAt,
-  formatCompactUsd,
-  formatDailyChange,
-  formatSharePercent,
-} from "./formatCoinMap";
+import { formatCompactUsd, formatDailyChange, formatSharePercent } from "./formatCoinMap";
 import { resolveTileColor } from "./resolveTileColor";
 
 interface BuildHeatmapShareDataParams {
@@ -58,6 +54,6 @@ export const buildHeatmapShareData = ({
     bitcoinChangeLabel: formatDailyChange(bitcoinTile?.dailyChangePercent ?? null),
     bitcoinChangeTone: resolveChangeTone(bitcoinTile?.dailyChangePercent ?? null),
     totalMarketCapLabel: formatCompactUsd(totalMarketCapInUsd),
-    collectedAtLabel: formatCollectedAt(fetchedAt),
+    collectedAtLabel: formatDateTimeKST(fetchedAt),
   };
 };

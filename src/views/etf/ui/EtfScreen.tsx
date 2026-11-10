@@ -1,5 +1,6 @@
 import { fetchInitialExchangeRate } from "@/entities/bitcoin/server";
 import { fetchBitcoinEtfSnapshot } from "@/entities/etf/server";
+import { UpdatedAtBar } from "@/shared/ui";
 import EtfFetchFailedCard from "./EtfFetchFailedCard";
 import EtfFlowChart from "./EtfFlowChart";
 import EtfFundListCard from "./EtfFundListCard";
@@ -27,9 +28,9 @@ export default async function EtfScreen() {
       <EtfSummaryHero
         summary={snapshot.summary}
         dailyFlows={snapshot.dailyFlows}
-        sourceUpdatedAt={snapshot.sourceUpdatedAt}
         usdExRate={exchangeRate.usdExRate}
       />
+      <UpdatedAtBar updatedAt={snapshot.sourceUpdatedAt} />
       <EtfFlowChart dailyFlows={snapshot.dailyFlows} />
       <EtfFundListCard funds={snapshot.funds} />
       <EtfGuideArticle />
