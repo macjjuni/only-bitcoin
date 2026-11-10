@@ -1,12 +1,13 @@
-import { LayoutGrid, Trophy } from "lucide-react";
 import type { ReactNode } from "react";
 import {
   BanknoteIcon,
   BlockIcon,
   BuildingIcon,
+  CrownIcon,
   DashboardIcon,
   EagleIcon,
   ExchangeIcon,
+  HeatmapIcon,
   PillIcon,
   PremiumIcon,
   TreasuryIcon,
@@ -126,14 +127,14 @@ const clientRoutes: ClientRoute[] = [
     path: "/asset-ranking",
     isNav: false,
     isFavorite: false,
-    icon: <Trophy size={24} />,
+    icon: <CrownIcon size={24} />,
   },
   {
     title: "히트맵",
     path: "/heatmap",
     isNav: false,
     isFavorite: false,
-    icon: <LayoutGrid size={24} />,
+    icon: <HeatmapIcon size={24} />,
   },
   {
     title: "출금 수수료",

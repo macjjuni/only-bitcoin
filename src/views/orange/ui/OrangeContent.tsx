@@ -1,16 +1,18 @@
 "use client";
 
 import { KIcon } from "kku-ui";
-import { Gamepad2, HandCoins, LayoutGrid, Swords, TableProperties, Trophy } from "lucide-react";
+import { Gamepad2, HandCoins, Swords, TableProperties } from "lucide-react";
 import type { ReactNode } from "react";
 import { useHasUnseenIncident } from "@/entities/incident";
 import {
   BanknoteIcon,
   BuildingIcon,
   CalendarIcon,
+  CrownIcon,
   DiscordIcon,
   EagleIcon,
   HalfCircleIcon,
+  HeatmapIcon,
   IncidentIcon,
   MinerIcon,
   NaverIcon,
@@ -69,12 +71,12 @@ const UTILITY_LINKS: OrangeLink[] = [
   },
   {
     title: "자산 랭킹",
-    icon: <Trophy size={28} strokeWidth={1.8} className={ICON_CLASS} />,
+    icon: <CrownIcon size={28} className={ICON_CLASS} />,
     href: "/asset-ranking",
   },
   {
     title: "히트맵",
-    icon: <LayoutGrid size={28} strokeWidth={1.8} className={ICON_CLASS} />,
+    icon: <HeatmapIcon size={28} className={ICON_CLASS} />,
     href: "/heatmap",
   },
   {

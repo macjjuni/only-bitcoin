@@ -6,6 +6,7 @@ export { default as BtcTextLogo } from "./BtcTextLogo";
 export { default as BuildingIcon } from "./BuildingIcon";
 export { default as CalendarIcon } from "./CalendarIcon";
 export { default as ChartColumnIcon } from "./ChartColumnIcon";
+export { default as CrownIcon } from "./CrownIcon";
 export { default as CurrencyIcon } from "./CurrencyIcon";
 // Navigation Icon
 export { default as DashboardIcon } from "./DashboardIcon";
@@ -15,6 +16,7 @@ export { default as ExchangeIcon } from "./ExchangeIcon";
 export { default as GroupIcon } from "./GroupIcon";
 export { default as HalfCircleIcon } from "./HalfCircleIcon";
 export { default as HalfIcon } from "./HalfIcon";
+export { default as HeatmapIcon } from "./HeatmapIcon";
 export { default as IncidentIcon } from "./IncidentIcon";
 export { default as IosShareIcon } from "./IosShareIcon";
 export { default as MinerIcon } from "./MinerIcon";
