@@ -8,6 +8,7 @@ const createHtmlResponse = () =>
   });
 
 afterEach(() => {
+  vi.restoreAllMocks();
   vi.unstubAllGlobals();
   vi.useRealTimers();
 });
@@ -32,6 +33,37 @@ describe("collectAssetRanking", () => {
     const fetchMock = vi.fn().mockResolvedValue(new Response("Forbidden", { status: 403 }));
     vi.stubGlobal("fetch", fetchMock);
     await expect(collectAssetRanking()).rejects.toThrow("HTTP 403");
+    expect(fetchMock).toHaveBeenCalledTimes(1);
+  });
+
+  it("8초를 넘기는 정상 응답도 중단하거나 재시도하지 않고 수집한다", async () => {
+    vi.useFakeTimers();
+    vi.spyOn(AbortSignal, "timeout").mockImplementation((delayInMilliseconds) => {
+      const controller = new AbortController();
+      setTimeout(() => {
+        controller.abort(new DOMException("Request timed out", "TimeoutError"));
+      }, delayInMilliseconds);
+      return controller.signal;
+    });
+    const fetchMock = vi.fn(
+      (_url: string, options: RequestInit) =>
+        new Promise<Response>((resolve, reject) => {
+          const responseTimer = setTimeout(() => resolve(createHtmlResponse()), 9000);
+          options.signal?.addEventListener(
+            "abort",
+            () => {
+              clearTimeout(responseTimer);
+              reject(options.signal?.reason);
+            },
+            { once: true },
+          );
+        }),
+    );
+    vi.stubGlobal("fetch", fetchMock);
+    await Promise.all([
+      expect(collectAssetRanking()).resolves.toHaveProperty("assets.length", 100),
+      vi.runAllTimersAsync(),
+    ]);
     expect(fetchMock).toHaveBeenCalledTimes(1);
   });
 

@@ -14,7 +14,8 @@ export const metadata = createPageMetadata({
 });
 
 export const runtime = "nodejs";
-export const maxDuration = 30;
+// 원본 수집 20초 × 2회와 재시도 대기·렌더링 시간을 포함한다.
+export const maxDuration = 60;
 
 export default function AssetRankingPage() {
   return (

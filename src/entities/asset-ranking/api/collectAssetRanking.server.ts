@@ -4,7 +4,8 @@ import type { AssetRankingSnapshot } from "../model/types";
 
 // region [Privates]
 const MAX_FETCH_ATTEMPTS = 2;
-const REQUEST_TIMEOUT_IN_MILLISECONDS = 8000;
+// 해외 원본의 느린 응답을 허용한다. 재시도 포함 최대 40.5초이므로 라우트는 60초를 확보한다.
+const REQUEST_TIMEOUT_IN_MILLISECONDS = 20_000;
 const RETRY_DELAY_IN_MILLISECONDS = 500;
 // endregion
 
