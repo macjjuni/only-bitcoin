@@ -19,7 +19,7 @@ const DATA_SOURCES = [
   "비트코인 시세(과거 BTC/USD): blockchain.com",
   "도미넌스(BTC.D): CoinGecko",
   "공포·탐욕 지수: alternative.me",
-  "비트코인 현물 ETF 자금 흐름: Xoomar(xoomar.com)",
+  "비트코인 현물 ETF 자금 흐름: The Commoner Bitcoin ETF Tracker by TFTC(tftc.io)",
   "미국 M2 통화량: FRED(미국 세인트루이스 연방준비은행, M2SL 시리즈)",
   "원/달러 환율: Naver(KEB)",
   "블록·트랜잭션 정보: mempool.space",

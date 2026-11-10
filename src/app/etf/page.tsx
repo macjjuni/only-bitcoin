@@ -7,9 +7,9 @@ import { EtfScreen } from "@/views/etf";
 import EtfLoading from "./loading";
 
 const ETF_PAGE_DESCRIPTION =
-  "미국 비트코인 현물 ETF의 일별 추정 순유입, BTC 보유량, 운용자산과 BTC 현물 ETF별 현황을 확인하세요.";
+  "미국 비트코인 현물 ETF의 일별 순유입과 누적 순유입, 전체 운용자산, ETF별 자금 흐름을 확인하세요.";
 const ETF_PAGE_TITLE = "미국 비트코인 현물 ETF 현황";
-const ETF_PAGE_SUBTITLE = "발행사 보유량을 기반으로 계산한 일별 추정 자금 흐름";
+const ETF_PAGE_SUBTITLE = "ETF로 들어오고 나간 자금을 거래일마다 확인하세요";
 
 export const metadata = createPageMetadata({
   path: "/etf",
@@ -17,7 +17,10 @@ export const metadata = createPageMetadata({
   description: ETF_PAGE_DESCRIPTION,
 });
 
-/** Xoomar 서버 캐시 주기와 같은 1시간 ISR. */
+/**
+ * ISR 주기(초) = 1시간.
+ * 리터럴이어야 정적 분석됨. `BITCOIN_ETF_REVALIDATE_SECONDS`( entities/etf ) 와 같은 값 유지.
+ */
 export const revalidate = 3600;
 
 export default function EtfPage() {

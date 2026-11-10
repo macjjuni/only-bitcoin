@@ -1,71 +1,40 @@
-/** Xoomar ETF 흐름 API의 개별 일별 행. */
-export interface XoomarEtfFlowRowResponse {
-  id?: number;
+/** TFTC `data.json` 의 한 거래일 행 중 쓰는 필드만. */
+export interface TftcEtfFlowDayResponse {
   date: string;
-  ticker: string;
-  issuer: string;
-  asset: string;
-  holdings: string | null;
-  flowUsd: string | null;
-  aumUsd: string | null;
+  /** 전체 순유입(USD). ETF별 값의 합이고, 내역이 없으면 원 집계값. */
+  netFlowUsd: number | null;
+  /** 전체 운용자산(USD). 2025-05 이전은 null. */
+  totalNetAssetsUsd?: number | null;
+  /** 그날 21:00 UTC 무렵의 BTC 가격. */
+  btcCloseUsd?: number | null;
+  /** 티커별 순유입(USD). 휴장일이나 내역이 없는 날은 비어 있음. */
+  perEtfUsd?: Record<string, number | null> | null;
 }
 
-/** Xoomar ETF 흐름 API 응답 봉투. */
-export interface XoomarEtfFlowResponse {
-  data: XoomarEtfFlowRowResponse[];
-  updatedAt: string;
-  source: string;
-  docs: string;
+/** TFTC `data.json` 응답 중 쓰는 필드만. */
+export interface TftcEtfFlowResponse {
+  days: TftcEtfFlowDayResponse[];
+  /** 마지막으로 반영된 거래일( YYYY-MM-DD ). */
+  updatedThrough?: string;
+  /** 파일이 마지막으로 갱신된 시각( ISO ). */
+  dateModified?: string;
 }
 
-/** 개발 서버 시작 전에 생성하는 비트코인 ETF 전체 이력 아카이브. */
-export interface BitcoinEtfFlowArchive {
-  generatedAt: string;
-  latestSourceDate: string;
-  sourceUpdatedAt: string;
-  rows: XoomarEtfFlowRowResponse[];
-}
-
-/** 한 기준일의 ETF별 화면용 데이터. */
-export interface BitcoinEtfFundSnapshot {
-  date: string;
-  ticker: string;
-  issuer: string;
-  holdingsInBtc: number | null;
-  estimatedFlowInUsd: number | null;
-  estimatedAumInUsd: number | null;
-  /** 비정상적으로 큰 추정 흐름이라 합계에서 제외됐는지 여부. */
-  isEstimatedFlowExcluded: boolean;
-}
-
-/** 차트에서 사용하는 일별 합산 흐름. */
+/** 정규화한 한 거래일. */
 export interface BitcoinEtfDailyFlow {
   date: string;
-  estimatedNetFlowInUsd: number;
-  reportedFundCount: number;
-  validFlowFundCount: number;
-  excludedFlowCount: number;
+  netFlowInUsd: number;
+  totalNetAssetsInUsd: number | null;
+  bitcoinCloseInUsd: number | null;
+  /** 티커별 순유입. 내역이 없는 날은 빈 객체. */
+  fundFlowsInUsd: Record<string, number>;
 }
 
-/** ETF 페이지 최상단 합산 지표. */
-export interface BitcoinEtfSummary {
-  referenceDate: string;
-  latestSourceDate: string;
-  trackedFundCount: number;
-  reportedFundCount: number;
-  validFlowFundCount: number;
-  excludedFlowCount: number;
-  estimatedNetFlowInUsd: number;
-  totalHoldingsInBtc: number;
-  estimatedAumInUsd: number;
-  isFullCoverage: boolean;
-}
-
-/** ETF 페이지가 서버에서 받아 가는 정규화된 전체 데이터. */
+/** ETF 화면이 서버에서 받아 가는 정규화된 전체 데이터. */
 export interface BitcoinEtfSnapshot {
-  summary: BitcoinEtfSummary;
+  /** 날짜 오름차순. 휴장일은 빠져 있음. */
   dailyFlows: BitcoinEtfDailyFlow[];
-  funds: BitcoinEtfFundSnapshot[];
+  /** 원천 파일이 갱신된 시각( ISO ). 모르면 빈 문자열. */
   sourceUpdatedAt: string;
   hasFetchFailed: boolean;
 }

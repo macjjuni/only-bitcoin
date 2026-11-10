@@ -60,7 +60,6 @@
       "!assets",
       "!**/*.css",
       "!src/shared/assets/lottie",
-      "!src/entities/etf/model/bitcoinEtfFlowArchive.json",
       "!src/entities/bitcoin/model/btcMonthlyUsdArchive.json",
       "!src/entities/apartment/model/archive.json"
     ]

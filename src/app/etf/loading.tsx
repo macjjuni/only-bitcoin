@@ -1,4 +1,5 @@
-const ETF_LOADING_CARD_HEIGHTS = [160, 360, 320, 220] as const;
+/** 요약 · 수치 칸 · 업데이트 바 · 일별 차트 · 누적 차트 · ETF별 차트 순서의 대략 높이. */
+const ETF_LOADING_CARD_HEIGHTS = [170, 430, 40, 380, 360, 460] as const;
 
 /** ETF 외부 데이터를 조회하는 동안 페이지 골격 안에 표시하는 스켈레톤. */
 export default function EtfLoading() {

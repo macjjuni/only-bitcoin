@@ -8,7 +8,7 @@ const AXIS_PADDING_RATIO = 1.08;
 
 export interface EtfFlowChartOptionPoint {
   date: string;
-  estimatedNetFlowInUsd: number;
+  netFlowInUsd: number;
 }
 
 export interface CreateEtfFlowChartOptionsParams {
@@ -73,15 +73,11 @@ const resolveDateAxisRange = (dailyFlows: EtfFlowChartOptionPoint[]): DateAxisRa
 
 const resolveFlowAxisRange = (dailyFlows: EtfFlowChartOptionPoint[]): FlowAxisRange => {
   const maximumPositiveFlowInUsd = Math.max(
-    ...dailyFlows
-      .map(({ estimatedNetFlowInUsd }) => estimatedNetFlowInUsd)
-      .filter((flowInUsd) => flowInUsd > 0),
+    ...dailyFlows.map(({ netFlowInUsd }) => netFlowInUsd).filter((flowInUsd) => flowInUsd > 0),
     0,
   );
   const maximumNegativeFlowInUsd = Math.min(
-    ...dailyFlows
-      .map(({ estimatedNetFlowInUsd }) => estimatedNetFlowInUsd)
-      .filter((flowInUsd) => flowInUsd < 0),
+    ...dailyFlows.map(({ netFlowInUsd }) => netFlowInUsd).filter((flowInUsd) => flowInUsd < 0),
     0,
   );
   const hasPositiveFlow = maximumPositiveFlowInUsd > 0;

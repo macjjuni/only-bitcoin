@@ -10,9 +10,9 @@ import {
 import { ChevronDown } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
-import type { BitcoinEtfDailyFlow } from "@/entities/etf";
 import useSettingStore from "@/shared/stores/settingStore";
 import { Card, CardContent } from "@/shared/ui";
+import type { EtfChartPoint } from "../lib/buildEtfOverview";
 import { formatSignedEtfFlowInUsd } from "../lib/formatEtf";
 import {
   createEtfFlowChartOptions,
@@ -27,7 +27,8 @@ const CHART_HEIGHT = 240;
 type EtfFlowPeriod = "7" | "30" | "90" | "all";
 
 interface EtfFlowChartProps {
-  dailyFlows: BitcoinEtfDailyFlow[];
+  /** 날짜 오름차순 일별 순유입. 휴장일은 빠져 있음. */
+  chartPoints: EtfChartPoint[];
 }
 
 interface EtfFlowPeriodOption {
@@ -42,9 +43,9 @@ interface EtfFlowPeriodMenuItemProps {
 }
 
 const PERIOD_OPTIONS: EtfFlowPeriodOption[] = [
-  { label: "7일", value: "7" },
-  { label: "30일", value: "30" },
-  { label: "90일", value: "90" },
+  { label: "7거래일", value: "7" },
+  { label: "30거래일", value: "30" },
+  { label: "90거래일", value: "90" },
   { label: "전체", value: "all" },
 ];
 
@@ -53,9 +54,9 @@ const dateToTimestamp = (isoDate: string): number => {
   return new Date(`${isoDate}T00:00:00`).getTime();
 };
 
-const resolveFlowChartPoints = (dailyFlows: BitcoinEtfDailyFlow[]): EtfFlowChartOptionPoint[] => {
-  return dailyFlows.map(({ date, estimatedNetFlowInUsd }) => {
-    return { date, estimatedNetFlowInUsd };
+const resolveFlowChartPoints = (chartPoints: EtfChartPoint[]): EtfFlowChartOptionPoint[] => {
+  return chartPoints.map(({ date, netFlowInUsd }) => {
+    return { date, netFlowInUsd };
   });
 };
 // endregion
@@ -78,32 +79,33 @@ function EtfFlowPeriodMenuItem({
   );
 }
 
-export default function EtfFlowChart({ dailyFlows }: EtfFlowChartProps) {
+/** 일별 순유입 막대 차트. 기간을 골라 볼 수 있음. */
+export default function EtfFlowChart({ chartPoints: allChartPoints }: EtfFlowChartProps) {
   // region [Hooks]
   const isDark = useSettingStore((store) => store.theme) === "dark";
-  const [selectedPeriod, setSelectedPeriod] = useState<EtfFlowPeriod>("all");
+  const [selectedPeriod, setSelectedPeriod] = useState<EtfFlowPeriod>("90");
   // endregion
 
   // region [Privates]
   const selectedTradingDayCount = selectedPeriod === "all" ? null : Number(selectedPeriod);
   const visibleDailyFlows = useMemo(() => {
     if (selectedTradingDayCount === null) {
-      return dailyFlows;
+      return allChartPoints;
     }
 
-    return dailyFlows.slice(-selectedTradingDayCount);
-  }, [dailyFlows, selectedTradingDayCount]);
+    return allChartPoints.slice(-selectedTradingDayCount);
+  }, [allChartPoints, selectedTradingDayCount]);
   const isFullHistory = selectedPeriod === "all";
   const chartPoints = useMemo(() => resolveFlowChartPoints(visibleDailyFlows), [visibleDailyFlows]);
   const chartSeries = useMemo(() => {
     return [
       {
-        name: "추정 순유입",
-        data: chartPoints.map(({ date, estimatedNetFlowInUsd }) => {
+        name: "순유입",
+        data: chartPoints.map(({ date, netFlowInUsd }) => {
           return {
             x: dateToTimestamp(date),
-            y: estimatedNetFlowInUsd,
-            fillColor: estimatedNetFlowInUsd >= 0 ? UP_FLOW_COLOR : DOWN_FLOW_COLOR,
+            y: netFlowInUsd,
+            fillColor: netFlowInUsd >= 0 ? UP_FLOW_COLOR : DOWN_FLOW_COLOR,
           };
         }),
       },
@@ -118,18 +120,18 @@ export default function EtfFlowChart({ dailyFlows }: EtfFlowChartProps) {
   }, [chartPoints, isDark, isFullHistory]);
   const periodNetFlowInUsd = useMemo(() => {
     return visibleDailyFlows.reduce((accumulatedFlowInUsd, dailyFlow) => {
-      return accumulatedFlowInUsd + dailyFlow.estimatedNetFlowInUsd;
+      return accumulatedFlowInUsd + dailyFlow.netFlowInUsd;
     }, 0);
   }, [visibleDailyFlows]);
   const periodFlowColorClassName = periodNetFlowInUsd >= 0 ? "text-up" : "text-down";
   const selectedPeriodLabel =
-    PERIOD_OPTIONS.find(({ value }) => value === selectedPeriod)?.label ?? "전체";
+    PERIOD_OPTIONS.find(({ value }) => value === selectedPeriod)?.label ?? "90거래일";
   const periodSummaryLabel = isFullHistory
     ? `전체 ${visibleDailyFlows.length}거래일 합계`
     : `최근 ${visibleDailyFlows.length}거래일 합계`;
   const chartAriaLabel = isFullHistory
-    ? `전체 ${visibleDailyFlows.length}거래일 비트코인 ETF 추정 순유입 막대 차트`
-    : `최근 ${visibleDailyFlows.length}거래일 비트코인 ETF 추정 순유입 막대 차트`;
+    ? `전체 ${visibleDailyFlows.length}거래일 비트코인 ETF 순유입 막대 차트`
+    : `최근 ${visibleDailyFlows.length}거래일 비트코인 ETF 순유입 막대 차트`;
   // endregion
 
   // region [Events]
@@ -158,7 +160,7 @@ export default function EtfFlowChart({ dailyFlows }: EtfFlowChartProps) {
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
-            <h2 className="text-base font-bold">BTC 현물 ETF 순유입</h2>
+            <h2 className="text-base font-bold">일별 순유입</h2>
           </div>
           <KDropdownMenu>
             <KDropdownMenuTrigger
@@ -217,8 +219,8 @@ export default function EtfFlowChart({ dailyFlows }: EtfFlowChartProps) {
         </div>
 
         <p className="text-sm leading-relaxed text-muted-foreground">
-          모든 ETF가 집계된 거래일만 표시합니다. 일부 ETF만 집계된 최근 날짜는 제외하며, 검증 제외
-          행의 순유입액은 합계에 포함하지 않습니다.
+          미국 휴장일은 빼고 거래일만 표시합니다. 순유입은 새로 만든 지분에서 환매한 지분을 뺀
+          금액이며, 음수는 자금이 빠져나간 날입니다.
         </p>
       </CardContent>
     </Card>

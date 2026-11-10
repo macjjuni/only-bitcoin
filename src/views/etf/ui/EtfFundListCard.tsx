@@ -8,127 +8,148 @@ import {
   KDropdownMenuTrigger,
 } from "kku-ui";
 import { ChevronDown } from "lucide-react";
-import dynamic from "next/dynamic";
 import { useMemo, useState } from "react";
-import type { BitcoinEtfFundSnapshot } from "@/entities/etf";
-import useSettingStore from "@/shared/stores/settingStore";
 import { Card, CardContent } from "@/shared/ui";
-import {
-  createEtfFundChartOptions,
-  DOWN_FLOW_COLOR,
-  type EtfFundMetric,
-  EXCLUDED_FLOW_COLOR,
-  resolveEtfFundBarColor,
-  resolveEtfFundMetricValue,
-  UP_FLOW_COLOR,
-} from "./createEtfFundChartOptions";
+import type { EtfFundFlow } from "../lib/buildEtfOverview";
+import { formatSignedEtfFlowInUsd } from "../lib/formatEtf";
 
-const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });
-const CHART_HEIGHT = 300;
+/** ETF별 순유입을 볼 기간. */
+type EtfFundPeriod = "latest" | "sevenDay" | "thirtyDay" | "cumulative";
 
 interface EtfFundListCardProps {
-  funds: BitcoinEtfFundSnapshot[];
+  funds: EtfFundFlow[];
 }
 
-interface EtfFundMetricOption {
+interface EtfFundPeriodOption {
   label: string;
-  value: EtfFundMetric;
+  value: EtfFundPeriod;
 }
 
-interface EtfFundMetricMenuItemProps {
+interface EtfFundPeriodMenuItemProps {
   isSelected: boolean;
-  option: EtfFundMetricOption;
-  onChangeSelectedMetric: (nextMetric: EtfFundMetric) => void;
+  option: EtfFundPeriodOption;
+  onChangeSelectedPeriod: (nextPeriod: EtfFundPeriod) => void;
 }
 
-const METRIC_OPTIONS: EtfFundMetricOption[] = [
-  { label: "운용자산", value: "aum" },
-  { label: "BTC 보유량", value: "holdings" },
-  { label: "일일 순유입", value: "flow" },
+interface EtfFundBarRow {
+  ticker: string;
+  flowInUsd: number;
+  /** 막대 영역 안에서의 위치와 길이(%). */
+  barLeftPercent: number;
+  barWidthPercent: number;
+}
+
+const PERIOD_OPTIONS: EtfFundPeriodOption[] = [
+  { label: "최근 거래일", value: "latest" },
+  { label: "최근 7거래일", value: "sevenDay" },
+  { label: "최근 30거래일", value: "thirtyDay" },
+  { label: "상장 후 누적", value: "cumulative" },
 ];
 
+const PERIOD_VALUE_KEY: Record<EtfFundPeriod, keyof Omit<EtfFundFlow, "ticker">> = {
+  latest: "latestInUsd",
+  sevenDay: "sevenDayInUsd",
+  thirtyDay: "thirtyDayInUsd",
+  cumulative: "cumulativeInUsd",
+};
+
 // region [Privates]
-const resolveFundChartData = (funds: BitcoinEtfFundSnapshot[], selectedMetric: EtfFundMetric) => {
-  return funds.map((fund) => {
-    const metricValue = resolveEtfFundMetricValue(fund, selectedMetric);
-    const barColor = resolveEtfFundBarColor(fund, selectedMetric);
+const resolveFlowColorClassName = (flowInUsd: number): string => {
+  if (flowInUsd === 0) {
+    return "text-muted-foreground";
+  }
+  return flowInUsd > 0 ? "text-up" : "text-down";
+};
+
+/**
+ * 순유입이 큰 순서로 줄을 만들고, 0 을 기준으로 좌우로 뻗는 막대의 위치를 계산함.
+ * 유출만 있으면 기준선이 오른쪽 끝, 유입만 있으면 왼쪽 끝에 옴.
+ *
+ * 차트 라이브러리를 안 쓰는 이유: 가로 막대에 금액 라벨을 붙이면 음수 막대에서 라벨이
+ * 막대 안으로 겹쳐 들어가는데 그걸 막대별로 조정할 방법이 없었음.
+ */
+const buildBarRows = (funds: EtfFundFlow[], selectedPeriod: EtfFundPeriod): EtfFundBarRow[] => {
+  const valueKey = PERIOD_VALUE_KEY[selectedPeriod];
+  const sortedFunds = [...funds].sort((firstFund, secondFund) => {
+    return secondFund[valueKey] - firstFund[valueKey];
+  });
+  const flowValues = sortedFunds.map((fund) => fund[valueKey]);
+  const maximumFlow = Math.max(...flowValues, 0);
+  const minimumFlow = Math.min(...flowValues, 0);
+  const flowRange = maximumFlow - minimumFlow;
+  const zeroPercent = flowRange > 0 ? (-minimumFlow / flowRange) * 100 : 0;
+
+  return sortedFunds.map((fund) => {
+    const flowInUsd = fund[valueKey];
+    const barWidthPercent = flowRange > 0 ? (Math.abs(flowInUsd) / flowRange) * 100 : 0;
 
     return {
-      x: fund.ticker,
-      y: metricValue,
-      fillColor: barColor,
+      ticker: fund.ticker,
+      flowInUsd,
+      barLeftPercent: flowInUsd >= 0 ? zeroPercent : zeroPercent - barWidthPercent,
+      barWidthPercent,
     };
   });
 };
 // endregion
 
-function EtfFundMetricMenuItem({
+function EtfFundPeriodMenuItem({
   isSelected,
   option,
-  onChangeSelectedMetric,
-}: EtfFundMetricMenuItemProps) {
+  onChangeSelectedPeriod,
+}: EtfFundPeriodMenuItemProps) {
   // region [Events]
-  const onCheckedChangeMetricOption = (): void => {
-    onChangeSelectedMetric(option.value);
+  const onCheckedChangePeriodOption = (): void => {
+    onChangeSelectedPeriod(option.value);
   };
   // endregion
 
   return (
-    <KDropdownMenuCheckboxItem checked={isSelected} onCheckedChange={onCheckedChangeMetricOption}>
+    <KDropdownMenuCheckboxItem checked={isSelected} onCheckedChange={onCheckedChangePeriodOption}>
       {option.label}
     </KDropdownMenuCheckboxItem>
   );
 }
 
+/** ETF별 순유입을 기간을 바꿔 가며 비교함. */
 export default function EtfFundListCard({ funds }: EtfFundListCardProps) {
   // region [Hooks]
-  const isDark = useSettingStore((store) => store.theme) === "dark";
-  const [selectedMetric, setSelectedMetric] = useState<EtfFundMetric>("aum");
+  const [selectedPeriod, setSelectedPeriod] = useState<EtfFundPeriod>("latest");
+  const barRows = useMemo(() => buildBarRows(funds, selectedPeriod), [funds, selectedPeriod]);
   // endregion
 
   // region [Privates]
-  const selectedMetricLabel =
-    METRIC_OPTIONS.find(({ value }) => value === selectedMetric)?.label ?? "운용자산";
-  const chartSeries = useMemo(() => {
-    return [{ name: selectedMetricLabel, data: resolveFundChartData(funds, selectedMetric) }];
-  }, [funds, selectedMetric, selectedMetricLabel]);
-  const chartOptions = useMemo(() => {
-    return createEtfFundChartOptions({ funds, isDark, selectedMetric });
-  }, [funds, isDark, selectedMetric]);
-  const isFlowMetricSelected = selectedMetric === "flow";
+  const selectedPeriodLabel =
+    PERIOD_OPTIONS.find(({ value }) => value === selectedPeriod)?.label ?? "최근 거래일";
   // endregion
 
   // region [Events]
-  const onChangeSelectedMetric = (nextMetric: EtfFundMetric): void => {
-    setSelectedMetric(nextMetric);
+  const onChangeSelectedPeriod = (nextPeriod: EtfFundPeriod): void => {
+    setSelectedPeriod(nextPeriod);
   };
   // endregion
 
   // region [Templates]
-  const MetricMenuItemTemplates = useMemo(() => {
-    return METRIC_OPTIONS.map((option) => {
-      return (
-        <EtfFundMetricMenuItem
-          key={option.value}
-          isSelected={selectedMetric === option.value}
-          option={option}
-          onChangeSelectedMetric={onChangeSelectedMetric}
-        />
-      );
-    });
-  }, [selectedMetric]);
+  const PeriodMenuItemTemplates = PERIOD_OPTIONS.map((option) => {
+    return (
+      <EtfFundPeriodMenuItem
+        key={option.value}
+        isSelected={selectedPeriod === option.value}
+        option={option}
+        onChangeSelectedPeriod={onChangeSelectedPeriod}
+      />
+    );
+  });
   // endregion
 
   return (
     <Card className="font-pretendard">
       <CardContent className="flex flex-col gap-3 p-4">
         <div className="flex items-center justify-between gap-3">
-          <div>
-            <h2 className="text-base font-bold">BTC 현물 ETF별 현황</h2>
-          </div>
+          <h2 className="text-base font-bold">ETF별 순유입</h2>
           <KDropdownMenu>
             <KDropdownMenuTrigger
-              aria-label="ETF 현황 지표 선택"
+              aria-label="ETF별 순유입 기간 선택"
               className={[
                 "flex items-center gap-0.5 rounded-full px-2.5 py-1.5 text-xs font-bold tracking-wide transition-all duration-200",
                 "border border-gray-200 dark:border-gray-700",
@@ -138,50 +159,44 @@ export default function EtfFundListCard({ funds }: EtfFundListCardProps) {
               ].join(" ")}
             >
               <ChevronDown size={16} />
-              {selectedMetricLabel}
+              {selectedPeriodLabel}
             </KDropdownMenuTrigger>
 
             <KDropdownMenuContent align="end" side="bottom" sideOffset={8} className="min-w-0">
-              <KDropdownMenuLabel>지표 선택</KDropdownMenuLabel>
-              {MetricMenuItemTemplates}
+              <KDropdownMenuLabel>기간 선택</KDropdownMenuLabel>
+              {PeriodMenuItemTemplates}
             </KDropdownMenuContent>
           </KDropdownMenu>
         </div>
 
-        <div className="-mx-2 select-none overflow-hidden" style={{ height: CHART_HEIGHT }}>
-          <div role="img" aria-label={`ETF별 ${selectedMetricLabel} 비교 차트`}>
-            <ReactApexChart
-              type="bar"
-              series={chartSeries}
-              options={chartOptions}
-              height={CHART_HEIGHT}
-              width="100%"
-            />
-          </div>
-        </div>
+        <ul aria-label={`${selectedPeriodLabel} ETF별 순유입`} className="flex flex-col gap-2">
+          {barRows.map((barRow) => (
+            <li
+              key={barRow.ticker}
+              className="grid grid-cols-[44px_minmax(0,1fr)_76px] items-center gap-2"
+            >
+              <span className="font-number text-xs font-bold">{barRow.ticker}</span>
+              <span aria-hidden="true" className="relative h-3 rounded-sm bg-foreground/5">
+                <i
+                  className={`absolute inset-y-0 rounded-sm ${barRow.flowInUsd >= 0 ? "bg-up" : "bg-down"}`}
+                  style={{
+                    left: `${barRow.barLeftPercent}%`,
+                    width: `${barRow.barWidthPercent}%`,
+                  }}
+                />
+              </span>
+              <span
+                className={`font-number text-right text-xs font-bold ${resolveFlowColorClassName(barRow.flowInUsd)}`}
+              >
+                {formatSignedEtfFlowInUsd(barRow.flowInUsd)}
+              </span>
+            </li>
+          ))}
+        </ul>
 
-        {isFlowMetricSelected && (
-          <div className="flex flex-wrap gap-x-3 gap-y-1 text-[11px] text-muted-foreground">
-            <span className="inline-flex items-center gap-1">
-              <i className="h-1.5 w-1.5 rounded-full" style={{ backgroundColor: UP_FLOW_COLOR }} />
-              유입
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <i
-                className="h-1.5 w-1.5 rounded-full"
-                style={{ backgroundColor: DOWN_FLOW_COLOR }}
-              />
-              유출
-            </span>
-            <span className="inline-flex items-center gap-1">
-              <i
-                className="h-1.5 w-1.5 rounded-full"
-                style={{ backgroundColor: EXCLUDED_FLOW_COLOR }}
-              />
-              검증 제외
-            </span>
-          </div>
-        )}
+        <p className="text-xs leading-relaxed text-muted-foreground">
+          막대 길이는 고른 기간 안에서의 상대 크기입니다. 초록은 유입, 빨강은 유출입니다.
+        </p>
       </CardContent>
     </Card>
   );

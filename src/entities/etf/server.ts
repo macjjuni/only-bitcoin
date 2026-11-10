@@ -1,4 +1,4 @@
 export {
+  BITCOIN_ETF_REVALIDATE_SECONDS,
   fetchBitcoinEtfSnapshot,
-  XOOMAR_ETF_REVALIDATE_SECONDS,
-} from "./api/xoomarEtf.server";
+} from "./api/tftcEtf.server";

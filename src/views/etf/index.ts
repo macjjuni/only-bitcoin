@@ -1,3 +1,4 @@
+export { default as EtfCumulativeChart } from "./ui/EtfCumulativeChart";
 export { default as EtfFetchFailedCard } from "./ui/EtfFetchFailedCard";
 export { default as EtfFlowChart } from "./ui/EtfFlowChart";
 export { default as EtfFundListCard } from "./ui/EtfFundListCard";
