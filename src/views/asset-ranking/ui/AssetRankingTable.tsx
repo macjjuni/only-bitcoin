@@ -2,7 +2,7 @@
 
 import { Search } from "lucide-react";
 import { type ChangeEvent, useMemo, useState } from "react";
-import type { RankedAsset } from "@/entities/asset-ranking";
+import { isBitcoinAsset, type RankedAsset } from "@/entities/asset-ranking";
 import { Card, CardContent, InputGroup, InputGroupAddon, InputGroupInput } from "@/shared/ui";
 import AssetRankingRow from "./AssetRankingRow";
 
@@ -16,7 +16,7 @@ export default function AssetRankingTable({ assets }: AssetRankingTableProps) {
   const filteredAssets = useMemo(() => {
     const normalizedKeyword = searchKeyword.trim().toLowerCase();
     return assets.filter((asset) => {
-      const searchableName = asset.ticker === "BTC" ? `${asset.name} 비트코인` : asset.name;
+      const searchableName = isBitcoinAsset(asset) ? `${asset.name} 비트코인` : asset.name;
       return `${searchableName} ${asset.ticker}`.toLowerCase().includes(normalizedKeyword);
     });
   }, [assets, searchKeyword]);

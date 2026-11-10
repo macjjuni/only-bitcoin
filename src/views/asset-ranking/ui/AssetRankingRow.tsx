@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import type { RankedAsset } from "@/entities/asset-ranking";
+import { isBitcoinAsset, type RankedAsset } from "@/entities/asset-ranking";
 import { formatAssetPrice, formatDailyChange, formatMarketCap } from "../lib/formatAssetRanking";
 
 interface AssetRankingRowProps {
@@ -14,7 +14,7 @@ export default function AssetRankingRow({ asset }: AssetRankingRowProps) {
   // endregion
 
   // region [Privates]
-  const isBitcoin = asset.ticker === "BTC" && asset.name === "Bitcoin";
+  const isBitcoin = isBitcoinAsset(asset);
   const shouldShowLogo = Boolean(asset.logoUrl) && !hasLogoFailed;
   const changeColorClassName =
     asset.dailyChangePercent === null || asset.dailyChangePercent === 0

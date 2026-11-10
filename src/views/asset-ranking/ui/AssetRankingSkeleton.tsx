@@ -1,6 +1,6 @@
 const SKELETON_ROWS = ["asset-1", "asset-2", "asset-3", "asset-4", "asset-5", "asset-6"];
 
-export default function AssetRankingLoading() {
+export default function AssetRankingSkeleton() {
   return (
     <div
       role="status"

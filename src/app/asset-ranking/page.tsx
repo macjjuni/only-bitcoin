@@ -3,8 +3,7 @@ import { ASSET_RANKING_SOURCE_URL } from "@/entities/asset-ranking";
 import { createPageMetadata } from "@/shared/config/metadata";
 import { PageTitle } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
-import { AssetRankingScreen } from "@/views/asset-ranking";
-import AssetRankingLoading from "./loading";
+import { AssetRankingScreen, AssetRankingSkeleton } from "@/views/asset-ranking";
 
 export const metadata = createPageMetadata({
   path: "/asset-ranking",
@@ -25,7 +24,7 @@ export default function AssetRankingPage() {
         title="전 세계 자산 랭킹"
         description="기업·귀금속·암호화폐·ETF 시가총액 상위 100개"
       />
-      <Suspense fallback={<AssetRankingLoading />}>
+      <Suspense fallback={<AssetRankingSkeleton />}>
         <AssetRankingScreen />
       </Suspense>
       <footer className="space-y-2 px-2 py-4 text-[11px] leading-relaxed text-muted-foreground">

@@ -1,4 +1,4 @@
-import type { AssetRankingSnapshot } from "@/entities/asset-ranking";
+import { type AssetRankingSnapshot, isBitcoinAsset } from "@/entities/asset-ranking";
 import { formatCollectedAt } from "../lib/formatAssetRanking";
 import BitcoinRankCard from "./BitcoinRankCard";
 
@@ -10,9 +10,7 @@ const PANEL_CLASS_NAME = "rounded-xl border border-border bg-background/55 glass
 
 export default function AssetRankingSummary({ snapshot }: AssetRankingSummaryProps) {
   // region [Privates]
-  const bitcoin = snapshot.assets.find(
-    (asset) => asset.ticker === "BTC" && asset.name === "Bitcoin",
-  );
+  const bitcoin = snapshot.assets.find(isBitcoinAsset);
   const hasDelayedCollection = Date.now() - Date.parse(snapshot.fetchedAt) > 2 * 60 * 60 * 1000;
   const precedingAsset = snapshot.assets.find((asset) => asset.rank === (bitcoin?.rank ?? 0) - 1);
   const formattedCollectedAt = formatCollectedAt(snapshot.fetchedAt);

@@ -1,6 +1,7 @@
 import { load } from "cheerio";
 import { ASSET_RANKING_COUNT, ASSET_RANKING_SOURCE_URL } from "../model/constants";
 import type { RankedAsset } from "../model/types";
+import { isBitcoinAsset } from "./isBitcoinAsset";
 
 // region [Privates]
 const parseRequiredNumber = (rawValue: string | undefined): number => {
@@ -94,7 +95,7 @@ export const parseAssetRanking = (html: string): RankedAsset[] => {
     };
   });
 
-  if (!assets.some((asset) => asset.ticker === "BTC" && asset.name === "Bitcoin")) {
+  if (!assets.some(isBitcoinAsset)) {
     throw new Error("자산 랭킹에서 비트코인을 찾지 못했습니다.");
   }
   return assets;
