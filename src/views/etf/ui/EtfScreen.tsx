@@ -2,9 +2,8 @@ import { fetchInitialExchangeRate } from "@/entities/bitcoin/server";
 import { fetchBitcoinEtfSnapshot } from "@/entities/etf/server";
 import { UpdatedAtBar } from "@/shared/ui";
 import { buildEtfOverview } from "../lib/buildEtfOverview";
-import EtfCumulativeChart from "./EtfCumulativeChart";
+import EtfChartCard from "./EtfChartCard";
 import EtfFetchFailedCard from "./EtfFetchFailedCard";
-import EtfFlowChart from "./EtfFlowChart";
 import EtfFundListCard from "./EtfFundListCard";
 import EtfGuideArticle from "./EtfGuideArticle";
 import EtfSummaryHero from "./EtfSummaryHero";
@@ -55,8 +54,7 @@ export default async function EtfScreen() {
         updatedAt={snapshot.sourceUpdatedAt}
         isDelayed={isLatestSessionStale(overview.latestDate)}
       />
-      <EtfFlowChart chartPoints={overview.chartPoints} />
-      <EtfCumulativeChart chartPoints={overview.chartPoints} />
+      <EtfChartCard chartPoints={overview.chartPoints} />
       <EtfFundListCard funds={overview.fundFlows} />
       <EtfGuideArticle />
     </>

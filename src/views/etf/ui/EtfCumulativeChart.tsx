@@ -4,7 +4,6 @@ import dynamic from "next/dynamic";
 import { useMemo } from "react";
 import { BITCOIN_COLOR } from "@/shared/config/color";
 import useSettingStore from "@/shared/stores/settingStore";
-import { Card, CardContent } from "@/shared/ui";
 import type { EtfChartPoint } from "../lib/buildEtfOverview";
 import { formatEtfDate, formatSignedEtfFlowInUsd } from "../lib/formatEtf";
 import {
@@ -27,7 +26,10 @@ const dateToTimestamp = (isoDate: string): number => {
 };
 // endregion
 
-/** 상장 이후 누적 순유입과 BTC 가격을 한 차트에 겹쳐 봄. */
+/**
+ * 상장 이후 누적 순유입과 BTC 가격을 한 차트에 겹쳐 봄.
+ * 카드는 바깥( `EtfChartCard` )이 그리고 여기선 안쪽 내용만 그림.
+ */
 export default function EtfCumulativeChart({ chartPoints }: EtfCumulativeChartProps) {
   // region [Hooks]
   const isDark = useSettingStore((store) => store.theme) === "dark";
@@ -64,54 +66,47 @@ export default function EtfCumulativeChart({ chartPoints }: EtfCumulativeChartPr
   const firstPoint = chartPoints.at(0);
   const lastPoint = chartPoints.at(-1);
   const cumulativeFlowInUsd = chartPoints.reduce((sum, point) => sum + point.netFlowInUsd, 0);
-  const cumulativeFlowColor = resolveCumulativeFlowColor(isDark);
+  const cumulativeFlowColorClassName = cumulativeFlowInUsd >= 0 ? "text-up" : "text-down";
   const periodLabel =
     firstPoint && lastPoint
-      ? `${formatEtfDate(firstPoint.date)} ~ ${formatEtfDate(lastPoint.date)}`
-      : "";
-  const cumulativeLegendStyle = { backgroundColor: cumulativeFlowColor };
+      ? `${formatEtfDate(firstPoint.date)} ~ ${formatEtfDate(lastPoint.date)} 누적`
+      : "상장 이후 누적";
+  const cumulativeLegendStyle = { backgroundColor: resolveCumulativeFlowColor(isDark) };
   const bitcoinLegendStyle = { backgroundColor: BITCOIN_COLOR };
   const chartWrapperStyle = { height: CHART_HEIGHT };
   // endregion
 
   return (
-    <Card className="font-pretendard">
-      <CardContent className="flex flex-col gap-3 p-4">
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <h2 className="text-base font-bold">누적 순유입과 BTC 가격</h2>
-            {periodLabel && (
-              <p className="mt-0.5 font-number text-[11px] text-muted-foreground">{periodLabel}</p>
-            )}
-          </div>
-          <strong className="font-number shrink-0 text-base font-black">
-            {formatSignedEtfFlowInUsd(cumulativeFlowInUsd)}
-          </strong>
-        </div>
+    <div className="flex flex-col gap-3">
+      <div>
+        <p className="font-number text-xs text-muted-foreground">{periodLabel}</p>
+        <strong className={`font-number text-xl font-black ${cumulativeFlowColorClassName}`}>
+          {formatSignedEtfFlowInUsd(cumulativeFlowInUsd)}
+        </strong>
+      </div>
 
-        <div className="-mx-2 select-none overflow-hidden" style={chartWrapperStyle}>
-          <div role="img" aria-label="상장 이후 비트코인 ETF 누적 순유입과 비트코인 가격 추이 차트">
-            <ReactApexChart
-              type="line"
-              series={chartSeries}
-              options={chartOptions}
-              height={CHART_HEIGHT}
-              width="100%"
-            />
-          </div>
+      <div className="-mx-2 select-none overflow-hidden" style={chartWrapperStyle}>
+        <div role="img" aria-label="상장 이후 비트코인 ETF 누적 순유입과 비트코인 가격 추이 차트">
+          <ReactApexChart
+            type="line"
+            series={chartSeries}
+            options={chartOptions}
+            height={CHART_HEIGHT}
+            width="100%"
+          />
         </div>
+      </div>
 
-        <div className="flex gap-3 text-xs text-muted-foreground">
-          <span className="inline-flex items-center gap-1">
-            <i className="h-1.5 w-1.5 rounded-full" style={cumulativeLegendStyle} />
-            누적 순유입 (왼쪽 축)
-          </span>
-          <span className="inline-flex items-center gap-1">
-            <i className="h-1.5 w-1.5 rounded-full" style={bitcoinLegendStyle} />
-            BTC 가격 (오른쪽 축)
-          </span>
-        </div>
-      </CardContent>
-    </Card>
+      <div className="flex flex-wrap gap-x-3 gap-y-1 text-xs text-muted-foreground">
+        <span className="inline-flex items-center gap-1">
+          <i className="h-1.5 w-1.5 rounded-full" style={cumulativeLegendStyle} />
+          누적 순유입 (왼쪽 축)
+        </span>
+        <span className="inline-flex items-center gap-1">
+          <i className="h-1.5 w-1.5 rounded-full" style={bitcoinLegendStyle} />
+          BTC 가격 (오른쪽 축)
+        </span>
+      </div>
+    </div>
   );
 }
