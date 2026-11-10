@@ -48,16 +48,18 @@ interface ExternalLinkSectionData {
 // region [Constants]
 const ICON_CLASS = "text-orange-500 dark:text-orange-400";
 
+/** 화면에 4칸씩 놓임. 한 줄이 한 주제라 순서를 바꿀 때는 줄 단위로 봄. */
 const UTILITY_LINKS: OrangeLink[] = [
-  {
-    title: "BTC 스페이스",
-    icon: <Gamepad2 size={28} strokeWidth={1.8} className={ICON_CLASS} />,
-    href: "/space",
-  },
+  // 1줄: 기관 · 거시 데이터
   {
     title: "M2·비트코인",
     icon: <BanknoteIcon size={28} className={ICON_CLASS} />,
     href: "/m2btc",
+  },
+  {
+    title: "자산 랭킹",
+    icon: <CrownIcon size={28} className={ICON_CLASS} />,
+    href: "/asset-ranking",
   },
   {
     title: "현물 ETF 현황",
@@ -69,11 +71,7 @@ const UTILITY_LINKS: OrangeLink[] = [
     icon: <TreasuryIcon size={28} className={ICON_CLASS} />,
     href: "/treasury",
   },
-  {
-    title: "자산 랭킹",
-    icon: <CrownIcon size={28} className={ICON_CLASS} />,
-    href: "/asset-ranking",
-  },
+  // 2줄: 시세 · 비교
   {
     title: "히트맵",
     icon: <HeatmapIcon size={28} className={ICON_CLASS} />,
@@ -85,20 +83,20 @@ const UTILITY_LINKS: OrangeLink[] = [
     href: "/cagr",
   },
   {
-    title: "밈 저장소",
-    icon: <ShootingStarIcon size={30} className={ICON_CLASS} />,
-    href: "/meme",
-  },
-  {
     title: "아파트 몇 BTC?",
     icon: <BuildingIcon size={28} className={ICON_CLASS} />,
     href: "/btc2apartment",
   },
   {
-    title: "거래소 사고 연표",
-    icon: <IncidentIcon size={30} className={ICON_CLASS} />,
-    href: "/incidents",
-    badge: "unseenIncident",
+    title: "반감기 카운트",
+    icon: <HalfCircleIcon size={24} />,
+    href: "/blocks/countdown",
+  },
+  // 3줄: 실용 도구
+  {
+    title: "DCA 계산기",
+    icon: <MinerIcon size={32} />,
+    href: "/dca",
   },
   {
     title: "출금 수수료",
@@ -112,24 +110,31 @@ const UTILITY_LINKS: OrangeLink[] = [
     href: "/withdraw-fee",
   },
   {
+    title: "BIP39",
+    icon: <TableProperties size={26} strokeWidth={1.8} />,
+    href: "/bip39",
+  },
+  {
+    title: "거래소 사고 연표",
+    icon: <IncidentIcon size={30} className={ICON_CLASS} />,
+    href: "/incidents",
+    badge: "unseenIncident",
+  },
+  // 4줄: 재미
+  {
+    title: "BTC 스페이스",
+    icon: <Gamepad2 size={28} strokeWidth={1.8} className={ICON_CLASS} />,
+    href: "/space",
+  },
+  {
     title: "BTC War",
     icon: <Swords size={28} strokeWidth={1.8} className={ICON_CLASS} />,
     href: "/war",
   },
   {
-    title: "반감기 카운트",
-    icon: <HalfCircleIcon size={24} />,
-    href: "/blocks/countdown",
-  },
-  {
-    title: "DCA 계산기",
-    icon: <MinerIcon size={32} />,
-    href: "/dca",
-  },
-  {
-    title: "BIP39",
-    icon: <TableProperties size={26} strokeWidth={1.8} />,
-    href: "/bip39",
+    title: "밈 저장소",
+    icon: <ShootingStarIcon size={30} className={ICON_CLASS} />,
+    href: "/meme",
   },
 ];
 
