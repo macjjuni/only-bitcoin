@@ -78,6 +78,14 @@ useEffect(() => {
 // endregion
 ```
 
+### 3.4 Card Surface
+카드 모양은 한 벌만 쓴다. 화면 코드에서 테두리 · 배경 · 흐림 클래스를 직접 조합하지 않는다.
+
+- 일반 카드는 `@/shared/ui` 의 `Card` 를 쓴다. 화면당 하나인 핵심 수치 카드는 `<Card variant="accent">`.
+- `div` · `section` 등 다른 요소에 같은 표면이 필요하면 `card-surface` 클래스를 붙인다. ( 강조는 `card-surface-accent` 추가 )
+- 표면 정의는 `src/app/globals.css` 의 `.card-surface` 한 곳이다. 모양을 바꿀 때는 거기만 고친다.
+- 카드 안쪽 여백은 `p-4`, 카드 제목은 `text-base font-bold`, 카드 사이 간격은 `gap-2.5` 를 기본으로 한다.
+
 ## 4. Git Commit Rules
 - **Co-Authored-By 금지:** 커밋 메시지에 `Co-Authored-By` 라인을 절대 포함하지 않는다.
 - **아카이브 데이터 커밋:** `pnpm dev` 실행 시 갱신되는 아카이브 JSON 파일은 `chore: 아카이브 데이터 업데이트(내용)` 형식으로 커밋한다.

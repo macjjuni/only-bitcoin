@@ -28,7 +28,8 @@ const SUPPLY_GAUGE_SEGMENT_INDEXES = Array.from(
 );
 
 /** 게이지 · 지표 박스의 공통 틀. 틴트 위에 얹히므로 배경은 반투명으로 씀. */
-const PANEL_CLASS_NAME = "rounded-xl border border-border bg-background/55 glass-bg";
+/** 요약 수치 칸. 공용 카드 표면을 그대로 씀. */
+const PANEL_CLASS_NAME = "card-surface";
 
 /**
  * 상장기업 전체 합산 지표. 페이지 최상단을 통째로 쓰는 히어로임.

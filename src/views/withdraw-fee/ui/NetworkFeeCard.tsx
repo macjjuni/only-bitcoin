@@ -14,7 +14,7 @@ export default function NetworkFeeCard({ exchanges, row }: NetworkFeeCardProps) 
   const supportedExchangeLabel = `${supportedExchangeCount}/${exchanges.length} 지원`;
 
   return (
-    <section className="overflow-hidden rounded-xl border border-border bg-background/60">
+    <section className="card-surface overflow-hidden">
       <header className="flex items-center justify-between gap-3 border-b border-border bg-muted/25 px-3 py-2.5">
         <div className="flex min-w-0 items-center gap-2">
           <span

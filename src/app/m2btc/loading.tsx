@@ -6,7 +6,7 @@ export default function M2BtcLoading() {
     <div
       aria-busy="true"
       aria-label="미국 M2와 비트코인 데이터 불러오는 중"
-      className="flex w-full animate-pulse flex-col gap-3 rounded-xl border-[0.75px] border-neutral-300 p-4 font-pretendard dark:border-neutral-600"
+      className="flex w-full animate-pulse flex-col gap-3 rounded-xl border border-border p-4 font-pretendard"
       role="status"
     >
       {/* 타이틀 + 기간 라벨 */}

@@ -241,7 +241,7 @@ export default function M2BtcChart({ chartPoints, currentMonthKey }: M2BtcChartP
     <Card className="font-pretendard">
       <CardContent className="flex flex-col gap-3 p-4">
         <div>
-          <h2 className="text-lg font-bold">월별 M2와 비트코인 가격</h2>
+          <h2 className="text-base font-bold">월별 M2와 비트코인 가격</h2>
           {chartPeriodLabel && (
             <p className="mt-0.5 text-[11px] text-muted-foreground">{chartPeriodLabel}</p>
           )}

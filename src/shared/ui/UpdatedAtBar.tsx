@@ -29,7 +29,7 @@ export default function UpdatedAtBar({
 
   return (
     <p
-      className={`glass-bg flex flex-wrap items-center justify-between gap-2 rounded-xl border border-border bg-background/55 px-3.5 py-2.5 font-pretendard text-[11px] font-bold text-muted-foreground ${className ?? ""}`}
+      className={`card-surface flex flex-wrap items-center justify-between gap-2 px-3.5 py-2.5 font-pretendard text-[11px] font-bold text-muted-foreground ${className ?? ""}`}
     >
       <span className="flex items-center gap-1.5">
         <span className={`size-1.5 shrink-0 rounded-full ${statusDotClassName}`} />

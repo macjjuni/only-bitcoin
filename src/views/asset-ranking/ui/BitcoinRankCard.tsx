@@ -39,7 +39,7 @@ export default function BitcoinRankCard({
   return (
     <section
       aria-label="비트코인 자산 순위"
-      className="relative isolate overflow-hidden rounded-2xl border border-bitcoin/25 bg-background"
+      className="card-surface card-surface-accent relative isolate overflow-hidden"
     >
       <div
         aria-hidden="true"

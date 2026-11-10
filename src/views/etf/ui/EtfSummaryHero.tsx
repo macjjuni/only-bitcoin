@@ -14,7 +14,8 @@ interface EtfSummaryHeroProps {
   usdExRate: number;
 }
 
-const PANEL_CLASS_NAME = "rounded-xl border border-border bg-background/55 glass-bg";
+/** 요약 수치 칸. 공용 카드 표면을 그대로 씀. */
+const PANEL_CLASS_NAME = "card-surface";
 
 export default function EtfSummaryHero({ summary, dailyFlows, usdExRate }: EtfSummaryHeroProps) {
   // region [Privates]

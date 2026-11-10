@@ -21,7 +21,7 @@ export const revalidate = 14400;
 
 export default function M2BtcPage() {
   return (
-    <PageLayout className="gap-3 font-pretendard">
+    <PageLayout className="gap-2.5 font-pretendard">
       <JsonLd
         schema={createWebApplicationSchema({
           description: PAGE_DESCRIPTION,
