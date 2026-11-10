@@ -1,4 +1,4 @@
-import { Trophy } from "lucide-react";
+import { LayoutGrid, Trophy } from "lucide-react";
 import type { ReactNode } from "react";
 import {
   BanknoteIcon,
@@ -127,6 +127,13 @@ const clientRoutes: ClientRoute[] = [
     isNav: false,
     isFavorite: false,
     icon: <Trophy size={24} />,
+  },
+  {
+    title: "히트맵",
+    path: "/heatmap",
+    isNav: false,
+    isFavorite: false,
+    icon: <LayoutGrid size={24} />,
   },
   {
     title: "출금 수수료",

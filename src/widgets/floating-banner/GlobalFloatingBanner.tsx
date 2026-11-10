@@ -11,6 +11,7 @@ import BlocksCountdownFloatingBanner from "./ui/BlocksCountdownFloatingBanner";
 import BtcSurgeShareFloatingBanner from "./ui/BtcSurgeShareFloatingBanner";
 import CountdownBackFloatingBanner from "./ui/CountdownBackFloatingBanner";
 import DcaAddRecordFloatingBanner from "./ui/DcaAddRecordFloatingBanner";
+import HeatmapShareFloatingBanner from "./ui/HeatmapShareFloatingBanner";
 import OrangeBackFloatingBanner from "./ui/OrangeBackFloatingBanner";
 import ScrollUpFloatingBanner from "./ui/ScrollUpFloatingBanner";
 
@@ -67,6 +68,7 @@ const BANNER_CONFIGS: BannerConfig[] = [
         "/etf",
         "/treasury",
         "/asset-ranking",
+        "/heatmap",
         "/cagr",
         "/meme",
         "/btc2apartment",
@@ -108,6 +110,14 @@ const BANNER_CONFIGS: BannerConfig[] = [
     useIsVisible: () => {
       const pathname = usePathname();
       return pathname.startsWith("/btc2apartment");
+    },
+  },
+  {
+    id: "heatmap-share",
+    Component: HeatmapShareFloatingBanner,
+    useIsVisible: () => {
+      const pathname = usePathname();
+      return pathname.startsWith("/heatmap");
     },
   },
   {
