@@ -31,7 +31,7 @@ export function resolveApartmentIDFromQuery(search: string): string {
  * 현재 URL 에 단지를 반영한 주소를 만든다. 바뀔 게 없으면 `null`.
  *
  * `null` 을 구분하는 이유는 `replaceState` 를 불필요하게 호출하지 않기 위해서다.
- * 캐러셀은 슬라이드마다 이 경로를 타므로 매번 히스토리를 건드리면 낭비다.
+ * 단지를 바꿀 때마다 이 경로를 타므로 매번 히스토리를 건드리면 낭비다.
  */
 export function buildApartmentQueryUrl(href: string, apartmentID: string): string | null {
   const url = new URL(href);

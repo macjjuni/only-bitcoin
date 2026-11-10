@@ -3,11 +3,12 @@
 import { memo, useCallback, useMemo } from "react";
 import { findLandmarkApartment, useApartmentSeriesQuery } from "@/entities/apartment";
 import { ApartmentShareDialog } from "@/features/btc2apartment-share";
-import { PageTitle } from "@/shared/ui";
+import { Card, CardContent, PageTitle } from "@/shared/ui";
+import type { ApartmentPriceHints } from "../lib/apartmentPriceHint";
 import { resolveSelectedArea } from "../lib/buildChartSeries";
 import { useApartmentQuerySync } from "../lib/useApartmentQuerySync";
 import useBtc2ApartmentStore from "../model/btc2ApartmentStore";
-import ApartmentSelector from "./ApartmentSelector";
+import ApartmentPicker from "./ApartmentPicker";
 import ApartmentSummaryCard from "./ApartmentSummaryCard";
 import AreaBucketTabs from "./AreaBucketTabs";
 import Btc2ApartmentChart from "./Btc2ApartmentChart";
@@ -21,9 +22,14 @@ interface Btc2ApartmentPanelProps {
    * 통째로 번들에 실린다. 필요한 것은 날짜 한 줄뿐이므로 prop 으로 받는다.
    */
   archiveGeneratedAt: string;
+  /** 단지별 대표 가격. 단지 목록에서 BTC 환산값을 미리 보여 주는 데 씀. 같은 이유로 서버에서 받음. */
+  apartmentPriceHints: ApartmentPriceHints;
 }
 
-const Btc2ApartmentPanel = ({ archiveGeneratedAt }: Btc2ApartmentPanelProps) => {
+const Btc2ApartmentPanel = ({
+  archiveGeneratedAt,
+  apartmentPriceHints,
+}: Btc2ApartmentPanelProps) => {
   // region [Hooks]
   const apartmentID = useBtc2ApartmentStore((state) => state.apartmentID);
   const selectedAreaInSquareMeter = useBtc2ApartmentStore(
@@ -89,26 +95,34 @@ const Btc2ApartmentPanel = ({ archiveGeneratedAt }: Btc2ApartmentPanelProps) => 
   return (
     <>
       <PageTitle label="BTC to Apartment" title="아파트 실거래 × BTC" />
-      <ApartmentSelector selectedApartmentID={apartmentID} onSelectApartment={onSelectApartment} />
-      <div className="flex flex-col gap-4 p-2">
-        <ApartmentSummaryCard
-          landmark={landmark}
-          yearPoints={series?.years ?? []}
-          areaInSquareMeter={resolvedArea}
-        />
-        <AreaBucketTabs
-          availableAreas={series?.availableAreas ?? []}
-          selectedAreaInSquareMeter={resolvedArea}
-          onSelectArea={onSelectArea}
-        />
-        <Btc2ApartmentChart
-          yearPoints={series?.years ?? []}
-          areaInSquareMeter={resolvedArea}
-          isLoading={isLoading}
-          hasIncompleteYear={hasIncompleteYear}
-        />
-        {ErrorTemplate}
-      </div>
+      <ApartmentPicker
+        selectedApartmentID={apartmentID}
+        priceHints={apartmentPriceHints}
+        onSelectApartment={onSelectApartment}
+      />
+      <ApartmentSummaryCard
+        landmark={landmark}
+        yearPoints={series?.years ?? []}
+        areaInSquareMeter={resolvedArea}
+      />
+      {/* 평형 칩과 차트의 음수 여백은 이 카드의 p-4 를 기준으로 잡혀 있음. 패딩을 바꾸면 같이 봐야 함. */}
+      <Card>
+        <CardContent className="flex flex-col gap-3 overflow-hidden p-4">
+          <h2 className="text-base font-bold">연도별 실거래가</h2>
+          <AreaBucketTabs
+            availableAreas={series?.availableAreas ?? []}
+            selectedAreaInSquareMeter={resolvedArea}
+            onSelectArea={onSelectArea}
+          />
+          <Btc2ApartmentChart
+            yearPoints={series?.years ?? []}
+            areaInSquareMeter={resolvedArea}
+            isLoading={isLoading}
+            hasIncompleteYear={hasIncompleteYear}
+          />
+          {ErrorTemplate}
+        </CardContent>
+      </Card>
       <DataSourceFooter archiveGeneratedAt={archiveGeneratedAt} />
 
       {/*

@@ -4,6 +4,7 @@ import { createPageMetadata } from "@/shared/config/metadata";
 import { JsonLd } from "@/shared/ui";
 import { PageLayout } from "@/shared/ui/layout";
 import { Btc2ApartmentPanel } from "@/views/btc2apartment";
+import { buildApartmentPriceHints } from "@/views/btc2apartment/server";
 
 const PAGE_DESCRIPTION =
   "원화로는 폭등했지만 비트코인으로는 1/10 토막 난 대한민국 랜드마크 아파트 실거래가 추이";
@@ -22,7 +23,7 @@ export const metadata = createPageMetadata({
 
 export default function Btc2ApartmentPage() {
   return (
-    <PageLayout className="gap-3">
+    <PageLayout className="gap-2.5 font-pretendard">
       <JsonLd
         schema={createWebApplicationSchema({
           name: "아파트 몇 BTC?",
@@ -30,7 +31,10 @@ export default function Btc2ApartmentPage() {
           path: "/btc2apartment",
         })}
       />
-      <Btc2ApartmentPanel archiveGeneratedAt={ARCHIVE_GENERATED_AT} />
+      <Btc2ApartmentPanel
+        archiveGeneratedAt={ARCHIVE_GENERATED_AT}
+        apartmentPriceHints={buildApartmentPriceHints()}
+      />
     </PageLayout>
   );
 }

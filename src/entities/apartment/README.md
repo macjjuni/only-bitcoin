@@ -48,5 +48,5 @@ pnpm build:apartment-archive     # .env.local 의 DATA_GO_KR_SERVICE_KEY 필요
 
 ### 5. 확인
 
-`pnpm test && pnpm check` → 캐러셀에 뜨는지, 기본 평형 막대가 연도별로 그려지는지.
+`pnpm test && pnpm check` → 단지 목록에 뜨는지, 기본 평형 막대가 연도별로 그려지는지.
 막대가 비면 2단계 기본 평형 판정을 다시 본다.

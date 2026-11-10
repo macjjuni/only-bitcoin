@@ -40,7 +40,7 @@ describe("buildApartmentQueryUrl", () => {
   });
 
   it("이미 같은 값이면 null 을 돌려준다", () => {
-    // 캐러셀은 슬라이드마다 이 경로를 타므로 불필요한 replaceState 를 막아야 한다.
+    // 단지를 바꿀 때마다 이 경로를 타므로 불필요한 replaceState 를 막아야 한다.
     expect(
       buildApartmentQueryUrl(
         `https://only-btc.app/btc2apartment?${APARTMENT_QUERY_KEY}=${OTHER_ID}`,

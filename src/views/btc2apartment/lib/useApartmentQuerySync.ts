@@ -16,7 +16,7 @@ import { buildApartmentQueryUrl, resolveApartmentIDFromQuery } from "./apartment
  *
  * `useSearchParams` 대신 `window.location` 을 직접 읽는다. 이 페이지는 정적 생성 대상이라
  * `useSearchParams` 를 쓰면 Suspense 경계가 필요하고, 쓰기를 `router.replace` 로 하면
- * 슬라이드를 넘길 때마다 라우터 렌더가 돌아 캐러셀이 버벅인다.
+ * 단지를 바꿀 때마다 라우터 렌더가 돌아 화면이 버벅인다.
  * `replaceState` 는 Next 가 공식 지원하는 경로이며 리렌더를 일으키지 않는다.
  */
 export function useApartmentQuerySync(
