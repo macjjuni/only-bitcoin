@@ -3,7 +3,7 @@
 import { type CSSProperties, memo } from "react";
 import { QRCode } from "react-qrcode-logo";
 
-const SHARE_QR_SIZE = 48;
+const SHARE_QR_SIZE = 40;
 const SHARE_QR_PADDING = 6;
 const SHARE_QR_RENDER_SCALE = 3;
 

@@ -207,7 +207,7 @@ function ApartmentShareCard({
 
       <div className="relative flex flex-col p-6 text-white">
         {/* 급등 알림 카드와 같은 규격. QR 이 로고보다 커서 `items-center` 면 로고가 내려앉으므로 위 맞춤 씀. */}
-        <div className="mb-3 flex items-start gap-2 min-h-[60px]">
+        <div className="mb-3 flex items-start gap-2 min-h-[52px]">
           <div className="flex items-center gap-2">
             <div className="flex justify-center items-center bg-white rounded-full p-[1px]">
               <KIcon icon="bitcoin" color={BITCOIN_COLOR} size={36} />
