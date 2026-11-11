@@ -15,7 +15,7 @@ export default function SettingButton() {
       <button
         type="button"
         onClick={() => router.back()}
-        className="text-current cursor-pointer tap-highlight-transparent select-none press-feedback"
+        className="text-current cursor-pointer select-none press-feedback"
       >
         <Undo2Icon size={30} className="text-gray-800 dark:text-gray-200" />
       </button>

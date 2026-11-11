@@ -53,7 +53,7 @@ export default function TransitionLink({
       {...restProps}
       href={href}
       onClick={handleClick}
-      className={`touch-callout-none select-none tap-highlight-transparent ${className}`.trim()}
+      className={`touch-callout-none select-none ${className}`.trim()}
     >
       {children}
     </a>

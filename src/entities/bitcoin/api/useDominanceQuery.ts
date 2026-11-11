@@ -58,7 +58,7 @@ const useBitcoinGlobalStatsQuery = (initialDominance = 0) => {
     refetchOnMount: true,
     retry: 3,
     initialData: initialDominance ? { dominance: initialDominance, marketCapUsd: 0 } : undefined,
-    // 서버 캐시 10분이므로 즉시 stale 처리함. 마운트 직후 재조회됨.
+    // 서버 캐시 1시간이므로 즉시 stale 처리함. 마운트 직후 재조회됨.
     initialDataUpdatedAt: 0,
   });
 };

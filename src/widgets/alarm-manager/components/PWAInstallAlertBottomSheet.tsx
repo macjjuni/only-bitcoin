@@ -12,22 +12,19 @@ import {
   KIcon,
 } from "kku-ui";
 import { useState } from "react";
-import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import { useInitializePWA } from "@/shared/lib/hooks";
-import { setCookie } from "@/shared/utils/cookie";
 
 export default function PWAInstallAlertBottomSheet() {
   // region [Hooks]
-  // AlertManager에 의해 렌더링되면 즉시 열려야 하므로 기본값 true
+  // AlarmManager에 의해 렌더링되면 즉시 열려야 하므로 기본값 true
   const [open, setOpen] = useState(true);
   const { onClickInstall, onClickDisabled } = useInitializePWA();
   // endregion
 
   // region [Events]
   const onClickClose = () => {
-    setCookie(PWA_COOKIE_KEY, "true", 1); // 하루 안보기 쿠키 저장
     setOpen(false);
-    onClickDisabled();
+    onClickDisabled(); // 하루 안보기 쿠키 저장
   };
 
   const handleInstall = async () => {

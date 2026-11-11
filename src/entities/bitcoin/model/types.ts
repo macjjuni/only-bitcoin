@@ -44,7 +44,6 @@ export interface InitialPrice {
   usdChange24h: string;
 }
 
-/** SSR 초기 매크로 지표 (macro.server) */
 /** 환율만 필요한 화면용. `InitialMacro` 에서 환율 부분만 떼어낸 것. */
 export interface InitialExchangeRate {
   /** USD -> KRW 환율 */
@@ -53,6 +52,7 @@ export interface InitialExchangeRate {
   usdExRateDate: string;
 }
 
+/** SSR 초기 매크로 지표 (macro.server) */
 export interface InitialMacro {
   /** 비트코인 도미넌스(%) */
   dominance: number;

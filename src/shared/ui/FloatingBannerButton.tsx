@@ -40,7 +40,7 @@ export default function FloatingBannerButton({
     <button
       ref={buttonRef}
       type="button"
-      className={`${commonClassName} tap-highlight-transparent select-none`}
+      className={`${commonClassName} select-none`}
       onClick={handleButtonClick}
       {...props}
     >

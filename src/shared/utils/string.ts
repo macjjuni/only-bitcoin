@@ -29,12 +29,3 @@ export function comma(num: string | number, removeDecimal = true): string {
 
   return rexReplace(num.toString()) || "0";
 }
-
-export const removeSpaces = (str: string): string => {
-  return str.replace(/\s+/g, "");
-};
-
-export function extractNumbers(input: string): number {
-  const strNumber = input.replace(/[^0-9.]/g, "");
-  return Number(strNumber);
-}

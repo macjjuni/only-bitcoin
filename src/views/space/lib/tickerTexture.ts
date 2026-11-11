@@ -94,8 +94,8 @@ const EXCHANGE_RATE_FORMATTER = new Intl.NumberFormat("en-US", { maximumFraction
 /**
  * 시가총액 축약 표기.
  *
- * 2조 달러를 자릿수로 적으면 열세 글자라 한 칸에 안 들어감. 기존
- * `formatUsdVolume` 은 조 단위가 없어 `$1600.1B` 로 나와서 따로 둠.
+ * 2조 달러를 자릿수로 적으면 열세 글자라 한 칸에 안 들어감. 십억(B) 단위로만
+ * 줄이면 `$1600.1B` 로 나와서 조(T) 단위까지 둠.
  */
 export const formatMarketCapUsd = (marketCapUsd: number): string => {
   if (marketCapUsd >= 1_000_000_000_000) {

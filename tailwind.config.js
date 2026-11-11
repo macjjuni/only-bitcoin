@@ -50,10 +50,6 @@ export default {
           "0%": { transform: "translateX(-8px)", opacity: "0" },
           "100%": { transform: "translateX(0)", opacity: "1" },
         },
-        firstLoad: {
-          from: { opacity: "0" },
-          to: { opacity: "1" },
-        },
         emberGlow: {
           "0%, 100%": {
             opacity: "0.5",
@@ -92,24 +88,6 @@ export default {
           "0%, 100%": { transform: "translate3d(0, 0, 0) scale(1.1)" },
           "50%": { transform: "translate3d(-7%, -6%, 0) scale(0.9)" },
         },
-        swing: {
-          "0%, 50%, 100%": {
-            transform: "perspective(1000px) rotateY(0deg)",
-            animationTimingFunction: "ease-out",
-          },
-          "25%": {
-            transform: "perspective(1000px) rotateY(-8deg)",
-            animationTimingFunction: "ease-in",
-          },
-          "75%": {
-            transform: "perspective(1000px) rotateY(8deg)",
-            animationTimingFunction: "ease-in",
-          },
-        },
-        "glow-pulse": {
-          "0%, 100%": { opacity: "0" },
-          "50%": { opacity: "1" },
-        },
         // 스페이스 말풍선 한 생애. 5초 기준 퍼센트라 TTL 을 바꾸면 같이 봐야 함.
         // 0~3.6%(180ms) 튀어나옴, 93%(4.65s)부터 흐려짐.
         spaceBubbleLife: {
@@ -117,11 +95,6 @@ export default {
           "3.6%": { opacity: "1", transform: "translateY(0) scale(1)" },
           "93%": { opacity: "1", transform: "translateY(0) scale(1)" },
           "100%": { opacity: "0", transform: "translateY(-4px) scale(0.97)" },
-        },
-        chatPanelIn: {
-          "0%": { opacity: "0", transform: "translateY(10px) scale(0.92)" },
-          "60%": { opacity: "1" },
-          "100%": { opacity: "1", transform: "translateY(0) scale(1)" },
         },
         surgeFlameRise: {
           "0%, 100%": { transform: "translateY(0) scaleX(1) scaleY(1)", opacity: "0.88" },
@@ -168,10 +141,6 @@ export default {
             filter: "drop-shadow(0 0 26px rgba(var(--surge-glow-rgb), 0.65))",
           },
         },
-        chatPanelOut: {
-          "0%": { opacity: "1", transform: "translateY(0) scale(1)" },
-          "100%": { opacity: "0", transform: "translateY(8px) scale(0.96)" },
-        },
         priceLivePulse: {
           "0%": { transform: "scale(0.5)", opacity: "0.5" },
           "70%": { opacity: "0" },
@@ -182,27 +151,21 @@ export default {
         wiggle: "wiggle 0.36s ease-in-out infinite",
         "blink-gold": "blink 1.2s infinite ease-in-out",
         "blink-fade": "blinkFade 1.33s infinite ease-in-out",
-        swing: "swing 3.4s linear infinite",
         "view-exit": "fadeOut 0.2s ease-in-out forwards",
         "view-enter-right": "slideInFromRight 0.2s ease-in-out forwards",
         "view-enter-left": "slideInFromLeft 0.2s ease-in-out forwards",
-        "view-enter-first": "firstLoad 0.2s ease-in-out forwards",
         "ember-glow": "emberGlow 7s ease-in-out infinite",
         shimmer: "shimmer 2.6s ease-in-out infinite",
         "gauge-pulse": "gaugePulse 1.8s ease-in-out infinite",
         "aurora-flow": "auroraFlow 4s linear infinite",
         "blob-drift-a": "blobDriftA 20s ease-in-out infinite",
         "blob-drift-b": "blobDriftB 24s ease-in-out infinite",
-        "glow-pulse": "glow-pulse 2s ease-in-out infinite",
         "surge-flame": "surgeFlameRise 1.7s ease-in-out infinite",
         "surge-flame-sway": "surgeFlameSway 2s ease-in-out infinite",
         "surge-flame-lean": "surgeFlameLean 2.1s ease-in-out infinite",
         "surge-ember": "surgeEmberRise 2.8s ease-in infinite",
         "surge-text-flicker": "surgeTextFlicker 2.2s ease-in-out infinite",
-        "chat-panel-in": "chatPanelIn 0.28s cubic-bezier(0.16, 1, 0.3, 1)",
         "space-bubble-life": "spaceBubbleLife 5s cubic-bezier(0.16, 1, 0.3, 1) both",
-        "chat-panel-out": "chatPanelOut 0.2s cubic-bezier(0.4, 0, 1, 1) forwards",
-        "chat-backdrop-out": "fadeOut 0.2s ease-in-out forwards",
         "price-live-pulse": "priceLivePulse 1.9s ease-out infinite",
       },
     },

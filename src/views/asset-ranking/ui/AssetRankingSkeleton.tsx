@@ -10,7 +10,7 @@ export default function AssetRankingSkeleton() {
     >
       <div className="h-36 rounded-xl bg-foreground/10" />
       <div className="h-10 rounded-xl bg-foreground/10" />
-      <div className="space-y-3 rounded-xl border border-border p-4">
+      <div className="space-y-3 card-surface p-4">
         <div className="h-6 w-32 rounded bg-foreground/10" />
         <div className="h-10 rounded-lg bg-foreground/10" />
         {SKELETON_ROWS.map((rowID) => (

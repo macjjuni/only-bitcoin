@@ -33,7 +33,6 @@ export default function BlockHalvingCard({ initialBlockHeight }: BlockHalvingCar
     () => nextHalvingData.blockHeight - recentBlockHeight,
     [nextHalvingData, recentBlockHeight],
   );
-  // eslint-disable-next-line react-hooks/purity
   const expectNextHalvingDate = useMemo(
     () => calcDate(Date.now(), restBlockCount * 10, "minute", "YYYY.MM.DD"),
     [restBlockCount],

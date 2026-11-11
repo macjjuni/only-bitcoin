@@ -267,7 +267,7 @@ export default function MacroWidgetPanel({
           <SortableContext items={macroSequence} strategy={horizontalListSortingStrategy}>
             <div className={`grid grid-cols-4 gap-3 ${isEditMode ? "cursor-pointer mt-3" : ""}`}>
               {visibleItems.map(({ id, label, value, sign, decimals, onClick }) => (
-                <div key={id} className="tap-highlight-transparent">
+                <div key={id}>
                   <WidgetItem
                     id={id}
                     label={label}
@@ -284,7 +284,7 @@ export default function MacroWidgetPanel({
                 <div
                   key={`empty-${i}`}
                   onClick={onClickEmptySlot}
-                  className="flex justify-center items-center h-[52px] text-[32px] text-border border border-dashed border-muted-foreground rounded-lg cursor-pointer tap-highlight-transparent"
+                  className="flex justify-center items-center h-[52px] text-[32px] text-border border border-dashed border-muted-foreground rounded-lg cursor-pointer"
                 >
                   +
                 </div>

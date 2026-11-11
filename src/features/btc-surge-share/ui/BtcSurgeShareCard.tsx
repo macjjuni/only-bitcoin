@@ -220,7 +220,7 @@ function BtcSurgeShareCard({ cardRef }: BtcSurgeShareCardProps) {
         </div>
       </div>
 
-      {/* eslint-disable-next-line @next/next/no-img-element */}
+      {/* biome-ignore lint/performance/noImgElement: 캡처에서 빼고 canvas 로 따로 합성하는 장식 이미지라 next/image 를 안 씀 */}
       <img
         src={COIN_IMAGE_SRC}
         alt=""

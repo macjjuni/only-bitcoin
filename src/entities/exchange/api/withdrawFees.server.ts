@@ -1,10 +1,4 @@
-import { buildNetworkKey } from "../model/fallback";
-import type {
-  ExchangeId,
-  ExchangeWithdrawSnapshot,
-  WithdrawAsset,
-  WithdrawNetworkRow,
-} from "../model/types";
+import type { ExchangeWithdrawSnapshot, WithdrawAsset, WithdrawNetworkRow } from "../model/types";
 import { fetchBinanceWithdrawInfo } from "./binanceWithdraw.server";
 import { fetchBithumbWithdrawInfo } from "./bithumbWithdraw.server";
 import { fetchKorbitWithdrawInfo } from "./korbitWithdraw.server";
@@ -42,7 +36,7 @@ const buildRows = (results: ExchangeFetchResult[]): WithdrawNetworkRow[] => {
 
     for (const result of results) {
       const option = result.options[key];
-      if (option) options[result.meta.id as ExchangeId] = option;
+      if (option) options[result.meta.id] = option;
     }
 
     rows.push({ asset, networkName, options });
@@ -96,5 +90,3 @@ export async function fetchExchangeWithdrawSnapshot(): Promise<ExchangeWithdrawS
     hasAnyFallback: results.some((result) => result.meta.source === "fallback"),
   };
 }
-
-export { buildNetworkKey };

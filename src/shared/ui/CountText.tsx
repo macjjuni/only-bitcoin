@@ -26,7 +26,6 @@ const CountText = (props: CountTextTypes) => {
     if (!isCountUp) {
       return value;
     }
-    // eslint-disable-next-line react-hooks/purity
     const isPositive = Math.random() < 0.5; // 50% 확률로 + 또는 -
     const difference = value * 0.005; // 0.5% 차이 계산
 

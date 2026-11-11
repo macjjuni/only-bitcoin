@@ -3,7 +3,8 @@ import type { BIP39Item } from "../model/types";
 const BIP39_URL =
   "https://raw.githubusercontent.com/bitcoin/bips/refs/heads/master/bip-0039/english.txt" as const;
 
-const useBIP39Query = async (): Promise<BIP39Item[]> => {
+/** 훅이 아니라 서버 컴포넌트에서 부르는 조회 함수임. */
+const getBip39Data = async (): Promise<BIP39Item[]> => {
   try {
     const res = await fetch(BIP39_URL, { method: "GET", headers: { Accept: "text/plain" } });
     const text = await res.text();
@@ -17,4 +18,4 @@ const useBIP39Query = async (): Promise<BIP39Item[]> => {
   }
 };
 
-export default useBIP39Query;
+export default getBip39Data;
