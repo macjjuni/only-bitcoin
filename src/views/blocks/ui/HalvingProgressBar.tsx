@@ -31,7 +31,6 @@ const HalvingProgressBar = ({ className = "", initialBlockHeight }: HalvingProgr
   );
   const expectNextHalvingDate = useMemo(() => {
     if (!isMount) return "YYYY.MM.DD";
-    // eslint-disable-next-line react-hooks/purity
     return calcDate(Date.now(), restBlockCount * 10, "minute", "YYYY.MM.DD");
   }, [restBlockCount, isMount]);
   // endregion

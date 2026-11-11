@@ -1,7 +1,6 @@
 import { dateUtil } from "kku-util";
 
-const { formatConfig, getFormatDate, getCurrentDate, calcCurrentDateDifference, calcDate } =
-  dateUtil;
+const { formatConfig, getFormatDate, getCurrentDate, calcDate } = dateUtil;
 
 function formatDate(
   date: Date | string | number | undefined | null,
@@ -88,7 +87,6 @@ function getCurrentDateTimeKST(): string {
 }
 
 export {
-  calcCurrentDateDifference,
   calcDate,
   formatDate,
   formatDateTimeKST,

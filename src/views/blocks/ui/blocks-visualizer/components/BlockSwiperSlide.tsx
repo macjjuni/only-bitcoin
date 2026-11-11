@@ -1,12 +1,13 @@
 "use client";
 
 import { dateUtil } from "kku-util";
-import { memo, useCallback, useEffect, useMemo, useState } from "react";
+import { memo, useCallback, useMemo } from "react";
 import { SwiperSlide } from "swiper/react";
-import { calcCurrentDateDifference } from "@/shared/lib/date";
 import { bytesToMB } from "@/shared/utils/number";
+import { formatBlockElapsedTime } from "../../../lib/formatBlockTime";
 
 interface BlockSwiperSlideProps {
+  currentTimeInMilliseconds: number | null;
   id?: string;
   height?: number;
   timestamp?: number;
@@ -20,15 +21,18 @@ interface BlockSwiperSlideProps {
 
 const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
   // region [Hooks]
-  const { isUnmined, isGenesis, id, height, size, poolName, timestamp, onClick, onClickGenesis } =
-    props;
-
-  const [now, setNow] = useState(() => Date.now());
-
-  const diffNowMin = useMemo(
-    () => calcCurrentDateDifference(timestamp || 0, "minute"),
-    [timestamp, now],
-  );
+  const {
+    currentTimeInMilliseconds,
+    isUnmined,
+    isGenesis,
+    id,
+    height,
+    size,
+    poolName,
+    timestamp,
+    onClick,
+    onClickGenesis,
+  } = props;
   const isDefaultRender = useMemo(() => !isUnmined, [isUnmined]);
 
   // 상태별 동적 스타일 생성
@@ -52,18 +56,6 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
   }, [isUnmined, isGenesis]);
   // endregion
 
-  // region [Privates]
-  const convertMinutes = useCallback(
-    (minutes: number) => {
-      if (isGenesis) return "-";
-      const hours = Math.floor(minutes / 60);
-      const remainingMinutes = minutes % 60;
-      return `${hours}시간 ${remainingMinutes}분`;
-    },
-    [isGenesis],
-  );
-  // endregion
-
   // region [Events]
   const onClickBlock = useCallback(() => {
     if (!isGenesis && id) {
@@ -74,30 +66,21 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
   }, [id, isGenesis, onClick, onClickGenesis]);
   // endregion
 
-  // region [Life Cycles]
-  // 시간 표시가 필요한 일반 블록만 15초마다 경과 시간을 갱신한다.
-  useEffect(() => {
-    if (isGenesis || isUnmined) return;
-
-    const timerId = setInterval(() => setNow(Date.now()), 15_000);
-    return () => clearInterval(timerId);
-  }, [isGenesis, isUnmined]);
-  // endregion
-
   // region [Templates]
   const timeDisplay = useMemo(() => {
-    if (isGenesis) {
-      return dateUtil.getFormatDate(timestamp || 0, "YYYY.MM.DD HH:mm:ss");
+    if (currentTimeInMilliseconds === null) {
+      return "-";
     }
-    if (diffNowMin <= 0) return "조금 전";
-    if (diffNowMin < 60) return `${diffNowMin}분 전`;
-    return `${convertMinutes(diffNowMin)} 전`;
-  }, [isGenesis, timestamp, diffNowMin, convertMinutes]);
+    if (isGenesis) {
+      // 날짜만 씀. 시분초까지 쓰면 두 줄로 꺾여서 좁은 화면에서 블록 아래로 넘쳤음.
+      return dateUtil.getFormatDate(timestamp || 0, "YYYY.MM.DD");
+    }
+    return formatBlockElapsedTime(timestamp, currentTimeInMilliseconds);
+  }, [isGenesis, timestamp, currentTimeInMilliseconds]);
   // endregion
 
   return (
     <SwiperSlide className="relative pt-[20px] pr-0  pb-2 pl-[20px] cursor-pointer !-translate-x-[64px]">
-      {/* eslint-disable-next-line jsx-a11y/click-events-have-key-events,jsx-a11y/no-static-element-interactions */}
       <div
         onClick={onClickBlock}
         className={[
@@ -117,7 +100,11 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
             <div className="flex flex-col items-center justify-center gap-1 font-number text-[12px] leading-[1.2] layout-max:gap-2 layout-max:text-[14px]">
               <p>{isGenesis ? "285B" : `${bytesToMB(size || 0)}MB`}</p>
               <p className="w-full text-center truncate px-1">{poolName}</p>
-              <p className="text-center">{timeDisplay}</p>
+              <p
+                className={`text-center${isGenesis ? " whitespace-nowrap text-[11px] tracking-tighter layout-max:text-[14px] layout-max:tracking-normal" : ""}`}
+              >
+                {timeDisplay}
+              </p>
             </div>
           </>
         )}
