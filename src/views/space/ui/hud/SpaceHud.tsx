@@ -10,7 +10,6 @@ import {
   Share2,
   UserRound,
   VolumeX,
-  Zap,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
@@ -30,7 +29,7 @@ import {
 } from "@/features/space-controls";
 import type { SpaceSession } from "@/features/space-session";
 import { env } from "@/shared/config/env";
-import { DonationQrDialog } from "@/shared/ui";
+import { DonationQrDialog, LightningIcon } from "@/shared/ui";
 import { useDismissOnOutsidePointer } from "@/views/space/lib/useDismissOnOutsidePointer";
 import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
 import SpaceAvatarPicker from "./SpaceAvatarPicker";
@@ -298,7 +297,7 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
       actions.push({
         id: "space-donation-toggle",
         label: "개발자 후원",
-        icon: <Zap size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+        icon: <LightningIcon size={ICON_SIZE} />,
         isActive: isDonationOpen,
         onClick: onClickOpenDonation,
       });

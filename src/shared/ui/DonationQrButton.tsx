@@ -1,8 +1,8 @@
 "use client";
 
-import { Zap } from "lucide-react";
 import { useId, useState } from "react";
 import DonationQrDialog from "./DonationQrDialog";
+import { LightningIcon } from "./icon";
 
 export interface DonationQrButtonProps {
   lightningAddress: string;
@@ -43,7 +43,7 @@ function DonationQrButton({ lightningAddress, isDisabled = false }: DonationQrBu
         aria-expanded={isOpen}
         className="flex h-9 flex-shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-bitcoin/40 bg-neutral-800/80 px-3 text-xs font-bold text-bitcoin backdrop-blur-sm transition-colors hover:bg-neutral-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bitcoin disabled:pointer-events-none disabled:opacity-60"
       >
-        <Zap size={14} aria-hidden="true" />
+        <LightningIcon size={14} />
         후원하기
       </button>
       <DonationQrDialog

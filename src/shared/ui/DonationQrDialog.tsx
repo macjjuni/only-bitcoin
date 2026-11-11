@@ -12,8 +12,9 @@ import {
   kToast,
 } from "kku-ui";
 import { clipboardUtil } from "kku-util";
-import { Copy, X, Zap } from "lucide-react";
+import { Copy, X } from "lucide-react";
 import { useId } from "react";
+import { LightningIcon } from "./icon";
 import ShareCardQr from "./ShareCardQr";
 
 export interface DonationQrDialogProps {
@@ -81,7 +82,7 @@ function DonationQrDialog({ lightningAddress, isOpen, onClose, returnFocusID }: 
         <KDialogHeader className="space-y-2">
           <div className="flex items-center justify-between gap-2">
             <KDialogTitle className="flex items-center gap-1.5 text-base font-bold">
-              <Zap size={18} className="text-bitcoin" aria-hidden="true" />
+              <LightningIcon size={18} />
               개발자 후원
             </KDialogTitle>
             <KDialogClose asChild>

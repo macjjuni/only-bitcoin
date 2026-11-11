@@ -19,6 +19,7 @@ export { default as HalfIcon } from "./HalfIcon";
 export { default as HeatmapIcon } from "./HeatmapIcon";
 export { default as IncidentIcon } from "./IncidentIcon";
 export { default as IosShareIcon } from "./IosShareIcon";
+export { default as LightningIcon } from "./LightningIcon";
 export { default as MinerIcon } from "./MinerIcon";
 export { default as NaverIcon } from "./NaverIcon";
 export { default as PageIcon } from "./PageIcon";
