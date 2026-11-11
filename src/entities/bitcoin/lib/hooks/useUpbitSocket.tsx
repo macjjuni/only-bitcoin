@@ -71,7 +71,8 @@ export default function useUpbitSocket() {
     const socket = new ReconnectingWebSocket(UPBIT_URL, [], {
       maxReconnectionDelay: 8000, // 재연결 최대 지연: 8초
       minReconnectionDelay: 1000,
-      reconnectionDelayGrowFactor: 1, // 재시도 간 딜레이 증가 비율
+      // 1 이면 간격이 안 늘어 1초마다 영원히 다시 붙으려 함. 다른 소켓과 같이 8초까지 늘림.
+      reconnectionDelayGrowFactor: 1.5, // 재시도 간 딜레이 증가 비율
       minUptime: 5000, // 연결이 최소 유지되어야 하는 시간 (5초)
       connectionTimeout: 3000, // 연결 시도 타임아웃: 3초
       maxEnqueuedMessages: 100, // 연결 안 된 동안 큐에 쌓을 메시지 수 제한
