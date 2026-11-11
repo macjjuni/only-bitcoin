@@ -6,6 +6,7 @@ import {
   Flame,
   MessageCircle,
   Music,
+  PartyPopper,
   Pencil,
   Share2,
   UserRound,
@@ -15,7 +16,7 @@ import { usePathname } from "next/navigation";
 import { useTransitionRouter } from "next-view-transitions";
 import { memo, type ReactNode, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { saveChatNickname } from "@/features/chat-session";
-import { type SpaceBgm, useSpaceBgm } from "@/features/space-bgm";
+import type { SpaceBgm } from "@/features/space-bgm";
 import {
   JumpButton,
   KickButton,
@@ -79,6 +80,9 @@ const resolveBgmIcon = (bgm: SpaceBgm): ReactNode => {
 };
 
 interface SpaceHudProps {
+  bgm: SpaceBgm;
+  canTestCelebration: boolean;
+  onCelebrate: () => void;
   inputSource: SpaceInputSource;
   session: SpaceSession;
   nickname: string;
@@ -98,12 +102,11 @@ interface SpaceHudProps {
  * 전체 화면 3D 페이지라 브라우저가 대신 비켜주지 않음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }: SpaceHudProps): ReactNode {
+function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, modelIndex, onChangeModel, onCelebrate }: SpaceHudProps): ReactNode {
   // region [Hooks]
   const router = useTransitionRouter();
   const pathname = usePathname();
   const isCoarsePointer = useCoarsePointer();
-  const bgm = useSpaceBgm();
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
   const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
@@ -118,6 +121,10 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
 
 
   // region [Events]
+  const onClickTestCelebration = useCallback((): void => {
+    onCelebrate();
+  }, [onCelebrate]);
+
   const onClickBack = useCallback((): void => {
     // 직접 링크로 들어온 경우 뒤로 갈 곳이 없어 빈 화면에 남음.
     if (window.history.length > 1) {
@@ -339,6 +346,15 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
       });
     }
 
+    if (canTestCelebration) {
+      actions.push({
+      id: "space-celebration-test",
+      label: "전광판 폭죽 테스트",
+      icon: <PartyPopper size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+      onClick: onClickTestCelebration,
+      });
+    }
+
     actions.push({
       id: "guide",
       label: "조작 안내",
@@ -364,6 +380,8 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
     bgm.isUnavailable,
     bgm.isSurging,
     bgm.toggle,
+    onClickTestCelebration,
+    canTestCelebration,
   ]);
 
   const NicknameEditorTemplate = isNicknameEditorOpen ? (

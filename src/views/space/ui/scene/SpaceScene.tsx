@@ -19,9 +19,12 @@ import {
   type LocalPlayerState,
   resolveColorIndexFromClientKey,
   SPACE_HALL,
+  SPACE_HEATMAP_FRAME,
   SPACE_KICK,
   SPACE_MENU_FRAME,
+  SPACE_SCREEN_FRAME,
   SPACE_SCREEN_PLACEMENTS,
+  type SpaceCelebration,
   type SpacePeer,
   type SpaceTerrain,
 } from "@/entities/space";
@@ -65,10 +68,13 @@ import PlayerAvatar from "./PlayerAvatar";
 import PriceBillboard from "./PriceBillboard";
 import RemoteAvatars from "./RemoteAvatars";
 import SceneLighting from "./SceneLighting";
+import ScreenCelebration from "./ScreenCelebration";
 import SpaceHeatmap from "./SpaceHeatmap";
 import SpaceTicker from "./SpaceTicker";
 
 interface SpaceSceneProps {
+  celebration: SpaceCelebration | null;
+  celebrationClockOffsetMs: number | null;
   inputSource: SpaceInputSource;
   clientKey: string;
   nickname: string;
@@ -87,6 +93,8 @@ interface SpaceSceneProps {
 const EMPTY_LANTERN_ANCHORS: readonly LanternAnchor[] = [];
 
 function SpaceScene({
+  celebration,
+  celebrationClockOffsetMs,
   inputSource,
   clientKey,
   nickname,
@@ -509,6 +517,16 @@ function SpaceScene({
       <SpaceTicker />
 
       <SpaceHeatmap />
+      <ScreenCelebration
+        celebration={celebration}
+        clockOffsetMs={celebrationClockOffsetMs}
+        frame={SPACE_SCREEN_FRAME}
+      />
+      <ScreenCelebration
+        celebration={celebration}
+        clockOffsetMs={celebrationClockOffsetMs}
+        frame={SPACE_HEATMAP_FRAME}
+      />
 
       {/* 같은 액자 오른쪽 반쪽에 네트워크 현황판을 끼움. */}
       <group

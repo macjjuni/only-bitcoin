@@ -148,7 +148,22 @@ class RoomState {
   sockets: RoomSocket[] = [];
   autoResponses = new Map<WebSocket, Date>();
   setWebSocketAutoResponse = vi.fn();
-  storage = { sql: new FakeChatHistorySql() };
+  private marketValues = new Map<string, unknown>();
+  private alarmAt: number | null = null;
+  storage = {
+    sql: new FakeChatHistorySql(),
+    get: vi.fn(async (key: string) => structuredClone(this.marketValues.get(key))),
+    put: vi.fn(async (key: string, value: unknown) => {
+      this.marketValues.set(key, structuredClone(value));
+    }),
+    getAlarm: vi.fn(async () => this.alarmAt),
+    setAlarm: vi.fn(async (at: number) => {
+      this.alarmAt = at;
+    }),
+    deleteAlarm: vi.fn(async () => {
+      this.alarmAt = null;
+    }),
+  };
 
   getWebSockets(): WebSocket[] {
     return this.sockets.map((socket) => socket.asWebSocket());
@@ -217,6 +232,26 @@ afterEach(() => {
 });
 
 describe("SpaceRoom", () => {
+  it("한 사용자의 테스트를 같은 이벤트로 방 전체에 보내고 옛 클라이언트에는 보내지 않는다", async () => {
+    const { join, send } = createRoom();
+    const first = await join(clientKey(1), "첫째", 0, "ip-1", ["market-sync-v1"]);
+    const second = await join(clientKey(2), "둘째", 0, "ip-2", ["market-sync-v1"]);
+    const legacy = await join(clientKey(3), "이전버전", 0, "ip-3", ["kick"]);
+    await send(first, { v: SPACE_PROTOCOL_VERSION, t: "celebrate" });
+    const firstEvent = first.frames().find((frame) => frame.t === "celebrate");
+    expect(firstEvent).toBeDefined();
+    expect(second.frames().find((frame) => frame.t === "celebrate")).toEqual(firstEvent);
+    expect(legacy.frames().some((frame) => frame.t === "celebrate")).toBe(false);
+    await send(second, { v: SPACE_PROTOCOL_VERSION, t: "celebrate" });
+    expect(second.frames().at(-1)).toMatchObject({ t: "error", code: "CELEBRATION_COOLDOWN" });
+    await send(first, { v: SPACE_PROTOCOL_VERSION, t: "clock", sentAt: 123.5 });
+    expect(first.frames().at(-1)).toMatchObject({
+      t: "clock",
+      sentAt: 123.5,
+      serverAt: Date.now(),
+    });
+  });
+
   it("서버가 50석을 배정하고 51번째 입장은 full로 종료한다", async () => {
     const { join, state } = createRoom();
     const seats = new Set<number>();
@@ -324,6 +359,7 @@ describe("SpaceRoom", () => {
       t: "welcome",
       self: observer.peer(),
       peers: [remaining.peer()],
+      features: ["kick", "market-sync-v1"],
     });
     expect(vi.getTimerCount()).toBe(0);
   });
@@ -855,7 +891,7 @@ describe("SpaceRoom", () => {
       const socket = await join(clientKey(1), "참여자", 0, "test-ip", ["kick"]);
 
       expect(socket.frames().find((frame) => frame.t === "welcome")).toMatchObject({
-        features: ["kick"],
+        features: ["kick", "market-sync-v1"],
       });
     });
 
