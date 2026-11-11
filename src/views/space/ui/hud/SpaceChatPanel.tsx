@@ -1,7 +1,15 @@
 "use client";
 
 import { Eye, EyeOff, WifiOff } from "lucide-react";
-import { memo, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import {
+  type MouseEvent,
+  memo,
+  type ReactNode,
+  useCallback,
+  useEffect,
+  useRef,
+  useState,
+} from "react";
 import type { SpaceChatMessage, SpacePresence } from "@/entities/space";
 import { resolvePresenceDisplay } from "@/views/space/lib/presenceLabel";
 import SpaceChatComposer from "./SpaceChatComposer";
@@ -102,6 +110,10 @@ function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessa
       shouldFollowLogRef.current = logElement.scrollHeight - logElement.scrollTop - logElement.clientHeight < 24;
     }
   }, []);
+
+  const onMouseDownLog = useCallback((event: MouseEvent<HTMLDivElement>): void => {
+    event.preventDefault();
+  }, []);
   // endregion
 
 
@@ -156,8 +168,7 @@ function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessa
         </div>
       </div>
 
-      {/* biome-ignore lint/a11y/noNoninteractiveTabindex: The scrollable chat log needs keyboard scrolling. */}
-      <div ref={logRef} id={CHAT_LOG_ID} role="log" aria-label="공간 대화" aria-live="polite" aria-relevant="additions" tabIndex={0} hidden={isLogHidden} onScroll={onScrollLog} className="min-h-0 flex-1 select-none overflow-y-auto overscroll-contain space-chat-scrollbar py-2 pl-2.5 pr-1.5">
+      <div ref={logRef} id={CHAT_LOG_ID} role="log" aria-label="공간 대화" aria-live="polite" aria-relevant="additions" tabIndex={-1} hidden={isLogHidden} onMouseDown={onMouseDownLog} onScroll={onScrollLog} className="min-h-0 flex-1 select-none overflow-y-auto overscroll-contain space-chat-scrollbar py-2 pl-2.5 pr-1.5">
         {messages.length === 0 && <p className={`${messageTextClassName} text-white/60`}>함께 전광판을 보며 이야기해 보세요.</p>}
         <ol className="flex flex-col gap-0.5">
           {messages.map((message) => (
