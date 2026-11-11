@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, useEffect, useState } from "react";
+import { shuffleArray } from "@/shared/utils/common";
 
 const bitcoinWiseSayingList = [
   "Not your keys, not your Bitcoin.",
@@ -19,15 +20,6 @@ const GLITCH_DURATION = 420 as const;
 const ANIMATION_CHANGE_TIME = 10000 as const;
 /** 문구 교체 사이 한가운데(5초)에도 글리치만 한 번 줌. */
 const GLITCH_INTERVAL_TIME = ANIMATION_CHANGE_TIME / 2;
-
-const shuffleArray = <T,>(array: readonly T[]): T[] => {
-  const newArray = [...array];
-  for (let i = newArray.length - 1; i > 0; i--) {
-    const j = Math.floor(Math.random() * (i + 1));
-    [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
-  }
-  return newArray;
-};
 
 const NotKeyNotYourBitcoin = () => {
   // region [Hooks]

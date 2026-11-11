@@ -19,7 +19,6 @@ interface ModalTypes {
 
 function FearAndGreedDialog({ open, setOpen }: ModalTypes) {
   // region [Hooks]
-  // eslint-disable-next-line react-hooks/purity
   const imageUrl = useMemo(
     () => `https://alternative.me/crypto/fear-and-greed-index.png?${Date.now()}`,
     [open],

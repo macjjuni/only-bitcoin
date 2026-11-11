@@ -17,7 +17,7 @@ export function NewsFloatingBanner() {
     <TransitionLink
       href={latestNews.href}
       aria-label={`${latestNews.label} 소식: ${latestNews.title}`}
-      className="flex h-[52px] max-w-full items-center gap-2.5 rounded-full border border-bitcoin/40 bg-white pl-3 pr-4 shadow-md transition-transform hover:scale-[1.02] active:scale-95 dark:bg-neutral-800 tap-highlight-transparent select-none"
+      className="flex h-[52px] max-w-full items-center gap-2.5 rounded-full border border-bitcoin/40 bg-white pl-3 pr-4 shadow-md transition-transform hover:scale-[1.02] active:scale-95 dark:bg-neutral-800 select-none"
     >
       <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-bitcoin/15 text-bitcoin">
         <BellDot size={18} />

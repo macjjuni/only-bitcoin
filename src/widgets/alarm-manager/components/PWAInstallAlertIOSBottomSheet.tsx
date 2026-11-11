@@ -12,10 +12,8 @@ import {
   KIcon,
 } from "kku-ui";
 import { useState } from "react";
-import { PWA_COOKIE_KEY } from "@/shared/constants/setting";
 import { useInitializePWA } from "@/shared/lib/hooks";
 import { IosShareIcon } from "@/shared/ui";
-import { setCookie } from "@/shared/utils/cookie";
 
 export default function PWAInstallAlertIOSBottomSheet() {
   // region [Hooks]
@@ -26,9 +24,8 @@ export default function PWAInstallAlertIOSBottomSheet() {
 
   // region [Events]
   const onClickClose = () => {
-    setCookie(PWA_COOKIE_KEY, "true", 1);
     setOpen(false);
-    onClickDisabled();
+    onClickDisabled(); // 하루 안보기 쿠키 저장
   };
   // endregion
 

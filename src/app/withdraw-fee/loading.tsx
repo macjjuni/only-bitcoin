@@ -11,7 +11,7 @@ const EXCHANGE_SKELETON_ROWS = [
 export default function WithdrawFeeLoading() {
   return (
     <div
-      className="flex w-full animate-pulse flex-col gap-3 rounded-xl border border-border p-4 font-pretendard"
+      className="flex w-full animate-pulse flex-col gap-3 card-surface p-4 font-pretendard"
       role="status"
       aria-busy="true"
       aria-label="거래소 출금 수수료 불러오는 중"

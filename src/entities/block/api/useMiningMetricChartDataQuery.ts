@@ -9,6 +9,10 @@ import type {
   MiningMetricChartIntervalType,
 } from "../model/types";
 
+const MINING_HASHRATE_API_URL = "https://mempool.space/api/v1/mining/hashrate/";
+const STALE_TIME_MIN = 30;
+const INTERVAL_TIME_MIN = 30;
+
 function processDataInWorker(data: HashrateChartResponseData): Promise<HashrateChartFormattedData> {
   return new Promise((resolve, reject) => {
     const worker = new Worker("/worker/hashrate-chart.js");
@@ -28,30 +32,21 @@ function processDataInWorker(data: HashrateChartResponseData): Promise<HashrateC
   });
 }
 
+/**
+ * 실패는 삼키지 않고 던짐. 빈 데이터를 돌려주면 성공으로 잡혀서 재시도도 안 하고
+ * 빈 차트가 30분 동안 캐시에 남았음.
+ */
 async function fetchMiningMetricChart(
   interval: MiningMetricChartIntervalType,
 ): Promise<HashrateChartFormattedData> {
-  try {
-    const data: HashrateChartResponseData = await fetcher(MARKET_CHART_API_URL + interval);
+  const data: HashrateChartResponseData = await fetcher(MINING_HASHRATE_API_URL + interval);
 
-    if (isDev) {
-      console.log("✅ 해시레이트 차트 데이터 초기화!");
-    }
-
-    return await processDataInWorker(data);
-  } catch {
-    return {
-      currentHashrate: 0,
-      currentDifficulty: 0,
-      hashrates: { value: [], date: [] },
-      difficulty: { value: [], date: [] },
-    };
+  if (isDev) {
+    console.log("✅ 해시레이트 차트 데이터 초기화!");
   }
-}
 
-const MARKET_CHART_API_URL = "https://mempool.space/api/v1/mining/hashrate/";
-const STALE_TIME_MIN = 30;
-const INTERVAL_TIME_MIN = 30;
+  return processDataInWorker(data);
+}
 
 const useMiningMetricChartData = (days: MiningMetricChartIntervalType) => {
   // region [Hooks]

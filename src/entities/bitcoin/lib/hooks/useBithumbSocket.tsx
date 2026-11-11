@@ -1,11 +1,10 @@
-import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
+import { createConnectionToast } from "@/shared/lib/connectionToast";
 import { formatDate } from "@/shared/lib/date";
 import { generateUUID } from "@/shared/lib/uuid";
 import useSettingStore from "@/shared/stores/settingStore";
 import { isDev } from "@/shared/utils/common";
-import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
 import LocalStorage from "@/shared/utils/storage";
 import useBitcoinStore from "../../model/bitcoinStore";
@@ -29,6 +28,8 @@ const getRequestPayload = () => [
   { type: "ticker", codes: [BITHUMB_BTC_TICKER, BITHUMB_USDT_TICKER] },
   { format: "SIMPLE" },
 ];
+
+const notifyConnected = createConnectionToast("빗썸 연결!");
 
 export default function useBithumbSocket() {
   // region [Hooks]
@@ -74,15 +75,15 @@ export default function useBithumbSocket() {
       reconnectionDelayGrowFactor: 1.5,
       minUptime: 5000,
       connectionTimeout: 3000,
-      maxRetries: 10,
       maxEnqueuedMessages: 100,
+      // maxRetries 는 안 줌. 기본값이 무한 재시도라 끊겨도 계속 다시 붙음.
       startClosed: false,
       debug: false,
     });
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      kToast.success("빗썸 연결!");
+      notifyConnected();
       if (isDev) console.log("✅ 빗썸 소켓 연결");
       socket.send(JSON.stringify(getRequestPayload()));
     };
@@ -107,10 +108,7 @@ export default function useBithumbSocket() {
 
     socket.onerror = (e) => {
       console.error("Bithumb WebSocket Error:", e);
-
-      if (!isNetwork()) {
-        socket.close();
-      }
+      // 여기서 close() 를 부르면 안 됨. 재연결이 꺼져서 네트워크가 돌아와도 안 붙었음.
     };
 
     socket.onclose = (e) => {

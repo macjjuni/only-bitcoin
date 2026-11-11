@@ -59,7 +59,10 @@ describe("ensureChatDevVars", () => {
     );
     expect(values.CHAT_ALLOWED_ORIGINS).toBe("http://localhost:3002,http://127.0.0.1:3002");
     expect(values.SPACE_DISABLE_IP_CONNECTION_LIMIT).toBe("true");
-    expect(statSync(devVarsPath).mode & 0o777).toBe(0o600);
+    // 윈도우는 POSIX 권한이 없어 항상 0o666 으로 읽힘. 권한 검사는 그 밖에서만 함.
+    if (process.platform !== "win32") {
+      expect(statSync(devVarsPath).mode & 0o777).toBe(0o600);
+    }
   });
 
   it("새 파일마다 독립된 랜덤 키를 만든다", () => {

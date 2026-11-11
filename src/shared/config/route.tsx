@@ -102,13 +102,6 @@ const clientRoutes: ClientRoute[] = [
     icon: <BanknoteIcon size={24} />,
   },
   {
-    title: "Solo Mining",
-    path: "/solo-mining",
-    isNav: false,
-    isFavorite: false,
-    icon: null,
-  },
-  {
     title: "Corporate Treasury",
     path: "/treasury",
     isNav: false,
@@ -179,13 +172,9 @@ const clientRoutes: ClientRoute[] = [
   },
 ];
 
-export const allRouteList = clientRoutes.filter(({ title, ...restProps }) => restProps);
-export const favoriteRouteList = clientRoutes.filter(
-  ({ title, isFavorite, ...restProps }) => isFavorite && restProps,
-);
-export const navigationRouteList = clientRoutes.filter(
-  ({ title, isNav, ...restProps }) => isNav && restProps,
-);
+export const allRouteList = clientRoutes;
+export const favoriteRouteList = clientRoutes.filter(({ isFavorite }) => isFavorite);
+export const navigationRouteList = clientRoutes.filter(({ isNav }) => isNav);
 
 /** 헤더를 렌더링하지 않을 경로 목록 */
 export const hideHeaderPathList = clientRoutes
@@ -196,5 +185,3 @@ export const hideHeaderPathList = clientRoutes
 export const hideBottomNavPathList = clientRoutes
   .filter(({ hideBottomNav }) => hideBottomNav)
   .map(({ path }) => path);
-
-export default { allRouteList, favoriteRouteList, navigationRouteList };

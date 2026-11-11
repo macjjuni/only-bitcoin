@@ -9,7 +9,6 @@ export function setCookie(name: string, value: string, days: number) {
 
 export function getCookie(name: string): string | null {
   const cookies = document.cookie.split("; ");
-  // eslint-disable-next-line no-restricted-syntax
   for (const cookie of cookies) {
     const [key, value] = cookie.split("=");
     if (key === name) return value;

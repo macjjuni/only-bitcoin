@@ -1,14 +1,15 @@
-import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
+import { createConnectionToast } from "@/shared/lib/connectionToast";
 import { isDev, setTitle } from "@/shared/utils/common";
-import { isNetwork } from "@/shared/utils/network";
 import { floorToDecimal } from "@/shared/utils/number";
 import { comma } from "@/shared/utils/string";
 import useBitcoinStore from "../../model/bitcoinStore";
 import { COINBASE_MARKET_FLAG } from "../../model/market";
 
 const COINBASE_URL = `wss://ws-feed.exchange.coinbase.com`;
+
+const notifyConnected = createConnectionToast("코인베이스 연결!");
 
 export default function useCoinbaseSocket() {
   // region [Hooks]
@@ -45,14 +46,14 @@ export default function useCoinbaseSocket() {
       reconnectionDelayGrowFactor: 1.5,
       minUptime: 5000,
       connectionTimeout: 3000,
-      maxRetries: 10,
       maxEnqueuedMessages: 100,
+      // maxRetries 는 안 줌. 기본값이 무한 재시도라 끊겨도 계속 다시 붙음.
       startClosed: false,
       debug: false,
     });
 
     socket.onopen = () => {
-      kToast.success("코인베이스 연결!");
+      notifyConnected();
       if (isDev) console.log("✅ 코인베이스 소켓 연결");
 
       // [중요] 코인베이스는 연결 후 구독 메시지를 보내야 함
@@ -87,10 +88,7 @@ export default function useCoinbaseSocket() {
 
     socket.onerror = (e) => {
       console.error("Coinbase WebSocket Error:", e);
-
-      if (!isNetwork()) {
-        socket.close();
-      }
+      // 여기서 close() 를 부르면 안 됨. 재연결이 꺼져서 네트워크가 돌아와도 안 붙었음.
     };
 
     socket.onclose = (e) => {

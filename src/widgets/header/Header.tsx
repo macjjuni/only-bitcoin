@@ -11,8 +11,6 @@ import { GlitchWordmark, TransitionLink } from "@/shared/ui";
 import ConnectionDot from "./components/connection-dot/ConnectionDot";
 import SettingButton from "./components/setting-button/SettingButton";
 
-const TRANSITION_DURATION = 420;
-
 /** 헤더 워드마크에 쓰는 글리치 프리셋. 모든 페이지에 상주하는 자리라 가장 약한 Whisper 를 쓴다. */
 const HEADER_GLITCH_PRESET = GLITCH_PRESETS[0];
 
@@ -56,8 +54,9 @@ export default function Header() {
         // `<alpha-value>` 플레이스홀더 없는 `hsl(var(--background))` 라서 알파 수정자가 먹지 않는다.
         "bg-[hsl(var(--background)/0.72)] backdrop-blur-[4px]",
         "flex justify-between items-center gap-1 w-full h-header p-2 pb-1.5",
-        "z-[10] select-none tap-highlight-transparent",
-        `transition-transform duration-[${TRANSITION_DURATION}ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]`,
+        "z-[10] select-none",
+        // 클래스는 리터럴로 써야 함. 변수로 조립하면 Tailwind 가 못 찾아서 기본 150ms 로 돌았음.
+        "transition-transform duration-[420ms] ease-[cubic-bezier(0.25,0.1,0.25,1)]",
         isHeaderHidden ? "-translate-y-full" : "translate-y-0",
       ]
         .filter(Boolean)

@@ -22,7 +22,7 @@ export default function TreasuryLoading() {
         </div>
       </section>
 
-      <section className="flex flex-col gap-3 rounded-xl border border-border p-4">
+      <section className="flex flex-col gap-3 card-surface p-4">
         <div className="flex items-center justify-between">
           <div className={`h-5 w-32 ${SKELETON_BLOCK}`} />
           <div className={`h-3 w-10 ${SKELETON_BLOCK}`} />

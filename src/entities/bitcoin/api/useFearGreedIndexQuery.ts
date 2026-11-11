@@ -40,7 +40,7 @@ const useFearGreedIndex = (initialFearGreedIndex = 0) => {
     refetchOnMount: true,
     retry: 3,
     initialData: initialFearGreedIndex || undefined,
-    // 서버 값은 최대 12시간 캐시된 값이므로 즉시 stale 로 두어 마운트 직후 재조회시킨다.
+    // 서버 값은 최대 1시간 캐시된 값이므로 즉시 stale 로 두어 마운트 직후 재조회시킨다.
     initialDataUpdatedAt: 0,
   });
   // endregion

@@ -141,7 +141,6 @@ const HalvingCountdown = ({ initialBlockHeight }: HalvingCountdownProps) => {
       return;
     }
 
-    // eslint-disable-next-line react-hooks/purity
     setTargetTime(Date.now() + restBlockCount * BLOCK_INTERVAL_MS);
   }, [restBlockCount]);
 

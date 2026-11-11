@@ -24,7 +24,6 @@ export default function Content({
         "only-btc__content",
         `flex flex-col flex-1 min-h-0 w-full mx-auto max-w-layout${hasHeader ? " pt-header" : ""}`,
         "overflow-y-auto overflow-x-hidden overscroll-contain",
-        "transition-opacity duration-500 ease-in-out",
         fadeInClasses,
         className,
       ]
