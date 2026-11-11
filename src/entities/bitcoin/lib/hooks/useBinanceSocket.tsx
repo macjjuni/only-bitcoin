@@ -1,13 +1,15 @@
-import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
-import { isDev } from "@/shared/utils/common";
-import { isNetwork } from "@/shared/utils/network";
+import { createConnectionToast } from "@/shared/lib/connectionToast";
+import { isDev, setTitle } from "@/shared/utils/common";
 import { floorToDecimal } from "@/shared/utils/number";
+import { comma } from "@/shared/utils/string";
 import useBitcoinStore from "../../model/bitcoinStore";
 import { BINANCE_MARKET_FLAG } from "../../model/market";
 
 const BINANCE_URL = `wss://stream.binance.com:9443/ws/btcusdt@ticker`;
+
+const notifyConnected = createConnectionToast("바이낸스 연결!");
 
 export default function useBinanceSocket() {
   // region [Hooks]
@@ -25,6 +27,7 @@ export default function useBinanceSocket() {
       const { setBitcoinUsdPrice } = useBitcoinStore.getState();
       const usdChange24hStr = floorToDecimal(Number(usdChange24h), 2).toString();
 
+      setTitle(comma(price.toFixed(0)));
       setBitcoinUsdPrice({
         usd: price,
         usdChange24h: usdChange24hStr,
@@ -37,13 +40,13 @@ export default function useBinanceSocket() {
 
   const connect = useCallback(() => {
     const socket = new ReconnectingWebSocket(BINANCE_URL, [], {
-      maxReconnectionDelay: 8000, // 재연결 최대 지연: 10초
+      maxReconnectionDelay: 8000, // 재연결 최대 지연: 8초
       minReconnectionDelay: 1000, // 재연결 최소 지연: 1초
       reconnectionDelayGrowFactor: 1.5, // 재시도 간 딜레이 증가 비율
       minUptime: 5000, // 연결이 최소 유지되어야 하는 시간 (5초)
-      connectionTimeout: 3000, // 연결 시도 타임아웃: 4초
-      maxRetries: 10, // 10회 재시도 (실서비스 기준)
+      connectionTimeout: 3000, // 연결 시도 타임아웃: 3초
       maxEnqueuedMessages: 100, // 연결 안 된 동안 큐에 쌓을 메시지 수 제한
+      // maxRetries 는 안 줌. 기본값이 무한 재시도라 끊겨도 계속 다시 붙음.
       startClosed: false, // 생성 직후 자동 연결
       debug: false, // 디버깅 로그 출력 여부
     });
@@ -51,7 +54,7 @@ export default function useBinanceSocket() {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      kToast.success("바이낸스 연결!");
+      notifyConnected();
       if (isDev) console.log("✅ 바이낸스 소켓 연결");
     };
 
@@ -69,10 +72,7 @@ export default function useBinanceSocket() {
 
     socket.onerror = (e) => {
       console.warn("Binance WebSocket Error:", e);
-
-      if (!isNetwork()) {
-        socket.close();
-      }
+      // 여기서 close() 를 부르면 안 됨. 재연결이 꺼져서 네트워크가 돌아와도 안 붙었음.
     };
 
     socket.onclose = (e) => {

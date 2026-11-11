@@ -107,7 +107,7 @@ export default function useBtcLiveCandles(): BtcLiveCandles {
       minReconnectionDelay: 1000,
       reconnectionDelayGrowFactor: 1.5,
       connectionTimeout: 3000,
-      maxRetries: 10,
+      // maxRetries 는 안 줌. 기본값이 무한 재시도임.
     });
 
     socket.onopen = () => {

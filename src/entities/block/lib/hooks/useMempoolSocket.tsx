@@ -1,6 +1,7 @@
 import { kToast } from "kku-ui";
 import { useCallback, useEffect, useRef } from "react";
 import ReconnectingWebSocket from "reconnecting-websocket";
+import { createConnectionToast } from "@/shared/lib/connectionToast";
 import useConfettiStore from "@/shared/stores/confettiStore";
 import { deepEqual, isDev } from "@/shared/utils/common";
 import { comma } from "@/shared/utils/string";
@@ -9,6 +10,8 @@ import useBlockStore from "../../model/blockStore";
 import type { MemPoolBlockTypes, MempoolInfoMessage } from "../../model/types";
 
 const MEMPOOL_WS_URL = "wss://mempool.space/api/v1/ws";
+
+const notifyConnected = createConnectionToast("Mempool 연결!");
 
 export default function useMempoolSocket(shouldShowMiningEffects: boolean) {
   const socketRef = useRef<ReconnectingWebSocket | null>(null);
@@ -73,13 +76,13 @@ export default function useMempoolSocket(shouldShowMiningEffects: boolean) {
 
   const connect = useCallback(() => {
     const socket = new ReconnectingWebSocket(MEMPOOL_WS_URL, [], {
-      maxReconnectionDelay: 8000, // 재연결 최대 지연: 10초
+      maxReconnectionDelay: 8000, // 재연결 최대 지연: 8초
       minReconnectionDelay: 1000, // 재연결 최소 지연: 1초
       reconnectionDelayGrowFactor: 1.5, // 재시도 간 딜레이 증가 비율
       minUptime: 5000, // 연결이 최소 유지되어야 하는 시간 (5초)
-      connectionTimeout: 3000, // 연결 시도 타임아웃: 4초
-      maxRetries: 10, // 무한 재시도 (실서비스 기준)
+      connectionTimeout: 3000, // 연결 시도 타임아웃: 3초
       maxEnqueuedMessages: 100, // 연결 안 된 동안 큐에 쌓을 메시지 수 제한
+      // maxRetries 는 안 줌. 기본값이 무한 재시도라 끊겨도 계속 다시 붙음.
       startClosed: false, // 생성 직후 자동 연결
       debug: false, // 디버깅 로그 출력 여부
     });
@@ -87,7 +90,7 @@ export default function useMempoolSocket(shouldShowMiningEffects: boolean) {
     socket.binaryType = "arraybuffer";
 
     socket.onopen = () => {
-      kToast.success("Mempool 연결!");
+      notifyConnected();
       if (isDev) {
         console.log("✅ Mempool 소켓 연결");
       }
