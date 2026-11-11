@@ -5,14 +5,15 @@ import { useEffect } from "react";
 
 interface M2BtcErrorProps {
   error: Error & { digest?: string };
-  reset: () => void;
+  /** 서버 조회부터 다시 함. `reset` 은 다시 그리기만 해서 서버 오류엔 소용없음. */
+  retry: () => void;
 }
 
 /** M2 또는 BTC 서버 조회가 실패했을 때 페이지 안에서 재시도를 제공한다. */
-export default function M2BtcError({ error, reset }: M2BtcErrorProps) {
+export default function M2BtcError({ error, retry }: M2BtcErrorProps) {
   // region [Events]
   const onClickRetryButton = (): void => {
-    reset();
+    retry();
   };
   // endregion
 

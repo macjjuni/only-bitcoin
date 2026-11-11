@@ -5,7 +5,8 @@ import { useEffect } from "react";
 
 interface CagrErrorProps {
   error: Error & { digest?: string };
-  reset: () => void;
+  /** 서버 조회부터 다시 함. `reset` 은 다시 그리기만 해서 서버 오류엔 소용없음. */
+  retry: () => void;
 }
 
 /**
@@ -15,7 +16,7 @@ interface CagrErrorProps {
  * 루트 `error.tsx` 는 화면 전체를 덮어 헤더·하단 네비까지 사라지는데, 이 페이지는
  * 카드 하나가 못 그려진 것뿐이라 레이아웃을 남겨 두는 편이 나음.
  */
-export default function CagrError({ error, reset }: CagrErrorProps) {
+export default function CagrError({ error, retry }: CagrErrorProps) {
   // region [Life Cycles]
   useEffect(() => {
     console.error("월별 등락률 조회 실패:", error);
@@ -30,7 +31,7 @@ export default function CagrError({ error, reset }: CagrErrorProps) {
         잠시 후 다시 시도해 주세요.
       </p>
 
-      <KButton onClick={reset}>다시 시도</KButton>
+      <KButton onClick={retry}>다시 시도</KButton>
     </div>
   );
 }

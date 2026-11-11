@@ -130,7 +130,8 @@ const nextConfig: NextConfig = {
     NEXT_PUBLIC_MODEL_ASSET_VERSIONS: JSON.stringify(MODEL_ASSET_VERSIONS),
   },
   compiler: {
-    removeConsole: process.env.NODE_ENV === "production",
+    // error·warn 은 남김. 전부 지우면 서버 조회 실패 로그까지 사라져서 장애 원인을 못 봄.
+    removeConsole: process.env.NODE_ENV === "production" ? { exclude: ["error", "warn"] } : false,
   },
   allowedDevOrigins: ["192.168.68.*"],
   devIndicators: false,

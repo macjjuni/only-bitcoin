@@ -36,32 +36,44 @@ export default function useUsdExchangeRate() {
     return { value, date: getCurrentDate() };
   }, []);
 
-  const onError = useCallback(() => {
-    if (!query?.error) {
+  /**
+   * 조회 실패 처리.
+   *
+   * 받아 둔 환율이 있으면 그대로 둠. 1분마다 다시 받는데 한 번 실패했다고 0 으로
+   * 덮으면 프리미엄 계산이 전부 깨짐. 한 번도 못 받았을 때만 실패 표시를 남김.
+   */
+  const markExchangeRateError = useCallback(
+    (error: unknown) => {
+      console.error("환율 데이터 업데이트 실패:", error);
+
+      if (useBitcoinStore.getState().exRate.value === 0) {
+        setExRate({ value: 0, date: "Update error." });
+      }
+    },
+    [setExRate],
+  );
+
+  useEffect(() => {
+    if (!query.data) {
       return;
     }
 
-    console.error(query.error);
-    setExRate({ value: 0, date: "Update error." });
-  }, []);
+    const exRateData = parseExchangeRate(query.data);
 
-  useEffect(() => {
-    if (query.data) {
-      const exRateData = parseExchangeRate(query.data);
-      if (exRateData) {
-        setExRate(exRateData);
-        if (isDev) {
-          console.log("✅ 환율 데이터 초기화!");
-        }
-        return;
-      }
+    if (!exRateData) {
+      markExchangeRateError(new Error("환율 응답에 원화 항목이 없습니다."));
+      return;
     }
-    onError();
+
+    setExRate(exRateData);
+    if (isDev) {
+      console.log("✅ 환율 데이터 초기화!");
+    }
   }, [query.data, isUsdtStandard]);
 
   useEffect(() => {
     if (query.error) {
-      onError();
+      markExchangeRateError(query.error);
     }
   }, [query.error]);
 

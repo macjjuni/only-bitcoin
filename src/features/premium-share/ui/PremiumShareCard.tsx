@@ -27,6 +27,9 @@ function buildCurrentShareUrl(): string {
   return new URL("/premium", env.NEXT_PUBLIC_URL).toString();
 }
 
+/** 시세를 못 받았을 때 숫자 자리에 찍는 글자. */
+const ERROR_TEXT = "error";
+
 export interface PremiumShareCardProps {
   cardRef?: RefObject<HTMLDivElement | null>;
 }
@@ -43,20 +46,22 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
   const [capturedAtKst] = useState<string>(getCurrentDateTimeKST);
   const [shareUrl, setShareUrl] = useState("");
 
-  const krw = socketKrw || 142500000;
-  const usd = socketUsd || 95200;
-  const usdExRate = storeExRate || 1450;
+  const krw = socketKrw;
+  const usd = socketUsd;
+  const usdExRate = storeExRate;
 
-  const { diffKrw, diffUsd } = useMemo(() => {
-    const usdKoreaPrice = usdExRate ? krw / usdExRate : 0;
-    const krwGlobalPrice = usd * usdExRate;
+  /**
+   * 시세나 환율이 아직 0 이면 가짜 숫자로 채우지 않고 `error` 를 찍음.
+   * 예전엔 하드코딩한 값으로 카드를 그려서 틀린 숫자가 공유될 수 있었음.
+   */
+  const hasUsdInKrw = usd > 0 && usdExRate > 0;
+  const hasAllPrices = krw > 0 && hasUsdInKrw;
 
-    return { diffKrw: krw - krwGlobalPrice, diffUsd: usdKoreaPrice - usd };
-  }, [krw, usd, usdExRate]);
+  const diffKrw = hasAllPrices ? krw - usd * usdExRate : 0;
 
   const PremiumPercent = useMemo(
-    () => calcPremiumPercent(krw, usd, usdExRate),
-    [krw, usd, usdExRate],
+    () => (hasAllPrices ? calcPremiumPercent(krw, usd, usdExRate) : 0),
+    [hasAllPrices, krw, usd, usdExRate],
   );
 
   const isPositive = PremiumPercent > 0;
@@ -135,7 +140,13 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
                 style={{ backgroundColor: themeColor }}
               />
             </span>
-            {isPositive ? "한국 프리미엄" : isNegative ? "역프리미엄" : "동일 시세"}
+            {!hasAllPrices
+              ? ERROR_TEXT
+              : isPositive
+                ? "한국 프리미엄"
+                : isNegative
+                  ? "역프리미엄"
+                  : "동일 시세"}
           </span>
         </div>
 
@@ -156,14 +167,16 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
             className="text-[56px] font-black font-number tracking-tight leading-[1.35]"
             style={{ textShadow: `0 0 25px ${themeColor}60` }}
           >
-            {PremiumPercent.toFixed(2)}
+            {hasAllPrices ? PremiumPercent.toFixed(2) : ERROR_TEXT}
           </span>
-          <span
-            className="text-4xl font-black ml-0.5 leading-[1.35]"
-            style={{ textShadow: `0 0 25px ${themeColor}60` }}
-          >
-            %
-          </span>
+          {hasAllPrices && (
+            <span
+              className="text-4xl font-black ml-0.5 leading-[1.35]"
+              style={{ textShadow: `0 0 25px ${themeColor}60` }}
+            >
+              %
+            </span>
+          )}
         </div>
 
         {/* 비교 블록 */}
@@ -173,11 +186,12 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
             {!isUsdtStandard && <span>환율:</span>}
             <span className="text-white font-number">
               1 {!isUsdtStandard ? "USD" : "USDT"} ={" "}
-              {usdExRate.toLocaleString("ko-KR", {
-                minimumFractionDigits: 1,
-                maximumFractionDigits: 1,
-              })}{" "}
-              KRW
+              {usdExRate > 0
+                ? `${usdExRate.toLocaleString("ko-KR", {
+                    minimumFractionDigits: 1,
+                    maximumFractionDigits: 1,
+                  })} KRW`
+                : ERROR_TEXT}
             </span>
           </div>
 
@@ -193,7 +207,7 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
           </div>
           <div className="flex items-baseline justify-start gap-2">
             <span className="text-2xl font-black text-white tracking-tight font-number">
-              ₩{krw.toLocaleString()}
+              {krw > 0 ? `₩${krw.toLocaleString()}` : ERROR_TEXT}
             </span>
             {currency.includes("KRW") && diffKrw !== 0 && (
               <span
@@ -217,11 +231,13 @@ function PremiumShareCard({ cardRef }: PremiumShareCardProps) {
           </div>
           <div className="flex items-baseline justify-start gap-2">
             <span className="text-2xl font-black text-white tracking-tight font-number">
-              ₩{Math.round(usd * usdExRate).toLocaleString()}
+              {hasUsdInKrw ? `₩${Math.round(usd * usdExRate).toLocaleString()}` : ERROR_TEXT}
             </span>
-            <span className="text-sm font-bold tracking-tight text-white/50 font-number">
-              ${usd.toLocaleString("en-US", { maximumFractionDigits: 0 })}
-            </span>
+            {usd > 0 && (
+              <span className="text-sm font-bold tracking-tight text-white/50 font-number">
+                ${usd.toLocaleString("en-US", { maximumFractionDigits: 0 })}
+              </span>
+            )}
           </div>
         </div>
 

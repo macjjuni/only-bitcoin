@@ -93,11 +93,15 @@ export default function OverviewChartShell<T extends string | number>({
 
   return (
     <div className="relative flex flex-col justify-between gap-2 -mx-2 w-[calc(100%+1rem)] select-none overflow-hidden">
-      <div className="flex justify-between items-center px-2 py-0.5">
+      <div className="flex justify-between items-center gap-1 px-2 py-0.5">
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-2 relative">
+          {/*
+            좁은 화면에서 현재값·등락률이 기간 버튼 밑으로 넘쳤음. ( Hashrate · All 이 가장 김 )
+            380px 아래에서는 글자를 한 단계 줄이고, 그래도 모자라면 값이 다음 줄로 내려감.
+          */}
+          <div className="flex flex-wrap items-center gap-x-2 gap-y-0.5 relative max-[380px]:gap-x-1.5">
             <KDropdownMenu>
-              <KDropdownMenuTrigger className="flex items-center gap-0.5 text-[20px] leading-6 font-bold">
+              <KDropdownMenuTrigger className="flex shrink-0 items-center gap-0.5 whitespace-nowrap text-[20px] leading-6 font-bold max-[380px]:text-[17px]">
                 <ChartColumnIcon size={20} className="mr-1" />
                 {selectedChartLabel}
                 <ChevronDown size={16} />
@@ -120,8 +124,8 @@ export default function OverviewChartShell<T extends string | number>({
             </KDropdownMenu>
 
             {title && (
-              <div className="flex items-center gap-1">
-                <span className="text-sm font-number font-bold">{title}</span>
+              <div className="flex items-center gap-1 whitespace-nowrap">
+                <span className="text-sm font-number font-bold max-[380px]:text-xs">{title}</span>
                 {percentage !== undefined && Math.abs(percentage) > 0.01 && (
                   <span
                     className={`flex justify-center items-center font-number font-bold text-[12px] leading-4 ${percentage >= 0 ? "text-up" : "text-down"}`}
