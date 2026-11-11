@@ -6,7 +6,7 @@ export interface BlockTypes {
   timestamp: number; // 블록 생성 타임스탬프
   size: number;
   poolName: string;
-  difficulty: number; // 채굴 난이도. persist 된 구버전 캐시에는 없을 수 있어 getCurrentDifficulty 로 읽는다.
+  difficulty: number; // 채굴 난이도. persist 된 구버전 캐시에는 없을 수 있음.
   txCount?: number; // 블록에 담긴 거래 수. 구버전 캐시에는 없음.
 }
 

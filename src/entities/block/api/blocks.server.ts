@@ -22,12 +22,6 @@ const REVALIDATE_SECONDS = 60 * 10;
  */
 export const BLOCK_HEIGHT_REVALIDATE_SECONDS = 60 * 60;
 
-/**
- * 채굴 난이도만 쓰는 화면용 주기(초). 6시간.
- * 난이도는 2016블록( 약 2주 )마다 한 번 바뀌므로 더 자주 읽을 이유가 없음.
- */
-export const DIFFICULTY_REVALIDATE_SECONDS = 60 * 60 * 6;
-
 const EMPTY_BLOCK_DATA: InitialBlocks = {
   blocks: [{ id: "", height: 0, timestamp: 0, size: 0, poolName: "-", difficulty: 0 }],
   fees: { economyFee: 0, fastestFee: 0, halfHourFee: 0, hourFee: 0, minimumFee: 0 },

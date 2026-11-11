@@ -8,6 +8,5 @@
  */
 export {
   BLOCK_HEIGHT_REVALIDATE_SECONDS,
-  DIFFICULTY_REVALIDATE_SECONDS,
   fetchInitialBlocks,
 } from "./api/blocks.server";
