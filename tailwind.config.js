@@ -141,6 +141,11 @@ export default {
             filter: "drop-shadow(0 0 26px rgba(var(--surge-glow-rgb), 0.65))",
           },
         },
+        // 블록 화면 첫 진입 때 채굴된 블록이 오른쪽에서 들어와 붙는 움직임.
+        blockEnter: {
+          "0%": { opacity: "0", transform: "translateX(100%)" },
+          "100%": { opacity: "1", transform: "translateX(0)" },
+        },
         priceLivePulse: {
           "0%": { transform: "scale(0.5)", opacity: "0.5" },
           "70%": { opacity: "0" },
@@ -167,6 +172,8 @@ export default {
         "surge-text-flicker": "surgeTextFlicker 2.2s ease-in-out infinite",
         "space-bubble-life": "spaceBubbleLife 5s cubic-bezier(0.16, 1, 0.3, 1) both",
         "price-live-pulse": "priceLivePulse 1.9s ease-out infinite",
+        // backwards: 차례가 오기 전에는 0% 상태( 안 보임 )로 대기하고, 끝나면 transform 을 남기지 않음.
+        "block-enter": "blockEnter 0.5s cubic-bezier(0.16, 1, 0.3, 1) backwards",
       },
     },
   },

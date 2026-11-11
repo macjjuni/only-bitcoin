@@ -6,8 +6,18 @@ import { SwiperSlide } from "swiper/react";
 import { bytesToMB } from "@/shared/utils/number";
 import { formatBlockElapsedTime } from "../../../lib/formatBlockTime";
 
+/** 들어오는 블록 사이 간격. */
+const BLOCK_ENTER_STAGGER_IN_MILLISECONDS = 70;
+/**
+ * 간격을 늘리는 마지막 순번. 한 화면에 3칸만 보여서 그 뒤는 같은 시점에 들어옴.
+ * 끝까지 늘리면 옆으로 넘겼을 때 아직 안 나온 블록이 보임.
+ */
+const BLOCK_ENTER_MAX_STAGGER_ORDER = 4;
+
 interface BlockSwiperSlideProps {
   currentTimeInMilliseconds: number | null;
+  /** 첫 진입 때 오른쪽에서 들어올 순번( 0 부터 ). 없으면 움직임 없이 바로 보임. */
+  enterOrder?: number;
   id?: string;
   height?: number;
   timestamp?: number;
@@ -23,6 +33,7 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
   // region [Hooks]
   const {
     currentTimeInMilliseconds,
+    enterOrder,
     isUnmined,
     isGenesis,
     id,
@@ -34,6 +45,7 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
     onClickGenesis,
   } = props;
   const isDefaultRender = useMemo(() => !isUnmined, [isUnmined]);
+  const hasEnterMotion = enterOrder !== undefined;
 
   // 상태별 동적 스타일 생성
   const blockThemeClass = useMemo(() => {
@@ -80,10 +92,23 @@ const BlockSwiperSlide = (props: BlockSwiperSlideProps) => {
   // endregion
 
   return (
-    <SwiperSlide className="relative pt-[20px] pr-0  pb-2 pl-[20px] cursor-pointer !-translate-x-[64px]">
+    /*
+      폭과 간격을 CSS 로 미리 맞춰 둠. Swiper 는 JS 가 뜬 뒤에야 폭을 넣어 주는데, 그 전까지는
+      기본값 100% 라 서버 HTML 에서 맨 앞 미채굴 블록이 화면 폭만큼 늘어나 보였음.
+      `BlocksVisualizer` 의 slidesPerView 3 · spaceBetween 6 과 같은 값이어야 함.
+    */
+    <SwiperSlide className="relative !w-[calc((100%-12px)/3)] mr-[6px] pt-[20px] pr-0  pb-2 pl-[20px] cursor-pointer !-translate-x-[64px]">
       <div
         onClick={onClickBlock}
+        style={
+          hasEnterMotion
+            ? {
+                animationDelay: `${Math.min(enterOrder, BLOCK_ENTER_MAX_STAGGER_ORDER) * BLOCK_ENTER_STAGGER_IN_MILLISECONDS}ms`,
+              }
+            : undefined
+        }
         className={[
+          hasEnterMotion && "animate-block-enter motion-reduce:animate-none",
           "relative flex flex-col justify-between items-center gap-1.5 p-1.5 text-white font-bold transition-all duration-300",
           "h-[calc((100dvw-88px)/3)] layout-max:h-[calc((524px-88px)/3)] layout-max:p-2",
           isUnmined && " animate-blink-gold",

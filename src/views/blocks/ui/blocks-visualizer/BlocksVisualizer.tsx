@@ -22,6 +22,13 @@ const BlocksVisualizer = ({ initialBlocks }: BlocksVisualizerProps) => {
   const storeBlockData = useBlockStore((state) => state.blockData);
   const [isGenesisBlockModal, setIsGenesisBlockModal] = useState(false);
   const [currentTimeInMilliseconds, setCurrentTimeInMilliseconds] = useState<number | null>(null);
+  /**
+   * 첫 진입 때 오른쪽에서 들어올 블록과 그 순번. 서버가 내려준 목록으로 한 번만 정함.
+   * 나중에 소켓으로 새로 붙는 블록은 여기 없어서 움직임 없이 바로 보임.
+   */
+  const [enterOrderByBlockID] = useState(
+    () => new Map(initialBlocks.map((block, index) => [block.id, index])),
+  );
 
   // 소켓이 값을 채우기 전(= 서버 렌더링 및 첫 페인트)에는 SSR 값으로 대체한다.
   const blockData = storeBlockData[0]?.height ? storeBlockData : initialBlocks;
@@ -74,6 +81,7 @@ const BlocksVisualizer = ({ initialBlocks }: BlocksVisualizerProps) => {
               key={block.id}
               {...block}
               currentTimeInMilliseconds={currentTimeInMilliseconds}
+              enterOrder={enterOrderByBlockID.get(block.id)}
               onClick={onClickBlock}
             />
           ))}
