@@ -111,6 +111,29 @@ describe("공간 공통 시세와 연출", () => {
     ).toHaveLength(2);
   });
 
+  it("빈 방에 남은 급등 상태는 다음 입장자에게 기본 음악으로 돌려준다", async () => {
+    const { monitor, room, frames } = createHarness();
+    room.price = 101;
+    await monitor.poll();
+    room.occupied = false;
+    await monitor.stopIfEmpty();
+    vi.advanceTimersByTime(3_600_000);
+    room.occupied = true;
+    const state = await monitor.start();
+    expect(state).toMatchObject({ track: "base", direction: null, celebration: null });
+    expect(state.revision).toBeGreaterThan(
+      (frames[0] as Extract<SpaceServerFrame, { t: "market" }>).state.revision,
+    );
+    // 잠깐 비었다 돌아온 경우에는 진행 중인 급등을 유지한다.
+    room.price = 101;
+    await monitor.poll();
+    room.occupied = false;
+    await monitor.stopIfEmpty();
+    vi.advanceTimersByTime(30_000);
+    room.occupied = true;
+    expect((await monitor.start()).track).toBe("surge");
+  });
+
   it("조회 실패는 상승 종료로 취급하지 않고 429 재시도 간격을 지킨다", async () => {
     const { monitor, room, feed, frames, storage } = createHarness();
     room.price = 101;

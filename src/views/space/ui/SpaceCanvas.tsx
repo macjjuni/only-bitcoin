@@ -107,6 +107,10 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   const [hasPerformanceStats] = useState(
     () => new URLSearchParams(window.location.search).get("stats") === "1",
   );
+  /** `?celebrate=1` 로만 폭죽 테스트 버튼을 켠다. 누르면 방 전체에 터져서 일반 접속자에게는 숨긴다. */
+  const [hasCelebrationTest] = useState(
+    () => new URLSearchParams(window.location.search).get("celebrate") === "1",
+  );
 
   /**
    * 고른 아바타 모델.
@@ -361,7 +365,8 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
       <SpaceHud
         bgm={bgm}
         canTestCelebration={
-          dummyCount > 0 || (session.canSyncMarket && session.presence.status === "online")
+          hasCelebrationTest &&
+          (dummyCount > 0 || (session.canSyncMarket && session.presence.status === "online"))
         }
         onCelebrate={onCelebrate}
         inputSource={inputSource}

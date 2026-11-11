@@ -77,9 +77,26 @@ export class SpaceMarketMonitor {
 
   start(): Promise<SpaceMarketState> {
     return this.enqueue(async () => {
-      const saved = await this.load();
+      let saved = await this.load();
       if (this.hasOccupants() && (await this.storage.getAlarm()) === null) {
-        await this.storage.setAlarm(Math.max(Date.now() + 1, saved.nextPollAt));
+        const now = Date.now();
+        const isStale = now - saved.nextPollAt > SPACE_BGM_SURGE.stalePriceMs;
+        // 방이 빈 동안 멈춘 급등 판정을 다음 입장자에게 그대로 들려주지 않는다.
+        if (isStale && (saved.state.track !== "base" || saved.state.prefetch)) {
+          const state: SpaceMarketState = {
+            revision: saved.state.revision + 1,
+            track: "base",
+            direction: null,
+            startsAt: now,
+            prefetch: false,
+            celebration: null,
+          };
+          saved = { ...saved, state, surge: createSurgeState() };
+          await this.storage.put(STORAGE_KEY, saved);
+          this.saved = saved;
+          this.broadcast({ v: SPACE_PROTOCOL_VERSION, t: "market", state, serverAt: now });
+        }
+        await this.storage.setAlarm(Math.max(now + 1, saved.nextPollAt));
       }
       return saved.state;
     });

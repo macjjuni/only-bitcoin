@@ -36,6 +36,7 @@ const useSpaceBgm = ({ market, serverClockOffsetMs }: SpaceBgmOptions): SpaceBgm
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const marketRef = useRef(market);
   const clockOffsetRef = useRef(serverClockOffsetMs);
+  const blockedPlaybackRef = useRef<(() => void) | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isUnavailable, setIsUnavailable] = useState(false);
   const [isSurging, setIsSurging] = useState(false);
@@ -93,7 +94,11 @@ const useSpaceBgm = ({ market, serverClockOffsetMs }: SpaceBgmOptions): SpaceBgm
     alignPosition(audio, startsAt);
     try {
       await audio.play();
-      if (generation !== generationRef.current || !enabledRef.current) {
+      if (generation !== generationRef.current) {
+        return false;
+      }
+      if (!enabledRef.current) {
+        audio.pause();
         return false;
       }
       alignPosition(audio, startsAt);
@@ -126,6 +131,8 @@ const useSpaceBgm = ({ market, serverClockOffsetMs }: SpaceBgmOptions): SpaceBgm
         setIsPlaying(false);
         setIsSurging(false);
         setIsUnavailable((error as DOMException).name !== "NotAllowedError" && track === "base");
+        // 새 시도로 교체된 취소는 위에서 걸러졌다. 실제로 막힌 재생만 첫 조작을 기다린다.
+        blockedPlaybackRef.current?.();
       }
       return false;
     } finally {
@@ -189,17 +196,19 @@ const useSpaceBgm = ({ market, serverClockOffsetMs }: SpaceBgmOptions): SpaceBgm
         void startPlayback();
       }
     };
+    blockedPlaybackRef.current = (): void => {
+      if (!disposed && loadBgmEnabled()) {
+        enabledRef.current = false;
+        window.addEventListener("pointerdown", onFirstGesture);
+        window.addEventListener("keydown", onFirstGesture);
+      }
+    };
     if (loadBgmEnabled()) {
-      void startPlayback().then((started) => {
-        if (!started && !disposed && loadBgmEnabled()) {
-          enabledRef.current = false;
-          window.addEventListener("pointerdown", onFirstGesture);
-          window.addEventListener("keydown", onFirstGesture);
-        }
-      });
+      void startPlayback();
     }
     return () => {
       disposed = true;
+      blockedPlaybackRef.current = null;
       window.removeEventListener("pointerdown", onFirstGesture);
       window.removeEventListener("keydown", onFirstGesture);
       stopPlayback();
