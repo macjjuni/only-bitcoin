@@ -1,8 +1,7 @@
-import { COIN_MARKET_TOP_COUNT } from "@/entities/coin-market";
+import { buildCoinMapSummary, COIN_MARKET_TOP_COUNT } from "@/entities/coin-market";
 import { fetchCoinMarketSnapshot } from "@/entities/coin-market/server";
 import { HeatmapShareDialog } from "@/features/heatmap-share";
 import { Card, CardContent, UpdatedAtBar } from "@/shared/ui";
-import { buildCoinMapSummary } from "../lib/buildCoinMapSummary";
 import { buildHeatmapShareData } from "../lib/buildHeatmapShareData";
 import CoinShareListCard from "./CoinShareListCard";
 import CoinTreemapCard from "./CoinTreemapCard";

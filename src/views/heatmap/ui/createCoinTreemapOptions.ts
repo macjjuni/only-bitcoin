@@ -1,7 +1,11 @@
 import type { ApexOptions } from "apexcharts";
-import type { CoinMapTile } from "../lib/buildCoinMapSummary";
-import { formatCompactUsd, formatDailyChange, formatSharePercent } from "../lib/formatCoinMap";
-import { resolveTileColor } from "../lib/resolveTileColor";
+import type { CoinMapTile } from "@/entities/coin-market";
+import {
+  formatCompactUsd,
+  formatDailyChange,
+  formatSharePercent,
+  resolveTileColor,
+} from "@/entities/coin-market";
 
 // region [Privates]
 const escapeHtml = (value: string): string => {

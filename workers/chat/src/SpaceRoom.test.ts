@@ -488,7 +488,7 @@ describe("SpaceRoom", () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  it("재전송 rid는 sender에만 같은 ID를 echo하며 3초 쿨다운과 본문 재사용을 검증한다", async () => {
+  it("재전송 rid는 sender에만 같은 ID를 echo하며 2초 쿨다운과 본문 재사용을 검증한다", async () => {
     const { join, send } = createRoom();
     const sender = await join(clientKey(1));
     const observer = await join(clientKey(2));
@@ -509,7 +509,14 @@ describe("SpaceRoom", () => {
     expect(sender.frames()).toContainEqual(
       expect.objectContaining({ t: "error", code: "RATE_SAY_INTERVAL" }),
     );
-    vi.advanceTimersByTime(3000);
+    vi.advanceTimersByTime(1999);
+    const earlyRid = crypto.randomUUID();
+    await send(sender, { ...frame, rid: earlyRid });
+    expect(sender.frames()).toContainEqual(
+      expect.objectContaining({ t: "error", code: "RATE_SAY_INTERVAL", rid: earlyRid }),
+    );
+    expect(observer.frames().filter((item) => item.t === "say")).toHaveLength(1);
+    vi.advanceTimersByTime(1);
     await send(sender, { ...frame, rid: crypto.randomUUID() });
     expect(observer.frames().filter((item) => item.t === "say")).toHaveLength(2);
   });
@@ -895,6 +902,7 @@ describe("SpaceRoom", () => {
       const { send, kicker, target } = await setUpPair(1);
       const kick = { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat };
       const serverCooldown = SPACE_KICK.cooldownMs - SPACE_KICK.serverCooldownToleranceMs;
+      expect(SPACE_KICK.cooldownMs).toBe(2000);
 
       await send(kicker, kick);
       vi.advanceTimersByTime(serverCooldown - 1);

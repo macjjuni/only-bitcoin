@@ -12,10 +12,10 @@ import type {
 
 // region [Privates]
 /**
- * 서버 캐시 주기(초). 10분.
+ * 서버 캐시 주기(초). 5분.
  * `/heatmap` page.tsx 의 revalidate 리터럴과 항상 같이 바꿔야 함.
  */
-export const COIN_MARKET_REVALIDATE_SECONDS = 600;
+export const COIN_MARKET_REVALIDATE_SECONDS = 300;
 
 const MAX_FETCH_ATTEMPTS = 2;
 const RETRY_DELAY_MS = 1000;

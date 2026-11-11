@@ -13,10 +13,10 @@ export const metadata = createPageMetadata({
 });
 
 /**
- * ISR 주기(초) = 10분.
+ * ISR 주기(초) = 5분.
  * 리터럴이어야 정적 분석됨. `COIN_MARKET_REVALIDATE_SECONDS` 와 같은 값 유지.
  */
-export const revalidate = 600;
+export const revalidate = 300;
 
 export default function CoinMapPage() {
   return (
@@ -40,7 +40,7 @@ export default function CoinMapPage() {
           >
             CoinGecko
           </a>{" "}
-          · 10분마다 갱신합니다.
+          · 5분마다 갱신합니다.
         </p>
         <p>
           비중의 분모는 CoinGecko 가 집계한 전체 암호화폐 시가총액입니다. 기타는 상위 20개를 뺀

@@ -16,7 +16,7 @@ import { SPACE_MAX_ALTITUDE, SPACE_MAX_OCCUPANTS } from "./spaceWorld";
  */
 export const SPACE_PROTOCOL_VERSION = 2;
 export const SPACE_NETWORK_INTERVAL_MS = 100;
-export const SPACE_CHAT_COOLDOWN_MS = 3_000;
+export const SPACE_CHAT_COOLDOWN_MS = 2_000;
 export const SPACE_CHAT_MAX_GRAPHEMES = 100;
 /** 입장할 때 서버가 함께 내려주는 최근 대화 수. */
 export const SPACE_CHAT_HISTORY_COUNT = 50;

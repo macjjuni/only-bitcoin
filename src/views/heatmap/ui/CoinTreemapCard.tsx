@@ -2,14 +2,14 @@
 
 import dynamic from "next/dynamic";
 import { useCallback, useEffect, useMemo, useRef } from "react";
-import useSettingStore from "@/shared/stores/settingStore";
-import { Card, CardContent } from "@/shared/ui";
-import type { CoinMapTile } from "../lib/buildCoinMapSummary";
+import type { CoinMapTile } from "@/entities/coin-market";
 import {
   CHANGE_COLOR_STOPS,
   resolveNeutralTileFill,
   resolveTileColor,
-} from "../lib/resolveTileColor";
+} from "@/entities/coin-market";
+import useSettingStore from "@/shared/stores/settingStore";
+import { Card, CardContent } from "@/shared/ui";
 import { createCoinTreemapOptions } from "./createCoinTreemapOptions";
 
 const ReactApexChart = dynamic(() => import("react-apexcharts"), { ssr: false });

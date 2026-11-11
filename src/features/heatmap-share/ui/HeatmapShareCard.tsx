@@ -4,9 +4,9 @@ import { KIcon } from "kku-ui";
 import { memo, type RefObject, useMemo } from "react";
 import { BITCOIN_COLOR } from "@/shared/config/color";
 import { env, SERVICE_DOMAIN } from "@/shared/config/env";
+import { squarifyTreemap } from "@/shared/lib/treemap";
 import { BtcTextLogo, ShareCardQr } from "@/shared/ui";
 import { BitcoinIcon } from "@/shared/ui/icon";
-import { squarifyTreemap } from "../lib/squarifyTreemap";
 import type { HeatmapShareData, HeatmapShareTile, HeatmapShareTone } from "../model/types";
 
 export const HEATMAP_SHARE_CARD_DESIGN_WIDTH = 440;

@@ -7,6 +7,7 @@ import {
   SPACE_BOUNDS,
   SPACE_CAMERA_BOUNDS,
   SPACE_HALL,
+  SPACE_HEATMAP_FRAME,
   SPACE_MAX_ALTITUDE,
   SPACE_MENU_FRAME,
   SPACE_SCREEN_FRAME,
@@ -41,6 +42,7 @@ interface GltfNode {
   mesh?: number;
   translation?: number[];
   scale?: number[];
+  rotation?: number[];
   extras?: {
     spawn?: boolean;
     lamp?: boolean;
@@ -300,5 +302,20 @@ describe("램프 자리", () => {
 
     expect(lamps.length).toBeGreaterThan(0);
     expect(lamps.every((node) => node.name.startsWith("Lamp_"))).toBe(true);
+  });
+});
+
+describe("벽난로 히트맵", () => {
+  it("추가 화면의 치수·높이·방향을 GLB 앵커와 맞추고 유리 앞에 둔다", () => {
+    const anchor = findNode("Fireplace_Screen_Anchor");
+    const [x, y, z] = toWorld(anchor.translation);
+
+    expect(SPACE_HEATMAP_FRAME.width).toBe(anchor.extras?.width_m);
+    expect(SPACE_HEATMAP_FRAME.height).toBe(anchor.extras?.height_m);
+    expect(SPACE_HEATMAP_FRAME.position[0]).toBeCloseTo(x + 0.02, 5);
+    expect(SPACE_HEATMAP_FRAME.position[1]).toBeCloseTo(y, 5);
+    expect(SPACE_HEATMAP_FRAME.position[2]).toBeCloseTo(z, 5);
+    expect(anchor.rotation?.[1]).toBeCloseTo(Math.sin(SPACE_HEATMAP_FRAME.rotationY / 2), 5);
+    expect(anchor.rotation?.[3]).toBeCloseTo(Math.cos(SPACE_HEATMAP_FRAME.rotationY / 2), 5);
   });
 });

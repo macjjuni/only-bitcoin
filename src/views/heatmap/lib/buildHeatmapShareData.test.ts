@@ -1,7 +1,7 @@
 import { describe, expect, it } from "vitest";
-import type { CoinMapTile } from "./buildCoinMapSummary";
+import type { CoinMapTile } from "@/entities/coin-market";
+import { resolveNeutralTileFill } from "@/entities/coin-market";
 import { buildHeatmapShareData } from "./buildHeatmapShareData";
-import { resolveNeutralTileFill } from "./resolveTileColor";
 
 const createTile = (overrides: Partial<CoinMapTile>): CoinMapTile => ({
   id: "bitcoin",

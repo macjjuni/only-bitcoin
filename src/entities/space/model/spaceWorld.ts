@@ -200,3 +200,12 @@ export const SPACE_OVERLAY_LIMITS = {
   bubbleMaxCount: 12,
   bubbleTtlMs: 5_000,
 } as const;
+
+/** 벽난로 쪽 추가 화면. GLB `Fireplace_Screen_Anchor`의 2:1 표시 영역. */
+export const SPACE_HEATMAP_FRAME = {
+  width: 13,
+  height: 6.5,
+  /** 유리와 겹치지 않도록 앵커에서 실내(+X) 방향으로 2 cm 띄움. */
+  position: [-18.57 + 0.02, 9.2 + SPACE_HALL.mapOffsetY, 4] as const,
+  rotationY: Math.PI / 2,
+} as const;

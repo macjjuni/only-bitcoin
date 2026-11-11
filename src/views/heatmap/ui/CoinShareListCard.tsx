@@ -2,9 +2,9 @@
 
 import { ChevronDown } from "lucide-react";
 import { useId, useState } from "react";
+import type { CoinMapTile } from "@/entities/coin-market";
+import { formatCompactUsd, formatDailyChange, formatSharePercent } from "@/entities/coin-market";
 import { Card, CardContent } from "@/shared/ui";
-import type { CoinMapTile } from "../lib/buildCoinMapSummary";
-import { formatCompactUsd, formatDailyChange, formatSharePercent } from "../lib/formatCoinMap";
 
 interface CoinShareListCardProps {
   tiles: CoinMapTile[];

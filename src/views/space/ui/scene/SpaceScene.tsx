@@ -65,6 +65,7 @@ import PlayerAvatar from "./PlayerAvatar";
 import PriceBillboard from "./PriceBillboard";
 import RemoteAvatars from "./RemoteAvatars";
 import SceneLighting from "./SceneLighting";
+import SpaceHeatmap from "./SpaceHeatmap";
 import SpaceTicker from "./SpaceTicker";
 
 interface SpaceSceneProps {
@@ -506,6 +507,8 @@ function SpaceScene({
 
       {/* 액자 위 가로 띠(28 × 2)에 지표 티커를 흘림. */}
       <SpaceTicker />
+
+      <SpaceHeatmap />
 
       {/* 같은 액자 오른쪽 반쪽에 네트워크 현황판을 끼움. */}
       <group

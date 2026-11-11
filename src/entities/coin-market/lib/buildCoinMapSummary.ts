@@ -1,4 +1,4 @@
-import type { CoinMarketSnapshot } from "@/entities/coin-market";
+import type { CoinMarketSnapshot } from "../model/types";
 
 export type CoinMapTileKind = "bitcoin" | "coin" | "stablecoin" | "others";
 
