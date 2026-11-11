@@ -30,13 +30,13 @@ import {
 } from "@/features/space-controls";
 import type { SpaceSession } from "@/features/space-session";
 import { env } from "@/shared/config/env";
+import { DonationQrDialog } from "@/shared/ui";
 import { useDismissOnOutsidePointer } from "@/views/space/lib/useDismissOnOutsidePointer";
 import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
 import SpaceAvatarPicker from "./SpaceAvatarPicker";
 import { SPACE_CHAT_INPUT_ID } from "./SpaceChatComposer";
 import SpaceChatPanel from "./SpaceChatPanel";
 import SpaceControlGuide from "./SpaceControlGuide";
-import SpaceDonationDialog from "./SpaceDonationDialog";
 import SpaceKeyboardChatBar from "./SpaceKeyboardChatBar";
 import SpaceNicknameEditor from "./SpaceNicknameEditor";
 import SpaceOccupantBadge from "./SpaceOccupantBadge";
@@ -170,7 +170,6 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
 
   const onClickCloseDonation = useCallback((): void => {
     setIsDonationOpen(false);
-    document.getElementById("space-donation-toggle")?.focus();
   }, []);
 
   const onClickToggleAvatarPicker = useCallback((): void => {
@@ -504,9 +503,12 @@ function SpaceHud({ inputSource, session, nickname, modelIndex, onChangeModel }:
 
       {isShareOpen && <SpaceShareDialog onClose={onClickCloseShare} />}
 
-      {isDonationOpen && (
-        <SpaceDonationDialog lightningAddress={DONATION_LIGHTNING_ADDRESS} onClose={onClickCloseDonation} />
-      )}
+      <DonationQrDialog
+        lightningAddress={DONATION_LIGHTNING_ADDRESS}
+        isOpen={isDonationOpen}
+        onClose={onClickCloseDonation}
+        returnFocusID="space-donation-toggle"
+      />
 
       {/* 데스크톱은 접속 표시를 겸한 대화창을 좌측 하단에 늘 띄움. */}
       {!isCoarsePointer && (

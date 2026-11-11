@@ -9,7 +9,6 @@ import {
   KDialogOverlay,
   KDialogPortal,
   KDialogTitle,
-  KDialogTrigger,
   kToast,
 } from "kku-ui";
 import { clipboardUtil } from "kku-util";
@@ -19,21 +18,37 @@ import ShareCardQr from "./ShareCardQr";
 
 export interface DonationQrDialogProps {
   lightningAddress: string;
-  isDisabled?: boolean;
+  isOpen: boolean;
+  onClose: () => void;
+  /** 모달을 닫은 뒤 포커스를 돌려줄 버튼의 ID. */
+  returnFocusID: string;
 }
 
 /** 설정 화면과 같은 QR 크기와 여백을 사용한다. */
 const DONATION_QR_SIZE = 200;
 const DONATION_QR_PADDING = 16;
+const DONATION_QR_LOGO_SRC = "/app/icon-192x192.png";
 
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function DonationQrDialog({ lightningAddress, isDisabled = false }: DonationQrDialogProps) {
+function DonationQrDialog({ lightningAddress, isOpen, onClose, returnFocusID }: DonationQrDialogProps) {
   // region [Hooks]
   const qrCanvasID = useId();
   // endregion
 
 
   // region [Events]
+  const onOpenChangeDialog = (nextIsOpen: boolean): void => {
+    if (!nextIsOpen) {
+      onClose();
+    }
+  };
+
+  /** 외부 버튼으로 여는 모달도 닫힘 애니메이션이 끝난 뒤 포커스를 복원한다. */
+  const onCloseAutoFocusDialog = (event: Event): void => {
+    event.preventDefault();
+    document.getElementById(returnFocusID)?.focus();
+  };
+
   const onClickCopyAddress = async (): Promise<void> => {
     try {
       const isCopySuccess = await clipboardUtil.copyToClipboard(lightningAddress);
@@ -54,23 +69,15 @@ function DonationQrDialog({ lightningAddress, isDisabled = false }: DonationQrDi
   }
 
   return (
-    <KDialog size="sm" blur={3} opacity={70}>
-      <KDialogTrigger asChild>
-        <button
-          type="button"
-          disabled={isDisabled}
-          className="flex h-9 flex-shrink-0 items-center justify-center gap-1.5 whitespace-nowrap rounded-full border border-bitcoin/40 bg-neutral-800/80 px-3 text-xs font-bold text-bitcoin backdrop-blur-sm transition-colors hover:bg-neutral-700 focus-visible:outline focus-visible:outline-2 focus-visible:outline-bitcoin disabled:pointer-events-none disabled:opacity-60"
-        >
-          <Zap size={14} aria-hidden="true" />
-          후원하기
-        </button>
-      </KDialogTrigger>
-
+    <KDialog open={isOpen} onOpenChange={onOpenChangeDialog} size="sm" blur={3} opacity={70}>
       {/* 공유 카드의 transform 안에 배경이 갇히지 않도록 body 에 포털로 띄운다. */}
       <KDialogPortal>
         <KDialogOverlay className="z-[60]" />
       </KDialogPortal>
-      <KDialogContent className="z-[60] max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-[320px] gap-4 overflow-y-auto rounded-3xl border-white/10 bg-[#0d1119] p-5 text-white [&>button]:hidden">
+      <KDialogContent
+        onCloseAutoFocus={onCloseAutoFocusDialog}
+        className="z-[60] max-h-[calc(100dvh-2rem)] w-[calc(100vw-2rem)] max-w-[320px] gap-4 overflow-y-auto rounded-3xl border-white/10 bg-[#0d1119] p-5 text-white [&>button]:hidden"
+      >
         <KDialogHeader className="space-y-2">
           <div className="flex items-center justify-between gap-2">
             <KDialogTitle className="flex items-center gap-1.5 text-base font-bold">
@@ -88,7 +95,7 @@ function DonationQrDialog({ lightningAddress, isDisabled = false }: DonationQrDi
             </KDialogClose>
           </div>
           <KDialogDescription className="text-xs leading-relaxed text-white/60">
-            라이트닝으로 후원해 주시면 온리 비트코인 운영에 큰 힘이 돼요.
+            라이트닝 후원은 운영에 큰 힘이 돼요.
           </KDialogDescription>
         </KDialogHeader>
 
@@ -99,7 +106,7 @@ function DonationQrDialog({ lightningAddress, isDisabled = false }: DonationQrDi
             size={DONATION_QR_SIZE}
             padding={DONATION_QR_PADDING}
             ecLevel="Q"
-            logoEmoji="⚡"
+            logoImageSrc={DONATION_QR_LOGO_SRC}
             logoPadding={6}
           />
         </div>

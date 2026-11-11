@@ -38,8 +38,7 @@ interface SpaceShareDialogProps {
  * 스페이스 공유 모달.
  *
  * 캔버스 위 전체를 덮어 뒤 조작을 막음. Esc·배경 클릭·닫기 버튼으로 닫힘.
- * 구조와 조작은 `SpaceDonationDialog` 과 같게 맞춤 — 같은 버튼 묶음에서 열리는
- * 창 둘이 서로 다르게 동작하면 혼란스러움.
+ * 닫은 뒤 여는 버튼으로 포커스를 돌려주는 동작은 후원 모달과 동일하다.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 function SpaceShareDialog({ onClose }: SpaceShareDialogProps): ReactNode {

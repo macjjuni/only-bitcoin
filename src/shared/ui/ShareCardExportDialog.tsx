@@ -26,7 +26,7 @@ import {
   isIos,
   isShareAbortedByUser,
 } from "@/shared/lib/imageExport";
-import DonationQrDialog from "./DonationQrDialog";
+import DonationQrButton from "./DonationQrButton";
 
 export interface ShareCardExportDialogProps {
   isOpen: boolean;
@@ -304,7 +304,7 @@ export default function ShareCardExportDialog({
               {headerActions}
             </div>
             <div className="flex flex-shrink-0 items-center gap-2">
-              <DonationQrDialog
+              <DonationQrButton
                 lightningAddress={env.NEXT_PUBLIC_DONATION_ADDRESS}
                 isDisabled={isExporting}
               />

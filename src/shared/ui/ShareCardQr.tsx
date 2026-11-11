@@ -39,6 +39,8 @@ export interface ShareCardQrProps {
   qrStyle?: "squares" | "dots" | "fluid";
   eyeRadius?: number;
   logoEmoji?: string;
+  /** 이미지 주소가 있으면 이모지보다 우선하여 QR 중앙에 그린다. */
+  logoImageSrc?: string;
   logoPadding?: number;
 }
 
@@ -54,6 +56,7 @@ function ShareCardQr({
   qrStyle = "dots",
   eyeRadius = 8,
   logoEmoji,
+  logoImageSrc,
   logoPadding = 0,
 }: ShareCardQrProps) {
   if (!value) {
@@ -61,7 +64,7 @@ function ShareCardQr({
   }
 
   const totalSize = size + padding * 2;
-  const logoImage = logoEmoji ? buildEmojiLogoSrc(logoEmoji) : undefined;
+  const logoImage = logoImageSrc || (logoEmoji ? buildEmojiLogoSrc(logoEmoji) : undefined);
 
   return (
     <div
@@ -83,6 +86,7 @@ function ShareCardQr({
           qrStyle={qrStyle}
           eyeRadius={eyeRadius}
           logoImage={logoImage}
+          enableCORS
           // 캔버스를 renderScale 배로 그린 뒤 CSS 로 줄이므로, 화면 기준 px 로 받은 값도 같은 배율로 키운다.
           logoPadding={logoPadding * renderScale}
           logoPaddingStyle="circle"
