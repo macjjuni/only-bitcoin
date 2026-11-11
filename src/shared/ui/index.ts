@@ -12,6 +12,7 @@ export { default as ConfettiEffect } from "./ConfettiEffect";
 export { default as CountText } from "./CountText";
 export { default as DitherBackground } from "./DitherBackground";
 export { type DitherLogoProps, default as DitherLogo } from "./DitherLogo";
+export { type DonationQrDialogProps, default as DonationQrDialog } from "./DonationQrDialog";
 export { default as FloatingBannerButton } from "./FloatingBannerButton";
 export { default as GlitchWordmark } from "./GlitchWordmark";
 export { default as GuideArticle } from "./GuideArticle";

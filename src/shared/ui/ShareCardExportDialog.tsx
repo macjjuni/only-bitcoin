@@ -12,6 +12,7 @@ import {
 } from "kku-ui";
 import { Copy, Download, X } from "lucide-react";
 import { type ReactNode, type RefObject, useCallback, useEffect, useRef, useState } from "react";
+import { env } from "@/shared/config/env";
 import {
   captureElementToPngBlob,
   captureElementToPngDataUrl,
@@ -25,6 +26,7 @@ import {
   isIos,
   isShareAbortedByUser,
 } from "@/shared/lib/imageExport";
+import DonationQrDialog from "./DonationQrDialog";
 
 export interface ShareCardExportDialogProps {
   isOpen: boolean;
@@ -47,6 +49,7 @@ export interface ShareCardExportDialogProps {
   shouldNotifyDownloadSuccess?: boolean;
 }
 
+// biome-ignore format: AGENTS.md requires two blank lines between regions.
 export default function ShareCardExportDialog({
   isOpen,
   title,
@@ -73,6 +76,7 @@ export default function ShareCardExportDialog({
   const [scaledCardHeightInPixels, setScaledCardHeightInPixels] = useState<number>();
   const [isIosDevice, setIsIosDevice] = useState(false);
   // endregion
+
 
   // region [Privates]
   const resolveImageCaptureOptions = (cardElement: HTMLDivElement): ImageCaptureOptions => {
@@ -152,6 +156,7 @@ export default function ShareCardExportDialog({
   };
   // endregion
 
+
   // region [Events]
   const onOpenChangeDialog = (nextIsOpen: boolean): void => {
     if (!nextIsOpen) {
@@ -223,11 +228,13 @@ export default function ShareCardExportDialog({
   };
   // endregion
 
+
   // region [Life Cycles]
   useEffect(() => {
     setIsIosDevice(isIos());
   }, []);
   // endregion
+
 
   // region [Templates]
   const isExportDisabled = isExporting || !isExportReady;
@@ -296,14 +303,20 @@ export default function ShareCardExportDialog({
             <div className={isExporting ? "pointer-events-none opacity-60" : undefined}>
               {headerActions}
             </div>
-            <button
-              type="button"
-              onClick={onClickCloseButton}
-              className="flex-shrink-0 cursor-pointer rounded-full border border-neutral-700/50 bg-neutral-800/80 p-2 text-neutral-300 backdrop-blur-sm transition-colors hover:bg-neutral-700"
-              aria-label="닫기"
-            >
-              <X size={18} />
-            </button>
+            <div className="flex flex-shrink-0 items-center gap-2">
+              <DonationQrDialog
+                lightningAddress={env.NEXT_PUBLIC_DONATION_ADDRESS}
+                isDisabled={isExporting}
+              />
+              <button
+                type="button"
+                onClick={onClickCloseButton}
+                className="flex-shrink-0 cursor-pointer rounded-full border border-neutral-700/50 bg-neutral-800/80 p-2 text-neutral-300 backdrop-blur-sm transition-colors hover:bg-neutral-700"
+                aria-label="닫기"
+              >
+                <X size={18} />
+              </button>
+            </div>
           </div>
 
           <div ref={setCardScaleAreaReference} className="flex w-full justify-center">
