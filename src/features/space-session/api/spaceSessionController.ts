@@ -348,7 +348,14 @@ export class SpaceSessionController {
     this.isVisible = isVisible;
 
     if (!isVisible) {
-      this.kickEvents = [];
+      // 씬이 아직 안 꺼낸 내 피격은 넘기고 나머지 연출만 버림. 같이 버리면 남의
+      // 화면에서만 밀렸다가 제자리로 돌아옴.
+      const selfSeat = this.snapshot.self?.seat;
+      for (const event of this.drainKickEvents()) {
+        if (selfSeat !== undefined && event.to === selfSeat) {
+          this.hiddenHitHandler?.(event);
+        }
+      }
       this.clearReconnectTimer();
       this.scheduleHiddenDisconnect();
       return;

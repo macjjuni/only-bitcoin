@@ -333,9 +333,14 @@ function SpaceScene({
    * 나눠 보낼 수 없어서 멈출 때까지 계산한 마지막 위치만 보냄. 바닥에 못 닿았으면
    * (섬 밖으로 떨어지는 중) 안 보내고 복귀 후 프레임 루프에 맡김.
    */
-  const applyHiddenKnockback = (event: SpaceKickEvent): void => {
-    let state = applyKnockback(playerStateRef.current, event.dirX, event.dirZ);
+  const settleHiddenKnockbacks = (
+    knockbacks: readonly Pick<SpaceKickEvent, "dirX" | "dirZ">[],
+  ): void => {
+    let state = playerStateRef.current;
 
+    for (const knockback of knockbacks) {
+      state = applyKnockback(state, knockback.dirX, knockback.dirZ);
+    }
     for (let step = 0; step < hiddenKnockbackMaximumSteps; step += 1) {
       state = stepMovement(state, hiddenKnockbackInput, 0, undefined, terrainRef.current);
       if (state.isGrounded && state.knockbackX === 0 && state.knockbackZ === 0) {
@@ -347,6 +352,26 @@ function SpaceScene({
     if (state.isGrounded) {
       session.publishMovement(state, true);
     }
+  };
+
+  const applyHiddenKnockback = (event: SpaceKickEvent): void => {
+    settleHiddenKnockbacks([event]);
+  };
+
+  /**
+   * 타격 시각을 기다리던 넉백을 탭이 숨는 순간 마저 적용함.
+   *
+   * 그대로 두면 프레임이 멈춰 복귀 때 오래된 것으로 버려지고, 남의 화면에서는
+   * 밀렸다가 제자리로 돌아옴.
+   */
+  const flushPendingKnockbacks = (): void => {
+    const pendingKnockbacks = pendingKnockbacksRef.current;
+
+    if (pendingKnockbacks.length === 0) {
+      return;
+    }
+    pendingKnockbacksRef.current = [];
+    settleHiddenKnockbacks(pendingKnockbacks);
   };
 
   const resetKickPresentation = (): void => {
@@ -524,10 +549,18 @@ function SpaceScene({
 
   useEffect(() => {
     // 참조만 읽는 함수라 처음 것을 계속 써도 됨.
+    const onChangeVisibilityDocument = (): void => {
+      if (document.hidden) {
+        flushPendingKnockbacks();
+      }
+    };
+
     session.setHiddenHitHandler(applyHiddenKnockback);
+    document.addEventListener("visibilitychange", onChangeVisibilityDocument);
 
     return () => {
       session.setHiddenHitHandler(null);
+      document.removeEventListener("visibilitychange", onChangeVisibilityDocument);
     };
   }, [session.setHiddenHitHandler]);
 
@@ -543,13 +576,14 @@ function SpaceScene({
 
     const cameraOrbit = advanceCameraOrbit(deltaSeconds);
     const steppedState = advancePlayerState(cameraOrbit.yaw, deltaSeconds);
-    handleKickInput(now, steppedState);
     applyPlayerTransform(steppedState);
 
     // 맵 밖으로 빠졌으면 여기서 스폰으로 되돌아옴. 되돌린 궤도를 쓰려고 아래
     // 카메라 계산은 지역 변수가 아니라 ref 를 다시 읽음.
     const playerState = resolveFallOut(steppedState);
 
+    // 공격은 위치를 바로 보내서 되돌린 뒤에 처리함. 음수 높이가 나가면 서버가 반려함.
+    handleKickInput(now, playerState);
     session.publishMovement(playerState, hasAppliedKnockback);
 
     const focus = resolveCameraFocus(playerState);

@@ -1104,6 +1104,27 @@ describe("SpaceSessionController", () => {
       controller.stop();
     });
 
+    it("탭이 숨는 순간 아직 안 꺼낸 내 피격은 처리 함수로 넘기고 남의 연출은 버림", () => {
+      const { controller, welcome } = createHarness();
+      controller.start();
+      const socket = welcome(undefined, [remote, { ...remote, seat: 2 }], ["kick"]);
+      const onHiddenHit = vi.fn();
+      controller.setHiddenHitHandler(onHiddenHit);
+      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, to: 2, dirX: 1, dirZ: 0 });
+      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, to: 0, dirX: 1, dirZ: 0 });
+      controller.setVisibility(false);
+      expect(onHiddenHit).toHaveBeenCalledTimes(1);
+      expect(onHiddenHit).toHaveBeenCalledWith({
+        from: 1,
+        to: 0,
+        dirX: 1,
+        dirZ: 0,
+        startedAt: 1000,
+      });
+      expect(controller.drainKickEvents()).toEqual([]);
+      controller.stop();
+    });
+
     it("수신 큐의 대기 시간이 짧아도 원래 공격 시작부터 오래 지난 이벤트는 버림", () => {
       const { controller, welcome } = createHarness();
       controller.start();
