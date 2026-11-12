@@ -170,6 +170,13 @@ export class SpaceMarketMonitor {
       const change = readCandleChangePercent(sampled, sample.referencePrice, sample.atMs);
       let state = saved.state;
       const prefetch = change !== null && Math.abs(change) >= SPACE_BGM_SURGE.prefetchPercent;
+      // 급등락 중 반대쪽으로 진입 기준을 넘으면 방향이 뒤집힌 것으로 봄.
+      const liveDirection =
+        surge.isSurging && change !== null && Math.abs(change) >= SPACE_BGM_SURGE.enterPercent
+          ? change > 0
+            ? "rise"
+            : "fall"
+          : null;
       if (surge.isSurging !== saved.surge.isSurging) {
         const isRising = surge.isSurging && change !== null && change > 0;
         const celebration = isRising ? this.createCelebration() : null;
@@ -180,6 +187,15 @@ export class SpaceMarketMonitor {
           startsAt: celebration?.startsAt ?? Date.now() + SPACE_MARKET.eventLeadMs,
           prefetch,
           celebration,
+        };
+      } else if (liveDirection && liveDirection !== state.direction) {
+        // 곡은 이어 틀어야 해서 startsAt 은 그대로 둠. 상승으로 뒤집힐 때만 폭죽을 쏨.
+        state = {
+          ...state,
+          revision: state.revision + 1,
+          direction: liveDirection,
+          prefetch,
+          celebration: liveDirection === "rise" ? this.createCelebration() : null,
         };
       } else if (prefetch !== state.prefetch) {
         state = { ...state, revision: state.revision + 1, prefetch };

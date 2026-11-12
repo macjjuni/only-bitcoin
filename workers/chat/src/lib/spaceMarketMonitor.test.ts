@@ -92,6 +92,38 @@ describe("공간 공통 시세와 연출", () => {
     });
   });
 
+  it("하락 중 상승으로 뒤집히면 곡은 그대로 두고 폭죽만 한 번 쏜다", async () => {
+    const { monitor, room, frames } = createHarness();
+    room.price = 99;
+    await monitor.poll();
+    const entered = (frames[0] as Extract<SpaceServerFrame, { t: "market" }>).state;
+    room.price = 101;
+    vi.advanceTimersByTime(10000);
+    await monitor.poll();
+    expect(frames).toHaveLength(2);
+    expect(frames[1]).toMatchObject({
+      t: "market",
+      state: {
+        track: "surge",
+        direction: "rise",
+        startsAt: entered.startsAt,
+        celebration: { startsAt: Date.now() + 700 },
+      },
+    });
+    // 같은 방향이 이어지는 동안에는 다시 쏘지 않음.
+    vi.advanceTimersByTime(10000);
+    await monitor.poll();
+    expect(frames).toHaveLength(2);
+    // 다시 하락으로 뒤집히면 방향만 바꾸고 폭죽은 없음.
+    room.price = 99;
+    vi.advanceTimersByTime(10000);
+    await monitor.poll();
+    expect(frames[2]).toMatchObject({
+      t: "market",
+      state: { track: "surge", direction: "fall", startsAt: entered.startsAt, celebration: null },
+    });
+  });
+
   it("안정되면 기본 음악으로 복귀하고 10분 동안 다시 발동하지 않는다", async () => {
     const { monitor, room, frames } = createHarness();
     room.price = 101;
