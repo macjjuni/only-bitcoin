@@ -171,7 +171,7 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
       blends.setX(instanceIndex, Math.min(1, Math.max(0, blend)));
     });
 
-    // 발차기는 좌석마다 시작 시각으로 진행도를 구함. 맞은 사람 반응은 위치(넉백)로 보임.
+    // 발차기는 좌석마다 시작 시각으로 진행도를 구함.
     const now = performance.now();
     renderedPlayers.forEach((player, instanceIndex) => {
       const kick = resolveKickPose(

@@ -3,7 +3,7 @@ import { SPACE_BOUNDS } from "@/entities/space";
 
 /** 아바타끼리 밀어내는 튜닝 값. 근거는 `docs/btc-space-3d.md` §5 에 있음. */
 export const SPACE_SEPARATION = {
-  /** 두 아바타 중심 사이 최소 거리(m). 공격 사거리 1.45 보다 충분히 작아야 함. */
+  /** 두 아바타 중심 사이 최소 거리(m). */
   minimumDistance: 0.7,
   /** 밀려나는 최대 속도(m/s). 걷기 4.5 보다 느려야 밀고 지나갈 수 있음. */
   maximumSpeed: 3,
@@ -32,7 +32,6 @@ interface SeparationTarget {
  * 둘이 절반씩 벌어짐.
  *
  * 단단한 벽이 아니라 느린 힘임. 좁은 길에 서 있는 사람을 밀고 지나갈 수 있어야 함.
- * 넉백 중에는 끔. 밀리는 궤적이 틀어지면 남의 화면 예측과 어긋남.
  */
 export const separateFromPlayers = (
   state: LocalPlayerState,
@@ -41,7 +40,7 @@ export const separateFromPlayers = (
   deltaSeconds: number,
   terrain: SpaceTerrain,
 ): LocalPlayerState => {
-  if (others.length === 0 || state.knockbackX !== 0 || state.knockbackZ !== 0) {
+  if (others.length === 0) {
     return state;
   }
 

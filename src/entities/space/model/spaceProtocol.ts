@@ -85,7 +85,7 @@ export type SpaceClientFrame =
   | { v: SpaceProtocolVersion; t: "say"; rid: string; body: string }
   | { v: SpaceProtocolVersion; t: "nick"; rid: string; nickname: string }
   | { v: SpaceProtocolVersion; t: "model"; rid: string; modelIndex: number }
-  /** `target` 이 없으면 허공에 참. 연출만 퍼짐. */
+  /** 연출만 퍼짐. `target` 은 유저끼리 맞던 때의 옛 클라이언트만 보내고 서버는 안 봄. */
   | { v: SpaceProtocolVersion; t: "kick"; target?: number; id?: string; startedAt?: number };
 
 export type SpaceServerFrame =
@@ -108,8 +108,10 @@ export type SpaceServerFrame =
   | { v: SpaceProtocolVersion; t: "error"; code: string; message: string; rid?: string }
   | { v: SpaceProtocolVersion; t: "full" }
   /**
-   * `from` 이 찼음. `to` 가 있으면 맞은 사람이고 `dirX/dirZ` 는 찬 사람에서 맞은
-   * 사람 쪽 단위 방향. 맞은 사람만 이 방향으로 밀림.
+   * `from` 이 찼음. 동작만 재생함.
+   *
+   * `to` 는 유저끼리 맞던 때의 옛 서버만 보내고 안 읽음. `dirX/dirZ` 는 찬 사람이
+   * 보는 방향인데 지금은 안 쓰고, 옛 클라이언트가 없으면 프레임을 버려서 계속 보냄.
    */
   | {
       v: SpaceProtocolVersion;
@@ -189,7 +191,7 @@ const isFeatureList = (value: unknown): value is string[] => {
   );
 };
 
-/** 넉백 방향. 서버가 정규화해 보내지만 크기가 1 을 넘지 않는지만 봄. */
+/** 공격 방향. 서버가 정규화해 보내지만 크기가 1 을 넘지 않는지만 봄. */
 const isKickDirection = (x: unknown, z: unknown): boolean => {
   return isFiniteNumber(x) && isFiniteNumber(z) && Math.hypot(x, z) <= 1.001;
 };

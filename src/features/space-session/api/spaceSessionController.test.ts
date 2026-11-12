@@ -2,7 +2,6 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   encodeSpaceSnapshot,
   type LocalPlayerState,
-  resolveKickImpactAt,
   SPACE_PROTOCOL_VERSION,
   type SpacePeer,
 } from "@/entities/space";
@@ -111,8 +110,6 @@ const movement = (x: number, y = 0): LocalPlayerState => ({
   velocityZ: 0,
   velocityY: 0,
   isRunning: false,
-  knockbackX: 0,
-  knockbackZ: 0,
 });
 
 const sentFrames = (socket: FakeSocket, type: string) =>
@@ -919,7 +916,7 @@ describe("SpaceSessionController", () => {
         features: ["kick", "market-sync-v1", "kick-timing-v1"],
       });
       expect(controller.getSnapshot().canKick).toBe(false);
-      expect(controller.sendKick(1)).toBe(false);
+      expect(controller.sendKick()).toBe(false);
       controller.stop();
 
       const next = createHarness();
@@ -927,12 +924,8 @@ describe("SpaceSessionController", () => {
       const socket = next.welcome(undefined, [remote], ["kick"]);
 
       expect(next.controller.getSnapshot().canKick).toBe(true);
-      expect(next.controller.sendKick(1)).toBe(true);
-      expect(next.controller.sendKick(null)).toBe(true);
-      expect(sentFrames(socket, "kick")).toEqual([
-        { v: SPACE_PROTOCOL_VERSION, t: "kick", target: 1 },
-        { v: SPACE_PROTOCOL_VERSION, t: "kick" },
-      ]);
+      expect(next.controller.sendKick()).toBe(true);
+      expect(sentFrames(socket, "kick")).toEqual([{ v: SPACE_PROTOCOL_VERSION, t: "kick" }]);
       next.controller.stop();
     });
 
@@ -947,9 +940,10 @@ describe("SpaceSessionController", () => {
       socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, dirX: 0, dirZ: 1 });
 
       expect(onChange).not.toHaveBeenCalled();
+      // 옛 서버가 실어 보내는 맞은 사람(`to`)과 방향은 안 읽음.
       expect(controller.drainKickEvents()).toEqual([
-        { from: 1, to: 0, dirX: -1, dirZ: 0, startedAt: 1000 },
-        { from: 1, dirX: 0, dirZ: 1, startedAt: 1000 },
+        { from: 1, startedAt: 1000 },
+        { from: 1, startedAt: 1000 },
       ]);
       expect(controller.drainKickEvents()).toEqual([]);
       controller.stop();
@@ -964,9 +958,7 @@ describe("SpaceSessionController", () => {
       vi.advanceTimersByTime(5_000);
       socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, dirX: 0, dirZ: 1 });
 
-      expect(controller.drainKickEvents()).toEqual([
-        { from: 1, dirX: 0, dirZ: 1, startedAt: 6000 },
-      ]);
+      expect(controller.drainKickEvents()).toEqual([{ from: 1, startedAt: 6000 }]);
       controller.stop();
     });
 
@@ -984,7 +976,7 @@ describe("SpaceSessionController", () => {
 
     it.each([
       100, 200, 400,
-    ])("왕복 %dms에서도 내 명중은 원래 타격 시각을 유지하고 중복 수신을 무시함", (roundTripMs) => {
+    ])("왕복 %dms에서도 내 공격은 원래 시작 시각을 유지하고 중복 수신을 무시함", (roundTripMs) => {
       const { controller, welcome } = createHarness();
       controller.start();
       const socket = welcome(undefined, [remote], ["kick", "kick-timing-v1"]);
@@ -995,7 +987,7 @@ describe("SpaceSessionController", () => {
         sentAt: clockSentAt,
         serverAt: clockSentAt + 5000,
       });
-      controller.sendKick(1);
+      controller.sendKick();
       const attack = sentFrames(socket, "kick")[0];
       expect(attack).toMatchObject({ id: requestId, startedAt: 6000 });
       vi.advanceTimersByTime(roundTripMs);
@@ -1006,7 +998,6 @@ describe("SpaceSessionController", () => {
         startedAt: attack.startedAt,
         serverAt: attack.startedAt + roundTripMs / 2,
         from: 0,
-        to: 1,
         dirX: 1,
         dirZ: 0,
       };
@@ -1014,13 +1005,11 @@ describe("SpaceSessionController", () => {
       socket.receive(response);
       const events = controller.drainKickEvents();
       expect(events).toHaveLength(1);
-      expect(resolveKickImpactAt(events[0].startedAt, Date.now())).toBe(
-        1000 + Math.max(280, roundTripMs),
-      );
+      expect(events[0].startedAt).toBe(1000);
       controller.stop();
     });
 
-    it("맞는 쪽도 서버 시계로 전송 중 지난 준비 시간을 빼고, 늦은 공격은 다시 재생하지 않음", () => {
+    it("보는 쪽도 서버 시계로 전송 중 지난 시간을 빼고, 늦은 공격은 다시 재생하지 않음", () => {
       const { controller, welcome } = createHarness();
       controller.start();
       const socket = welcome(undefined, [remote], ["kick", "kick-timing-v1"]);
@@ -1031,7 +1020,6 @@ describe("SpaceSessionController", () => {
         t: "kick",
         id: requestId,
         from: 1,
-        to: 0,
         dirX: -1,
         dirZ: 0,
         startedAt: 6000,
@@ -1039,21 +1027,21 @@ describe("SpaceSessionController", () => {
       };
       socket.receive(response);
       const [event] = controller.drainKickEvents();
-      expect(resolveKickImpactAt(event.startedAt, Date.now()) - Date.now()).toBe(80);
+      expect(Date.now() - event.startedAt).toBe(200);
       vi.advanceTimersByTime(2000);
       socket.receive({ ...response, id: "22222222-2222-4222-8222-222222222222" });
       expect(controller.drainKickEvents()).toEqual([]);
       controller.stop();
     });
 
-    it("공격 직전 위치와 피격 직후 위치는 평소 전송 주기를 기다리지 않고 보내며 혼잡한 소켓은 건너뜀", () => {
+    it("공격 직전 위치는 평소 전송 주기를 기다리지 않고 보내며 혼잡한 소켓은 건너뜀", () => {
       const { controller, welcome } = createHarness();
       controller.start();
       const socket = welcome(undefined, [remote], ["kick"]);
       controller.publishMovement(movement(1));
       vi.advanceTimersByTime(10);
       const beforeAttack = socket.sent.length;
-      expect(controller.sendKick(1, movement(1.1))).toBe(true);
+      expect(controller.sendKick(movement(1.1))).toBe(true);
       expect(socket.sent.slice(beforeAttack).map((frame) => JSON.parse(frame).t)).toEqual([
         "move",
         "kick",
@@ -1062,12 +1050,12 @@ describe("SpaceSessionController", () => {
       controller.publishMovement(movement(1.2), true);
       expect(sentFrames(socket, "move").at(-1).x).toBe(1.2);
       socket.bufferedAmount = 20_000;
-      expect(controller.sendKick(1, movement(1.3))).toBe(false);
+      expect(controller.sendKick(movement(1.3))).toBe(false);
       expect(sentFrames(socket, "move").at(-1).x).toBe(1.2);
       controller.stop();
     });
 
-    it("탭이 숨겨진 동안 수신한 공격을 복귀 후 적용하지 않음", () => {
+    it("탭이 숨기 전과 숨은 동안 수신한 공격을 복귀 후 재생하지 않음", () => {
       const { controller, welcome } = createHarness();
       controller.start();
       const socket = welcome(undefined, [remote], ["kick"]);
@@ -1075,52 +1063,6 @@ describe("SpaceSessionController", () => {
       controller.setVisibility(false);
       socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, to: 0, dirX: 1, dirZ: 0 });
       controller.setVisibility(true);
-      expect(controller.drainKickEvents()).toEqual([]);
-      controller.stop();
-    });
-
-    it("숨은 탭에서 내가 맞으면 처리 함수로 바로 넘기고 그때 밀린 위치는 전송함", () => {
-      const { controller, welcome } = createHarness();
-      controller.start();
-      const socket = welcome(undefined, [remote, { ...remote, seat: 2 }], ["kick"]);
-      const onHiddenHit = vi.fn();
-      controller.setHiddenHitHandler(onHiddenHit);
-      controller.setVisibility(false);
-      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, to: 2, dirX: 1, dirZ: 0 });
-      expect(onHiddenHit).not.toHaveBeenCalled();
-      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, to: 0, dirX: 1, dirZ: 0 });
-      expect(onHiddenHit).toHaveBeenCalledWith({
-        from: 1,
-        to: 0,
-        dirX: 1,
-        dirZ: 0,
-        startedAt: 1000,
-      });
-      controller.publishMovement(movement(2));
-      expect(sentFrames(socket, "move")).toHaveLength(0);
-      controller.publishMovement(movement(2), true);
-      expect(sentFrames(socket, "move").at(-1).x).toBe(2);
-      expect(controller.drainKickEvents()).toEqual([]);
-      controller.stop();
-    });
-
-    it("탭이 숨는 순간 아직 안 꺼낸 내 피격은 처리 함수로 넘기고 남의 연출은 버림", () => {
-      const { controller, welcome } = createHarness();
-      controller.start();
-      const socket = welcome(undefined, [remote, { ...remote, seat: 2 }], ["kick"]);
-      const onHiddenHit = vi.fn();
-      controller.setHiddenHitHandler(onHiddenHit);
-      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, to: 2, dirX: 1, dirZ: 0 });
-      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "kick", from: 1, to: 0, dirX: 1, dirZ: 0 });
-      controller.setVisibility(false);
-      expect(onHiddenHit).toHaveBeenCalledTimes(1);
-      expect(onHiddenHit).toHaveBeenCalledWith({
-        from: 1,
-        to: 0,
-        dirX: 1,
-        dirZ: 0,
-        startedAt: 1000,
-      });
       expect(controller.drainKickEvents()).toEqual([]);
       controller.stop();
     });

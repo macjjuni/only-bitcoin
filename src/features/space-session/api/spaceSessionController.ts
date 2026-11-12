@@ -41,12 +41,9 @@ export interface SpaceSessionSnapshot {
   canKick: boolean;
 }
 
-/** 받은 발차기 하나. `to` 가 없으면 허공에 찬 것. */
+/** 받은 발차기 하나. 동작만 재생하고 아무도 안 밀림. */
 export interface SpaceKickEvent {
   from: number;
-  to?: number;
-  dirX: number;
-  dirZ: number;
   /** 수신 때 로컬 performance.now() 시간축으로 변환한 공격 시작 시각. */
   startedAt: number;
 }
@@ -107,8 +104,8 @@ const connectionTimeoutMs = 10_000;
 /**
  * 탭이 숨은 뒤 연결을 끊기까지 기다리는 시간.
  *
- * 숨은 탭도 heartbeat ping 은 계속 보내서 서버는 접속 중으로 봄. 그런데 이동·넉백은
- * 멈춰 있어 다른 사람 화면에는 차도 반응 없는 아바타가 계속 서 있게 됨. 잠깐 다른
+ * 숨은 탭도 heartbeat ping 은 계속 보내서 서버는 접속 중으로 봄. 그런데 이동은
+ * 멈춰 있어 다른 사람 화면에는 반응 없는 아바타가 계속 서 있게 됨. 잠깐 다른
  * 탭을 보는 정도는 자리를 지키고, 이보다 오래 숨으면 나간 것으로 처리함.
  */
 const hiddenDisconnectDelayMs = 60_000;
@@ -249,8 +246,6 @@ export class SpaceSessionController {
    * 씬이 매 프레임 `drainKickEvents` 로 비움.
    */
   private kickEvents: { event: SpaceKickEvent; receivedAt: number }[] = [];
-  /** 탭이 숨어 프레임 루프가 멈춘 동안 내가 맞으면 부름. 씬이 넉백을 대신 적분함. */
-  private hiddenHitHandler: ((event: SpaceKickEvent) => void) | null = null;
   private canSyncKickTiming = false;
   private lastKickStartedAt: number | null = null;
   private readonly pendingKickStarts = new Map<string, number>();
@@ -348,14 +343,8 @@ export class SpaceSessionController {
     this.isVisible = isVisible;
 
     if (!isVisible) {
-      // 씬이 아직 안 꺼낸 내 피격은 넘기고 나머지 연출만 버림. 같이 버리면 남의
-      // 화면에서만 밀렸다가 제자리로 돌아옴.
-      const selfSeat = this.snapshot.self?.seat;
-      for (const event of this.drainKickEvents()) {
-        if (selfSeat !== undefined && event.to === selfSeat) {
-          this.hiddenHitHandler?.(event);
-        }
-      }
+      // 씬이 아직 안 꺼낸 연출은 버림. 돌아와서 지난 동작을 재생하지 않음.
+      this.kickEvents = [];
       this.clearReconnectTimer();
       this.scheduleHiddenDisconnect();
       return;
@@ -400,11 +389,7 @@ export class SpaceSessionController {
    * 판정은 서버가 함. 보냈는지만 돌려줌. 쿨다운은 호출부(씬)가 먼저 걸러서 여기서는
    * 안 봄. 서버가 같은 규칙으로 한 번 더 막음.
    */
-  setHiddenHitHandler = (handler: ((event: SpaceKickEvent) => void) | null): void => {
-    this.hiddenHitHandler = handler;
-  };
-
-  sendKick = (targetSeat: number | null, state?: LocalPlayerState): boolean => {
+  sendKick = (state?: LocalPlayerState): boolean => {
     if (
       !this.snapshot.canKick ||
       this.snapshot.presence.status !== "online" ||
@@ -414,7 +399,7 @@ export class SpaceSessionController {
       return false;
     }
 
-    // 공격보다 먼저 최신 위치를 보냄. 100ms 주기를 기다리면 달려들 때 옛 위치로 판정됨.
+    // 공격보다 먼저 최신 위치를 보냄. 100ms 주기를 기다리면 옛 자리에서 휘두른 것으로 보임.
     if (state) {
       this.publishMovement(state, true);
     }
@@ -424,7 +409,6 @@ export class SpaceSessionController {
     const sent = this.sendFrame({
       v: SPACE_PROTOCOL_VERSION,
       t: "kick",
-      ...(targetSeat === null ? {} : { target: targetSeat }),
       ...(id === undefined ? {} : { id }),
       ...(id === undefined || clockOffset === null
         ? {}
@@ -448,8 +432,7 @@ export class SpaceSessionController {
    * 쌓인 발차기를 꺼내고 비움. 씬이 매 프레임 부름.
    *
    * `maximumKickEventAgeMs` 보다 오래된 건 버림. 탭을 내리면 프레임 루프가 멈춰 큐에
-   * 쌓이기만 하는데, 돌아왔을 때 한꺼번에 꺼내면 지난 넉백이 다 더해져 캐릭터가
-   * 갑자기 날아가고 남들 발차기도 한꺼번에 재생됐음.
+   * 쌓이기만 하는데, 돌아왔을 때 한꺼번에 꺼내면 남들 발차기가 한꺼번에 재생됐음.
    */
   drainKickEvents = (): SpaceKickEvent[] => {
     if (this.kickEvents.length === 0) {
@@ -958,29 +941,11 @@ export class SpaceSessionController {
           return;
         }
         if (!this.isVisible) {
-          // 숨은 탭은 프레임이 안 돌아 큐를 아무도 안 비움. 연출은 버리고 내가 맞은
-          // 것만 바로 넘김. 안 넘기면 남의 화면에서 밀렸다가 제자리로 돌아왔음.
-          if (frame.to === this.snapshot.self.seat) {
-            this.hiddenHitHandler?.({
-              from: frame.from,
-              to: frame.to,
-              dirX: frame.dirX,
-              dirZ: frame.dirZ,
-              startedAt,
-            });
-          }
+          // 숨은 탭은 프레임이 안 돌아 큐를 아무도 안 비움. 연출은 버림.
           return;
         }
         // 한 프레임에 수십 개 쌓일 일은 없지만 탭이 멈춰 있으면 끝없이 쌓여서 자름.
-        const event: SpaceKickEvent = {
-          from: frame.from,
-          dirX: frame.dirX,
-          dirZ: frame.dirZ,
-          startedAt,
-        };
-        if (frame.to !== undefined) {
-          event.to = frame.to;
-        }
+        const event: SpaceKickEvent = { from: frame.from, startedAt };
         this.kickEvents = [...this.kickEvents, { event, receivedAt }].slice(-maximumKickEventCount);
         return;
       }

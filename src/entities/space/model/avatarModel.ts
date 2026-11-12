@@ -56,7 +56,7 @@ export interface SpaceAvatarModel {
    */
   handPivot: readonly [number, number, number];
   /**
-   * 공격할 때 손에 나타나는 무기. 모양만 다르고 사거리·넉백·쿨다운은 모두 같음.
+   * 공격할 때 손에 나타나는 무기. 모양만 다르고 쿨다운은 모두 같음.
    *
    * 성능이 다르면 다들 센 아바타만 고름. 모양은 `views/space/lib/weaponModel.ts`.
    */

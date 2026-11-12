@@ -27,14 +27,6 @@ export interface LocalPlayerState extends PlayerTransform {
    * 실어 보냄 — 걷기 모션이 이 값으로 다리를 멈춤.
    */
   isGrounded: boolean;
-  /**
-   * 발차기에 맞아 밀리는 속도(m/s). 입력 속도와 따로 둠.
-   *
-   * 입력 속도는 초당 25~30 m/s² 로 목표 속도를 따라가서, 거기에 넣으면 0.25 초 만에
-   * 멈춰 거의 안 밀림. 따로 두고 천천히 줄여야 약 1 m 밀림.
-   */
-  knockbackX: number;
-  knockbackZ: number;
 }
 
 export interface RemotePlayer extends PlayerTransform {
@@ -58,8 +50,6 @@ export const createLocalPlayerState = (spawn: PlayerTransform): LocalPlayerState
   velocityY: 0,
   isRunning: false,
   isGrounded: true,
-  knockbackX: 0,
-  knockbackZ: 0,
 });
 
 /**

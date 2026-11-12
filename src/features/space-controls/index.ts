@@ -21,7 +21,6 @@ export {
 } from "./model/followCamera";
 export { shouldIgnoreSpaceHotkey } from "./model/keyboardInputEvents";
 export {
-  applyKnockback,
   createEmptyMovementInput,
   type MovementInput,
   planFixedSteps,

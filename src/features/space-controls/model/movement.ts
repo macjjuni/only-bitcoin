@@ -1,5 +1,5 @@
 import type { LocalPlayerState, SpaceTerrain } from "@/entities/space";
-import { createFlatTerrain, SPACE_BOUNDS, SPACE_KICK } from "@/entities/space";
+import { createFlatTerrain, SPACE_BOUNDS } from "@/entities/space";
 
 /**
  * 지형이 아직 없을 때 쓰는 대체 평지.
@@ -246,12 +246,7 @@ export const stepMovement = (
   deltaSeconds: number = SPACE_MOVEMENT.fixedTimeStep,
   terrain: SpaceTerrain = FALLBACK_TERRAIN,
 ): LocalPlayerState => {
-  // 세게 밀리는 동안은 조작을 안 받음. 버티고 서 있으면 맞은 티가 안 남.
-  const knockbackSpeed = Math.hypot(state.knockbackX, state.knockbackZ);
-  const isStaggered = knockbackSpeed > SPACE_KICK.knockbackControlResumeSpeed;
-  const direction = isStaggered
-    ? { x: 0, z: 0, magnitude: 0 }
-    : resolveMoveDirection(input, cameraYaw);
+  const direction = resolveMoveDirection(input, cameraYaw);
   const speed = input.isRunning ? SPACE_MOVEMENT.runSpeed : SPACE_MOVEMENT.walkSpeed;
   const rate = direction.magnitude > 0 ? SPACE_MOVEMENT.acceleration : SPACE_MOVEMENT.deceleration;
   const velocity = approachVelocity(
@@ -262,11 +257,8 @@ export const stepMovement = (
     rate,
     deltaSeconds,
   );
-  const knockbackDecay = Math.exp(-SPACE_KICK.knockbackDamping * deltaSeconds);
-  const knockbackX = knockbackSpeed < 0.05 ? 0 : state.knockbackX * knockbackDecay;
-  const knockbackZ = knockbackSpeed < 0.05 ? 0 : state.knockbackZ * knockbackDecay;
-  const rawX = state.x + (velocity.x + knockbackX) * deltaSeconds;
-  const rawZ = state.z + (velocity.z + knockbackZ) * deltaSeconds;
+  const rawX = state.x + velocity.x * deltaSeconds;
+  const rawZ = state.z + velocity.z * deltaSeconds;
   const boundedX = clamp(rawX, SPACE_BOUNDS.minX, SPACE_BOUNDS.maxX);
   const boundedZ = clamp(rawZ, SPACE_BOUNDS.minZ, SPACE_BOUNDS.maxZ);
   // 벽을 파고든 만큼 되밀어냄. 바깥 상자 클램프 다음에 둬야 상자 모서리와
@@ -278,13 +270,6 @@ export const stepMovement = (
     z: boundedZ === rawZ ? velocity.z : 0,
   };
   const slid = slideAlongWall(bounded.x, bounded.z, resolved.pushX, resolved.pushZ);
-  // 넉백도 같은 벽 규칙을 따름. 벽으로 밀리면 그 성분만 사라지고 벽을 따라 미끄러짐.
-  const knockbackSlid = slideAlongWall(
-    boundedX === rawX ? knockbackX : 0,
-    boundedZ === rawZ ? knockbackZ : 0,
-    resolved.pushX,
-    resolved.pushZ,
-  );
   const velocityX = slid.x;
   const velocityZ = slid.z;
   const x = resolved.x;
@@ -312,43 +297,5 @@ export const stepMovement = (
     velocityY: jump.velocityY,
     isRunning: input.isRunning && direction.magnitude > 0,
     isGrounded: jump.isGrounded,
-    knockbackX: knockbackSlid.x,
-    knockbackZ: knockbackSlid.z,
-  };
-};
-
-/**
- * 발차기에 맞은 상태로 바꿈.
- *
- * `directionX/Z` 는 찬 사람에서 맞은 사람 쪽 방향이고 서버가 정규화해 보냄. 땅에
- * 서 있으면 살짝 띄움. 이미 공중이면 수직 속도는 건드리지 않음(점프 중에 맞아도
- * 갑자기 더 높이 뜨지 않게).
- *
- * 아직 밀리는 중이면 넉백을 **더함**. 여럿이 몰아 차면 합쳐진 방향으로 더 멀리
- * 밀리고, 양쪽에서 차면 상쇄됨. 크기는 `knockbackMaxSpeed` 로 자름.
- */
-export const applyKnockback = (
-  state: LocalPlayerState,
-  directionX: number,
-  directionZ: number,
-): LocalPlayerState => {
-  const length = Math.hypot(directionX, directionZ);
-
-  if (!Number.isFinite(length) || length === 0) {
-    return state;
-  }
-
-  const addedX = state.knockbackX + (directionX / length) * SPACE_KICK.knockbackSpeed;
-  const addedZ = state.knockbackZ + (directionZ / length) * SPACE_KICK.knockbackSpeed;
-  const addedSpeed = Math.hypot(addedX, addedZ);
-  const scale =
-    addedSpeed > SPACE_KICK.knockbackMaxSpeed ? SPACE_KICK.knockbackMaxSpeed / addedSpeed : 1;
-
-  return {
-    ...state,
-    knockbackX: addedX * scale,
-    knockbackZ: addedZ * scale,
-    velocityY: state.isGrounded ? SPACE_KICK.knockbackHopSpeed : state.velocityY,
-    isGrounded: false,
   };
 };

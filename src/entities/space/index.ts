@@ -1,5 +1,4 @@
 export { resolveColorIndexFromClientKey } from "./lib/clientKeyHash";
-export { resolveKickImpactAt } from "./lib/kickTiming";
 export {
   appendPriceSample,
   createSurgeState,

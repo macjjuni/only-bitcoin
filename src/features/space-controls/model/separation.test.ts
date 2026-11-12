@@ -5,7 +5,7 @@ import {
   type LocalPlayerState,
   type SpaceTerrain,
 } from "@/entities/space";
-import { applyKnockback, createEmptyMovementInput, SPACE_MOVEMENT, stepMovement } from "./movement";
+import { createEmptyMovementInput, SPACE_MOVEMENT, stepMovement } from "./movement";
 import { SPACE_SEPARATION, separateFromPlayers } from "./separation";
 
 const step = SPACE_MOVEMENT.fixedTimeStep;
@@ -74,12 +74,10 @@ describe("separateFromPlayers", () => {
     expect(Math.hypot(first.x - second.x, first.z - second.z)).toBeGreaterThan(0.5);
   });
 
-  it("다른 층이나 점프 중인 상대, 넉백 중인 나는 건드리지 않음", () => {
+  it("다른 층이나 점프 중인 상대는 건드리지 않음", () => {
     const state = createState(0.2);
 
     expect(separateFromPlayers(state, [{ x: 0, y: 1.5, z: 0 }], 0, step, terrain)).toBe(state);
-    const knocked = applyKnockback(state, 1, 0);
-    expect(separateFromPlayers(knocked, [{ x: 0, y: 0, z: 0 }], 0, step, terrain)).toBe(knocked);
   });
 
   it("양쪽에서 끼면 힘이 상쇄되고, 겹치지 않으면 지형을 묻지 않음", () => {

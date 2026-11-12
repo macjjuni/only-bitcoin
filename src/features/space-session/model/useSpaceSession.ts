@@ -101,7 +101,6 @@ export const useSpaceSession = ({ identity, modelIndex, enabled }: UseSpaceSessi
     sendKick: controller.sendKick,
     requestCelebration: controller.requestCelebration,
     drainKickEvents: controller.drainKickEvents,
-    setHiddenHitHandler: controller.setHiddenHitHandler,
     sendMessage: controller.sendMessage,
     changeNickname: controller.changeNickname,
     changeModel: controller.changeModel,

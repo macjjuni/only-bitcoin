@@ -6,7 +6,6 @@ import {
   type ReactNode,
   Suspense,
   useCallback,
-  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -19,7 +18,6 @@ import {
   createSpawnPoint,
   type LocalPlayerState,
   resolveColorIndexFromClientKey,
-  resolveKickImpactAt,
   SPACE_HALL,
   SPACE_HEATMAP_FRAME,
   SPACE_KICK,
@@ -34,13 +32,11 @@ import {
   applyCameraDrag,
   applyCameraZoom,
   applyKeyboardYaw,
-  applyKnockback,
   approachCollisionDistance,
   type CameraOrbit,
   consumePendingDrag,
   consumePendingZoom,
   createDefaultCameraOrbit,
-  createEmptyMovementInput,
   dampVector,
   planFixedSteps,
   resolveCameraFocus,
@@ -58,12 +54,10 @@ import {
   usePrefersReducedMotion,
   type Vector3Like,
 } from "@/features/space-controls";
-import type { SpaceKickEvent, SpaceSession } from "@/features/space-session";
+import type { SpaceSession } from "@/features/space-session";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import type { LanternAnchor } from "@/views/space/lib/hallModel";
 import type { HallTerrain } from "@/views/space/lib/hallTerrain";
-import { selectKickTarget } from "@/views/space/lib/kickTarget";
-import { createRemoteKickPrediction } from "@/views/space/lib/remoteKickPrediction";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 import BlockDashboard from "./BlockDashboard";
 import ChatBubbles from "./ChatBubbles";
@@ -97,10 +91,6 @@ interface SpaceSceneProps {
 }
 
 const EMPTY_LANTERN_ANCHORS: readonly LanternAnchor[] = [];
-const hiddenKnockbackInput = createEmptyMovementInput();
-/** 숨은 탭 넉백 적분 상한(2초). 넉백은 1초 안에 멎고 나머지는 착지 여유임. */
-const hiddenKnockbackMaximumSteps = Math.ceil(2 / SPACE_MOVEMENT.fixedTimeStep);
-
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 function SpaceScene({
   celebration,
@@ -133,12 +123,7 @@ function SpaceScene({
   /** 서버가 확정한 모델을 씀. 접속 전에는 저장된 선택으로 보여줌. */
   const avatarModelIndex = session.self?.modelIndex ?? modelIndex;
   const dummies = useMemo(() => createStressDummies(dummyCount), [dummyCount]);
-  const sourceRemotePlayers = dummyCount > 0 ? dummies : session.remotePlayers;
-  const remotePlayers = useMemo(
-    () => sourceRemotePlayers.map((player) => ({ ...player })),
-    [sourceRemotePlayers, session.rosterRevision],
-  );
-  const remoteKickPrediction = useMemo(createRemoteKickPrediction, []);
+  const remotePlayers = dummyCount > 0 ? dummies : session.remotePlayers;
   /** 1단계는 빈 슬롯임. 3단계에서 라이트닝 결제로 채움. */
 
   const playerStateRef = useRef<LocalPlayerState>(createLocalPlayerState(spawnTransform));
@@ -154,8 +139,6 @@ function SpaceScene({
   const kickStartedAtRef = useRef<number | undefined>(undefined);
   /** 다른 사람이 발차기를 시작한 시각(좌석별). 끝난 건 지움. */
   const remoteKickStartsRef = useRef(new Map<number, number>());
-  /** 내가 맞았지만 아직 발이 안 닿아 기다리는 넉백. `at` 은 `performance.now()` 시각. */
-  const pendingKnockbacksRef = useRef<{ at: number; dirX: number; dirZ: number }[]>([]);
   /**
    * 지형 질의.
    *
@@ -227,7 +210,7 @@ function SpaceScene({
 
     for (let stepIndex = 0; stepIndex < stepPlan.stepCount; stepIndex += 1) {
       nextState = stepMovement(nextState, movementInput, cameraYaw, undefined, terrainRef.current);
-      // 화면에 보이는 위치(예측 포함) 기준으로 겹친 만큼 나만 비킴.
+      // 화면에 보이는 위치 기준으로 겹친 만큼 나만 비킴.
       nextState = separateFromPlayers(
         nextState,
         remotePlayers,
@@ -243,57 +226,17 @@ function SpaceScene({
   };
 
   /**
-   * 받은 발차기를 처리함. 이동 적분 **전에** 돌아야 맞은 프레임부터 밀림.
+   * 남이 시작한 공격 동작을 받아 둠. 상대 동작도 같은 시작 시각으로 재생함.
    *
-   * 공격 시작 + impactSeconds가 타격 시각. 네트워크에서 이미 지난 시간은 빼고
-   * 남은 시간만 기다림. 상대 동작도 같은 시작 시각으로 재생함.
-   *
-   * 내가 찬 건 누른 순간 이미 재생해서 서버가 되돌려준 동작은 무시함. 서버가 쿨다운
-   * 등으로 버리면 재생만 되고 아무도 안 밀리는데, 클라이언트가 같은 규칙으로 먼저
-   * 걸러서 거의 없음.
-   *
-   * 명중은 맞은 사람이 내가 아니면 찬 사람이 누구든 넉백을 예측해 보여줌.
+   * 내가 찬 건 누른 순간 이미 재생해서 서버가 되돌려준 동작은 무시함. 유저끼리는
+   * 맞지 않음. 동작만 보임.
    */
-  const applyReceivedKicks = (now: number): boolean => {
+  const applyReceivedKicks = (now: number): void => {
     const selfSeat = session.self?.seat;
-    let hasAppliedKnockback = false;
 
     for (const event of session.drainKickEvents()) {
       if (event.from !== selfSeat) {
         remoteKickStartsRef.current.set(event.from, event.startedAt);
-      }
-      const impactAt = resolveKickImpactAt(event.startedAt, now);
-      if (selfSeat !== undefined && event.to === selfSeat) {
-        pendingKnockbacksRef.current.push({
-          at: impactAt,
-          dirX: event.dirX,
-          dirZ: event.dirZ,
-        });
-      } else if (event.to !== undefined) {
-        // 내가 찬 것뿐 아니라 남이 남을 찬 것도 예측함. 구경꾼 화면에서도 바로 밀림.
-        const target = sourceRemotePlayers.find((player) => player.seat === event.to);
-        if (target) {
-          remoteKickPrediction.enqueue({
-            player: target,
-            impactAt,
-            dirX: event.dirX,
-            dirZ: event.dirZ,
-            confirmationDelayMs: now - event.startedAt,
-          });
-        }
-      }
-    }
-
-    if (pendingKnockbacksRef.current.length > 0) {
-      const due = pendingKnockbacksRef.current.filter(({ at }) => at <= now && now - at <= 1000);
-      pendingKnockbacksRef.current = pendingKnockbacksRef.current.filter(({ at }) => at > now);
-      for (const knockback of due) {
-        hasAppliedKnockback = true;
-        playerStateRef.current = applyKnockback(
-          playerStateRef.current,
-          knockback.dirX,
-          knockback.dirZ,
-        );
       }
     }
 
@@ -303,11 +246,10 @@ function SpaceScene({
         remoteKickStartsRef.current.delete(seat);
       }
     }
-    return hasAppliedKnockback;
   };
 
   /**
-   * 발차기 입력을 처리함. 쿨다운이면 버림. 대상이 없으면 허공에 참.
+   * 발차기 입력을 처리함. 쿨다운이면 버림.
    *
    * 누른 순간 내 화면에서 바로 재생함. 서버 왕복을 기다리면 조작이 굼떠 보임.
    */
@@ -321,63 +263,13 @@ function SpaceScene({
       return;
     }
     // 전송에 실패해도 내 화면에서는 휘두름. 재접속 중에 버튼이 먹통으로 보였음.
-    session.sendKick(selectKickTarget(remotePlayers, playerState), playerState);
+    session.sendKick(playerState);
     inputSource.kickCooldownUntil = now + SPACE_KICK.cooldownMs;
     kickStartedAtRef.current = now;
   };
 
-  /**
-   * 숨은 탭에서 맞았을 때 넉백을 한 번에 끝까지 적분해 보냄.
-   *
-   * 숨은 탭은 프레임이 안 돌아 평소 경로로는 안 밀림. 타이머도 1초 단위로 묶여
-   * 나눠 보낼 수 없어서 멈출 때까지 계산한 마지막 위치만 보냄. 바닥에 못 닿았으면
-   * (섬 밖으로 떨어지는 중) 안 보내고 복귀 후 프레임 루프에 맡김.
-   */
-  const settleHiddenKnockbacks = (
-    knockbacks: readonly Pick<SpaceKickEvent, "dirX" | "dirZ">[],
-  ): void => {
-    let state = playerStateRef.current;
-
-    for (const knockback of knockbacks) {
-      state = applyKnockback(state, knockback.dirX, knockback.dirZ);
-    }
-    for (let step = 0; step < hiddenKnockbackMaximumSteps; step += 1) {
-      state = stepMovement(state, hiddenKnockbackInput, 0, undefined, terrainRef.current);
-      if (state.isGrounded && state.knockbackX === 0 && state.knockbackZ === 0) {
-        break;
-      }
-    }
-    playerStateRef.current = state;
-    accumulatedSecondsRef.current = 0;
-    if (state.isGrounded) {
-      session.publishMovement(state, true);
-    }
-  };
-
-  const applyHiddenKnockback = (event: SpaceKickEvent): void => {
-    settleHiddenKnockbacks([event]);
-  };
-
-  /**
-   * 타격 시각을 기다리던 넉백을 탭이 숨는 순간 마저 적용함.
-   *
-   * 그대로 두면 프레임이 멈춰 복귀 때 오래된 것으로 버려지고, 남의 화면에서는
-   * 밀렸다가 제자리로 돌아옴.
-   */
-  const flushPendingKnockbacks = (): void => {
-    const pendingKnockbacks = pendingKnockbacksRef.current;
-
-    if (pendingKnockbacks.length === 0) {
-      return;
-    }
-    pendingKnockbacksRef.current = [];
-    settleHiddenKnockbacks(pendingKnockbacks);
-  };
-
   const resetKickPresentation = (): void => {
-    pendingKnockbacksRef.current = [];
     remoteKickStartsRef.current.clear();
-    remoteKickPrediction.clear();
   };
 
   const applyPlayerTransform = (playerState: LocalPlayerState): void => {
@@ -410,8 +302,6 @@ function SpaceScene({
 
     const respawned = createLocalPlayerState(spawnTransform);
 
-    // 떨어지기 전에 맞아 기다리던 넉백이 스폰 직후 걸리지 않게 비움.
-    pendingKnockbacksRef.current = [];
     playerStateRef.current = respawned;
     accumulatedSecondsRef.current = 0;
     cameraOrbitRef.current = { ...cameraOrbitRef.current, yaw: spawnTransform.yaw };
@@ -545,24 +435,7 @@ function SpaceScene({
 
   useLayoutEffect(() => {
     resetKickPresentation();
-  }, [session.presence.status, session.self?.seat, remoteKickPrediction]);
-
-  useEffect(() => {
-    // 참조만 읽는 함수라 처음 것을 계속 써도 됨.
-    const onChangeVisibilityDocument = (): void => {
-      if (document.hidden) {
-        flushPendingKnockbacks();
-      }
-    };
-
-    session.setHiddenHitHandler(applyHiddenKnockback);
-    document.addEventListener("visibilitychange", onChangeVisibilityDocument);
-
-    return () => {
-      session.setHiddenHitHandler(null);
-      document.removeEventListener("visibilitychange", onChangeVisibilityDocument);
-    };
-  }, [session.setHiddenHitHandler]);
+  }, [session.presence.status, session.self?.seat]);
 
   useFrame(({ clock }, deltaSeconds) => {
     session.sampleRemotePlayers(performance.now());
@@ -571,8 +444,7 @@ function SpaceScene({
     }
 
     const now = performance.now();
-    const hasAppliedKnockback = applyReceivedKicks(now);
-    remoteKickPrediction.update(sourceRemotePlayers, remotePlayers, terrainRef.current, now);
+    applyReceivedKicks(now);
 
     const cameraOrbit = advanceCameraOrbit(deltaSeconds);
     const steppedState = advancePlayerState(cameraOrbit.yaw, deltaSeconds);
@@ -584,7 +456,7 @@ function SpaceScene({
 
     // 공격은 위치를 바로 보내서 되돌린 뒤에 처리함. 음수 높이가 나가면 서버가 반려함.
     handleKickInput(now, playerState);
-    session.publishMovement(playerState, hasAppliedKnockback);
+    session.publishMovement(playerState);
 
     const focus = resolveCameraFocus(playerState);
     const targetPosition = resolveCameraPosition(playerState, cameraOrbitRef.current);
