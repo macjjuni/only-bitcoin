@@ -88,6 +88,7 @@ export const useSpaceSession = ({ identity, modelIndex, enabled }: UseSpaceSessi
     publishMovement: controller.publishMovement,
     sampleRemotePlayers: controller.sampleRemotePlayers,
     sendKick: controller.sendKick,
+    requestCelebration: controller.requestCelebration,
     drainKickEvents: controller.drainKickEvents,
     sendMessage: controller.sendMessage,
     changeNickname: controller.changeNickname,

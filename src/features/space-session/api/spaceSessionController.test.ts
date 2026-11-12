@@ -131,6 +131,61 @@ describe("SpaceSessionController", () => {
     vi.useRealTimers();
   });
 
+  it("서버 시계는 왕복 지연의 중간값으로 보정하고 상승 이벤트 중복을 무시한다", () => {
+    const { controller, welcome } = createHarness();
+    controller.start();
+    const socket = welcome(undefined, [], ["market-sync-v1"]);
+    const sentAt = sentFrames(socket, "clock")[0].sentAt;
+    vi.advanceTimersByTime(100);
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "clock", sentAt, serverAt: sentAt + 50 + 5000 });
+    expect(controller.getSnapshot().serverClockOffsetMs).toBe(5000);
+    const event = { id: "rise-1", startsAt: 7000, seed: 123 };
+    const state = {
+      revision: 1,
+      track: "surge",
+      direction: "rise",
+      startsAt: 7000,
+      prefetch: true,
+      celebration: event,
+    };
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "market", state, serverAt: 6100 });
+    const snapshot = controller.getSnapshot();
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "market", state, serverAt: 6100 });
+    expect(controller.getSnapshot()).toBe(snapshot);
+    expect(snapshot.celebration).toEqual(event);
+    expect(controller.requestCelebration()).toBe(true);
+    expect(sentFrames(socket, "celebrate")).toHaveLength(1);
+  });
+
+  it("새 테스트 폭죽을 오래된 상승 프리패치 프레임으로 되돌리지 않는다", () => {
+    const { controller, welcome } = createHarness();
+    controller.start();
+    const socket = welcome(undefined, [], ["market-sync-v1"]);
+    socket.receive({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "celebrate",
+      event: { id: "test-2", startsAt: 3000, seed: 2 },
+      serverAt: 2200,
+    });
+    socket.receive({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "market",
+      state: {
+        revision: 2,
+        track: "surge",
+        direction: "rise",
+        startsAt: 2000,
+        prefetch: false,
+        celebration: { id: "rise-1", startsAt: 2000, seed: 1 },
+      },
+      serverAt: 2300,
+    });
+    expect(controller.getSnapshot().celebration?.id).toBe("test-2");
+    controller.stop();
+    expect(controller.getSnapshot().celebration).toBeNull();
+    expect(controller.requestCelebration()).toBe(false);
+  });
+
   it("welcome 기록은 패널 목록에만 합치고 중복 없이 최근 100개를 유지한다", () => {
     const { controller, sockets } = createHarness();
     controller.start();
@@ -174,7 +229,13 @@ describe("SpaceSessionController", () => {
     const socket = welcome(sockets[0], [remote]);
 
     expect(sentFrames(socket, "join")).toEqual([
-      { v: SPACE_PROTOCOL_VERSION, t: "join", ...identity, modelIndex: 0, features: ["kick"] },
+      {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "join",
+        ...identity,
+        modelIndex: 0,
+        features: ["kick", "market-sync-v1"],
+      },
     ]);
     expect(socket.binaryType).toBe("arraybuffer");
     expect(controller.getSnapshot().presence).toEqual({ status: "online", occupantCount: 2 });
@@ -701,7 +762,7 @@ describe("SpaceSessionController", () => {
         clientKey: identity.clientKey,
         nickname: identity.nickname,
         modelIndex: 1,
-        features: ["kick"],
+        features: ["kick", "market-sync-v1"],
       },
     ]);
     controller.stop();
@@ -783,7 +844,7 @@ describe("SpaceSessionController", () => {
         clientKey: identity.clientKey,
         nickname: "새이름",
         modelIndex: 0,
-        features: ["kick"],
+        features: ["kick", "market-sync-v1"],
       },
     ]);
     controller.stop();
@@ -853,7 +914,9 @@ describe("SpaceSessionController", () => {
       controller.start();
       const oldServer = welcome();
 
-      expect(sentFrames(oldServer, "join")[0]).toMatchObject({ features: ["kick"] });
+      expect(sentFrames(oldServer, "join")[0]).toMatchObject({
+        features: ["kick", "market-sync-v1"],
+      });
       expect(controller.getSnapshot().canKick).toBe(false);
       expect(controller.sendKick(1)).toBe(false);
       controller.stop();

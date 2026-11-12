@@ -1,5 +1,11 @@
 import { isAvatarModelIndex, SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "./avatarModel";
 import type { PlayerTransform, RemotePlayer } from "./playerState";
+import {
+  isSpaceCelebration,
+  isSpaceMarketState,
+  type SpaceCelebration,
+  type SpaceMarketState,
+} from "./spaceMarket";
 import { SPACE_MAX_ALTITUDE, SPACE_MAX_OCCUPANTS } from "./spaceWorld";
 
 /**
@@ -56,6 +62,8 @@ export interface SpaceMotionSnapshot {
 type SpaceProtocolVersion = typeof SPACE_PROTOCOL_VERSION;
 
 export type SpaceClientFrame =
+  | { v: SpaceProtocolVersion; t: "clock"; sentAt: number }
+  | { v: SpaceProtocolVersion; t: "celebrate" }
   | {
       v: SpaceProtocolVersion;
       t: "join";
@@ -81,6 +89,9 @@ export type SpaceClientFrame =
   | { v: SpaceProtocolVersion; t: "kick"; target?: number };
 
 export type SpaceServerFrame =
+  | { v: SpaceProtocolVersion; t: "clock"; sentAt: number; serverAt: number }
+  | { v: SpaceProtocolVersion; t: "market"; state: SpaceMarketState; serverAt: number }
+  | { v: SpaceProtocolVersion; t: "celebrate"; event: SpaceCelebration; serverAt: number }
   | {
       v: SpaceProtocolVersion;
       t: "welcome";
@@ -269,6 +280,12 @@ export const parseSpaceClientFrame = (rawPayload: string): SpaceClientFrame | nu
   }
 
   switch (payload.t) {
+    case "clock":
+      return isFiniteNumber(payload.sentAt) && payload.sentAt >= 0
+        ? (payload as SpaceClientFrame)
+        : null;
+    case "celebrate":
+      return payload as SpaceClientFrame;
     case "join":
       return typeof payload.clientKey === "string" &&
         CLIENT_KEY_PATTERN.test(payload.clientKey) &&
@@ -324,6 +341,25 @@ export const parseSpaceServerFrame = (rawPayload: string): SpaceServerFrame | nu
   }
 
   switch (payload.t) {
+    case "clock":
+      return isFiniteNumber(payload.sentAt) &&
+        payload.sentAt >= 0 &&
+        isFiniteNumber(payload.serverAt) &&
+        payload.serverAt >= 0
+        ? (payload as SpaceServerFrame)
+        : null;
+    case "market":
+      return isSpaceMarketState(payload.state) &&
+        isFiniteNumber(payload.serverAt) &&
+        payload.serverAt >= 0
+        ? (payload as SpaceServerFrame)
+        : null;
+    case "celebrate":
+      return isSpaceCelebration(payload.event) &&
+        isFiniteNumber(payload.serverAt) &&
+        payload.serverAt >= 0
+        ? (payload as SpaceServerFrame)
+        : null;
     case "welcome": {
       const selfPeer = payload.self;
       const peers = payload.peers;

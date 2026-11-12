@@ -7,8 +7,11 @@ import {
   parseSpaceServerFrame,
   type RemotePlayer,
   SPACE_FEATURE_KICK,
+  SPACE_FEATURE_MARKET,
   SPACE_PROTOCOL_VERSION,
+  type SpaceCelebration,
   type SpaceChatMessage,
+  type SpaceMarketState,
   type SpacePeer,
   type SpacePresence,
   type SpaceServerFrame,
@@ -20,6 +23,10 @@ export interface SpaceSessionIdentity {
 }
 
 export interface SpaceSessionSnapshot {
+  market: SpaceMarketState | null;
+  celebration: SpaceCelebration | null;
+  serverClockOffsetMs: number | null;
+  canSyncMarket: boolean;
   presence: SpacePresence;
   isNicknamePending: boolean;
   messages: SpaceChatMessage[];
@@ -219,6 +226,10 @@ export class SpaceSessionController {
   private rateLimitedUntil = 0;
   private lastReceivedAt = 0;
   private snapshot: SpaceSessionSnapshot = {
+    market: null,
+    celebration: null,
+    serverClockOffsetMs: null,
+    canSyncMarket: false,
     presence: createOfflinePresence(),
     messages: [],
     bubbleMessages: [],
@@ -235,6 +246,8 @@ export class SpaceSessionController {
    * 씬이 매 프레임 `drainKickEvents` 로 비움.
    */
   private kickEvents: { event: SpaceKickEvent; receivedAt: number }[] = [];
+  private clockSentAt: number | null = null;
+  private bestClockRtt = Number.POSITIVE_INFINITY;
 
   /** 재접속 시 보낼 닉네임. 변경이 확정되면 갱신함. */
   private nickname: string;
@@ -254,6 +267,22 @@ export class SpaceSessionController {
   }
 
   getSnapshot = (): SpaceSessionSnapshot => this.snapshot;
+
+  requestCelebration = (): boolean => {
+    return (
+      this.snapshot.presence.status === "online" &&
+      this.snapshot.canSyncMarket &&
+      this.sendFrame({ v: SPACE_PROTOCOL_VERSION, t: "celebrate" })
+    );
+  };
+
+  private requestClock(): void {
+    if (!this.snapshot.canSyncMarket) {
+      return;
+    }
+    this.clockSentAt = this.options.now();
+    this.sendFrame({ v: SPACE_PROTOCOL_VERSION, t: "clock", sentAt: this.clockSentAt });
+  }
 
   subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
@@ -583,7 +612,7 @@ export class SpaceSessionController {
         clientKey: this.options.identity.clientKey,
         nickname: this.nickname,
         modelIndex: this.modelIndex,
-        features: [SPACE_FEATURE_KICK],
+        features: [SPACE_FEATURE_KICK, SPACE_FEATURE_MARKET],
       });
     });
     socket.addEventListener("message", (event) => {
@@ -655,6 +684,56 @@ export class SpaceSessionController {
 
   private applyServerFrame(frame: SpaceServerFrame): void {
     switch (frame.t) {
+      case "clock": {
+        if (!this.snapshot.self || frame.sentAt !== this.clockSentAt) {
+          return;
+        }
+        const receivedAt = this.options.now();
+        const rtt = receivedAt - frame.sentAt;
+        this.clockSentAt = null;
+        if (rtt >= 0 && rtt <= this.bestClockRtt && rtt < 10000) {
+          this.bestClockRtt = rtt;
+          this.updateSnapshot({
+            serverClockOffsetMs: frame.serverAt - (frame.sentAt + receivedAt) / 2,
+          });
+        }
+        return;
+      }
+      case "market": {
+        if (
+          !this.snapshot.self ||
+          !this.snapshot.canSyncMarket ||
+          (this.snapshot.market && frame.state.revision <= this.snapshot.market.revision)
+        ) {
+          return;
+        }
+        this.updateSnapshot({
+          market: frame.state,
+          serverClockOffsetMs:
+            this.snapshot.serverClockOffsetMs ?? frame.serverAt - this.options.now(),
+          ...(frame.state.celebration &&
+          (!this.snapshot.celebration ||
+            frame.state.celebration.startsAt > this.snapshot.celebration.startsAt)
+            ? { celebration: frame.state.celebration }
+            : {}),
+        });
+        return;
+      }
+      case "celebrate": {
+        if (
+          !this.snapshot.self ||
+          !this.snapshot.canSyncMarket ||
+          (this.snapshot.celebration && frame.event.startsAt <= this.snapshot.celebration.startsAt)
+        ) {
+          return;
+        }
+        this.updateSnapshot({
+          celebration: frame.event,
+          serverClockOffsetMs:
+            this.snapshot.serverClockOffsetMs ?? frame.serverAt - this.options.now(),
+        });
+        return;
+      }
       case "welcome": {
         this.clearConnectionTimer();
         this.retryAttempt = 0;
@@ -676,9 +755,11 @@ export class SpaceSessionController {
           bubbleMessages: [],
           rosterRevision: this.snapshot.rosterRevision + 1,
           canKick: frame.features?.includes(SPACE_FEATURE_KICK) ?? false,
+          canSyncMarket: frame.features?.includes(SPACE_FEATURE_MARKET) ?? false,
         });
         this.kickEvents = [];
         this.startHeartbeat();
+        this.requestClock();
         return;
       }
       case "peer": {
@@ -824,12 +905,18 @@ export class SpaceSessionController {
   }
 
   private clearRoster(): void {
+    this.clockSentAt = null;
+    this.bestClockRtt = Number.POSITIVE_INFINITY;
     this.kickEvents = [];
     this.peers.clear();
     this.interpolator.clear();
     this.latestMovement = null;
     this.lastSentMovement = null;
     this.updateSnapshot({
+      market: null,
+      celebration: null,
+      canSyncMarket: false,
+      serverClockOffsetMs: null,
       remotePlayers: this.interpolator.sample(this.options.now()),
       bubbleMessages: [],
       rosterRevision: this.snapshot.rosterRevision + 1,
@@ -891,6 +978,7 @@ export class SpaceSessionController {
       if (this.socket?.readyState === socketOpenState) {
         try {
           this.socket.send("ping");
+          this.requestClock();
         } catch {
           this.handleDisconnected("스페이스 연결이 끊겼어요. 다시 접속합니다.");
         }

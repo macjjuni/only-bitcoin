@@ -13,7 +13,9 @@ import {
   useState,
 } from "react";
 import { NeutralToneMapping } from "three";
+import { SPACE_MARKET, type SpaceCelebration } from "@/entities/space";
 import type { ChatIdentity } from "@/features/chat-session";
+import { useSpaceBgm } from "@/features/space-bgm";
 import {
   createSpaceInputSource,
   loadAvatarModelIndex,
@@ -34,6 +36,7 @@ import {
   SPACE_LOADING,
   type SpaceLoadStages,
 } from "@/views/space/lib/spaceLoading";
+import { useScreenCelebrationSound } from "../model/useScreenCelebrationSound";
 import SpaceHud from "./hud/SpaceHud";
 import SpaceFallback, { type SpaceFallbackReason } from "./SpaceFallback";
 import SpaceLoadingOverlay from "./SpaceLoadingOverlay";
@@ -81,6 +84,7 @@ const hasRealtimeShadowBudget = (): boolean => {
 function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   // region [Hooks]
   const inputSource = useMemo(() => createSpaceInputSource(), []);
+  const [localCelebration, setLocalCelebration] = useState<SpaceCelebration | null>(null);
   const [fallbackReason, setFallbackReason] = useState<SpaceFallbackReason | null>(null);
   const [isSupportProbed, setIsSupportProbed] = useState<boolean>(false);
   const [hasRealtimeShadows, setHasRealtimeShadows] = useState<boolean>(false);
@@ -103,6 +107,10 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   const [hasPerformanceStats] = useState(
     () => new URLSearchParams(window.location.search).get("stats") === "1",
   );
+  /** `?celebrate=1` 로만 폭죽 테스트 버튼을 켠다. 누르면 방 전체에 터져서 일반 접속자에게는 숨긴다. */
+  const [hasCelebrationTest] = useState(
+    () => new URLSearchParams(window.location.search).get("celebrate") === "1",
+  );
 
   /**
    * 고른 아바타 모델.
@@ -116,6 +124,19 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
     modelIndex: localModelIndex,
     enabled: isSupportProbed && !fallbackReason && dummyCount === 0,
   });
+  const bgm = useSpaceBgm({
+    market: session.market,
+    serverClockOffsetMs: session.serverClockOffsetMs,
+  });
+  const celebration = dummyCount > 0 ? localCelebration : session.celebration;
+  const celebrationClockOffsetMs = dummyCount > 0 ? 0 : session.serverClockOffsetMs;
+  const isTestRequester =
+    celebration?.testSeat !== undefined && celebration.testSeat === session.self?.seat;
+  useScreenCelebrationSound(
+    celebration,
+    celebrationClockOffsetMs,
+    bgm.isPlaying || isTestRequester || dummyCount > 0,
+  );
   /** 입장 로딩 신호. 한 번 켜지면 끄지 않음 — 모델을 바꿔도 오버레이를 다시 띄우지 않음. */
   const [isMapReady, setIsMapReady] = useState<boolean>(false);
   const [isAvatarReady, setIsAvatarReady] = useState<boolean>(false);
@@ -128,6 +149,18 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   // endregion
 
   // region [Events]
+  const onCelebrate = useCallback((): void => {
+    if (dummyCount > 0) {
+      setLocalCelebration({
+        id: crypto.randomUUID(),
+        startsAt: performance.now() + SPACE_MARKET.eventLeadMs,
+        seed: Math.floor(Math.random() * 0xffffffff),
+      });
+      return;
+    }
+    session.requestCelebration();
+  }, [dummyCount, session.requestCelebration]);
+
   /** 선택을 저장하고 서버에 알린다. 서버가 받아들이면 `peer` 로 모두에게 퍼진다. */
   const onChangeModel = useCallback(
     async (nextModelIndex: number): Promise<boolean> => {
@@ -314,6 +347,8 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
         <Suspense fallback={null}>
           <SpaceScene
             inputSource={inputSource}
+            celebration={celebration}
+            celebrationClockOffsetMs={celebrationClockOffsetMs}
             clientKey={identity.clientKey}
             modelIndex={modelIndex}
             nickname={nickname}
@@ -328,6 +363,12 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
       </Canvas>
 
       <SpaceHud
+        bgm={bgm}
+        canTestCelebration={
+          hasCelebrationTest &&
+          (dummyCount > 0 || (session.canSyncMarket && session.presence.status === "online"))
+        }
+        onCelebrate={onCelebrate}
         inputSource={inputSource}
         session={session}
         nickname={nickname}

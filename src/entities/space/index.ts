@@ -1,4 +1,15 @@
 export { resolveColorIndexFromClientKey } from "./lib/clientKeyHash";
+export {
+  appendPriceSample,
+  createSurgeState,
+  type PriceSample,
+  readCalmChangePercent,
+  readCandleChangePercent,
+  resolveReferencePrice,
+  SPACE_BGM_SURGE,
+  type SurgeState,
+  stepSurgeState,
+} from "./lib/marketSurge";
 export { createSpaceInterpolator, type SpaceInterpolator } from "./lib/remoteInterpolation";
 export { decodeSpaceSnapshot, encodeSpaceSnapshot } from "./lib/spaceSnapshot";
 export { createSpawnPoint } from "./lib/spawnPoint";
@@ -26,6 +37,14 @@ export {
   type SpacePresence,
   type SpacePresenceStatus,
 } from "./model/playerState";
+export {
+  isSpaceCelebration,
+  isSpaceMarketState,
+  SPACE_FEATURE_MARKET,
+  SPACE_MARKET,
+  type SpaceCelebration,
+  type SpaceMarketState,
+} from "./model/spaceMarket";
 export {
   parseSpaceClientFrame,
   parseSpaceServerFrame,

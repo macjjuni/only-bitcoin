@@ -4,6 +4,7 @@ import { encodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapsh
 import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
 import { SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "../../../src/entities/space/model/avatarModel";
 import { SPACE_FEATURE_KICK, SPACE_KICK } from "../../../src/entities/space/model/kick";
+import { SPACE_FEATURE_MARKET } from "../../../src/entities/space/model/spaceMarket";
 import {
   parseSpaceClientFrame,
   SPACE_CHAT_COOLDOWN_MS,
@@ -25,6 +26,7 @@ import {
 } from "../../../src/entities/space/model/spaceWorld";
 import { createSha256Hex, deriveStableActorKey } from "./lib/crypto";
 import { getSpaceIpConnectionLimit } from "./lib/spaceConnectionLimit";
+import { SpaceMarketMonitor } from "./lib/spaceMarketMonitor";
 import {
   ChatValidationError,
   countGraphemes,
@@ -91,7 +93,7 @@ const JOIN_TIMEOUT_MS = 10_000;
 const STALE_CONNECTION_MS = 60_000;
 const PRUNE_INTERVAL_MS = 15_000;
 /** 이 서버가 지원하는 기능. 입장 응답에 실어 보냄. */
-const SERVER_FEATURES = [SPACE_FEATURE_KICK];
+const SERVER_FEATURES = [SPACE_FEATURE_KICK, SPACE_FEATURE_MARKET];
 /** 마지막 이동 뒤 더 보내는 빈 틱 수. 클라이언트의 정지 판정용. */
 const TRAILING_SNAPSHOT_TICKS = 2;
 /** 클라이언트 달리기 8 m/s에 전송·적분 오차 여유만 더함. */
@@ -118,6 +120,7 @@ const textEncoder = new TextEncoder();
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
+  private marketMonitor: SpaceMarketMonitor;
   private socketsBySeat = new Map<number, WebSocket>();
   private dirtySeats = new Set<number>();
   private snapshotTimer: ReturnType<typeof setTimeout> | null = null;
@@ -138,6 +141,13 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     private readonly workerEnv: ChatWorkerEnv,
   ) {
     super(state, workerEnv);
+    this.marketMonitor = new SpaceMarketMonitor(state.storage, () => this.socketsBySeat.size > 0, (frame) => {
+      for (const socket of this.socketsBySeat.values()) {
+        if (this.getJoinedAttachment(socket)?.features?.includes(SPACE_FEATURE_MARKET)) {
+          this.sendFrame(socket, frame);
+        }
+      }
+    });
     this.state.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
 
     for (const socket of this.state.getWebSockets()) {
@@ -404,6 +414,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         v: SPACE_PROTOCOL_VERSION,
         t: "welcome",
         self: current.peer,
+        features: SERVER_FEATURES,
         peers: connectedPeers
           .filter((entry) => entry.socket !== current.socket)
           .map((entry) => entry.peer),
@@ -465,6 +476,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     }
     if (this.socketsBySeat.size === 0) {
       this.stopSnapshotTimer();
+      void this.marketMonitor.stopIfEmpty().catch((error) => console.error("Market alarm cleanup failed", error));
     }
 
     try {
@@ -667,6 +679,10 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
       if (this.getJoinedAttachment(socket)) {
         this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer }, socket);
+        const market = await this.marketMonitor.start();
+        if (this.getJoinedAttachment(socket)?.features?.includes(SPACE_FEATURE_MARKET)) {
+          this.sendFrame(socket, { v: SPACE_PROTOCOL_VERSION, t: "market", state: market, serverAt: Date.now() });
+        }
       }
     } finally {
       this.joiningSockets.delete(socket);
@@ -1078,6 +1094,20 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
     try {
       switch (frame.t) {
+        case "clock":
+        case "celebrate": {
+          const attachment = this.getJoinedAttachment(socket);
+          if (!attachment?.peer || !attachment.features?.includes(SPACE_FEATURE_MARKET)) {
+            this.sendError(socket, "JOIN_REQUIRED", "먼저 공간에 입장해 주세요.");
+            break;
+          }
+          if (frame.t === "clock") {
+            this.sendFrame(socket, { v: SPACE_PROTOCOL_VERSION, t: "clock", sentAt: frame.sentAt, serverAt: Date.now() });
+          } else if (!await this.marketMonitor.testCelebration(attachment.peer.seat)) {
+            this.sendError(socket, "CELEBRATION_COOLDOWN", "폭죽 테스트는 공간 전체에서 30초에 한 번만 할 수 있어요.");
+          }
+          break;
+        }
         case "join":
           await this.handleJoin(socket, frame);
           break;
@@ -1112,6 +1142,11 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
   webSocketClose(socket: WebSocket): void {
     this.removeSocket(socket);
+  }
+
+  async alarm(): Promise<void> {
+    this.pruneStaleConnections();
+    await this.marketMonitor.poll();
   }
 
   webSocketError(socket: WebSocket): void {
