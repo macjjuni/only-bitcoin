@@ -22,6 +22,17 @@ interface SpaceBgmOptions {
   serverClockOffsetMs: number | null;
 }
 
+/** 곡을 새로 틀 때 서버 위치와 맞추는 허용 오차(초). */
+const START_TOLERANCE_SECONDS = 0.3;
+
+/**
+ * 재생 중 주기 점검의 허용 오차(초).
+ *
+ * 모바일은 탐색 한 번에 0.3 초 넘게 멈춘다. 시작 때와 같은 오차를 쓰면 탐색으로
+ * 밀린 만큼을 다음 점검이 또 탐색으로 고치려 들어 5 초마다 소리가 끊긴다.
+ */
+const RESYNC_TOLERANCE_SECONDS = 2;
+
 /** 음악을 켤지 여부만 개인 설정이다. 트랙 종류·시작 시각·재생 위치는 서버가 정한다. */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 const useSpaceBgm = ({ market, serverClockOffsetMs }: SpaceBgmOptions): SpaceBgm => {
@@ -64,14 +75,15 @@ const useSpaceBgm = ({ market, serverClockOffsetMs }: SpaceBgmOptions): SpaceBgm
     }
   }, []);
 
-  const alignPosition = useCallback((audio: HTMLAudioElement, startsAt: number | null): void => {
+  const alignPosition = useCallback((audio: HTMLAudioElement, startsAt: number | null, toleranceSeconds: number): void => {
     const offset = clockOffsetRef.current;
-    if (startsAt === null || offset === null || !Number.isFinite(audio.duration) || audio.duration <= 0) {
+    // 앞선 탐색이 끝나기 전에 또 옮기면 버퍼링만 길어진다.
+    if (audio.seeking || startsAt === null || offset === null || !Number.isFinite(audio.duration) || audio.duration <= 0) {
       return;
     }
     const position = Math.max(0, (performance.now() + offset - startsAt) / 1000) % audio.duration;
     const distance = Math.abs(audio.currentTime - position);
-    if (Math.min(distance, audio.duration - distance) > 0.3) {
+    if (Math.min(distance, audio.duration - distance) > toleranceSeconds) {
       audio.currentTime = position;
     }
   }, []);
@@ -91,7 +103,7 @@ const useSpaceBgm = ({ market, serverClockOffsetMs }: SpaceBgmOptions): SpaceBgm
     } else {
       audio.volume = volume;
     }
-    alignPosition(audio, startsAt);
+    alignPosition(audio, startsAt, START_TOLERANCE_SECONDS);
     try {
       await audio.play();
       if (generation !== generationRef.current) {
@@ -101,7 +113,7 @@ const useSpaceBgm = ({ market, serverClockOffsetMs }: SpaceBgmOptions): SpaceBgm
         audio.pause();
         return false;
       }
-      alignPosition(audio, startsAt);
+      alignPosition(audio, startsAt, START_TOLERANCE_SECONDS);
       activeTrackRef.current = track;
       activeStartRef.current = startsAt;
       setIsPlaying(true);
@@ -178,8 +190,16 @@ const useSpaceBgm = ({ market, serverClockOffsetMs }: SpaceBgmOptions): SpaceBgm
       return;
     }
     const audio = tracksRef.current[state.track];
-    if (audio && !audio.paused) {
-      alignPosition(audio, state.startsAt);
+    if (!audio) {
+      return;
+    }
+    if (!audio.paused) {
+      alignPosition(audio, state.startsAt, RESYNC_TOLERANCE_SECONDS);
+      return;
+    }
+    // 모바일은 앱 전환·전화·잠금으로 OS 가 재생을 멈춘다. 화면에 돌아오면 다시 잇는다.
+    if (!document.hidden && performance.now() - lastAttemptRef.current >= 5000) {
+      void playTrack(state.track, state.startsAt);
     }
   }, [alignPosition, playTrack]);
 
