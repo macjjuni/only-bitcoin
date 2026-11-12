@@ -3,7 +3,11 @@ import { resolveColorIndexFromClientKey } from "../../../src/entities/space/lib/
 import { encodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapshot";
 import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
 import { SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "../../../src/entities/space/model/avatarModel";
-import { SPACE_FEATURE_KICK, SPACE_KICK } from "../../../src/entities/space/model/kick";
+import {
+  SPACE_FEATURE_KICK,
+  SPACE_FEATURE_KICK_TIMING,
+  SPACE_KICK,
+} from "../../../src/entities/space/model/kick";
 import { SPACE_FEATURE_MARKET } from "../../../src/entities/space/model/spaceMarket";
 import {
   parseSpaceClientFrame,
@@ -75,6 +79,7 @@ interface SpaceSocketAttachment {
   features?: string[];
   /** 마지막으로 찬 시각. 쿨다운 판정용. */
   lastKickAt?: number;
+  lastKickId?: string;
 }
 
 const MAXIMUM_PENDING_CONNECTIONS = 10;
@@ -93,7 +98,7 @@ const JOIN_TIMEOUT_MS = 10_000;
 const STALE_CONNECTION_MS = 60_000;
 const PRUNE_INTERVAL_MS = 15_000;
 /** 이 서버가 지원하는 기능. 입장 응답에 실어 보냄. */
-const SERVER_FEATURES = [SPACE_FEATURE_KICK, SPACE_FEATURE_MARKET];
+const SERVER_FEATURES = [SPACE_FEATURE_KICK, SPACE_FEATURE_MARKET, SPACE_FEATURE_KICK_TIMING];
 /** 마지막 이동 뒤 더 보내는 빈 틱 수. 클라이언트의 정지 판정용. */
 const TRAILING_SNAPSHOT_TICKS = 2;
 /** 클라이언트 달리기 8 m/s에 전송·적분 오차 여유만 더함. */
@@ -668,6 +673,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         // 서버가 아는 기능만 남김. 탭을 바꿔 들어와도 쿨다운은 이어 감.
         features: (frame.features ?? []).filter((feature) => SERVER_FEATURES.includes(feature)),
         lastKickAt: previousAttachment?.lastKickAt,
+        lastKickId: previousAttachment?.lastKickId,
       } satisfies SpaceSocketAttachment);
       this.socketsBySeat.set(seat, socket);
       this.clearJoinDeadline(socket);
@@ -803,6 +809,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     }
     const now = Date.now();
 
+    if (frame.id !== undefined && frame.id === attachment.lastKickId) {
+      return;
+    }
     if (attachment.lastKickAt !== undefined && now - attachment.lastKickAt < SPACE_KICK.cooldownMs - SPACE_KICK.serverCooldownToleranceMs) {
       return;
     }
@@ -812,7 +821,10 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     // 발차기가 나가고 다른 사람은 아무것도 못 봄.
     const hit = this.resolveKickHit(kicker, frame.target);
 
-    socket.serializeAttachment({ ...attachment, lastKickAt: now } satisfies SpaceSocketAttachment);
+    const id = frame.id ?? crypto.randomUUID();
+    // 시각은 연출에만 사용함. 거리 판정·쿨다운은 서버의 실제 상태로 유지함.
+    const startedAt = Math.min(now, Math.max(now - SPACE_KICK.maximumBackdateMs, frame.startedAt ?? now));
+    socket.serializeAttachment({ ...attachment, lastKickAt: now, lastKickId: id } satisfies SpaceSocketAttachment);
     if (hit) {
       hit.socket.serializeAttachment({
         ...hit.attachment,
@@ -826,6 +838,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     const payload = JSON.stringify({
       v: SPACE_PROTOCOL_VERSION,
       t: "kick",
+      id,
+      startedAt,
+      serverAt: now,
       from: kicker.seat,
       ...(hit ? { to: hit.seat } : {}),
       dirX: hit ? hit.dirX : facingX,

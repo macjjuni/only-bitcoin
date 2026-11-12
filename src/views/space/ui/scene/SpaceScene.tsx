@@ -18,6 +18,7 @@ import {
   createSpawnPoint,
   type LocalPlayerState,
   resolveColorIndexFromClientKey,
+  resolveKickImpactAt,
   SPACE_HALL,
   SPACE_HEATMAP_FRAME,
   SPACE_KICK,
@@ -58,6 +59,7 @@ import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import type { LanternAnchor } from "@/views/space/lib/hallModel";
 import type { HallTerrain } from "@/views/space/lib/hallTerrain";
 import { selectKickTarget } from "@/views/space/lib/kickTarget";
+import { createRemoteKickPrediction } from "@/views/space/lib/remoteKickPrediction";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 import BlockDashboard from "./BlockDashboard";
 import ChatBubbles from "./ChatBubbles";
@@ -92,6 +94,7 @@ interface SpaceSceneProps {
 
 const EMPTY_LANTERN_ANCHORS: readonly LanternAnchor[] = [];
 
+// biome-ignore format: AGENTS.md requires two blank lines between regions.
 function SpaceScene({
   celebration,
   celebrationClockOffsetMs,
@@ -123,7 +126,12 @@ function SpaceScene({
   /** 서버가 확정한 모델을 씀. 접속 전에는 저장된 선택으로 보여줌. */
   const avatarModelIndex = session.self?.modelIndex ?? modelIndex;
   const dummies = useMemo(() => createStressDummies(dummyCount), [dummyCount]);
-  const remotePlayers = dummyCount > 0 ? dummies : session.remotePlayers;
+  const sourceRemotePlayers = dummyCount > 0 ? dummies : session.remotePlayers;
+  const remotePlayers = useMemo(
+    () => sourceRemotePlayers.map((player) => ({ ...player })),
+    [sourceRemotePlayers, session.rosterRevision],
+  );
+  const remoteKickPrediction = useMemo(createRemoteKickPrediction, []);
   /** 1단계는 빈 슬롯임. 3단계에서 라이트닝 결제로 채움. */
 
   const playerStateRef = useRef<LocalPlayerState>(createLocalPlayerState(spawnTransform));
@@ -221,33 +229,47 @@ function SpaceScene({
   /**
    * 받은 발차기를 처리함. 이동 적분 **전에** 돌아야 맞은 프레임부터 밀림.
    *
-   * 내가 맞았으면 바로 밀지 않고 상대 다리가 닿는 시점(`impactSeconds`)까지 기다림.
-   * 상대 동작도 이벤트를 받은 순간부터 재생해서 둘이 같은 시계로 맞물림.
+   * 공격 시작 + impactSeconds가 타격 시각. 네트워크에서 이미 지난 시간은 빼고
+   * 남은 시간만 기다림. 상대 동작도 같은 시작 시각으로 재생함.
    *
    * 내가 찬 건 누른 순간 이미 재생해서 서버가 되돌려준 건 무시함. 서버가 쿨다운
    * 등으로 버리면 재생만 되고 아무도 안 밀리는데, 클라이언트가 같은 규칙으로 먼저
    * 걸러서 거의 없음.
    */
-  const applyReceivedKicks = (now: number): void => {
+  const applyReceivedKicks = (now: number): boolean => {
     const selfSeat = session.self?.seat;
+    let hasAppliedKnockback = false;
 
     for (const event of session.drainKickEvents()) {
       if (event.from !== selfSeat) {
-        remoteKickStartsRef.current.set(event.from, now);
+        remoteKickStartsRef.current.set(event.from, event.startedAt);
       }
+      const impactAt = resolveKickImpactAt(event.startedAt, now);
       if (selfSeat !== undefined && event.to === selfSeat) {
         pendingKnockbacksRef.current.push({
-          at: now + SPACE_KICK.impactSeconds * 1000,
+          at: impactAt,
           dirX: event.dirX,
           dirZ: event.dirZ,
         });
+      } else if (event.from === selfSeat && event.to !== undefined) {
+        const target = sourceRemotePlayers.find((player) => player.seat === event.to);
+        if (target) {
+          remoteKickPrediction.enqueue({
+            player: target,
+            impactAt,
+            dirX: event.dirX,
+            dirZ: event.dirZ,
+            confirmationDelayMs: now - event.startedAt,
+          });
+        }
       }
     }
 
     if (pendingKnockbacksRef.current.length > 0) {
-      const due = pendingKnockbacksRef.current.filter(({ at }) => at <= now);
+      const due = pendingKnockbacksRef.current.filter(({ at }) => at <= now && now - at <= 1000);
       pendingKnockbacksRef.current = pendingKnockbacksRef.current.filter(({ at }) => at > now);
       for (const knockback of due) {
+        hasAppliedKnockback = true;
         playerStateRef.current = applyKnockback(
           playerStateRef.current,
           knockback.dirX,
@@ -262,6 +284,7 @@ function SpaceScene({
         remoteKickStartsRef.current.delete(seat);
       }
     }
+    return hasAppliedKnockback;
   };
 
   /**
@@ -278,9 +301,17 @@ function SpaceScene({
     if (now < inputSource.kickCooldownUntil) {
       return;
     }
+    if (!session.sendKick(selectKickTarget(remotePlayers, playerState), playerState)) {
+      return;
+    }
     inputSource.kickCooldownUntil = now + SPACE_KICK.cooldownMs;
     kickStartedAtRef.current = now;
-    session.sendKick(selectKickTarget(remotePlayers, playerState));
+  };
+
+  const resetKickPresentation = (): void => {
+    pendingKnockbacksRef.current = [];
+    remoteKickStartsRef.current.clear();
+    remoteKickPrediction.clear();
   };
 
   const applyPlayerTransform = (playerState: LocalPlayerState): void => {
@@ -377,6 +408,7 @@ function SpaceScene({
   };
   // endregion
 
+
   // region [Events]
   const onReadyTerrain = useCallback(
     (terrain: HallTerrain): void => {
@@ -390,6 +422,7 @@ function SpaceScene({
     setLanternAnchors(anchors);
   }, []);
   // endregion
+
 
   // region [Life Cycles]
   useLayoutEffect(() => {
@@ -444,6 +477,10 @@ function SpaceScene({
     }
   }, [session.self, applyServerTransform]);
 
+  useLayoutEffect(() => {
+    resetKickPresentation();
+  }, [session.presence.status, session.self?.seat, remoteKickPrediction]);
+
   useFrame(({ clock }, deltaSeconds) => {
     session.sampleRemotePlayers(performance.now());
     if (dummies.length > 0) {
@@ -451,7 +488,8 @@ function SpaceScene({
     }
 
     const now = performance.now();
-    applyReceivedKicks(now);
+    const hasAppliedKnockback = applyReceivedKicks(now);
+    remoteKickPrediction.update(sourceRemotePlayers, remotePlayers, terrainRef.current, now);
 
     const cameraOrbit = advanceCameraOrbit(deltaSeconds);
     const steppedState = advancePlayerState(cameraOrbit.yaw, deltaSeconds);
@@ -462,7 +500,7 @@ function SpaceScene({
     // 카메라 계산은 지역 변수가 아니라 ref 를 다시 읽음.
     const playerState = resolveFallOut(steppedState);
 
-    session.publishMovement(playerState);
+    session.publishMovement(playerState, hasAppliedKnockback);
 
     const focus = resolveCameraFocus(playerState);
     const targetPosition = resolveCameraPosition(playerState, cameraOrbitRef.current);

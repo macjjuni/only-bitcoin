@@ -62,13 +62,17 @@ export const SPACE_KICK = {
   /** 발차기 연출 길이(초). 구운 프레임을 이 시간에 맞춰 늘려 재생함. */
   animationSeconds: 0.55,
   /**
-   * 발이 닿는 시점(초). 맞은 사람은 이벤트를 받고 이만큼 기다렸다 밀림.
+   * 공격 시작부터 발이 닿는 시점(초). 전송 중 지난 시간은 다시 기다리지 않음.
    *
    * 받는 즉시 밀면 찬 사람 다리가 아직 뒤로 당겨져 있을 때 먼저 날아갔음. 가공
    * 스크립트의 당김(0.32)→차기(0.58) 구간에서 다리가 앞으로 지나가는 0.5 쯤에 맞춤.
    */
   impactSeconds: 0.28,
+  /** 클라이언트가 보내는 공격 시각을 서버가 되돌려 인정하는 최대 시간. */
+  maximumBackdateMs: 500,
 } as const;
 
 /** 서버·클라이언트가 같이 지원한다고 알리는 기능 이름. */
 export const SPACE_FEATURE_KICK = "kick";
+/** 공격 식별자와 서버 시간축을 지원함. 옛 kick 프레임도 계속 받음. */
+export const SPACE_FEATURE_KICK_TIMING = "kick-timing-v1";

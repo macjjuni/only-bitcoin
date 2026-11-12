@@ -1,4 +1,5 @@
 export { resolveColorIndexFromClientKey } from "./lib/clientKeyHash";
+export { resolveKickImpactAt } from "./lib/kickTiming";
 export {
   appendPriceSample,
   createSurgeState,
@@ -27,7 +28,7 @@ export {
   type SpaceAvatarModel,
   type SpaceWeaponId,
 } from "./model/avatarModel";
-export { SPACE_FEATURE_KICK, SPACE_KICK } from "./model/kick";
+export { SPACE_FEATURE_KICK, SPACE_FEATURE_KICK_TIMING, SPACE_KICK } from "./model/kick";
 export {
   createLocalPlayerState,
   createOfflinePresence,

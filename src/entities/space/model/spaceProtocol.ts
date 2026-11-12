@@ -86,7 +86,7 @@ export type SpaceClientFrame =
   | { v: SpaceProtocolVersion; t: "nick"; rid: string; nickname: string }
   | { v: SpaceProtocolVersion; t: "model"; rid: string; modelIndex: number }
   /** `target` 이 없으면 허공에 참. 연출만 퍼짐. */
-  | { v: SpaceProtocolVersion; t: "kick"; target?: number };
+  | { v: SpaceProtocolVersion; t: "kick"; target?: number; id?: string; startedAt?: number };
 
 export type SpaceServerFrame =
   | { v: SpaceProtocolVersion; t: "clock"; sentAt: number; serverAt: number }
@@ -118,6 +118,10 @@ export type SpaceServerFrame =
       to?: number;
       dirX: number;
       dirZ: number;
+      /** 세 필드는 함께 옴. 없으면 시각 동기화를 모르는 옛 서버임. */
+      id?: string;
+      startedAt?: number;
+      serverAt?: number;
     }
   /** 이 클라이언트가 모르는 새 종류. 끊지 않고 버림. */
   | { v: SpaceProtocolVersion; t: "ignored" };
@@ -149,6 +153,25 @@ const isBoundedString = (value: unknown, maximumLength: number): value is string
 
 const isUuid = (value: unknown): value is string => {
   return typeof value === "string" && UUID_PATTERN.test(value);
+};
+
+const isTimestamp = (value: unknown): value is number =>
+  isFiniteNumber(value) && Number.isSafeInteger(value) && value >= 0;
+
+const isKickTiming = (payload: Record<string, unknown>): boolean => {
+  if (
+    payload.id === undefined &&
+    payload.startedAt === undefined &&
+    payload.serverAt === undefined
+  ) {
+    return true;
+  }
+  return (
+    isUuid(payload.id) &&
+    isTimestamp(payload.startedAt) &&
+    isTimestamp(payload.serverAt) &&
+    payload.startedAt <= payload.serverAt
+  );
 };
 
 const isSeat = (value: unknown): value is number => {
@@ -312,7 +335,9 @@ export const parseSpaceClientFrame = (rawPayload: string): SpaceClientFrame | nu
         ? (payload as SpaceClientFrame)
         : null;
     case "kick":
-      return payload.target === undefined || isSeat(payload.target)
+      return (payload.target === undefined || isSeat(payload.target)) &&
+        (payload.id === undefined || isUuid(payload.id)) &&
+        (payload.startedAt === undefined || (isUuid(payload.id) && isTimestamp(payload.startedAt)))
         ? (payload as SpaceClientFrame)
         : null;
     default:
@@ -402,7 +427,8 @@ export const parseSpaceServerFrame = (rawPayload: string): SpaceServerFrame | nu
       return isSeat(payload.from) &&
         (payload.to === undefined || isSeat(payload.to)) &&
         payload.to !== payload.from &&
-        isKickDirection(payload.dirX, payload.dirZ)
+        isKickDirection(payload.dirX, payload.dirZ) &&
+        isKickTiming(payload)
         ? (payload as SpaceServerFrame)
         : null;
     default:

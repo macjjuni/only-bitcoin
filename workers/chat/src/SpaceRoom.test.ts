@@ -359,7 +359,7 @@ describe("SpaceRoom", () => {
       t: "welcome",
       self: observer.peer(),
       peers: [remaining.peer()],
-      features: ["kick", "market-sync-v1"],
+      features: ["kick", "market-sync-v1", "kick-timing-v1"],
     });
     expect(vi.getTimerCount()).toBe(0);
   });
@@ -902,7 +902,7 @@ describe("SpaceRoom", () => {
       const socket = await join(clientKey(1), "참여자", 0, "test-ip", ["kick"]);
 
       expect(socket.frames().find((frame) => frame.t === "welcome")).toMatchObject({
-        features: ["kick", "market-sync-v1"],
+        features: ["kick", "market-sync-v1", "kick-timing-v1"],
       });
     });
 
@@ -925,6 +925,43 @@ describe("SpaceRoom", () => {
       expect(
         (target.deserializeAttachment() as { movementBudget: number }).movementBudget,
       ).toBeCloseTo(budgetBefore + 2);
+    });
+
+    it.each([
+      -2000, -200, 5000,
+    ])("공격 시각 오차 %dms를 제한하고 동일 공격은 쿨다운 후에도 재적용하지 않음", async (clockDelta) => {
+      const { send, kicker, target } = await setUpPair(1);
+      const now = Date.now();
+      const request = {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "kick",
+        id: requestId,
+        startedAt: now + clockDelta,
+        target: target.peer().seat,
+      };
+      await send(kicker, request);
+      const [event] = hitFrames(target);
+      expect(event).toMatchObject({
+        id: requestId,
+        startedAt: Math.max(now - SPACE_KICK.maximumBackdateMs, Math.min(now, now + clockDelta)),
+        serverAt: now,
+      });
+      expect(parseSpaceServerFrame(JSON.stringify(event))).toEqual(event);
+      vi.advanceTimersByTime(SPACE_KICK.cooldownMs);
+      await send(kicker, request);
+      expect(hitFrames(target)).toHaveLength(1);
+    });
+
+    it("옛 클라이언트의 공격도 서버에서 식별자와 시각을 붙여 전달함", async () => {
+      const { send, kicker, target } = await setUpPair(1);
+      await send(kicker, { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat });
+      const [event] = hitFrames(target);
+      expect(event).toMatchObject({
+        id: expect.any(String),
+        startedAt: Date.now(),
+        serverAt: Date.now(),
+      });
+      expect(parseSpaceServerFrame(JSON.stringify(event))).toEqual(event);
     });
 
     it("멀리 있는 상대는 못 맞히고 허공 차기로 알림", async () => {
