@@ -30,7 +30,13 @@ export default function FloatingBannerButton({
 
   if (href) {
     return (
-      <TransitionLink href={href} className={commonClassName} onClick={handleAnchorClick}>
+      <TransitionLink
+        href={href}
+        className={commonClassName}
+        onClick={handleAnchorClick}
+        // 링크로 그릴 때 이름이 빠져 아이콘만 있는 버튼이 이름 없이 읽혔음.
+        aria-label={props["aria-label"]}
+      >
         {children}
       </TransitionLink>
     );

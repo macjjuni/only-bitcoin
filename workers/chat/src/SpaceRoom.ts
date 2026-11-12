@@ -1018,6 +1018,11 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   async fetch(request: Request): Promise<Response> {
     const requestUrl = new URL(request.url);
 
+    // 플로팅 버튼용 인원수. 입장 없이 숫자만 돌려줌. 유령 좌석은 세기 전에 걷어냄.
+    if (requestUrl.pathname === "/v1/space/presence" && request.method === "GET") {
+      this.pruneStaleConnections();
+      return Response.json({ count: this.socketsBySeat.size });
+    }
     if (requestUrl.pathname !== "/v1/space/ws" || request.method !== "GET") {
       return new Response(null, { status: 404 });
     }

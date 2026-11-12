@@ -629,6 +629,17 @@ describe("SpaceRoom", () => {
     expect(state.sockets).toHaveLength(10);
   });
 
+  it("입장 없이 현재 좌석 수만 돌려준다", async () => {
+    const { room, join } = createRoom();
+    const readCount = async () =>
+      (await room.fetch(new Request("https://space-room/v1/space/presence"))).json();
+
+    expect(await readCount()).toEqual({ count: 0 });
+    await join(clientKey(1));
+    await join(clientKey(2), "둘째", 0, "other-ip");
+    expect(await readCount()).toEqual({ count: 2 });
+  });
+
   it("입장 완료된 소켓도 같은 IP guard의 2개 연결 상한에 포함한다", async () => {
     const { room, join } = createRoom();
     await join(clientKey(1));

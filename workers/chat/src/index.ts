@@ -125,6 +125,44 @@ const handleSpaceWebSocketUpgrade = async (
 
   return spaceRoomStub.fetch(forwardedRequest);
 };
+
+/**
+ * 인원수 응답을 붙들어 두는 시간.
+ *
+ * 플로팅 버튼이 여러 페이지에 떠서 방문자마다 방을 깨우면 비용이 늘어남.
+ * isolate 메모리에 잠깐 두고 브라우저에도 같은 시간만큼 캐시하게 함.
+ * workers.dev 주소에서는 Cache API 가 동작하지 않아 메모리를 씀.
+ */
+const PRESENCE_CACHE_MS = 10_000;
+let cachedPresence: { count: number; expiresAt: number } | null = null;
+
+/** 방에 묻는 데 실패하면 숫자를 지어내지 않고 503 을 돌려줌. */
+const handleSpacePresence = async (
+  workerEnv: ChatWorkerEnv,
+  corsHeaders: Headers,
+): Promise<Response> => {
+  const now = Date.now();
+
+  if (!cachedPresence || cachedPresence.expiresAt <= now) {
+    try {
+      const spaceRoomStub = workerEnv.SPACE_ROOM.get(workerEnv.SPACE_ROOM.idFromName("main"), {
+        locationHint: "apac-ne",
+      });
+      const roomResponse = await spaceRoomStub.fetch("https://space-room/v1/space/presence");
+      const payload: { count?: unknown } = await roomResponse.json();
+
+      if (!roomResponse.ok || !Number.isInteger(payload.count) || Number(payload.count) < 0) {
+        throw new Error("Invalid presence response");
+      }
+      cachedPresence = { count: Number(payload.count), expiresAt: now + PRESENCE_CACHE_MS };
+    } catch {
+      return jsonResponse({ error: "UNAVAILABLE" }, 503, corsHeaders);
+    }
+  }
+  corsHeaders.set("Cache-Control", `public, max-age=${PRESENCE_CACHE_MS / 1000}`);
+
+  return jsonResponse({ count: cachedPresence.count }, 200, corsHeaders);
+};
 // endregion
 
 export default {
@@ -141,6 +179,9 @@ export default {
     const requestUrl = new URL(request.url);
     if (requestUrl.pathname === "/v1/space/ws" && request.method === "GET") {
       return handleSpaceWebSocketUpgrade(request, workerEnv);
+    }
+    if (requestUrl.pathname === "/v1/space/presence" && request.method === "GET") {
+      return handleSpacePresence(workerEnv, createCorsHeaders(allowedOrigin));
     }
 
     return jsonResponse({ error: "NOT_FOUND" }, 404, createCorsHeaders(allowedOrigin));

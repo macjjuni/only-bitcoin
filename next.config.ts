@@ -48,8 +48,16 @@ const toCspOrigins = (...urlValues: Array<string | undefined>): string => {
     .join(" ");
 };
 
-/** 스페이스 웹소켓 호스트. 주소는 채팅 시절 환경변수를 그대로 씀. */
-const SPACE_CONNECT_SOURCES = toCspOrigins(process.env.NEXT_PUBLIC_CHAT_WS_URL);
+/**
+ * 스페이스 웹소켓 호스트. 주소는 채팅 시절 환경변수를 그대로 씀.
+ *
+ * 플로팅 버튼 인원수는 같은 호스트를 fetch 로 부름. CSP 에서 `wss://` 는 `https://` 를
+ * 허용하지 않아 HTTP 쪽 origin 도 같이 넣음.
+ */
+const SPACE_CONNECT_SOURCES = toCspOrigins(
+  process.env.NEXT_PUBLIC_CHAT_WS_URL,
+  process.env.NEXT_PUBLIC_CHAT_WS_URL?.replace(/^ws/, "http"),
+);
 /** 밈 이미지 호스트. 갤러리는 <img>, 저장·복사는 fetch 라 img-src 와 connect-src 양쪽에 필요. */
 const MEME_IMAGE_SOURCE = toCspOrigins(process.env.NEXT_PUBLIC_MEME_IMAGE_URL);
 const CONTENT_SECURITY_POLICY = [

@@ -107,3 +107,41 @@ describe("space WebSocket ingress", () => {
     expect(forwarded.headers.get("X-Chat-IP-Guard-Key")).not.toBe("untrusted-client-value");
   });
 });
+
+describe("space presence", () => {
+  it("인원수를 10초 캐시하고 방 조회 실패는 503 으로 알리며 Origin 을 검증한다", async () => {
+    vi.useFakeTimers();
+    vi.setSystemTime(new Date("2026-11-12T00:00:00Z"));
+    const ingress = createIngress();
+    const presenceRequest = () => ingress.request("/v1/space/presence", { Upgrade: "" });
+
+    const forbidden = await ingress.fetch(
+      ingress.request("/v1/space/presence", { Origin: "https://other.test", Upgrade: "" }),
+    );
+    expect(forbidden.status).toBe(403);
+    expect(ingress.spaceFetch).not.toHaveBeenCalled();
+
+    // 방이 이상한 값을 주면 숫자를 지어내지 않고, 실패는 캐시하지 않음.
+    const failed = await ingress.fetch(presenceRequest());
+    expect(failed.status).toBe(503);
+
+    ingress.spaceFetch.mockImplementation(async () => Response.json({ count: 3 }));
+    const first = await ingress.fetch(presenceRequest());
+    expect(first.status).toBe(200);
+    expect(await first.json()).toEqual({ count: 3 });
+    expect(first.headers.get("Access-Control-Allow-Origin")).toBe("https://www.only-btc.app");
+    expect(first.headers.get("Cache-Control")).toBe("public, max-age=10");
+    expect(ingress.rateLimit).not.toHaveBeenCalled();
+
+    ingress.spaceFetch.mockImplementation(async () => Response.json({ count: 5 }));
+    const cached = await ingress.fetch(presenceRequest());
+    expect(await cached.json()).toEqual({ count: 3 });
+    expect(ingress.spaceFetch).toHaveBeenCalledTimes(2);
+
+    vi.advanceTimersByTime(10_000);
+    const refreshed = await ingress.fetch(presenceRequest());
+    expect(await refreshed.json()).toEqual({ count: 5 });
+    expect(ingress.spaceFetch).toHaveBeenCalledTimes(3);
+    vi.useRealTimers();
+  });
+});
