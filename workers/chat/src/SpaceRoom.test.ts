@@ -986,7 +986,7 @@ describe("SpaceRoom", () => {
       const { send, kicker, target } = await setUpPair(1);
       const kick = { v: SPACE_PROTOCOL_VERSION, t: "kick", target: target.peer().seat };
       const serverCooldown = SPACE_KICK.cooldownMs - SPACE_KICK.serverCooldownToleranceMs;
-      expect(SPACE_KICK.cooldownMs).toBe(2000);
+      expect(SPACE_KICK.cooldownMs).toBe(1000);
 
       await send(kicker, kick);
       vi.advanceTimersByTime(serverCooldown - 1);
