@@ -51,6 +51,7 @@ import {
   SPACE_CAMERA,
   SPACE_MOVEMENT,
   type SpaceInputSource,
+  separateFromPlayers,
   stepMovement,
   useCoarsePointer,
   usePointerDrag,
@@ -222,9 +223,18 @@ function SpaceScene({
     accumulatedSecondsRef.current = stepPlan.remainder;
 
     let nextState = playerStateRef.current;
+    const selfSeat = session.self?.seat ?? 0;
 
     for (let stepIndex = 0; stepIndex < stepPlan.stepCount; stepIndex += 1) {
       nextState = stepMovement(nextState, movementInput, cameraYaw, undefined, terrainRef.current);
+      // 화면에 보이는 위치(예측 포함) 기준으로 겹친 만큼 나만 비킴.
+      nextState = separateFromPlayers(
+        nextState,
+        remotePlayers,
+        selfSeat,
+        SPACE_MOVEMENT.fixedTimeStep,
+        terrainRef.current,
+      );
     }
 
     playerStateRef.current = nextState;

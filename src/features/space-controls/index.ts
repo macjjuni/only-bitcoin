@@ -38,6 +38,7 @@ export {
   readPinchSpread,
   releasePointer,
 } from "./model/pointerGesture";
+export { SPACE_SEPARATION, separateFromPlayers } from "./model/separation";
 export {
   consumePendingDrag,
   consumePendingZoom,
