@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { spaceConfig } from "@/shared/config/space";
+import { createDelayedSocket, resolveDebugSocketDelayMs } from "../api/delayedSocket";
 import { SpaceSessionController, type SpaceSessionIdentity } from "../api/spaceSessionController";
 
 export interface UseSpaceSessionOptions {
@@ -24,15 +25,25 @@ export const useSpaceSession = ({ identity, modelIndex, enabled }: UseSpaceSessi
    * 위치를 잃음. 변경은 `changeNickname` 이 `nick` 프레임으로 처리함.
    * 아바타 모델도 같은 이유로 의존성에서 뺀다(`changeModel`).
    */
-  const controller = useMemo(
-    () =>
-      new SpaceSessionController({
-        identity,
-        modelIndex,
-        webSocketUrl: spaceConfig.webSocketUrl,
-      }),
-    [identity.clientKey],
-  );
+  const controller = useMemo(() => {
+    // 개발 모드에서 `?lag=200` 을 붙이면 편도 200ms 지연을 걸어 봄.
+    const debugDelayMs =
+      typeof window === "undefined"
+        ? 0
+        : resolveDebugSocketDelayMs(
+            window.location.search,
+            process.env.NODE_ENV === "development",
+          );
+
+    return new SpaceSessionController({
+      identity,
+      modelIndex,
+      webSocketUrl: spaceConfig.webSocketUrl,
+      ...(debugDelayMs > 0
+        ? { createSocket: (url: string) => createDelayedSocket(new WebSocket(url), debugDelayMs) }
+        : {}),
+    });
+  }, [identity.clientKey]);
   const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
   // endregion
 
@@ -90,6 +101,7 @@ export const useSpaceSession = ({ identity, modelIndex, enabled }: UseSpaceSessi
     sendKick: controller.sendKick,
     requestCelebration: controller.requestCelebration,
     drainKickEvents: controller.drainKickEvents,
+    setHiddenHitHandler: controller.setHiddenHitHandler,
     sendMessage: controller.sendMessage,
     changeNickname: controller.changeNickname,
     changeModel: controller.changeModel,

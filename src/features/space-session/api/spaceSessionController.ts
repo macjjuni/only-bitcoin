@@ -7,6 +7,7 @@ import {
   parseSpaceServerFrame,
   type RemotePlayer,
   SPACE_FEATURE_KICK,
+  SPACE_FEATURE_KICK_TIMING,
   SPACE_FEATURE_MARKET,
   SPACE_PROTOCOL_VERSION,
   type SpaceCelebration,
@@ -46,6 +47,8 @@ export interface SpaceKickEvent {
   to?: number;
   dirX: number;
   dirZ: number;
+  /** 수신 때 로컬 performance.now() 시간축으로 변환한 공격 시작 시각. */
+  startedAt: number;
 }
 
 export interface SpaceSessionSocket {
@@ -246,6 +249,12 @@ export class SpaceSessionController {
    * 씬이 매 프레임 `drainKickEvents` 로 비움.
    */
   private kickEvents: { event: SpaceKickEvent; receivedAt: number }[] = [];
+  /** 탭이 숨어 프레임 루프가 멈춘 동안 내가 맞으면 부름. 씬이 넉백을 대신 적분함. */
+  private hiddenHitHandler: ((event: SpaceKickEvent) => void) | null = null;
+  private canSyncKickTiming = false;
+  private lastKickStartedAt: number | null = null;
+  private readonly pendingKickStarts = new Map<string, number>();
+  private readonly receivedKickIds = new Map<string, number>();
   private clockSentAt: number | null = null;
   private bestClockRtt = Number.POSITIVE_INFINITY;
 
@@ -277,7 +286,7 @@ export class SpaceSessionController {
   };
 
   private requestClock(): void {
-    if (!this.snapshot.canSyncMarket) {
+    if (!this.snapshot.canSyncMarket && !this.canSyncKickTiming) {
       return;
     }
     this.clockSentAt = this.options.now();
@@ -339,6 +348,14 @@ export class SpaceSessionController {
     this.isVisible = isVisible;
 
     if (!isVisible) {
+      // 씬이 아직 안 꺼낸 내 피격은 넘기고 나머지 연출만 버림. 같이 버리면 남의
+      // 화면에서만 밀렸다가 제자리로 돌아옴.
+      const selfSeat = this.snapshot.self?.seat;
+      for (const event of this.drainKickEvents()) {
+        if (selfSeat !== undefined && event.to === selfSeat) {
+          this.hiddenHitHandler?.(event);
+        }
+      }
       this.clearReconnectTimer();
       this.scheduleHiddenDisconnect();
       return;
@@ -368,13 +385,13 @@ export class SpaceSessionController {
     this.connect();
   }
 
-  publishMovement = (state: LocalPlayerState): void => {
+  publishMovement = (state: LocalPlayerState, isImmediate = false): void => {
     if (![state.x, state.y, state.z, state.yaw].every(Number.isFinite)) {
       return;
     }
 
     this.latestMovement = quantizeMovement(state);
-    this.flushMovement();
+    this.flushMovement(isImmediate);
   };
 
   /**
@@ -383,16 +400,48 @@ export class SpaceSessionController {
    * 판정은 서버가 함. 보냈는지만 돌려줌. 쿨다운은 호출부(씬)가 먼저 걸러서 여기서는
    * 안 봄. 서버가 같은 규칙으로 한 번 더 막음.
    */
-  sendKick = (targetSeat: number | null): boolean => {
-    if (!this.snapshot.canKick || this.snapshot.presence.status !== "online") {
+  setHiddenHitHandler = (handler: ((event: SpaceKickEvent) => void) | null): void => {
+    this.hiddenHitHandler = handler;
+  };
+
+  sendKick = (targetSeat: number | null, state?: LocalPlayerState): boolean => {
+    if (
+      !this.snapshot.canKick ||
+      this.snapshot.presence.status !== "online" ||
+      !this.isVisible ||
+      (this.socket?.bufferedAmount ?? 0) > maximumBufferedBytes
+    ) {
       return false;
     }
 
-    return this.sendFrame({
+    // 공격보다 먼저 최신 위치를 보냄. 100ms 주기를 기다리면 달려들 때 옛 위치로 판정됨.
+    if (state) {
+      this.publishMovement(state, true);
+    }
+    const startedAt = this.options.now();
+    const id = this.canSyncKickTiming ? this.options.createRequestId() : undefined;
+    const clockOffset = this.snapshot.serverClockOffsetMs;
+    const sent = this.sendFrame({
       v: SPACE_PROTOCOL_VERSION,
       t: "kick",
       ...(targetSeat === null ? {} : { target: targetSeat }),
+      ...(id === undefined ? {} : { id }),
+      ...(id === undefined || clockOffset === null
+        ? {}
+        : { startedAt: Math.max(0, Math.round(startedAt + clockOffset)) }),
     });
+    if (sent) {
+      this.lastKickStartedAt = startedAt;
+      for (const [pendingId, pendingAt] of this.pendingKickStarts) {
+        if (startedAt - pendingAt > maximumKickEventAgeMs) {
+          this.pendingKickStarts.delete(pendingId);
+        }
+      }
+      if (id !== undefined) {
+        this.pendingKickStarts.set(id, startedAt);
+      }
+    }
+    return sent;
   };
 
   /**
@@ -408,7 +457,11 @@ export class SpaceSessionController {
     }
     const now = this.options.now();
     const events = this.kickEvents
-      .filter(({ receivedAt }) => now - receivedAt <= maximumKickEventAgeMs)
+      .filter(
+        ({ event, receivedAt }) =>
+          now - receivedAt <= maximumKickEventAgeMs &&
+          now - event.startedAt <= maximumKickEventAgeMs,
+      )
       .map(({ event }) => event);
     this.kickEvents = [];
 
@@ -612,7 +665,7 @@ export class SpaceSessionController {
         clientKey: this.options.identity.clientKey,
         nickname: this.nickname,
         modelIndex: this.modelIndex,
-        features: [SPACE_FEATURE_KICK, SPACE_FEATURE_MARKET],
+        features: [SPACE_FEATURE_KICK, SPACE_FEATURE_MARKET, SPACE_FEATURE_KICK_TIMING],
       });
     });
     socket.addEventListener("message", (event) => {
@@ -745,6 +798,10 @@ export class SpaceSessionController {
         });
         this.interpolator.setPeers(peers);
         this.setAuthoritativeMovement(frame.self);
+        this.canSyncKickTiming = frame.features?.includes(SPACE_FEATURE_KICK_TIMING) ?? false;
+        this.receivedKickIds.clear();
+        this.pendingKickStarts.clear();
+        this.lastKickStartedAt = null;
         this.updateSnapshot({
           self: frame.self,
           presence: { status: "online", occupantCount: this.peers.size + 1 },
@@ -865,14 +922,66 @@ export class SpaceSessionController {
         if (!this.snapshot.self) {
           return;
         }
+        const receivedAt = this.options.now();
+        if (frame.id !== undefined) {
+          if (this.receivedKickIds.has(frame.id)) {
+            return;
+          }
+          this.receivedKickIds.set(frame.id, receivedAt);
+          for (const [receivedId, timestamp] of this.receivedKickIds) {
+            if (
+              receivedAt - timestamp > maximumKickEventAgeMs ||
+              this.receivedKickIds.size > maximumKickEventCount * 2
+            ) {
+              this.receivedKickIds.delete(receivedId);
+            }
+          }
+        }
+        const ownStartedAt =
+          frame.from === this.snapshot.self.seat
+            ? frame.id === undefined
+              ? this.lastKickStartedAt
+              : this.pendingKickStarts.get(frame.id)
+            : undefined;
+        if (frame.id !== undefined) {
+          this.pendingKickStarts.delete(frame.id);
+        }
+        const clockOffset = this.snapshot.serverClockOffsetMs;
+        const remoteStartedAt =
+          frame.startedAt === undefined || frame.serverAt === undefined
+            ? receivedAt
+            : clockOffset === null
+              ? receivedAt - (frame.serverAt - frame.startedAt)
+              : frame.startedAt - clockOffset;
+        const startedAt = Math.min(receivedAt, ownStartedAt ?? remoteStartedAt);
+        if (receivedAt - startedAt > maximumKickEventAgeMs) {
+          return;
+        }
+        if (!this.isVisible) {
+          // 숨은 탭은 프레임이 안 돌아 큐를 아무도 안 비움. 연출은 버리고 내가 맞은
+          // 것만 바로 넘김. 안 넘기면 남의 화면에서 밀렸다가 제자리로 돌아왔음.
+          if (frame.to === this.snapshot.self.seat) {
+            this.hiddenHitHandler?.({
+              from: frame.from,
+              to: frame.to,
+              dirX: frame.dirX,
+              dirZ: frame.dirZ,
+              startedAt,
+            });
+          }
+          return;
+        }
         // 한 프레임에 수십 개 쌓일 일은 없지만 탭이 멈춰 있으면 끝없이 쌓여서 자름.
-        const event: SpaceKickEvent = { from: frame.from, dirX: frame.dirX, dirZ: frame.dirZ };
+        const event: SpaceKickEvent = {
+          from: frame.from,
+          dirX: frame.dirX,
+          dirZ: frame.dirZ,
+          startedAt,
+        };
         if (frame.to !== undefined) {
           event.to = frame.to;
         }
-        this.kickEvents = [...this.kickEvents, { event, receivedAt: this.options.now() }].slice(
-          -maximumKickEventCount,
-        );
+        this.kickEvents = [...this.kickEvents, { event, receivedAt }].slice(-maximumKickEventCount);
         return;
       }
       case "ignored":
@@ -905,6 +1014,10 @@ export class SpaceSessionController {
   }
 
   private clearRoster(): void {
+    this.canSyncKickTiming = false;
+    this.lastKickStartedAt = null;
+    this.pendingKickStarts.clear();
+    this.receivedKickIds.clear();
     this.clockSentAt = null;
     this.bestClockRtt = Number.POSITIVE_INFINITY;
     this.kickEvents = [];
@@ -923,15 +1036,17 @@ export class SpaceSessionController {
     });
   }
 
-  private flushMovement(): void {
+  private flushMovement(isImmediate = false): void {
     const movement = this.latestMovement;
     const now = this.options.now();
 
     if (
       !movement ||
-      !this.isVisible ||
+      // 숨은 탭도 맞아서 밀린 위치는 보냄. 평소 전송만 막음.
+      (!this.isVisible && !isImmediate) ||
       this.snapshot.presence.status !== "online" ||
-      now - this.lastMovementSentAt < movementIntervalMs - movementSendToleranceMs ||
+      (!isImmediate &&
+        now - this.lastMovementSentAt < movementIntervalMs - movementSendToleranceMs) ||
       hasSameMovement(this.lastSentMovement, movement) ||
       (this.socket?.bufferedAmount ?? 0) > maximumBufferedBytes
     ) {
@@ -944,7 +1059,7 @@ export class SpaceSessionController {
       // 잠깐 멈췄다 보낼 때도 여유 이상은 당기지 않음. 몰아 보내면 대역만 씀.
       const scheduledAt = this.lastMovementSentAt + movementIntervalMs;
       this.lastMovementSentAt =
-        scheduledAt < now - movementIntervalMs
+        isImmediate || scheduledAt < now - movementIntervalMs
           ? now
           : Math.max(scheduledAt, now - movementSendToleranceMs);
     }

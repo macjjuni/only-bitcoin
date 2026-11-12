@@ -22,6 +22,28 @@ const createPeer = (seat = 0): SpacePeer => ({
 });
 
 describe("parseSpaceClientFrame", () => {
+  it("공격 식별자와 시각을 검증하고 옛 공격 형식도 허용함", () => {
+    const frame = {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "kick",
+      target: 1,
+      id: requestId,
+      startedAt: 1000,
+    };
+    expect(parseSpaceClientFrame(JSON.stringify(frame))).toEqual(frame);
+    for (const changes of [
+      { id: "bad" },
+      { startedAt: -1 },
+      { startedAt: 1.5 },
+      { startedAt: null },
+      { id: undefined },
+    ]) {
+      expect(parseSpaceClientFrame(JSON.stringify({ ...frame, ...changes }))).toBeNull();
+    }
+    expect(
+      parseSpaceClientFrame(JSON.stringify({ v: SPACE_PROTOCOL_VERSION, t: "kick", target: 1 })),
+    ).not.toBeNull();
+  });
   it.each([
     { v: SPACE_PROTOCOL_VERSION, t: "join", clientKey, nickname: "비트코인", modelIndex: 1 },
     {
@@ -97,6 +119,29 @@ describe("parseSpaceClientFrame", () => {
 });
 
 describe("parseSpaceServerFrame", () => {
+  it("공격 시간 필드는 모두 함께 있어야 하고 시작은 서버 전송보다 미래일 수 없음", () => {
+    const frame = {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "kick",
+      from: 0,
+      to: 1,
+      dirX: 1,
+      dirZ: 0,
+      id: requestId,
+      startedAt: 1000,
+      serverAt: 1100,
+    };
+    expect(parseSpaceServerFrame(JSON.stringify(frame))).toEqual(frame);
+    for (const changes of [
+      { id: undefined },
+      { serverAt: undefined },
+      { startedAt: undefined },
+      { startedAt: 1200 },
+      { serverAt: -1 },
+    ]) {
+      expect(parseSpaceServerFrame(JSON.stringify({ ...frame, ...changes }))).toBeNull();
+    }
+  });
   it.each([
     { v: SPACE_PROTOCOL_VERSION, t: "welcome", self: createPeer(), peers: [createPeer(1)] },
     { v: SPACE_PROTOCOL_VERSION, t: "peer", peer: createPeer(49) },
