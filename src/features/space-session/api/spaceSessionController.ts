@@ -249,6 +249,8 @@ export class SpaceSessionController {
    * 씬이 매 프레임 `drainKickEvents` 로 비움.
    */
   private kickEvents: { event: SpaceKickEvent; receivedAt: number }[] = [];
+  /** 탭이 숨어 프레임 루프가 멈춘 동안 내가 맞으면 부름. 씬이 넉백을 대신 적분함. */
+  private hiddenHitHandler: ((event: SpaceKickEvent) => void) | null = null;
   private canSyncKickTiming = false;
   private lastKickStartedAt: number | null = null;
   private readonly pendingKickStarts = new Map<string, number>();
@@ -391,6 +393,10 @@ export class SpaceSessionController {
    * 판정은 서버가 함. 보냈는지만 돌려줌. 쿨다운은 호출부(씬)가 먼저 걸러서 여기서는
    * 안 봄. 서버가 같은 규칙으로 한 번 더 막음.
    */
+  setHiddenHitHandler = (handler: ((event: SpaceKickEvent) => void) | null): void => {
+    this.hiddenHitHandler = handler;
+  };
+
   sendKick = (targetSeat: number | null, state?: LocalPlayerState): boolean => {
     if (
       !this.snapshot.canKick ||
@@ -941,7 +947,21 @@ export class SpaceSessionController {
               ? receivedAt - (frame.serverAt - frame.startedAt)
               : frame.startedAt - clockOffset;
         const startedAt = Math.min(receivedAt, ownStartedAt ?? remoteStartedAt);
-        if (receivedAt - startedAt > maximumKickEventAgeMs || !this.isVisible) {
+        if (receivedAt - startedAt > maximumKickEventAgeMs) {
+          return;
+        }
+        if (!this.isVisible) {
+          // 숨은 탭은 프레임이 안 돌아 큐를 아무도 안 비움. 연출은 버리고 내가 맞은
+          // 것만 바로 넘김. 안 넘기면 남의 화면에서 밀렸다가 제자리로 돌아왔음.
+          if (frame.to === this.snapshot.self.seat) {
+            this.hiddenHitHandler?.({
+              from: frame.from,
+              to: frame.to,
+              dirX: frame.dirX,
+              dirZ: frame.dirZ,
+              startedAt,
+            });
+          }
           return;
         }
         // 한 프레임에 수십 개 쌓일 일은 없지만 탭이 멈춰 있으면 끝없이 쌓여서 자름.
@@ -1015,7 +1035,8 @@ export class SpaceSessionController {
 
     if (
       !movement ||
-      !this.isVisible ||
+      // 숨은 탭도 맞아서 밀린 위치는 보냄. 평소 전송만 막음.
+      (!this.isVisible && !isImmediate) ||
       this.snapshot.presence.status !== "online" ||
       (!isImmediate &&
         now - this.lastMovementSentAt < movementIntervalMs - movementSendToleranceMs) ||

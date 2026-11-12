@@ -6,6 +6,7 @@ import {
   type ReactNode,
   Suspense,
   useCallback,
+  useEffect,
   useLayoutEffect,
   useMemo,
   useRef,
@@ -39,6 +40,7 @@ import {
   consumePendingDrag,
   consumePendingZoom,
   createDefaultCameraOrbit,
+  createEmptyMovementInput,
   dampVector,
   planFixedSteps,
   resolveCameraFocus,
@@ -47,6 +49,7 @@ import {
   resolveFollowDamping,
   resolveMergedMovementInput,
   SPACE_CAMERA,
+  SPACE_MOVEMENT,
   type SpaceInputSource,
   stepMovement,
   useCoarsePointer,
@@ -54,7 +57,7 @@ import {
   usePrefersReducedMotion,
   type Vector3Like,
 } from "@/features/space-controls";
-import type { SpaceSession } from "@/features/space-session";
+import type { SpaceKickEvent, SpaceSession } from "@/features/space-session";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import type { LanternAnchor } from "@/views/space/lib/hallModel";
 import type { HallTerrain } from "@/views/space/lib/hallTerrain";
@@ -93,6 +96,9 @@ interface SpaceSceneProps {
 }
 
 const EMPTY_LANTERN_ANCHORS: readonly LanternAnchor[] = [];
+const hiddenKnockbackInput = createEmptyMovementInput();
+/** 숨은 탭 넉백 적분 상한(2초). 넉백은 1초 안에 멎고 나머지는 착지 여유임. */
+const hiddenKnockbackMaximumSteps = Math.ceil(2 / SPACE_MOVEMENT.fixedTimeStep);
 
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 function SpaceScene({
@@ -310,6 +316,29 @@ function SpaceScene({
     kickStartedAtRef.current = now;
   };
 
+  /**
+   * 숨은 탭에서 맞았을 때 넉백을 한 번에 끝까지 적분해 보냄.
+   *
+   * 숨은 탭은 프레임이 안 돌아 평소 경로로는 안 밀림. 타이머도 1초 단위로 묶여
+   * 나눠 보낼 수 없어서 멈출 때까지 계산한 마지막 위치만 보냄. 바닥에 못 닿았으면
+   * (섬 밖으로 떨어지는 중) 안 보내고 복귀 후 프레임 루프에 맡김.
+   */
+  const applyHiddenKnockback = (event: SpaceKickEvent): void => {
+    let state = applyKnockback(playerStateRef.current, event.dirX, event.dirZ);
+
+    for (let step = 0; step < hiddenKnockbackMaximumSteps; step += 1) {
+      state = stepMovement(state, hiddenKnockbackInput, 0, undefined, terrainRef.current);
+      if (state.isGrounded && state.knockbackX === 0 && state.knockbackZ === 0) {
+        break;
+      }
+    }
+    playerStateRef.current = state;
+    accumulatedSecondsRef.current = 0;
+    if (state.isGrounded) {
+      session.publishMovement(state, true);
+    }
+  };
+
   const resetKickPresentation = (): void => {
     pendingKnockbacksRef.current = [];
     remoteKickStartsRef.current.clear();
@@ -482,6 +511,15 @@ function SpaceScene({
   useLayoutEffect(() => {
     resetKickPresentation();
   }, [session.presence.status, session.self?.seat, remoteKickPrediction]);
+
+  useEffect(() => {
+    // 참조만 읽는 함수라 처음 것을 계속 써도 됨.
+    session.setHiddenHitHandler(applyHiddenKnockback);
+
+    return () => {
+      session.setHiddenHitHandler(null);
+    };
+  }, [session.setHiddenHitHandler]);
 
   useFrame(({ clock }, deltaSeconds) => {
     session.sampleRemotePlayers(performance.now());

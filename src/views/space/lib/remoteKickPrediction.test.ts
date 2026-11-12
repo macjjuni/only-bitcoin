@@ -53,6 +53,8 @@ describe("원격 넉백 표시", () => {
     let firstSnapshotMotionAt = Number.POSITIVE_INFINITY;
     let previousX = 0;
     let largestBackwardStep = 0;
+    let peakX = 0;
+    let largestPullBack = 0;
     for (let now = 0; now <= 2200; now += 10) {
       const serverAt = now - roundTripMs / 2;
       if (serverAt >= 0 && serverAt % 100 === 0) {
@@ -81,12 +83,75 @@ describe("원격 넉백 표시", () => {
       }
       largestBackwardStep = Math.max(largestBackwardStep, previousX - displayed[0].x);
       previousX = displayed[0].x;
+      peakX = Math.max(peakX, displayed[0].x);
+      largestPullBack = Math.max(largestPullBack, peakX - displayed[0].x);
       expect(displayed[0].x).toBeLessThan(1.05);
     }
     expect(firstPreviewAt).toBeLessThanOrEqual(impactAt + 30);
     expect(firstPreviewAt).toBeLessThan(firstSnapshotMotionAt);
     expect(largestBackwardStep).toBeLessThan(0.04);
+    // 밀렸다가 뒤로 되돌아오는 거리. 걸음 단위가 아니라 누적으로 봄.
+    expect(largestPullBack).toBeLessThan(0.05);
     expect(displayed[0].x).toBeCloseTo(sources[0].x, 5);
+  });
+
+  it.each([
+    0, 100, 200, 400,
+  ])("숨은 탭 상대가 맞자마자 최종 위치를 보내도(왕복 %dms) 더 밀렸다가 되돌아오지 않음", (roundTripMs) => {
+    const terrain = createFlatTerrain(0);
+    const target = { ...createPlayer(), isRunning: false };
+    const interpolator = createSpaceInterpolator();
+    interpolator.setPeers([target]);
+    const sources = interpolator.sample(0);
+    const displayed = [{ ...sources[0] }];
+    const prediction = createRemoteKickPrediction();
+    const idle = createEmptyMovementInput();
+    let finalState = applyKnockback(createLocalPlayerState(target), 1, 0);
+    for (let step = 0; step < 120; step += 1) {
+      finalState = stepMovement(finalState, idle, 0, 1 / 60, terrain);
+    }
+    const impactAt = Math.max(280, roundTripMs);
+    let peakX = 0;
+    let largestPullBack = 0;
+    let previousX = 0;
+    let largestStep = 0;
+    for (let now = 0; now <= 2200; now += 10) {
+      const serverAt = now - roundTripMs / 2;
+      if (serverAt >= 0 && serverAt % 100 === 0) {
+        // 숨은 탭은 공격을 받은 순간(서버 시각 roundTripMs) 최종 위치를 한 번에 보냄.
+        const state = serverAt >= roundTripMs ? finalState : createLocalPlayerState(target);
+        interpolator.pushSnapshot(
+          { timestamp: serverAt, players: [{ ...target, x: state.x, y: state.y, z: state.z }] },
+          now,
+        );
+      }
+      interpolator.sample(now);
+      if (now === roundTripMs) {
+        prediction.enqueue({
+          player: sources[0],
+          impactAt,
+          dirX: 1,
+          dirZ: 0,
+          confirmationDelayMs: roundTripMs,
+        });
+      }
+      prediction.update(sources, displayed, terrain, now);
+      // 넉백 첫 적분 한 걸음(7 m/s ÷ 60)보다 크게 움직이면 뚝 끊겨 보임.
+      largestStep = Math.max(largestStep, Math.abs(displayed[0].x - previousX));
+      previousX = displayed[0].x;
+      if (now < impactAt) {
+        expect(displayed[0].x).toBe(0);
+      }
+      if (now === impactAt + 100) {
+        expect(displayed[0].y).toBeGreaterThan(0);
+      }
+      peakX = Math.max(peakX, displayed[0].x);
+      largestPullBack = Math.max(largestPullBack, peakX - displayed[0].x);
+    }
+    expect(largestStep).toBeLessThan(0.12);
+    expect(peakX).toBeLessThan(finalState.x + 0.05);
+    expect(largestPullBack).toBeLessThan(0.05);
+    expect(displayed[0].x).toBeCloseTo(finalState.x, 5);
   });
 
   it("위치 패킷이 없어도 타격 시점부터 밀리고 보간기 원본은 변경하지 않음", () => {
