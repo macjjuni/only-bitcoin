@@ -232,9 +232,11 @@ function SpaceScene({
    * 공격 시작 + impactSeconds가 타격 시각. 네트워크에서 이미 지난 시간은 빼고
    * 남은 시간만 기다림. 상대 동작도 같은 시작 시각으로 재생함.
    *
-   * 내가 찬 건 누른 순간 이미 재생해서 서버가 되돌려준 건 무시함. 서버가 쿨다운
+   * 내가 찬 건 누른 순간 이미 재생해서 서버가 되돌려준 동작은 무시함. 서버가 쿨다운
    * 등으로 버리면 재생만 되고 아무도 안 밀리는데, 클라이언트가 같은 규칙으로 먼저
    * 걸러서 거의 없음.
+   *
+   * 명중은 맞은 사람이 내가 아니면 찬 사람이 누구든 넉백을 예측해 보여줌.
    */
   const applyReceivedKicks = (now: number): boolean => {
     const selfSeat = session.self?.seat;
@@ -251,7 +253,8 @@ function SpaceScene({
           dirX: event.dirX,
           dirZ: event.dirZ,
         });
-      } else if (event.from === selfSeat && event.to !== undefined) {
+      } else if (event.to !== undefined) {
+        // 내가 찬 것뿐 아니라 남이 남을 찬 것도 예측함. 구경꾼 화면에서도 바로 밀림.
         const target = sourceRemotePlayers.find((player) => player.seat === event.to);
         if (target) {
           remoteKickPrediction.enqueue({
@@ -301,9 +304,8 @@ function SpaceScene({
     if (now < inputSource.kickCooldownUntil) {
       return;
     }
-    if (!session.sendKick(selectKickTarget(remotePlayers, playerState), playerState)) {
-      return;
-    }
+    // 전송에 실패해도 내 화면에서는 휘두름. 재접속 중에 버튼이 먹통으로 보였음.
+    session.sendKick(selectKickTarget(remotePlayers, playerState), playerState);
     inputSource.kickCooldownUntil = now + SPACE_KICK.cooldownMs;
     kickStartedAtRef.current = now;
   };
