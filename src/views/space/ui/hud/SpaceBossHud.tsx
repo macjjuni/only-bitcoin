@@ -166,10 +166,14 @@ function SpaceBossHud({ session, isCoarsePointer }: SpaceBossHudProps): ReactNod
       </div>
     ) : null;
 
+  /**
+   * 화면 아래에서 2/3 높이에 카드 가운데를 맞춤. 정가운데에 두면 내 캐릭터와 쓰러지는
+   * 보스를 가림.
+   */
   const DefeatResultTemplate = shownDefeat ? (
     <div
       role="status"
-      className="absolute left-1/2 top-1/2 w-[min(320px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-black/75 p-4 backdrop-blur-sm"
+      className="absolute left-1/2 top-1/3 w-[min(320px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-black/75 p-4 backdrop-blur-sm"
     >
       <p className="text-center text-base font-bold text-bitcoin">{BOSS_NAME} 처치!</p>
       <p className="mt-1 text-center text-xs text-white/70">

@@ -32,7 +32,7 @@
 
 ### 2.1 보스 에셋 — `public/models/bear-raid-boss.glb`
 
-원본은 `assets/Bear-Raid-Boss.glb` 이고 같은 파일을 복사했다. Draco 압축은 안 했다(용량 대부분이 모션 키라 효과가 작다).
+원본은 `assets/originals/boss/Bear-Raid-Boss.glb` 이고 같은 파일을 복사했다. Draco 압축은 안 했다(용량 대부분이 모션 키라 효과가 작다).
 
 | 항목 | 값 |
 | --- | --- |
