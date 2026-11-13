@@ -4,6 +4,7 @@ import { resolveBossSpawnedAt } from "../../../src/entities/space/lib/bossSchedu
 import {
   type BossDeath,
   type BossPlayerHit,
+  type BossSimulation,
   type BossSimulationPlayer,
   createBossSimulation,
 } from "../../../src/entities/space/lib/bossSimulation";
@@ -44,6 +45,7 @@ import {
   SPACE_MAX_OCCUPANTS,
 } from "../../../src/entities/space/model/spaceWorld";
 import { createSha256Hex, deriveStableActorKey } from "./lib/crypto";
+import { resolveBossMaximumHealth } from "./lib/spaceBossConfig";
 import { getSpaceIpConnectionLimit } from "./lib/spaceConnectionLimit";
 import { SpaceMarketMonitor } from "./lib/spaceMarketMonitor";
 import {
@@ -184,7 +186,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
    * 배포 등으로 서버가 다시 뜨면 체력 가득인 대기 상태로 돌아감. 저장하는 건
    * 마지막 처치 시각뿐이라 젠 주기는 어긋나지 않음.
    */
-  private boss = createBossSimulation();
+  private boss: BossSimulation;
   /** 마지막 처치 시각. `undefined` 면 아직 저장소에서 안 읽은 것임. */
   private bossLastKilledAt: number | null | undefined;
   private lastBossStepAt = 0;
@@ -202,6 +204,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     private readonly workerEnv: ChatWorkerEnv,
   ) {
     super(state, workerEnv);
+    this.boss = createBossSimulation(
+      resolveBossMaximumHealth(workerEnv.SPACE_BOSS_MAXIMUM_HEALTH),
+    );
     this.marketMonitor = new SpaceMarketMonitor(state.storage, () => this.socketsBySeat.size > 0, (frame) => {
       for (const socket of this.socketsBySeat.values()) {
         if (this.getJoinedAttachment(socket)?.features?.includes(SPACE_FEATURE_MARKET)) {

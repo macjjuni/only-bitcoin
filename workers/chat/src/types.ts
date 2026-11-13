@@ -9,6 +9,8 @@ export interface ChatWorkerEnv {
   CHAT_UPGRADE_RATE_LIMITER: RateLimit;
   CHAT_ALLOWED_ORIGINS: string;
   SPACE_DISABLE_IP_CONNECTION_LIMIT?: string;
+  /** 보스 최대 체력. 비우면 기본값(3,000). 로컬에서 처치 흐름을 볼 때 `1` 로 둠. */
+  SPACE_BOSS_MAXIMUM_HEALTH?: string;
   ENFORCEMENT_SECRET: string;
   IP_GUARD_SECRET: string;
 }

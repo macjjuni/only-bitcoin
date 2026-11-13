@@ -1125,6 +1125,31 @@ describe("SpaceRoom", () => {
       expect(vi.getTimerCount()).toBe(1);
     });
 
+    it("환경변수로 보스 체력을 1 로 두면 한 대에 쓰러진다", async () => {
+      const state = new RoomState();
+      const room = new SpaceRoom(state.asDurableState(), {
+        ...workerEnv,
+        SPACE_BOSS_MAXIMUM_HEALTH: "1",
+      });
+      const fighter = new RoomSocket("ip-1");
+      const send = (frame: unknown) =>
+        room.webSocketMessage(fighter.asWebSocket(), JSON.stringify(frame));
+
+      state.sockets.push(fighter);
+      await send({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "join",
+        clientKey: clientKey(1),
+        nickname: "싸움꾼",
+        features: BOSS_FEATURES,
+      });
+      await moveIntoArena((_, frame) => send(frame), fighter, 2.5, 0, Math.PI / 2);
+      await send({ v: SPACE_PROTOCOL_VERSION, t: "kick" });
+
+      expect(framesOf(fighter, "boss-hit")[0]).toMatchObject({ damage: 1, health: 0 });
+      expect(framesOf(fighter, "boss-dead")).toHaveLength(1);
+    });
+
     it("대상이 나가면 보스가 돌아가 쉬고 틱이 멈춘다", async () => {
       const { join, send } = createRoom();
       const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
