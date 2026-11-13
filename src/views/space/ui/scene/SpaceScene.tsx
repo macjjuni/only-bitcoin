@@ -71,6 +71,7 @@ import type { LanternAnchor } from "@/views/space/lib/hallModel";
 import type { HallTerrain } from "@/views/space/lib/hallTerrain";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 import BlockDashboard from "./BlockDashboard";
+import BossAttackEffects from "./BossAttackEffects";
 import BossDamageNumbers from "./BossDamageNumbers";
 import ChatBubbles from "./ChatBubbles";
 import Hall from "./Hall";
@@ -716,6 +717,8 @@ function SpaceScene({
           <RaidBoss bossState={session.bossState} getBossHealth={session.getBossHealth} />
         </Suspense>
       )}
+
+      {session.canFightBoss && <BossAttackEffects bossState={session.bossState} />}
 
       {session.canFightBoss && (
         <BossDamageNumbers
