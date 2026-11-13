@@ -82,6 +82,7 @@ import PriceBillboard from "./PriceBillboard";
 import RaidBoss from "./RaidBoss";
 import RemoteAvatars, { type RemoteAvatarHit } from "./RemoteAvatars";
 import SceneLighting from "./SceneLighting";
+import SelfHealthBar from "./SelfHealthBar";
 import ScreenCelebration from "./ScreenCelebration";
 import SpaceHeatmap from "./SpaceHeatmap";
 import SpaceTicker from "./SpaceTicker";
@@ -741,6 +742,12 @@ function SpaceScene({
         selfModelIndex={avatarModelIndex}
         isCoarsePointer={isCoarsePointer}
         rosterRevision={session.rosterRevision}
+        viewerTransformRef={playerStateRef}
+      />
+      <SelfHealthBar
+        session={session}
+        modelIndex={avatarModelIndex}
+        isCoarsePointer={isCoarsePointer}
         viewerTransformRef={playerStateRef}
       />
       <ChatBubbles

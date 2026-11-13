@@ -8,8 +8,12 @@ import { resolveAvatarModel, SPACE_AVATAR } from "@/entities/space";
  * 둘 사이가 벌어지거나 겹치지 않게 하려는 것.
  */
 
-/** 머리 중심에서 명찰 중심까지 높이(m). 말풍선도 이 점에 붙음. */
-export const NAMEPLATE_HEAD_OFFSET_Y = 0.55;
+/**
+ * 머리 중심에서 명찰 중심까지 높이(m). 말풍선도 이 점에 붙음.
+ *
+ * 명찰 아래에 체력바(`SelfHealthBar`)가 붙어서 0.55 에서 올림. 그대로면 체력바가 머리에 닿음.
+ */
+export const NAMEPLATE_HEAD_OFFSET_Y = 0.65;
 export const DESKTOP_NAMEPLATE_DISTANCE_FACTOR = 18;
 export const TOUCH_NAMEPLATE_DISTANCE_FACTOR = 12;
 /** 명찰 알약 높이(px). 명찰이 `h-5` 로 이 값에 고정됨. */

@@ -1,6 +1,6 @@
 "use client";
 
-import { Heart, Skull, Timer } from "lucide-react";
+import { Skull, Timer } from "lucide-react";
 import { type CSSProperties, memo, type ReactNode, useEffect, useMemo, useState } from "react";
 import type { SpaceBossDefeat, SpaceSession } from "@/features/space-session";
 import { BOSS_NAME, formatBossCountdown } from "@/views/space/lib/bossHud";
@@ -8,8 +8,6 @@ import { useBossHud } from "@/views/space/model/useBossHud";
 
 /** 처치 결과를 띄워 두는 시간(ms). */
 const DEFEAT_RESULT_DURATION_MS = 9_000;
-/** 내 체력이 이 비율 아래면 체력바를 위험 색으로 바꿈. */
-const LOW_HEALTH_RATIO = 0.3;
 
 interface SpaceBossHudProps {
   session: SpaceSession;
@@ -20,7 +18,7 @@ interface SpaceBossHudProps {
 /**
  * 보스 전투 UI.
  *
- * 보스 체력은 여기 없고 보스 머리 위에 뜸(`RaidBoss`).
+ * 보스 체력은 여기 없고 보스 머리 위에 뜸(`RaidBoss`). 내 체력도 내 명찰 아래에 뜸(`SelfHealthBar`).
  *
  * 전부 읽기 전용이라 터치를 막지 않음. 막으면 떠 있는 동안 그 자리의 시야 조작이 죽음.
  * 색·크기는 HUD 의 다른 패널(인원 배지, 조작 안내)과 같은 반투명 검정 판을 씀.
@@ -87,33 +85,6 @@ function SpaceBossHud({ session, isCoarsePointer }: SpaceBossHudProps): ReactNod
       </div>
     ) : null;
 
-  const isLowHealth = (view.playerBar?.ratio ?? 1) <= LOW_HEALTH_RATIO;
-  const PlayerBarTemplate = view.playerBar ? (
-    <div className="flex w-[min(240px,calc(100vw-13rem))] items-center gap-2 rounded-full bg-black/60 py-1.5 pl-2.5 pr-3 backdrop-blur-sm">
-      <Heart
-        size={14}
-        className={`shrink-0 ${isLowHealth ? "animate-pulse text-red-400" : "text-emerald-400"}`}
-        fill="currentColor"
-      />
-      <div
-        role="progressbar"
-        aria-label="내 체력"
-        aria-valuemin={0}
-        aria-valuemax={100}
-        aria-valuenow={view.playerBar.health}
-        className="h-2 flex-1 overflow-hidden rounded-full bg-white/10"
-      >
-        <div
-          className={`h-full rounded-full transition-[width] duration-300 ease-out ${isLowHealth ? "bg-red-400" : "bg-emerald-400"}`}
-          style={{ width: `${view.playerBar.ratio * 100}%` }}
-        />
-      </div>
-      <span className="w-7 text-right text-xs font-bold tabular-nums text-white/90">
-        {view.playerBar.health}
-      </span>
-    </div>
-  ) : null;
-
   /** 맞을 때마다 키가 바뀌어 번쩍임이 처음부터 다시 재생됨. */
   const HitFlashTemplate =
     selfDamagedAt !== null ? (
@@ -124,11 +95,12 @@ function SpaceBossHud({ session, isCoarsePointer }: SpaceBossHudProps): ReactNod
       />
     ) : null;
 
+  // z-[35]: 씬 위에 뜨는 이름표·말풍선·피해 숫자(z 20 ~ 30)보다 위, 우측 상단 버튼(z-40)보다 아래.
   const KnockoutTemplate =
     view.knockoutSeconds !== null ? (
       <div
         role="status"
-        className="absolute inset-0 flex flex-col items-center justify-center gap-3 bg-black/70 backdrop-blur-[2px]"
+        className="absolute inset-0 z-[35] flex flex-col items-center justify-center gap-3 bg-black/70 backdrop-blur-[2px]"
       >
         <Skull size={44} className="text-red-400" />
         <p className="text-2xl font-bold text-white">쓰러졌습니다</p>
@@ -146,7 +118,7 @@ function SpaceBossHud({ session, isCoarsePointer }: SpaceBossHudProps): ReactNod
   const DefeatResultTemplate = shownDefeat ? (
     <div
       role="status"
-      className="absolute left-1/2 top-1/3 w-[min(320px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-black/75 p-4 backdrop-blur-sm"
+      className="absolute left-1/2 top-1/3 z-[35] w-[min(320px,calc(100vw-2rem))] -translate-x-1/2 -translate-y-1/2 rounded-xl bg-black/75 p-4 backdrop-blur-sm"
     >
       <p className="text-center text-base font-bold text-bitcoin">{BOSS_NAME} 처치!</p>
       <p className="mt-1 text-center text-xs text-white/70">
@@ -178,13 +150,6 @@ function SpaceBossHud({ session, isCoarsePointer }: SpaceBossHudProps): ReactNod
 
       <div className="absolute left-1/2 flex -translate-x-1/2 flex-col items-center gap-2" style={topStyle}>
         {NextSpawnTemplate}
-      </div>
-
-      <div
-        className="absolute left-1/2 -translate-x-1/2"
-        style={{ bottom: "calc(1rem + env(safe-area-inset-bottom))" }}
-      >
-        {PlayerBarTemplate}
       </div>
 
       {DefeatResultTemplate}
