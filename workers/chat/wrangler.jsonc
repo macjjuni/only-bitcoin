@@ -40,7 +40,10 @@
     "enabled": true,
     "logs": {
       "enabled": true,
-      "invocation_logs": true
+      // 호출 로그는 끔. 웹소켓 메시지 하나(이동·공격)가 호출 하나라, 켜 두면 접속자 몇 명만으로
+      // 하루 무료 한도를 다 씀. 한도가 차면 정작 봐야 할 오류 로그도 안 들어옴.
+      // 코드가 직접 남기는 로그(console.error)는 그대로 들어감.
+      "invocation_logs": false
     }
   },
   "vars": {
