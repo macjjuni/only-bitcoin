@@ -633,7 +633,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     }
     const spawnedAt = resolveBossSpawnedAt(now, this.bossLastKilledAt);
 
-    if (spawnedAt !== null && this.boss.state.phase === "hidden") {
+    // 개발용 재등장을 기다리는 중이면 젠 계산으로는 안 세움. 그 사이 짝수 정시를 넘기면
+    // 여기서 한 번, 타이머에서 또 한 번 나옴.
+    if (spawnedAt !== null && this.boss.state.phase === "hidden" && this.bossRespawnTimer === null) {
       this.boss.spawn(spawnedAt);
     }
 
