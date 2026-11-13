@@ -27,6 +27,22 @@ export {
   type SpaceAvatarModel,
   type SpaceWeaponId,
 } from "./model/avatarModel";
+export {
+  createHiddenBossState,
+  resolveBossAttackSeconds,
+  resolveBossChargeTravel,
+  SPACE_BOSS,
+  SPACE_BOSS_ATTACKS,
+  SPACE_BOSS_CLIP_SECONDS,
+  SPACE_BOSS_DEATH,
+  SPACE_BOSS_HIT,
+  SPACE_BOSS_SPAWN,
+  SPACE_BOSS_STRIDE,
+  SPACE_BOSS_TURN,
+  type SpaceBossAttack,
+  type SpaceBossPhase,
+  type SpaceBossState,
+} from "./model/boss";
 export { SPACE_FEATURE_KICK, SPACE_FEATURE_KICK_TIMING, SPACE_KICK } from "./model/kick";
 export {
   createLocalPlayerState,

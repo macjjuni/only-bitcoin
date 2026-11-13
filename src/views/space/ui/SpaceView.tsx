@@ -37,12 +37,26 @@ const resolveDummyCountFromLocation = (): number => {
 
   return resolveSpaceAvatarCount(parsedCount);
 };
+
+/**
+ * `?boss=1` 로 보스 미리보기를 켠다.
+ *
+ * 개발 환경에서만 동작한다. 서버 보스가 붙기 전의 흉내 보스라 운영에 보이면 안 된다.
+ */
+const resolveBossPreviewFromLocation = (): boolean => {
+  if (process.env.NODE_ENV === "production") {
+    return false;
+  }
+
+  return new URLSearchParams(window.location.search).get("boss") === "1";
+};
 // endregion
 
 function SpaceView(): ReactNode {
   // region [Hooks]
   const [identity, setIdentity] = useState<ChatIdentity | null>(null);
   const [dummyCount, setDummyCount] = useState<number>(0);
+  const [hasBossPreview, setHasBossPreview] = useState<boolean>(false);
   // endregion
 
   // region [Privates]
@@ -51,6 +65,7 @@ function SpaceView(): ReactNode {
     // 같은 사용자가 두 기능에서 같은 정체성을 갖게 한다.
     setIdentity(loadOrCreateChatIdentity());
     setDummyCount(resolveDummyCountFromLocation());
+    setHasBossPreview(resolveBossPreviewFromLocation());
   }, []);
   // endregion
 
@@ -64,7 +79,9 @@ function SpaceView(): ReactNode {
   }
   // endregion
 
-  return <SpaceCanvas identity={identity} dummyCount={dummyCount} />;
+  return (
+    <SpaceCanvas identity={identity} dummyCount={dummyCount} hasBossPreview={hasBossPreview} />
+  );
 }
 
 const MemoizedSpaceView = memo(SpaceView);

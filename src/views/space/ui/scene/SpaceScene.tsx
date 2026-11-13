@@ -55,6 +55,7 @@ import {
   type Vector3Like,
 } from "@/features/space-controls";
 import type { SpaceSession } from "@/features/space-session";
+import { createBossPreview } from "@/views/space/lib/bossPreview";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import type { LanternAnchor } from "@/views/space/lib/hallModel";
 import type { HallTerrain } from "@/views/space/lib/hallTerrain";
@@ -66,6 +67,7 @@ import MenuGraffiti from "./MenuGraffiti";
 import Nameplates from "./Nameplates";
 import PlayerAvatar from "./PlayerAvatar";
 import PriceBillboard from "./PriceBillboard";
+import RaidBoss from "./RaidBoss";
 import RemoteAvatars from "./RemoteAvatars";
 import SceneLighting from "./SceneLighting";
 import ScreenCelebration from "./ScreenCelebration";
@@ -84,6 +86,8 @@ interface SpaceSceneProps {
   hasRealtimeShadows: boolean;
   /** 개발 전용 더미 아바타 수. 더미 측정 중에는 실제 공간 소켓을 열지 않음. */
   dummyCount: number;
+  /** 개발 전용 보스 미리보기. 서버 보스가 붙기 전까지 내 화면에서만 도는 흉내 보스를 띄움. */
+  hasBossPreview: boolean;
   /** 맵 지형이 잡혔을 때. 입장 로딩 오버레이가 기다림. */
   onReadyMap?: () => void;
   /** 내 캐릭터 모델이 올라왔을 때. 입장 로딩 오버레이가 기다림. */
@@ -102,6 +106,7 @@ function SpaceScene({
   session,
   hasRealtimeShadows,
   dummyCount,
+  hasBossPreview,
   onReadyMap,
   onReadyAvatar,
 }: SpaceSceneProps): ReactNode {
@@ -124,6 +129,11 @@ function SpaceScene({
   const avatarModelIndex = session.self?.modelIndex ?? modelIndex;
   const dummies = useMemo(() => createStressDummies(dummyCount), [dummyCount]);
   const remotePlayers = dummyCount > 0 ? dummies : session.remotePlayers;
+  /** 흉내 보스. 켜지 않았으면 만들지 않음. 상태 객체는 매 프레임 제자리에서 바뀜. */
+  const bossPreview = useMemo(
+    () => (hasBossPreview ? createBossPreview() : null),
+    [hasBossPreview],
+  );
   /** 1단계는 빈 슬롯임. 3단계에서 라이트닝 결제로 채움. */
 
   const playerStateRef = useRef<LocalPlayerState>(createLocalPlayerState(spawnTransform));
@@ -266,6 +276,7 @@ function SpaceScene({
     session.sendKick(playerState);
     inputSource.kickCooldownUntil = now + SPACE_KICK.cooldownMs;
     kickStartedAtRef.current = now;
+    bossPreview?.registerKick(now, playerState);
   };
 
   const resetKickPresentation = (): void => {
@@ -457,6 +468,7 @@ function SpaceScene({
     // 공격은 위치를 바로 보내서 되돌린 뒤에 처리함. 음수 높이가 나가면 서버가 반려함.
     handleKickInput(now, playerState);
     session.publishMovement(playerState);
+    bossPreview?.step(now, deltaSeconds, playerState);
 
     const focus = resolveCameraFocus(playerState);
     const targetPosition = resolveCameraPosition(playerState, cameraOrbitRef.current);
@@ -552,6 +564,13 @@ function SpaceScene({
           />
         </Suspense>
       </group>
+
+      {/* 보스 모델을 받는 동안 씬이 비지 않게 따로 매달아 둠. */}
+      {bossPreview && (
+        <Suspense fallback={null}>
+          <RaidBoss bossState={bossPreview.state} />
+        </Suspense>
+      )}
 
       <RemoteAvatars
         players={remotePlayers}
