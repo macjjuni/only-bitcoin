@@ -56,9 +56,9 @@ export const SPACE_BGM_SURGE_TRACK_SRC = `${BGM_BASE_URL}/nervous.mp3`;
 const RAID_BGM_SOURCE_REF = "cc264357014f9f4cdabb587ee1d990fa6c28c3a6";
 
 /**
- * 레이드 구역(안뜰)에 나와 있는 동안 까는 곡.
+ * 안뜰에서 보스가 떠 있는 동안 까는 보스전 곡.
  *
- * 안뜰에 처음 나갈 때 받기 시작함. 홀에만 머무는 사람은 5.8 MB 를 안 받음.
+ * 처음 틀 때 받기 시작함. 홀에만 머무는 사람은 5.8 MB 를 안 받음.
  */
 export const SPACE_BGM_RAID_TRACK_SRC = `https://cdn.jsdelivr.net/gh/macjjuni/only-bitcoin@${RAID_BGM_SOURCE_REF}/media/raid-mine.mp3`;
 
@@ -77,6 +77,25 @@ export const SPACE_BGM_VOLUME = 0.12;
  * 바뀐 게 조금 더 크게 들리는 편이 낫다.
  */
 export const SPACE_BGM_SURGE_VOLUME = 0.15;
+
+/** 안뜰 대기 곡이 든 커밋. 따로 박는 이유는 `RAID_BGM_SOURCE_REF` 와 같음. */
+const COURTYARD_BGM_SOURCE_REF = "70bcf2401b9b2508aac8acd325a0e88e1fc53e43";
+
+/**
+ * 안뜰에서 보스가 없는 동안 까는 대기 곡.
+ *
+ * 보스는 2시간마다 떠서 안뜰은 대부분 비어 있음. 그동안 보스전 곡을 틀면 어색해서
+ * 낮게 깔리는 곡을 따로 둠. ElevenLabs Music 으로 만들었음.
+ */
+export const SPACE_BGM_COURTYARD_TRACK_SRC = `https://cdn.jsdelivr.net/gh/macjjuni/only-bitcoin@${COURTYARD_BGM_SOURCE_REF}/media/courtyard-wait.mp3`;
+
+/**
+ * 안뜰 대기 곡 음량.
+ *
+ * 음원 자체가 기본 곡보다 3 dB 작게 녹음돼 있음(평균 −19.1 dB 대 −16.0 dB).
+ * 0.15 로 올려야 기본 곡보다 살짝 작게 들림.
+ */
+export const SPACE_BGM_COURTYARD_VOLUME = 0.15;
 
 /** 레이드 곡 음량. 급등락 곡과 같은 이유로 기본 곡보다 조금 크게 둠. */
 export const SPACE_BGM_RAID_VOLUME = 0.15;

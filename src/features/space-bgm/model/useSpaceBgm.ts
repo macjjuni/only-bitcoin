@@ -4,6 +4,8 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import type { SpaceMarketState } from "@/entities/space";
 import { loadBgmEnabled, saveBgmEnabled } from "./bgmPreferenceStore";
 import {
+  SPACE_BGM_COURTYARD_TRACK_SRC,
+  SPACE_BGM_COURTYARD_VOLUME,
   SPACE_BGM_RAID_TRACK_SRC,
   SPACE_BGM_RAID_VOLUME,
   SPACE_BGM_SURGE_TRACK_SRC,
@@ -12,7 +14,10 @@ import {
   SPACE_BGM_VOLUME,
 } from "./spaceBgmTrack";
 
-type BgmTrack = "base" | "surge" | "raid";
+/** 내가 선 자리로 정하는 곡. 안뜰에서 보스가 없으면 `courtyard`, 떠 있으면 `raid`. */
+export type SpaceBgmZoneTrack = "courtyard" | "raid";
+
+type BgmTrack = "base" | "surge" | SpaceBgmZoneTrack;
 
 interface BgmTarget {
   track: BgmTrack;
@@ -23,12 +28,14 @@ interface BgmTarget {
 const TRACK_SRC: Record<BgmTrack, string> = {
   base: SPACE_BGM_TRACK_SRC,
   surge: SPACE_BGM_SURGE_TRACK_SRC,
+  courtyard: SPACE_BGM_COURTYARD_TRACK_SRC,
   raid: SPACE_BGM_RAID_TRACK_SRC,
 };
 
 const TRACK_VOLUME: Record<BgmTrack, number> = {
   base: SPACE_BGM_VOLUME,
   surge: SPACE_BGM_SURGE_VOLUME,
+  courtyard: SPACE_BGM_COURTYARD_VOLUME,
   raid: SPACE_BGM_RAID_VOLUME,
 };
 
@@ -42,8 +49,8 @@ export interface SpaceBgm {
 interface SpaceBgmOptions {
   market: SpaceMarketState | null;
   serverClockOffsetMs: number | null;
-  /** 레이드 구역(안뜰)에 나와 있는지. 나와 있는 동안은 시세 트랙 대신 레이드 곡을 튼다. */
-  isInRaid: boolean;
+  /** 안뜰에 나와 있는 동안 시세 트랙 대신 틀 곡. 홀 안이면 `null`. */
+  zoneTrack: SpaceBgmZoneTrack | null;
 }
 
 /** 곡을 새로 틀 때 서버 위치와 맞추는 허용 오차(초). */
@@ -60,10 +67,10 @@ const RESYNC_TOLERANCE_SECONDS = 2;
 /**
  * 음악을 켤지 여부만 개인 설정이다. 트랙 종류·시작 시각·재생 위치는 서버가 정한다.
  *
- * 레이드 곡만 예외다. 내가 안뜰에 있는지로 정해서 사람마다 다르고 위치도 안 맞춘다.
+ * 안뜰 곡(대기·보스전)만 예외다. 내가 선 자리로 정해서 사람마다 다르고 위치도 안 맞춘다.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-const useSpaceBgm = ({ market, serverClockOffsetMs, isInRaid }: SpaceBgmOptions): SpaceBgm => {
+const useSpaceBgm = ({ market, serverClockOffsetMs, zoneTrack }: SpaceBgmOptions): SpaceBgm => {
   // region [Hooks]
   const tracksRef = useRef<Partial<Record<BgmTrack, HTMLAudioElement>>>({});
   const enabledRef = useRef(false);
@@ -75,7 +82,7 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, isInRaid }: SpaceBgmOptions)
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const marketRef = useRef(market);
   const clockOffsetRef = useRef(serverClockOffsetMs);
-  const inRaidRef = useRef(isInRaid);
+  const zoneTrackRef = useRef(zoneTrack);
   const blockedPlaybackRef = useRef<(() => void) | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isUnavailable, setIsUnavailable] = useState(false);
@@ -185,16 +192,17 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, isInRaid }: SpaceBgmOptions)
 
   /** 지금 틀어야 할 곡. 아직 정할 수 없으면 `null`. */
   const resolveTarget = useCallback((): BgmTarget | null => {
-    if (inRaidRef.current) {
-      return { track: "raid", startsAt: null };
+    if (zoneTrackRef.current) {
+      return { track: zoneTrackRef.current, startsAt: null };
     }
     const state = marketRef.current;
     const offset = clockOffsetRef.current;
     if (state && offset !== null && performance.now() + offset >= state.startsAt) {
       return { track: state.track, startsAt: state.startsAt };
     }
-    // 안뜰에서 나왔는데 시세 상태를 아직 모르면 레이드 곡이 계속 남는다. 기본 곡으로 돌린다.
-    return activeTrackRef.current === "raid" ? { track: "base", startsAt: null } : null;
+    // 안뜰에서 나왔는데 시세 상태를 아직 모르면 안뜰 곡이 계속 남는다. 기본 곡으로 돌린다.
+    const isZoneTrackActive = activeTrackRef.current === "raid" || activeTrackRef.current === "courtyard";
+    return isZoneTrackActive ? { track: "base", startsAt: null } : null;
   }, []);
 
   const startPlayback = useCallback(async (): Promise<boolean> => {
@@ -283,14 +291,14 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, isInRaid }: SpaceBgmOptions)
   const scheduleSynchronization = (): (() => void) => {
     marketRef.current = market;
     clockOffsetRef.current = serverClockOffsetMs;
-    inRaidRef.current = isInRaid;
+    zoneTrackRef.current = zoneTrack;
     if (enabledRef.current && (market?.prefetch || market?.track === "surge")) {
       resolveTrack("surge");
     }
     // 새 서버 이벤트는 과거 실패의 재시도 대기와 별도로 예정 시각에 실행한다.
     const begin = (): void => {
       const pending = pendingTrackRef.current;
-      const awaited = isInRaid ? "raid:null" : market && `${market.track}:${market.startsAt}`;
+      const awaited = zoneTrack ? `${zoneTrack}:null` : market && `${market.track}:${market.startsAt}`;
       if (awaited && pending && pending !== awaited) {
         generationRef.current += 1;
         pendingTrackRef.current = null;
@@ -303,8 +311,8 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, isInRaid }: SpaceBgmOptions)
       lastAttemptRef.current = Number.NEGATIVE_INFINITY;
       synchronizePlayback();
     };
-    // 레이드 곡은 서버 예정 시각을 안 기다린다. 안뜰을 드나든 즉시 바꾼다.
-    const delay = !isInRaid && market && serverClockOffsetMs !== null ? Math.max(0, market.startsAt - serverClockOffsetMs - performance.now()) : 0;
+    // 안뜰 곡은 서버 예정 시각을 안 기다린다. 안뜰을 드나들거나 보스가 뜨면 즉시 바꾼다.
+    const delay = !zoneTrack && market && serverClockOffsetMs !== null ? Math.max(0, market.startsAt - serverClockOffsetMs - performance.now()) : 0;
     const timer = setTimeout(begin, delay);
     const retryTimer = setInterval(synchronizePlayback, 5000);
     const onVisibility = (): void => {
@@ -337,7 +345,7 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, isInRaid }: SpaceBgmOptions)
 
   // region [Life Cycles]
   useEffect(restorePlayback, [restorePlayback]);
-  useEffect(() => scheduleSynchronization(), [market, serverClockOffsetMs, isInRaid, isPlaying, resolveTrack, synchronizePlayback]);
+  useEffect(() => scheduleSynchronization(), [market, serverClockOffsetMs, zoneTrack, isPlaying, resolveTrack, synchronizePlayback]);
   // endregion
 
   return { isPlaying, isUnavailable, isSurging, toggle: onClickToggleBgm };

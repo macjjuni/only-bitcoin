@@ -11,6 +11,7 @@ import {
   isSameBossHudView,
   resolveBossHudView,
   resolveRaidZonePresence,
+  resolveZoneBgmTrack,
   stepDisplayedHealth,
 } from "./bossHud";
 
@@ -135,5 +136,21 @@ describe("resolveRaidZonePresence", () => {
   it("서버가 보스를 모르거나 접속 전이면 거짓이다", () => {
     expect(resolveRaidZonePresence(true, false, COURTYARD)).toBe(false);
     expect(resolveRaidZonePresence(true, true, null)).toBe(false);
+  });
+});
+
+describe("resolveZoneBgmTrack", () => {
+  it("홀 안이면 안뜰 곡을 안 튼다", () => {
+    expect(resolveZoneBgmTrack(false, "idle")).toBeNull();
+  });
+
+  it("안뜰에서 보스가 떠 있으면 보스전 곡을 튼다", () => {
+    expect(resolveZoneBgmTrack(true, "spawn")).toBe("raid");
+    expect(resolveZoneBgmTrack(true, "attack")).toBe("raid");
+  });
+
+  it("보스가 없거나 쓰러졌으면 대기 곡을 튼다", () => {
+    expect(resolveZoneBgmTrack(true, "hidden")).toBe("courtyard");
+    expect(resolveZoneBgmTrack(true, "dead")).toBe("courtyard");
   });
 });

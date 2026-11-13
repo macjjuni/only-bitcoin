@@ -55,7 +55,7 @@ const isInCourtyard = (selfPosition: BossHudInput["selfPosition"]): boolean => {
 const RAID_ZONE_MARGIN = 1;
 
 /**
- * 레이드 구역(안뜰)에 나와 있는지. 레이드 배경음악을 틀지 정하는 데 씀.
+ * 레이드 구역(안뜰)에 나와 있는지. 안뜰 배경음악을 틀지 정하는 데 씀.
  *
  * 보스가 쉬는 중이어도 안뜰이면 참임. 서버가 보스를 모르면 늘 거짓임.
  */
@@ -72,6 +72,22 @@ export const resolveRaidZonePresence = (
     SPACE_BOSS_PLAYER.hallMaximumX + (wasInside ? -RAID_ZONE_MARGIN : RAID_ZONE_MARGIN);
 
   return selfPosition.x > boundaryX;
+};
+
+/**
+ * 안뜰에서 틀 곡. 보스가 떠 있으면 보스전 곡, 없으면 대기 곡. 홀 안이면 `null`.
+ *
+ * 쓰러지는 모션(`dead`)부터 대기 곡으로 돌림. 처치한 순간 전투 곡이 빠지는 편이 맞음.
+ */
+export const resolveZoneBgmTrack = (
+  isInRaidZone: boolean,
+  bossPhase: SpaceBossPhase,
+): "courtyard" | "raid" | null => {
+  if (!isInRaidZone) {
+    return null;
+  }
+
+  return bossPhase === "hidden" || bossPhase === "dead" ? "courtyard" : "raid";
 };
 
 export const resolveBossHudView = (input: BossHudInput): BossHudView => {
