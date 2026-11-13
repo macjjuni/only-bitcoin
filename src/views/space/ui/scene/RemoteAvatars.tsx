@@ -186,7 +186,7 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
 
     // 앞판·눈·무기는 몸통과 같은 위상이어야 따로 안 놂. 복사를 먼저 안 하면 한 프레임
     // 뒤처진 값이 올라감.
-    for (const part of [accent, pupilGlint, weapon.buffers]) {
+    for (const part of [accent, pupilGlint, weapon?.buffers]) {
       if (!part) {
         continue;
       }
@@ -208,10 +208,10 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
       pupilGlint?.blend,
       pupilGlint?.kickPhase,
       pupilGlint?.kickBlend,
-      weapon.buffers.phase,
-      weapon.buffers.blend,
-      weapon.buffers.kickPhase,
-      weapon.buffers.kickBlend,
+      weapon?.buffers.phase,
+      weapon?.buffers.blend,
+      weapon?.buffers.kickPhase,
+      weapon?.buffers.kickBlend,
     ]) {
       if (attribute) {
         attribute.needsUpdate = true;
@@ -297,12 +297,14 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
         dispose={null}
       />
 
-      <instancedMesh
-        ref={weaponMeshRef}
-        count={renderedPlayers.length}
-        args={[weapon.buffers.geometry, weapon.material, SPACE_MAX_OCCUPANTS]}
-        frustumCulled={false}
-      />
+      {weapon && (
+        <instancedMesh
+          ref={weaponMeshRef}
+          count={renderedPlayers.length}
+          args={[weapon.buffers.geometry, weapon.material, SPACE_MAX_OCCUPANTS]}
+          frustumCulled={false}
+        />
+      )}
 
       {pupilGlint && pupilGlintMaterial && (
         <instancedMesh

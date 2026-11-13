@@ -97,7 +97,7 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
     const step = deltaSeconds / CREW_WALK.blendSeconds;
     const blend = body.blend.getX(0) + (speed > MOVING_SPEED_THRESHOLD ? step : -step);
 
-    for (const buffers of [body, accent, pupilGlint, weapon.buffers]) {
+    for (const buffers of [body, accent, pupilGlint, weapon?.buffers]) {
       if (!buffers) {
         continue;
       }
@@ -118,7 +118,7 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
       CREW_KICK.blendInRatio,
     );
 
-    for (const buffers of [body, accent, pupilGlint, weapon.buffers]) {
+    for (const buffers of [body, accent, pupilGlint, weapon?.buffers]) {
       if (!buffers) {
         continue;
       }
@@ -192,13 +192,15 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
         dispose={null}
       />
 
-      <instancedMesh
-        ref={weaponMeshRef}
-        args={[weapon.buffers.geometry, weapon.material, 1]}
-        count={1}
-        castShadow={hasRealtimeShadows}
-        frustumCulled={false}
-      />
+      {weapon && (
+        <instancedMesh
+          ref={weaponMeshRef}
+          args={[weapon.buffers.geometry, weapon.material, 1]}
+          count={1}
+          castShadow={hasRealtimeShadows}
+          frustumCulled={false}
+        />
+      )}
 
       {pupilGlint && pupilGlintMaterial && (
         <instancedMesh

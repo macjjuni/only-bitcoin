@@ -276,20 +276,26 @@ export const createWeaponGeometry = (
  * 무기 접기(`isWeapon`)를 켬. 언마운트·모델 변경 때 직접 만든 버퍼와 재질을 정리함.
  */
 export const useWeapon = (
-  weapon: SpaceWeaponId,
+  weapon: SpaceWeaponId | "embedded",
   handPivot: readonly [number, number, number],
   capacity: number,
   walkTexture: Texture,
   kickTexture: Texture,
-): { buffers: CrewInstanceGeometry; material: Material } => {
+): { buffers: CrewInstanceGeometry; material: Material } | null => {
   const [pivotX, pivotY, pivotZ] = handPivot;
   const buffers = useMemo(() => {
+    if (weapon === "embedded") {
+      return null;
+    }
     const source = createWeaponGeometry(weapon, [pivotX, pivotY, pivotZ]);
     const instance = createCrewInstanceGeometry(source, capacity);
     source.dispose();
     return instance;
   }, [weapon, pivotX, pivotY, pivotZ, capacity]);
   const material = useMemo(() => {
+    if (weapon === "embedded") {
+      return null;
+    }
     const textureUrl = WEAPON_TEXTURE_URLS[weapon];
     const weaponMaterial = new MeshStandardMaterial({
       vertexColors: true,
@@ -302,15 +308,15 @@ export const useWeapon = (
 
   useEffect(() => {
     return () => {
-      buffers.geometry.dispose();
+      buffers?.geometry.dispose();
     };
   }, [buffers]);
 
   useEffect(() => {
     return () => {
-      material.dispose();
+      material?.dispose();
     };
   }, [material]);
 
-  return { buffers, material };
+  return buffers && material ? { buffers, material } : null;
 };

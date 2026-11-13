@@ -60,7 +60,7 @@ export interface SpaceAvatarModel {
    *
    * 성능이 다르면 다들 센 아바타만 고름. 모양은 `views/space/lib/weaponModel.ts`.
    */
-  weapon: SpaceWeaponId;
+  weapon: SpaceWeaponId | "embedded";
   /**
    * Walk `.bin` 의 프레임 수. 가공 스크립트의 `[export] 프레임=` 값.
    *
@@ -212,6 +212,23 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     // 황소처럼 Walk 가 48프레임임. 본은 22개를 꽉 써서 패딩이 없음.
     walkFrameCount: 48,
     triangleCount: 3392,
+  },
+  {
+    id: "nightshift",
+    label: "나이트시프트",
+    swatchColor: "#526e35",
+    modelUrl: "/models/nightshift.glb",
+    walkUrl: "/models/nightshift-walk.bin",
+    kickUrl: "/models/nightshift-kick.bin",
+    bodyMeshName: "nightshift_body",
+    accentMeshName: "nightshift_accent",
+    pupilGlintMeshName: "nightshift_pupil_glint",
+    height: 1.81,
+    headCenterY: 1.473,
+    handPivot: [0.2856, 0.7305, 0],
+    weapon: "embedded",
+    walkFrameCount: 32,
+    triangleCount: 2986,
   },
 ] as const;
 
