@@ -15,7 +15,12 @@ import {
   Object3D,
   type Texture,
 } from "three";
-import { SPACE_BOSS, type SpaceBossState } from "@/entities/space";
+import { SPACE_BOSS, type SpaceBossAttack, type SpaceBossState } from "@/entities/space";
+import {
+  type BossPhaseSound,
+  createBossAttackSoundTracker,
+  createBossPhaseSoundTracker,
+} from "@/views/space/lib/bossAttackSounds";
 import {
   type BossDustPuff,
   type BossShockwave,
@@ -69,6 +74,10 @@ interface ActiveSlash extends BossSlash {
 interface BossAttackEffectsProps {
   /** 보스 상태. 같은 객체를 제자리에서 고쳐 넘기므로 `useFrame` 안에서만 읽음. */
   bossState: SpaceBossState;
+  /** 공격 소리를 틀 순간에 부름. 소리를 낼지는 받는 쪽이 정함. */
+  onAttackSound?: (attack: SpaceBossAttack) => void;
+  /** 등장·포효·비틀거림·쓰러짐에 막 들어섰을 때 부름. */
+  onPhaseSound?: (phase: BossPhaseSound) => void;
 }
 
 // region [Privates]
@@ -156,9 +165,11 @@ const createSlashGeometry = (): BufferGeometry => {
  * 새로 만들지 않음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function BossAttackEffects({ bossState }: BossAttackEffectsProps): ReactNode {
+function BossAttackEffects({ bossState, onAttackSound, onPhaseSound }: BossAttackEffectsProps): ReactNode {
   // region [Hooks]
   const impactTracker = useMemo(() => createBossImpactTracker(), []);
+  const soundTracker = useMemo(() => createBossAttackSoundTracker(), []);
+  const phaseSoundTracker = useMemo(() => createBossPhaseSoundTracker(), []);
   /** 가장자리 가까이에만 띠가 있는 고리. */
   const ringTexture = useMemo(
     () => createRadialTexture([[0, 0], [0.55, 0], [0.82, 0.95], [0.94, 0.35], [1, 0]]),
@@ -370,6 +381,16 @@ function BossAttackEffects({ bossState }: BossAttackEffectsProps): ReactNode {
     const now = performance.now();
 
     collectImpacts(now);
+    const attackToSound = soundTracker.step(bossState, now);
+
+    if (attackToSound) {
+      onAttackSound?.(attackToSound);
+    }
+    const phaseToSound = phaseSoundTracker.step(bossState, now);
+
+    if (phaseToSound) {
+      onPhaseSound?.(phaseToSound);
+    }
     applyShockwaves(now);
     applyDustPuffs(now);
     applySlash(now);

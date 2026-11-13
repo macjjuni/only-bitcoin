@@ -13,7 +13,7 @@ import {
   useState,
 } from "react";
 import { NeutralToneMapping } from "three";
-import { SPACE_MARKET, type SpaceCelebration } from "@/entities/space";
+import { SPACE_BOSS_PLAYER, SPACE_MARKET, type SpaceCelebration } from "@/entities/space";
 import type { ChatIdentity } from "@/features/chat-session";
 import { useSpaceBgm } from "@/features/space-bgm";
 import {
@@ -38,6 +38,7 @@ import {
 } from "@/views/space/lib/spaceLoading";
 import { useScreenCelebrationSound } from "../model/useScreenCelebrationSound";
 import { useSpaceBgmZone } from "../model/useSpaceBgmZone";
+import { useSpaceSfx } from "../model/useSpaceSfx";
 import SpaceHud from "./hud/SpaceHud";
 import SpaceFallback, { type SpaceFallbackReason } from "./SpaceFallback";
 import SpaceLoadingOverlay from "./SpaceLoadingOverlay";
@@ -46,6 +47,8 @@ import SpaceScene from "./scene/SpaceScene";
 
 /** 컨텍스트 복구를 기다리는 시간. 넘기면 폴백으로 전환한다. */
 const CONTEXT_RESTORE_TIMEOUT_MS = 3_000;
+/** 처치 팡파르를 늦추는 시간(초). 보스가 쓰러지는 소리와 안 겹치게 함. */
+const VICTORY_SOUND_DELAY_SECONDS = 1.5;
 /**
  * 톤 매핑.
  *
@@ -142,6 +145,9 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
     celebrationClockOffsetMs,
     bgm.isPlaying || isTestRequester || dummyCount > 0,
   );
+  /** 효과음도 배경음악 설정을 따름. 음악을 끈 사람은 조용히 있고 싶은 사람임. */
+  const playSfx = useSpaceSfx(bgm.isPlaying);
+  const bossKilledAt = session.bossDefeat?.killedAt;
   /** 입장 로딩 신호. 한 번 켜지면 끄지 않음 — 모델을 바꿔도 오버레이를 다시 띄우지 않음. */
   const [isMapReady, setIsMapReady] = useState<boolean>(false);
   const [isAvatarReady, setIsAvatarReady] = useState<boolean>(false);
@@ -258,6 +264,19 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
 
   // region [Life Cycles]
   useEffect(() => {
+    const selfPosition = session.getSelfPosition();
+
+    // 보스 소리는 전부 안뜰에서만 냄. 홀 안까지 울리면 뜬금없음.
+    if (
+      bossKilledAt !== undefined &&
+      selfPosition &&
+      selfPosition.x > SPACE_BOSS_PLAYER.hallMaximumX
+    ) {
+      playSfx("victory", VICTORY_SOUND_DELAY_SECONDS);
+    }
+  }, [bossKilledAt, playSfx, session.getSelfPosition]);
+
+  useEffect(() => {
     if (!isSupportProbed) {
       return;
     }
@@ -362,6 +381,7 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
             dummyCount={dummyCount}
             onReadyMap={onReadyMap}
             onReadyAvatar={onReadyAvatar}
+            playSfx={playSfx}
           />
         </Suspense>
         {hasPerformanceStats && <SpacePerformanceStats dummyCount={dummyCount} />}

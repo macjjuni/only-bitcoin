@@ -37,6 +37,8 @@ interface BossDamageNumbersProps {
   drainBossHits: () => SpaceBossHitEvent[];
   /** 내 좌석. 내가 준 피해는 강조함. */
   selfSeat: number | undefined;
+  /** 내 공격이 닿았을 때 부름. 타격음을 냄. */
+  onHitByMe?: () => void;
 }
 
 /**
@@ -45,7 +47,7 @@ interface BossDamageNumbersProps {
  * 맞은 순간의 자리에 박아 둠. 보스를 따라다니게 하면 돌진 중에 숫자가 같이 끌려가 못 읽음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function BossDamageNumbers({ bossState, drainBossHits, selfSeat }: BossDamageNumbersProps): ReactNode {
+function BossDamageNumbers({ bossState, drainBossHits, selfSeat, onHitByMe }: BossDamageNumbersProps): ReactNode {
   // region [Hooks]
   const [numbers, setNumbers] = useState<DamageNumber[]>([]);
   const nextIDRef = useRef<number>(0);
@@ -80,6 +82,11 @@ function BossDamageNumbers({ bossState, drainBossHits, selfSeat }: BossDamageNum
     }
 
     const created = events.map((event) => createNumber(event, now));
+
+    // 한 프레임에 여러 대가 닿아도 한 번만 냄.
+    if (created.some((number) => number.isMine)) {
+      onHitByMe?.();
+    }
 
     setNumbers((previousNumbers) => {
       const nextNumbers = [...previousNumbers.filter((number) => number.expiresAt > now), ...created]

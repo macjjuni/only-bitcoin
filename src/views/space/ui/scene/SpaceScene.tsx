@@ -28,6 +28,7 @@ import {
   SPACE_MENU_FRAME,
   SPACE_SCREEN_FRAME,
   SPACE_SCREEN_PLACEMENTS,
+  type SpaceBossAttack,
   type SpaceCelebration,
   type SpacePeer,
   type SpaceTerrain,
@@ -66,10 +67,13 @@ import {
   type Vector3Like,
 } from "@/features/space-controls";
 import type { SpaceSession } from "@/features/space-session";
+import type { BossPhaseSound } from "@/views/space/lib/bossAttackSounds";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import type { LanternAnchor } from "@/views/space/lib/hallModel";
 import type { HallTerrain } from "@/views/space/lib/hallTerrain";
+import type { SpaceSfxName } from "@/views/space/lib/spaceSfx";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
+import type { PlaySpaceSfx } from "@/views/space/model/useSpaceSfx";
 import BlockDashboard from "./BlockDashboard";
 import BossAttackEffects from "./BossAttackEffects";
 import BossDamageNumbers from "./BossDamageNumbers";
@@ -82,8 +86,8 @@ import PriceBillboard from "./PriceBillboard";
 import RaidBoss from "./RaidBoss";
 import RemoteAvatars, { type RemoteAvatarHit } from "./RemoteAvatars";
 import SceneLighting from "./SceneLighting";
-import SelfHealthBar from "./SelfHealthBar";
 import ScreenCelebration from "./ScreenCelebration";
+import SelfHealthBar from "./SelfHealthBar";
 import SpaceHeatmap from "./SpaceHeatmap";
 import SpaceTicker from "./SpaceTicker";
 
@@ -103,9 +107,32 @@ interface SpaceSceneProps {
   onReadyMap?: () => void;
   /** 내 캐릭터 모델이 올라왔을 때. 입장 로딩 오버레이가 기다림. */
   onReadyAvatar?: () => void;
+  /** 효과음을 틂. 소리를 꺼 둔 사람에게는 아무 일도 안 일어남. */
+  playSfx: PlaySpaceSfx;
 }
 
 const EMPTY_LANTERN_ANCHORS: readonly LanternAnchor[] = [];
+/**
+ * 휘두르는 소리를 무기가 닿기 이만큼 전에 틂(초).
+ *
+ * 누른 순간에 틀면 모션이 긴 버거빠따킹은 방망이를 들기도 전에 소리가 남.
+ * 닿는 시점이 이보다 늦은 캐릭터는 그 차이만큼 소리를 늦춤. 버거빠따킹(0.45초)이
+ * 0.22초 늦게 나도록 맞춘 값이고, 맥시크루는 0.05초라 티가 안 남.
+ */
+const SWING_SOUND_LEAD_SECONDS = 0.23;
+/** 쓰러지는 소리를 늦추는 시간(초). 맞는 순간에는 보스 공격 소리가 가장 커서 겹치면 묻힘. */
+const KNOCKOUT_SOUND_DELAY_SECONDS = 0.2;
+const BOSS_ATTACK_SFX: Record<SpaceBossAttack, SpaceSfxName> = {
+  swipe: "bossSwipe",
+  slam: "bossSlam",
+  charge: "bossCharge",
+};
+const BOSS_PHASE_SFX: Record<BossPhaseSound, SpaceSfxName> = {
+  spawn: "bossSpawn",
+  enrage: "bossEnrage",
+  stagger: "bossStagger",
+  dead: "bossDeath",
+};
 /** 가장 긴 공격 모션(ms). 남의 공격 기록을 이만큼 들고 있다가 지움. */
 const LONGEST_ATTACK_MS =
   Math.max(...SPACE_AVATAR_MODELS.map((model) => model.combat.attackSeconds)) * 1000;
@@ -126,6 +153,7 @@ function SpaceScene({
   dummyCount,
   onReadyMap,
   onReadyAvatar,
+  playSfx,
 }: SpaceSceneProps): ReactNode {
   // region [Hooks]
   const canvasElement = useThree((rootState) => rootState.gl.domElement);
@@ -161,6 +189,8 @@ function SpaceScene({
   const knockbackRef = useRef<Knockback | null>(null);
   /** 이미 밀림으로 옮긴 피격 시각. 같은 피격으로 두 번 밀지 않음. */
   const handledDamageAtRef = useRef<number | null>(null);
+  /** 쓰러지는 소리를 낸 `deadUntil`. 쓰러질 때마다 한 번만 냄. */
+  const soundedDeadUntilRef = useRef<number | null>(null);
   /** 내가 발차기를 시작한 시각. 아바타가 이걸로 동작을 재생함. */
   const kickStartedAtRef = useRef<number | undefined>(undefined);
   /** 다른 사람이 발차기를 시작한 시각(좌석별). 끝난 건 지움. */
@@ -276,6 +306,9 @@ function SpaceScene({
     }
     handledDamageAtRef.current = selfDamagedAt;
 
+    if (selfDamagedAt !== null) {
+      playSfx("hurt");
+    }
     if (selfDamagedAt === null || selfDamagedBy === null || session.selfHealth <= 0) {
       return;
     }
@@ -293,6 +326,15 @@ function SpaceScene({
   ): LocalPlayerState => {
     if (isKnockedOut(now)) {
       knockbackRef.current = null;
+      // 쓰러뜨린 피격은 여기서 받음. 서버가 체력 0 과 리스폰을 연달아 보내서, 다음 프레임에는
+      // 이미 쓰러진 상태라 아래 `startKnockbackIfDamaged` 까지 못 감. 여기서 처리해 두지 않으면
+      // 일어난 뒤에 묵은 피격으로 뒤늦게 밀림.
+      handledDamageAtRef.current = session.selfDamagedAt;
+      // 소리는 피격이 아니라 쓰러진 것 자체에 묶음. 보스 공격 소리에 묻히지 않게 조금 늦춤.
+      if (soundedDeadUntilRef.current !== session.deadUntil) {
+        soundedDeadUntilRef.current = session.deadUntil;
+        playSfx("knockout", KNOCKOUT_SOUND_DELAY_SECONDS);
+      }
       // 쌓인 시간을 버림. 안 버리면 일어나는 순간 밀린 걸음을 한꺼번에 걸음.
       accumulatedSecondsRef.current = 0;
 
@@ -390,7 +432,9 @@ function SpaceScene({
     // 전송에 실패해도 내 화면에서는 휘두름. 재접속 중에 버튼이 먹통으로 보였음.
     session.sendKick(playerState);
     // 쿨다운은 캐릭터마다 다름. 서버도 같은 표로 한 번 더 막음.
-    const { cooldownMs } = resolveAvatarCombat(avatarModelIndex);
+    const { cooldownMs, impactSeconds } = resolveAvatarCombat(avatarModelIndex);
+
+    playSfx("swing", impactSeconds - SWING_SOUND_LEAD_SECONDS);
 
     inputSource.kickCooldownMs = cooldownMs;
     inputSource.kickCooldownUntil = now + cooldownMs;
@@ -530,6 +574,34 @@ function SpaceScene({
   const onReadyLanterns = useCallback((anchors: readonly LanternAnchor[]): void => {
     setLanternAnchors(anchors);
   }, []);
+
+  /** 보스 공격 소리는 안뜰에 나와 있는 사람에게만 냄. 홀 안까지 울리면 뜬금없음. */
+  const onBossAttackSound = useCallback(
+    (attack: SpaceBossAttack): void => {
+      const selfPosition = session.getSelfPosition();
+
+      if (selfPosition && selfPosition.x > SPACE_BOSS_PLAYER.hallMaximumX) {
+        playSfx(BOSS_ATTACK_SFX[attack]);
+      }
+    },
+    [playSfx, session.getSelfPosition],
+  );
+
+  /** 등장·포효 같은 소리도 안뜰에서만 냄. */
+  const onBossPhaseSound = useCallback(
+    (phase: BossPhaseSound): void => {
+      const selfPosition = session.getSelfPosition();
+
+      if (selfPosition && selfPosition.x > SPACE_BOSS_PLAYER.hallMaximumX) {
+        playSfx(BOSS_PHASE_SFX[phase]);
+      }
+    },
+    [playSfx, session.getSelfPosition],
+  );
+
+  const onHitBossByMe = useCallback((): void => {
+    playSfx("hit");
+  }, [playSfx]);
   // endregion
 
 
@@ -719,13 +791,20 @@ function SpaceScene({
         </Suspense>
       )}
 
-      {session.canFightBoss && <BossAttackEffects bossState={session.bossState} />}
+      {session.canFightBoss && (
+        <BossAttackEffects
+          bossState={session.bossState}
+          onAttackSound={onBossAttackSound}
+          onPhaseSound={onBossPhaseSound}
+        />
+      )}
 
       {session.canFightBoss && (
         <BossDamageNumbers
           bossState={session.bossState}
           drainBossHits={session.drainBossHits}
           selfSeat={session.self?.seat}
+          onHitByMe={onHitBossByMe}
         />
       )}
 
