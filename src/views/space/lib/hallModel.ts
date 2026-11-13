@@ -83,6 +83,10 @@ const isMesh = (object: Object3D): object is Mesh => {
  * 라이트맵은 glTF 의 occlusion 슬롯(TEXCOORD_1)에 실려 와서 로더가 `aoMap` 으로
  * 읽음. 그걸 `lightMap` 으로 옮긴 언릿 머티리얼을 씀. 이미 바꾼 메시(재마운트)는
  * `aoMap` 이 없어 건너뜀.
+ *
+ * 색 텍스처는 굽는 쪽에 따라 자리가 다름. 블렌더를 거쳐 내보낸 맵은 base color 를
+ * 검정으로 두고 emission 슬롯에 실어 와서(`emissiveMap`), `map` 이 비면 그쪽을 씀.
+ * 안 그러면 홀 안이 텍스처 없이 라이트맵만 입혀짐.
  */
 const applyBakedLighting = (mesh: Mesh): void => {
   if (mesh.userData.lamp_glow === true) {
@@ -103,7 +107,7 @@ const applyBakedLighting = (mesh: Mesh): void => {
 
   lightMap.colorSpace = SRGBColorSpace;
   mesh.material = new MeshBasicMaterial({
-    map: source.map,
+    map: source.map ?? source.emissiveMap,
     vertexColors: true,
     lightMap,
     lightMapIntensity: HALL_LIGHTMAP_MAX * Math.PI,
