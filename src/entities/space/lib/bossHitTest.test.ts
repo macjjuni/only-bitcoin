@@ -34,8 +34,11 @@ describe("휘두르기 부채꼴", () => {
   });
 
   it("여유만큼 안쪽으로 깎아 판정한다", () => {
-    expect(isInsideBossAttack("swipe", ORIGIN, at(radius - 0.1, 0), 0)).toBe(true);
-    expect(isInsideBossAttack("swipe", ORIGIN, at(radius - 0.1, 0))).toBe(false);
+    // 여유의 절반만 들어온 자리. 여유를 바꿔도 따라가게 상수에서 구함.
+    const justInside = at(radius - SPACE_BOSS_COMBAT.hitMargin / 2, 0);
+
+    expect(isInsideBossAttack("swipe", ORIGIN, justInside, 0)).toBe(true);
+    expect(isInsideBossAttack("swipe", ORIGIN, justInside)).toBe(false);
   });
 
   it("보스 방향을 따라 돈다", () => {
