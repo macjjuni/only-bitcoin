@@ -6,7 +6,10 @@ import {
 import { resolveColorIndexFromClientKey } from "../../../src/entities/space/lib/clientKeyHash";
 import { decodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapshot";
 import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
-import { resolveAvatarCombat } from "../../../src/entities/space/model/avatarModel";
+import {
+  resolveAvatarCombat,
+  SPACE_AVATAR_MODELS,
+} from "../../../src/entities/space/model/avatarModel";
 import {
   SPACE_BOSS,
   SPACE_BOSS_COMBAT,
@@ -1031,6 +1034,14 @@ describe("SpaceRoom", () => {
     const BOSS_FEATURES = ["kick", "boss-v1"];
     /** 테스트 유저가 쓰는 기본 모델(0번)의 공격 성격. */
     const DEFAULT_COMBAT = resolveAvatarCombat(0);
+    /** 무기가 닿기까지 가장 오래 걸리는 모델. */
+    const SLOWEST_MODEL_INDEX = SPACE_AVATAR_MODELS.reduce(
+      (slowest, model, index) =>
+        model.combat.impactSeconds > SPACE_AVATAR_MODELS[slowest].combat.impactSeconds
+          ? index
+          : slowest,
+      0,
+    );
     const { arena } = SPACE_BOSS;
     const framesOf = <Kind extends SpaceServerFrame["t"]>(socket: RoomSocket, kind: Kind) =>
       socket.frames().filter((frame) => frame.t === kind) as Extract<
@@ -1152,6 +1163,7 @@ describe("SpaceRoom", () => {
         t: "join",
         clientKey: clientKey(1),
         nickname: "싸움꾼",
+        modelIndex: 0,
         features: BOSS_FEATURES,
       });
       await moveIntoArena((_, frame) => send(frame), fighter, 2.5, 0, Math.PI / 2);
@@ -1407,8 +1419,21 @@ describe("SpaceRoom", () => {
 
     it("휘두르는 사이 물러나거나 나가면 안 맞는다", async () => {
       const { room, join, send } = createRoom();
-      const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
-      const leaver = await join(clientKey(2), "나갈사람", 0, "ip-2", BOSS_FEATURES);
+      // 닿기까지 가장 오래 걸리는 버거빠따킹(0.45초)으로 봄. 그 사이에 물러날 시간이 있어야 함.
+      const fighter = await join(
+        clientKey(1),
+        "싸움꾼",
+        SLOWEST_MODEL_INDEX,
+        "ip-1",
+        BOSS_FEATURES,
+      );
+      const leaver = await join(
+        clientKey(2),
+        "나갈사람",
+        SLOWEST_MODEL_INDEX,
+        "ip-2",
+        BOSS_FEATURES,
+      );
 
       await moveIntoArena(send, fighter, 2.5, 0, Math.PI / 2);
       await moveIntoArena(send, leaver, 2.5, 0.5, Math.PI / 2);
@@ -1426,7 +1451,7 @@ describe("SpaceRoom", () => {
         isRunning: false,
       });
       room.webSocketClose(leaver.asWebSocket());
-      waitForImpact();
+      waitForImpact(SLOWEST_MODEL_INDEX);
 
       expect(framesOf(fighter, "kick")).toHaveLength(2);
       expect(framesOf(fighter, "boss-hit")).toHaveLength(0);
@@ -1581,6 +1606,8 @@ describe("SpaceRoom", () => {
             t: "join",
             clientKey: key,
             nickname: "싸움꾼",
+            // 아래 수치가 0번 모델 기준이라 모델을 못 박아 둠.
+            modelIndex: 0,
             features: BOSS_FEATURES,
           });
 

@@ -20,7 +20,13 @@ export const loadAvatarModelIndex = (): number => {
   }
 
   try {
-    const stored = Number(window.localStorage.getItem(STORAGE_KEY));
+    const rawValue = window.localStorage.getItem(STORAGE_KEY);
+
+    // 고른 적이 없으면 기본 모델임. `Number(null)` 이 0 이라 그냥 바꾸면 0번 모델로 읽힘.
+    if (rawValue === null || rawValue.trim() === "") {
+      return SPACE_DEFAULT_AVATAR_MODEL_INDEX;
+    }
+    const stored = Number(rawValue);
 
     return isAvatarModelIndex(stored) ? stored : SPACE_DEFAULT_AVATAR_MODEL_INDEX;
   } catch {

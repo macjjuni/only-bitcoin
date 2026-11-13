@@ -101,6 +101,36 @@ export interface SpaceAvatarModel {
 
 export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
   {
+    id: "redcrew",
+    label: "맥시크루",
+    swatchColor: "#dc2626",
+    modelUrl: "/models/redcrew.glb",
+    clipsUrl: "/models/redcrew-clips.bin",
+    // 텍스처 없이 정점 색으로 칠함. 렌치가 몸통 메시에 합쳐져 있고, 렌치의 재질 색은
+    // 구울 때 정점 색으로 옮겼음(금속 재질은 몸통과 한 재질로 못 합쳐서).
+    bodyMeshName: "redcrew_body",
+    // 앞치마가 플레이어 색을 받음.
+    accentMeshName: "redcrew_accent",
+    pupilGlintMeshName: "redcrew_pupil_glint",
+    weaponMeshName: null,
+    height: 1.81,
+    headCenterY: 1.484,
+    // 뼈대와 모션이 버거빠따킹과 같아 표도 같음(아래).
+    clipFrameCount: 235,
+    clips: {
+      idle: { startFrame: 0, frameCount: 49, seconds: 2 },
+      walk: { startFrame: 49, frameCount: 33, seconds: 1.3333 },
+      run: { startFrame: 82, frameCount: 23, seconds: 0.9167 },
+      attack: { startFrame: 105, frameCount: 27, seconds: 1.0833 },
+      hit: { startFrame: 132, frameCount: 18, seconds: 0.7083 },
+      death: { startFrame: 150, frameCount: 39, seconds: 1.5833 },
+      revive: { startFrame: 189, frameCount: 46, seconds: 1.875 },
+    },
+    // 렌치. 기준이 되는 표준형.
+    combat: { kickDamage: 10, cooldownMs: 1_000, attackSeconds: 0.55, impactSeconds: 0.28 },
+    triangleCount: 1212,
+  },
+  {
     id: "nightshift",
     label: "버거빠따킹",
     swatchColor: "#526e35",
@@ -126,36 +156,6 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     // 철조망 방망이. 느리고 묵직한 한 방. 보스 공격 사이의 틈에 한 대 넣고 빠지는 식.
     combat: { kickDamage: 16, cooldownMs: 1_500, attackSeconds: 0.9, impactSeconds: 0.45 },
     triangleCount: 2986,
-  },
-  {
-    id: "redcrew",
-    label: "맥시크루",
-    swatchColor: "#dc2626",
-    modelUrl: "/models/redcrew.glb",
-    clipsUrl: "/models/redcrew-clips.bin",
-    // 텍스처 없이 정점 색으로 칠함. 렌치가 몸통 메시에 합쳐져 있고, 렌치의 재질 색은
-    // 구울 때 정점 색으로 옮겼음(금속 재질은 몸통과 한 재질로 못 합쳐서).
-    bodyMeshName: "redcrew_body",
-    // 앞치마가 플레이어 색을 받음.
-    accentMeshName: "redcrew_accent",
-    pupilGlintMeshName: "redcrew_pupil_glint",
-    weaponMeshName: null,
-    height: 1.81,
-    headCenterY: 1.484,
-    // 뼈대와 모션이 버거빠따킹과 같아 표도 같음.
-    clipFrameCount: 235,
-    clips: {
-      idle: { startFrame: 0, frameCount: 49, seconds: 2 },
-      walk: { startFrame: 49, frameCount: 33, seconds: 1.3333 },
-      run: { startFrame: 82, frameCount: 23, seconds: 0.9167 },
-      attack: { startFrame: 105, frameCount: 27, seconds: 1.0833 },
-      hit: { startFrame: 132, frameCount: 18, seconds: 0.7083 },
-      death: { startFrame: 150, frameCount: 39, seconds: 1.5833 },
-      revive: { startFrame: 189, frameCount: 46, seconds: 1.875 },
-    },
-    // 렌치. 기준이 되는 표준형.
-    combat: { kickDamage: 10, cooldownMs: 1_000, attackSeconds: 0.55, impactSeconds: 0.28 },
-    triangleCount: 1212,
   },
   {
     id: "pepe",
@@ -190,6 +190,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
   },
 ] as const;
 
+/** 처음 온 사람이 받는 모델. 표준형인 맥시크루임. */
 export const SPACE_DEFAULT_AVATAR_MODEL_INDEX = 0;
 
 /**

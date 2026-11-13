@@ -97,8 +97,8 @@ describe("캐릭터별 공격 성격", () => {
 
 describe("resolveAvatarModel", () => {
   it("범위 안 번호는 그 모델을 준다", () => {
-    expect(resolveAvatarModel(0).id).toBe("nightshift");
-    expect(resolveAvatarModel(1).id).toBe("redcrew");
+    expect(resolveAvatarModel(0).id).toBe("redcrew");
+    expect(resolveAvatarModel(1).id).toBe("nightshift");
     expect(resolveAvatarModel(2).id).toBe("pepe");
   });
 
