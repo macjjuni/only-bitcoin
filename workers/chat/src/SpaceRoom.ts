@@ -14,6 +14,7 @@ import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
 import {
   resolveAvatarCombat,
   resolveAvatarModelIndex,
+  type SpaceAvatarCombat,
 } from "../../../src/entities/space/model/avatarModel";
 import {
   SPACE_BOSS_COMBAT,
@@ -1243,13 +1244,33 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         this.sendPayload(candidate, payload);
       }
     }
-    this.applyKickToBoss(kicker, attachment, now, combat.kickDamage);
+    this.scheduleKickImpact(kicker.seat, id, combat, startedAt + combat.impactSeconds * 1000 - now);
+  }
+
+  /**
+   * 무기가 닿을 때 보스 판정을 함. 누른 순간에 하면 느린 캐릭터는 휘두르기 전에 맞음.
+   *
+   * 위치·방향·생사는 닿는 순간의 것을 다시 읽음. 그 사이 나갔거나 쓰러졌거나 다른
+   * 공격으로 넘어갔으면 버림.
+   */
+  private scheduleKickImpact(seat: number, kickId: string, combat: SpaceAvatarCombat, delayMs: number): void {
+    setTimeout(() => {
+      const socket = this.socketsBySeat.get(seat);
+      const attachment = socket ? this.getJoinedAttachment(socket) : null;
+      const kicker = attachment?.peer;
+      const now = Date.now();
+
+      if (!attachment || !kicker || attachment.lastKickId !== kickId || this.isDead(attachment, now)) {
+        return;
+      }
+      this.applyKickToBoss(kicker, attachment, now, combat.kickDamage);
+    }, Math.max(0, delayMs));
   }
 
   /**
    * 휘두른 공격이 보스에 닿았는지 봄. 새 프레임 없이 기존 `kick` 에 판정만 붙였음.
    *
-   * 쿨다운은 위에서 이미 걸렀음. 사거리와 방향은 서버가 아는 위치로 봄.
+   * 쿨다운은 받을 때 이미 걸렀음. 사거리와 방향은 무기가 닿는 순간 서버가 아는 위치로 봄.
    */
   private applyKickToBoss(kicker: SpacePeer, attachment: SpaceSocketAttachment, now: number, damage: number): void {
     if (!attachment.features?.includes(SPACE_FEATURE_BOSS) || !this.syncBossPresence(now)) {

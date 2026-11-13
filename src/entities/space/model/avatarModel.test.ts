@@ -69,6 +69,9 @@ describe("캐릭터별 공격 성격", () => {
     for (const { id, combat } of SPACE_AVATAR_MODELS) {
       expect(combat.attackSeconds * 1000, id).toBeLessThanOrEqual(combat.cooldownMs);
       expect(combat.attackSeconds, id).toBeGreaterThan(0.2);
+      // 닿는 순간은 모션 안에 있어야 함. 모션이 끝난 뒤 피해가 뜨면 어긋나 보임.
+      expect(combat.impactSeconds, id).toBeGreaterThan(0);
+      expect(combat.impactSeconds, id).toBeLessThan(combat.attackSeconds);
       expect(combat.kickDamage, id).toBeGreaterThan(0);
     }
   });

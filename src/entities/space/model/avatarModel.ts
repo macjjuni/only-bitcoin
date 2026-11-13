@@ -48,6 +48,13 @@ export interface SpaceAvatarCombat {
    * 길면 다음 공격이 앞 모션을 끊고 시작해 휘두르다 만 것처럼 보임.
    */
   attackSeconds: number;
+  /**
+   * 공격을 시작하고 무기가 닿기까지(초). 서버가 이만큼 기다렸다가 맞았는지 봄.
+   *
+   * 누른 순간에 판정하면 느린 캐릭터는 휘두르기도 전에 피해 숫자가 뜸.
+   * `attackSeconds` 보다 짧아야 함.
+   */
+  impactSeconds: number;
 }
 
 export interface SpaceAvatarModel {
@@ -117,7 +124,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
       revive: { startFrame: 189, frameCount: 46, seconds: 1.875 },
     },
     // 철조망 방망이. 느리고 묵직한 한 방. 보스 공격 사이의 틈에 한 대 넣고 빠지는 식.
-    combat: { kickDamage: 16, cooldownMs: 1_500, attackSeconds: 0.9 },
+    combat: { kickDamage: 16, cooldownMs: 1_500, attackSeconds: 0.9, impactSeconds: 0.45 },
     triangleCount: 2986,
   },
   {
@@ -147,7 +154,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
       revive: { startFrame: 189, frameCount: 46, seconds: 1.875 },
     },
     // 렌치. 기준이 되는 표준형.
-    combat: { kickDamage: 10, cooldownMs: 1_000, attackSeconds: 0.55 },
+    combat: { kickDamage: 10, cooldownMs: 1_000, attackSeconds: 0.55, impactSeconds: 0.28 },
     triangleCount: 1212,
   },
   {
@@ -178,7 +185,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
       revive: { startFrame: 188, frameCount: 46, seconds: 1.875 },
     },
     // 파리채. 빠르고 약한 연타. 붙어서 계속 때려야 해서 맞을 일도 많음.
-    combat: { kickDamage: 6, cooldownMs: 550, attackSeconds: 0.45 },
+    combat: { kickDamage: 6, cooldownMs: 550, attackSeconds: 0.45, impactSeconds: 0.2 },
     triangleCount: 1498,
   },
 ] as const;
