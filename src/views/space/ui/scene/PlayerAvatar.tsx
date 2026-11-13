@@ -8,32 +8,34 @@ import {
   resolveAvatarColor,
   resolveAvatarModel,
   SPACE_AVATAR,
-  SPACE_KICK,
 } from "@/entities/space";
-import { CREW_KICK, CREW_WALK, useCrewModel } from "@/views/space/lib/crewModel";
+import { createAvatarAnimation, stepAvatarAnimation } from "@/views/space/lib/avatarAnimation";
+import { useCrewModel } from "@/views/space/lib/crewModel";
 import {
   applyCrewSkinning,
   createCrewInstanceGeometry,
-  resolveKickPose,
+  syncCrewPose,
   useSkinnedCrewMaterial,
+  writeCrewPose,
 } from "@/views/space/lib/crewSkinning";
 import { createShadowBlobTexture } from "@/views/space/lib/shadowBlobTexture";
-import { useWeapon } from "@/views/space/lib/weaponModel";
 
 /** 그림자 블롭이 바닥 격자와 겹쳐 지저분해지지 않도록 살짝 띄움. */
 const SHADOW_LIFT_Y = 0.02;
-/** 이보다 느리면 멈춘 것으로 보고 레스트 포즈로 돌림. */
-const MOVING_SPEED_THRESHOLD = 0.25;
 
 interface PlayerAvatarProps {
   colorIndex: number;
-  /** 고른 아바타 모델 번호. 남이 보는 내 모습과 같아야 하므로 서버 값을 씀. */
+  /** 아바타 모델 번호. 남이 보는 내 모습과 같아야 하므로 서버 값을 씀. */
   modelIndex: number;
   hasRealtimeShadows: boolean;
   /** 걷기 사이클 속도. 매 프레임 바뀌므로 ref 로 받음. */
   playerStateRef: RefObject<LocalPlayerState>;
-  /** 발차기를 시작한 `performance.now()` 시각. 안 찼으면 `undefined`. */
+  /** 공격을 시작한 `performance.now()` 시각. 안 했으면 `undefined`. */
   kickStartedAtRef: RefObject<number | undefined>;
+  /** 보스에게 마지막으로 맞은 시각. 움찔하는 모션을 틂. */
+  damagedAt: number | null;
+  /** 쓰러져 있는 끝 시각. 그때까지 쓰러졌다가 그 시각에 맞춰 일어남. */
+  knockedOutUntil: number | null;
   /** 모델을 받아 처음 그려질 때. 모델을 바꿔 다시 올라와도 또 부름. */
   onReady?: () => void;
 }
@@ -41,24 +43,22 @@ interface PlayerAvatarProps {
 /**
  * 로컬 플레이어 아바타.
  *
- * 지오메트리·재질·걷기 모션 모두 `RemoteAvatars` 와 같아야 함. 한쪽만 바꾸면
- * 내 모습과 남이 보는 내 모습이 달라짐. 셰이더를 공유하려고 혼자여도
- * `InstancedMesh`(count 1)로 그림. 모델은 발바닥이 원점이라 그룹을 바닥에
- * 그대로 둠.
+ * 지오메트리·재질·모션 모두 `RemoteAvatars` 와 같아야 함. 한쪽만 바꾸면 내 모습과 남이
+ * 보는 내 모습이 달라짐. 셰이더를 공유하려고 혼자여도 `InstancedMesh`(count 1)로 그림.
+ * 모델은 발바닥이 원점이라 그룹을 바닥에 그대로 둠.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateRef, kickStartedAtRef, onReady }: PlayerAvatarProps): ReactNode {
+function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateRef, kickStartedAtRef, damagedAt, knockedOutUntil, onReady }: PlayerAvatarProps): ReactNode {
   // region [Hooks]
   const shadowTexture = useMemo(() => createShadowBlobTexture(), []);
   const avatarColor = useMemo(() => resolveAvatarColor(colorIndex), [colorIndex]);
   const model = resolveAvatarModel(modelIndex);
   const crew = useCrewModel(model);
-  /** 공격 때만 손에서 펼쳐지는 무기(렌치, 머슼크는 도지코인). 평소에는 손 한 점으로 접혀 안 보임. */
-  const weapon = useWeapon(model.weapon, model.handPivot, 1, crew.walkTexture, crew.kickTexture);
-  const bodyMaterial = useSkinnedCrewMaterial(crew.bodyMaterial, crew.walkTexture, crew.kickTexture);
-  const pupilGlintMaterial = useSkinnedCrewMaterial(crew.pupilGlintMaterial, crew.walkTexture, crew.kickTexture);
+  const bodyMaterial = useSkinnedCrewMaterial(crew.bodyMaterial, crew.clipTexture);
+  const pupilGlintMaterial = useSkinnedCrewMaterial(crew.pupilGlintMaterial, crew.clipTexture);
+  const weaponMaterial = useSkinnedCrewMaterial(crew.weaponMaterial, crew.clipTexture);
   const body = useMemo(() => createCrewInstanceGeometry(crew.bodyGeometry, 1), [crew.bodyGeometry]);
-  /** 글린트가 없는 모델(곰)에서는 `null` 임. 메시도 그리지 않음. */
+  /** 눈 메시가 없는 모델에서는 `null` 임. 메시도 그리지 않음. */
   const pupilGlint = useMemo(
     () => (crew.pupilGlintGeometry ? createCrewInstanceGeometry(crew.pupilGlintGeometry, 1) : null),
     [crew.pupilGlintGeometry],
@@ -67,11 +67,18 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
     () => createCrewInstanceGeometry(crew.accentGeometry, 1),
     [crew.accentGeometry],
   );
+  /** 무기를 몸통에 합친 모델에서는 `null` 임. */
+  const weapon = useMemo(
+    () => (crew.weaponGeometry ? createCrewInstanceGeometry(crew.weaponGeometry, 1) : null),
+    [crew.weaponGeometry],
+  );
   const accentMaterial = useMemo(() => {
     const material = new MeshStandardMaterial({ roughness: 0.84, metalness: 0 });
-    applyCrewSkinning(material, crew.walkTexture, crew.kickTexture);
+    applyCrewSkinning(material, crew.clipTexture);
     return material;
-  }, [crew.walkTexture, crew.kickTexture]);
+  }, [crew.clipTexture]);
+  /** 지금 틀고 있는 모션. 매 프레임 제자리에서 고침. */
+  const animation = useMemo(() => createAvatarAnimation(), []);
 
   // 혼자라 인스턴스 색이 필요 없음. 머티리얼에 바로 넣음.
   accentMaterial.color.set(avatarColor);
@@ -83,51 +90,31 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
 
 
   // region [Privates]
-  /** 걸은 거리만큼 사이클을 돌림. 시간 기준으로 돌리면 발이 미끄러짐. */
-  const advanceWalkCycle = (deltaSeconds: number): void => {
+  /** 지금 상태에 맞는 모션을 골라 모든 부위에 같은 포즈를 넣음. 한 부위만 늦으면 눈·색 띠가 따로 놂. */
+  const advanceAnimation = (deltaSeconds: number): void => {
     const state = playerStateRef.current;
-    // 공중에서는 다리를 멈춤. 뛰는 중에 걷는 모션이 돌면 허우적대 보임.
-    //
-    // 접지 판정은 **지형이 정하고 적분기가 넘겨줌.** 전에는 `y <= 0` 으로
-    // 봤는데, 그건 바닥이 0 이던 벙커 기준이라 광장(5)·테라스(7.5)·궁전(11)
-    // 어디에 서 있어도 거짓이 되어 걷기 모션이 통째로 멈춰 있었음.
-    const speed = state?.isGrounded ? Math.hypot(state.velocityX, state.velocityZ) : 0;
 
-    const phase = body.phase.getX(0) + (speed * deltaSeconds) / CREW_WALK.metersPerCycle;
-    const step = deltaSeconds / CREW_WALK.blendSeconds;
-    const blend = body.blend.getX(0) + (speed > MOVING_SPEED_THRESHOLD ? step : -step);
-
-    for (const buffers of [body, accent, pupilGlint, weapon.buffers]) {
-      if (!buffers) {
-        continue;
-      }
-
-      buffers.phase.setX(0, phase - Math.floor(phase));
-      buffers.blend.setX(0, Math.min(1, Math.max(0, blend)));
-      buffers.phase.needsUpdate = true;
-      buffers.blend.needsUpdate = true;
-    }
-  };
-
-  /** 공격 진행도를 모든 메시에 같이 넣음. 한 메시만 늦으면 눈·앞판·무기가 따로 놂. */
-  const advanceKick = (): void => {
-    const kick = resolveKickPose(
-      kickStartedAtRef.current,
-      performance.now(),
-      SPACE_KICK.animationSeconds,
-      CREW_KICK.blendInRatio,
+    stepAvatarAnimation(
+      animation,
+      {
+        nowMs: performance.now(),
+        deltaSeconds,
+        speed: state ? Math.hypot(state.velocityX, state.velocityZ) : 0,
+        // 접지 판정은 지형이 정하고 적분기가 넘겨줌.
+        isGrounded: state?.isGrounded ?? true,
+        attackStartedAt: kickStartedAtRef.current,
+        attackSeconds: model.combat.attackSeconds,
+        hitStartedAt: damagedAt ?? undefined,
+        // 쓰러뜨린 피격 시각부터 다시 움직일 수 있는 시각까지.
+        knockout:
+          damagedAt !== null && knockedOutUntil !== null
+            ? { startedAt: damagedAt, until: knockedOutUntil }
+            : undefined,
+      },
+      model,
     );
-
-    for (const buffers of [body, accent, pupilGlint, weapon.buffers]) {
-      if (!buffers) {
-        continue;
-      }
-
-      buffers.kickPhase.setX(0, kick.phase);
-      buffers.kickBlend.setX(0, kick.blend);
-      buffers.kickPhase.needsUpdate = true;
-      buffers.kickBlend.needsUpdate = true;
-    }
+    writeCrewPose(body, 0, animation);
+    syncCrewPose(body, [accent, pupilGlint, weapon]);
   };
 
   /** 그룹이 위치를 잡으므로 인스턴스 행렬은 단위행렬 한 번만 넣음. */
@@ -145,7 +132,8 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
 
 
   // region [Life Cycles]
-  useEffect(resetInstanceMatrix, []);
+  // 모델을 바꾸면 부위 메시가 새로 생김. 새 메시에도 단위행렬을 넣어야 보임.
+  useEffect(resetInstanceMatrix, [body, accent, pupilGlint, weapon]);
 
   // 훅이 서스펜드하지 않고 여기까지 왔으면 모델이 다 받아진 것임.
   useEffect(() => {
@@ -159,13 +147,13 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
       body.geometry.dispose();
       accent.geometry.dispose();
       pupilGlint?.geometry.dispose();
+      weapon?.geometry.dispose();
       accentMaterial.dispose();
     };
-  }, [shadowTexture, body, accent, pupilGlint, accentMaterial]);
+  }, [shadowTexture, body, accent, pupilGlint, weapon, accentMaterial]);
 
   useFrame((_, deltaSeconds) => {
-    advanceWalkCycle(deltaSeconds);
-    advanceKick();
+    advanceAnimation(deltaSeconds);
   });
   // endregion
 
@@ -182,7 +170,7 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
         dispose={null}
       />
 
-      {/* 앞치마 앞판만 플레이어 색을 받음. 텍스처를 쓰지 않아야 색이 그대로 나옴. */}
+      {/* 가슴 띠만 플레이어 색을 받음. 텍스처를 쓰지 않아야 색이 그대로 나옴. */}
       <instancedMesh
         ref={accentMeshRef}
         args={[accent.geometry, accentMaterial, 1]}
@@ -192,19 +180,22 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
         dispose={null}
       />
 
-      <instancedMesh
-        ref={weaponMeshRef}
-        args={[weapon.buffers.geometry, weapon.material, 1]}
-        count={1}
-        castShadow={hasRealtimeShadows}
-        frustumCulled={false}
-      />
-
       {pupilGlint && pupilGlintMaterial && (
         <instancedMesh
           ref={pupilGlintMeshRef}
           args={[pupilGlint.geometry, pupilGlintMaterial, 1]}
           count={1}
+          frustumCulled={false}
+          dispose={null}
+        />
+      )}
+
+      {weapon && weaponMaterial && (
+        <instancedMesh
+          ref={weaponMeshRef}
+          args={[weapon.geometry, weaponMaterial, 1]}
+          count={1}
+          castShadow={hasRealtimeShadows}
           frustumCulled={false}
           dispose={null}
         />

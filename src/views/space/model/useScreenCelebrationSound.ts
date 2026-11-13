@@ -2,6 +2,7 @@
 
 import { useEffect, useRef } from "react";
 import type { SpaceCelebration } from "@/entities/space";
+import { toVersionedAudioUrl } from "../lib/audioAssetUrl";
 import { createCelebrationSoundPlayer } from "../lib/celebrationSoundPlayer";
 import {
   type CelebrationSoundSequence,
@@ -24,7 +25,7 @@ export const useScreenCelebrationSound = (
 
   // region [Privates]
   const prepareSound = (): (() => void) => {
-    const audio = new Audio("/audio/winneris.mp3");
+    const audio = new Audio(toVersionedAudioUrl("/audio/winneris.mp3"));
     audio.volume = 0.3;
     audio.loop = false;
     audio.preload = "auto";

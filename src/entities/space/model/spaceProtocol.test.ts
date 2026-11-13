@@ -1,5 +1,9 @@
 import { describe, expect, it } from "vitest";
-import { resolveAvatarModel, SPACE_AVATAR_MODELS } from "./avatarModel";
+import {
+  resolveAvatarModel,
+  SPACE_AVATAR_MODELS,
+  SPACE_DEFAULT_AVATAR_MODEL_INDEX,
+} from "./avatarModel";
 import {
   parseSpaceClientFrame,
   parseSpaceServerFrame,
@@ -244,8 +248,8 @@ describe("모델 선택 전 버전과의 호환", () => {
     if (parsed?.t !== "welcome") {
       throw new Error("welcome 프레임이 아닙니다.");
     }
-    expect(parsed.self.modelIndex).toBe(0);
-    expect(parsed.peers[0].modelIndex).toBe(0);
+    expect(parsed.self.modelIndex).toBe(SPACE_DEFAULT_AVATAR_MODEL_INDEX);
+    expect(parsed.peers[0].modelIndex).toBe(SPACE_DEFAULT_AVATAR_MODEL_INDEX);
   });
 
   it("modelIndex 없는 peer 에도 기본 모델을 채운다", () => {
@@ -257,7 +261,7 @@ describe("모델 선택 전 버전과의 호환", () => {
     if (parsed?.t !== "peer") {
       throw new Error("peer 프레임이 아닙니다.");
     }
-    expect(parsed.peer.modelIndex).toBe(0);
+    expect(parsed.peer.modelIndex).toBe(SPACE_DEFAULT_AVATAR_MODEL_INDEX);
   });
 
   it("목록에 없는 새 modelIndex 도 받고 기본 모델로 그림", () => {
@@ -274,7 +278,9 @@ describe("모델 선택 전 버전과의 호환", () => {
       throw new Error("peer 프레임이어야 함");
     }
     expect(parsed.peer.modelIndex).toBe(99);
-    expect(resolveAvatarModel(parsed.peer.modelIndex)).toBe(SPACE_AVATAR_MODELS[0]);
+    expect(resolveAvatarModel(parsed.peer.modelIndex)).toBe(
+      SPACE_AVATAR_MODELS[SPACE_DEFAULT_AVATAR_MODEL_INDEX],
+    );
   });
 
   it.each([-1, 256, 1.5, "1"])("범위·형식이 틀린 modelIndex(%s)는 거절함", (modelIndex) => {

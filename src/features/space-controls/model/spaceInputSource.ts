@@ -1,3 +1,4 @@
+import { SPACE_KICK } from "@/entities/space";
 import { SPACE_CAMERA } from "./followCamera";
 import { createEmptyMovementInput, type MovementInput } from "./movement";
 
@@ -33,6 +34,8 @@ export interface SpaceInputSource {
   isKickRequested: boolean;
   /** 다시 찰 수 있는 `performance.now()` 시각. 씬이 쓰고 버튼이 남은 시간을 그림. */
   kickCooldownUntil: number;
+  /** 지금 걸린 쿨다운의 전체 길이(ms). 캐릭터마다 달라서 버튼이 남은 비율을 구할 때 씀. */
+  kickCooldownMs: number;
 }
 
 export const createSpaceInputSource = (): SpaceInputSource => ({
@@ -46,6 +49,7 @@ export const createSpaceInputSource = (): SpaceInputSource => ({
   consumedPinchSpread: null,
   isKickRequested: false,
   kickCooldownUntil: 0,
+  kickCooldownMs: SPACE_KICK.cooldownMs,
 });
 
 const clamp = (value: number, min: number, max: number): number => {

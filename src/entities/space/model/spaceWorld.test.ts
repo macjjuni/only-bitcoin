@@ -137,11 +137,13 @@ describe("홀 높이", () => {
 describe("이동 경계", () => {
   it("충돌 메시 전체를 덮는다", () => {
     const { min, max } = readNodeBounds("Collision");
+    // Draco 양자화로 꼭짓점이 0.05 mm 쯤 밀려 나옴(z 20 이 20.00005). 1 mm 까지는 같은 것으로 봄.
+    const quantizationSlack = 0.001;
 
-    expect(SPACE_BOUNDS.minX).toBeLessThanOrEqual(min[0]);
-    expect(SPACE_BOUNDS.maxX).toBeGreaterThanOrEqual(max[0]);
-    expect(SPACE_BOUNDS.minZ).toBeLessThanOrEqual(min[2]);
-    expect(SPACE_BOUNDS.maxZ).toBeGreaterThanOrEqual(max[2]);
+    expect(SPACE_BOUNDS.minX).toBeLessThanOrEqual(min[0] + quantizationSlack);
+    expect(SPACE_BOUNDS.maxX).toBeGreaterThanOrEqual(max[0] - quantizationSlack);
+    expect(SPACE_BOUNDS.minZ).toBeLessThanOrEqual(min[2] + quantizationSlack);
+    expect(SPACE_BOUNDS.maxZ).toBeGreaterThanOrEqual(max[2] - quantizationSlack);
   });
 
   it("모든 스폰 노드를 담는다", () => {

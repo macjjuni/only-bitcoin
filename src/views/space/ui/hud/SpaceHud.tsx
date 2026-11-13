@@ -34,6 +34,7 @@ import { DonationQrDialog, LightningIcon } from "@/shared/ui";
 import { useDismissOnOutsidePointer } from "@/views/space/lib/useDismissOnOutsidePointer";
 import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
 import SpaceAvatarPicker from "./SpaceAvatarPicker";
+import SpaceBossHud from "./SpaceBossHud";
 import { SPACE_CHAT_INPUT_ID } from "./SpaceChatComposer";
 import SpaceChatPanel from "./SpaceChatPanel";
 import SpaceControlGuide from "./SpaceControlGuide";
@@ -447,6 +448,9 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
         paddingLeft: "env(safe-area-inset-left)",
       }}
     >
+      {/* 맨 아래에 깖. 사망 화면이 떠도 우측 상단 버튼(뒤로 가기 등)은 눌려야 함. */}
+      <SpaceBossHud session={session} isCoarsePointer={isCoarsePointer} />
+
       <div
         className="absolute left-4 top-4"
         style={{

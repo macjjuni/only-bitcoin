@@ -1,16 +1,12 @@
 import { useMemo } from "react";
 import type { BufferGeometry, DataTexture, Material, Texture } from "three";
 import { DynamicDrawUsage, InstancedBufferAttribute, Vector2 } from "three";
-import { CREW_MODEL, CREW_WALK } from "./crewModel";
+import { CREW_CLIPS, CREW_MODEL } from "./crewModel";
 
-/** 인스턴스별 걷기 위상(0~1). 아바타마다 다른 지점에서 사이클을 돎. */
-export const WALK_PHASE_ATTRIBUTE = "aWalkPhase";
-/** 레스트 포즈와 걷기 포즈 사이 섞는 비율(0~1). */
-export const WALK_BLEND_ATTRIBUTE = "aWalkBlend";
-/** 발차기 진행도(0~1). */
-export const KICK_PHASE_ATTRIBUTE = "aKickPhase";
-/** 걷기 결과와 발차기 포즈 사이 섞는 비율(0~1). 안 찰 때는 0. */
-export const KICK_BLEND_ATTRIBUTE = "aKickBlend";
+/** 인스턴스별 포즈 줄. x 는 이전 포즈, y 는 지금 포즈의 줄 번호(소수). */
+export const POSE_ROWS_ATTRIBUTE = "aPoseRows";
+/** 이전 포즈에서 지금 포즈로 섞는 비율(0…1). */
+export const POSE_BLEND_ATTRIBUTE = "aPoseBlend";
 
 /**
  * 본 행렬 텍스처를 읽어 정점을 변형하는 셰이더 조각.
@@ -19,29 +15,22 @@ export const KICK_BLEND_ATTRIBUTE = "aKickBlend";
  * 텍스처에서 직접 읽어 정점을 옮김. 정점 하나가 본 하나에 100% 묶여 있어(리지드
  * 바인딩) 행렬 한 번만 곱하면 됨.
  *
- * 걷기·발차기 텍스처는 폭이 같고(본 22칸) 높이(프레임 수)만 다름. 그래서 읽는 함수
- * 하나에 텍스처와 높이를 넘김.
+ * 텍스처 한 장에 모든 모션이 세로로 쌓여 있음. 셰이더는 모션이 뭔지 모르고 **줄 번호**만
+ * 받음. 어느 모션의 몇 번째 프레임인지는 CPU(`avatarAnimation.ts`)가 줄 번호로 바꿔 줌.
  */
 const VERTEX_DECLARATIONS = /* glsl */ `
   attribute float ${CREW_MODEL.boneIndexAttribute};
-  attribute float ${WALK_PHASE_ATTRIBUTE};
-  attribute float ${WALK_BLEND_ATTRIBUTE};
-  attribute float ${KICK_PHASE_ATTRIBUTE};
-  attribute float ${KICK_BLEND_ATTRIBUTE};
-  uniform sampler2D uWalkTexture;
-  uniform vec2 uWalkTextureSize;
-  uniform sampler2D uKickTexture;
-  uniform vec2 uKickTextureSize;
-  #ifdef CREW_WEAPON
-  attribute vec3 aWeaponOffset;
-  #endif
+  attribute vec2 ${POSE_ROWS_ATTRIBUTE};
+  attribute float ${POSE_BLEND_ATTRIBUTE};
+  uniform sampler2D uClipTexture;
+  uniform vec2 uClipTextureSize;
 
-  mat4 readBoneMatrix(sampler2D boneTexture, vec2 textureSize, float boneIndex, float frame) {
-    float column = boneIndex * ${CREW_WALK.rowsPerBone}.0;
-    float v = (frame + 0.5) / textureSize.y;
-    vec4 row0 = texture2D(boneTexture, vec2((column + 0.5) / textureSize.x, v));
-    vec4 row1 = texture2D(boneTexture, vec2((column + 1.5) / textureSize.x, v));
-    vec4 row2 = texture2D(boneTexture, vec2((column + 2.5) / textureSize.x, v));
+  mat4 readBoneMatrix(float boneIndex, float frame) {
+    float column = boneIndex * ${CREW_CLIPS.rowsPerBone}.0;
+    float v = (frame + 0.5) / uClipTextureSize.y;
+    vec4 row0 = texture2D(uClipTexture, vec2((column + 0.5) / uClipTextureSize.x, v));
+    vec4 row1 = texture2D(uClipTexture, vec2((column + 1.5) / uClipTextureSize.x, v));
+    vec4 row2 = texture2D(uClipTexture, vec2((column + 2.5) / uClipTextureSize.x, v));
 
     // GLSL 의 mat4 생성자는 열 우선임. 구운 값은 행이라 전치해 넣음.
     return mat4(
@@ -54,62 +43,43 @@ const VERTEX_DECLARATIONS = /* glsl */ `
 `;
 
 /**
- * 두 프레임을 섞어 읽음.
+ * 포즈 둘을 읽음. 포즈마다 이웃한 두 줄을 섞음.
  *
- * 그냥 끊어 쓰면 다리가 덜컥거림. 위치를 선형 보간해야 부드러움.
- *
- * 걷기는 순환이라 끝 다음이 처음임. 발차기는 한 번만 돌아서 마지막 프레임에서 멈춤.
- * 프레임 수를 셰이더에 **상수로 안 박고** 텍스처 높이에서 읽음. 모델마다 Walk 길이가
- * 달라(크루·곰 40, 황소 48) 상수로 박으면 모델마다 프로그램이 따로 컴파일됨.
+ * 그냥 끊어 쓰면 다리가 덜컥거림. 줄 번호의 소수부로 다음 줄과 선형 보간해야 부드러움.
+ * 반복 모션도 끝 프레임까지 구워져 있어 "다음 줄" 이 늘 같은 모션 안에 있음. 그래서
+ * 끝에서 처음으로 돌아가는 계산이 필요 없음. 맨 마지막 줄만 텍스처 끝이라 잘라 줌.
  */
 const POSE = /* glsl */ `
-  float walkFrameCount = uWalkTextureSize.y;
-  float walkFrame = ${WALK_PHASE_ATTRIBUTE} * walkFrameCount;
-  float walkFrameFloor = floor(walkFrame);
-  float walkLerp = walkFrame - walkFrameFloor;
-  mat4 walkBoneA = readBoneMatrix(uWalkTexture, uWalkTextureSize,
-    ${CREW_MODEL.boneIndexAttribute}, mod(walkFrameFloor, walkFrameCount));
-  mat4 walkBoneB = readBoneMatrix(uWalkTexture, uWalkTextureSize,
-    ${CREW_MODEL.boneIndexAttribute}, mod(walkFrameFloor + 1.0, walkFrameCount));
-
-  float kickLastFrame = uKickTextureSize.y - 1.0;
-  float kickFrame = clamp(${KICK_PHASE_ATTRIBUTE}, 0.0, 1.0) * kickLastFrame;
-  float kickFrameFloor = floor(kickFrame);
-  float kickLerp = kickFrame - kickFrameFloor;
-  mat4 kickBoneA = readBoneMatrix(uKickTexture, uKickTextureSize,
-    ${CREW_MODEL.boneIndexAttribute}, kickFrameFloor);
-  mat4 kickBoneB = readBoneMatrix(uKickTexture, uKickTextureSize,
-    ${CREW_MODEL.boneIndexAttribute}, min(kickFrameFloor + 1.0, kickLastFrame));
+  float lastRow = uClipTextureSize.y - 1.0;
+  float rowA = clamp(${POSE_ROWS_ATTRIBUTE}.x, 0.0, lastRow);
+  float rowB = clamp(${POSE_ROWS_ATTRIBUTE}.y, 0.0, lastRow);
+  float rowAFloor = floor(rowA);
+  float rowBFloor = floor(rowB);
+  float lerpA = rowA - rowAFloor;
+  float lerpB = rowB - rowBFloor;
+  mat4 boneA0 = readBoneMatrix(${CREW_MODEL.boneIndexAttribute}, rowAFloor);
+  mat4 boneA1 = readBoneMatrix(${CREW_MODEL.boneIndexAttribute}, min(rowAFloor + 1.0, lastRow));
+  mat4 boneB0 = readBoneMatrix(${CREW_MODEL.boneIndexAttribute}, rowBFloor);
+  mat4 boneB1 = readBoneMatrix(${CREW_MODEL.boneIndexAttribute}, min(rowBFloor + 1.0, lastRow));
 `;
 
 const resolveTextureSize = (texture: Texture): Vector2 => {
   const { image } = texture as DataTexture;
 
-  // 세로 크기가 곧 프레임 수임. 셰이더가 이 값으로 프레임을 고름.
+  // 세로 크기가 곧 전체 프레임 수임. 셰이더가 이 값으로 줄을 고름.
   return new Vector2(image.width, image.height);
 };
 
 /**
  * 머티리얼에 인스턴스 스키닝을 심음.
  *
- * 멈춰 있을 때는 레스트 포즈로 섞음. `Idle` 클립에 움직임이 없어(전 본 0°) 서 있는
- * 자세는 모델 그대로가 정답임. 공격(kick 텍스처, 지금은 무기 내려치기)은 그 결과 위에 한
- * 번 더 섞음.
- *
- * `isWeapon` 면 정점을 손 위치 쪽으로 `aWeaponOffset × (1 - 공격 비율)` 만큼 접은 뒤 같은
- * 행렬을 곱함. 공격하지 않을 때는 손 한 점으로 모여 안 보이고, 휘두를 때만 펼쳐짐.
+ * 이전 포즈와 지금 포즈를 `aPoseBlend` 로 섞음. 정점마다 행렬 넷(포즈 둘 × 이웃 줄 둘)을
+ * 읽는데, 걷기·공격 두 텍스처를 따로 읽던 때와 같은 횟수임.
  */
-export const applyCrewSkinning = (
-  material: Material,
-  walkTexture: Texture,
-  kickTexture: Texture,
-  isWeapon = false,
-): void => {
+export const applyCrewSkinning = (material: Material, clipTexture: Texture): void => {
   material.onBeforeCompile = (shader) => {
-    shader.uniforms.uWalkTexture = { value: walkTexture };
-    shader.uniforms.uWalkTextureSize = { value: resolveTextureSize(walkTexture) };
-    shader.uniforms.uKickTexture = { value: kickTexture };
-    shader.uniforms.uKickTextureSize = { value: resolveTextureSize(kickTexture) };
+    shader.uniforms.uClipTexture = { value: clipTexture };
+    shader.uniforms.uClipTextureSize = { value: resolveTextureSize(clipTexture) };
 
     shader.vertexShader = shader.vertexShader
       .replace("#include <common>", `#include <common>\n${VERTEX_DECLARATIONS}`)
@@ -118,63 +88,36 @@ export const applyCrewSkinning = (
         /* glsl */ `
         #include <beginnormal_vertex>
         ${POSE}
-        vec3 walkNormal = mix(
-          mat3(walkBoneA) * objectNormal, mat3(walkBoneB) * objectNormal, walkLerp);
-        vec3 kickNormal = mix(
-          mat3(kickBoneA) * objectNormal, mat3(kickBoneB) * objectNormal, kickLerp);
-        objectNormal = normalize(mix(
-          mix(objectNormal, walkNormal, ${WALK_BLEND_ATTRIBUTE}),
-          kickNormal,
-          ${KICK_BLEND_ATTRIBUTE}
-        ));
+        vec3 normalA = mix(mat3(boneA0) * objectNormal, mat3(boneA1) * objectNormal, lerpA);
+        vec3 normalB = mix(mat3(boneB0) * objectNormal, mat3(boneB1) * objectNormal, lerpB);
+        objectNormal = normalize(mix(normalA, normalB, ${POSE_BLEND_ATTRIBUTE}));
         `,
       )
       .replace(
         "#include <begin_vertex>",
         /* glsl */ `
         #include <begin_vertex>
-        vec3 skinSource = position;
-        #ifdef CREW_WEAPON
-        skinSource -= aWeaponOffset * (1.0 - ${KICK_BLEND_ATTRIBUTE});
-        transformed = skinSource;
-        #endif
-        vec3 walkPosition = mix(
-          (walkBoneA * vec4(skinSource, 1.0)).xyz,
-          (walkBoneB * vec4(skinSource, 1.0)).xyz,
-          walkLerp
-        );
-        vec3 kickPosition = mix(
-          (kickBoneA * vec4(skinSource, 1.0)).xyz,
-          (kickBoneB * vec4(skinSource, 1.0)).xyz,
-          kickLerp
-        );
-        transformed = mix(
-          mix(transformed, walkPosition, ${WALK_BLEND_ATTRIBUTE}),
-          kickPosition,
-          ${KICK_BLEND_ATTRIBUTE}
-        );
+        vec4 skinSource = vec4(position, 1.0);
+        vec3 positionA = mix((boneA0 * skinSource).xyz, (boneA1 * skinSource).xyz, lerpA);
+        vec3 positionB = mix((boneB0 * skinSource).xyz, (boneB1 * skinSource).xyz, lerpB);
+        transformed = mix(positionA, positionB, ${POSE_BLEND_ATTRIBUTE});
         `,
       );
   };
-  if (isWeapon) {
-    material.defines = { ...material.defines, CREW_WEAPON: "" };
-  }
   // 패치는 프로그램을 새로 만들게 함. 캐시 키를 바꿔야 반영됨.
-  material.customProgramCacheKey = () =>
-    isWeapon ? "crew-skinning-kick-weapon" : "crew-skinning-kick";
+  material.customProgramCacheKey = () => "crew-skinning-clips";
   material.needsUpdate = true;
 };
 
 export interface CrewInstanceGeometry {
   geometry: BufferGeometry;
-  phase: InstancedBufferAttribute;
-  blend: InstancedBufferAttribute;
-  kickPhase: InstancedBufferAttribute;
-  kickBlend: InstancedBufferAttribute;
+  /** 인스턴스마다 (이전 포즈 줄, 지금 포즈 줄). */
+  poseRows: InstancedBufferAttribute;
+  poseBlend: InstancedBufferAttribute;
 }
 
 /**
- * 인스턴스별 걷기·발차기 버퍼를 붙인 지오메트리 사본을 만듦.
+ * 인스턴스별 포즈 버퍼를 붙인 지오메트리 사본을 만듦.
  *
  * 원본은 `useGLTF` 캐시가 공유해서 인스턴스 속성을 직접 달면 안 됨. 로컬 플레이어와
  * 원격 아바타가 서로의 버퍼를 덮어씀.
@@ -184,24 +127,59 @@ export const createCrewInstanceGeometry = (
   capacity: number,
 ): CrewInstanceGeometry => {
   const geometry = source.clone();
-  const createAttribute = (name: string): InstancedBufferAttribute => {
-    const attribute = new InstancedBufferAttribute(new Float32Array(capacity), 1);
+  const createAttribute = (name: string, itemSize: number): InstancedBufferAttribute => {
+    const attribute = new InstancedBufferAttribute(new Float32Array(capacity * itemSize), itemSize);
     attribute.setUsage(DynamicDrawUsage);
     geometry.setAttribute(name, attribute);
     return attribute;
   };
+  const poseBlend = createAttribute(POSE_BLEND_ATTRIBUTE, 1);
+
+  // 0 으로 두면 첫 프레임에 이전 포즈(0번 줄)만 보임. 지금 포즈가 보이게 채워 둠.
+  poseBlend.array.fill(1);
 
   return {
     geometry,
-    phase: createAttribute(WALK_PHASE_ATTRIBUTE),
-    blend: createAttribute(WALK_BLEND_ATTRIBUTE),
-    kickPhase: createAttribute(KICK_PHASE_ATTRIBUTE),
-    kickBlend: createAttribute(KICK_BLEND_ATTRIBUTE),
+    poseRows: createAttribute(POSE_ROWS_ATTRIBUTE, 2),
+    poseBlend,
   };
 };
 
+/** 한 인스턴스의 포즈를 버퍼에 씀. */
+export const writeCrewPose = (
+  buffers: CrewInstanceGeometry,
+  instanceIndex: number,
+  pose: { rowA: number; rowB: number; blend: number },
+): void => {
+  buffers.poseRows.setXY(instanceIndex, pose.rowA, pose.rowB);
+  buffers.poseBlend.setX(instanceIndex, pose.blend);
+};
+
 /**
- * 걷기 셰이더를 심은 머티리얼 사본.
+ * `source` 의 포즈 버퍼를 다른 부위들에 그대로 복사하고 GPU 에 올리라고 표시함.
+ *
+ * 몸통·색 띠·눈은 같은 포즈여야 따로 안 놂. 부위마다 계산하면 한 프레임 어긋날 수 있음.
+ */
+export const syncCrewPose = (
+  source: CrewInstanceGeometry,
+  parts: readonly (CrewInstanceGeometry | null)[],
+): void => {
+  source.poseRows.needsUpdate = true;
+  source.poseBlend.needsUpdate = true;
+
+  for (const part of parts) {
+    if (!part) {
+      continue;
+    }
+    part.poseRows.array.set(source.poseRows.array);
+    part.poseBlend.array.set(source.poseBlend.array);
+    part.poseRows.needsUpdate = true;
+    part.poseBlend.needsUpdate = true;
+  }
+};
+
+/**
+ * 스키닝 셰이더를 심은 머티리얼 사본.
  *
  * `useGLTF` 캐시의 원본을 직접 고치면 다른 데서 쓸 때 섞임. 사본 하나를 만들어 로컬
  * 플레이어와 원격 아바타가 같이 씀. 컴포넌트마다 만들면 같은 프로그램을 두 번
@@ -210,25 +188,19 @@ export const createCrewInstanceGeometry = (
 const skinnedMaterials = new WeakMap<Material, Material>();
 
 /**
- * 글린트가 없는 모델(곰)에서는 `source` 가 `null` 이라 그대로 `null` 을 돌려줌.
+ * 눈 메시가 없는 모델에서는 `source` 가 `null` 이라 그대로 `null` 을 돌려줌.
  *
  * 오버로드를 두는 이유는 몸통 머티리얼이 **늘 있어서**임. 반환형을 `Material | null`
  * 하나로 두면 호출부마다 없을 수도 있는 값처럼 다뤄야 함.
  */
-export function useSkinnedCrewMaterial(
-  source: Material,
-  walkTexture: Texture,
-  kickTexture: Texture,
-): Material;
+export function useSkinnedCrewMaterial(source: Material, clipTexture: Texture): Material;
 export function useSkinnedCrewMaterial(
   source: Material | null,
-  walkTexture: Texture,
-  kickTexture: Texture,
+  clipTexture: Texture,
 ): Material | null;
 export function useSkinnedCrewMaterial(
   source: Material | null,
-  walkTexture: Texture,
-  kickTexture: Texture,
+  clipTexture: Texture,
 ): Material | null {
   return useMemo(() => {
     if (!source) {
@@ -240,35 +212,9 @@ export function useSkinnedCrewMaterial(
       return cached;
     }
     const material = source.clone();
-    applyCrewSkinning(material, walkTexture, kickTexture);
+    applyCrewSkinning(material, clipTexture);
     skinnedMaterials.set(source, material);
 
     return material;
-  }, [source, walkTexture, kickTexture]);
+  }, [source, clipTexture]);
 }
-
-/**
- * 발차기 진행도와 섞는 비율.
- *
- * `startedAt` 이 없거나 연출 시간이 지났으면 안 섞음. 시작·끝 `blendInRatio` 구간은
- * 걷기에서 부드럽게 넘어가고 돌아옴.
- */
-export const resolveKickPose = (
-  startedAt: number | undefined,
-  now: number,
-  durationSeconds: number,
-  blendInRatio: number,
-): { phase: number; blend: number } => {
-  if (startedAt === undefined) {
-    return { phase: 0, blend: 0 };
-  }
-  const phase = (now - startedAt) / (durationSeconds * 1000);
-
-  if (phase < 0 || phase >= 1) {
-    return { phase: 0, blend: 0 };
-  }
-  const edge = Math.min(phase, 1 - phase) / blendInRatio;
-  const ramp = Math.min(1, edge);
-
-  return { phase, blend: ramp * ramp * (3 - 2 * ramp) };
-};

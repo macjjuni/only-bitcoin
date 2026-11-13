@@ -1,3 +1,21 @@
+export {
+  canKickReachBoss,
+  isInsideBossArena,
+  isInsideBossAttack,
+  isInsideBossChargeSweep,
+} from "./lib/bossHitTest";
+export {
+  isBossPresent,
+  resolveBossSlotStart,
+  resolveBossSpawnedAt,
+  resolveNextBossSpawnAt,
+} from "./lib/bossSchedule";
+export {
+  type BossDeath,
+  type BossSimulation,
+  type BossSimulationPlayer,
+  createBossSimulation,
+} from "./lib/bossSimulation";
 export { resolveColorIndexFromClientKey } from "./lib/clientKeyHash";
 export {
   appendPriceSample,
@@ -21,13 +39,44 @@ export {
 } from "./model/avatar";
 export {
   isAvatarModelIndex,
+  resolveAvatarCombat,
   resolveAvatarModel,
+  resolveAvatarModelIndex,
   SPACE_AVATAR_MODELS,
   SPACE_DEFAULT_AVATAR_MODEL_INDEX,
+  type SpaceAvatarClip,
+  type SpaceAvatarClipRange,
+  type SpaceAvatarCombat,
   type SpaceAvatarModel,
-  type SpaceWeaponId,
 } from "./model/avatarModel";
-export { SPACE_FEATURE_KICK, SPACE_FEATURE_KICK_TIMING, SPACE_KICK } from "./model/kick";
+export {
+  createHiddenBossState,
+  resolveBossAttackSeconds,
+  resolveBossChargeTravel,
+  rollKickDamage,
+  SPACE_BOSS,
+  SPACE_BOSS_ATTACKS,
+  SPACE_BOSS_CLIP_SECONDS,
+  SPACE_BOSS_COMBAT,
+  SPACE_BOSS_DEATH,
+  SPACE_BOSS_HIT,
+  SPACE_BOSS_PLAYER,
+  SPACE_BOSS_SPAWN,
+  SPACE_BOSS_SPAWN_INTERVAL_MS,
+  SPACE_BOSS_STRIDE,
+  SPACE_BOSS_TURN,
+  SPACE_FEATURE_BOSS,
+  type SpaceBossAttack,
+  type SpaceBossPhase,
+  type SpaceBossState,
+} from "./model/boss";
+export {
+  resolveKickAdmission,
+  resolveKickServerIntervalMs,
+  SPACE_FEATURE_KICK,
+  SPACE_FEATURE_KICK_TIMING,
+  SPACE_KICK,
+} from "./model/kick";
 export {
   createLocalPlayerState,
   createOfflinePresence,
@@ -54,6 +103,9 @@ export {
   SPACE_NICKNAME_COOLDOWN_MS,
   SPACE_PROTOCOL_VERSION,
   SPACE_SERVER_FRAME_MAX_BYTES,
+  type SpaceBossRankingEntry,
+  type SpaceBossWelcome,
+  type SpaceBossWire,
   type SpaceChatMessage,
   type SpaceClientFrame,
   type SpaceMotion,

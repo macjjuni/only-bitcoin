@@ -13,7 +13,7 @@ export type ModelAssetVersions = Readonly<Record<string, string>>;
 
 // region [Privates]
 /** 빌드 때 넣은 해시 표. 값이 없거나 깨졌으면 해시 없이 원래 주소를 씀. */
-const parseModelAssetVersions = (rawVersions: string | undefined): ModelAssetVersions => {
+export const parseModelAssetVersions = (rawVersions: string | undefined): ModelAssetVersions => {
   if (!rawVersions) {
     return {};
   }

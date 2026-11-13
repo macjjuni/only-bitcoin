@@ -34,13 +34,13 @@ interface SpaceChatComposerProps {
   onBlur?: () => void;
   className?: string;
   /**
-   * 입력칸과 보내기 버튼을 2 px 키운다.
+   * 입력칸과 보내기 버튼을 손가락 크기(44 px)로 키운다.
    *
    * 손가락 기기의 키보드 위 막대에서만 켠다. 데스크톱 대화창은 폭이 400 px
    * 로 좁아 같은 높이를 주면 그만큼 대화 로그가 줄어든다.
    *
-   * **입력칸만 키우면 안 된다.** 둥근 입력 배경과 보내기 버튼이 둘 다 32 px
-   * 라 한쪽만 키우면 나란히 선 두 요소의 높이가 어긋난다.
+   * **입력칸만 키우면 안 된다.** 둥근 입력 배경과 보내기 버튼의 높이가 같아야
+   * 나란히 선 두 요소가 어긋나지 않는다.
    */
   isTouchSized?: boolean;
 }
@@ -159,14 +159,16 @@ function SpaceChatComposer({ presence, isMessagePending, sendMessage, onFocus, o
   const canSend = presence.status === "online" && !isMessagePending && remainingSeconds === 0 && characterCount > 0 && characterCount <= SPACE_CHAT_MAX_GRAPHEMES;
   const sendLabel = isMessagePending ? "전송 중" : remainingSeconds > 0 ? `${remainingSeconds}초` : "보내기";
   const isOverCharacterLimit = characterCount > SPACE_CHAT_MAX_GRAPHEMES;
-  /** 기본 32 px. 손가락 기기에서만 2 px 키운다. */
-  const inputHeightClassName = isTouchSized ? "h-[34px]" : "h-8";
-  const sendButtonSizeClassName = isTouchSized ? "size-[34px]" : "size-8";
+  /** 기본 32 px. 손가락 기기에서는 44 px. 34 px 일 때는 칸도 보내기 버튼도 작아 누르기 어려웠음. */
+  const inputHeightClassName = isTouchSized ? "h-11" : "h-8";
+  const sendButtonSizeClassName = isTouchSized ? "size-11 text-xs" : "size-8 text-[10px]";
+  const inputPaddingClassName = isTouchSized ? "pl-4 pr-3" : "pl-3 pr-2";
+  const sendIconSize = isTouchSized ? 18 : 13;
   // endregion
 
   return (
-    <form onSubmit={onSubmitMessage} className={`flex items-center gap-1.5 ${className ?? ""}`}>
-      <div className="flex min-w-0 flex-1 items-center rounded-full bg-white/10 pl-3 pr-2 focus-within:bg-white/15 focus-within:ring-1 focus-within:ring-bitcoin/50">
+    <form onSubmit={onSubmitMessage} className={`flex items-center ${isTouchSized ? "gap-2" : "gap-1.5"} ${className ?? ""}`}>
+      <div className={`flex min-w-0 flex-1 items-center rounded-full bg-white/10 ${inputPaddingClassName} focus-within:bg-white/15 focus-within:ring-1 focus-within:ring-white/60`}>
         <input ref={inputRef} id={SPACE_CHAT_INPUT_ID} aria-label="공간 메시지" value={draft} onChange={onChangeDraft} onKeyDown={onKeyDownInput} onFocus={onFocus} onBlur={onBlur} maxLength={8192} autoComplete="off" enterKeyHint="send" placeholder="메시지 입력" className={`${inputHeightClassName} min-w-0 flex-1 bg-transparent text-base text-white outline-none placeholder:text-white/40`} />
         {characterCount > CHARACTER_COUNT_VISIBLE_FROM && (
           <span className={`ml-2 shrink-0 text-[10px] tabular-nums ${isOverCharacterLimit ? "text-amber-200" : "text-white/50"}`}>
@@ -174,8 +176,8 @@ function SpaceChatComposer({ presence, isMessagePending, sendMessage, onFocus, o
           </span>
         )}
       </div>
-      <button type="submit" aria-label={sendLabel} title={sendLabel} disabled={!canSend} onPointerDown={onPointerDownSend} className={`flex ${sendButtonSizeClassName} shrink-0 items-center justify-center rounded-full bg-bitcoin text-[10px] font-bold text-black [text-shadow:none] transition-opacity disabled:opacity-30`}>
-        {remainingSeconds > 0 ? sendLabel : <Send size={13} />}
+      <button type="submit" aria-label={sendLabel} title={sendLabel} disabled={!canSend} onPointerDown={onPointerDownSend} className={`flex ${sendButtonSizeClassName} shrink-0 items-center justify-center rounded-full bg-white font-bold text-black [text-shadow:none] transition-opacity disabled:opacity-30`}>
+        {remainingSeconds > 0 ? sendLabel : <Send size={sendIconSize} />}
       </button>
     </form>
   );

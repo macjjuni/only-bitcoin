@@ -21,6 +21,13 @@ export {
 } from "./model/followCamera";
 export { shouldIgnoreSpaceHotkey } from "./model/keyboardInputEvents";
 export {
+  createBossKnockback,
+  isKnockbackActive,
+  type Knockback,
+  SPACE_BOSS_KNOCKBACK,
+  stepKnockback,
+} from "./model/knockback";
+export {
   createEmptyMovementInput,
   type MovementInput,
   planFixedSteps,
@@ -37,7 +44,13 @@ export {
   readPinchSpread,
   releasePointer,
 } from "./model/pointerGesture";
-export { SPACE_SEPARATION, separateFromPlayers } from "./model/separation";
+export {
+  type SolidBody,
+  SPACE_SEPARATION,
+  SPACE_SOLID_BODY,
+  separateFromPlayers,
+  separateFromSolidBody,
+} from "./model/separation";
 export {
   consumePendingDrag,
   consumePendingZoom,

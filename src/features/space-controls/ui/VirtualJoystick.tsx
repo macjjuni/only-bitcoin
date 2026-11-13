@@ -18,6 +18,18 @@ interface KnobOffset {
 }
 
 const ZERO_OFFSET: KnobOffset = { x: 0, y: 0 };
+/** 네 방향 눈금을 놓는 각도(도). 위가 0 이고 시계 방향임. */
+const DIRECTION_TICK_ANGLES = [0, 90, 180, 270] as const;
+/** 눈금을 가운데서 띄우는 거리(px). 손잡이가 쉬는 자리 바깥임. */
+const DIRECTION_TICK_DISTANCE = 40;
+/** 바탕 판의 겉모양. 상태마다 테두리와 바탕색만 다름. */
+const BASE_STATE_CLASS = {
+  idle: "border-white/20 bg-[radial-gradient(circle,rgba(255,255,255,0.02)_0%,rgba(255,255,255,0.10)_100%)]",
+  active:
+    "border-white/35 bg-[radial-gradient(circle,rgba(255,255,255,0.04)_0%,rgba(255,255,255,0.16)_100%)]",
+  running:
+    "border-bitcoin/70 bg-[radial-gradient(circle,rgba(247,147,26,0.10)_0%,rgba(247,147,26,0.22)_100%)]",
+} as const;
 
 /**
  * 하단 중앙 고정 조이스틱.
@@ -184,12 +196,20 @@ function VirtualJoystick({ inputSource }: VirtualJoystickProps): ReactNode {
   useEffect(attachJoystickResetEvents, [attachJoystickResetEvents]);
   // endregion
 
+  // region [Templates]
+  const isActive = knobOffset !== ZERO_OFFSET;
+  /** 달리기 구간까지 밀었는지. 입력 판정과 같은 기준임. */
+  const isRunning =
+    Math.hypot(knobOffset.x, knobOffset.y) / JOYSTICK_BASE_RADIUS >= RUN_THRESHOLD_RATIO;
+  const baseState = isRunning ? "running" : isActive ? "active" : "idle";
+  // endregion
+
   return (
     <div
       ref={baseElementRef}
       role="presentation"
       aria-hidden="true"
-      className="absolute bottom-16 left-1/2 -translate-x-1/2 rounded-full border border-white/20 bg-white/5 backdrop-blur-sm touch-none select-none"
+      className={`absolute bottom-16 left-1/2 -translate-x-1/2 rounded-full border backdrop-blur-md touch-none select-none shadow-[0_4px_18px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.18)] transition-[border-color,background-color] duration-150 ${BASE_STATE_CLASS[baseState]}`}
       style={{
         width: JOYSTICK_BASE_RADIUS * 2,
         height: JOYSTICK_BASE_RADIUS * 2,
@@ -201,8 +221,29 @@ function VirtualJoystick({ inputSource }: VirtualJoystickProps): ReactNode {
       onPointerCancel={onPointerUpJoystickBase}
       onLostPointerCapture={onPointerUpJoystickBase}
     >
+      {/* 달리기 구간이 시작되는 선. 여기를 넘기면 달림. */}
       <div
-        className="absolute rounded-full bg-bitcoin/75 shadow-lg"
+        className={`pointer-events-none absolute rounded-full border border-dashed transition-colors duration-150 ${
+          isRunning ? "border-bitcoin/60" : "border-white/15"
+        }`}
+        style={{ inset: JOYSTICK_BASE_RADIUS * (1 - RUN_THRESHOLD_RATIO) }}
+      />
+
+      {DIRECTION_TICK_ANGLES.map((angle) => (
+        <span
+          key={angle}
+          className="pointer-events-none absolute left-1/2 top-1/2 h-1.5 w-1.5 rounded-full bg-white/30"
+          style={{
+            transform: `translate(-50%, -50%) rotate(${angle}deg) translateY(-${DIRECTION_TICK_DISTANCE}px)`,
+          }}
+        />
+      ))}
+
+      {/* 손을 떼면 가운데로 부드럽게 돌아감. 누르는 동안에는 전환 없이 손가락을 바로 따라감. */}
+      <div
+        className={`absolute rounded-full border border-white/40 bg-gradient-to-b from-[#ffb04d] to-bitcoin shadow-[0_3px_10px_rgba(0,0,0,0.45),inset_0_1px_0_rgba(255,255,255,0.45)] ${
+          isActive ? "" : "opacity-80 transition-transform duration-150 ease-out"
+        } ${isRunning ? "ring-2 ring-bitcoin/50" : ""}`}
         style={{
           width: JOYSTICK_KNOB_RADIUS * 2,
           height: JOYSTICK_KNOB_RADIUS * 2,

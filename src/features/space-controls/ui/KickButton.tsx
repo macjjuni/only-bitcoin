@@ -1,19 +1,25 @@
 "use client";
 
-import { Wrench } from "lucide-react";
+import { Swords } from "lucide-react";
 import { memo, type ReactNode, useCallback, useEffect, useState } from "react";
-import { SPACE_KICK } from "@/entities/space";
 import type { SpaceInputSource } from "../model/spaceInputSource";
 import {
   KICK_BUTTON_POSITION,
   TOUCH_BUTTON_DIAMETER,
   TOUCH_BUTTON_ICON_SIZE,
+  TOUCH_BUTTON_IDLE_CLASS,
+  TOUCH_BUTTON_PRESSED_CLASS,
+  TOUCH_BUTTON_SURFACE_CLASS,
 } from "./touchButtonLayout";
 
 const ICON_STROKE_WIDTH = 2.25;
 
-/** 테두리 안쪽에 그림. 선 굵기(2.5)만큼 지름에서 뺌. */
-const RING_RADIUS = TOUCH_BUTTON_DIAMETER / 2 - 2;
+/** 쿨다운 고리 굵기(px). */
+const RING_STROKE_WIDTH = 3;
+/** 테두리 안쪽에 그림. 선 굵기만큼 지름에서 뺌. */
+const RING_RADIUS = TOUCH_BUTTON_DIAMETER / 2 - RING_STROKE_WIDTH / 2 - 0.5;
+/** 누른 모습을 보여 주는 시간(ms). 누른 순간 한 번만 나가는 동작이라 짧게 번쩍임. */
+const PRESS_FLASH_MS = 140;
 const RING_LENGTH = 2 * Math.PI * RING_RADIUS;
 /** 남은 비율을 이 단위로 끊어 상태를 바꿈. 매 프레임 리렌더하지 않게 함. */
 const RING_STEPS = 60;
@@ -23,7 +29,7 @@ interface KickButtonProps {
 }
 
 /**
- * 손가락 기기 전용 렌치 공격 버튼.
+ * 손가락 기기 전용 공격 버튼. 캐릭터마다 무기가 달라 아이콘은 무기가 아니라 공격을 뜻하는 것으로 씀.
  *
  * 처음엔 발차기였어서 코드·프로토콜 이름은 kick 으로 남아 있음. 이름을 바꾸면 배포된
  * 클라이언트·서버와 서로 못 알아들어 그대로 둠.
@@ -37,6 +43,7 @@ function KickButton({ inputSource }: KickButtonProps): ReactNode {
   // region [Hooks]
   /** 남은 쿨다운 비율(0~1)을 `RING_STEPS` 단위로 끊은 값. */
   const [remainingStep, setRemainingStep] = useState<number>(0);
+  const [isPressed, setIsPressed] = useState<boolean>(false);
   // endregion
 
 
@@ -46,7 +53,7 @@ function KickButton({ inputSource }: KickButtonProps): ReactNode {
     let frameId = 0;
     const tick = (): void => {
       const remaining = Math.max(0, inputSource.kickCooldownUntil - performance.now());
-      setRemainingStep(Math.ceil((remaining / SPACE_KICK.cooldownMs) * RING_STEPS));
+      setRemainingStep(Math.ceil((remaining / inputSource.kickCooldownMs) * RING_STEPS));
       frameId = requestAnimationFrame(tick);
     };
     frameId = requestAnimationFrame(tick);
@@ -62,6 +69,7 @@ function KickButton({ inputSource }: KickButtonProps): ReactNode {
       // 조이스틱과 동시에 눌러도 이 손가락이 조이스틱 드래그로 안 넘어가게 함.
       pointerEvent.stopPropagation();
       inputSource.isKickRequested = true;
+      setIsPressed(true);
     },
     [inputSource],
   );
@@ -70,18 +78,38 @@ function KickButton({ inputSource }: KickButtonProps): ReactNode {
 
   // region [Life Cycles]
   useEffect(watchCooldown, [watchCooldown]);
+
+  useEffect(() => {
+    if (!isPressed) {
+      return;
+    }
+    const timeoutID = window.setTimeout(() => {
+      setIsPressed(false);
+    }, PRESS_FLASH_MS);
+
+    return () => {
+      window.clearTimeout(timeoutID);
+    };
+  }, [isPressed]);
   // endregion
 
   const isCoolingDown = remainingStep > 0;
 
+  /** 누른 순간 → 쿨다운 → 평소 순으로 겉모양을 고름. */
+  const resolveSurfaceClassName = (): string => {
+    if (isPressed) {
+      return TOUCH_BUTTON_PRESSED_CLASS;
+    }
+
+    return isCoolingDown ? "border-white/10 bg-black/35" : TOUCH_BUTTON_IDLE_CLASS;
+  };
+
   return (
     <button
       type="button"
-      aria-label={isCoolingDown ? "렌치 공격 준비 중" : "렌치 공격"}
+      aria-label={isCoolingDown ? "공격 준비 중" : "공격"}
       aria-disabled={isCoolingDown}
-      className={`absolute flex items-center justify-center rounded-full border backdrop-blur-sm touch-none select-none transition-colors ${
-        isCoolingDown ? "border-white/10 bg-white/5" : "border-white/20 bg-white/10 active:border-bitcoin/70 active:bg-bitcoin/35"
-      }`}
+      className={`${TOUCH_BUTTON_SURFACE_CLASS} ${resolveSurfaceClassName()}`}
       style={{
         width: TOUCH_BUTTON_DIAMETER,
         height: TOUCH_BUTTON_DIAMETER,
@@ -89,10 +117,10 @@ function KickButton({ inputSource }: KickButtonProps): ReactNode {
       }}
       onPointerDown={onPointerDownKick}
     >
-      <Wrench
+      <Swords
         size={TOUCH_BUTTON_ICON_SIZE}
         strokeWidth={ICON_STROKE_WIDTH}
-        className={isCoolingDown ? "text-white/35" : "text-white/85"}
+        className={isCoolingDown && !isPressed ? "text-white/35" : "text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"}
         aria-hidden="true"
       />
       {isCoolingDown && (
@@ -101,13 +129,22 @@ function KickButton({ inputSource }: KickButtonProps): ReactNode {
           className="pointer-events-none absolute inset-0 -rotate-90"
           viewBox={`0 0 ${TOUCH_BUTTON_DIAMETER} ${TOUCH_BUTTON_DIAMETER}`}
         >
+          {/* 고리가 채워질 자리. 남은 양을 가늠하기 쉬움. */}
+          <circle
+            cx={TOUCH_BUTTON_DIAMETER / 2}
+            cy={TOUCH_BUTTON_DIAMETER / 2}
+            r={RING_RADIUS}
+            fill="none"
+            stroke="rgba(255,255,255,0.12)"
+            strokeWidth={RING_STROKE_WIDTH}
+          />
           <circle
             cx={TOUCH_BUTTON_DIAMETER / 2}
             cy={TOUCH_BUTTON_DIAMETER / 2}
             r={RING_RADIUS}
             fill="none"
             stroke="rgb(var(--bitcoin-rgb))"
-            strokeWidth={2.5}
+            strokeWidth={RING_STROKE_WIDTH}
             strokeLinecap="round"
             strokeDasharray={RING_LENGTH}
             strokeDashoffset={RING_LENGTH * (1 - remainingStep / RING_STEPS)}

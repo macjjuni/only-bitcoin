@@ -1,12 +1,15 @@
 "use client";
 
-import { ChevronUp } from "lucide-react";
+import { ChevronsUp } from "lucide-react";
 import { memo, type ReactNode, useCallback, useEffect, useRef, useState } from "react";
 import type { SpaceInputSource } from "../model/spaceInputSource";
 import {
   JUMP_BUTTON_POSITION,
   TOUCH_BUTTON_DIAMETER,
   TOUCH_BUTTON_ICON_SIZE,
+  TOUCH_BUTTON_IDLE_CLASS,
+  TOUCH_BUTTON_PRESSED_CLASS,
+  TOUCH_BUTTON_SURFACE_CLASS,
 } from "./touchButtonLayout";
 
 const ICON_STROKE_WIDTH = 2.5;
@@ -91,8 +94,8 @@ function JumpButton({ inputSource }: JumpButtonProps): ReactNode {
     <button
       type="button"
       aria-label="점프"
-      className={`absolute flex items-center justify-center rounded-full border backdrop-blur-sm touch-none select-none ${
-        isPressed ? "border-bitcoin/70 bg-bitcoin/35" : "border-white/20 bg-white/10"
+      className={`${TOUCH_BUTTON_SURFACE_CLASS} ${
+        isPressed ? TOUCH_BUTTON_PRESSED_CLASS : TOUCH_BUTTON_IDLE_CLASS
       }`}
       style={{
         width: TOUCH_BUTTON_DIAMETER,
@@ -104,10 +107,10 @@ function JumpButton({ inputSource }: JumpButtonProps): ReactNode {
       onPointerCancel={onPointerUpJump}
       onLostPointerCapture={onPointerUpJump}
     >
-      <ChevronUp
+      <ChevronsUp
         size={TOUCH_BUTTON_ICON_SIZE}
         strokeWidth={ICON_STROKE_WIDTH}
-        className="text-white/85"
+        className="text-white drop-shadow-[0_1px_2px_rgba(0,0,0,0.6)]"
         aria-hidden="true"
       />
     </button>

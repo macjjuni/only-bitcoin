@@ -17,13 +17,18 @@ import {
   createLocalPlayerState,
   createSpawnPoint,
   type LocalPlayerState,
+  resolveAvatarCombat,
   resolveColorIndexFromClientKey,
+  SPACE_AVATAR_COLLISION_RADIUS,
+  SPACE_AVATAR_MODELS,
+  SPACE_BOSS,
+  SPACE_BOSS_PLAYER,
   SPACE_HALL,
   SPACE_HEATMAP_FRAME,
-  SPACE_KICK,
   SPACE_MENU_FRAME,
   SPACE_SCREEN_FRAME,
   SPACE_SCREEN_PLACEMENTS,
+  type SpaceBossAttack,
   type SpaceCelebration,
   type SpacePeer,
   type SpaceTerrain,
@@ -36,18 +41,25 @@ import {
   type CameraOrbit,
   consumePendingDrag,
   consumePendingZoom,
+  createBossKnockback,
   createDefaultCameraOrbit,
+  createEmptyMovementInput,
   dampVector,
+  isKnockbackActive,
+  type Knockback,
   planFixedSteps,
   resolveCameraFocus,
   resolveCameraLookTarget,
   resolveCameraPosition,
   resolveFollowDamping,
   resolveMergedMovementInput,
+  type SolidBody,
   SPACE_CAMERA,
   SPACE_MOVEMENT,
   type SpaceInputSource,
   separateFromPlayers,
+  separateFromSolidBody,
+  stepKnockback,
   stepMovement,
   useCoarsePointer,
   usePointerDrag,
@@ -55,20 +67,27 @@ import {
   type Vector3Like,
 } from "@/features/space-controls";
 import type { SpaceSession } from "@/features/space-session";
+import type { BossPhaseSound } from "@/views/space/lib/bossAttackSounds";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import type { LanternAnchor } from "@/views/space/lib/hallModel";
 import type { HallTerrain } from "@/views/space/lib/hallTerrain";
+import { resolveRemoteSfxGain, type SpaceSfxName } from "@/views/space/lib/spaceSfx";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
+import type { PlaySpaceSfx } from "@/views/space/model/useSpaceSfx";
 import BlockDashboard from "./BlockDashboard";
+import BossAttackEffects from "./BossAttackEffects";
+import BossDamageNumbers from "./BossDamageNumbers";
 import ChatBubbles from "./ChatBubbles";
 import Hall from "./Hall";
 import MenuGraffiti from "./MenuGraffiti";
 import Nameplates from "./Nameplates";
 import PlayerAvatar from "./PlayerAvatar";
 import PriceBillboard from "./PriceBillboard";
-import RemoteAvatars from "./RemoteAvatars";
+import RaidBoss from "./RaidBoss";
+import RemoteAvatars, { type RemoteAvatarHit } from "./RemoteAvatars";
 import SceneLighting from "./SceneLighting";
 import ScreenCelebration from "./ScreenCelebration";
+import SelfHealthBar from "./SelfHealthBar";
 import SpaceHeatmap from "./SpaceHeatmap";
 import SpaceTicker from "./SpaceTicker";
 
@@ -88,9 +107,39 @@ interface SpaceSceneProps {
   onReadyMap?: () => void;
   /** 내 캐릭터 모델이 올라왔을 때. 입장 로딩 오버레이가 기다림. */
   onReadyAvatar?: () => void;
+  /** 효과음을 틂. 소리를 꺼 둔 사람에게는 아무 일도 안 일어남. */
+  playSfx: PlaySpaceSfx;
 }
 
 const EMPTY_LANTERN_ANCHORS: readonly LanternAnchor[] = [];
+/**
+ * 휘두르는 소리를 무기가 닿기 이만큼 전에 틂(초).
+ *
+ * 누른 순간에 틀면 모션이 긴 버거빠따킹은 방망이를 들기도 전에 소리가 남.
+ * 닿는 시점이 이보다 늦은 캐릭터는 그 차이만큼 소리를 늦춤. 버거빠따킹(0.45초)이
+ * 0.22초 늦게 나도록 맞춘 값이고, 맥시크루는 0.05초라 티가 안 남.
+ */
+const SWING_SOUND_LEAD_SECONDS = 0.23;
+/** 쓰러지는 소리를 늦추는 시간(초). 맞는 순간에는 보스 공격 소리가 가장 커서 겹치면 묻힘. */
+const KNOCKOUT_SOUND_DELAY_SECONDS = 0.2;
+const BOSS_ATTACK_SFX: Record<SpaceBossAttack, SpaceSfxName> = {
+  swipe: "bossSwipe",
+  slam: "bossSlam",
+  charge: "bossCharge",
+};
+const BOSS_PHASE_SFX: Record<BossPhaseSound, SpaceSfxName> = {
+  spawn: "bossSpawn",
+  enrage: "bossEnrage",
+  stagger: "bossStagger",
+  dead: "bossDeath",
+};
+/** 가장 긴 공격 모션(ms). 남의 공격 기록을 이만큼 들고 있다가 지움. */
+const LONGEST_ATTACK_MS =
+  Math.max(...SPACE_AVATAR_MODELS.map((model) => model.combat.attackSeconds)) * 1000;
+/** 남의 피격 기록을 들고 있는 시간(ms). 쓰러졌다 일어나는 모션이 다 끝난 뒤 지움. */
+const REMOTE_HIT_KEEP_MS = SPACE_BOSS_PLAYER.respawnDelayMs + 1_000;
+/** 밀리는 동안 대신 넣는 빈 입력. 중력·착지는 그대로 돌아감. */
+const EMPTY_MOVEMENT_INPUT = createEmptyMovementInput();
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 function SpaceScene({
   celebration,
@@ -104,6 +153,7 @@ function SpaceScene({
   dummyCount,
   onReadyMap,
   onReadyAvatar,
+  playSfx,
 }: SpaceSceneProps): ReactNode {
   // region [Hooks]
   const canvasElement = useThree((rootState) => rootState.gl.domElement);
@@ -135,10 +185,18 @@ function SpaceScene({
   );
   const accumulatedSecondsRef = useRef<number>(0);
   const playerGroupRef = useRef<Group>(null);
+  /** 보스 공격에 맞아 밀리는 중이면 그 밀림. 끝났거나 안 맞았으면 `null`. */
+  const knockbackRef = useRef<Knockback | null>(null);
+  /** 이미 밀림으로 옮긴 피격 시각. 같은 피격으로 두 번 밀지 않음. */
+  const handledDamageAtRef = useRef<number | null>(null);
+  /** 쓰러지는 소리를 낸 `deadUntil`. 쓰러질 때마다 한 번만 냄. */
+  const soundedDeadUntilRef = useRef<number | null>(null);
   /** 내가 발차기를 시작한 시각. 아바타가 이걸로 동작을 재생함. */
   const kickStartedAtRef = useRef<number | undefined>(undefined);
   /** 다른 사람이 발차기를 시작한 시각(좌석별). 끝난 건 지움. */
   const remoteKickStartsRef = useRef(new Map<number, number>());
+  /** 다른 사람이 보스에게 맞은 시각(좌석별). 쓰러졌으면 일어나는 시각도 같이 둠. */
+  const remoteHitsRef = useRef(new Map<number, RemoteAvatarHit>());
   /**
    * 지형 질의.
    *
@@ -197,8 +255,100 @@ function SpaceScene({
     return nextOrbit;
   };
 
-  const advancePlayerState = (cameraYaw: number, deltaSeconds: number): LocalPlayerState => {
-    const movementInput = resolveMergedMovementInput(inputSource);
+  /**
+   * 지금 몸으로 막고 서 있는 보스. 막지 않을 때는 `null`.
+   *
+   * 없거나 쓰러진 보스는 안 막음. **돌진 중에도 안 막음** — 막으면 보스 앞에 선 사람이
+   * 12 m/s 로 9 m 를 밀려가는데, 서버의 이동 속도 상한(8.5 m/s)을 넘어 이동이 반려되고
+   * 화면이 되감김. 돌진은 몸으로 밀지 않고 치고 지나감(피해는 서버가 줌).
+   */
+  const resolveBossBody = (): SolidBody | null => {
+    const bossState = session.canFightBoss ? session.bossState : null;
+
+    if (
+      !bossState ||
+      bossState.phase === "hidden" ||
+      bossState.phase === "dead" ||
+      bossState.attack === "charge"
+    ) {
+      return null;
+    }
+
+    return {
+      x: bossState.x,
+      y: SPACE_BOSS.arena.floorY,
+      z: bossState.z,
+      radius: SPACE_BOSS.bodyRadius,
+      height: SPACE_BOSS.height,
+    };
+  };
+
+  /**
+   * 보스에게 쓰러져 리스폰을 기다리는 중인지.
+   *
+   * 서버가 이 동안 이동·공격을 안 받음. 화면에서만 움직이면 끝났을 때 서버 자리로 되감김.
+   */
+  const isKnockedOut = (now: number): boolean => {
+    return session.deadUntil !== null && now < session.deadUntil;
+  };
+
+  /**
+   * 서버가 새로 알려 준 피격이 있으면 뒤로 밀리기 시작함.
+   *
+   * 서버 프레임을 받은 뒤에 밀어서 판정과 어긋나지 않음. 쓰러진 피격은 안 밂 — 곧바로
+   * 홀로 옮겨지는데 그 전에 밀리면 리스폰 자리에서 미끄러져 보임.
+   */
+  const startKnockbackIfDamaged = (): void => {
+    const { selfDamagedAt, selfDamagedBy } = session;
+
+    if (selfDamagedAt === handledDamageAtRef.current) {
+      return;
+    }
+    handledDamageAtRef.current = selfDamagedAt;
+
+    if (selfDamagedAt !== null) {
+      playSfx("hurt");
+    }
+    if (selfDamagedAt === null || selfDamagedBy === null || session.selfHealth <= 0) {
+      return;
+    }
+    knockbackRef.current = createBossKnockback(
+      selfDamagedBy,
+      session.bossState,
+      playerStateRef.current,
+    );
+  };
+
+  const advancePlayerState = (
+    cameraYaw: number,
+    deltaSeconds: number,
+    now: number,
+  ): LocalPlayerState => {
+    if (isKnockedOut(now)) {
+      knockbackRef.current = null;
+      // 쓰러뜨린 피격은 여기서 받음. 서버가 체력 0 과 리스폰을 연달아 보내서, 다음 프레임에는
+      // 이미 쓰러진 상태라 아래 `startKnockbackIfDamaged` 까지 못 감. 여기서 처리해 두지 않으면
+      // 일어난 뒤에 묵은 피격으로 뒤늦게 밀림.
+      handledDamageAtRef.current = session.selfDamagedAt;
+      // 소리는 피격이 아니라 쓰러진 것 자체에 묶음. 보스 공격 소리에 묻히지 않게 조금 늦춤.
+      if (soundedDeadUntilRef.current !== session.deadUntil) {
+        soundedDeadUntilRef.current = session.deadUntil;
+        playSfx("knockout", KNOCKOUT_SOUND_DELAY_SECONDS);
+      }
+      // 쌓인 시간을 버림. 안 버리면 일어나는 순간 밀린 걸음을 한꺼번에 걸음.
+      accumulatedSecondsRef.current = 0;
+
+      return playerStateRef.current;
+    }
+
+    startKnockbackIfDamaged();
+
+    const knockback = knockbackRef.current;
+    // 밀리는 동안에는 조작을 안 받음. 내 걸음이 더해지면 서버 속도 상한을 넘김.
+    const movementInput = isKnockbackActive(knockback)
+      ? EMPTY_MOVEMENT_INPUT
+      : resolveMergedMovementInput(inputSource);
+    const bossBody = resolveBossBody();
 
     accumulatedSecondsRef.current += deltaSeconds;
 
@@ -210,10 +360,27 @@ function SpaceScene({
 
     for (let stepIndex = 0; stepIndex < stepPlan.stepCount; stepIndex += 1) {
       nextState = stepMovement(nextState, movementInput, cameraYaw, undefined, terrainRef.current);
+      if (isKnockbackActive(knockback)) {
+        nextState = stepKnockback(
+          nextState,
+          knockback,
+          SPACE_MOVEMENT.fixedTimeStep,
+          terrainRef.current,
+        );
+      }
       // 화면에 보이는 위치 기준으로 겹친 만큼 나만 비킴.
       nextState = separateFromPlayers(
         nextState,
         remotePlayers,
+        selfSeat,
+        SPACE_MOVEMENT.fixedTimeStep,
+        terrainRef.current,
+      );
+      // 보스 몸통은 밀고 지나갈 수 없음.
+      nextState = separateFromSolidBody(
+        nextState,
+        bossBody,
+        SPACE_AVATAR_COLLISION_RADIUS,
         selfSeat,
         SPACE_MOVEMENT.fixedTimeStep,
         terrainRef.current,
@@ -223,6 +390,27 @@ function SpaceScene({
     playerStateRef.current = nextState;
 
     return nextState;
+  };
+
+  /**
+   * 남이 휘두르는 소리. 거리에 따라 작게 내고, 내 것과 같이 무기가 닿기 조금 전에 틂.
+   *
+   * 시작 시각은 서버가 알려 준 값이라 받았을 때 이미 조금 지나 있음. 그만큼 덜 기다림.
+   */
+  const playRemoteSwing = (seat: number, startedAt: number, now: number): void => {
+    const kicker = remotePlayers.find((player) => player.seat === seat);
+
+    if (!kicker) {
+      return;
+    }
+    const { impactSeconds } = resolveAvatarCombat(kicker.modelIndex);
+    const elapsedSeconds = (now - startedAt) / 1000;
+
+    playSfx(
+      "swing",
+      impactSeconds - SWING_SOUND_LEAD_SECONDS - elapsedSeconds,
+      resolveRemoteSfxGain(playerStateRef.current, kicker),
+    );
   };
 
   /**
@@ -237,10 +425,11 @@ function SpaceScene({
     for (const event of session.drainKickEvents()) {
       if (event.from !== selfSeat) {
         remoteKickStartsRef.current.set(event.from, event.startedAt);
+        playRemoteSwing(event.from, event.startedAt, now);
       }
     }
 
-    const animationMs = SPACE_KICK.animationSeconds * 1000;
+    const animationMs = LONGEST_ATTACK_MS;
     for (const [seat, startedAt] of remoteKickStartsRef.current) {
       if (now - startedAt > animationMs) {
         remoteKickStartsRef.current.delete(seat);
@@ -259,17 +448,56 @@ function SpaceScene({
     }
     inputSource.isKickRequested = false;
 
-    if (now < inputSource.kickCooldownUntil) {
+    if (now < inputSource.kickCooldownUntil || isKnockedOut(now)) {
       return;
     }
     // 전송에 실패해도 내 화면에서는 휘두름. 재접속 중에 버튼이 먹통으로 보였음.
     session.sendKick(playerState);
-    inputSource.kickCooldownUntil = now + SPACE_KICK.cooldownMs;
+    // 쿨다운은 캐릭터마다 다름. 서버도 같은 표로 한 번 더 막음.
+    const { cooldownMs, impactSeconds } = resolveAvatarCombat(avatarModelIndex);
+
+    playSfx("swing", impactSeconds - SWING_SOUND_LEAD_SECONDS);
+
+    inputSource.kickCooldownMs = cooldownMs;
+    inputSource.kickCooldownUntil = now + cooldownMs;
     kickStartedAtRef.current = now;
+  };
+
+  /**
+   * 남이 보스에게 맞은 것을 받아 둠. 그 사람 아바타가 움찔하거나 쓰러짐.
+   *
+   * 쓰러진 사람은 서버가 잠시 뒤 홀로 옮김. 그때까지 그 자리에 누워 있다가, 옮겨진
+   * 자리에서 일어나는 모션이 이어짐(내 화면의 내 캐릭터와 같은 흐름).
+   */
+  const applyReceivedPlayerHits = (now: number): void => {
+    for (const event of session.drainPlayerHits()) {
+      const victim = remotePlayers.find((player) => player.seat === event.seat);
+
+      if (victim) {
+        playSfx(
+          event.isFatal ? "knockout" : "hurt",
+          0,
+          resolveRemoteSfxGain(playerStateRef.current, victim),
+        );
+      }
+      remoteHitsRef.current.set(event.seat, {
+        hitAt: event.hitAt,
+        knockedOutUntil: event.isFatal
+          ? event.hitAt + SPACE_BOSS_PLAYER.respawnDelayMs
+          : undefined,
+      });
+    }
+
+    for (const [seat, hit] of remoteHitsRef.current) {
+      if (now - hit.hitAt > REMOTE_HIT_KEEP_MS) {
+        remoteHitsRef.current.delete(seat);
+      }
+    }
   };
 
   const resetKickPresentation = (): void => {
     remoteKickStartsRef.current.clear();
+    remoteHitsRef.current.clear();
   };
 
   const applyPlayerTransform = (playerState: LocalPlayerState): void => {
@@ -377,6 +605,39 @@ function SpaceScene({
   const onReadyLanterns = useCallback((anchors: readonly LanternAnchor[]): void => {
     setLanternAnchors(anchors);
   }, []);
+
+  /** 보스 공격 소리는 안뜰에 나와 있는 사람에게만 냄. 홀 안까지 울리면 뜬금없음. */
+  const onBossAttackSound = useCallback(
+    (attack: SpaceBossAttack): void => {
+      const selfPosition = session.getSelfPosition();
+
+      if (selfPosition && selfPosition.x > SPACE_BOSS_PLAYER.hallMaximumX) {
+        playSfx(BOSS_ATTACK_SFX[attack]);
+      }
+    },
+    [playSfx, session.getSelfPosition],
+  );
+
+  /** 등장·포효 같은 소리도 안뜰에서만 냄. */
+  const onBossPhaseSound = useCallback(
+    (phase: BossPhaseSound): void => {
+      const selfPosition = session.getSelfPosition();
+
+      if (selfPosition && selfPosition.x > SPACE_BOSS_PLAYER.hallMaximumX) {
+        playSfx(BOSS_PHASE_SFX[phase]);
+      }
+    },
+    [playSfx, session.getSelfPosition],
+  );
+
+  const onHitBossByMe = useCallback((): void => {
+    playSfx("hit");
+  }, [playSfx]);
+
+  /** 남이 보스를 때린 소리는 보스가 선 자리에서 나는 것으로 봄. */
+  const onHitBossByOthers = useCallback((): void => {
+    playSfx("hit", 0, resolveRemoteSfxGain(playerStateRef.current, session.bossState));
+  }, [playSfx, session.bossState]);
   // endregion
 
 
@@ -445,9 +706,10 @@ function SpaceScene({
 
     const now = performance.now();
     applyReceivedKicks(now);
+    applyReceivedPlayerHits(now);
 
     const cameraOrbit = advanceCameraOrbit(deltaSeconds);
-    const steppedState = advancePlayerState(cameraOrbit.yaw, deltaSeconds);
+    const steppedState = advancePlayerState(cameraOrbit.yaw, deltaSeconds, now);
     applyPlayerTransform(steppedState);
 
     // 맵 밖으로 빠졌으면 여기서 스폰으로 되돌아옴. 되돌린 궤도를 쓰려고 아래
@@ -457,6 +719,9 @@ function SpaceScene({
     // 공격은 위치를 바로 보내서 되돌린 뒤에 처리함. 음수 높이가 나가면 서버가 반려함.
     handleKickInput(now, playerState);
     session.publishMovement(playerState);
+    if (session.canFightBoss) {
+      session.sampleBoss(now);
+    }
 
     const focus = resolveCameraFocus(playerState);
     const targetPosition = resolveCameraPosition(playerState, cameraOrbitRef.current);
@@ -548,16 +813,44 @@ function SpaceScene({
             hasRealtimeShadows={hasRealtimeShadows}
             playerStateRef={playerStateRef}
             kickStartedAtRef={kickStartedAtRef}
+            damagedAt={session.selfDamagedAt}
+            knockedOutUntil={session.deadUntil}
             onReady={onReadyAvatar}
           />
         </Suspense>
       </group>
+
+      {/* 보스 모델을 받는 동안 씬이 비지 않게 따로 매달아 둠. */}
+      {session.canFightBoss && (
+        <Suspense fallback={null}>
+          <RaidBoss bossState={session.bossState} getBossHealth={session.getBossHealth} />
+        </Suspense>
+      )}
+
+      {session.canFightBoss && (
+        <BossAttackEffects
+          bossState={session.bossState}
+          onAttackSound={onBossAttackSound}
+          onPhaseSound={onBossPhaseSound}
+        />
+      )}
+
+      {session.canFightBoss && (
+        <BossDamageNumbers
+          bossState={session.bossState}
+          drainBossHits={session.drainBossHits}
+          selfSeat={session.self?.seat}
+          onHitByMe={onHitBossByMe}
+          onHitByOthers={onHitBossByOthers}
+        />
+      )}
 
       <RemoteAvatars
         players={remotePlayers}
         rosterRevision={session.rosterRevision}
         terrainRef={terrainRef}
         kickStartsRef={remoteKickStartsRef}
+        hitsRef={remoteHitsRef}
       />
       <Nameplates
         players={remotePlayers}
@@ -565,6 +858,12 @@ function SpaceScene({
         selfModelIndex={avatarModelIndex}
         isCoarsePointer={isCoarsePointer}
         rosterRevision={session.rosterRevision}
+        viewerTransformRef={playerStateRef}
+      />
+      <SelfHealthBar
+        session={session}
+        modelIndex={avatarModelIndex}
+        isCoarsePointer={isCoarsePointer}
         viewerTransformRef={playerStateRef}
       />
       <ChatBubbles

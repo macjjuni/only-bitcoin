@@ -6,8 +6,8 @@ import { memo, type ReactNode } from "react";
 const CONTROL_GUIDE = [
   { action: "이동", desktop: "W A S D", mobile: "조이스틱" },
   { action: "달리기", desktop: "Shift", mobile: "끝까지 밀기" },
-  { action: "점프", desktop: "Space", mobile: "우측 하단 버튼" },
-  { action: "렌치 공격", desktop: "F", mobile: "점프 왼쪽 위 버튼" },
+  { action: "점프", desktop: "Space", mobile: "공격 위 버튼" },
+  { action: "공격", desktop: "클릭 · F", mobile: "우측 하단 버튼" },
   { action: "시야 회전", desktop: "드래그 · Q E", mobile: "화면 드래그" },
   { action: "줌", desktop: "휠", mobile: "두 손가락" },
   { action: "채팅", desktop: "Enter", mobile: "좌측 하단 버튼" },

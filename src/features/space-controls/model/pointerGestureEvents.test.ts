@@ -1,6 +1,6 @@
 import { afterEach, describe, expect, it } from "vitest";
 import { SPACE_CAMERA } from "./followCamera";
-import { attachPointerGestureEvents } from "./pointerGestureEvents";
+import { attachPointerGestureEvents, CLICK_ATTACK_MAXIMUM_TRAVEL_PX } from "./pointerGestureEvents";
 import { consumePendingDrag, consumePendingZoom, createSpaceInputSource } from "./spaceInputSource";
 
 class CanvasEventTarget extends EventTarget {
@@ -26,9 +26,10 @@ class CanvasEventTarget extends EventTarget {
     clientX = 0,
     clientY = 0,
     pointerType = "touch",
+    button = 0,
   ): void {
     const pointerEvent = new Event(eventType);
-    Object.assign(pointerEvent, { pointerId, clientX, clientY, pointerType });
+    Object.assign(pointerEvent, { pointerId, clientX, clientY, pointerType, button });
     this.dispatchEvent(pointerEvent);
   }
 
@@ -282,5 +283,50 @@ describe("캔버스 포인터 이벤트 → 프레임 입력", () => {
     canvas.emitWheel(-100);
 
     expect(consumePendingZoom(inputSource)).toBeCloseTo(-100 * SPACE_CAMERA.wheelZoomSensitivity);
+  });
+
+  it("마우스 왼쪽을 끌지 않고 떼면 공격하고, 손 떨림 정도는 클릭으로 받는다", () => {
+    const { canvas, inputSource } = createCanvasControls();
+
+    canvas.emitPointer("pointerdown", 1, 100, 100, "mouse");
+    expect(inputSource.isKickRequested).toBe(false);
+    canvas.emitPointer("pointerup", 1, 100, 100, "mouse");
+    expect(inputSource.isKickRequested).toBe(true);
+
+    inputSource.isKickRequested = false;
+    canvas.emitPointer("pointerdown", 1, 100, 100, "mouse");
+    canvas.emitPointer("pointermove", 1, 100 + CLICK_ATTACK_MAXIMUM_TRAVEL_PX, 100, "mouse");
+    canvas.emitPointer("pointerup", 1, 100 + CLICK_ATTACK_MAXIMUM_TRAVEL_PX, 100, "mouse");
+    expect(inputSource.isKickRequested).toBe(true);
+  });
+
+  it("끌어서 시야를 돌린 마우스는 공격하지 않고, 제자리로 돌아와 떼도 마찬가지다", () => {
+    const { canvas, inputSource } = createCanvasControls();
+
+    canvas.emitPointer("pointerdown", 1, 100, 100, "mouse");
+    canvas.emitPointer("pointermove", 1, 140, 100, "mouse");
+    canvas.emitPointer("pointermove", 1, 100, 100, "mouse");
+    canvas.emitPointer("pointerup", 1, 100, 100, "mouse");
+
+    expect(inputSource.isKickRequested).toBe(false);
+    // 시야 회전은 그대로 전달됨. 갔다 온 만큼 상쇄돼 0 임.
+    expect(consumePendingDrag(inputSource)).toEqual({ deltaX: 0, deltaY: 0 });
+  });
+
+  it("오른쪽 버튼, 터치 탭, 취소된 클릭은 공격하지 않는다", () => {
+    const { canvas, windowEvents, inputSource } = createCanvasControls();
+
+    canvas.emitPointer("pointerdown", 1, 100, 100, "mouse", 2);
+    canvas.emitPointer("pointerup", 1, 100, 100, "mouse", 2);
+    canvas.emitPointer("pointerdown", 2, 100, 100, "touch");
+    canvas.emitPointer("pointerup", 2, 100, 100, "touch");
+    canvas.emitPointer("pointerdown", 3, 100, 100, "mouse");
+    canvas.emitPointer("pointercancel", 3, 100, 100, "mouse");
+    // 누른 채 창이 포커스를 잃으면 그 뒤에 떼도 클릭이 아님.
+    canvas.emitPointer("pointerdown", 4, 100, 100, "mouse");
+    windowEvents.dispatchEvent(new Event("blur"));
+    canvas.emitPointer("pointerup", 4, 100, 100, "mouse");
+
+    expect(inputSource.isKickRequested).toBe(false);
   });
 });

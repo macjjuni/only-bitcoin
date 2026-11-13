@@ -1,4 +1,5 @@
 import { isAvatarModelIndex, SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "./avatarModel";
+import type { SpaceBossAttack, SpaceBossPhase } from "./boss";
 import type { PlayerTransform, RemotePlayer } from "./playerState";
 import {
   isSpaceCelebration,
@@ -54,6 +55,51 @@ export interface SpaceMotionSnapshot {
 }
 
 /**
+ * 서버가 보내는 보스 상태.
+ *
+ * 시각은 전부 **서버 시각**(ms)임. 받는 쪽이 `clock` 으로 잰 차이만큼 옮겨 씀.
+ * "지금 몇 초째" 가 아니라 시작 시각이라 중간에 들어온 사람도 모션을 이어서 봄.
+ */
+/** 처치 순위 한 줄. */
+export interface SpaceBossRankingEntry {
+  /** 그 사람이 마지막으로 때릴 때 앉아 있던 좌석. */
+  seat: number;
+  damage: number;
+  /** 마지막으로 때릴 때의 이름. 옛 서버는 안 보내서 그때는 좌석으로 이름을 찾음. */
+  nickname?: string;
+}
+
+export interface SpaceBossWire {
+  phase: SpaceBossPhase;
+  attack: SpaceBossAttack | null;
+  phaseStartedAt: number;
+  x: number;
+  z: number;
+  yaw: number;
+  /** 공격을 시작한 자리. 바닥 예고를 여기 박아 둠. */
+  attackOriginX: number;
+  attackOriginZ: number;
+  speed: number;
+  health: number;
+  maximumHealth: number;
+  /** 쫓고 있는 좌석. 없으면 `null`. */
+  targetSeat: number | null;
+  /** 마지막으로 맞은 시각. 한 번도 안 맞았으면 없음. */
+  lastHitAt?: number;
+}
+
+/** 입장할 때 받는 보스 정보. */
+export interface SpaceBossWelcome {
+  /** 마지막 처치 시각. 이걸로 젠 시각을 스스로 계산함. 한 번도 안 잡았으면 `null`. */
+  lastKilledAt: number | null;
+  /** 싸우는 중일 때만 옴. 없으면 가운데 서 있는 것으로 그림. */
+  state?: SpaceBossWire;
+  /** 내 체력. */
+  health: number;
+  serverAt: number;
+}
+
+/**
  * 프레임의 버전 칸.
  *
  * 숫자를 직접 안 씀. 전에는 양쪽 유니온과 호출부 40여 곳이 `v: 1` 을
@@ -101,6 +147,8 @@ export type SpaceServerFrame =
       messages?: SpaceChatMessage[];
       /** 서버가 지원하는 기능. 없으면 발차기 버튼을 숨김. */
       features?: string[];
+      /** 보스를 아는 클라이언트에만 옴. */
+      boss?: SpaceBossWelcome;
     }
   | { v: SpaceProtocolVersion; t: "peer"; peer: SpacePeer }
   | { v: SpaceProtocolVersion; t: "leave"; seat: number }
@@ -124,6 +172,64 @@ export type SpaceServerFrame =
       id?: string;
       startedAt?: number;
       serverAt?: number;
+    }
+  /** 싸우는 동안 매 틱 옴. 싸움이 끝나 쉬러 들어갈 때 마지막으로 한 번 더 옴. */
+  | { v: SpaceProtocolVersion; t: "boss"; state: SpaceBossWire; serverAt: number }
+  /** `from` 이 보스를 맞힘. 피해 숫자를 띄우는 데 씀. */
+  | {
+      v: SpaceProtocolVersion;
+      t: "boss-hit";
+      from: number;
+      damage: number;
+      health: number;
+      serverAt: number;
+    }
+  /**
+   * `seat` 이 보스 공격에 맞음. 맞는 모션과 쓰러지는 모션을 남에게도 보여 주는 데 씀.
+   *
+   * 체력은 안 실음. 남의 체력은 본인만 앎(`hp`).
+   */
+  | {
+      v: SpaceProtocolVersion;
+      t: "player-hit";
+      seat: number;
+      by: SpaceBossAttack;
+      /** 이 공격으로 쓰러졌는지. */
+      isFatal: boolean;
+      serverAt: number;
+    }
+  /** 내 체력이 바뀜. `by` 가 있으면 그 공격에 맞은 것임. */
+  | { v: SpaceProtocolVersion; t: "hp"; health: number; by?: SpaceBossAttack; serverAt: number }
+  /** 내가 쓰러짐. `reviveAt` 까지 사망 화면을 보여 주고 이 좌표에서 다시 시작함. */
+  | {
+      v: SpaceProtocolVersion;
+      t: "respawn";
+      x: number;
+      y: number;
+      z: number;
+      yaw: number;
+      reviveAt: number;
+      serverAt: number;
+    }
+  /**
+   * 보스가 젠 시각이 아닌데 다시 나옴. 개발 서버에서 처치 뒤 바로 다시 불러낼 때만 옴.
+   *
+   * 받는 쪽은 처치 기록을 지우고 `spawnedAt` 부터 등장 연출을 틂.
+   */
+  | { v: SpaceProtocolVersion; t: "boss-spawn"; spawnedAt: number; serverAt: number }
+  /**
+   * 보스를 잡음. 순위는 피해를 많이 준 순서이고 사람 기준으로 쌓은 값임.
+   *
+   * `nickname` 은 그 사람이 마지막으로 때릴 때의 이름임. 싸우다 나간 사람도 이름이
+   * 남고, 그 좌석에 새로 온 사람과 헷갈리지 않음. 옛 서버는 안 보냄.
+   */
+  | {
+      v: SpaceProtocolVersion;
+      t: "boss-dead";
+      killedAt: number;
+      lastHitSeat: number;
+      ranking: SpaceBossRankingEntry[];
+      serverAt: number;
     }
   /** 이 클라이언트가 모르는 새 종류. 끊지 않고 버림. */
   | { v: SpaceProtocolVersion; t: "ignored" };
@@ -176,6 +282,30 @@ const isKickTiming = (payload: Record<string, unknown>): boolean => {
   );
 };
 
+const BOSS_PHASES: readonly string[] = [
+  "hidden",
+  "spawn",
+  "idle",
+  "walk",
+  "run",
+  "turn",
+  "attack",
+  "stagger",
+  "enrage",
+  "dead",
+] satisfies SpaceBossPhase[];
+const BOSS_ATTACKS: readonly string[] = ["swipe", "slam", "charge"] satisfies SpaceBossAttack[];
+/** 체력·피해로 받아 주는 상한. 수치를 조정해도 걸리지 않게 넉넉히 잡음. */
+const MAXIMUM_BOSS_AMOUNT = 10_000_000;
+
+const isBossAttack = (value: unknown): value is SpaceBossAttack => {
+  return typeof value === "string" && BOSS_ATTACKS.includes(value);
+};
+
+const isAmount = (value: unknown): value is number => {
+  return isFiniteNumber(value) && value >= 0 && value <= MAXIMUM_BOSS_AMOUNT;
+};
+
 const isSeat = (value: unknown): value is number => {
   return (
     isFiniteNumber(value) && Number.isInteger(value) && value >= 0 && value < SPACE_MAX_OCCUPANTS
@@ -210,6 +340,56 @@ const isTransform = (value: Record<string, unknown>): boolean => {
     value.y >= 0 &&
     value.y <= SPACE_MAX_ALTITUDE &&
     isFiniteNumber(value.yaw)
+  );
+};
+
+const isBossWire = (value: unknown): value is SpaceBossWire => {
+  return (
+    isRecord(value) &&
+    typeof value.phase === "string" &&
+    BOSS_PHASES.includes(value.phase) &&
+    (value.attack === null || isBossAttack(value.attack)) &&
+    isTimestamp(value.phaseStartedAt) &&
+    isFiniteNumber(value.x) &&
+    isFiniteNumber(value.z) &&
+    isFiniteNumber(value.yaw) &&
+    isFiniteNumber(value.attackOriginX) &&
+    isFiniteNumber(value.attackOriginZ) &&
+    isAmount(value.speed) &&
+    isAmount(value.health) &&
+    isAmount(value.maximumHealth) &&
+    value.maximumHealth > 0 &&
+    (value.targetSeat === null || isSeat(value.targetSeat)) &&
+    (value.lastHitAt === undefined || isTimestamp(value.lastHitAt))
+  );
+};
+
+const isBossWelcome = (value: unknown): value is SpaceBossWelcome => {
+  return (
+    isRecord(value) &&
+    (value.lastKilledAt === null || isTimestamp(value.lastKilledAt)) &&
+    (value.state === undefined || isBossWire(value.state)) &&
+    isAmount(value.health) &&
+    isTimestamp(value.serverAt)
+  );
+};
+
+/** 순위에 실린 이름의 길이 상한. 닉네임 규칙보다 넉넉하게 잡아 규칙이 바뀌어도 안 끊김. */
+const MAXIMUM_RANKING_NICKNAME_LENGTH = 64;
+
+const isBossRanking = (value: unknown): value is SpaceBossRankingEntry[] => {
+  return (
+    Array.isArray(value) &&
+    value.length <= SPACE_MAX_OCCUPANTS &&
+    value.every(
+      (entry) =>
+        isRecord(entry) &&
+        isSeat(entry.seat) &&
+        isAmount(entry.damage) &&
+        (entry.nickname === undefined ||
+          (typeof entry.nickname === "string" &&
+            entry.nickname.length <= MAXIMUM_RANKING_NICKNAME_LENGTH)),
+    )
   );
 };
 
@@ -315,8 +495,9 @@ export const parseSpaceClientFrame = (rawPayload: string): SpaceClientFrame | nu
       return typeof payload.clientKey === "string" &&
         CLIENT_KEY_PATTERN.test(payload.clientKey) &&
         isBoundedString(payload.nickname, 128) &&
-        // 모델 선택 전에 배포된 클라이언트는 이 값을 안 보냄.
-        (payload.modelIndex === undefined || isAvatarModelIndex(payload.modelIndex)) &&
+        // 범위만 봄. 목록에 없는 번호로 막으면, 캐릭터를 줄여 배포했을 때 새로고침 안 한
+        // 탭(옛 번호를 들고 있음)이 재접속할 때마다 입장을 거절당함. 서버가 기본 모델로 접음.
+        (payload.modelIndex === undefined || isReceivedModelIndex(payload.modelIndex)) &&
         (payload.features === undefined || isFeatureList(payload.features))
         ? (payload as SpaceClientFrame)
         : null;
@@ -407,6 +588,8 @@ export const parseSpaceServerFrame = (rawPayload: string): SpaceServerFrame | nu
         ...payload,
         self: withDefaultModel(selfPeer),
         peers: peers.map(withDefaultModel),
+        // 보스 정보가 깨져 와도 입장은 막지 않음. 보스만 안 보임.
+        boss: isBossWelcome(payload.boss) ? payload.boss : undefined,
       } as SpaceServerFrame;
     }
     case "peer":
@@ -431,6 +614,45 @@ export const parseSpaceServerFrame = (rawPayload: string): SpaceServerFrame | nu
         payload.to !== payload.from &&
         isKickDirection(payload.dirX, payload.dirZ) &&
         isKickTiming(payload)
+        ? (payload as SpaceServerFrame)
+        : null;
+    case "boss":
+      return isBossWire(payload.state) && isTimestamp(payload.serverAt)
+        ? (payload as SpaceServerFrame)
+        : null;
+    case "boss-hit":
+      return isSeat(payload.from) &&
+        isAmount(payload.damage) &&
+        isAmount(payload.health) &&
+        isTimestamp(payload.serverAt)
+        ? (payload as SpaceServerFrame)
+        : null;
+    case "player-hit":
+      return isSeat(payload.seat) &&
+        isBossAttack(payload.by) &&
+        typeof payload.isFatal === "boolean" &&
+        isTimestamp(payload.serverAt)
+        ? (payload as SpaceServerFrame)
+        : null;
+    case "hp":
+      return isAmount(payload.health) &&
+        (payload.by === undefined || isBossAttack(payload.by)) &&
+        isTimestamp(payload.serverAt)
+        ? (payload as SpaceServerFrame)
+        : null;
+    case "respawn":
+      return isTransform(payload) && isTimestamp(payload.reviveAt) && isTimestamp(payload.serverAt)
+        ? (payload as SpaceServerFrame)
+        : null;
+    case "boss-spawn":
+      return isTimestamp(payload.spawnedAt) && isTimestamp(payload.serverAt)
+        ? (payload as SpaceServerFrame)
+        : null;
+    case "boss-dead":
+      return isTimestamp(payload.killedAt) &&
+        isSeat(payload.lastHitSeat) &&
+        isBossRanking(payload.ranking) &&
+        isTimestamp(payload.serverAt)
         ? (payload as SpaceServerFrame)
         : null;
     default:
