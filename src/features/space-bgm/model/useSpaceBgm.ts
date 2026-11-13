@@ -132,6 +132,13 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, zoneTrack }: SpaceBgmOptions
     pendingTrackRef.current = `${track}:${startsAt}`;
     lastAttemptRef.current = performance.now();
     clearFade();
+    // 페이드를 끊으면 사라지던 곡이 줄어들다 만 음량으로 계속 돈다. 곡이 둘일 때는 그 곡이 곧
+    // 다음 전환의 대상이라 정리됐지만, 셋 이상이면 남아서 겹쳐 들린다. 이번 전환과 무관한 곡은 멈춘다.
+    for (const other of Object.values(tracksRef.current)) {
+      if (other !== audio && other !== previous) {
+        other.pause();
+      }
+    }
     // 전환이 중간에 취소됐어도 현재 곡의 음량을 복원해 무음으로 남기지 않는다.
     if (previous && previous !== audio) {
       previous.volume = TRACK_VOLUME[activeTrackRef.current];
