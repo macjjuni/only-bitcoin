@@ -112,6 +112,13 @@ export const SPACE_BOSS_COMBAT = {
    * 초당 피해는 셋 다 10 안팎으로 맞춰 둠.
    */
   kickDamage: 10,
+  /**
+   * 공격 피해가 기준값에서 위아래로 흔들리는 비율. 0.2 면 기준의 80 ~ 120 %.
+   *
+   * 고정 피해면 같은 캐릭터로 같은 횟수를 때린 사람끼리 순위가 정확히 같아짐.
+   * 평균은 기준값 그대로라 초당 피해 균형은 안 바뀜.
+   */
+  kickDamageSpreadRatio: 0.2,
   /** 보스 몸통에서 이 거리 안이어야 닿음(m). 렌치 길이 정도. */
   kickReach: 2,
   /** 보스를 향한 정도(내적)가 이보다 커야 닿음. 등지고 휘두른 건 안 맞음. 약 70° 안. */
@@ -288,6 +295,20 @@ export const resolveBossChargeTravel = (elapsedSeconds: number): number => {
   const to = BOSS_CHARGE_TRAVEL_METERS[index + 1];
 
   return from + (to - from) * (frame - index);
+};
+
+/**
+ * 이번 공격의 피해를 뽑음. 기준값의 `1 ± kickDamageSpreadRatio` 안에서 고른 정수임.
+ *
+ * 서버만 부름. 클라이언트는 서버가 알려 준 값을 그대로 띄움.
+ *
+ * @param random 0 이상 1 미만의 난수. 0.5 면 기준값이 나옴.
+ */
+export const rollKickDamage = (baseDamage: number, random: number): number => {
+  const spread = (random * 2 - 1) * SPACE_BOSS_COMBAT.kickDamageSpreadRatio;
+
+  // 피해가 작은 캐릭터도 0 이 나오면 안 됨.
+  return Math.max(1, Math.round(baseDamage * (1 + spread)));
 };
 
 /** 아무것도 없는 상태. 젠 전이나 처치 뒤임. */

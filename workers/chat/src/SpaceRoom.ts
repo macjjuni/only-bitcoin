@@ -17,13 +17,14 @@ import {
   type SpaceAvatarCombat,
 } from "../../../src/entities/space/model/avatarModel";
 import {
+  rollKickDamage,
   SPACE_BOSS_COMBAT,
   SPACE_BOSS_DEATH,
   SPACE_BOSS_PLAYER,
   SPACE_FEATURE_BOSS,
 } from "../../../src/entities/space/model/boss";
 import {
-  resolveKickServerIntervalMs,
+  resolveKickAdmission,
   SPACE_FEATURE_KICK,
   SPACE_FEATURE_KICK_TIMING,
   SPACE_KICK,
@@ -103,6 +104,8 @@ interface SpaceSocketAttachment {
   /** 마지막으로 찬 시각. 쿨다운 판정용. */
   lastKickAt?: number;
   lastKickId?: string;
+  /** 다음 공격의 기준 시각. 공격 속도를 평균으로 묶는 데 씀(`resolveKickAdmission`). */
+  kickReadyAt?: number;
   /** 체력. 없으면 가득임. 한 번도 안 맞은 사람은 이 칸이 없음. */
   health?: number;
   /** `health` 를 잰 시각. 홀 안에서 지난 시간만큼 회복을 더해 읽음. */
@@ -1112,6 +1115,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         features: (frame.features ?? []).filter((feature) => SERVER_FEATURES.includes(feature)),
         lastKickAt: previousAttachment?.lastKickAt,
         lastKickId: previousAttachment?.lastKickId,
+        kickReadyAt: previousAttachment?.kickReadyAt,
         // 탭을 바꾸거나 나갔다 들어와도 싸우던 체력을 이어 감.
         ...(previousAttachment
           ? {
@@ -1245,7 +1249,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     // 쿨다운과 피해는 캐릭터마다 다름. 서버가 아는 모델 번호로 정함.
     const combat = resolveAvatarCombat(kicker.modelIndex);
 
-    if (attachment.lastKickAt !== undefined && now - attachment.lastKickAt < resolveKickServerIntervalMs(combat.cooldownMs)) {
+    const admission = resolveKickAdmission(now, attachment.kickReadyAt, combat.cooldownMs);
+
+    if (!admission.isAccepted) {
       return;
     }
     const facingX = -Math.sin(kicker.yaw);
@@ -1253,7 +1259,12 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     const id = frame.id ?? crypto.randomUUID();
     // 시각은 연출에만 사용함. 쿨다운은 서버의 실제 시각으로 봄.
     const startedAt = Math.min(now, Math.max(now - SPACE_KICK.maximumBackdateMs, frame.startedAt ?? now));
-    socket.serializeAttachment({ ...attachment, lastKickAt: now, lastKickId: id } satisfies SpaceSocketAttachment);
+    socket.serializeAttachment({
+      ...attachment,
+      lastKickAt: now,
+      lastKickId: id,
+      kickReadyAt: admission.readyAt,
+    } satisfies SpaceSocketAttachment);
 
     const payload = JSON.stringify({
       v: SPACE_PROTOCOL_VERSION,
@@ -1290,7 +1301,8 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       if (!attachment || !kicker || attachment.lastKickId !== kickId || this.isDead(attachment, now)) {
         return;
       }
-      this.applyKickToBoss(kicker, attachment, now, combat.kickDamage);
+      // 피해는 닿는 순간에 뽑음. 캐릭터 기준값에서 위아래로 조금씩 흔들림.
+      this.applyKickToBoss(kicker, attachment, now, rollKickDamage(combat.kickDamage, Math.random()));
     }, Math.max(0, delayMs));
   }
 

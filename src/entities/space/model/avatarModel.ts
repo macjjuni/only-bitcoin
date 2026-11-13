@@ -34,7 +34,7 @@ export interface SpaceAvatarClipRange {
 /**
  * 캐릭터의 공격 성격. 서버 판정과 클라이언트 연출이 같이 씀.
  *
- * **초당 피해는 캐릭터끼리 비슷하게 둠**(10 ~ 11). 한 캐릭터가 확실히 세면 다들 그것만
+ * **초당 피해는 캐릭터끼리 비슷하게 둠**(10.7 ~ 11). 한 캐릭터가 확실히 세면 다들 그것만
  * 고름. 차이는 싸우는 방식에 둠 — 느리고 묵직한 한 방이냐, 빠르고 약한 연타냐.
  */
 export interface SpaceAvatarCombat {
@@ -126,8 +126,9 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
       death: { startFrame: 150, frameCount: 39, seconds: 1.5833 },
       revive: { startFrame: 189, frameCount: 46, seconds: 1.875 },
     },
-    // 렌치. 기준이 되는 표준형.
-    combat: { kickDamage: 10, cooldownMs: 1_000, attackSeconds: 0.55, impactSeconds: 0.28 },
+    // 렌치. 기준이 되는 표준형. 처음 온 사람이 받는 캐릭터라 초당 피해가 다른 둘보다
+    // 처지지 않게 11 로 둠(10 이면 초당 10.0 으로 혼자 7 ~ 9 % 낮았음).
+    combat: { kickDamage: 11, cooldownMs: 1_000, attackSeconds: 0.55, impactSeconds: 0.28 },
     triangleCount: 1212,
   },
   {

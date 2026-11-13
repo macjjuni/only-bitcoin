@@ -1032,6 +1032,15 @@ describe("SpaceRoom", () => {
 
   describe("레이드 보스", () => {
     const BOSS_FEATURES = ["kick", "boss-v1"];
+
+    // 피해가 기준값으로 나오게 난수를 가운데로 고정함. 흔들림은 따로 봄.
+    beforeEach(() => {
+      vi.spyOn(Math, "random").mockReturnValue(0.5);
+    });
+
+    afterEach(() => {
+      vi.restoreAllMocks();
+    });
     /** 테스트 유저가 쓰는 기본 모델(0번)의 공격 성격. */
     const DEFAULT_COMBAT = resolveAvatarCombat(0);
     /** 무기가 닿기까지 가장 오래 걸리는 모델. */
@@ -1415,6 +1424,61 @@ describe("SpaceRoom", () => {
       ]);
       expect(parseSpaceServerFrame(JSON.stringify(hits[0]))).toEqual(hits[0]);
       expect(framesOf(fighter, "kick")).toHaveLength(2);
+    });
+
+    it("쿨다운의 절반 간격으로 연타해도 길게 보면 쿨다운당 한 번만 받는다", async () => {
+      const { join, send } = createRoom();
+      const watcher = await join(clientKey(9), "구경꾼", 0, "ip-9", BOSS_FEATURES);
+
+      for (const modelIndex of SPACE_AVATAR_MODELS.keys()) {
+        const { cooldownMs } = resolveAvatarCombat(modelIndex);
+        const fighter = await join(
+          clientKey(modelIndex),
+          "연타꾼",
+          modelIndex,
+          `ip-${modelIndex}`,
+          BOSS_FEATURES,
+        );
+        const countSwings = () =>
+          framesOf(watcher, "kick").filter((frame) => frame.from === fighter.peer().seat).length;
+        // 초당 프레임 상한에 걸려 끊기지 않을 만큼만 빠르게 보냄.
+        const spamIntervalMs = 50;
+        const cooldownCount = 10;
+
+        // 화면 버튼을 거치지 않고 50 ms 마다 요청을 직접 보내는 클라이언트.
+        for (
+          let elapsedMs = 0;
+          elapsedMs < cooldownMs * cooldownCount;
+          elapsedMs += spamIntervalMs
+        ) {
+          await send(fighter, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+          vi.advanceTimersByTime(spamIntervalMs);
+        }
+
+        // 처음 한 번 일찍 받아 주는 것까지 쳐도 쿨다운 수 + 1 을 못 넘음. 전에는 두 배였음.
+        expect(countSwings(), `model ${modelIndex}`).toBeGreaterThanOrEqual(cooldownCount);
+        expect(countSwings(), `model ${modelIndex}`).toBeLessThanOrEqual(cooldownCount + 1);
+      }
+    });
+
+    it("피해는 캐릭터 기준값의 80 ~ 120 % 안에서 그때그때 달라진다", async () => {
+      const { join, send } = createRoom();
+      const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
+      const { kickDamage, cooldownMs } = DEFAULT_COMBAT;
+
+      await moveIntoArena(send, fighter, 2.5, 0, Math.PI / 2);
+      for (const random of [0, 0.5, 0.999]) {
+        vi.spyOn(Math, "random").mockReturnValue(random);
+        await send(fighter, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+        waitForImpact();
+        vi.advanceTimersByTime(cooldownMs);
+      }
+
+      expect(framesOf(fighter, "boss-hit").map((frame) => frame.damage)).toEqual([
+        Math.round(kickDamage * 0.8),
+        kickDamage,
+        Math.round(kickDamage * 1.2),
+      ]);
     });
 
     it("휘두르는 사이 물러나거나 나가면 안 맞는다", async () => {

@@ -3,6 +3,7 @@ import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
   resolveBossChargeTravel,
+  rollKickDamage,
   SPACE_BOSS,
   SPACE_BOSS_ATTACKS,
   SPACE_BOSS_CLIP_SECONDS,
@@ -190,5 +191,38 @@ describe("보스 아레나 ↔ bitcoin_hall_draco.glb", () => {
     expect(SPACE_BOSS.arena.centerX).toBe(x);
     expect(SPACE_BOSS.arena.centerZ).toBe(z);
     expect(SPACE_BOSS.arena.floorY).toBe(y + SPACE_HALL.mapOffsetY);
+  });
+});
+
+describe("rollKickDamage", () => {
+  it("난수가 가운데면 기준값이고, 양 끝이면 80 % 와 120 % 다", () => {
+    expect(rollKickDamage(10, 0.5)).toBe(10);
+    expect(rollKickDamage(10, 0)).toBe(8);
+    expect(rollKickDamage(10, 0.999_999)).toBe(12);
+    expect(rollKickDamage(16, 0)).toBe(13);
+    expect(rollKickDamage(16, 0.999_999)).toBe(19);
+  });
+
+  it("늘 정수이고, 피해가 작은 캐릭터도 범위가 생기며 0 은 안 나온다", () => {
+    const rolled = new Set<number>();
+
+    for (let step = 0; step < 100; step += 1) {
+      rolled.add(rollKickDamage(6, step / 100));
+    }
+
+    expect(Array.from(rolled).sort()).toEqual([5, 6, 7]);
+    expect(rollKickDamage(1, 0)).toBe(1);
+  });
+
+  it("고르게 뽑으면 평균이 기준값이라 초당 피해 균형이 안 바뀐다", () => {
+    for (const baseDamage of [6, 10, 16]) {
+      let total = 0;
+
+      for (let step = 0; step < 1_000; step += 1) {
+        total += rollKickDamage(baseDamage, (step + 0.5) / 1_000);
+      }
+
+      expect(total / 1_000).toBeCloseTo(baseDamage, 1);
+    }
   });
 });

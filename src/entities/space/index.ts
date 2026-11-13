@@ -53,6 +53,7 @@ export {
   createHiddenBossState,
   resolveBossAttackSeconds,
   resolveBossChargeTravel,
+  rollKickDamage,
   SPACE_BOSS,
   SPACE_BOSS_ATTACKS,
   SPACE_BOSS_CLIP_SECONDS,
@@ -70,6 +71,7 @@ export {
   type SpaceBossState,
 } from "./model/boss";
 export {
+  resolveKickAdmission,
   resolveKickServerIntervalMs,
   SPACE_FEATURE_KICK,
   SPACE_FEATURE_KICK_TIMING,
