@@ -21,6 +21,13 @@ export {
 } from "./model/followCamera";
 export { shouldIgnoreSpaceHotkey } from "./model/keyboardInputEvents";
 export {
+  createBossKnockback,
+  isKnockbackActive,
+  type Knockback,
+  SPACE_BOSS_KNOCKBACK,
+  stepKnockback,
+} from "./model/knockback";
+export {
   createEmptyMovementInput,
   type MovementInput,
   planFixedSteps,

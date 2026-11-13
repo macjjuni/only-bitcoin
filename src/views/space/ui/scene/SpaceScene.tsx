@@ -38,8 +38,12 @@ import {
   type CameraOrbit,
   consumePendingDrag,
   consumePendingZoom,
+  createBossKnockback,
   createDefaultCameraOrbit,
+  createEmptyMovementInput,
   dampVector,
+  isKnockbackActive,
+  type Knockback,
   planFixedSteps,
   resolveCameraFocus,
   resolveCameraLookTarget,
@@ -52,6 +56,7 @@ import {
   type SpaceInputSource,
   separateFromPlayers,
   separateFromSolidBody,
+  stepKnockback,
   stepMovement,
   useCoarsePointer,
   usePointerDrag,
@@ -100,6 +105,8 @@ interface SpaceSceneProps {
 }
 
 const EMPTY_LANTERN_ANCHORS: readonly LanternAnchor[] = [];
+/** 밀리는 동안 대신 넣는 빈 입력. 중력·착지는 그대로 돌아감. */
+const EMPTY_MOVEMENT_INPUT = createEmptyMovementInput();
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 function SpaceScene({
   celebration,
@@ -153,6 +160,10 @@ function SpaceScene({
   );
   const accumulatedSecondsRef = useRef<number>(0);
   const playerGroupRef = useRef<Group>(null);
+  /** 보스 공격에 맞아 밀리는 중이면 그 밀림. 끝났거나 안 맞았으면 `null`. */
+  const knockbackRef = useRef<Knockback | null>(null);
+  /** 이미 밀림으로 옮긴 피격 시각. 같은 피격으로 두 번 밀지 않음. */
+  const handledDamageAtRef = useRef<number | null>(null);
   /** 내가 발차기를 시작한 시각. 아바타가 이걸로 동작을 재생함. */
   const kickStartedAtRef = useRef<number | undefined>(undefined);
   /** 다른 사람이 발차기를 시작한 시각(좌석별). 끝난 건 지움. */
@@ -252,19 +263,50 @@ function SpaceScene({
     return session.deadUntil !== null && now < session.deadUntil;
   };
 
+  /**
+   * 서버가 새로 알려 준 피격이 있으면 뒤로 밀리기 시작함.
+   *
+   * 서버 프레임을 받은 뒤에 밀어서 판정과 어긋나지 않음. 쓰러진 피격은 안 밂 — 곧바로
+   * 홀로 옮겨지는데 그 전에 밀리면 리스폰 자리에서 미끄러져 보임.
+   */
+  const startKnockbackIfDamaged = (): void => {
+    const { selfDamagedAt, selfDamagedBy } = session;
+
+    if (selfDamagedAt === handledDamageAtRef.current) {
+      return;
+    }
+    handledDamageAtRef.current = selfDamagedAt;
+
+    if (selfDamagedAt === null || selfDamagedBy === null || session.selfHealth <= 0) {
+      return;
+    }
+    knockbackRef.current = createBossKnockback(
+      selfDamagedBy,
+      session.bossState,
+      playerStateRef.current,
+    );
+  };
+
   const advancePlayerState = (
     cameraYaw: number,
     deltaSeconds: number,
     now: number,
   ): LocalPlayerState => {
     if (isKnockedOut(now)) {
+      knockbackRef.current = null;
       // 쌓인 시간을 버림. 안 버리면 일어나는 순간 밀린 걸음을 한꺼번에 걸음.
       accumulatedSecondsRef.current = 0;
 
       return playerStateRef.current;
     }
 
-    const movementInput = resolveMergedMovementInput(inputSource);
+    startKnockbackIfDamaged();
+
+    const knockback = knockbackRef.current;
+    // 밀리는 동안에는 조작을 안 받음. 내 걸음이 더해지면 서버 속도 상한을 넘김.
+    const movementInput = isKnockbackActive(knockback)
+      ? EMPTY_MOVEMENT_INPUT
+      : resolveMergedMovementInput(inputSource);
     const bossBody = resolveBossBody();
 
     accumulatedSecondsRef.current += deltaSeconds;
@@ -277,6 +319,14 @@ function SpaceScene({
 
     for (let stepIndex = 0; stepIndex < stepPlan.stepCount; stepIndex += 1) {
       nextState = stepMovement(nextState, movementInput, cameraYaw, undefined, terrainRef.current);
+      if (isKnockbackActive(knockback)) {
+        nextState = stepKnockback(
+          nextState,
+          knockback,
+          SPACE_MOVEMENT.fixedTimeStep,
+          terrainRef.current,
+        );
+      }
       // 화면에 보이는 위치 기준으로 겹친 만큼 나만 비킴.
       nextState = separateFromPlayers(
         nextState,

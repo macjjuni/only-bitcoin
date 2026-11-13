@@ -12,6 +12,7 @@ import {
   SPACE_FEATURE_KICK_TIMING,
   SPACE_FEATURE_MARKET,
   SPACE_PROTOCOL_VERSION,
+  type SpaceBossAttack,
   type SpaceBossState,
   type SpaceCelebration,
   type SpaceChatMessage,
@@ -55,6 +56,8 @@ export interface SpaceSessionSnapshot {
   deadUntil: number | null;
   /** 마지막으로 보스에게 맞은 시각(로컬). 화면 번쩍임을 다시 트는 데 씀. */
   selfDamagedAt: number | null;
+  /** 그때 맞은 공격. 공격마다 밀리는 세기가 다름. */
+  selfDamagedBy: SpaceBossAttack | null;
   /** 가장 최근 처치 결과. 처치 연출과 순위 표시에 씀. */
   bossDefeat: SpaceBossDefeat | null;
 }
@@ -278,6 +281,7 @@ export class SpaceSessionController {
     selfHealth: SPACE_BOSS_PLAYER.maximumHealth,
     deadUntil: null,
     selfDamagedAt: null,
+    selfDamagedBy: null,
     bossDefeat: null,
   };
   /** 아직 씬이 안 꺼내 간 피해 숫자. 발차기 큐와 같은 이유로 React 상태가 아님. */
@@ -1069,7 +1073,7 @@ export class SpaceSessionController {
         if (this.snapshot.canFightBoss) {
           this.updateSnapshot({
             selfHealth: frame.health,
-            ...(frame.by ? { selfDamagedAt: this.options.now() } : {}),
+            ...(frame.by ? { selfDamagedAt: this.options.now(), selfDamagedBy: frame.by } : {}),
           });
         }
         return;
@@ -1144,6 +1148,7 @@ export class SpaceSessionController {
     this.bossHitEvents = [];
     this.updateSnapshot({
       selfDamagedAt: null,
+      selfDamagedBy: null,
       market: null,
       celebration: null,
       canSyncMarket: false,
