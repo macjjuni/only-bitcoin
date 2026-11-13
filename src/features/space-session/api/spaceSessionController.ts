@@ -6,10 +6,13 @@ import {
   type LocalPlayerState,
   parseSpaceServerFrame,
   type RemotePlayer,
+  SPACE_BOSS_PLAYER,
+  SPACE_FEATURE_BOSS,
   SPACE_FEATURE_KICK,
   SPACE_FEATURE_KICK_TIMING,
   SPACE_FEATURE_MARKET,
   SPACE_PROTOCOL_VERSION,
+  type SpaceBossState,
   type SpaceCelebration,
   type SpaceChatMessage,
   type SpaceMarketState,
@@ -17,6 +20,7 @@ import {
   type SpacePresence,
   type SpaceServerFrame,
 } from "@/entities/space";
+import { type BossHealth, createBossTracker } from "../model/bossTracker";
 
 export interface SpaceSessionIdentity {
   clientKey: string;
@@ -39,6 +43,25 @@ export interface SpaceSessionSnapshot {
   isMessagePending: boolean;
   /** 서버가 발차기를 지원하는지. 옛 서버면 버튼을 숨김. */
   canKick: boolean;
+  /** 서버가 보스를 지원하는지. 옛 서버면 보스를 안 그림. */
+  canFightBoss: boolean;
+  /**
+   * 서버가 마지막으로 알려 준 내 체력.
+   *
+   * 홀 안 회복은 프레임이 안 와서 여기 반영되지 않음. 그리는 쪽이 같은 식으로 채워 보여 줌.
+   */
+  selfHealth: number;
+  /** 쓰러져 있는 동안의 끝 시각(로컬 `now` 축). 살아 있으면 `null`. */
+  deadUntil: number | null;
+  /** 가장 최근 처치 결과. 처치 연출과 순위 표시에 씀. */
+  bossDefeat: SpaceBossDefeat | null;
+}
+
+export interface SpaceBossDefeat {
+  /** 처치 시각(서버 축). 같은 처치를 두 번 띄우지 않게 구분하는 데도 씀. */
+  killedAt: number;
+  lastHitSeat: number;
+  ranking: { seat: number; damage: number }[];
 }
 
 /** 받은 발차기 하나. 동작만 재생하고 아무도 안 밀림. */
@@ -240,7 +263,16 @@ export class SpaceSessionController {
     isMessagePending: false,
     isNicknamePending: false,
     canKick: false,
+    canFightBoss: false,
+    selfHealth: SPACE_BOSS_PLAYER.maximumHealth,
+    deadUntil: null,
+    bossDefeat: null,
   };
+  /**
+   * 보스 상태. 매 프레임 바뀌어서 React 상태로 두지 않음.
+   * 씬이 `sampleBoss` 로 갱신하고 `bossState` 를 그대로 읽음.
+   */
+  private readonly bossTracker = createBossTracker();
   /**
    * 아직 씬이 안 꺼내 간 발차기. React 상태로 두면 매번 리렌더가 나서 큐로 둠.
    * 씬이 매 프레임 `drainKickEvents` 로 비움.
@@ -280,8 +312,26 @@ export class SpaceSessionController {
     );
   };
 
+  /** 그릴 보스 상태. 같은 객체를 `sampleBoss` 가 제자리에서 고침. */
+  get bossState(): SpaceBossState {
+    return this.bossTracker.state;
+  }
+
+  /** 지금 시각의 보스 상태로 갱신함. 씬이 매 프레임 부름. */
+  sampleBoss = (now: number): SpaceBossState => {
+    return this.bossTracker.sample(now, this.snapshot.serverClockOffsetMs);
+  };
+
+  /** 보스 체력. 보스가 없으면 `null`. */
+  getBossHealth = (): BossHealth | null => this.bossTracker.getHealth();
+
+  /** 서버 시각과의 차이. 시계 왕복을 아직 못 했으면 프레임에 실린 시각으로 어림함. */
+  private resolveClockOffset(serverAt: number): number {
+    return this.snapshot.serverClockOffsetMs ?? serverAt - this.options.now();
+  }
+
   private requestClock(): void {
-    if (!this.snapshot.canSyncMarket && !this.canSyncKickTiming) {
+    if (!this.snapshot.canSyncMarket && !this.canSyncKickTiming && !this.snapshot.canFightBoss) {
       return;
     }
     this.clockSentAt = this.options.now();
@@ -648,7 +698,12 @@ export class SpaceSessionController {
         clientKey: this.options.identity.clientKey,
         nickname: this.nickname,
         modelIndex: this.modelIndex,
-        features: [SPACE_FEATURE_KICK, SPACE_FEATURE_MARKET, SPACE_FEATURE_KICK_TIMING],
+        features: [
+          SPACE_FEATURE_KICK,
+          SPACE_FEATURE_MARKET,
+          SPACE_FEATURE_KICK_TIMING,
+          SPACE_FEATURE_BOSS,
+        ],
       });
     });
     socket.addEventListener("message", (event) => {
@@ -785,7 +840,20 @@ export class SpaceSessionController {
         this.receivedKickIds.clear();
         this.pendingKickStarts.clear();
         this.lastKickStartedAt = null;
+        // 옛 서버는 보스 정보를 안 보냄. 그러면 보스를 끔.
+        const boss = frame.features?.includes(SPACE_FEATURE_BOSS) ? frame.boss : undefined;
+        this.bossTracker.reset(
+          boss
+            ? { lastKilledAt: boss.lastKilledAt, wire: boss.state, nowMs: this.options.now() }
+            : null,
+        );
         this.updateSnapshot({
+          canFightBoss: boss !== undefined,
+          selfHealth: boss?.health ?? SPACE_BOSS_PLAYER.maximumHealth,
+          deadUntil: null,
+          bossDefeat: null,
+          // 보스는 젠 시각을 서버 시계로 계산함. 시계 왕복 전에도 그릴 수 있게 어림값을 넣어 둠.
+          ...(boss ? { serverClockOffsetMs: this.resolveClockOffset(boss.serverAt) } : {}),
           self: frame.self,
           presence: { status: "online", occupantCount: this.peers.size + 1 },
           error: null,
@@ -949,12 +1017,49 @@ export class SpaceSessionController {
         this.kickEvents = [...this.kickEvents, { event, receivedAt }].slice(-maximumKickEventCount);
         return;
       }
-      // 보스 프레임. 받는 쪽은 아직 안 붙였음. 입장 때 보스 기능을 알리지 않아 지금은 오지 않음.
-      case "boss":
-      case "boss-hit":
-      case "hp":
-      case "respawn":
-      case "boss-dead":
+      case "boss": {
+        if (this.snapshot.canFightBoss) {
+          this.bossTracker.applyWire(frame.state, this.options.now());
+        }
+        return;
+      }
+      case "boss-hit": {
+        if (this.snapshot.canFightBoss) {
+          this.bossTracker.applyHit(frame.health, this.options.now());
+        }
+        return;
+      }
+      case "hp": {
+        if (this.snapshot.canFightBoss) {
+          this.updateSnapshot({ selfHealth: frame.health });
+        }
+        return;
+      }
+      case "respawn": {
+        if (!this.snapshot.canFightBoss) {
+          return;
+        }
+        // 자리는 뒤따라오는 `peer` 프레임이 옮김. 여기서는 언제까지 쓰러져 있는지만 기억함.
+        this.updateSnapshot({
+          deadUntil: frame.reviveAt - this.resolveClockOffset(frame.serverAt),
+          selfHealth: SPACE_BOSS_PLAYER.maximumHealth,
+        });
+        return;
+      }
+      case "boss-dead": {
+        if (!this.snapshot.canFightBoss) {
+          return;
+        }
+        this.bossTracker.applyDefeat(frame.killedAt);
+        this.updateSnapshot({
+          bossDefeat: {
+            killedAt: frame.killedAt,
+            lastHitSeat: frame.lastHitSeat,
+            ranking: frame.ranking,
+          },
+        });
+        return;
+      }
       case "ignored":
         return;
       default: {
@@ -996,10 +1101,14 @@ export class SpaceSessionController {
     this.interpolator.clear();
     this.latestMovement = null;
     this.lastSentMovement = null;
+    this.bossTracker.reset(null);
     this.updateSnapshot({
       market: null,
       celebration: null,
       canSyncMarket: false,
+      canFightBoss: false,
+      deadUntil: null,
+      bossDefeat: null,
       serverClockOffsetMs: null,
       remotePlayers: this.interpolator.sample(this.options.now()),
       bubbleMessages: [],

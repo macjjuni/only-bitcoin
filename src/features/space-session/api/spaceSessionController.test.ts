@@ -2,7 +2,10 @@ import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
 import {
   encodeSpaceSnapshot,
   type LocalPlayerState,
+  SPACE_BOSS,
+  SPACE_BOSS_PLAYER,
   SPACE_PROTOCOL_VERSION,
+  type SpaceBossWire,
   type SpacePeer,
 } from "@/entities/space";
 import { resolveSpaceWebSocketUrl } from "@/shared/config/space";
@@ -232,7 +235,7 @@ describe("SpaceSessionController", () => {
         t: "join",
         ...identity,
         modelIndex: 0,
-        features: ["kick", "market-sync-v1", "kick-timing-v1"],
+        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1"],
       },
     ]);
     expect(socket.binaryType).toBe("arraybuffer");
@@ -760,7 +763,7 @@ describe("SpaceSessionController", () => {
         clientKey: identity.clientKey,
         nickname: identity.nickname,
         modelIndex: 1,
-        features: ["kick", "market-sync-v1", "kick-timing-v1"],
+        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1"],
       },
     ]);
     controller.stop();
@@ -842,7 +845,7 @@ describe("SpaceSessionController", () => {
         clientKey: identity.clientKey,
         nickname: "새이름",
         modelIndex: 0,
-        features: ["kick", "market-sync-v1", "kick-timing-v1"],
+        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1"],
       },
     ]);
     controller.stop();
@@ -913,7 +916,7 @@ describe("SpaceSessionController", () => {
       const oldServer = welcome();
 
       expect(sentFrames(oldServer, "join")[0]).toMatchObject({
-        features: ["kick", "market-sync-v1", "kick-timing-v1"],
+        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1"],
       });
       expect(controller.getSnapshot().canKick).toBe(false);
       expect(controller.sendKick()).toBe(false);
@@ -1086,6 +1089,224 @@ describe("SpaceSessionController", () => {
       });
       vi.advanceTimersByTime(500);
       expect(controller.drainKickEvents()).toEqual([]);
+      controller.stop();
+    });
+  });
+
+  describe("레이드 보스", () => {
+    /** 서버 시각. 테스트의 로컬 시각은 1,000 ms 에서 시작함. */
+    const SERVER_NOW = Date.parse("2026-11-13T13:25:00+09:00");
+    const BOSS_FEATURES = ["kick", "boss-v1"];
+    const bossWire: SpaceBossWire = {
+      phase: "run",
+      attack: null,
+      phaseStartedAt: SERVER_NOW,
+      x: SPACE_BOSS.arena.centerX + 3,
+      z: SPACE_BOSS.arena.centerZ,
+      yaw: 0,
+      attackOriginX: SPACE_BOSS.arena.centerX,
+      attackOriginZ: SPACE_BOSS.arena.centerZ,
+      speed: 4,
+      health: 2_400,
+      maximumHealth: 3_000,
+      targetSeat: 0,
+    };
+
+    const joinWithBoss = (boss: Record<string, unknown> | null) => {
+      const harness = createHarness();
+
+      harness.controller.start();
+      const socket = harness.sockets[0];
+
+      socket.open();
+      socket.receive({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "welcome",
+        self,
+        peers: [],
+        features: BOSS_FEATURES,
+        ...(boss ? { boss } : {}),
+      });
+
+      return { ...harness, socket };
+    };
+
+    it("서버가 보스 정보를 주면 켜고, 시계 왕복 전에도 젠 계산으로 가운데에 세운다", () => {
+      const { controller } = joinWithBoss({ lastKilledAt: null, health: 80, serverAt: SERVER_NOW });
+      const snapshot = controller.getSnapshot();
+
+      expect(snapshot.canFightBoss).toBe(true);
+      expect(snapshot.selfHealth).toBe(80);
+      expect(snapshot.serverClockOffsetMs).toBe(SERVER_NOW - 1_000);
+      expect(controller.sampleBoss(1_000)).toMatchObject({
+        phase: "idle",
+        x: SPACE_BOSS.arena.centerX,
+        z: SPACE_BOSS.arena.centerZ,
+      });
+      expect(controller.sampleBoss(1_000)).toBe(controller.bossState);
+      expect(controller.getBossHealth()).toEqual({ health: 3_000, maximumHealth: 3_000 });
+      controller.stop();
+    });
+
+    it("보스를 모르는 옛 서버면 끄고, 보스 프레임이 와도 무시한다", () => {
+      const { controller, socket } = joinWithBoss(null);
+
+      socket.receive({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "boss",
+        state: bossWire,
+        serverAt: SERVER_NOW,
+      });
+      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "hp", health: 10, serverAt: SERVER_NOW });
+
+      expect(controller.getSnapshot().canFightBoss).toBe(false);
+      expect(controller.getSnapshot().selfHealth).toBe(SPACE_BOSS_PLAYER.maximumHealth);
+      expect(controller.sampleBoss(1_000).phase).toBe("hidden");
+      expect(controller.getBossHealth()).toBeNull();
+      controller.stop();
+    });
+
+    it("싸우는 중의 상태와 피격을 그릴 상태에 반영한다", () => {
+      const { controller, socket } = joinWithBoss({
+        lastKilledAt: null,
+        health: 100,
+        serverAt: SERVER_NOW,
+      });
+
+      socket.receive({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "boss",
+        state: bossWire,
+        serverAt: SERVER_NOW,
+      });
+      expect(controller.sampleBoss(1_000)).toMatchObject({
+        phase: "run",
+        // 서버 시작 시각을 로컬 축으로 옮긴 값.
+        phaseStartedAt: 1_000,
+        x: bossWire.x,
+      });
+
+      vi.advanceTimersByTime(50);
+      socket.receive({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "boss-hit",
+        from: 1,
+        damage: 10,
+        health: 2_390,
+        serverAt: SERVER_NOW + 50,
+      });
+
+      expect(controller.sampleBoss(1_060).lastHitAt).toBe(1_050);
+      expect(controller.getBossHealth()?.health).toBe(2_390);
+      controller.stop();
+    });
+
+    it("맞으면 체력을, 쓰러지면 다시 움직일 수 있는 시각을 알리고 서버가 정한 자리로 옮긴다", () => {
+      const { controller, socket } = joinWithBoss({
+        lastKilledAt: null,
+        health: 100,
+        serverAt: SERVER_NOW,
+      });
+      const respawned = { ...self, x: 3, z: -2, y: 0.5 };
+
+      socket.receive({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "hp",
+        health: 65,
+        by: "slam",
+        serverAt: SERVER_NOW,
+      });
+      expect(controller.getSnapshot().selfHealth).toBe(65);
+      expect(controller.getSnapshot().deadUntil).toBeNull();
+
+      socket.receive({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "hp",
+        health: 0,
+        by: "swipe",
+        serverAt: SERVER_NOW,
+      });
+      socket.receive({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "respawn",
+        x: respawned.x,
+        y: respawned.y,
+        z: respawned.z,
+        yaw: 0,
+        reviveAt: SERVER_NOW + SPACE_BOSS_PLAYER.respawnDelayMs,
+        serverAt: SERVER_NOW,
+      });
+      socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: respawned });
+
+      const snapshot = controller.getSnapshot();
+
+      expect(snapshot.deadUntil).toBe(1_000 + SPACE_BOSS_PLAYER.respawnDelayMs);
+      expect(snapshot.selfHealth).toBe(SPACE_BOSS_PLAYER.maximumHealth);
+      expect(snapshot.self).toMatchObject({ x: 3, z: -2, y: 0.5 });
+      controller.stop();
+    });
+
+    it("처치 소식을 받으면 결과를 남기고 보스를 지운다", () => {
+      const { controller, socket } = joinWithBoss({
+        lastKilledAt: null,
+        health: 100,
+        serverAt: SERVER_NOW,
+      });
+      const ranking = [
+        { seat: 1, damage: 1_800 },
+        { seat: 0, damage: 1_200 },
+      ];
+
+      socket.receive({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "boss-dead",
+        killedAt: SERVER_NOW + 10,
+        lastHitSeat: 1,
+        ranking,
+        serverAt: SERVER_NOW + 10,
+      });
+
+      expect(controller.getSnapshot().bossDefeat).toEqual({
+        killedAt: SERVER_NOW + 10,
+        lastHitSeat: 1,
+        ranking,
+      });
+      expect(controller.sampleBoss(1_100).phase).toBe("hidden");
+      controller.stop();
+    });
+
+    it("이번 칸에 이미 잡힌 뒤 들어오면 보스가 없다", () => {
+      const { controller } = joinWithBoss({
+        lastKilledAt: SERVER_NOW - 60_000,
+        health: 100,
+        serverAt: SERVER_NOW,
+      });
+
+      expect(controller.getSnapshot().canFightBoss).toBe(true);
+      expect(controller.sampleBoss(1_000).phase).toBe("hidden");
+      controller.stop();
+    });
+
+    it("연결이 끊기면 보스와 쓰러짐 상태를 지운다", () => {
+      const { controller, socket } = joinWithBoss({
+        lastKilledAt: null,
+        health: 100,
+        serverAt: SERVER_NOW,
+      });
+
+      socket.receive({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "respawn",
+        ...self,
+        reviveAt: SERVER_NOW + 3_000,
+        serverAt: SERVER_NOW,
+      });
+      expect(controller.getSnapshot().deadUntil).not.toBeNull();
+
+      socket.emitClose();
+
+      expect(controller.getSnapshot()).toMatchObject({ canFightBoss: false, deadUntil: null });
+      expect(controller.sampleBoss(1_000).phase).toBe("hidden");
       controller.stop();
     });
   });

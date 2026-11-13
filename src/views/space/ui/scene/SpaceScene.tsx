@@ -129,7 +129,10 @@ function SpaceScene({
   const avatarModelIndex = session.self?.modelIndex ?? modelIndex;
   const dummies = useMemo(() => createStressDummies(dummyCount), [dummyCount]);
   const remotePlayers = dummyCount > 0 ? dummies : session.remotePlayers;
-  /** 흉내 보스. 켜지 않았으면 만들지 않음. 상태 객체는 매 프레임 제자리에서 바뀜. */
+  /**
+   * 흉내 보스. 서버 없이 모션을 볼 때만 씀(`?boss=1`). 켜면 서버 보스 대신 이걸 그림.
+   * 상태 객체는 매 프레임 제자리에서 바뀜.
+   */
   const bossPreview = useMemo(
     () => (hasBossPreview ? createBossPreview() : null),
     [hasBossPreview],
@@ -207,7 +210,27 @@ function SpaceScene({
     return nextOrbit;
   };
 
-  const advancePlayerState = (cameraYaw: number, deltaSeconds: number): LocalPlayerState => {
+  /**
+   * 보스에게 쓰러져 리스폰을 기다리는 중인지.
+   *
+   * 서버가 이 동안 이동·공격을 안 받음. 화면에서만 움직이면 끝났을 때 서버 자리로 되감김.
+   */
+  const isKnockedOut = (now: number): boolean => {
+    return session.deadUntil !== null && now < session.deadUntil;
+  };
+
+  const advancePlayerState = (
+    cameraYaw: number,
+    deltaSeconds: number,
+    now: number,
+  ): LocalPlayerState => {
+    if (isKnockedOut(now)) {
+      // 쌓인 시간을 버림. 안 버리면 일어나는 순간 밀린 걸음을 한꺼번에 걸음.
+      accumulatedSecondsRef.current = 0;
+
+      return playerStateRef.current;
+    }
+
     const movementInput = resolveMergedMovementInput(inputSource);
 
     accumulatedSecondsRef.current += deltaSeconds;
@@ -269,7 +292,7 @@ function SpaceScene({
     }
     inputSource.isKickRequested = false;
 
-    if (now < inputSource.kickCooldownUntil) {
+    if (now < inputSource.kickCooldownUntil || isKnockedOut(now)) {
       return;
     }
     // 전송에 실패해도 내 화면에서는 휘두름. 재접속 중에 버튼이 먹통으로 보였음.
@@ -458,7 +481,7 @@ function SpaceScene({
     applyReceivedKicks(now);
 
     const cameraOrbit = advanceCameraOrbit(deltaSeconds);
-    const steppedState = advancePlayerState(cameraOrbit.yaw, deltaSeconds);
+    const steppedState = advancePlayerState(cameraOrbit.yaw, deltaSeconds, now);
     applyPlayerTransform(steppedState);
 
     // 맵 밖으로 빠졌으면 여기서 스폰으로 되돌아옴. 되돌린 궤도를 쓰려고 아래
@@ -468,7 +491,11 @@ function SpaceScene({
     // 공격은 위치를 바로 보내서 되돌린 뒤에 처리함. 음수 높이가 나가면 서버가 반려함.
     handleKickInput(now, playerState);
     session.publishMovement(playerState);
-    bossPreview?.step(now, deltaSeconds, playerState);
+    if (bossPreview) {
+      bossPreview.step(now, deltaSeconds, playerState);
+    } else if (session.canFightBoss) {
+      session.sampleBoss(now);
+    }
 
     const focus = resolveCameraFocus(playerState);
     const targetPosition = resolveCameraPosition(playerState, cameraOrbitRef.current);
@@ -566,9 +593,9 @@ function SpaceScene({
       </group>
 
       {/* 보스 모델을 받는 동안 씬이 비지 않게 따로 매달아 둠. */}
-      {bossPreview && (
+      {(bossPreview || session.canFightBoss) && (
         <Suspense fallback={null}>
-          <RaidBoss bossState={bossPreview.state} />
+          <RaidBoss bossState={bossPreview?.state ?? session.bossState} />
         </Suspense>
       )}
 
