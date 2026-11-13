@@ -1,3 +1,5 @@
+import { toVersionedAudioUrl } from "./audioAssetUrl";
+
 /**
  * 스페이스 효과음. 배경음악과 달리 짧은 소리를 겹쳐 틀어서 Web Audio 로 냄.
  *
@@ -27,18 +29,18 @@ interface SpaceSfxSource {
 
 /** `boss-slam` 만 직접 가져온 음원이고 나머지는 ElevenLabs Sound Effects 로 만들었음. */
 export const SPACE_SFX: Record<SpaceSfxName, SpaceSfxSource> = {
-  swing: { src: "/audio/space-sfx/swing.mp3", volume: 0.18 },
-  hit: { src: "/audio/space-sfx/hit.mp3", volume: 0.4 },
-  hurt: { src: "/audio/space-sfx/hurt.mp3", volume: 0.45 },
-  bossSwipe: { src: "/audio/space-sfx/boss-swipe.mp3", volume: 0.4 },
-  bossSlam: { src: "/audio/space-sfx/boss-slam.mp3", volume: 0.45 },
-  bossCharge: { src: "/audio/space-sfx/boss-charge.mp3", volume: 0.3 },
-  knockout: { src: "/audio/space-sfx/knockout.mp3", volume: 0.5 },
-  bossSpawn: { src: "/audio/space-sfx/boss-spawn.mp3", volume: 0.4 },
-  bossEnrage: { src: "/audio/space-sfx/boss-enrage.mp3", volume: 0.4 },
-  bossStagger: { src: "/audio/space-sfx/boss-stagger.mp3", volume: 0.35 },
-  bossDeath: { src: "/audio/space-sfx/boss-death.mp3", volume: 0.4 },
-  victory: { src: "/audio/space-sfx/victory.mp3", volume: 0.3 },
+  swing: { src: toVersionedAudioUrl("/audio/space-sfx/swing.mp3"), volume: 0.18 },
+  hit: { src: toVersionedAudioUrl("/audio/space-sfx/hit.mp3"), volume: 0.4 },
+  hurt: { src: toVersionedAudioUrl("/audio/space-sfx/hurt.mp3"), volume: 0.45 },
+  bossSwipe: { src: toVersionedAudioUrl("/audio/space-sfx/boss-swipe.mp3"), volume: 0.4 },
+  bossSlam: { src: toVersionedAudioUrl("/audio/space-sfx/boss-slam.mp3"), volume: 0.45 },
+  bossCharge: { src: toVersionedAudioUrl("/audio/space-sfx/boss-charge.mp3"), volume: 0.3 },
+  knockout: { src: toVersionedAudioUrl("/audio/space-sfx/knockout.mp3"), volume: 0.5 },
+  bossSpawn: { src: toVersionedAudioUrl("/audio/space-sfx/boss-spawn.mp3"), volume: 0.4 },
+  bossEnrage: { src: toVersionedAudioUrl("/audio/space-sfx/boss-enrage.mp3"), volume: 0.4 },
+  bossStagger: { src: toVersionedAudioUrl("/audio/space-sfx/boss-stagger.mp3"), volume: 0.35 },
+  bossDeath: { src: toVersionedAudioUrl("/audio/space-sfx/boss-death.mp3"), volume: 0.4 },
+  victory: { src: toVersionedAudioUrl("/audio/space-sfx/victory.mp3"), volume: 0.3 },
 };
 
 export interface SpaceSfxPlayer {

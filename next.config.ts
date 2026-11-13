@@ -28,6 +28,24 @@ const MODEL_ASSET_VERSIONS = Object.fromEntries(
 );
 
 /**
+ * `public/audio` 음원별 내용 해시. 효과음 주소 뒤 `?v=` 로 붙음. 이유는 위 모델과 같음.
+ *
+ * 하위 폴더(`space-sfx`)까지 훑고 파일 이름을 키로 씀. 그래서 **폴더가 달라도 파일 이름은
+ * 겹치면 안 됨.** 음원을 같은 이름으로 덮어쓰면 다음 빌드에서 주소가 바뀜.
+ */
+const AUDIO_ASSET_VERSIONS = Object.fromEntries(
+  readdirSync("./public/audio", { recursive: true, encoding: "utf-8" })
+    .filter((filePath) => filePath.endsWith(".mp3"))
+    .map((filePath) => [
+      filePath.split(/[\\/]/).pop() ?? filePath,
+      createHash("sha256")
+        .update(readFileSync(`./public/audio/${filePath}`))
+        .digest("hex")
+        .slice(0, 12),
+    ]),
+);
+
+/**
  * 환경변수 URL 에서 CSP 소스로 쓸 origin 만 뽑음.
  *
  * 잘못된 값은 빌드를 세우지 않고 건너뜀. CSP 한 줄 때문에 배포 전체가
@@ -136,6 +154,7 @@ const nextConfig: NextConfig = {
   env: {
     NEXT_PUBLIC_APP_VERSION: APP_VERSION,
     NEXT_PUBLIC_MODEL_ASSET_VERSIONS: JSON.stringify(MODEL_ASSET_VERSIONS),
+    NEXT_PUBLIC_AUDIO_ASSET_VERSIONS: JSON.stringify(AUDIO_ASSET_VERSIONS),
   },
   compiler: {
     // error·warn 은 남김. 전부 지우면 서버 조회 실패 로그까지 사라져서 장애 원인을 못 봄.
@@ -223,6 +242,21 @@ const nextConfig: NextConfig = {
          * 나가고 있었다.
          */
         source: "/:dir(models|draco)/:path*",
+        headers: [
+          {
+            key: "Cache-Control",
+            value: "public, max-age=2592000, stale-while-revalidate=86400",
+          },
+        ],
+      },
+      {
+        /**
+         * `/space` 효과음. 모델처럼 한 달로 잡음.
+         *
+         * 확장자 목록에 `mp3` 가 없어 `max-age=0` 으로 나가고 있었음. 주소에 내용 해시가
+         * 붙어서(`audioAssetUrl.ts`) 음원을 바꾸면 주소가 달라져 캐시가 길어도 새 파일을 받음.
+         */
+        source: "/audio/:path*",
         headers: [
           {
             key: "Cache-Control",
