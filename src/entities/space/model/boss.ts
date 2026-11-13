@@ -252,7 +252,7 @@ export const resolveBossAttackSeconds = (attack: SpaceBossAttack): number => {
 /**
  * 돌진을 시작한 뒤 `elapsedSeconds` 가 지났을 때 나아간 거리(m).
  *
- * 서버가 틱마다 보스 위치를 구할 때도, 클라이언트 미리보기도 이 함수를 씀.
+ * 서버가 틱마다 보스 위치를 구할 때도, 클라이언트가 틱 사이 위치를 그릴 때도 이 함수를 씀.
  */
 export const resolveBossChargeTravel = (elapsedSeconds: number): number => {
   const frame = (elapsedSeconds - SPACE_BOSS_ATTACKS.charge.launchSeconds) * BOSS_CLIP_FPS;

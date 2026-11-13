@@ -14,7 +14,6 @@ import {
 } from "@/entities/space";
 import { createBossAnimator } from "./bossAnimator";
 import { BOSS_NODE_NAMES, type BossModel, prepareBossModel } from "./bossModel";
-import { type BossPreviewPlayer, createBossPreview } from "./bossPreview";
 
 /**
  * 실제 에셋을 열어 모션 연결을 확인함.
@@ -190,7 +189,7 @@ describe("createBossAnimator", () => {
       yaw: Math.PI / 2,
     });
 
-    // 미리보기·서버가 하듯 상태 위치만 9 m 옮김.
+    // 서버가 하듯 상태 위치만 9 m 옮김.
     state.x = originX - SPACE_BOSS_ATTACKS.charge.travel;
     runAnimator(state, SPACE_BOSS_CLIP_SECONDS.charge);
 
@@ -266,109 +265,5 @@ describe("재생기 수명", () => {
     const stalled = measureThighMotion(createState({ phase: "walk", speed: 0 }), 1, 0.5);
 
     expect(stalled).toBeLessThan(1);
-  });
-});
-
-describe("createBossPreview", () => {
-  const insidePlayer: BossPreviewPlayer = {
-    x: arena.centerX - 8,
-    y: arena.floorY,
-    z: arena.centerZ,
-    yaw: 0,
-  };
-  const outsidePlayer: BossPreviewPlayer = { x: 0, y: SPACE_BOSS.arena.floorY - 2, z: 0, yaw: 0 };
-
-  const runPreview = (
-    seconds: number,
-    player: BossPreviewPlayer,
-    preview = createBossPreview(),
-    fromSeconds = 0,
-  ) => {
-    const phases = new Set<string>();
-
-    for (let elapsed = fromSeconds; elapsed <= fromSeconds + seconds; elapsed += FRAME_SECONDS) {
-      preview.step(elapsed * 1000, FRAME_SECONDS, player);
-      phases.add(preview.state.attack ?? preview.state.phase);
-    }
-
-    return { preview, phases };
-  };
-
-  it("아무도 없으면 등장한 뒤 가운데 서 있는다", () => {
-    const { preview, phases } = runPreview(10, outsidePlayer);
-
-    expect([...phases]).toEqual(["spawn", "idle"]);
-    expect(preview.state.x).toBe(arena.centerX);
-    expect(preview.state.z).toBe(arena.centerZ);
-  });
-
-  it("아레나에 들어오면 쫓아와 공격하고 아레나를 벗어나지 않는다", () => {
-    const preview = createBossPreview();
-    const phases = new Set<string>();
-    let farthest = 0;
-
-    for (let elapsed = 0; elapsed <= 60; elapsed += FRAME_SECONDS) {
-      // 플레이어가 아레나 안을 크게 돎.
-      const angle = elapsed * 0.6;
-      const player = {
-        x: arena.centerX + Math.cos(angle) * 9,
-        y: arena.floorY,
-        z: arena.centerZ + Math.sin(angle) * 9,
-        yaw: 0,
-      };
-
-      preview.step(elapsed * 1000, FRAME_SECONDS, player);
-      phases.add(preview.state.attack ?? preview.state.phase);
-      farthest = Math.max(
-        farthest,
-        Math.hypot(preview.state.x - arena.centerX, preview.state.z - arena.centerZ),
-      );
-    }
-
-    expect(phases.has("run")).toBe(true);
-    expect(phases.has("swipe") || phases.has("slam") || phases.has("charge")).toBe(true);
-    expect(farthest).toBeLessThanOrEqual(arena.radius);
-  });
-
-  it("대상이 나가면 걸어서 가운데로 돌아온다", () => {
-    const engaged = runPreview(12, insidePlayer);
-    const { preview, phases } = runPreview(40, outsidePlayer, engaged.preview, 12);
-
-    expect(phases.has("walk")).toBe(true);
-    expect(preview.state.phase).toBe("idle");
-    expect(
-      Math.hypot(preview.state.x - arena.centerX, preview.state.z - arena.centerZ),
-    ).toBeLessThan(0.5);
-  });
-
-  it("맞다 보면 포효하고 · 비틀거리고 · 쓰러졌다가 다시 나온다", () => {
-    const preview = createBossPreview();
-    const phases: string[] = [];
-
-    for (let elapsed = 0; elapsed <= 90; elapsed += FRAME_SECONDS) {
-      const nowMs = elapsed * 1000;
-      // 보스 바로 옆(+X)에 붙어 보스 쪽(−X)을 보고 1초마다 때림.
-      const player = {
-        x: preview.state.x + 2,
-        y: arena.floorY,
-        z: preview.state.z,
-        yaw: Math.PI / 2,
-      };
-
-      preview.step(nowMs, FRAME_SECONDS, player);
-      if (Math.abs(elapsed % 1) < FRAME_SECONDS) {
-        preview.registerKick(nowMs, player);
-      }
-      if (phases.at(-1) !== preview.state.phase) {
-        phases.push(preview.state.phase);
-      }
-    }
-
-    const sequence = phases.join(" ");
-
-    expect(sequence).toContain("enrage");
-    expect(sequence).toContain("stagger");
-    expect(sequence).toMatch(/dead hidden spawn/);
-    expect(phases.indexOf("enrage")).toBeLessThan(phases.indexOf("stagger"));
   });
 });

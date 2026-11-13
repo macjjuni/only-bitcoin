@@ -66,8 +66,6 @@ interface SpaceCanvasProps {
   identity: ChatIdentity;
   /** 개발 전용 더미 아바타 수. */
   dummyCount: number;
-  /** 개발 전용 보스 미리보기. */
-  hasBossPreview: boolean;
 }
 
 // region [Privates]
@@ -86,7 +84,7 @@ const hasRealtimeShadowBudget = (): boolean => {
 };
 // endregion
 
-function SpaceCanvas({ identity, dummyCount, hasBossPreview }: SpaceCanvasProps): ReactNode {
+function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   // region [Hooks]
   const inputSource = useMemo(() => createSpaceInputSource(), []);
   const [localCelebration, setLocalCelebration] = useState<SpaceCelebration | null>(null);
@@ -360,7 +358,6 @@ function SpaceCanvas({ identity, dummyCount, hasBossPreview }: SpaceCanvasProps)
             session={session}
             hasRealtimeShadows={hasRealtimeShadows}
             dummyCount={dummyCount}
-            hasBossPreview={hasBossPreview}
             onReadyMap={onReadyMap}
             onReadyAvatar={onReadyAvatar}
           />
