@@ -1,10 +1,11 @@
 import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
-import { type AnimationClip, Vector3 } from "three";
+import { type AnimationClip, type Mesh, Vector3 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import { beforeAll, describe, expect, it } from "vitest";
 import {
   createHiddenBossState,
+  resolveBossAttackSeconds,
   SPACE_BOSS,
   SPACE_BOSS_ATTACKS,
   SPACE_BOSS_CLIP_SECONDS,
@@ -173,6 +174,55 @@ describe("createBossAnimator", () => {
 
     expect(visibleAt.get("before")).toBe(true);
     expect(visibleAt.get("after")).toBe(false);
+  });
+
+  it("회전 예고는 도는 내내 켜져서 보스를 따라가고 다 돌면 꺼진다", () => {
+    const { radius, launchSeconds, arriveSeconds } = SPACE_BOSS_ATTACKS.spin;
+    const spin = model.scene.getObjectByName(BOSS_NODE_NAMES.aoe.spin);
+    const footprint = model.scene.getObjectByName("Spin__01_full_footprint") as Mesh | undefined;
+    const originX = arena.centerX + 3;
+    const state = createState({
+      phase: "attack",
+      attack: "spin",
+      x: originX,
+      z: arena.centerZ,
+      attackOriginX: originX,
+      attackOriginZ: arena.centerZ,
+    });
+    const visibleAt = new Map<string, boolean>();
+    let drawnRadius = 0;
+    let followGap = 0;
+
+    footprint?.geometry.computeBoundingBox();
+
+    runAnimator(state, resolveBossAttackSeconds("spin"), (seconds) => {
+      if (seconds > 0.2 && seconds < launchSeconds) {
+        visibleAt.set("windup", spin?.visible ?? false);
+      }
+      if (seconds > launchSeconds && seconds < arriveSeconds - 0.1) {
+        // 서버가 하듯 도는 동안 상태 위치를 옮김.
+        state.x = originX - (seconds - launchSeconds) * SPACE_BOSS_ATTACKS.spin.moveSpeed;
+        // 모션의 도는 구간(1초)이 끝나는 이음매에서도 꺼지면 안 됨.
+        visibleAt.set("spinning", (visibleAt.get("spinning") ?? true) && (spin?.visible ?? false));
+        drawnRadius = (footprint?.geometry.boundingBox?.max.x ?? 0) * (spin?.scale.x ?? 0);
+        followGap = Math.max(
+          followGap,
+          Math.abs(readWorldPosition(BOSS_NODE_NAMES.aoe.spin).x - model.rig.position.x),
+        );
+      }
+      if (seconds > arriveSeconds + 0.1) {
+        visibleAt.set("after", spin?.visible ?? true);
+      }
+    });
+
+    expect(visibleAt.get("windup")).toBe(true);
+    expect(visibleAt.get("spinning")).toBe(true);
+    expect(visibleAt.get("after")).toBe(false);
+    // 보이는 원이 판정 반지름과 같음.
+    expect(drawnRadius).toBeCloseTo(radius, 3);
+    // 상태 위치는 이번 프레임 것을 그리므로 예고와 몸이 한 프레임 안에서 같은 자리임.
+    expect(followGap).toBeLessThan(SPACE_BOSS_ATTACKS.spin.moveSpeed * FRAME_SECONDS + 1e-6);
+    expect(Math.abs(state.x - originX)).toBeGreaterThan(10);
   });
 
   it("돌진 중 보스는 상태 위치를 따르고 예고는 시작 자리에 남는다", () => {

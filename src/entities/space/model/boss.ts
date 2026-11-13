@@ -13,7 +13,7 @@ const BOSS_CLIP_FPS = 24;
 
 const framesToSeconds = (frames: number): number => frames / BOSS_CLIP_FPS;
 
-export type SpaceBossAttack = "swipe" | "slam" | "charge";
+export type SpaceBossAttack = "swipe" | "slam" | "charge" | "spin";
 
 /**
  * 보스가 지금 하고 있는 일. 모션 하나와 1:1 임.
@@ -123,8 +123,12 @@ export const SPACE_BOSS_COMBAT = {
   kickReach: 2,
   /** 보스를 향한 정도(내적)가 이보다 커야 닿음. 등지고 휘두른 건 안 맞음. 약 70° 안. */
   kickFacingDot: 0.34,
-  /** 공격별 피해. 유저 최대 체력 100 기준 3 ~ 5대. */
-  attackDamage: { swipe: 20, slam: 35, charge: 30 },
+  /**
+   * 공격별 피해. 유저 최대 체력 100 기준 3 ~ 5대.
+   *
+   * 회전만 작음. 도는 5초 동안 1초마다 다시 맞아서 다 맞으면 75 임.
+   */
+  attackDamage: { swipe: 20, slam: 35, charge: 30, spin: 15 },
   /**
    * 판정 범위를 예고보다 이만큼 작게 잡음(m).
    *
@@ -155,6 +159,12 @@ export const SPACE_BOSS_COMBAT = {
   staggerHealthRatio: 0.25,
   /** 돌진을 연달아 쓰지 않게 두는 간격(ms). */
   chargeIntervalMs: 6_000,
+  /**
+   * 회전을 시작한 뒤 다음 회전까지 두는 간격(ms).
+   *
+   * 한 번이 6.5초라 근접 순서대로 매번 쓰면 싸움의 절반을 돌기만 함.
+   */
+  spinIntervalMs: 15_000,
 } as const;
 
 /** 유저 체력 규칙. */
@@ -189,6 +199,7 @@ export const SPACE_BOSS_CLIP_SECONDS = {
   swipe: framesToSeconds(53),
   slam: framesToSeconds(65),
   charge: framesToSeconds(71),
+  spin: framesToSeconds(60),
   idle: framesToSeconds(60),
   walk: framesToSeconds(30),
   run: framesToSeconds(16),
@@ -199,6 +210,16 @@ export const SPACE_BOSS_CLIP_SECONDS = {
   spawn: framesToSeconds(48),
   death: framesToSeconds(60),
 } as const;
+
+/**
+ * 회전 모션의 구간(초). 에셋 `Spin` 은 준비 1초 · 두 바퀴 도는 1초 · 마무리 0.5초임.
+ *
+ * 도는 1초를 `BOSS_SPIN_LOOP_COUNT` 번 이어 틀어 길게 돎. 두 바퀴를 꽉 채워 돌고 끝나는
+ * 구간이라 이어 붙여도 자세가 안 튐.
+ */
+const BOSS_SPIN_LAUNCH_SECONDS = framesToSeconds(24);
+const BOSS_SPIN_LOOP_SECONDS = framesToSeconds(24);
+const BOSS_SPIN_LOOP_COUNT = 5;
 
 /** `Turn` 모션에서 실제로 몸이 도는 구간(초). 이 사이에만 yaw 를 옮김. 앞뒤는 발 디딤임. */
 export const SPACE_BOSS_TURN = {
@@ -224,6 +245,24 @@ export const SPACE_BOSS_ATTACKS = {
     travel: 9,
     launchSeconds: framesToSeconds(24),
     arriveSeconds: framesToSeconds(46),
+  },
+  /**
+   * 발밑에 중심을 둔 원. 팔을 벌리고 돌면서 타깃을 쫓아감. 예고 원도 보스를 따라감.
+   *
+   * 한순간이 아니라 `launchSeconds` 부터 `arriveSeconds` 까지 도는 내내 판정함.
+   * 같은 사람은 `rehitSeconds` 마다 다시 맞음.
+   * 예고는 내려찍기 원(4 m)을 0.7배로 줄여 그려서 반지름이 2.8 m 임. 에셋 `extras` 의 3.1 은
+   * 판정 여유 0.3 을 빼기 전 값이라 안 옮김. 원이 이미 여유를 뺀 크기라 `hitMargin` 은 안 뺌.
+   */
+  spin: {
+    radius: 2.8,
+    launchSeconds: BOSS_SPIN_LAUNCH_SECONDS,
+    arriveSeconds: BOSS_SPIN_LAUNCH_SECONDS + BOSS_SPIN_LOOP_SECONDS * BOSS_SPIN_LOOP_COUNT,
+    /** 모션에서 도는 구간의 길이. 이만큼을 되풀이해 틂. */
+    loopSeconds: BOSS_SPIN_LOOP_SECONDS,
+    /** 돌면서 쫓는 속도(m/s). 추적(4)보다 느려서 걸어서도 벗어남. */
+    moveSpeed: 3,
+    rehitSeconds: 1,
   },
 } as const;
 
@@ -273,7 +312,33 @@ export const SPACE_BOSS_HIT = {
 
 /** 공격 한 번의 전체 길이(초). 끝나야 다음 행동으로 넘어감. */
 export const resolveBossAttackSeconds = (attack: SpaceBossAttack): number => {
+  if (attack === "spin") {
+    const { launchSeconds, arriveSeconds, loopSeconds } = SPACE_BOSS_ATTACKS.spin;
+
+    // 모션의 도는 구간(1초)을 늘려 틀어서 모션 길이보다 김.
+    return SPACE_BOSS_CLIP_SECONDS.spin + (arriveSeconds - launchSeconds - loopSeconds);
+  }
+
   return SPACE_BOSS_CLIP_SECONDS[attack];
+};
+
+/**
+ * 회전을 시작한 뒤 `elapsedSeconds` 가 지났을 때 `Spin` 모션에서 틀 지점(초).
+ *
+ * 준비는 그대로 틀고, 도는 구간을 되풀이하다가, 다 돌면 마무리로 넘어감.
+ */
+export const resolveBossSpinClipSeconds = (elapsedSeconds: number): number => {
+  const { launchSeconds, arriveSeconds, loopSeconds } = SPACE_BOSS_ATTACKS.spin;
+
+  if (elapsedSeconds <= launchSeconds) {
+    return Math.max(0, elapsedSeconds);
+  }
+
+  if (elapsedSeconds >= arriveSeconds) {
+    return launchSeconds + loopSeconds + (elapsedSeconds - arriveSeconds);
+  }
+
+  return launchSeconds + ((elapsedSeconds - launchSeconds) % loopSeconds);
 };
 
 /**

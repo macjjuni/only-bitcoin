@@ -19,12 +19,13 @@ import {
  *
  * 처음 속도는 셋 다 8 m/s 로 묶었음. 서버의 이동 속도 상한(8.5 m/s)을 넘으면 이동이
  * 반려되고 화면이 되감김. 밀리는 동안 조작 입력을 막아서 내 걸음이 더해지지도 않음.
- * 세기 차이는 시간으로 냄: 휘두르기 1.0 m, 내려찍기 1.6 m, 돌진 3.0 m.
+ * 세기 차이는 시간으로 냄: 휘두르기 1.0 m, 내려찍기 1.6 m, 회전 2.0 m, 돌진 3.0 m.
  */
 export const SPACE_BOSS_KNOCKBACK = {
   swipe: { speed: 8, seconds: 0.25 },
   slam: { speed: 8, seconds: 0.4 },
   charge: { speed: 8, seconds: 0.75 },
+  spin: { speed: 8, seconds: 0.5 },
 } as const satisfies Record<SpaceBossAttack, { speed: number; seconds: number }>;
 
 export interface Knockback {
@@ -51,7 +52,7 @@ const clamp = (value: number, minimum: number, maximum: number): number =>
 /**
  * 맞은 공격에 맞는 밀림을 만듦.
  *
- * 휘두르기·내려찍기는 보스 반대쪽으로, 돌진은 보스가 달리는 방향으로 밀림. 돌진을
+ * 휘두르기·내려찍기·회전은 보스 반대쪽으로, 돌진은 보스가 달리는 방향으로 밀림. 돌진을
  * 보스 반대쪽으로 밀면 옆에서 스친 사람이 옆으로 튀는데, 들이받힌 느낌은 진행 방향임.
  */
 export const createBossKnockback = (

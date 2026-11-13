@@ -93,9 +93,25 @@ export const isInsideBossChargeSweep = (
   );
 };
 
+/**
+ * 회전. 발밑에 중심을 둔 원. 방향을 안 가려서 뒤에 선 사람도 맞음.
+ *
+ * 다른 공격과 달리 기본 여유가 0 이라 예고 원 그대로 판정함. 에셋이 여유를 이미 뺀
+ * 크기(3.1 − 0.3 = 2.8 m)로 원을 그려서, 여기서 또 빼면 두 번 깎음.
+ */
+export const isInsideBossSpin = (
+  origin: BossAttackOrigin,
+  point: BossPoint,
+  margin: number = 0,
+): boolean => {
+  const { radius } = SPACE_BOSS_ATTACKS.spin;
+
+  return Math.hypot(point.x - origin.x, point.z - origin.z) <= radius - margin;
+};
+
 /** 한 번에 판정하는 공격(휘두르기 · 내려찍기)의 범위 안인지. */
 export const isInsideBossAttack = (
-  attack: Exclude<SpaceBossAttack, "charge">,
+  attack: Extract<SpaceBossAttack, "swipe" | "slam">,
   origin: BossAttackOrigin,
   point: BossPoint,
   margin: number = SPACE_BOSS_COMBAT.hitMargin,

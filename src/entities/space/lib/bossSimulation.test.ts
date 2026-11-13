@@ -335,6 +335,143 @@ describe("보스 공격 판정", () => {
 
     expect(attacks[0]).toBe("slam");
   });
+
+  it("가까이 붙어 있으면 휘두르기 · 내려찍기 다음에 회전이 오고, 도는 동안 1초마다 맞는다", () => {
+    const simulation = createSpawnedSimulation();
+    const { launchSeconds, arriveSeconds, rehitSeconds } = SPACE_BOSS_ATTACKS.spin;
+    const hits: { attack: string; afterSeconds: number }[] = [];
+
+    run({
+      simulation,
+      fromMs: 0,
+      seconds: 19,
+      players: (now) => [createPlayer(1, -2.5, 0, now)],
+      onTick: (nowMs, tickHits) => {
+        for (const hit of tickHits) {
+          hits.push({
+            attack: hit.attack,
+            afterSeconds: (nowMs - simulation.state.phaseStartedAt) / 1000,
+          });
+        }
+      },
+    });
+
+    const spinHits = hits.filter((hit) => hit.attack === "spin");
+    const spinCount = (arriveSeconds - launchSeconds) / rehitSeconds;
+
+    expect(hits.map((hit) => hit.attack)).toEqual([
+      "swipe",
+      "slam",
+      ...Array.from({ length: spinCount }, () => "spin"),
+      // 회전은 한동안 못 써서 순서를 건너뜀.
+      "swipe",
+    ]);
+    // 돌기 시작하는 걸음에 처음 맞고, 그 뒤로 1초마다. 마무리에는 안 맞음.
+    for (const [index, hit] of spinHits.entries()) {
+      expect(hit.afterSeconds).toBeCloseTo(launchSeconds + index * rehitSeconds, 6);
+      expect(hit.afterSeconds).toBeLessThan(arriveSeconds);
+    }
+  });
+
+  it("준비 동안은 제자리에 있고, 돌면서 타깃을 쫓아가 닿으면 때린다", () => {
+    const simulation = createSpawnedSimulation();
+    const { launchSeconds, arriveSeconds, moveSpeed, radius } = SPACE_BOSS_ATTACKS.spin;
+    const startYaw = simulation.state.yaw;
+    const fleeDistance = 9;
+    let windupTravel = 0;
+    let firstSpinHitSeconds = Number.NaN;
+    let spinEndX = Number.NaN;
+
+    run({
+      simulation,
+      fromMs: 0,
+      seconds: 15,
+      // 회전이 시작되면 9 m 밖으로 물러나 서 있음.
+      players: (now) => [
+        createPlayer(1, simulation.state.attack === "spin" ? -fleeDistance : -2.5, 0, now),
+      ],
+      onTick: (nowMs, tickHits) => {
+        if (simulation.state.attack !== "spin") {
+          return;
+        }
+
+        const spinSeconds = (nowMs - simulation.state.phaseStartedAt) / 1000;
+        const travel = Math.abs(simulation.state.x - simulation.state.attackOriginX);
+
+        if (spinSeconds < launchSeconds) {
+          windupTravel = Math.max(windupTravel, travel);
+        }
+        if (Number.isNaN(firstSpinHitSeconds) && tickHits.some((hit) => hit.attack === "spin")) {
+          firstSpinHitSeconds = spinSeconds;
+        }
+        spinEndX = simulation.state.x;
+        // 몸은 모션이 돌림. 보는 방향은 그대로임.
+        expect(simulation.state.yaw).toBe(startYaw);
+      },
+    });
+
+    expect(windupTravel).toBe(0);
+    // 타깃 몸에 닿을 만큼 붙으면 멈춤.
+    expect(arena.centerX - spinEndX).toBeCloseTo(fleeDistance - SPACE_BOSS.bodyRadius, 1);
+    // 9 m 를 3 m/s 로 좁혀 원(2.8 m)이 닿는 데 2초 남짓 걸림.
+    expect(firstSpinHitSeconds).toBeGreaterThanOrEqual(
+      launchSeconds + (fleeDistance - radius) / moveSpeed - TICK_SECONDS,
+    );
+    expect(firstSpinHitSeconds).toBeLessThan(arriveSeconds);
+  });
+
+  it("도는 중에 원 안으로 들어온 사람도 맞고, 다 돈 뒤에 들어오면 안 맞는다", () => {
+    const { launchSeconds, arriveSeconds } = SPACE_BOSS_ATTACKS.spin;
+    const countLateComerHits = (enterAtSeconds: number): number => {
+      const simulation = createSpawnedSimulation();
+      let hitCount = 0;
+
+      run({
+        simulation,
+        fromMs: 0,
+        seconds: 16,
+        players: (now) => {
+          const { state } = simulation;
+          const spinSeconds = state.attack === "spin" ? (now - state.phaseStartedAt) / 1000 : -1;
+          const lateComer =
+            spinSeconds >= enterAtSeconds
+              ? // 그때 보스가 있는 자리의 등 뒤 2 m.
+                createPlayer(2, 0, 0, now, { x: state.x + 2, z: state.z })
+              : createPlayer(2, 10, 0, now);
+
+          return [createPlayer(1, -2.5, 0, now), lateComer];
+        },
+        onTick: (_, tickHits) => {
+          hitCount += tickHits.filter((hit) => hit.attack === "spin" && hit.seat === 2).length;
+        },
+      });
+
+      return hitCount;
+    };
+
+    expect(countLateComerHits((launchSeconds + arriveSeconds) / 2)).toBeGreaterThan(0);
+    expect(countLateComerHits(arriveSeconds + TICK_SECONDS)).toBe(0);
+  });
+
+  it("옆이나 뒤에 붙은 사람이 있으면 순서를 건너뛰고 회전부터 쓴다", () => {
+    const simulation = createSpawnedSimulation();
+    const attacks: string[] = [];
+
+    run({
+      simulation,
+      fromMs: 0,
+      seconds: 3,
+      // 타깃은 앞에, 다른 한 사람은 보스 등 뒤 2 m 에 섬.
+      players: (now) => [createPlayer(1, -2.5, 0, now), createPlayer(2, 2, 0, now)],
+      onTick: () => {
+        if (simulation.state.attack && attacks.at(-1) !== simulation.state.attack) {
+          attacks.push(simulation.state.attack);
+        }
+      },
+    });
+
+    expect(attacks[0]).toBe("spin");
+  });
 });
 
 describe("유저 공격", () => {

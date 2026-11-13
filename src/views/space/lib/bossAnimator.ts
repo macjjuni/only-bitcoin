@@ -6,6 +6,7 @@ import {
   LoopRepeat,
 } from "three";
 import {
+  resolveBossSpinClipSeconds,
   SPACE_BOSS,
   SPACE_BOSS_CLIP_SECONDS,
   SPACE_BOSS_DEATH,
@@ -124,10 +125,17 @@ const resolveEmergence = (state: SpaceBossState, elapsedSeconds: number): number
   return state.phase === "hidden" ? 0 : 1;
 };
 
-/** 한 번 트는 모션에서 지금 있어야 할 지점(초). 등장은 솟는 동안 첫 프레임에 멈춰 둠. */
+/**
+ * 한 번 트는 모션에서 지금 있어야 할 지점(초). 등장은 솟는 동안 첫 프레임에 멈춰 두고,
+ * 회전은 도는 구간을 되풀이함.
+ */
 const resolveClipSeconds = (state: SpaceBossState, elapsedSeconds: number): number => {
   if (state.phase === "spawn") {
     return Math.max(0, elapsedSeconds - SPACE_BOSS_SPAWN.riseSeconds);
+  }
+
+  if (state.phase === "attack" && state.attack === "spin") {
+    return resolveBossSpinClipSeconds(elapsedSeconds);
   }
 
   return Math.max(0, elapsedSeconds);
@@ -217,7 +225,14 @@ export const createBossAnimator = (model: BossModel): BossAnimator => {
     model.rig.rotation.set(0, state.yaw + MODEL_YAW_OFFSET, 0);
 
     // 예고는 공격을 시작한 자리에 박아 둠. 공격 중에는 방향이 안 바뀌어 yaw 는 같이 씀.
-    model.aoeAnchor.position.set(state.attackOriginX, floorY, state.attackOriginZ);
+    // 회전만 보스를 따라감. 돌면서 움직이는 내내 보스 둘레가 맞는 자리임.
+    const isAoeFollowing = state.phase === "attack" && state.attack === "spin";
+
+    model.aoeAnchor.position.set(
+      isAoeFollowing ? state.x : state.attackOriginX,
+      floorY,
+      isAoeFollowing ? state.z : state.attackOriginZ,
+    );
     model.aoeAnchor.rotation.set(0, state.yaw + MODEL_YAW_OFFSET, 0);
   };
 

@@ -28,6 +28,7 @@ export const BOSS_CLIP_NAMES = {
   swipe: "Swipe",
   slam: "Slam",
   charge: "Charge",
+  spin: "Spin",
   idle: "Idle",
   walk: "Walk",
   run: "Run",
@@ -45,7 +46,7 @@ export type BossClipKey = keyof typeof BOSS_CLIP_NAMES;
 export const BOSS_NODE_NAMES = {
   rig: "Bear_Rig",
   rootBone: "root",
-  aoe: { swipe: "AOE_Swipe", slam: "AOE_Slam", charge: "AOE_Charge" },
+  aoe: { swipe: "AOE_Swipe", slam: "AOE_Slam", charge: "AOE_Charge", spin: "AOE_Spin" },
   aoeAnchor: "Boss_AOE_Anchor",
 } as const satisfies {
   rig: string;

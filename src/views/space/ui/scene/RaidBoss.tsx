@@ -15,6 +15,20 @@ import { createShadowBlobTexture } from "@/views/space/lib/shadowBlobTexture";
 const SHADOW_DIAMETER = 5.6;
 /** 바닥 예고 표시(최대 5.4 cm)보다 아래에 깔아 예고를 가리지 않게 함. */
 const SHADOW_LIFT_Y = 0.008;
+/**
+ * 어그로 범위 고리. 아레나 경계(`SPACE_BOSS.arena.radius`)가 바깥 가장자리임.
+ *
+ * 이 안에 서 있어야 보스가 쫓음. 공격 예고(빨강 · 주황)와 헷갈리지 않게 옅은 얼음색으로 깖.
+ */
+const AGGRO_RING = {
+  /** 선 굵기(m). */
+  width: 0.14,
+  /** 그림자보다도 아래. 예고와 그림자를 가리지 않음. */
+  liftY: 0.005,
+  color: "#bfe6ff",
+  opacity: 0.42,
+  segments: 96,
+} as const;
 /** 체력판을 정수리에서 띄우는 높이(m). */
 const HEALTH_PLATE_LIFT = 0.6;
 /** 거리와 무관하게 읽히는 크기. 명찰·피해 숫자와 같은 값. */
@@ -52,6 +66,8 @@ function RaidBoss({ bossState, getBossHealth }: RaidBossProps): ReactNode {
   const shadowTexture = useMemo(() => createShadowBlobTexture(), []);
   const shadowMeshRef = useRef<Mesh>(null);
   const shadowMaterialRef = useRef<MeshBasicMaterial>(null);
+  const aggroRingMeshRef = useRef<Mesh>(null);
+  const aggroRingMaterialRef = useRef<MeshBasicMaterial>(null);
   const healthAnchorRef = useRef<Group>(null);
   const healthPlateRef = useRef<HTMLDivElement>(null);
   const healthFillRef = useRef<HTMLDivElement>(null);
@@ -78,6 +94,19 @@ function RaidBoss({ bossState, getBossHealth }: RaidBossProps): ReactNode {
       model.rig.position.z,
     );
     shadowMaterial.opacity = emergence;
+  };
+
+  /** 어그로 고리는 보스가 나와 있을 때만 보임. 솟아오르고 가라앉는 만큼 같이 짙어지고 옅어짐. */
+  const applyAggroRing = (emergence: number): void => {
+    const ringMesh = aggroRingMeshRef.current;
+    const ringMaterial = aggroRingMaterialRef.current;
+
+    if (!ringMesh || !ringMaterial) {
+      return;
+    }
+
+    ringMesh.visible = emergence > 0;
+    ringMaterial.opacity = emergence * AGGRO_RING.opacity;
   };
 
   /**
@@ -163,6 +192,7 @@ function RaidBoss({ bossState, getBossHealth }: RaidBossProps): ReactNode {
     const emergence = animator.update(bossState, performance.now(), deltaSeconds);
 
     applyShadow(emergence);
+    applyAggroRing(emergence);
     applyHealthPlate(emergence);
   });
   // endregion
@@ -179,6 +209,35 @@ function RaidBoss({ bossState, getBossHealth }: RaidBossProps): ReactNode {
           map={shadowTexture}
           transparent
           depthWrite={false}
+        />
+      </mesh>
+
+      <mesh
+        ref={aggroRingMeshRef}
+        position={[
+          SPACE_BOSS.arena.centerX,
+          SPACE_BOSS.arena.floorY + AGGRO_RING.liftY,
+          SPACE_BOSS.arena.centerZ,
+        ]}
+        rotation={[-Math.PI / 2, 0, 0]}
+        visible={false}
+      >
+        <ringGeometry
+          args={[
+            SPACE_BOSS.arena.radius - AGGRO_RING.width,
+            SPACE_BOSS.arena.radius,
+            AGGRO_RING.segments,
+          ]}
+        />
+        <meshBasicMaterial
+          ref={aggroRingMaterialRef}
+          color={AGGRO_RING.color}
+          transparent
+          opacity={0}
+          depthWrite={false}
+          polygonOffset
+          polygonOffsetFactor={-2}
+          polygonOffsetUnits={-2}
         />
       </mesh>
 

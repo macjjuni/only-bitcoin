@@ -1,5 +1,5 @@
 import { describe, expect, it } from "vitest";
-import type { SpaceBossState } from "@/entities/space";
+import { SPACE_BOSS_ATTACKS, type SpaceBossState } from "@/entities/space";
 import {
   BOSS_ATTACK_SOUND_CUE_SECONDS,
   createBossAttackSoundTracker,
@@ -45,6 +45,27 @@ describe("createBossAttackSoundTracker", () => {
     const tracker = createBossAttackSoundTracker();
 
     expect(tracker.step(createState({ phase: "idle", attack: null }), 2_000)).toBeNull();
+  });
+
+  it("회전은 도는 동안 한 바퀴 구간마다 다시 알린다", () => {
+    const { launchSeconds, arriveSeconds, loopSeconds } = SPACE_BOSS_ATTACKS.spin;
+    const tracker = createBossAttackSoundTracker();
+    const state = createState({ attack: "spin" });
+    const cueSeconds: number[] = [];
+
+    for (let nowMs = 0; nowMs <= (arriveSeconds + 1) * 1000; nowMs += 16) {
+      if (tracker.step(state, nowMs) === "spin") {
+        cueSeconds.push(nowMs / 1000);
+      }
+    }
+
+    expect(cueSeconds).toHaveLength((arriveSeconds - launchSeconds) / loopSeconds);
+    for (const [index, seconds] of cueSeconds.entries()) {
+      const expected = BOSS_ATTACK_SOUND_CUE_SECONDS.spin + index * loopSeconds;
+
+      expect(seconds).toBeGreaterThanOrEqual(expected);
+      expect(seconds).toBeLessThan(expected + 0.02);
+    }
   });
 
   it("같은 공격을 다시 시작하면 다시 알린다", () => {

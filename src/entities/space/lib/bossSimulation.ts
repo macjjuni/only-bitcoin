@@ -19,6 +19,7 @@ import {
   isInsideBossArena,
   isInsideBossAttack,
   isInsideBossChargeSweep,
+  isInsideBossSpin,
 } from "./bossHitTest";
 
 /**
@@ -114,9 +115,12 @@ export interface BossSimulation {
   applyPlayerDeath: (actorKey: string) => void;
 }
 
+/** 가까이 붙었을 때 쓰는 공격. 돌진은 멀리서만 써서 빠짐. */
+type BossCloseAttack = Exclude<SpaceBossAttack, "charge">;
+
 /** 거리별 공격 선택 기준(m). */
 const ATTACK_RANGE = {
-  /** 이 안이면 가까이 붙은 것으로 봄. 휘두르기와 내려찍기를 번갈아 씀. */
+  /** 이 안이면 가까이 붙은 것으로 봄. 휘두르기 · 내려찍기 · 회전을 돌려 씀. */
   close: 3.3,
   /** 내려찍기 원이 닿는 거리. */
   slam: 5.8,
@@ -131,6 +135,12 @@ const HOME_ARRIVAL_DISTANCE = 0.3;
 const RANKING_COUNT = 5;
 /** 내려찍기 원 안에 이만큼 모여 있으면 거리와 상관없이 내려찍음. */
 const SLAM_CROWD_COUNT = 2;
+/** 가까이 붙은 타깃에게 쓰는 순서. 직전에 쓴 공격의 다음 것을 씀. */
+const NEXT_CLOSE_ATTACK: Record<BossCloseAttack, BossCloseAttack> = {
+  swipe: "slam",
+  slam: "spin",
+  spin: "swipe",
+};
 
 // region [Privates]
 /** 전방이 −Z 인 규약에서 `(deltaX, deltaZ)` 쪽을 보는 yaw. */
@@ -169,7 +179,9 @@ export const createBossSimulation = (
   let chargeReadyAt = 0;
   let hasEnraged = false;
   let hasStaggered = false;
-  let lastCloseAttack: SpaceBossAttack = "slam";
+  /** 직전에 쓴 근접 공격. 첫 공격이 휘두르기가 되게 순서의 마지막에서 시작함. */
+  let lastCloseAttack: BossCloseAttack = "spin";
+  let spinReadyAt = 0;
   /** 지금 하던 동작이 끝나면 틀 반응. 공격 도중에 끊지 않음. */
   let pendingReaction: "enrage" | "stagger" | null = null;
   let turnFromYaw = 0;
@@ -181,8 +193,10 @@ export const createBossSimulation = (
   let hadCandidates = false;
   /** 직전 걸음까지 진행한 공격 시간(초). 판정 시각을 넘는 순간을 잡음. */
   let attackElapsedSeconds = 0;
-  /** 이번 돌진에 이미 맞은 좌석. 같은 사람은 한 번만 맞음. */
-  const chargeHitSeats = new Set<number>();
+  /** 이번 돌진에 이미 맞은 좌석. 여러 틱에 걸쳐 판정해도 같은 사람은 한 번만 맞음. */
+  const sweepHitSeats = new Set<number>();
+  /** 이번 회전에 좌석별로 마지막으로 맞은 시각. `rehitSeconds` 가 지나야 다시 맞음. */
+  const spinHitAtBySeat = new Map<number, number>();
   /** 사람별 누적 피해. 어그로와 처치 순위에 씀. 좌석은 마지막으로 때릴 때의 것임. */
   const damageByActor = new Map<string, { seat: number; damage: number }>();
   /** 아레나에 들어온 시각. 아무도 안 때렸을 때 먼저 온 사람을 쫓음. */
@@ -203,6 +217,7 @@ export const createBossSimulation = (
     health = maximumHealth;
     restUntil = 0;
     chargeReadyAt = 0;
+    spinReadyAt = 0;
     hasEnraged = false;
     hasStaggered = false;
     pendingReaction = null;
@@ -228,12 +243,18 @@ export const createBossSimulation = (
     state.attackOriginX = state.x;
     state.attackOriginZ = state.z;
     attackElapsedSeconds = 0;
-    chargeHitSeats.clear();
+    sweepHitSeats.clear();
+    spinHitAtBySeat.clear();
 
     if (attack === "charge") {
       chargeReadyAt = nowMs + SPACE_BOSS_COMBAT.chargeIntervalMs;
-    } else {
-      lastCloseAttack = attack;
+      return;
+    }
+
+    lastCloseAttack = attack;
+
+    if (attack === "spin") {
+      spinReadyAt = nowMs + SPACE_BOSS_COMBAT.spinIntervalMs;
     }
   };
 
@@ -311,6 +332,17 @@ export const createBossSimulation = (
     candidates: readonly BossSimulationPlayer[],
   ): SpaceBossAttack | null => {
     const here = { x: state.x, z: state.z, yaw: state.yaw };
+    // 앞을 보는 공격이 못 닿는 옆 · 뒤에 붙은 사람. 회전만 닿음.
+    const hasFlanker = candidates.some(
+      (player) => isInsideBossSpin(here, player) && !isInsideBossAttack("swipe", here, player, 0),
+    );
+
+    const isSpinReady = nowMs >= spinReadyAt;
+
+    if (hasFlanker && isSpinReady) {
+      return "spin";
+    }
+
     const slamCrowd = candidates.filter((player) =>
       isInsideBossAttack("slam", here, player),
     ).length;
@@ -320,7 +352,10 @@ export const createBossSimulation = (
     }
 
     if (distance <= ATTACK_RANGE.close) {
-      return lastCloseAttack === "swipe" ? "slam" : "swipe";
+      const nextAttack = NEXT_CLOSE_ATTACK[lastCloseAttack];
+
+      // 회전 차례인데 아직 쉬는 중이면 건너뜀.
+      return nextAttack === "spin" && !isSpinReady ? NEXT_CLOSE_ATTACK.spin : nextAttack;
     }
 
     if (distance <= ATTACK_RANGE.slam) {
@@ -503,11 +538,41 @@ export const createBossSimulation = (
     }
   };
 
+  /**
+   * 돌면서 타깃 쪽으로 한 걸음 감.
+   *
+   * 몸은 모션이 돌려서 `yaw` 는 안 건드림. 끝나면 시작할 때 보던 쪽을 그대로 봄.
+   * 타깃 몸에 닿을 만큼 붙으면 멈춤. 더 가면 타깃을 타고 넘음.
+   */
+  const moveWhileSpinning = (target: BossSimulationPlayer, deltaSeconds: number): void => {
+    const deltaX = target.x - state.x;
+    const deltaZ = target.z - state.z;
+    const distance = Math.hypot(deltaX, deltaZ);
+    const stride = Math.min(
+      distance - SPACE_BOSS.bodyRadius,
+      SPACE_BOSS_ATTACKS.spin.moveSpeed * deltaSeconds,
+    );
+
+    if (stride <= 0) {
+      return;
+    }
+
+    const nextX = state.x + (deltaX / distance) * stride;
+    const nextZ = state.z + (deltaZ / distance) * stride;
+
+    if (isInsideArenaCircle(nextX, nextZ, 0)) {
+      state.x = nextX;
+      state.z = nextZ;
+    }
+  };
+
   /** 공격을 진행하고 이번 걸음에 맞은 사람을 `hits` 에 담음. */
   const stepAttack = (
     nowMs: number,
     elapsedSeconds: number,
+    deltaSeconds: number,
     players: readonly BossSimulationPlayer[],
+    candidates: readonly BossSimulationPlayer[],
     hits: BossPlayerHit[],
   ): void => {
     const attack = state.attack;
@@ -532,7 +597,7 @@ export const createBossSimulation = (
       if (travelTo > travelFrom) {
         for (const player of alivePlayers) {
           if (
-            !chargeHitSeats.has(player.seat) &&
+            !sweepHitSeats.has(player.seat) &&
             isInsideBossChargeSweep(
               origin,
               player,
@@ -541,7 +606,29 @@ export const createBossSimulation = (
               SPACE_BOSS_COMBAT.hitMargin,
             )
           ) {
-            chargeHitSeats.add(player.seat);
+            sweepHitSeats.add(player.seat);
+            hits.push({ seat: player.seat, attack });
+          }
+        }
+      }
+    } else if (attack === "spin") {
+      const { launchSeconds, arriveSeconds, rehitSeconds } = SPACE_BOSS_ATTACKS.spin;
+
+      // 준비(예고가 차는 동안)와 마무리에는 제자리에 서 있고 안 맞음. 도는 동안만 봄.
+      if (elapsedSeconds >= launchSeconds && elapsedSeconds < arriveSeconds) {
+        const target = pickTarget(nowMs, candidates);
+
+        if (target) {
+          moveWhileSpinning(target, deltaSeconds);
+        }
+
+        for (const player of alivePlayers) {
+          const lastHitAt = spinHitAtBySeat.get(player.seat);
+          const canHit = lastHitAt === undefined || nowMs - lastHitAt >= rehitSeconds * 1000;
+
+          // 원이 보스를 따라가서 지금 선 자리로 잼. 도는 중에 걸어 들어온 사람도 맞음.
+          if (canHit && isInsideBossSpin(state, player)) {
+            spinHitAtBySeat.set(player.seat, nowMs);
             hits.push({ seat: player.seat, attack });
           }
         }
@@ -612,7 +699,7 @@ export const createBossSimulation = (
         stepTurn(nowMs, elapsedSeconds);
         break;
       case "attack":
-        stepAttack(nowMs, elapsedSeconds, players, hits);
+        stepAttack(nowMs, elapsedSeconds, deltaSeconds, players, candidates, hits);
         break;
       case "idle":
       case "walk":

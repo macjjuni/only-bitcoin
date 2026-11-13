@@ -129,6 +129,26 @@ export const createBossImpactTracker = (): BossImpactTracker => {
     }
   };
 
+  const collectSpin = (
+    state: SpaceBossState,
+    elapsedSeconds: number,
+    impacts: BossImpact[],
+  ): void => {
+    const { launchSeconds, radius } = SPACE_BOSS_ATTACKS.spin;
+
+    // 돌기 시작하는 순간 발밑에서 예고 원만큼 퍼지는 고리. 땅을 찍는 게 아니라 눈덩이는 안 튀김.
+    // 이때는 아직 안 움직여서 시작한 자리가 곧 보스 자리임.
+    if (previousSeconds < launchSeconds && elapsedSeconds >= launchSeconds) {
+      impacts.push({
+        kind: "shockwave",
+        x: state.attackOriginX,
+        z: state.attackOriginZ,
+        radius,
+        hasDebris: false,
+      });
+    }
+  };
+
   const collectSwipe = (
     state: SpaceBossState,
     elapsedSeconds: number,
@@ -170,6 +190,8 @@ export const createBossImpactTracker = (): BossImpactTracker => {
       collectSlam(state, elapsedSeconds, impacts);
     } else if (attack === "charge") {
       collectCharge(state, elapsedSeconds, impacts);
+    } else if (attack === "spin") {
+      collectSpin(state, elapsedSeconds, impacts);
     } else {
       collectSwipe(state, elapsedSeconds, impacts);
     }

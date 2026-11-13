@@ -63,6 +63,22 @@ describe("createBossImpactTracker", () => {
     expect(impacts[0].impact.z).toBeCloseTo(20, 6);
   });
 
+  it("회전은 돌기 시작할 때 발밑에서 예고 원만큼 퍼지는 고리를 한 번 낸다", () => {
+    const { launchSeconds, radius } = SPACE_BOSS_ATTACKS.spin;
+    const impacts = collect(createAttackState("spin"), 0, 3);
+
+    expect(impacts).toHaveLength(1);
+    expect(impacts[0].atSeconds).toBeGreaterThanOrEqual(launchSeconds);
+    expect(impacts[0].atSeconds).toBeLessThan(launchSeconds + FRAME_MS / 1000 + 1e-6);
+    expect(impacts[0].impact).toMatchObject({
+      kind: "shockwave",
+      x: 10,
+      z: 20,
+      radius,
+      hasDebris: false,
+    });
+  });
+
   it("돌진은 박차는 고리, 길 따라 눈보라, 멈춰 서는 충격파 순으로 낸다", () => {
     const { launchSeconds, arriveSeconds, travel } = SPACE_BOSS_ATTACKS.charge;
     const impacts = collect(createAttackState("charge"), 0, 4);

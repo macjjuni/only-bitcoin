@@ -5,6 +5,7 @@ import {
   isInsideBossArena,
   isInsideBossAttack,
   isInsideBossChargeSweep,
+  isInsideBossSpin,
 } from "./bossHitTest";
 
 /** 원점에서 −Z 를 보는 보스. 앞이 −Z, 오른쪽이 +X 임. */
@@ -60,6 +61,24 @@ describe("내려찍기 원", () => {
     // 원이 보스 뒤로 1.7 m 까지 덮음.
     expect(isInsideBossAttack("slam", ORIGIN, at(forwardOffset - radius + 0.01, 0), 0)).toBe(true);
     expect(isInsideBossAttack("slam", ORIGIN, at(forwardOffset - radius - 0.01, 0), 0)).toBe(false);
+  });
+});
+
+describe("회전 원", () => {
+  const { radius } = SPACE_BOSS_ATTACKS.spin;
+
+  it("발밑이 중심이라 앞 · 옆 · 뒤가 똑같이 맞는다", () => {
+    for (const point of [at(radius - 0.01, 0), at(0, radius - 0.01), at(-(radius - 0.01), 0)]) {
+      expect(isInsideBossSpin(ORIGIN, point, 0)).toBe(true);
+    }
+    for (const point of [at(radius + 0.01, 0), at(0, radius + 0.01), at(-(radius + 0.01), 0)]) {
+      expect(isInsideBossSpin(ORIGIN, point, 0)).toBe(false);
+    }
+  });
+
+  it("기본 판정은 안쪽으로 깎지 않고 예고 원 그대로다", () => {
+    expect(isInsideBossSpin(ORIGIN, at(-(radius - 0.01), 0))).toBe(true);
+    expect(isInsideBossSpin(ORIGIN, at(-(radius + 0.01), 0))).toBe(false);
   });
 });
 

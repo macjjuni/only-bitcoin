@@ -2,7 +2,9 @@ import { readFileSync } from "node:fs";
 import { resolve } from "node:path";
 import { describe, expect, it } from "vitest";
 import {
+  resolveBossAttackSeconds,
   resolveBossChargeTravel,
+  resolveBossSpinClipSeconds,
   rollKickDamage,
   SPACE_BOSS,
   SPACE_BOSS_ATTACKS,
@@ -30,7 +32,13 @@ interface GltfAccessor {
 }
 
 interface GltfJson {
-  nodes: { name?: string; translation?: number[]; extras?: Record<string, unknown> }[];
+  nodes: {
+    name?: string;
+    mesh?: number;
+    translation?: number[];
+    extras?: Record<string, unknown>;
+  }[];
+  meshes: { primitives: { attributes: { POSITION: number } }[] }[];
   accessors: GltfAccessor[];
   bufferViews: { byteOffset?: number }[];
   animations: {
@@ -51,6 +59,7 @@ interface BossExtras {
       endOfDash: number;
       originXZ: [number, number];
     };
+    Spin: { radius: number; launchSeconds: number; arriveSeconds: number };
   };
   clipSettings: Record<
     string,
@@ -128,6 +137,61 @@ describe("보스 상수 ↔ bear-raid-boss.glb", () => {
     expect(SPACE_BOSS_ATTACKS.charge.forwardOffset).toBeCloseTo(Charge.originXZ[1], 3);
     expect(SPACE_BOSS_ATTACKS.charge.launchSeconds).toBeCloseTo(Charge.launchTime, 5);
     expect(SPACE_BOSS_ATTACKS.charge.arriveSeconds).toBeCloseTo(Charge.endOfDash, 5);
+  });
+
+  it("회전의 도는 구간이 에셋과 같고, 판정 반지름이 그려지는 예고 원과 같다", () => {
+    const { Spin } = extras.attackRanges;
+    const nodeIndex = (name: string): number =>
+      boss.json.nodes.findIndex((node) => node.name === name);
+    const spin = boss.json.animations.find((animation) => animation.name === "Spin");
+    const scaleChannel = spin?.channels.find(
+      (channel) => channel.target.node === nodeIndex("AOE_Spin") && channel.target.path === "scale",
+    );
+    const footprint = boss.json.nodes[nodeIndex("Spin / 01 full footprint")];
+
+    // 에셋의 도는 구간(1 ~ 2초)을 되풀이해 틂. 준비 길이와 한 번 도는 길이가 에셋과 같아야 함.
+    expect(SPACE_BOSS_ATTACKS.spin.launchSeconds).toBeCloseTo(Spin.launchSeconds, 5);
+    expect(SPACE_BOSS_ATTACKS.spin.loopSeconds).toBeCloseTo(
+      Spin.arriveSeconds - Spin.launchSeconds,
+      5,
+    );
+    expect(spin && scaleChannel && footprint?.mesh !== undefined).toBe(true);
+    if (!spin || !scaleChannel || footprint?.mesh === undefined) {
+      return;
+    }
+
+    // 예고는 내려찍기 원 메시를 줄여 그림. 메시 반지름 × 클립이 넣는 배율이 눈에 보이는 크기임.
+    // `extras` 의 반지름(3.1)은 판정 여유 0.3 을 빼기 전 값이라 안 씀. 지금 여유는 0.1 이라
+    // 그대로 옮기면 보이는 원(2.8)보다 넓게 맞음.
+    const sampler = spin.samplers[scaleChannel.sampler];
+    const [drawnScale] = readAccessor(boss.json, boss.binary, sampler.output)[0];
+    const [meshRadius] =
+      boss.json.accessors[boss.json.meshes[footprint.mesh].primitives[0].attributes.POSITION].max ??
+      [];
+
+    expect(SPACE_BOSS_ATTACKS.spin.radius).toBeCloseTo(meshRadius * drawnScale, 4);
+    expect(SPACE_BOSS_ATTACKS.spin.radius).toBeLessThanOrEqual(Spin.radius);
+  });
+
+  it("회전은 도는 구간을 되풀이해 틀고, 다 돌면 마무리로 넘어간다", () => {
+    const { launchSeconds, arriveSeconds, loopSeconds } = SPACE_BOSS_ATTACKS.spin;
+    const loopCount = (arriveSeconds - launchSeconds) / loopSeconds;
+
+    // 꽉 찬 바퀴 수만큼 돌아야 마무리로 넘어갈 때 자세가 안 튐.
+    expect(loopCount).toBeCloseTo(Math.round(loopCount), 6);
+    expect(resolveBossSpinClipSeconds(0.4)).toBeCloseTo(0.4, 6);
+    expect(resolveBossSpinClipSeconds(launchSeconds + 0.25)).toBeCloseTo(launchSeconds + 0.25, 6);
+    // 세 번째 바퀴의 0.25초 지점도 모션에서는 첫 바퀴의 같은 지점임.
+    expect(resolveBossSpinClipSeconds(launchSeconds + loopSeconds * 2 + 0.25)).toBeCloseTo(
+      launchSeconds + 0.25,
+      6,
+    );
+    expect(resolveBossSpinClipSeconds(arriveSeconds)).toBeCloseTo(launchSeconds + loopSeconds, 6);
+    expect(resolveBossSpinClipSeconds(resolveBossAttackSeconds("spin"))).toBeCloseTo(
+      SPACE_BOSS_CLIP_SECONDS.spin,
+      6,
+    );
+    expect(resolveBossAttackSeconds("slam")).toBe(SPACE_BOSS_CLIP_SECONDS.slam);
   });
 
   it("보폭 속도·회전 구간·무적 시간이 에셋과 같다", () => {

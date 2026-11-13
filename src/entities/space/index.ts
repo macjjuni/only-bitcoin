@@ -53,6 +53,7 @@ export {
   createHiddenBossState,
   resolveBossAttackSeconds,
   resolveBossChargeTravel,
+  resolveBossSpinClipSeconds,
   rollKickDamage,
   SPACE_BOSS,
   SPACE_BOSS_ATTACKS,

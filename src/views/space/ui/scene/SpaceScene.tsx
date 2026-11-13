@@ -126,6 +126,8 @@ const BOSS_ATTACK_SFX: Record<SpaceBossAttack, SpaceSfxName> = {
   swipe: "bossSwipe",
   slam: "bossSlam",
   charge: "bossCharge",
+  // 전용 음원이 없어 휘두르기 소리를 같이 씀.
+  spin: "bossSwipe",
 };
 const BOSS_PHASE_SFX: Record<BossPhaseSound, SpaceSfxName> = {
   spawn: "bossSpawn",

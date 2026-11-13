@@ -72,6 +72,7 @@ describe("stepKnockback", () => {
   it.each([
     ["swipe", 1.0],
     ["slam", 1.6],
+    ["spin", 2.0],
     ["charge", 3.0],
   ] as const)("%s 은 %f m 밀린다", (attack, meters) => {
     const { state } = runKnockback(attack, createState(0, -2));

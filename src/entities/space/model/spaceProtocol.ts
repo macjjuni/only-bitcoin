@@ -294,7 +294,12 @@ const BOSS_PHASES: readonly string[] = [
   "enrage",
   "dead",
 ] satisfies SpaceBossPhase[];
-const BOSS_ATTACKS: readonly string[] = ["swipe", "slam", "charge"] satisfies SpaceBossAttack[];
+const BOSS_ATTACKS: readonly string[] = [
+  "swipe",
+  "slam",
+  "charge",
+  "spin",
+] satisfies SpaceBossAttack[];
 /** 체력·피해로 받아 주는 상한. 수치를 조정해도 걸리지 않게 넉넉히 잡음. */
 const MAXIMUM_BOSS_AMOUNT = 10_000_000;
 

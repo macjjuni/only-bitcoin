@@ -15,6 +15,29 @@ export const BOSS_ATTACK_SOUND_CUE_SECONDS: Record<SpaceBossAttack, number> = {
   slam: SPACE_BOSS_ATTACKS.slam.hitSeconds - 0.1,
   // 땅을 박차는 순간부터 발소리를 냄.
   charge: SPACE_BOSS_ATTACKS.charge.launchSeconds,
+  // 휘두르기 음원을 같이 씀. 돌기 시작하는 순간에 찢는 소리가 오게 0.2초 먼저 틂.
+  // 도는 동안 `loopSeconds` 마다 다시 틂.
+  spin: SPACE_BOSS_ATTACKS.spin.launchSeconds - 0.2,
+};
+
+/**
+ * `seconds` 까지 틀었어야 할 소리의 수. 회전만 여러 번이고 나머지는 한 번임.
+ */
+const countAttackSoundCues = (attack: SpaceBossAttack, seconds: number): number => {
+  const firstCueSeconds = BOSS_ATTACK_SOUND_CUE_SECONDS[attack];
+
+  if (seconds < firstCueSeconds) {
+    return 0;
+  }
+
+  if (attack !== "spin") {
+    return 1;
+  }
+
+  const { launchSeconds, arriveSeconds, loopSeconds } = SPACE_BOSS_ATTACKS.spin;
+  const loopCount = Math.round((arriveSeconds - launchSeconds) / loopSeconds);
+
+  return Math.min(loopCount, Math.floor((seconds - firstCueSeconds) / loopSeconds) + 1);
 };
 
 /**
@@ -52,8 +75,8 @@ export const createBossAttackSoundTracker = (): BossAttackSoundTracker => {
         elapsedSeconds <= FRESH_ATTACK_SECONDS ? Number.NEGATIVE_INFINITY : elapsedSeconds;
     }
 
-    const cueSeconds = BOSS_ATTACK_SOUND_CUE_SECONDS[attack];
-    const isCueReached = previousSeconds < cueSeconds && elapsedSeconds >= cueSeconds;
+    const isCueReached =
+      countAttackSoundCues(attack, elapsedSeconds) > countAttackSoundCues(attack, previousSeconds);
 
     previousSeconds = elapsedSeconds;
 
