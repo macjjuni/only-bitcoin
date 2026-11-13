@@ -43,13 +43,43 @@ export const SPACE_SFX: Record<SpaceSfxName, SpaceSfxSource> = {
   victory: { src: toVersionedAudioUrl("/audio/space-sfx/victory.mp3"), volume: 0.3 },
 };
 
+/**
+ * 남이 낸 소리의 크기. 내 소리를 1 로 봤을 때의 비율임.
+ *
+ * 가까이서도 내 소리의 절반만 냄. 여럿이 같이 때리면 내 타격음이 묻혀서 내가 때리는지
+ * 알 수 없게 됨. `fullDistance` 안에서는 그 크기 그대로고, `silentDistance` 에서 0 이 됨.
+ */
+export const SPACE_REMOTE_SFX = {
+  gain: 0.5,
+  fullDistance: 4,
+  silentDistance: 18,
+} as const;
+
+/** 남이 낸 같은 소리를 동시에 겹쳐 트는 상한. 여럿이 연타해도 소리가 뭉개지지 않게 함. */
+export const MAXIMUM_SFX_VOICES_PER_NAME = 3;
+
+interface SfxPoint {
+  x: number;
+  z: number;
+}
+
+/** 듣는 사람과 소리 난 자리의 거리로 남의 소리 크기를 정함. 0 이면 안 틂. */
+export const resolveRemoteSfxGain = (listener: SfxPoint, source: SfxPoint): number => {
+  const { gain, fullDistance, silentDistance } = SPACE_REMOTE_SFX;
+  const distance = Math.hypot(source.x - listener.x, source.z - listener.z);
+  const falloff = 1 - (distance - fullDistance) / (silentDistance - fullDistance);
+
+  return gain * Math.min(1, Math.max(0, falloff));
+};
+
 export interface SpaceSfxPlayer {
   /**
    * 켜져 있고 음원이 준비됐을 때만 소리가 남. 아니면 조용히 넘어감.
    *
    * `delaySeconds` 를 주면 그만큼 뒤에 틂. 타이머가 아니라 오디오 시계에 예약해서 안 밀림.
+   * `gainScale` 은 음원 기본 음량에 곱함. 남이 낸 소리를 작게 틀 때 씀.
    */
-  play: (name: SpaceSfxName, delaySeconds?: number) => void;
+  play: (name: SpaceSfxName, delaySeconds?: number, gainScale?: number) => void;
   setEnabled: (isEnabled: boolean) => void;
   /** 첫 터치·키 입력에서 부름. 브라우저가 그 전에는 소리를 막음. */
   unlock: () => void;
@@ -58,6 +88,8 @@ export interface SpaceSfxPlayer {
 
 export const createSpaceSfxPlayer = (): SpaceSfxPlayer => {
   const buffers = new Map<SpaceSfxName, AudioBuffer>();
+  /** 소리마다 지금 나고 있는(예약된 것 포함) 수. */
+  const voiceCounts = new Map<SpaceSfxName, number>();
   let context: AudioContext | null = null;
   let isEnabled = false;
   let isUnlocked = false;
@@ -97,17 +129,26 @@ export const createSpaceSfxPlayer = (): SpaceSfxPlayer => {
     }
   };
 
-  const play = (name: SpaceSfxName, delaySeconds: number = 0): void => {
+  const play = (name: SpaceSfxName, delaySeconds: number = 0, gainScale: number = 1): void => {
     const buffer = buffers.get(name);
+    const voiceCount = voiceCounts.get(name) ?? 0;
 
-    if (!isEnabled || !context || context.state !== "running" || !buffer) {
+    if (!isEnabled || !context || context.state !== "running" || !buffer || gainScale <= 0) {
+      return;
+    }
+    // 상한은 남의 소리에만 건다. 남들 소리로 자리가 찼다고 내 타격음이 빠지면 안 됨.
+    if (gainScale < 1 && voiceCount >= MAXIMUM_SFX_VOICES_PER_NAME) {
       return;
     }
     const source = context.createBufferSource();
     const gain = context.createGain();
 
     source.buffer = buffer;
-    gain.gain.value = SPACE_SFX[name].volume;
+    gain.gain.value = SPACE_SFX[name].volume * gainScale;
+    voiceCounts.set(name, voiceCount + 1);
+    source.onended = (): void => {
+      voiceCounts.set(name, Math.max(0, (voiceCounts.get(name) ?? 1) - 1));
+    };
     source.connect(gain);
     gain.connect(context.destination);
     source.start(context.currentTime + Math.max(0, delaySeconds));
@@ -126,6 +167,7 @@ export const createSpaceSfxPlayer = (): SpaceSfxPlayer => {
   const dispose = (): void => {
     isDisposed = true;
     buffers.clear();
+    voiceCounts.clear();
     void context?.close().catch(() => {});
     context = null;
   };

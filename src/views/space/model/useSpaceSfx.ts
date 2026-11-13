@@ -8,7 +8,7 @@ import {
   type SpaceSfxPlayer,
 } from "@/views/space/lib/spaceSfx";
 
-export type PlaySpaceSfx = (name: SpaceSfxName, delaySeconds?: number) => void;
+export type PlaySpaceSfx = (name: SpaceSfxName, delaySeconds?: number, gainScale?: number) => void;
 
 /**
  * `?sfx=bossSpawn` 처럼 효과음 이름을 주면 화면을 누를 때마다 그 소리를 틂. 확인용임.
@@ -33,8 +33,8 @@ const readTestSfxName = (): SpaceSfxName | null => {
 export const useSpaceSfx = (isEnabled: boolean): PlaySpaceSfx => {
   // region [Hooks]
   const playerRef = useRef<SpaceSfxPlayer | null>(null);
-  const playSfx = useCallback<PlaySpaceSfx>((name, delaySeconds) => {
-    playerRef.current?.play(name, delaySeconds);
+  const playSfx = useCallback<PlaySpaceSfx>((name, delaySeconds, gainScale) => {
+    playerRef.current?.play(name, delaySeconds, gainScale);
   }, []);
   // endregion
 

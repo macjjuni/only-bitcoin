@@ -71,7 +71,7 @@ import type { BossPhaseSound } from "@/views/space/lib/bossAttackSounds";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import type { LanternAnchor } from "@/views/space/lib/hallModel";
 import type { HallTerrain } from "@/views/space/lib/hallTerrain";
-import type { SpaceSfxName } from "@/views/space/lib/spaceSfx";
+import { resolveRemoteSfxGain, type SpaceSfxName } from "@/views/space/lib/spaceSfx";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 import type { PlaySpaceSfx } from "@/views/space/model/useSpaceSfx";
 import BlockDashboard from "./BlockDashboard";
@@ -393,6 +393,27 @@ function SpaceScene({
   };
 
   /**
+   * 남이 휘두르는 소리. 거리에 따라 작게 내고, 내 것과 같이 무기가 닿기 조금 전에 틂.
+   *
+   * 시작 시각은 서버가 알려 준 값이라 받았을 때 이미 조금 지나 있음. 그만큼 덜 기다림.
+   */
+  const playRemoteSwing = (seat: number, startedAt: number, now: number): void => {
+    const kicker = remotePlayers.find((player) => player.seat === seat);
+
+    if (!kicker) {
+      return;
+    }
+    const { impactSeconds } = resolveAvatarCombat(kicker.modelIndex);
+    const elapsedSeconds = (now - startedAt) / 1000;
+
+    playSfx(
+      "swing",
+      impactSeconds - SWING_SOUND_LEAD_SECONDS - elapsedSeconds,
+      resolveRemoteSfxGain(playerStateRef.current, kicker),
+    );
+  };
+
+  /**
    * 남이 시작한 공격 동작을 받아 둠. 상대 동작도 같은 시작 시각으로 재생함.
    *
    * 내가 찬 건 누른 순간 이미 재생해서 서버가 되돌려준 동작은 무시함. 유저끼리는
@@ -404,6 +425,7 @@ function SpaceScene({
     for (const event of session.drainKickEvents()) {
       if (event.from !== selfSeat) {
         remoteKickStartsRef.current.set(event.from, event.startedAt);
+        playRemoteSwing(event.from, event.startedAt, now);
       }
     }
 
@@ -449,6 +471,15 @@ function SpaceScene({
    */
   const applyReceivedPlayerHits = (now: number): void => {
     for (const event of session.drainPlayerHits()) {
+      const victim = remotePlayers.find((player) => player.seat === event.seat);
+
+      if (victim) {
+        playSfx(
+          event.isFatal ? "knockout" : "hurt",
+          0,
+          resolveRemoteSfxGain(playerStateRef.current, victim),
+        );
+      }
       remoteHitsRef.current.set(event.seat, {
         hitAt: event.hitAt,
         knockedOutUntil: event.isFatal
@@ -602,6 +633,11 @@ function SpaceScene({
   const onHitBossByMe = useCallback((): void => {
     playSfx("hit");
   }, [playSfx]);
+
+  /** 남이 보스를 때린 소리는 보스가 선 자리에서 나는 것으로 봄. */
+  const onHitBossByOthers = useCallback((): void => {
+    playSfx("hit", 0, resolveRemoteSfxGain(playerStateRef.current, session.bossState));
+  }, [playSfx, session.bossState]);
   // endregion
 
 
@@ -805,6 +841,7 @@ function SpaceScene({
           drainBossHits={session.drainBossHits}
           selfSeat={session.self?.seat}
           onHitByMe={onHitBossByMe}
+          onHitByOthers={onHitBossByOthers}
         />
       )}
 
