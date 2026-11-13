@@ -57,11 +57,12 @@ describe("SPACE_AVATAR_MODELS", () => {
 describe("캐릭터별 공격 성격", () => {
   it("초당 피해가 캐릭터끼리 비슷하다", () => {
     // 한 캐릭터가 확실히 세면 다들 그것만 고른다. 차이는 싸우는 방식에만 둔다.
+    // 버거빠따킹은 느려서 놓치는 공격을 메우려고 일부러 16 % 높게 뒀다. 그 이상은 막는다.
     const damagePerSecond = SPACE_AVATAR_MODELS.map(
       ({ combat }) => combat.kickDamage / (combat.cooldownMs / 1000),
     );
 
-    expect(Math.max(...damagePerSecond) / Math.min(...damagePerSecond)).toBeLessThan(1.15);
+    expect(Math.max(...damagePerSecond) / Math.min(...damagePerSecond)).toBeLessThan(1.2);
   });
 
   it("공격 모션이 쿨다운 안에 끝난다", () => {

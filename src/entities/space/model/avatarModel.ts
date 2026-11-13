@@ -155,7 +155,9 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
       revive: { startFrame: 189, frameCount: 46, seconds: 1.875 },
     },
     // 철조망 방망이. 느리고 묵직한 한 방. 보스 공격 사이의 틈에 한 대 넣고 빠지는 식.
-    combat: { kickDamage: 16, cooldownMs: 1_500, attackSeconds: 0.9, impactSeconds: 0.45 },
+    // 초당 피해를 일부러 다른 둘보다 15 ~ 16 % 높게 둠(12.7). 닿기까지 0.45초라 보스 공격을
+    // 피하다 보면 한 대를 통째로 놓쳐서, 표로 맞춘 16 으로는 실전 피해가 코인충보다 처졌음.
+    combat: { kickDamage: 19, cooldownMs: 1_500, attackSeconds: 0.9, impactSeconds: 0.45 },
     triangleCount: 2986,
   },
   {
