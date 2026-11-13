@@ -10,6 +10,7 @@ import {
   formatBossCountdown,
   isSameBossHudView,
   resolveBossHudView,
+  resolveRaidZonePresence,
   stepDisplayedHealth,
 } from "./bossHud";
 
@@ -113,5 +114,26 @@ describe("isSameBossHudView", () => {
     expect(isSameBossHudView(first, same)).toBe(true);
     expect(isSameBossHudView(first, hurt)).toBe(false);
     expect(isSameBossHudView(first, EMPTY_BOSS_HUD_VIEW)).toBe(false);
+  });
+});
+
+describe("resolveRaidZonePresence", () => {
+  const { hallMaximumX } = SPACE_BOSS_PLAYER;
+
+  it("안뜰에 나가면 참, 홀 안이면 거짓이다", () => {
+    expect(resolveRaidZonePresence(false, true, COURTYARD)).toBe(true);
+    expect(resolveRaidZonePresence(true, true, HALL)).toBe(false);
+  });
+
+  it("문턱에서는 앞선 판정을 유지한다", () => {
+    const doorway = { x: hallMaximumX + 0.5 };
+
+    expect(resolveRaidZonePresence(false, true, doorway)).toBe(false);
+    expect(resolveRaidZonePresence(true, true, doorway)).toBe(true);
+  });
+
+  it("서버가 보스를 모르거나 접속 전이면 거짓이다", () => {
+    expect(resolveRaidZonePresence(true, false, COURTYARD)).toBe(false);
+    expect(resolveRaidZonePresence(true, true, null)).toBe(false);
   });
 });

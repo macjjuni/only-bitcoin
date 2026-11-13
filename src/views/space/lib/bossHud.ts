@@ -51,6 +51,29 @@ const isInCourtyard = (selfPosition: BossHudInput["selfPosition"]): boolean => {
 };
 // endregion
 
+/** 안뜰 경계에서 이만큼 더 지나야 드나든 것으로 봄(m). 문턱에 서 있을 때 곡이 번갈아 바뀌는 걸 막음. */
+const RAID_ZONE_MARGIN = 1;
+
+/**
+ * 레이드 구역(안뜰)에 나와 있는지. 레이드 배경음악을 틀지 정하는 데 씀.
+ *
+ * 보스가 쉬는 중이어도 안뜰이면 참임. 서버가 보스를 모르면 늘 거짓임.
+ */
+export const resolveRaidZonePresence = (
+  wasInside: boolean,
+  canFightBoss: boolean,
+  selfPosition: BossHudInput["selfPosition"],
+): boolean => {
+  if (!canFightBoss || selfPosition === null) {
+    return false;
+  }
+
+  const boundaryX =
+    SPACE_BOSS_PLAYER.hallMaximumX + (wasInside ? -RAID_ZONE_MARGIN : RAID_ZONE_MARGIN);
+
+  return selfPosition.x > boundaryX;
+};
+
 export const resolveBossHudView = (input: BossHudInput): BossHudView => {
   if (!input.canFightBoss) {
     return EMPTY_BOSS_HUD_VIEW;

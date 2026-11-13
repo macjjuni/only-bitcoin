@@ -36,6 +36,7 @@ import {
   SPACE_LOADING,
   type SpaceLoadStages,
 } from "@/views/space/lib/spaceLoading";
+import { useRaidZonePresence } from "../model/useRaidZonePresence";
 import { useScreenCelebrationSound } from "../model/useScreenCelebrationSound";
 import SpaceHud from "./hud/SpaceHud";
 import SpaceFallback, { type SpaceFallbackReason } from "./SpaceFallback";
@@ -130,6 +131,7 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   const bgm = useSpaceBgm({
     market: session.market,
     serverClockOffsetMs: session.serverClockOffsetMs,
+    isInRaid: useRaidZonePresence(session),
   });
   const celebration = dummyCount > 0 ? localCelebration : session.celebration;
   const celebrationClockOffsetMs = dummyCount > 0 ? 0 : session.serverClockOffsetMs;

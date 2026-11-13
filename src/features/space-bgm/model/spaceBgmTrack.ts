@@ -48,6 +48,21 @@ export const SPACE_BGM_TRACK_SRC = `${BGM_BASE_URL}/MONKEY_BGM.mp3`;
 export const SPACE_BGM_SURGE_TRACK_SRC = `${BGM_BASE_URL}/nervous.mp3`;
 
 /**
+ * 레이드 곡이 든 커밋.
+ *
+ * `BGM_SOURCE_REF` 를 올리지 않고 따로 박음. 공용 값을 올리면 기본·급등락 곡 주소까지
+ * 바뀌어 재방문자가 19 MB 를 다시 받음. 레이드 곡을 교체하면 이 값만 바꿈.
+ */
+const RAID_BGM_SOURCE_REF = "cc264357014f9f4cdabb587ee1d990fa6c28c3a6";
+
+/**
+ * 레이드 구역(안뜰)에 나와 있는 동안 까는 곡.
+ *
+ * 안뜰에 처음 나갈 때 받기 시작함. 홀에만 머무는 사람은 5.8 MB 를 안 받음.
+ */
+export const SPACE_BGM_RAID_TRACK_SRC = `https://cdn.jsdelivr.net/gh/macjjuni/only-bitcoin@${RAID_BGM_SOURCE_REF}/media/raid-mine.mp3`;
+
+/**
  * 기본 음량.
  *
  * 1.0 은 다른 탭 소리를 덮는다. 전광판을 보며 머무는 공간의 배경음이라
@@ -62,3 +77,6 @@ export const SPACE_BGM_VOLUME = 0.12;
  * 바뀐 게 조금 더 크게 들리는 편이 낫다.
  */
 export const SPACE_BGM_SURGE_VOLUME = 0.15;
+
+/** 레이드 곡 음량. 급등락 곡과 같은 이유로 기본 곡보다 조금 크게 둠. */
+export const SPACE_BGM_RAID_VOLUME = 0.15;
