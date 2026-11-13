@@ -107,7 +107,10 @@ export const SPACE_FEATURE_BOSS = "boss-v1";
 export const SPACE_BOSS_COMBAT = {
   /** 5명이 쉬지 않고 때리면 약 1분, 피하면서 싸우면 3 ~ 5분. */
   maximumHealth: 3_000,
-  /** 유저 공격 한 번의 피해. 쿨다운이 1초라 초당 피해와 같음. */
+  /**
+   * 표준 공격 한 번의 피해. 실제 피해는 캐릭터마다 다르고(`SpaceAvatarCombat`),
+   * 초당 피해는 셋 다 10 안팎으로 맞춰 둠.
+   */
   kickDamage: 10,
   /** 보스 몸통에서 이 거리 안이어야 닿음(m). 렌치 길이 정도. */
   kickReach: 2,
@@ -146,6 +149,13 @@ export const SPACE_BOSS_PLAYER = {
   hallMaximumX: 21,
   /** 쓰러진 뒤 다시 움직일 수 있기까지(ms). 그동안 사망 화면을 보여 줌. */
   respawnDelayMs: 3_000,
+  /**
+   * 쓰러진 자리에 누워 있는 시간(ms). 지나면 서버가 홀로 옮김.
+   *
+   * 바로 옮기면 남의 화면에서는 맞자마자 사라져 쓰러지는 모습을 볼 수 없음. 앞 절반은
+   * 그 자리에서 쓰러지고, 뒤 절반은 홀에서 일어남.
+   */
+  respawnMoveDelayMs: 1_500,
 } as const;
 
 /** 젠 주기(ms). 한국 시간 짝수 정시(0, 2, 4시 …)마다임. */

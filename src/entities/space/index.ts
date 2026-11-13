@@ -39,12 +39,14 @@ export {
 } from "./model/avatar";
 export {
   isAvatarModelIndex,
+  resolveAvatarCombat,
   resolveAvatarModel,
   resolveAvatarModelIndex,
   SPACE_AVATAR_MODELS,
   SPACE_DEFAULT_AVATAR_MODEL_INDEX,
   type SpaceAvatarClip,
   type SpaceAvatarClipRange,
+  type SpaceAvatarCombat,
   type SpaceAvatarModel,
 } from "./model/avatarModel";
 export {
@@ -67,7 +69,12 @@ export {
   type SpaceBossPhase,
   type SpaceBossState,
 } from "./model/boss";
-export { SPACE_FEATURE_KICK, SPACE_FEATURE_KICK_TIMING, SPACE_KICK } from "./model/kick";
+export {
+  resolveKickServerIntervalMs,
+  SPACE_FEATURE_KICK,
+  SPACE_FEATURE_KICK_TIMING,
+  SPACE_KICK,
+} from "./model/kick";
 export {
   createLocalPlayerState,
   createOfflinePresence,

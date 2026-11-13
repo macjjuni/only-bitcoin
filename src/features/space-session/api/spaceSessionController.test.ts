@@ -1366,5 +1366,41 @@ describe("SpaceSessionController", () => {
       expect(controller.getSelfPosition()).toMatchObject({ x: 30, z: 0 });
       controller.stop();
     });
+
+    it("남이 맞은 것만 쌓아 두고, 내 좌석과 숨은 탭에서 온 것은 버린다", () => {
+      const { controller, socket } = joinWithBoss({
+        lastKilledAt: null,
+        health: 100,
+        serverAt: SERVER_NOW,
+      });
+      const hit = (seat: number, isFatal: boolean) =>
+        socket.receive({
+          v: SPACE_PROTOCOL_VERSION,
+          t: "player-hit",
+          seat,
+          by: "slam",
+          isFatal,
+          serverAt: SERVER_NOW,
+        });
+
+      hit(1, false);
+      // 내 좌석(0). 내 피격은 `hp` 프레임이 알려 줌.
+      hit(0, false);
+      vi.advanceTimersByTime(300);
+      hit(2, true);
+
+      expect(controller.drainPlayerHits()).toEqual([
+        { seat: 1, hitAt: 1_000, isFatal: false },
+        { seat: 2, hitAt: 1_300, isFatal: true },
+      ]);
+      expect(controller.drainPlayerHits()).toEqual([]);
+
+      controller.setVisibility(false);
+      hit(1, false);
+      controller.setVisibility(true);
+
+      expect(controller.drainPlayerHits()).toEqual([]);
+      controller.stop();
+    });
   });
 });

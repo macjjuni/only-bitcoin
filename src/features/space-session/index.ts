@@ -2,6 +2,7 @@ export type {
   SpaceBossDefeat,
   SpaceBossHitEvent,
   SpaceKickEvent,
+  SpacePlayerHitEvent,
   SpaceSessionIdentity,
   SpaceSessionSnapshot,
 } from "./api/spaceSessionController";

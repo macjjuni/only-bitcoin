@@ -31,6 +31,25 @@ export interface SpaceAvatarClipRange {
   seconds: number;
 }
 
+/**
+ * 캐릭터의 공격 성격. 서버 판정과 클라이언트 연출이 같이 씀.
+ *
+ * **초당 피해는 캐릭터끼리 비슷하게 둠**(10 ~ 11). 한 캐릭터가 확실히 세면 다들 그것만
+ * 고름. 차이는 싸우는 방식에 둠 — 느리고 묵직한 한 방이냐, 빠르고 약한 연타냐.
+ */
+export interface SpaceAvatarCombat {
+  /** 공격 한 번이 보스에게 주는 피해. */
+  kickDamage: number;
+  /** 다시 공격할 수 있기까지(ms). 버튼에 남은 시간을 그림. */
+  cooldownMs: number;
+  /**
+   * 공격 모션을 이 시간에 맞춰 틂(초). 쿨다운보다 짧아야 함.
+   *
+   * 길면 다음 공격이 앞 모션을 끊고 시작해 휘두르다 만 것처럼 보임.
+   */
+  attackSeconds: number;
+}
+
 export interface SpaceAvatarModel {
   id: string;
   /** 화면에 보이는 이름. */
@@ -64,6 +83,7 @@ export interface SpaceAvatarModel {
   /** `-clips.bin` 의 전체 프레임 수. 로더가 파일 크기를 이 값으로 검증하고 텍스처 높이로 씀. */
   clipFrameCount: number;
   clips: Readonly<Record<SpaceAvatarClip, SpaceAvatarClipRange>>;
+  combat: SpaceAvatarCombat;
   /**
    * glb 의 삼각형 수. 예산 계산에 씀(`docs/btc-space-3d.md` §8).
    *
@@ -96,6 +116,8 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
       death: { startFrame: 150, frameCount: 39, seconds: 1.5833 },
       revive: { startFrame: 189, frameCount: 46, seconds: 1.875 },
     },
+    // 철조망 방망이. 느리고 묵직한 한 방. 보스 공격 사이의 틈에 한 대 넣고 빠지는 식.
+    combat: { kickDamage: 16, cooldownMs: 1_500, attackSeconds: 0.9 },
     triangleCount: 2986,
   },
   {
@@ -124,6 +146,8 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
       death: { startFrame: 150, frameCount: 39, seconds: 1.5833 },
       revive: { startFrame: 189, frameCount: 46, seconds: 1.875 },
     },
+    // 렌치. 기준이 되는 표준형.
+    combat: { kickDamage: 10, cooldownMs: 1_000, attackSeconds: 0.55 },
     triangleCount: 1212,
   },
   {
@@ -153,6 +177,8 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
       death: { startFrame: 149, frameCount: 39, seconds: 1.5833 },
       revive: { startFrame: 188, frameCount: 46, seconds: 1.875 },
     },
+    // 파리채. 빠르고 약한 연타. 붙어서 계속 때려야 해서 맞을 일도 많음.
+    combat: { kickDamage: 6, cooldownMs: 550, attackSeconds: 0.45 },
     triangleCount: 1498,
   },
 ] as const;
@@ -172,6 +198,11 @@ export const resolveAvatarModelIndex = (modelIndex: unknown): number => {
 
 export const resolveAvatarModel = (modelIndex: number): SpaceAvatarModel => {
   return SPACE_AVATAR_MODELS[resolveAvatarModelIndex(modelIndex)];
+};
+
+/** 그 모델의 공격 성격. 범위 밖 번호는 기본 모델의 것을 줌. */
+export const resolveAvatarCombat = (modelIndex: number): SpaceAvatarCombat => {
+  return resolveAvatarModel(modelIndex).combat;
 };
 
 /** 지금 목록에 있는 모델 번호인지. 서버가 모델 변경 요청을 검사할 때 씀. */

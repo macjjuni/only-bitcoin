@@ -8,7 +8,6 @@ import {
   resolveAvatarColor,
   resolveAvatarModel,
   SPACE_AVATAR,
-  SPACE_KICK,
   SPACE_MAX_OCCUPANTS,
   type SpaceAvatarModel,
   type SpaceTerrain,
@@ -41,6 +40,14 @@ const SHADOW_LIFT_Y = 0.02;
  */
 const GROUNDED_TOLERANCE_Y = 0.2;
 
+/** 남이 보스에게 맞은 기록. */
+export interface RemoteAvatarHit {
+  /** 맞은 시각(`performance.now()`). */
+  hitAt: number;
+  /** 쓰러졌으면 다시 움직일 수 있는 시각. 아니면 `undefined`. */
+  knockedOutUntil: number | undefined;
+}
+
 interface RemoteAvatarGroupProps {
   /** 이 그룹이 쓰는 모델. 그룹 하나가 `InstancedMesh` 4개(몸통·색 띠·눈·그림자)를 씀. */
   model: SpaceAvatarModel;
@@ -49,6 +56,8 @@ interface RemoteAvatarGroupProps {
   terrainRef: RefObject<SpaceTerrain>;
   /** 좌석별 발차기 시작 시각(`performance.now()`). 씬이 받은 이벤트로 채움. */
   kickStartsRef: RefObject<Map<number, number>>;
+  /** 좌석별 피격 기록. 씬이 받은 이벤트로 채움. */
+  hitsRef: RefObject<Map<number, RemoteAvatarHit>>;
 }
 
 /**
@@ -59,7 +68,7 @@ interface RemoteAvatarGroupProps {
  * 구워 둔 본 행렬을 셰이더가 읽어 처리함. 근거는 `docs/btc-space-3d.md` §8 에 있음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: RemoteAvatarGroupProps): ReactNode {
+function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef, hitsRef }: RemoteAvatarGroupProps): ReactNode {
   // region [Hooks]
   const bodyMeshRef = useRef<InstancedMesh>(null);
   const accentMeshRef = useRef<InstancedMesh>(null);
@@ -160,8 +169,8 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
    * 사람마다 지금 틀 모션을 골라 포즈를 넣음.
    *
    * 속도는 직전 프레임과의 이동 거리로 구함. 남의 위치는 보간된 값이라 이게 화면에서
-   * 실제로 움직인 속도임. 공격은 좌석마다 받아 둔 시작 시각으로 진행도를 구함.
-   * 남이 맞거나 쓰러지는 것은 서버가 안 알려 줘서 모션이 없음.
+   * 실제로 움직인 속도임. 공격·피격은 좌석마다 받아 둔 시각으로 진행도를 구함.
+   * 맞아서 밀리는 동안에도 위치는 움직이지만 피격 모션이 걷기보다 먼저라 달려 보이지 않음.
    */
   const advanceAnimations = (deltaSeconds: number): void => {
     const now = performance.now();
@@ -180,6 +189,8 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
       lastPositions.current.set(player.seat, { x: player.x, z: player.z });
       activeSeats.add(player.seat);
 
+      const hit = hitsRef.current?.get(player.seat);
+
       stepAvatarAnimation(
         animation,
         {
@@ -189,9 +200,12 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
           // 공중에서는 다리를 멈춤. 멈춰 있으면 지형에 물을 필요가 없음.
           isGrounded: speed <= AVATAR_MOTION.movingSpeed || isStandingOnGround(player),
           attackStartedAt: kickStartsRef.current?.get(player.seat),
-          attackSeconds: SPACE_KICK.animationSeconds,
-          hitStartedAt: undefined,
-          knockout: undefined,
+          attackSeconds: model.combat.attackSeconds,
+          hitStartedAt: hit?.hitAt,
+          knockout:
+            hit?.knockedOutUntil === undefined
+              ? undefined
+              : { startedAt: hit.hitAt, until: hit.knockedOutUntil },
         },
         model,
       );
@@ -333,6 +347,8 @@ interface RemoteAvatarsProps {
   terrainRef: RefObject<SpaceTerrain>;
   /** 좌석별 발차기 시작 시각. */
   kickStartsRef: RefObject<Map<number, number>>;
+  /** 좌석별 피격 기록. */
+  hitsRef: RefObject<Map<number, RemoteAvatarHit>>;
 }
 
 /**
@@ -348,6 +364,7 @@ function RemoteAvatars({
   rosterRevision,
   terrainRef,
   kickStartsRef,
+  hitsRef,
 }: RemoteAvatarsProps): ReactNode {
   // region [Hooks]
   const groups = useMemo(() => groupPlayersByModel(players), [players, rosterRevision]);
@@ -362,6 +379,7 @@ function RemoteAvatars({
             players={group.players}
             terrainRef={terrainRef}
             kickStartsRef={kickStartsRef}
+            hitsRef={hitsRef}
           />
         </Suspense>
       ))}

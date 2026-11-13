@@ -75,6 +75,15 @@ export interface SpaceBossHitEvent {
   damage: number;
 }
 
+/** 남이 보스 공격에 맞은 것 하나. 맞는 모션과 쓰러지는 모션을 트는 데 씀. */
+export interface SpacePlayerHitEvent {
+  seat: number;
+  /** 받은 시각(로컬 `now` 축). 모션을 이 시각부터 틂. */
+  hitAt: number;
+  /** 이 공격으로 쓰러졌는지. */
+  isFatal: boolean;
+}
+
 /** 받은 발차기 하나. 동작만 재생하고 아무도 안 밀림. */
 export interface SpaceKickEvent {
   from: number;
@@ -168,6 +177,7 @@ const maximumKickEventCount = 32;
 const maximumKickEventAgeMs = 1_000;
 const EMPTY_KICK_EVENTS: SpaceKickEvent[] = [];
 const EMPTY_BOSS_HIT_EVENTS: SpaceBossHitEvent[] = [];
+const EMPTY_PLAYER_HIT_EVENTS: SpacePlayerHitEvent[] = [];
 /** 씬이 안 꺼내 가는 동안 쌓아 둘 피해 숫자 상한. 넘으면 오래된 것부터 버림. */
 const maximumBossHitEventCount = 32;
 const fullTurn = Math.PI * 2;
@@ -286,6 +296,8 @@ export class SpaceSessionController {
   };
   /** 아직 씬이 안 꺼내 간 피해 숫자. 발차기 큐와 같은 이유로 React 상태가 아님. */
   private bossHitEvents: SpaceBossHitEvent[] = [];
+  /** 아직 씬이 안 꺼내 간 남의 피격. 내 피격은 `hp` 프레임으로 따로 옴. */
+  private playerHitEvents: SpacePlayerHitEvent[] = [];
   /**
    * 보스 상태. 매 프레임 바뀌어서 React 상태로 두지 않음.
    * 씬이 `sampleBoss` 로 갱신하고 `bossState` 를 그대로 읽음.
@@ -351,6 +363,18 @@ export class SpaceSessionController {
     const events = this.bossHitEvents;
 
     this.bossHitEvents = [];
+
+    return events;
+  };
+
+  /** 쌓인 남의 피격을 꺼내고 비움. 씬이 매 프레임 부름. */
+  drainPlayerHits = (): SpacePlayerHitEvent[] => {
+    if (this.playerHitEvents.length === 0) {
+      return EMPTY_PLAYER_HIT_EVENTS;
+    }
+    const events = this.playerHitEvents;
+
+    this.playerHitEvents = [];
 
     return events;
   };
@@ -1069,6 +1093,18 @@ export class SpaceSessionController {
         }
         return;
       }
+      case "player-hit": {
+        // 내 피격은 `hp` 프레임이 체력과 함께 알려 줌. 숨은 탭에서는 큐를 아무도 안 비워서 버림.
+        const isSelf = frame.seat === this.snapshot.self?.seat;
+
+        if (this.snapshot.canFightBoss && !isSelf && this.isVisible) {
+          this.playerHitEvents = [
+            ...this.playerHitEvents,
+            { seat: frame.seat, hitAt: this.options.now(), isFatal: frame.isFatal },
+          ].slice(-maximumBossHitEventCount);
+        }
+        return;
+      }
       case "hp": {
         if (this.snapshot.canFightBoss) {
           this.updateSnapshot({
@@ -1146,6 +1182,7 @@ export class SpaceSessionController {
     this.lastSentMovement = null;
     this.bossTracker.reset(null);
     this.bossHitEvents = [];
+    this.playerHitEvents = [];
     this.updateSnapshot({
       selfDamagedAt: null,
       selfDamagedBy: null,

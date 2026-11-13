@@ -86,8 +86,16 @@ export interface BossSimulation {
     deltaSeconds: number,
     players: readonly BossSimulationPlayer[],
   ) => BossStepResult;
-  /** 유저가 공격을 휘두름. 안 닿았으면 `null`. */
-  applyKick: (nowMs: number, player: BossSimulationPlayer) => BossKickResult | null;
+  /**
+   * 유저가 공격을 휘두름. 안 닿았으면 `null`.
+   *
+   * @param damage 이 공격의 피해. 캐릭터마다 다름. 안 넘기면 표준 피해를 씀.
+   */
+  applyKick: (
+    nowMs: number,
+    player: BossSimulationPlayer,
+    damage?: number,
+  ) => BossKickResult | null;
 }
 
 /** 거리별 공격 선택 기준(m). */
@@ -609,7 +617,11 @@ export const createBossSimulation = (
       .slice(0, RANKING_COUNT),
   });
 
-  const applyKick = (nowMs: number, player: BossSimulationPlayer): BossKickResult | null => {
+  const applyKick = (
+    nowMs: number,
+    player: BossSimulationPlayer,
+    kickDamage: number = SPACE_BOSS_COMBAT.kickDamage,
+  ): BossKickResult | null => {
     const elapsedSeconds = (nowMs - state.phaseStartedAt) / 1000;
     const isInvulnerable =
       state.phase === "hidden" ||
@@ -620,7 +632,7 @@ export const createBossSimulation = (
       return null;
     }
 
-    const damage = Math.min(health, SPACE_BOSS_COMBAT.kickDamage);
+    const damage = Math.min(health, kickDamage);
 
     health -= damage;
     lastHitSeat = player.seat;

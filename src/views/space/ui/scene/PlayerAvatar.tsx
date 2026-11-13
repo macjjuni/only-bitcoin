@@ -8,7 +8,6 @@ import {
   resolveAvatarColor,
   resolveAvatarModel,
   SPACE_AVATAR,
-  SPACE_KICK,
 } from "@/entities/space";
 import { createAvatarAnimation, stepAvatarAnimation } from "@/views/space/lib/avatarAnimation";
 import { useCrewModel } from "@/views/space/lib/crewModel";
@@ -104,7 +103,7 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
         // 접지 판정은 지형이 정하고 적분기가 넘겨줌.
         isGrounded: state?.isGrounded ?? true,
         attackStartedAt: kickStartedAtRef.current,
-        attackSeconds: SPACE_KICK.animationSeconds,
+        attackSeconds: model.combat.attackSeconds,
         hitStartedAt: damagedAt ?? undefined,
         // 쓰러뜨린 피격 시각부터 다시 움직일 수 있는 시각까지.
         knockout:

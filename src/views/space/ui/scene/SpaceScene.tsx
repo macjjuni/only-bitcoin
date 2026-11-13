@@ -17,12 +17,14 @@ import {
   createLocalPlayerState,
   createSpawnPoint,
   type LocalPlayerState,
+  resolveAvatarCombat,
   resolveColorIndexFromClientKey,
   SPACE_AVATAR_COLLISION_RADIUS,
+  SPACE_AVATAR_MODELS,
   SPACE_BOSS,
+  SPACE_BOSS_PLAYER,
   SPACE_HALL,
   SPACE_HEATMAP_FRAME,
-  SPACE_KICK,
   SPACE_MENU_FRAME,
   SPACE_SCREEN_FRAME,
   SPACE_SCREEN_PLACEMENTS,
@@ -77,7 +79,7 @@ import Nameplates from "./Nameplates";
 import PlayerAvatar from "./PlayerAvatar";
 import PriceBillboard from "./PriceBillboard";
 import RaidBoss from "./RaidBoss";
-import RemoteAvatars from "./RemoteAvatars";
+import RemoteAvatars, { type RemoteAvatarHit } from "./RemoteAvatars";
 import SceneLighting from "./SceneLighting";
 import ScreenCelebration from "./ScreenCelebration";
 import SpaceHeatmap from "./SpaceHeatmap";
@@ -102,6 +104,11 @@ interface SpaceSceneProps {
 }
 
 const EMPTY_LANTERN_ANCHORS: readonly LanternAnchor[] = [];
+/** 가장 긴 공격 모션(ms). 남의 공격 기록을 이만큼 들고 있다가 지움. */
+const LONGEST_ATTACK_MS =
+  Math.max(...SPACE_AVATAR_MODELS.map((model) => model.combat.attackSeconds)) * 1000;
+/** 남의 피격 기록을 들고 있는 시간(ms). 쓰러졌다 일어나는 모션이 다 끝난 뒤 지움. */
+const REMOTE_HIT_KEEP_MS = SPACE_BOSS_PLAYER.respawnDelayMs + 1_000;
 /** 밀리는 동안 대신 넣는 빈 입력. 중력·착지는 그대로 돌아감. */
 const EMPTY_MOVEMENT_INPUT = createEmptyMovementInput();
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
@@ -156,6 +163,8 @@ function SpaceScene({
   const kickStartedAtRef = useRef<number | undefined>(undefined);
   /** 다른 사람이 발차기를 시작한 시각(좌석별). 끝난 건 지움. */
   const remoteKickStartsRef = useRef(new Map<number, number>());
+  /** 다른 사람이 보스에게 맞은 시각(좌석별). 쓰러졌으면 일어나는 시각도 같이 둠. */
+  const remoteHitsRef = useRef(new Map<number, RemoteAvatarHit>());
   /**
    * 지형 질의.
    *
@@ -354,7 +363,7 @@ function SpaceScene({
       }
     }
 
-    const animationMs = SPACE_KICK.animationSeconds * 1000;
+    const animationMs = LONGEST_ATTACK_MS;
     for (const [seat, startedAt] of remoteKickStartsRef.current) {
       if (now - startedAt > animationMs) {
         remoteKickStartsRef.current.delete(seat);
@@ -378,12 +387,40 @@ function SpaceScene({
     }
     // 전송에 실패해도 내 화면에서는 휘두름. 재접속 중에 버튼이 먹통으로 보였음.
     session.sendKick(playerState);
-    inputSource.kickCooldownUntil = now + SPACE_KICK.cooldownMs;
+    // 쿨다운은 캐릭터마다 다름. 서버도 같은 표로 한 번 더 막음.
+    const { cooldownMs } = resolveAvatarCombat(avatarModelIndex);
+
+    inputSource.kickCooldownMs = cooldownMs;
+    inputSource.kickCooldownUntil = now + cooldownMs;
     kickStartedAtRef.current = now;
+  };
+
+  /**
+   * 남이 보스에게 맞은 것을 받아 둠. 그 사람 아바타가 움찔하거나 쓰러짐.
+   *
+   * 쓰러진 사람은 서버가 잠시 뒤 홀로 옮김. 그때까지 그 자리에 누워 있다가, 옮겨진
+   * 자리에서 일어나는 모션이 이어짐(내 화면의 내 캐릭터와 같은 흐름).
+   */
+  const applyReceivedPlayerHits = (now: number): void => {
+    for (const event of session.drainPlayerHits()) {
+      remoteHitsRef.current.set(event.seat, {
+        hitAt: event.hitAt,
+        knockedOutUntil: event.isFatal
+          ? event.hitAt + SPACE_BOSS_PLAYER.respawnDelayMs
+          : undefined,
+      });
+    }
+
+    for (const [seat, hit] of remoteHitsRef.current) {
+      if (now - hit.hitAt > REMOTE_HIT_KEEP_MS) {
+        remoteHitsRef.current.delete(seat);
+      }
+    }
   };
 
   const resetKickPresentation = (): void => {
     remoteKickStartsRef.current.clear();
+    remoteHitsRef.current.clear();
   };
 
   const applyPlayerTransform = (playerState: LocalPlayerState): void => {
@@ -559,6 +596,7 @@ function SpaceScene({
 
     const now = performance.now();
     applyReceivedKicks(now);
+    applyReceivedPlayerHits(now);
 
     const cameraOrbit = advanceCameraOrbit(deltaSeconds);
     const steppedState = advancePlayerState(cameraOrbit.yaw, deltaSeconds, now);
@@ -692,6 +730,7 @@ function SpaceScene({
         rosterRevision={session.rosterRevision}
         terrainRef={terrainRef}
         kickStartsRef={remoteKickStartsRef}
+        hitsRef={remoteHitsRef}
       />
       <Nameplates
         players={remotePlayers}

@@ -11,13 +11,17 @@ import {
 import { resolveColorIndexFromClientKey } from "../../../src/entities/space/lib/clientKeyHash";
 import { encodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapshot";
 import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
-import { resolveAvatarModelIndex } from "../../../src/entities/space/model/avatarModel";
+import {
+  resolveAvatarCombat,
+  resolveAvatarModelIndex,
+} from "../../../src/entities/space/model/avatarModel";
 import {
   SPACE_BOSS_COMBAT,
   SPACE_BOSS_PLAYER,
   SPACE_FEATURE_BOSS,
 } from "../../../src/entities/space/model/boss";
 import {
+  resolveKickServerIntervalMs,
   SPACE_FEATURE_KICK,
   SPACE_FEATURE_KICK_TIMING,
   SPACE_KICK,
@@ -198,6 +202,12 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
    * 키는 `stableActorKey` 임. 싸움이 끝나면 비움.
    */
   private healthByActor = new Map<string, { health: number; healthAt: number }>();
+  /**
+   * 쓰러져 누워 있는 좌석과 홀로 옮길 시각.
+   *
+   * 옮길 때까지는 틱을 이어 감. 보스가 쉬러 들어가도 누운 사람을 그대로 두면 안 됨.
+   */
+  private pendingRespawns = new Map<number, number>();
 
   constructor(
     private readonly state: DurableObjectState,
@@ -533,6 +543,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     if (ownedSeat !== undefined) {
       this.socketsBySeat.delete(ownedSeat);
       this.dirtySeats.delete(ownedSeat);
+      this.pendingRespawns.delete(ownedSeat);
 
       if (shouldAnnounceLeave) {
         this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "leave", seat: ownedSeat });
@@ -714,11 +725,10 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   }
 
   /**
-   * 보스 공격에 맞은 유저의 체력을 깎음. 0 이 되면 홀 안으로 되돌림.
+   * 보스 공격에 맞은 유저의 체력을 깎음. 0 이 되면 쓰러뜨리고 잠시 뒤 홀로 되돌림.
    *
-   * 서버가 유저 위치를 정하는 유일한 자리임. 평소 위치는 클라이언트가 보내고 서버는
-   * 검증만 함. 그래서 이동 검증의 기준(위치·예산·시각)도 여기서 같이 옮김. 안 옮기면
-   * 리스폰 뒤 첫 이동이 "한 번에 너무 멀리 갔다" 로 반려됨.
+   * 쓰러진 사람은 `respawnMoveDelayMs` 동안 그 자리에 누워 있음. 그동안 이동·공격은
+   * 안 받고, 보스도 쫓거나 때리지 않음. 홀로 옮기는 일은 `applyDueRespawns` 가 함.
    */
   private damagePlayer(hit: BossPlayerHit, now: number): void {
     const socket = this.socketsBySeat.get(hit.seat);
@@ -730,6 +740,16 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     }
     const health = this.resolveHealth(attachment, now) - SPACE_BOSS_COMBAT.attackDamage[hit.attack];
 
+    // 맞는 모션·쓰러지는 모션을 남의 화면에도 보여 주려고 모두에게 알림.
+    this.broadcastBossFrame({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "player-hit",
+      seat: peer.seat,
+      by: hit.attack,
+      isFatal: health <= 0,
+      serverAt: now,
+    });
+
     if (health > 0) {
       socket.serializeAttachment({ ...attachment, health, healthAt: now } satisfies SpaceSocketAttachment);
       this.healthByActor.set(attachment.stableActorKey, { health, healthAt: now });
@@ -739,32 +759,62 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     const reviveAt = now + SPACE_BOSS_PLAYER.respawnDelayMs;
     // 좌석 좌표는 clientKey 로 뽑지만 서버는 그 키를 안 들고 있음. 리스폰 자리는
     // 프레임에 실어 보내서 클라이언트가 미리 맞힐 필요가 없으니 서버 키로 뽑음.
-    const respawned: SpacePeer = { ...peer, ...createSpawnPoint(attachment.stableActorKey), isRunning: false };
+    const destination = createSpawnPoint(attachment.stableActorKey);
 
     socket.serializeAttachment({
       ...attachment,
-      peer: respawned,
       health: SPACE_BOSS_PLAYER.maximumHealth,
       healthAt: reviveAt,
       deadUntil: reviveAt,
-      lastMoveAt: now,
-      movementBudget: 0.5,
     } satisfies SpaceSocketAttachment);
     this.healthByActor.delete(attachment.stableActorKey);
+    this.pendingRespawns.set(peer.seat, now + SPACE_BOSS_PLAYER.respawnMoveDelayMs);
     this.sendBossFrameTo(socket, { v: SPACE_PROTOCOL_VERSION, t: "hp", health: 0, by: hit.attack, serverAt: now });
     this.sendBossFrameTo(socket, {
       v: SPACE_PROTOCOL_VERSION,
       t: "respawn",
-      x: respawned.x,
-      y: respawned.y,
-      z: respawned.z,
-      yaw: respawned.yaw,
+      x: destination.x,
+      y: destination.y,
+      z: destination.z,
+      yaw: destination.yaw,
       reviveAt,
       serverAt: now,
     });
-    // 보스를 모르는 옛 클라이언트도 `peer` 는 알아서 이걸로 자리를 옮김.
-    this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: respawned });
-    this.dirtySeats.add(respawned.seat);
+  }
+
+  /**
+   * 누워 있는 시간이 끝난 사람을 홀 안으로 옮김.
+   *
+   * 서버가 유저 위치를 정하는 유일한 자리임. 평소 위치는 클라이언트가 보내고 서버는
+   * 검증만 함. 그래서 이동 검증의 기준(위치·예산·시각)도 여기서 같이 옮김. 안 옮기면
+   * 리스폰 뒤 첫 이동이 "한 번에 너무 멀리 갔다" 로 반려됨.
+   */
+  private applyDueRespawns(now: number): void {
+    for (const [seat, moveAt] of this.pendingRespawns) {
+      if (moveAt > now) {
+        continue;
+      }
+      this.pendingRespawns.delete(seat);
+
+      const socket = this.socketsBySeat.get(seat);
+      const attachment = socket ? this.getJoinedAttachment(socket) : null;
+      const peer = attachment?.peer;
+
+      if (!socket || !attachment || !peer || !attachment.stableActorKey) {
+        continue;
+      }
+      const respawned: SpacePeer = { ...peer, ...createSpawnPoint(attachment.stableActorKey), isRunning: false };
+
+      socket.serializeAttachment({
+        ...attachment,
+        peer: respawned,
+        lastMoveAt: now,
+        movementBudget: 0.5,
+      } satisfies SpaceSocketAttachment);
+      // 보스를 모르는 옛 클라이언트도 `peer` 는 알아서 이걸로 자리를 옮김.
+      this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: respawned });
+      this.dirtySeats.add(respawned.seat);
+    }
   }
 
   private sendBossFrameTo(socket: WebSocket, frame: SpaceServerFrame): void {
@@ -864,8 +914,12 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     // 한 틱 넘게 밀렸으면 박자를 지금으로 다시 맞춤.
     const tickAt =
       now - this.nextSnapshotAt > SPACE_NETWORK_INTERVAL_MS ? now : this.nextSnapshotAt;
-    // 보스가 먼저임. 쓰러진 유저를 옮기면 그 좌석이 이번 스냅샷에 실려야 함.
-    const isBossActive = this.stepBoss(tickAt);
+    // 보스와 리스폰이 먼저임. 쓰러진 유저를 옮기면 그 좌석이 이번 스냅샷에 실려야 함.
+    const isBossTicking = this.stepBoss(tickAt);
+
+    this.applyDueRespawns(tickAt);
+    // 누워 있는 사람이 남아 있으면 옮길 때까지 틱을 이어 감.
+    const isBossActive = isBossTicking || this.pendingRespawns.size > 0;
     const players = Array.from(this.dirtySeats).flatMap((seat) => {
       const socket = this.socketsBySeat.get(seat);
       const peer = socket ? this.getJoinedAttachment(socket)?.peer : null;
@@ -1119,7 +1173,10 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     if (this.isDead(attachment, now)) {
       return;
     }
-    if (attachment.lastKickAt !== undefined && now - attachment.lastKickAt < SPACE_KICK.cooldownMs - SPACE_KICK.serverCooldownToleranceMs) {
+    // 쿨다운과 피해는 캐릭터마다 다름. 서버가 아는 모델 번호로 정함.
+    const combat = resolveAvatarCombat(kicker.modelIndex);
+
+    if (attachment.lastKickAt !== undefined && now - attachment.lastKickAt < resolveKickServerIntervalMs(combat.cooldownMs)) {
       return;
     }
     const facingX = -Math.sin(kicker.yaw);
@@ -1145,7 +1202,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         this.sendPayload(candidate, payload);
       }
     }
-    this.applyKickToBoss(kicker, attachment, now);
+    this.applyKickToBoss(kicker, attachment, now, combat.kickDamage);
   }
 
   /**
@@ -1153,7 +1210,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
    *
    * 쿨다운은 위에서 이미 걸렀음. 사거리와 방향은 서버가 아는 위치로 봄.
    */
-  private applyKickToBoss(kicker: SpacePeer, attachment: SpaceSocketAttachment, now: number): void {
+  private applyKickToBoss(kicker: SpacePeer, attachment: SpaceSocketAttachment, now: number, damage: number): void {
     if (!attachment.features?.includes(SPACE_FEATURE_BOSS) || !this.syncBossPresence(now)) {
       return;
     }
@@ -1165,7 +1222,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       yaw: kicker.yaw,
       lastInputAt: now,
       isAlive: !this.isDead(attachment, now),
-    });
+    }, damage);
 
     if (!result) {
       return;

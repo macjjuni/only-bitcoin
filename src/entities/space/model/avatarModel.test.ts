@@ -1,11 +1,13 @@
 import { describe, expect, it } from "vitest";
 import {
   isAvatarModelIndex,
+  resolveAvatarCombat,
   resolveAvatarModel,
   resolveAvatarModelIndex,
   SPACE_AVATAR_MODELS,
   SPACE_DEFAULT_AVATAR_MODEL_INDEX,
 } from "./avatarModel";
+import { resolveKickServerIntervalMs } from "./kick";
 
 describe("SPACE_AVATAR_MODELS", () => {
   it("모델 ID 가 겹치지 않는다", () => {
@@ -49,6 +51,44 @@ describe("SPACE_AVATAR_MODELS", () => {
 
   it("기본 모델이 목록 안에 있다", () => {
     expect(SPACE_AVATAR_MODELS[SPACE_DEFAULT_AVATAR_MODEL_INDEX]).toBeDefined();
+  });
+});
+
+describe("캐릭터별 공격 성격", () => {
+  it("초당 피해가 캐릭터끼리 비슷하다", () => {
+    // 한 캐릭터가 확실히 세면 다들 그것만 고른다. 차이는 싸우는 방식에만 둔다.
+    const damagePerSecond = SPACE_AVATAR_MODELS.map(
+      ({ combat }) => combat.kickDamage / (combat.cooldownMs / 1000),
+    );
+
+    expect(Math.max(...damagePerSecond) / Math.min(...damagePerSecond)).toBeLessThan(1.15);
+  });
+
+  it("공격 모션이 쿨다운 안에 끝난다", () => {
+    // 길면 다음 공격이 앞 모션을 끊고 시작해 휘두르다 만 것처럼 보인다.
+    for (const { id, combat } of SPACE_AVATAR_MODELS) {
+      expect(combat.attackSeconds * 1000, id).toBeLessThanOrEqual(combat.cooldownMs);
+      expect(combat.attackSeconds, id).toBeGreaterThan(0.2);
+      expect(combat.kickDamage, id).toBeGreaterThan(0);
+    }
+  });
+
+  it("서버가 받는 최소 간격은 쿨다운의 절반 아래로 내려가지 않는다", () => {
+    // 쿨다운이 짧은 캐릭터에서 여유를 통째로 빼면 제한이 사라져 연타 조작이 통한다.
+    for (const { id, combat } of SPACE_AVATAR_MODELS) {
+      const interval = resolveKickServerIntervalMs(combat.cooldownMs);
+
+      expect(interval, id).toBeGreaterThanOrEqual(combat.cooldownMs / 2);
+      expect(interval, id).toBeLessThanOrEqual(combat.cooldownMs);
+    }
+    expect(resolveKickServerIntervalMs(1_500)).toBe(1_000);
+    expect(resolveKickServerIntervalMs(550)).toBe(275);
+  });
+
+  it("범위 밖 번호는 기본 모델의 것을 준다", () => {
+    expect(resolveAvatarCombat(99)).toBe(
+      SPACE_AVATAR_MODELS[SPACE_DEFAULT_AVATAR_MODEL_INDEX].combat,
+    );
   });
 });
 

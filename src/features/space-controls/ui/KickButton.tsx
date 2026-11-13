@@ -2,7 +2,6 @@
 
 import { Wrench } from "lucide-react";
 import { memo, type ReactNode, useCallback, useEffect, useState } from "react";
-import { SPACE_KICK } from "@/entities/space";
 import type { SpaceInputSource } from "../model/spaceInputSource";
 import {
   KICK_BUTTON_POSITION,
@@ -46,7 +45,7 @@ function KickButton({ inputSource }: KickButtonProps): ReactNode {
     let frameId = 0;
     const tick = (): void => {
       const remaining = Math.max(0, inputSource.kickCooldownUntil - performance.now());
-      setRemainingStep(Math.ceil((remaining / SPACE_KICK.cooldownMs) * RING_STEPS));
+      setRemainingStep(Math.ceil((remaining / inputSource.kickCooldownMs) * RING_STEPS));
       frameId = requestAnimationFrame(tick);
     };
     frameId = requestAnimationFrame(tick);
