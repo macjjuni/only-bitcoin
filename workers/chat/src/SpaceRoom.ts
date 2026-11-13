@@ -17,6 +17,7 @@ import {
 } from "../../../src/entities/space/model/avatarModel";
 import {
   SPACE_BOSS_COMBAT,
+  SPACE_BOSS_DEATH,
   SPACE_BOSS_PLAYER,
   SPACE_FEATURE_BOSS,
 } from "../../../src/entities/space/model/boss";
@@ -49,7 +50,7 @@ import {
   SPACE_MAX_OCCUPANTS,
 } from "../../../src/entities/space/model/spaceWorld";
 import { createSha256Hex, deriveStableActorKey } from "./lib/crypto";
-import { resolveBossMaximumHealth } from "./lib/spaceBossConfig";
+import { resolveBossMaximumHealth, resolveBossRespawnSeconds } from "./lib/spaceBossConfig";
 import { getSpaceIpConnectionLimit } from "./lib/spaceConnectionLimit";
 import { SpaceMarketMonitor } from "./lib/spaceMarketMonitor";
 import {
@@ -208,6 +209,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
    * 옮길 때까지는 틱을 이어 감. 보스가 쉬러 들어가도 누운 사람을 그대로 두면 안 됨.
    */
   private pendingRespawns = new Map<number, number>();
+  /** 개발용. 처치 뒤 보스를 다시 불러낼 때까지의 시간(ms). 꺼져 있으면 `null`. */
+  private readonly bossRespawnMs: number | null;
+  private bossRespawnTimer: ReturnType<typeof setTimeout> | null = null;
 
   constructor(
     private readonly state: DurableObjectState,
@@ -217,6 +221,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     this.boss = createBossSimulation(
       resolveBossMaximumHealth(workerEnv.SPACE_BOSS_MAXIMUM_HEALTH),
     );
+    const bossRespawnSeconds = resolveBossRespawnSeconds(workerEnv.SPACE_BOSS_RESPAWN_SECONDS);
+
+    this.bossRespawnMs = bossRespawnSeconds === null ? null : bossRespawnSeconds * 1000;
     this.marketMonitor = new SpaceMarketMonitor(state.storage, () => this.socketsBySeat.size > 0, (frame) => {
       for (const socket of this.socketsBySeat.values()) {
         if (this.getJoinedAttachment(socket)?.features?.includes(SPACE_FEATURE_MARKET)) {
@@ -597,6 +604,12 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     if (this.bossLastKilledAt !== undefined) {
       return;
     }
+    // 개발용 재등장이 켜져 있으면 저장된 처치 기록을 안 봄. 이 설정을 켜기 전에 잡아 둔
+    // 기록이 남아 있으면 다음 칸까지 보스가 안 나옴.
+    if (this.bossRespawnMs !== null) {
+      this.bossLastKilledAt = null;
+      return;
+    }
 
     try {
       const saved = await this.state.storage.get<PersistedBoss>(BOSS_STORAGE_KEY);
@@ -826,9 +839,14 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   /** 처치 시각을 저장하고 모두에게 알림. 저장이 실패해도 이번 싸움은 끝난 것으로 둠. */
   private finishBoss(death: BossDeath, now: number): void {
     this.bossLastKilledAt = death.killedAt;
-    void this.state.storage
-      .put(BOSS_STORAGE_KEY, { lastKilledAt: death.killedAt } satisfies PersistedBoss)
-      .catch((error) => console.error("Boss kill save failed", error));
+    if (this.bossRespawnMs === null) {
+      void this.state.storage
+        .put(BOSS_STORAGE_KEY, { lastKilledAt: death.killedAt } satisfies PersistedBoss)
+        .catch((error) => console.error("Boss kill save failed", error));
+    } else {
+      // 개발용. 처치 시각을 저장하지 않고, 쓰러지는 연출이 끝난 뒤 다시 불러냄.
+      this.scheduleBossRespawn(SPACE_BOSS_DEATH.totalSeconds * 1000 + this.bossRespawnMs);
+    }
     this.broadcastBossFrame({
       v: SPACE_PROTOCOL_VERSION,
       t: "boss-dead",
@@ -837,6 +855,29 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       ranking: death.ranking,
       serverAt: now,
     });
+  }
+
+  /**
+   * 개발용. 젠 시각을 기다리지 않고 보스를 다시 불러냄.
+   *
+   * 클라이언트는 처치 기록으로 "다음 칸까지 없음" 이라고 계산하고 있어서, 다시 나왔다고
+   * 따로 알려 줘야 함. 그 뒤에 들어오는 사람은 입장 응답의 처치 기록이 비어 있어 그냥 보임.
+   */
+  private scheduleBossRespawn(delayMs: number): void {
+    if (this.bossRespawnTimer !== null) {
+      clearTimeout(this.bossRespawnTimer);
+    }
+    this.bossRespawnTimer = setTimeout(() => {
+      const now = Date.now();
+
+      this.bossRespawnTimer = null;
+      this.bossLastKilledAt = null;
+      this.boss.spawn(now);
+      this.broadcastBossFrame({ v: SPACE_PROTOCOL_VERSION, t: "boss-spawn", spawnedAt: now, serverAt: now });
+      // 아레나에 서 있던 사람이 있으면 가만히 있어도 보스가 알아보게 틱을 돌림.
+      this.wasBossActive = true;
+      this.scheduleSnapshot();
+    }, delayMs);
   }
 
   /**

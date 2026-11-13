@@ -202,6 +202,12 @@ export type SpaceServerFrame =
       reviveAt: number;
       serverAt: number;
     }
+  /**
+   * 보스가 젠 시각이 아닌데 다시 나옴. 개발 서버에서 처치 뒤 바로 다시 불러낼 때만 옴.
+   *
+   * 받는 쪽은 처치 기록을 지우고 `spawnedAt` 부터 등장 연출을 틂.
+   */
+  | { v: SpaceProtocolVersion; t: "boss-spawn"; spawnedAt: number; serverAt: number }
   /** 보스를 잡음. 순위는 피해를 많이 준 순서임. */
   | {
       v: SpaceProtocolVersion;
@@ -611,6 +617,10 @@ export const parseSpaceServerFrame = (rawPayload: string): SpaceServerFrame | nu
         : null;
     case "respawn":
       return isTransform(payload) && isTimestamp(payload.reviveAt) && isTimestamp(payload.serverAt)
+        ? (payload as SpaceServerFrame)
+        : null;
+    case "boss-spawn":
+      return isTimestamp(payload.spawnedAt) && isTimestamp(payload.serverAt)
         ? (payload as SpaceServerFrame)
         : null;
     case "boss-dead":

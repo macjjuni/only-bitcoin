@@ -39,6 +39,11 @@ export interface BossTracker {
   /** 처치됨. 다음 젠 시각까지 없는 것으로 계산함. */
   applyDefeat: (killedAt: number) => void;
   /**
+   * 젠 시각이 아닌데 다시 나옴(개발 서버). 처치 기록을 지우고 `spawnedAt`(서버 축)부터
+   * 등장 연출을 틂.
+   */
+  applySpawn: (spawnedAt: number) => void;
+  /**
    * 지금 그릴 상태를 구함.
    *
    * @param clockOffsetMs 서버 시각 − 로컬 시각. 아직 못 쟀으면 `null` 이고 그동안은 안 그림.
@@ -109,6 +114,8 @@ export const createBossTracker = (): BossTracker => {
    */
   let scheduleSpawnedAt: number | null = null;
   let scheduleLocalStartedAt = 0;
+  /** 서버가 따로 알려 준 등장 시각(서버 축). 있으면 젠 계산 대신 이걸 씀. */
+  let announcedSpawnedAt: number | null = null;
 
   const hide = (): void => {
     state.phase = "hidden";
@@ -129,7 +136,8 @@ export const createBossTracker = (): BossTracker => {
 
   /** 쉬는 보스. 젠 직후면 솟아오르는 중이고, 아니면 가운데 서 있음. */
   const sampleSchedule = (nowMs: number, clockOffsetMs: number): void => {
-    const spawnedAt = resolveBossSpawnedAt(nowMs + clockOffsetMs, lastKilledAt);
+    const spawnedAt =
+      announcedSpawnedAt ?? resolveBossSpawnedAt(nowMs + clockOffsetMs, lastKilledAt);
 
     wasFollowingWire = false;
 
@@ -208,6 +216,7 @@ export const createBossTracker = (): BossTracker => {
       lastHitAt = undefined;
       wasFollowingWire = false;
       scheduleSpawnedAt = null;
+      announcedSpawnedAt = null;
       hide();
     },
     applyWire: (nextWire, nowMs) => {
@@ -228,8 +237,19 @@ export const createBossTracker = (): BossTracker => {
       health = nextHealth;
       lastHitAt = nowMs;
     },
+    applySpawn: (spawnedAt) => {
+      if (!isEnabled) {
+        return;
+      }
+
+      lastKilledAt = null;
+      announcedSpawnedAt = spawnedAt;
+      wire = null;
+      health = null;
+    },
     applyDefeat: (killedAt) => {
       lastKilledAt = killedAt;
+      announcedSpawnedAt = null;
     },
     sample: (nowMs, clockOffsetMs) => {
       const deltaSeconds = Math.min(

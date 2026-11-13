@@ -49,7 +49,12 @@ describe("ensureChatDevVars", () => {
     const values = parseEnv(readFileSync(devVarsPath, "utf8"));
 
     expect(new Set(addedNames)).toEqual(
-      new Set([...secretNames, "CHAT_ALLOWED_ORIGINS", "SPACE_DISABLE_IP_CONNECTION_LIMIT"]),
+      new Set([
+        ...secretNames,
+        "CHAT_ALLOWED_ORIGINS",
+        "SPACE_DISABLE_IP_CONNECTION_LIMIT",
+        "SPACE_BOSS_RESPAWN_SECONDS",
+      ]),
     );
     for (const secretName of secretNames) {
       expect(values[secretName]).toMatch(/^[a-f0-9]{64}$/);
@@ -102,7 +107,11 @@ describe("ensureChatDevVars", () => {
     const values = parseEnv(updatedContent);
 
     expect(new Set(addedNames)).toEqual(
-      new Set(["IP_GUARD_SECRET", "SPACE_DISABLE_IP_CONNECTION_LIMIT"]),
+      new Set([
+        "IP_GUARD_SECRET",
+        "SPACE_DISABLE_IP_CONNECTION_LIMIT",
+        "SPACE_BOSS_RESPAWN_SECONDS",
+      ]),
     );
     expect(updatedContent.startsWith(`${originalContent}\n`)).toBe(true);
     expect(values.ACTOR_SECRET).toBe("actor#inside-quotes");
@@ -124,7 +133,12 @@ describe("ensureChatDevVars", () => {
     const values = parseEnv(readFileSync(devVarsPath, "utf8"));
 
     expect(new Set(addedNames)).toEqual(
-      new Set(["IP_GUARD_SECRET", "CHAT_ALLOWED_ORIGINS", "SPACE_DISABLE_IP_CONNECTION_LIMIT"]),
+      new Set([
+        "IP_GUARD_SECRET",
+        "CHAT_ALLOWED_ORIGINS",
+        "SPACE_DISABLE_IP_CONNECTION_LIMIT",
+        "SPACE_BOSS_RESPAWN_SECONDS",
+      ]),
     );
     expect(values.IP_GUARD_SECRET).toMatch(/^[a-f0-9]{64}$/);
     expect(values.ENFORCEMENT_SECRET).toBe("last#nonempty-value");

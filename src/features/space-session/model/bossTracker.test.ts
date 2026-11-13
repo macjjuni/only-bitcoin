@@ -228,4 +228,27 @@ describe("싸우는 보스(서버 프레임)", () => {
     });
     expect(tracker.getHealth()?.health).toBe(1_200);
   });
+
+  it("서버가 다시 나왔다고 알리면 처치 기록을 지우고 그 시각부터 솟아오른다", () => {
+    const tracker = createEnabledTracker();
+
+    tracker.applyDefeat(CLOCK_OFFSET_MS + 1_000);
+    expect(tracker.sample(2_000, CLOCK_OFFSET_MS).phase).toBe("hidden");
+
+    // 젠 시각이 아닌데 서버 시각 +9초에 다시 나옴(개발 서버).
+    tracker.applySpawn(CLOCK_OFFSET_MS + 9_000);
+
+    const spawning = tracker.sample(9_500, CLOCK_OFFSET_MS);
+
+    expect(spawning.phase).toBe("spawn");
+    expect(spawning.phaseStartedAt).toBe(9_000);
+    expect(
+      tracker.sample(9_000 + SPACE_BOSS_SPAWN.totalSeconds * 1000 + 1, CLOCK_OFFSET_MS).phase,
+    ).toBe("idle");
+    expect(tracker.getHealth()?.health).toBe(SPACE_BOSS_COMBAT.maximumHealth);
+
+    // 다시 잡으면 또 사라짐.
+    tracker.applyDefeat(CLOCK_OFFSET_MS + 20_000);
+    expect(tracker.sample(21_000, CLOCK_OFFSET_MS).phase).toBe("hidden");
+  });
 });

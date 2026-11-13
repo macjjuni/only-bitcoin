@@ -1125,6 +1125,14 @@ export class SpaceSessionController {
         });
         return;
       }
+      case "boss-spawn": {
+        if (this.snapshot.canFightBoss) {
+          this.bossTracker.applySpawn(frame.spawnedAt);
+          // 지난 처치 결과는 내림. 새 보스가 나왔는데 결과 카드가 남아 있으면 헷갈림.
+          this.updateSnapshot({ bossDefeat: null });
+        }
+        return;
+      }
       case "boss-dead": {
         if (!this.snapshot.canFightBoss) {
           return;

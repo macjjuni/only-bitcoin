@@ -10,6 +10,7 @@ import { resolveAvatarCombat } from "../../../src/entities/space/model/avatarMod
 import {
   SPACE_BOSS,
   SPACE_BOSS_COMBAT,
+  SPACE_BOSS_DEATH,
   SPACE_BOSS_PLAYER,
 } from "../../../src/entities/space/model/boss";
 import { resolveKickServerIntervalMs, SPACE_KICK } from "../../../src/entities/space/model/kick";
@@ -1469,6 +1470,109 @@ describe("SpaceRoom", () => {
       expect(attachmentOf(fighter).health).toBeCloseTo(
         Math.min(SPACE_BOSS_PLAYER.maximumHealth, damaged + SPACE_BOSS_PLAYER.hallRegenPerSecond),
       );
+    });
+
+    describe("개발용 재등장", () => {
+      const respawnEnv = { ...workerEnv, SPACE_BOSS_RESPAWN_SECONDS: "10" } as ChatWorkerEnv;
+
+      /** 재등장 설정을 켠 방. 체력이 작은 보스로 바꿔 끼워 두 대에 잡히게 함. */
+      const createRespawnRoom = (state = new RoomState()) => {
+        const room = new SpaceRoom(state.asDurableState(), respawnEnv);
+        const send = (socket: RoomSocket, frame: unknown) =>
+          room.webSocketMessage(socket.asWebSocket(), JSON.stringify(frame));
+        const join = async (key: string, ipGuardKey: string) => {
+          const socket = new RoomSocket(ipGuardKey);
+
+          state.sockets.push(socket);
+          await send(socket, {
+            v: SPACE_PROTOCOL_VERSION,
+            t: "join",
+            clientKey: key,
+            nickname: "싸움꾼",
+            features: BOSS_FEATURES,
+          });
+
+          return socket;
+        };
+
+        (room as unknown as { boss: BossSimulation }).boss = createBossSimulation(
+          DEFAULT_COMBAT.kickDamage,
+        );
+
+        return { state, room, send, join };
+      };
+
+      it("잡으면 쓰러지는 연출 뒤 정해진 초가 지나 다시 나오고 모두에게 알린다", async () => {
+        const { state, send, join } = createRespawnRoom();
+        const fighter = await join(clientKey(1), "ip-1");
+
+        await moveIntoArena(send, fighter, 2.5, 0, Math.PI / 2);
+        await send(fighter, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+
+        expect(framesOf(fighter, "boss-dead")).toHaveLength(1);
+        // 처치 시각을 저장하지 않음. 서버가 다시 떠도 보스가 있어야 함.
+        expect(state.storage.put).not.toHaveBeenCalledWith("space-boss-v1", expect.anything());
+
+        vi.advanceTimersByTime(SPACE_BOSS_DEATH.totalSeconds * 1000 + 10_000 - 1);
+        expect(framesOf(fighter, "boss-spawn")).toHaveLength(0);
+
+        vi.advanceTimersByTime(1);
+
+        const [spawn] = framesOf(fighter, "boss-spawn");
+
+        expect(spawn).toEqual({
+          v: SPACE_PROTOCOL_VERSION,
+          t: "boss-spawn",
+          spawnedAt: Date.now(),
+          serverAt: Date.now(),
+        });
+        expect(parseSpaceServerFrame(JSON.stringify(spawn))).toEqual(spawn);
+
+        // 다시 나온 보스는 체력이 가득이고, 등장이 끝나면 또 때릴 수 있음.
+        vi.advanceTimersByTime(5_000);
+        await send(fighter, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+
+        expect(framesOf(fighter, "boss-dead")).toHaveLength(2);
+      });
+
+      it("다시 나온 뒤에 들어온 사람은 처치 기록 없이 보스를 본다", async () => {
+        const { send, join } = createRespawnRoom();
+        const fighter = await join(clientKey(1), "ip-1");
+
+        await moveIntoArena(send, fighter, 2.5, 0, Math.PI / 2);
+        await send(fighter, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+        vi.advanceTimersByTime(SPACE_BOSS_DEATH.totalSeconds * 1000 + 10_000);
+
+        const late = await join(clientKey(2), "ip-2");
+
+        expect(framesOf(late, "welcome")[0].boss).toMatchObject({ lastKilledAt: null });
+      });
+
+      it("설정을 켜기 전에 저장된 처치 기록이 있어도 보스가 나온다", async () => {
+        const state = new RoomState();
+
+        await state.storage.put("space-boss-v1", { lastKilledAt: Date.now() - 1_000 });
+
+        const { join } = createRespawnRoom(state);
+        const fighter = await join(clientKey(1), "ip-1");
+
+        expect(framesOf(fighter, "welcome")[0].boss).toMatchObject({ lastKilledAt: null });
+      });
+
+      it("설정이 없으면 다시 나오지 않는다", async () => {
+        const { room, join, send } = createRoom();
+        const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
+
+        (room as unknown as { boss: BossSimulation }).boss = createBossSimulation(
+          DEFAULT_COMBAT.kickDamage,
+        );
+        await moveIntoArena(send, fighter, 2.5, 0, Math.PI / 2);
+        await send(fighter, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+        vi.advanceTimersByTime(60_000);
+
+        expect(framesOf(fighter, "boss-dead")).toHaveLength(1);
+        expect(framesOf(fighter, "boss-spawn")).toHaveLength(0);
+      });
     });
   });
 });

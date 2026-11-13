@@ -32,6 +32,12 @@ export const ensureChatDevVars = (devVarsPath = defaultDevVarsPath) => {
     addedNames.push("SPACE_DISABLE_IP_CONNECTION_LIMIT");
   }
 
+  // 보스는 원래 2시간에 한 번 나옴. 로컬에서는 잡은 뒤 10초면 다시 나오게 해 둠.
+  if (!configuredValues.SPACE_BOSS_RESPAWN_SECONDS?.trim()) {
+    additions.push("SPACE_BOSS_RESPAWN_SECONDS=10");
+    addedNames.push("SPACE_BOSS_RESPAWN_SECONDS");
+  }
+
   if (additions.length > 0) {
     const prefix = hasDevVarsFile
       ? originalContent
