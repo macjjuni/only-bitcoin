@@ -96,6 +96,59 @@ export const SPACE_BOSS = {
   attackRestSeconds: 1.5,
 } as const;
 
+/** 서버·클라이언트가 같이 지원한다고 알리는 기능 이름. 아는 쪽에만 보스 프레임을 보냄. */
+export const SPACE_FEATURE_BOSS = "boss-v1";
+
+/**
+ * 전투 수치. 전부 초기값이고 플레이하면서 조정함. 근거는 계획서 §6.
+ */
+export const SPACE_BOSS_COMBAT = {
+  /** 5명이 쉬지 않고 때리면 약 1분, 피하면서 싸우면 3 ~ 5분. */
+  maximumHealth: 3_000,
+  /** 유저 공격 한 번의 피해. 쿨다운이 1초라 초당 피해와 같음. */
+  kickDamage: 10,
+  /** 보스 몸통에서 이 거리 안이어야 닿음(m). 렌치 길이 정도. */
+  kickReach: 2,
+  /** 보스를 향한 정도(내적)가 이보다 커야 닿음. 등지고 휘두른 건 안 맞음. 약 70° 안. */
+  kickFacingDot: 0.34,
+  /** 공격별 피해. 유저 최대 체력 100 기준 3 ~ 5대. */
+  attackDamage: { swipe: 20, slam: 35, charge: 30 },
+  /**
+   * 판정 범위를 예고보다 이만큼 작게 잡음(m).
+   *
+   * 서버가 아는 유저 위치는 실제보다 0.1 ~ 0.3초 늦음. 예고 밖으로 막 나간 사람이
+   * 맞으면 억울해서 유저에게 유리하게 깎음.
+   */
+  hitMargin: 0.3,
+  /** 타깃을 다시 고르는 간격(ms). */
+  targetRepickMs: 1_000,
+  /** 이 시간 동안 이동·공격이 없으면 자리 비움으로 보고 타깃에서 뺌(ms). */
+  awayTimeoutMs: 10_000,
+  /** 복귀 중 초당 회복 비율. 20초면 가득 참. */
+  returnHealRatio: 0.05,
+  /** 이 높이 차 안이어야 아레나에 있는 것으로 봄(m). 발코니는 위라서 빠짐. */
+  arenaHeightTolerance: 2.5,
+  /** 체력이 이 비율 아래로 처음 내려가면 포효 · 비틀거림을 한 번씩 함. */
+  enrageHealthRatio: 0.5,
+  staggerHealthRatio: 0.25,
+  /** 돌진을 연달아 쓰지 않게 두는 간격(ms). */
+  chargeIntervalMs: 6_000,
+} as const;
+
+/** 유저 체력 규칙. */
+export const SPACE_BOSS_PLAYER = {
+  maximumHealth: 100,
+  /** 홀 안에 있으면 초당 이만큼 참. 안뜰에서는 안 참. */
+  hallRegenPerSecond: 10,
+  /** 홀과 안뜰의 경계(x). 홀 +X 외벽 자리임. */
+  hallMaximumX: 21,
+  /** 쓰러진 뒤 다시 움직일 수 있기까지(ms). 그동안 사망 화면을 보여 줌. */
+  respawnDelayMs: 3_000,
+} as const;
+
+/** 젠 주기(ms). 한국 시간 짝수 정시(0, 2, 4시 …)마다임. */
+export const SPACE_BOSS_SPAWN_INTERVAL_MS = 2 * 60 * 60 * 1_000;
+
 /** 모션별 보폭 속도(m/s). 재생 속도 = 실제 속도 ÷ 이 값. */
 export const SPACE_BOSS_STRIDE = {
   walk: 1.2516,

@@ -949,6 +949,12 @@ export class SpaceSessionController {
         this.kickEvents = [...this.kickEvents, { event, receivedAt }].slice(-maximumKickEventCount);
         return;
       }
+      // 보스 프레임. 받는 쪽은 아직 안 붙였음. 입장 때 보스 기능을 알리지 않아 지금은 오지 않음.
+      case "boss":
+      case "boss-hit":
+      case "hp":
+      case "respawn":
+      case "boss-dead":
       case "ignored":
         return;
       default: {

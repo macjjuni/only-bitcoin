@@ -1,3 +1,21 @@
+export {
+  canKickReachBoss,
+  isInsideBossArena,
+  isInsideBossAttack,
+  isInsideBossChargeSweep,
+} from "./lib/bossHitTest";
+export {
+  isBossPresent,
+  resolveBossSlotStart,
+  resolveBossSpawnedAt,
+  resolveNextBossSpawnAt,
+} from "./lib/bossSchedule";
+export {
+  type BossDeath,
+  type BossSimulation,
+  type BossSimulationPlayer,
+  createBossSimulation,
+} from "./lib/bossSimulation";
 export { resolveColorIndexFromClientKey } from "./lib/clientKeyHash";
 export {
   appendPriceSample,
@@ -34,11 +52,15 @@ export {
   SPACE_BOSS,
   SPACE_BOSS_ATTACKS,
   SPACE_BOSS_CLIP_SECONDS,
+  SPACE_BOSS_COMBAT,
   SPACE_BOSS_DEATH,
   SPACE_BOSS_HIT,
+  SPACE_BOSS_PLAYER,
   SPACE_BOSS_SPAWN,
+  SPACE_BOSS_SPAWN_INTERVAL_MS,
   SPACE_BOSS_STRIDE,
   SPACE_BOSS_TURN,
+  SPACE_FEATURE_BOSS,
   type SpaceBossAttack,
   type SpaceBossPhase,
   type SpaceBossState,

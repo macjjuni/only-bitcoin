@@ -274,8 +274,9 @@ describe("createBossPreview", () => {
     x: arena.centerX - 8,
     y: arena.floorY,
     z: arena.centerZ,
+    yaw: 0,
   };
-  const outsidePlayer: BossPreviewPlayer = { x: 0, y: SPACE_BOSS.arena.floorY - 2, z: 0 };
+  const outsidePlayer: BossPreviewPlayer = { x: 0, y: SPACE_BOSS.arena.floorY - 2, z: 0, yaw: 0 };
 
   const runPreview = (
     seconds: number,
@@ -313,6 +314,7 @@ describe("createBossPreview", () => {
         x: arena.centerX + Math.cos(angle) * 9,
         y: arena.floorY,
         z: arena.centerZ + Math.sin(angle) * 9,
+        yaw: 0,
       };
 
       preview.step(elapsed * 1000, FRAME_SECONDS, player);
@@ -345,8 +347,13 @@ describe("createBossPreview", () => {
 
     for (let elapsed = 0; elapsed <= 90; elapsed += FRAME_SECONDS) {
       const nowMs = elapsed * 1000;
-      // 보스 바로 옆에 붙어서 1초마다 때림.
-      const player = { x: preview.state.x + 2, y: arena.floorY, z: preview.state.z };
+      // 보스 바로 옆(+X)에 붙어 보스 쪽(−X)을 보고 1초마다 때림.
+      const player = {
+        x: preview.state.x + 2,
+        y: arena.floorY,
+        z: preview.state.z,
+        yaw: Math.PI / 2,
+      };
 
       preview.step(nowMs, FRAME_SECONDS, player);
       if (Math.abs(elapsed % 1) < FRAME_SECONDS) {

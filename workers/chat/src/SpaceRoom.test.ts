@@ -1,7 +1,16 @@
 import { afterEach, beforeEach, describe, expect, it, vi } from "vitest";
+import {
+  type BossSimulation,
+  createBossSimulation,
+} from "../../../src/entities/space/lib/bossSimulation";
 import { resolveColorIndexFromClientKey } from "../../../src/entities/space/lib/clientKeyHash";
 import { decodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapshot";
 import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
+import {
+  SPACE_BOSS,
+  SPACE_BOSS_COMBAT,
+  SPACE_BOSS_PLAYER,
+} from "../../../src/entities/space/model/boss";
 import { SPACE_KICK } from "../../../src/entities/space/model/kick";
 import {
   parseSpaceServerFrame,
@@ -359,7 +368,7 @@ describe("SpaceRoom", () => {
       t: "welcome",
       self: observer.peer(),
       peers: [remaining.peer()],
-      features: ["kick", "market-sync-v1", "kick-timing-v1"],
+      features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1"],
     });
     expect(vi.getTimerCount()).toBe(0);
   });
@@ -899,7 +908,7 @@ describe("SpaceRoom", () => {
       const socket = await join(clientKey(1), "참여자", 0, "test-ip", ["kick"]);
 
       expect(socket.frames().find((frame) => frame.t === "welcome")).toMatchObject({
-        features: ["kick", "market-sync-v1", "kick-timing-v1"],
+        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1"],
       });
     });
 
@@ -1011,6 +1020,341 @@ describe("SpaceRoom", () => {
         expect(frame.dirX).toBeCloseTo(-Math.sin(yaw));
         expect(frame.dirZ).toBeCloseTo(-Math.cos(yaw));
       }
+    });
+  });
+
+  describe("레이드 보스", () => {
+    const BOSS_FEATURES = ["kick", "boss-v1"];
+    const { arena } = SPACE_BOSS;
+    const framesOf = <Kind extends SpaceServerFrame["t"]>(socket: RoomSocket, kind: Kind) =>
+      socket.frames().filter((frame) => frame.t === kind) as Extract<
+        SpaceServerFrame,
+        { t: Kind }
+      >[];
+    const attachmentOf = (socket: RoomSocket) =>
+      socket.deserializeAttachment() as { health?: number; deadUntil?: number };
+
+    /** 홀에서 안뜰까지 걸어갈 시간을 흘려보낸 뒤 아레나 중심 기준 자리로 옮김. */
+    const moveIntoArena = async (
+      send: ReturnType<typeof createRoom>["send"],
+      socket: RoomSocket,
+      offsetX: number,
+      offsetZ: number,
+      yaw = 0,
+    ) => {
+      vi.advanceTimersByTime(8_000);
+      await send(socket, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "move",
+        x: arena.centerX + offsetX,
+        y: arena.floorY,
+        z: arena.centerZ + offsetZ,
+        yaw,
+        isRunning: false,
+      });
+    };
+
+    /** 자리 비움으로 빠지지 않게 1초마다 제자리에서 살짝 움직이며 시간을 보냄. */
+    const stayActive = async (
+      send: ReturnType<typeof createRoom>["send"],
+      socket: RoomSocket,
+      seconds: number,
+      until?: () => boolean,
+    ) => {
+      for (let second = 0; second < seconds && !until?.(); second += 1) {
+        const peer = socket.peer();
+
+        vi.advanceTimersByTime(1_000);
+        await send(socket, {
+          v: SPACE_PROTOCOL_VERSION,
+          t: "move",
+          x: peer.x,
+          y: peer.y,
+          z: peer.z + (second % 2 === 0 ? 0.02 : -0.02),
+          yaw: peer.yaw,
+          isRunning: false,
+        });
+      }
+    };
+
+    it("입장 응답에 마지막 처치 시각과 내 체력을 싣고, 보스를 모르는 클라이언트에는 안 싣는다", async () => {
+      const { join } = createRoom();
+      const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
+      const oldClient = await join(clientKey(2), "옛탭", 0, "ip-2", ["kick"]);
+      const [welcome] = framesOf(fighter, "welcome");
+
+      expect(welcome.boss).toEqual({
+        lastKilledAt: null,
+        health: SPACE_BOSS_PLAYER.maximumHealth,
+        serverAt: Date.now(),
+      });
+      expect(parseSpaceServerFrame(JSON.stringify(welcome))).toMatchObject({ boss: welcome.boss });
+      expect(framesOf(oldClient, "welcome")[0]).not.toHaveProperty("boss");
+    });
+
+    it("홀에서만 움직이는 동안에는 보스 프레임도 추가 틱도 없다", async () => {
+      const { join, send } = createRoom();
+      const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
+      const peer = fighter.peer();
+
+      vi.advanceTimersByTime(1_000);
+      await send(fighter, { ...peer, v: SPACE_PROTOCOL_VERSION, t: "move", x: peer.x + 0.5 });
+      vi.advanceTimersByTime(5_000);
+
+      expect(framesOf(fighter, "boss")).toHaveLength(0);
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it("아레나에 들어오면 매 틱 보스 상태를 보내고 가만히 있어도 틱이 이어진다", async () => {
+      const { join, send } = createRoom();
+      const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
+      const oldClient = await join(clientKey(2), "옛탭", 0, "ip-2", ["kick"]);
+
+      await moveIntoArena(send, fighter, -8, 0);
+      vi.advanceTimersByTime(2_000);
+
+      const bossFrames = framesOf(fighter, "boss");
+
+      expect(bossFrames.length).toBeGreaterThanOrEqual(19);
+      expect(bossFrames.at(-1)?.state.targetSeat).toBe(fighter.peer().seat);
+      expect(bossFrames.at(-1)?.state.health).toBe(SPACE_BOSS_COMBAT.maximumHealth);
+      for (const frame of bossFrames) {
+        expect(parseSpaceServerFrame(JSON.stringify(frame))).toEqual(frame);
+      }
+      expect(framesOf(oldClient, "boss")).toHaveLength(0);
+      expect(vi.getTimerCount()).toBe(1);
+    });
+
+    it("대상이 나가면 보스가 돌아가 쉬고 틱이 멈춘다", async () => {
+      const { join, send } = createRoom();
+      const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
+
+      await moveIntoArena(send, fighter, -8, 0);
+      vi.advanceTimersByTime(3_000);
+      // 아레나 밖(안뜰 구석)으로 나감.
+      await send(fighter, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "move",
+        x: arena.centerX - 14,
+        y: arena.floorY,
+        z: arena.centerZ + 10,
+        yaw: 0,
+        isRunning: false,
+      });
+      vi.advanceTimersByTime(60_000);
+
+      expect(framesOf(fighter, "boss").at(-1)?.state).toMatchObject({
+        phase: "idle",
+        targetSeat: null,
+        health: SPACE_BOSS_COMBAT.maximumHealth,
+      });
+      expect(vi.getTimerCount()).toBe(0);
+    });
+
+    it("보스 앞에 서 있으면 맞아서 체력이 깎이고, 0 이 되면 홀로 되돌린다", async () => {
+      const { join, send } = createRoom();
+      const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
+      const observer = await join(clientKey(2), "구경꾼", 0, "ip-2", ["kick"]);
+
+      // 보스가 처음 보는 방향(−X) 바로 앞.
+      await moveIntoArena(send, fighter, -2.5, 0);
+      await stayActive(send, fighter, 40, () => framesOf(fighter, "respawn").length > 0);
+
+      const healths = framesOf(fighter, "hp").map((frame) => frame.health);
+      const [respawn] = framesOf(fighter, "respawn");
+
+      expect(healths[0]).toBe(
+        SPACE_BOSS_PLAYER.maximumHealth - SPACE_BOSS_COMBAT.attackDamage.swipe,
+      );
+      expect(healths.at(-1)).toBe(0);
+      expect(respawn).toBeDefined();
+      expect(parseSpaceServerFrame(JSON.stringify(respawn))).toEqual(respawn);
+      expect(respawn.reviveAt - respawn.serverAt).toBe(SPACE_BOSS_PLAYER.respawnDelayMs);
+      // 홀 안 스폰 고리로 옮겨졌고, 보스를 모르는 구경꾼도 `peer` 로 그 자리를 받음.
+      expect(fighter.peer()).toMatchObject({ x: respawn.x, y: respawn.y, z: respawn.z });
+      expect(fighter.peer().x).toBeLessThan(SPACE_BOSS_PLAYER.hallMaximumX);
+      expect(framesOf(observer, "peer").at(-1)?.peer).toMatchObject({
+        seat: fighter.peer().seat,
+        x: respawn.x,
+        z: respawn.z,
+      });
+      expect(attachmentOf(fighter).health).toBe(SPACE_BOSS_PLAYER.maximumHealth);
+    });
+
+    it("쓰러져 있는 동안 온 이동·공격은 말없이 버리고, 끝나면 리스폰 자리에서 다시 받는다", async () => {
+      const { join, send } = createRoom();
+      const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
+
+      await moveIntoArena(send, fighter, -2.5, 0);
+      await stayActive(send, fighter, 40, () => framesOf(fighter, "respawn").length > 0);
+
+      const respawned = fighter.peer();
+
+      fighter.sent = [];
+      // 사망 화면 중에도 클라이언트는 옛 자리를 계속 보냄.
+      await send(fighter, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "move",
+        x: arena.centerX - 2.5,
+        y: arena.floorY,
+        z: arena.centerZ,
+        yaw: 0,
+        isRunning: false,
+      });
+      await send(fighter, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+
+      expect(fighter.peer()).toEqual(respawned);
+      expect(framesOf(fighter, "error")).toHaveLength(0);
+      expect(framesOf(fighter, "kick")).toHaveLength(0);
+
+      vi.advanceTimersByTime(SPACE_BOSS_PLAYER.respawnDelayMs);
+      await send(fighter, {
+        ...respawned,
+        v: SPACE_PROTOCOL_VERSION,
+        t: "move",
+        x: respawned.x + 1,
+      });
+
+      expect(fighter.peer().x).toBeCloseTo(respawned.x + 1);
+      expect(framesOf(fighter, "error")).toHaveLength(0);
+    });
+
+    it("보스를 모르는 옛 클라이언트는 쫓지도 때리지도 않고, 그쪽 공격도 보스에 안 들어간다", async () => {
+      const { join, send } = createRoom();
+      const oldClient = await join(clientKey(1), "옛탭", 0, "ip-1", ["kick"]);
+      const watcher = await join(clientKey(2), "구경꾼", 0, "ip-2", BOSS_FEATURES);
+      const spawn = oldClient.peer();
+
+      await moveIntoArena(send, oldClient, 2.5, 0, Math.PI / 2);
+      await send(oldClient, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+      await stayActive(send, oldClient, 20);
+
+      expect(framesOf(watcher, "boss")).toHaveLength(0);
+      expect(framesOf(watcher, "boss-hit")).toHaveLength(0);
+      expect(oldClient.peer().x).toBeGreaterThan(SPACE_BOSS_PLAYER.hallMaximumX);
+      expect(oldClient.peer().x).not.toBe(spawn.x);
+      expect(attachmentOf(oldClient).health).toBeUndefined();
+    });
+
+    it("닿는 거리에서 보스를 보고 휘두르면 피해를 주고, 멀면 연출만 나간다", async () => {
+      const { join, send } = createRoom();
+      const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
+      const farAway = await join(clientKey(2), "홀사람", 0, "ip-2", BOSS_FEATURES);
+
+      // 보스의 +X 쪽 2.5 m 에서 보스(−X)를 봄.
+      await moveIntoArena(send, fighter, 2.5, 0, Math.PI / 2);
+      await send(fighter, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+      await send(farAway, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+
+      const hits = framesOf(farAway, "boss-hit");
+
+      expect(hits).toEqual([
+        {
+          v: SPACE_PROTOCOL_VERSION,
+          t: "boss-hit",
+          from: fighter.peer().seat,
+          damage: SPACE_BOSS_COMBAT.kickDamage,
+          health: SPACE_BOSS_COMBAT.maximumHealth - SPACE_BOSS_COMBAT.kickDamage,
+          serverAt: Date.now(),
+        },
+      ]);
+      expect(parseSpaceServerFrame(JSON.stringify(hits[0]))).toEqual(hits[0]);
+      expect(framesOf(fighter, "kick")).toHaveLength(2);
+    });
+
+    it("잡으면 처치 시각을 저장하고 순위를 알리며, 서버가 다시 떠도 다음 젠까지 보스가 없다", async () => {
+      const { state, room, join, send } = createRoom();
+      const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
+
+      // 3,000 번 때릴 수는 없어서 체력이 작은 보스로 바꿔 끼움.
+      (room as unknown as { boss: BossSimulation }).boss = createBossSimulation(
+        SPACE_BOSS_COMBAT.kickDamage * 2,
+      );
+      await moveIntoArena(send, fighter, 2.5, 0, Math.PI / 2);
+      await send(fighter, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+      vi.advanceTimersByTime(SPACE_KICK.cooldownMs);
+      await send(fighter, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+
+      const killedAt = Date.now();
+      const [dead] = framesOf(fighter, "boss-dead");
+
+      expect(dead).toEqual({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "boss-dead",
+        killedAt,
+        lastHitSeat: fighter.peer().seat,
+        ranking: [{ seat: fighter.peer().seat, damage: SPACE_BOSS_COMBAT.kickDamage * 2 }],
+        serverAt: killedAt,
+      });
+      expect(parseSpaceServerFrame(JSON.stringify(dead))).toEqual(dead);
+      expect(state.storage.put).toHaveBeenCalledWith("space-boss-v1", { lastKilledAt: killedAt });
+
+      // 쓰러지는 연출이 끝나면 사라지고 틱이 멈춤.
+      vi.advanceTimersByTime(20_000);
+      expect(framesOf(fighter, "boss").at(-1)?.state.phase).toBe("hidden");
+      expect(vi.getTimerCount()).toBe(0);
+
+      // 하이버네이션에서 깨어난 서버.
+      const restored = createRoom(state);
+      const late = await restored.join(clientKey(2), "늦은사람", 0, "ip-2", BOSS_FEATURES);
+
+      expect(framesOf(late, "welcome")[0].boss).toMatchObject({ lastKilledAt: killedAt });
+      await moveIntoArena(restored.send, late, -3, 0);
+      vi.advanceTimersByTime(3_000);
+      expect(framesOf(late, "boss")).toHaveLength(0);
+    });
+
+    it("맞은 뒤 나갔다 바로 들어와도 체력이 가득 차 있지 않다", async () => {
+      const { room, join, send } = createRoom();
+      const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
+
+      await moveIntoArena(send, fighter, -2.5, 0);
+      await stayActive(send, fighter, 10, () => framesOf(fighter, "hp").length > 0);
+
+      const [{ health }] = framesOf(fighter, "hp");
+
+      room.webSocketClose(fighter.asWebSocket());
+
+      const rejoined = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
+
+      expect(health).toBeLessThan(SPACE_BOSS_PLAYER.maximumHealth);
+      expect(framesOf(rejoined, "welcome")[0].boss?.health).toBe(health);
+    });
+
+    it("홀 안에 있으면 지난 시간만큼 체력이 찬다", async () => {
+      const { join, send } = createRoom();
+      const fighter = await join(clientKey(1), "싸움꾼", 0, "ip-1", BOSS_FEATURES);
+
+      await moveIntoArena(send, fighter, -2.5, 0);
+      await stayActive(send, fighter, 10, () => framesOf(fighter, "hp").length > 0);
+
+      const damaged = attachmentOf(fighter).health ?? 0;
+
+      // 바로 홀 안으로 들어감. 안뜰에 있던 시간은 회복에 안 들어감.
+      await send(fighter, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "move",
+        x: 10,
+        y: 1.5,
+        z: 0,
+        yaw: 0,
+        isRunning: false,
+      });
+      expect(attachmentOf(fighter).health).toBe(damaged);
+
+      vi.advanceTimersByTime(1_000);
+      await send(fighter, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "move",
+        x: 10.5,
+        y: 1.5,
+        z: 0,
+        yaw: 0,
+        isRunning: false,
+      });
+      expect(attachmentOf(fighter).health).toBeCloseTo(
+        Math.min(SPACE_BOSS_PLAYER.maximumHealth, damaged + SPACE_BOSS_PLAYER.hallRegenPerSecond),
+      );
     });
   });
 });

@@ -1,8 +1,21 @@
 import { DurableObject } from "cloudflare:workers";
+import { isInsideBossArena } from "../../../src/entities/space/lib/bossHitTest";
+import { resolveBossSpawnedAt } from "../../../src/entities/space/lib/bossSchedule";
+import {
+  type BossDeath,
+  type BossPlayerHit,
+  type BossSimulationPlayer,
+  createBossSimulation,
+} from "../../../src/entities/space/lib/bossSimulation";
 import { resolveColorIndexFromClientKey } from "../../../src/entities/space/lib/clientKeyHash";
 import { encodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapshot";
 import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
 import { SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "../../../src/entities/space/model/avatarModel";
+import {
+  SPACE_BOSS_COMBAT,
+  SPACE_BOSS_PLAYER,
+  SPACE_FEATURE_BOSS,
+} from "../../../src/entities/space/model/boss";
 import {
   SPACE_FEATURE_KICK,
   SPACE_FEATURE_KICK_TIMING,
@@ -18,6 +31,8 @@ import {
   SPACE_NICKNAME_COOLDOWN_MS,
   SPACE_PROTOCOL_VERSION,
   SPACE_SERVER_FRAME_MAX_BYTES,
+  type SpaceBossWelcome,
+  type SpaceBossWire,
   type SpaceChatMessage,
   type SpaceClientFrame,
   type SpacePeer,
@@ -80,6 +95,16 @@ interface SpaceSocketAttachment {
   /** 마지막으로 찬 시각. 쿨다운 판정용. */
   lastKickAt?: number;
   lastKickId?: string;
+  /** 체력. 없으면 가득임. 한 번도 안 맞은 사람은 이 칸이 없음. */
+  health?: number;
+  /** `health` 를 잰 시각. 홀 안에서 지난 시간만큼 회복을 더해 읽음. */
+  healthAt?: number;
+  /** 쓰러져 있는 동안의 끝 시각. 그때까지 이동·공격을 안 받음. */
+  deadUntil?: number;
+}
+
+interface PersistedBoss {
+  lastKilledAt: number | null;
 }
 
 const MAXIMUM_PENDING_CONNECTIONS = 10;
@@ -98,7 +123,20 @@ const JOIN_TIMEOUT_MS = 10_000;
 const STALE_CONNECTION_MS = 60_000;
 const PRUNE_INTERVAL_MS = 15_000;
 /** 이 서버가 지원하는 기능. 입장 응답에 실어 보냄. */
-const SERVER_FEATURES = [SPACE_FEATURE_KICK, SPACE_FEATURE_MARKET, SPACE_FEATURE_KICK_TIMING];
+const SERVER_FEATURES = [
+  SPACE_FEATURE_KICK,
+  SPACE_FEATURE_MARKET,
+  SPACE_FEATURE_KICK_TIMING,
+  SPACE_FEATURE_BOSS,
+];
+const BOSS_STORAGE_KEY = "space-boss-v1";
+/**
+ * 보스 한 걸음의 최대 길이(초).
+ *
+ * 방이 비어 틱이 멈췄다가 다시 돌면 그 사이 시간이 한 걸음에 몰림. 그대로 넣으면
+ * 보스가 벽 너머로 순간이동함.
+ */
+const MAXIMUM_BOSS_STEP_SECONDS = 0.3;
 /** 마지막 이동 뒤 더 보내는 빈 틱 수. 클라이언트의 정지 판정용. */
 const TRAILING_SNAPSHOT_TICKS = 2;
 /** 클라이언트 달리기 8 m/s에 전송·적분 오차 여유만 더함. */
@@ -140,6 +178,24 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   private chatHistory: SpaceChatMessage[] | null = null;
   private isChatHistorySchemaReady = false;
   private isSayLogSchemaReady = false;
+  /**
+   * 보스. 전투 상태(체력·위치·누적 피해)는 메모리에만 둠.
+   *
+   * 배포 등으로 서버가 다시 뜨면 체력 가득인 대기 상태로 돌아감. 저장하는 건
+   * 마지막 처치 시각뿐이라 젠 주기는 어긋나지 않음.
+   */
+  private boss = createBossSimulation();
+  /** 마지막 처치 시각. `undefined` 면 아직 저장소에서 안 읽은 것임. */
+  private bossLastKilledAt: number | null | undefined;
+  private lastBossStepAt = 0;
+  /** 직전 틱에 보스가 싸우는 중이었는지. 쉬러 들어가는 순간 마지막 상태를 한 번 더 보냄. */
+  private wasBossActive = false;
+  /**
+   * 전투 중 유저별 체력. 재접속으로 체력을 채우지 못하게 기억해 둠.
+   *
+   * 키는 `stableActorKey` 임. 싸움이 끝나면 비움.
+   */
+  private healthByActor = new Map<string, { health: number; healthAt: number }>();
 
   constructor(
     private readonly state: DurableObjectState,
@@ -322,7 +378,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
    * 64KB 를 넘겨 클라이언트가 프레임을 버리고 아무도 입장하지 못함. 넘치면 오래된
    * 메시지부터 뺌.
    */
-  private createWelcomePayload(self: SpacePeer, peers: SpacePeer[]): string {
+  private createWelcomePayload(self: SpacePeer, peers: SpacePeer[], boss?: SpaceBossWelcome): string {
     const messages = [...this.getChatHistory()];
     const serialize = (): string =>
       JSON.stringify({
@@ -332,6 +388,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         peers,
         messages,
         features: SERVER_FEATURES,
+        ...(boss ? { boss } : {}),
       } satisfies SpaceServerFrame);
     let payload = serialize();
 
@@ -519,6 +576,251 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     }
   }
 
+  /** 저장소에서 마지막 처치 시각을 한 번 읽음. 실패하면 한 번도 안 잡은 것으로 봄. */
+  private async loadBoss(): Promise<void> {
+    if (this.bossLastKilledAt !== undefined) {
+      return;
+    }
+
+    try {
+      const saved = await this.state.storage.get<PersistedBoss>(BOSS_STORAGE_KEY);
+      // 읽는 사이 다른 입장이 먼저 채웠거나 그새 처치했으면 덮지 않음.
+      this.bossLastKilledAt ??= saved?.lastKilledAt ?? null;
+    } catch {
+      this.bossLastKilledAt ??= null;
+    }
+  }
+
+  /**
+   * 젠 시각이 지났으면 보스를 세움.
+   *
+   * 타이머로 깨우지 않음. 틱·입장·공격처럼 실제 일이 있을 때 확인함. 그 전에는
+   * 클라이언트가 같은 계산식으로 스스로 그리고 있음.
+   */
+  private syncBossPresence(now: number): boolean {
+    if (this.bossLastKilledAt === undefined) {
+      return false;
+    }
+    const spawnedAt = resolveBossSpawnedAt(now, this.bossLastKilledAt);
+
+    if (spawnedAt !== null && this.boss.state.phase === "hidden") {
+      this.boss.spawn(spawnedAt);
+    }
+
+    return true;
+  }
+
+  private hasBossFeature(socket: WebSocket): boolean {
+    return this.getJoinedAttachment(socket)?.features?.includes(SPACE_FEATURE_BOSS) ?? false;
+  }
+
+  private broadcastBossFrame(frame: SpaceServerFrame): void {
+    const payload = JSON.stringify(frame);
+
+    for (const socket of this.socketsBySeat.values()) {
+      if (this.hasBossFeature(socket)) {
+        this.sendPayload(socket, payload);
+      }
+    }
+  }
+
+  private createBossWire(): SpaceBossWire {
+    const { state } = this.boss;
+
+    return {
+      phase: state.phase,
+      attack: state.attack,
+      phaseStartedAt: state.phaseStartedAt,
+      x: state.x,
+      z: state.z,
+      yaw: state.yaw,
+      attackOriginX: state.attackOriginX,
+      attackOriginZ: state.attackOriginZ,
+      speed: state.speed,
+      health: this.boss.getHealth(),
+      maximumHealth: this.boss.maximumHealth,
+      targetSeat: this.boss.getTargetSeat(),
+      ...(state.lastHitAt === undefined ? {} : { lastHitAt: state.lastHitAt }),
+    };
+  }
+
+  /**
+   * 지금 체력. 홀 안에 있던 시간만큼 회복을 더해 읽음.
+   *
+   * 회복용 타이머를 안 돌리려고 읽을 때 계산함. 위치가 바뀌기 **전에** 불러야 함 —
+   * 지난 시간 동안 있던 자리가 홀인지로 회복을 정함.
+   */
+  private resolveHealth(attachment: SpaceSocketAttachment, now: number): number {
+    const { maximumHealth, hallRegenPerSecond, hallMaximumX } = SPACE_BOSS_PLAYER;
+    const health = attachment.health ?? maximumHealth;
+    const isInHall = (attachment.peer?.x ?? 0) <= hallMaximumX;
+
+    if (health >= maximumHealth || !isInHall) {
+      return Math.min(maximumHealth, health);
+    }
+    const elapsedSeconds = Math.max(0, now - (attachment.healthAt ?? now)) / 1000;
+
+    return Math.min(maximumHealth, health + elapsedSeconds * hallRegenPerSecond);
+  }
+
+  /**
+   * 나갔다 들어온 사람의 체력을 되살림. 기억해 둔 게 없으면 빈 객체(가득)임.
+   *
+   * 회복 기준 시각은 지금으로 다시 잡음. 나가 있던 시간은 홀에 있던 시간이 아님.
+   */
+  private restoreRememberedHealth(
+    stableActorKey: string,
+    now: number,
+  ): Pick<SpaceSocketAttachment, "health" | "healthAt"> {
+    const remembered = this.healthByActor.get(stableActorKey);
+
+    return remembered ? { health: remembered.health, healthAt: now } : {};
+  }
+
+  private isDead(attachment: SpaceSocketAttachment, now: number): boolean {
+    return attachment.deadUntil !== undefined && attachment.deadUntil > now;
+  }
+
+  /**
+   * 보스가 상대할 유저. **보스를 아는 클라이언트만** 넣음.
+   *
+   * 새로고침 안 한 옛 탭은 보스가 안 보임. 그런 사람이 안뜰을 걷다가 보이지 않는
+   * 공격에 맞아 홀로 튕기면 안 돼서, 쫓지도 때리지도 않음.
+   */
+  private collectBossPlayers(now: number): BossSimulationPlayer[] {
+    return Array.from(this.socketsBySeat.values()).flatMap((socket) => {
+      const attachment = this.getJoinedAttachment(socket);
+      const peer = attachment?.peer;
+
+      return attachment && peer && attachment.features?.includes(SPACE_FEATURE_BOSS)
+        ? [
+            {
+              seat: peer.seat,
+              x: peer.x,
+              y: peer.y,
+              z: peer.z,
+              yaw: peer.yaw,
+              lastInputAt: Math.max(attachment.lastMoveAt, attachment.lastKickAt ?? 0),
+              isAlive: !this.isDead(attachment, now),
+            },
+          ]
+        : [];
+    });
+  }
+
+  /**
+   * 보스 공격에 맞은 유저의 체력을 깎음. 0 이 되면 홀 안으로 되돌림.
+   *
+   * 서버가 유저 위치를 정하는 유일한 자리임. 평소 위치는 클라이언트가 보내고 서버는
+   * 검증만 함. 그래서 이동 검증의 기준(위치·예산·시각)도 여기서 같이 옮김. 안 옮기면
+   * 리스폰 뒤 첫 이동이 "한 번에 너무 멀리 갔다" 로 반려됨.
+   */
+  private damagePlayer(hit: BossPlayerHit, now: number): void {
+    const socket = this.socketsBySeat.get(hit.seat);
+    const attachment = socket ? this.getJoinedAttachment(socket) : null;
+    const peer = attachment?.peer;
+
+    if (!socket || !attachment || !peer || !attachment.stableActorKey || this.isDead(attachment, now)) {
+      return;
+    }
+    const health = this.resolveHealth(attachment, now) - SPACE_BOSS_COMBAT.attackDamage[hit.attack];
+
+    if (health > 0) {
+      socket.serializeAttachment({ ...attachment, health, healthAt: now } satisfies SpaceSocketAttachment);
+      this.healthByActor.set(attachment.stableActorKey, { health, healthAt: now });
+      this.sendBossFrameTo(socket, { v: SPACE_PROTOCOL_VERSION, t: "hp", health, by: hit.attack, serverAt: now });
+      return;
+    }
+    const reviveAt = now + SPACE_BOSS_PLAYER.respawnDelayMs;
+    // 좌석 좌표는 clientKey 로 뽑지만 서버는 그 키를 안 들고 있음. 리스폰 자리는
+    // 프레임에 실어 보내서 클라이언트가 미리 맞힐 필요가 없으니 서버 키로 뽑음.
+    const respawned: SpacePeer = { ...peer, ...createSpawnPoint(attachment.stableActorKey), isRunning: false };
+
+    socket.serializeAttachment({
+      ...attachment,
+      peer: respawned,
+      health: SPACE_BOSS_PLAYER.maximumHealth,
+      healthAt: reviveAt,
+      deadUntil: reviveAt,
+      lastMoveAt: now,
+      movementBudget: 0.5,
+    } satisfies SpaceSocketAttachment);
+    this.healthByActor.delete(attachment.stableActorKey);
+    this.sendBossFrameTo(socket, { v: SPACE_PROTOCOL_VERSION, t: "hp", health: 0, by: hit.attack, serverAt: now });
+    this.sendBossFrameTo(socket, {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "respawn",
+      x: respawned.x,
+      y: respawned.y,
+      z: respawned.z,
+      yaw: respawned.yaw,
+      reviveAt,
+      serverAt: now,
+    });
+    // 보스를 모르는 옛 클라이언트도 `peer` 는 알아서 이걸로 자리를 옮김.
+    this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: respawned });
+    this.dirtySeats.add(respawned.seat);
+  }
+
+  private sendBossFrameTo(socket: WebSocket, frame: SpaceServerFrame): void {
+    if (this.hasBossFeature(socket)) {
+      this.sendFrame(socket, frame);
+    }
+  }
+
+  /** 처치 시각을 저장하고 모두에게 알림. 저장이 실패해도 이번 싸움은 끝난 것으로 둠. */
+  private finishBoss(death: BossDeath, now: number): void {
+    this.bossLastKilledAt = death.killedAt;
+    void this.state.storage
+      .put(BOSS_STORAGE_KEY, { lastKilledAt: death.killedAt } satisfies PersistedBoss)
+      .catch((error) => console.error("Boss kill save failed", error));
+    this.broadcastBossFrame({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "boss-dead",
+      killedAt: death.killedAt,
+      lastHitSeat: death.lastHitSeat,
+      ranking: death.ranking,
+      serverAt: now,
+    });
+  }
+
+  /**
+   * 보스를 한 걸음 돌리고 결과를 보냄.
+   *
+   * @returns 다음 틱에도 돌려야 하는지. 쉬는 중이면 `false` 라 틱이 멈춤.
+   */
+  private stepBoss(now: number): boolean {
+    if (!this.syncBossPresence(now)) {
+      return false;
+    }
+    const players = this.collectBossPlayers(now);
+
+    // 쉬는 보스는 아레나에 누가 들어왔을 때만 깨움. 홀에서만 움직이는 동안에는 건드리지 않음.
+    if (this.boss.isResting() && !this.wasBossActive && !players.some((player) => isInsideBossArena(player))) {
+      return false;
+    }
+    const elapsedSeconds = (now - this.lastBossStepAt) / 1000;
+    const deltaSeconds = Math.min(MAXIMUM_BOSS_STEP_SECONDS, Math.max(0, elapsedSeconds));
+
+    this.lastBossStepAt = now;
+
+    for (const hit of this.boss.step(now, deltaSeconds, players).hits) {
+      this.damagePlayer(hit, now);
+    }
+    const isActive = !this.boss.isResting();
+
+    if (isActive || this.wasBossActive) {
+      this.broadcastBossFrame({ v: SPACE_PROTOCOL_VERSION, t: "boss", state: this.createBossWire(), serverAt: now });
+    }
+    if (!isActive) {
+      // 싸움이 끝났음. 다음 싸움은 다들 지금 체력에서 시작함.
+      this.healthByActor.clear();
+    }
+    this.wasBossActive = isActive;
+
+    return isActive;
+  }
+
   /** 쉬고 있으면 틱을 새로 시작함. 이미 돌고 있으면 그 박자를 그대로 씀. */
   private scheduleSnapshot(): void {
     if (this.snapshotTimer !== null) {
@@ -557,6 +859,8 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     // 한 틱 넘게 밀렸으면 박자를 지금으로 다시 맞춤.
     const tickAt =
       now - this.nextSnapshotAt > SPACE_NETWORK_INTERVAL_MS ? now : this.nextSnapshotAt;
+    // 보스가 먼저임. 쓰러진 유저를 옮기면 그 좌석이 이번 스냅샷에 실려야 함.
+    const isBossActive = this.stepBoss(tickAt);
     const players = Array.from(this.dirtySeats).flatMap((seat) => {
       const socket = this.socketsBySeat.get(seat);
       const peer = socket ? this.getJoinedAttachment(socket)?.peer : null;
@@ -568,13 +872,18 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     this.dirtySeats.clear();
     this.idleSnapshotTicks = players.length === 0 ? this.idleSnapshotTicks + 1 : 0;
 
-    if (this.idleSnapshotTicks > TRAILING_SNAPSHOT_TICKS || this.socketsBySeat.size === 0) {
+    const isMovementIdle = this.idleSnapshotTicks > TRAILING_SNAPSHOT_TICKS;
+
+    // 보스가 싸우는 중이면 아무도 안 움직여도 틱을 이어 감. 전투가 끝나면 원래대로 멈춤.
+    if ((isMovementIdle && !isBossActive) || this.socketsBySeat.size === 0) {
       return;
     }
-    const snapshot = encodeSpaceSnapshot({ timestamp: tickAt >>> 0, players });
+    if (!isMovementIdle) {
+      const snapshot = encodeSpaceSnapshot({ timestamp: tickAt >>> 0, players });
 
-    for (const socket of this.socketsBySeat.values()) {
-      this.sendPayload(socket, snapshot);
+      for (const socket of this.socketsBySeat.values()) {
+        this.sendPayload(socket, snapshot);
+      }
     }
     this.nextSnapshotAt = tickAt + SPACE_NETWORK_INTERVAL_MS;
     this.armSnapshotTimer();
@@ -638,6 +947,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         return;
       }
       const now = Date.now();
+      await this.loadBoss();
       // 스폰·색은 클라이언트도 같은 값을 계산해야 함. 비밀키에서 파생한
       // stableActorKey 로 뽑으면 입장 직후 welcome 이 아바타를 순간이동시킴.
       const peer: SpacePeer = {
@@ -674,6 +984,14 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         features: (frame.features ?? []).filter((feature) => SERVER_FEATURES.includes(feature)),
         lastKickAt: previousAttachment?.lastKickAt,
         lastKickId: previousAttachment?.lastKickId,
+        // 탭을 바꾸거나 나갔다 들어와도 싸우던 체력을 이어 감.
+        ...(previousAttachment
+          ? {
+              health: previousAttachment.health,
+              healthAt: previousAttachment.healthAt,
+              deadUntil: previousAttachment.deadUntil,
+            }
+          : this.restoreRememberedHealth(stableActorKey, now)),
       } satisfies SpaceSocketAttachment);
       this.socketsBySeat.set(seat, socket);
       this.clearJoinDeadline(socket);
@@ -681,7 +999,19 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         const currentPeer = this.getJoinedAttachment(candidate)?.peer;
         return candidate !== socket && currentPeer ? [currentPeer] : [];
       });
-      this.sendPayload(socket, this.createWelcomePayload(peer, peers));
+      const joined = this.getJoinedAttachment(socket);
+      const isBossKnown = this.syncBossPresence(now) && this.hasBossFeature(socket);
+      const bossWelcome: SpaceBossWelcome | undefined =
+        joined && isBossKnown && this.bossLastKilledAt !== undefined
+          ? {
+              lastKilledAt: this.bossLastKilledAt,
+              // 쉬는 보스는 안 보냄. 받는 쪽이 젠 계산식으로 가운데에 세움.
+              ...(this.boss.isResting() ? {} : { state: this.createBossWire() }),
+              health: this.resolveHealth(joined, now),
+              serverAt: now,
+            }
+          : undefined;
+      this.sendPayload(socket, this.createWelcomePayload(peer, peers, bossWelcome));
 
       if (this.getJoinedAttachment(socket)) {
         this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer }, socket);
@@ -704,6 +1034,12 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       return;
     }
     const now = Date.now();
+
+    // 쓰러져 있는 동안 온 이동은 말없이 버림. 사망 화면 중에도 클라이언트는 옛 자리를
+    // 계속 보내는데, 반려로 답하면 리스폰 자리로 되감는 프레임이 계속 나감.
+    if (this.isDead(attachment, now)) {
+      return;
+    }
     // 최소 간격 검사는 뺐음. 도착 시각 기준이라 모바일에서 붙어 온 정상 이동(특히
     // 마지막 위치)을 버렸음. 속도는 거리 예산이, 도배는 초당 프레임 제한이 막음.
     const elapsed = Math.max(0, now - attachment.lastMoveAt);
@@ -746,6 +1082,10 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       lastMoveAt: now,
       lastActivityAt: now,
       movementBudget: availableDistance - distance,
+      // 옮기기 전 자리 기준으로 회복을 정산함. 다친 사람만 해당함.
+      ...(attachment.health === undefined
+        ? {}
+        : { health: this.resolveHealth(attachment, now), healthAt: now }),
     } satisfies SpaceSocketAttachment);
     this.dirtySeats.add(peer.seat);
     this.scheduleSnapshot();
@@ -768,6 +1108,10 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     const now = Date.now();
 
     if (frame.id !== undefined && frame.id === attachment.lastKickId) {
+      return;
+    }
+    // 쓰러진 사람의 공격은 연출까지 버림.
+    if (this.isDead(attachment, now)) {
       return;
     }
     if (attachment.lastKickAt !== undefined && now - attachment.lastKickAt < SPACE_KICK.cooldownMs - SPACE_KICK.serverCooldownToleranceMs) {
@@ -796,6 +1140,45 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         this.sendPayload(candidate, payload);
       }
     }
+    this.applyKickToBoss(kicker, attachment, now);
+  }
+
+  /**
+   * 휘두른 공격이 보스에 닿았는지 봄. 새 프레임 없이 기존 `kick` 에 판정만 붙였음.
+   *
+   * 쿨다운은 위에서 이미 걸렀음. 사거리와 방향은 서버가 아는 위치로 봄.
+   */
+  private applyKickToBoss(kicker: SpacePeer, attachment: SpaceSocketAttachment, now: number): void {
+    if (!attachment.features?.includes(SPACE_FEATURE_BOSS) || !this.syncBossPresence(now)) {
+      return;
+    }
+    const result = this.boss.applyKick(now, {
+      seat: kicker.seat,
+      x: kicker.x,
+      y: kicker.y,
+      z: kicker.z,
+      yaw: kicker.yaw,
+      lastInputAt: now,
+      isAlive: !this.isDead(attachment, now),
+    });
+
+    if (!result) {
+      return;
+    }
+    this.broadcastBossFrame({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "boss-hit",
+      from: kicker.seat,
+      damage: result.damage,
+      health: this.boss.getHealth(),
+      serverAt: now,
+    });
+    if (result.death) {
+      this.finishBoss(result.death, now);
+    }
+    // 맞은 보스는 깨어 있어야 함. 쓰러지는 연출도 틱이 돌아야 끝남.
+    this.wasBossActive = true;
+    this.scheduleSnapshot();
   }
 
   /**
