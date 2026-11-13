@@ -11,14 +11,22 @@
  * 끝나면 모션별 시작 줄·프레임 수를 찍는다. 그 표를 `avatarModel.ts` 에 옮겨 적는다.
  * 어긋나면 `crewModel.test.ts` 가 `.bin` 크기와 표를 맞대어 잡아낸다.
  *
- * 사용: node scripts/bake-avatar.mjs assets/nightshift-rigged.glb nightshift
+ * 원본은 `assets/originals/avatars/` 에 둔다. `assets` 는 깃이 추적하지 않아서 이 폴더가
+ * 유일한 보관처다. 지우면 다시 구울 수 없다.
+ *
+ * 사용:
+ *   node scripts/bake-avatar.mjs assets/originals/avatars/nightshift-rigged.glb nightshift
+ *   node scripts/bake-avatar.mjs assets/originals/avatars/red-crew-laser-large-wrench.glb redcrew \
+ *     --body "Body,Combination wrench" --accent Apron --eyes "Laser eyes"
  *
  * 원본은 glTF 관례대로 +Z 를 본다. 게임의 전방은 −Z 라서 메시와 본 행렬을 Y 축으로
  * 반 바퀴 돌려 굽는다. 안 돌리면 아바타가 등을 보인 채 걷는다.
  *
  * 입력 GLB 의 조건:
- *   - 메시 이름이 `<id>_body` · `<id>_weapon`(선택) · `<id>_accent` · `<id>_eyes`(선택)
- *   - 정점 하나가 본 하나에만 100% 묶여 있음(리지드). 섞여 있으면 멈춘다.
+ *   - 메시 이름이 `<id>_body` · `<id>_weapon`(선택) · `<id>_accent` · `<id>_eyes`(선택).
+ *     다르면 `--body` · `--accent` · `--eyes` 로 알려 준다(쉼표로 여러 개).
+ *   - 부위 하나에 재질이 여러 개면 재질 색을 정점 색으로 구워 하나로 합친다
+ *   - 정점 하나가 본 하나에만 100% 묶여 있음(리지드). 섞인 정점은 가장 센 본에 붙이고 알린다.
  *   - 클립 이름이 `Idle` · `Walk` · `Run` · `Attack` · `Hit` · `Death` · `Revive`
  */
 import fs from "node:fs";
@@ -59,10 +67,12 @@ const TYPE_SIZES = { SCALAR: 1, VEC2: 2, VEC3: 3, VEC4: 4, MAT4: 16 };
  */
 const HALF_TURN = [-1, 1, -1];
 
-const [sourcePath, modelID] = process.argv.slice(2);
+const [sourcePath, modelID, ...options] = process.argv.slice(2);
 
 if (!sourcePath || !modelID) {
-  console.error("사용: node scripts/bake-avatar.mjs <리깅된 glb> <모델 id>");
+  console.error(
+    "사용: node scripts/bake-avatar.mjs <리깅된 glb> <모델 id> [--body 메시,메시] [--accent 메시] [--eyes 메시]",
+  );
   process.exit(1);
 }
 
@@ -112,85 +122,207 @@ const readAccessor = ({ json, binary }, accessorIndex) => {
 // endregion
 
 // region [메시 굽기]
-/** 메시 하나를 꺼내 본 번호를 정점 속성으로 바꾼다. 스킨의 관절 순서가 곧 본 칸 번호다. */
-const readRigidMesh = (glb, meshName) => {
+/** 벡터 배열을 반 바퀴 돌린다. */
+const turn = (values) => values.map((value, index) => value * HALF_TURN[index % 3]);
+
+/**
+ * 정점 색을 0…1 실수 RGB 로 읽는다.
+ *
+ * 내보내는 도구에 따라 8·16비트 정수로 담기고 알파가 붙기도 한다.
+ */
+const readColors = (glb, accessorIndex) => {
+  const accessor = glb.json.accessors[accessorIndex];
+  const raw = readAccessor(glb, accessorIndex);
+  const size = TYPE_SIZES[accessor.type];
+  const scale = accessor.componentType === 5123 ? 65535 : accessor.componentType === 5121 ? 255 : 1;
+  const colors = new Float32Array(accessor.count * 3);
+
+  for (let vertex = 0; vertex < accessor.count; vertex += 1) {
+    for (let channel = 0; channel < 3; channel += 1) {
+      colors[vertex * 3 + channel] = raw[vertex * size + channel] / scale;
+    }
+  }
+
+  return colors;
+};
+
+/** 본 칸 번호(스킨의 관절 순서)별 부모 칸 번호. 뿌리는 −1. */
+const readBoneParents = (glb) => {
+  const { joints } = glb.json.skins[0];
+
+  return joints.map((nodeIndex) => {
+    const parentNode = glb.json.nodes.findIndex((node) => node.children?.includes(nodeIndex));
+
+    return joints.indexOf(parentNode);
+  });
+};
+
+/**
+ * 본 여러 개에 묶인 정점이 따라갈 본 하나를 고른다. `influences` 는 센 순서다.
+ *
+ * 보통은 가장 센 본이다. 다만 위 둘이 비슷하게 세면(좌우 허벅지에 반반 묶인 앞치마
+ * 가운데 같은 경우) 둘 중 하나를 고르면 한쪽 다리만 따라가 비대칭으로 흔들린다.
+ * 그때는 후보 중에 나머지의 조상인 본(골반)이 있으면 그쪽에 붙인다.
+ */
+const pickRigidBone = (glb, influences) => {
+  const [strongest, second] = influences;
+
+  if (!second || strongest.weight - second.weight > 0.05) {
+    return strongest.bone;
+  }
+  const parents = readBoneParents(glb);
+  const isAncestor = (ancestor, bone) => {
+    for (let current = parents[bone]; current >= 0; current = parents[current]) {
+      if (current === ancestor) {
+        return true;
+      }
+    }
+
+    return false;
+  };
+  const shared = influences.find((candidate) =>
+    influences.every((other) => other === candidate || isAncestor(candidate.bone, other.bone)),
+  );
+
+  return (shared ?? strongest).bone;
+};
+
+/**
+ * 메시의 프리미티브들을 꺼내 본 번호를 정점 속성으로 바꾼다. 스킨의 관절 순서가 곧 본 칸 번호다.
+ *
+ * 메시가 없으면 빈 배열을 준다. 재질이 여러 개인 메시는 프리미티브가 여러 개다.
+ */
+const readParts = (glb, meshName) => {
   const node = glb.json.nodes.find((candidate) => candidate.name === meshName);
 
   if (!node || node.mesh === undefined) {
-    return null;
+    return [];
   }
-  const { primitives } = glb.json.meshes[node.mesh];
 
-  if (primitives.length !== 1) {
-    throw new Error(`'${meshName}' 은 프리미티브가 ${primitives.length}개입니다. 하나여야 합니다.`);
-  }
-  const [primitive] = primitives;
-  const joints = readAccessor(glb, primitive.attributes.JOINTS_0);
-  const weights = readAccessor(glb, primitive.attributes.WEIGHTS_0);
-  const vertexCount = joints.length / 4;
-  const boneIndices = new Float32Array(vertexCount);
+  return glb.json.meshes[node.mesh].primitives.map((primitive, primitiveIndex) => {
+    const joints = readAccessor(glb, primitive.attributes.JOINTS_0);
+    const weights = readAccessor(glb, primitive.attributes.WEIGHTS_0);
+    const vertexCount = joints.length / 4;
+    const boneIndices = new Float32Array(vertexCount);
 
-  for (let vertex = 0; vertex < vertexCount; vertex += 1) {
-    if (weights[vertex * 4] < 0.999) {
-      throw new Error(
-        `'${meshName}' 정점 ${vertex} 가 본 여러 개에 묶여 있습니다. 리지드여야 합니다.`,
+    let snappedCount = 0;
+
+    for (let vertex = 0; vertex < vertexCount; vertex += 1) {
+      const influences = [0, 1, 2, 3]
+        .map((slot) => ({ bone: joints[vertex * 4 + slot], weight: weights[vertex * 4 + slot] }))
+        .filter((influence) => influence.weight > 0)
+        .sort((first, second) => second.weight - first.weight);
+      const total = influences.reduce((sum, influence) => sum + influence.weight, 0);
+
+      if (influences[0].weight / total < 0.999) {
+        snappedCount += 1;
+      }
+      boneIndices[vertex] = pickRigidBone(glb, influences);
+    }
+    if (snappedCount > 0) {
+      // 런타임은 정점당 본 하나만 읽는다. 섞인 정점은 가장 센 본에 붙인다.
+      console.log(
+        `[bake] '${meshName}' #${primitiveIndex}: 본 여러 개에 묶인 정점 ${snappedCount}/${vertexCount}개를 본 하나로 붙임. 이 부위는 덜 부드럽게 접힘.`,
       );
     }
-    boneIndices[vertex] = joints[vertex * 4];
-  }
 
-  /** 벡터 배열을 반 바퀴 돌린다. */
-  const turn = (values) => values.map((value, index) => value * HALF_TURN[index % 3]);
-
-  return {
-    positions: turn(readAccessor(glb, primitive.attributes.POSITION)),
-    normals: turn(readAccessor(glb, primitive.attributes.NORMAL)),
-    uvs: readAccessor(glb, primitive.attributes.TEXCOORD_0),
-    boneIndices,
-    indices: Uint32Array.from(readAccessor(glb, primitive.indices)),
-    material: primitive.material,
-  };
+    return {
+      positions: turn(readAccessor(glb, primitive.attributes.POSITION)),
+      normals: turn(readAccessor(glb, primitive.attributes.NORMAL)),
+      uvs:
+        primitive.attributes.TEXCOORD_0 === undefined
+          ? null
+          : readAccessor(glb, primitive.attributes.TEXCOORD_0),
+      colors:
+        primitive.attributes.COLOR_0 === undefined
+          ? null
+          : readColors(glb, primitive.attributes.COLOR_0),
+      boneIndices,
+      indices: Uint32Array.from(readAccessor(glb, primitive.indices)),
+      materialIndex: primitive.material,
+    };
+  });
 };
 
-/** 같은 머티리얼을 쓰는 메시를 하나로 합친다. 드로우 콜 하나를 아낀다. */
-const mergeMeshes = (meshes) => {
-  const present = meshes.filter(Boolean);
-  const [first] = present;
-
-  if (present.some((mesh) => mesh.material !== first.material)) {
-    throw new Error("머티리얼이 다른 메시는 합칠 수 없습니다.");
+/**
+ * 조각들을 메시 하나로 합친다. 런타임은 부위마다 메시 하나·재질 하나만 받는다.
+ *
+ * 재질이 전부 같으면(아틀라스 하나를 같이 쓰는 경우) 그대로 이어 붙인다.
+ * 재질이 섞여 있으면 재질 색을 **정점 색으로 구워** 재질 하나로 만든다. 금속감 같은
+ * 재질별 차이는 사라지고 색만 남는다. 텍스처를 쓰는 재질은 이렇게 구울 수 없어 멈춘다.
+ */
+const mergeParts = (glb, parts, label) => {
+  if (parts.length === 0) {
+    return null;
   }
-  const concat = (key, ArrayType) => {
-    const merged = new ArrayType(present.reduce((sum, mesh) => sum + mesh[key].length, 0));
-    let offset = 0;
-
-    for (const mesh of present) {
-      merged.set(mesh[key], offset);
-      offset += mesh[key].length;
-    }
-
-    return merged;
-  };
-  const indices = new Uint32Array(present.reduce((sum, mesh) => sum + mesh.indices.length, 0));
-  let indexOffset = 0;
+  const materials = glb.json.materials;
+  const isSingleMaterial = parts.every((part) => part.materialIndex === parts[0].materialIndex);
+  const hasColors = parts.some((part) => part.colors !== null);
+  const vertexTotal = parts.reduce((sum, part) => sum + part.boneIndices.length, 0);
+  const positions = new Float32Array(vertexTotal * 3);
+  const normals = new Float32Array(vertexTotal * 3);
+  const uvs = new Float32Array(vertexTotal * 2);
+  const colors = isSingleMaterial && !hasColors ? null : new Float32Array(vertexTotal * 3);
+  const boneIndices = new Float32Array(vertexTotal);
+  const indices = new Uint32Array(parts.reduce((sum, part) => sum + part.indices.length, 0));
   let vertexOffset = 0;
+  let indexOffset = 0;
 
-  for (const mesh of present) {
-    for (let index = 0; index < mesh.indices.length; index += 1) {
-      indices[indexOffset + index] = mesh.indices[index] + vertexOffset;
+  for (const part of parts) {
+    const vertexCount = part.boneIndices.length;
+    const material = materials[part.materialIndex] ?? {};
+    const pbr = material.pbrMetallicRoughness ?? {};
+
+    if (!isSingleMaterial && pbr.baseColorTexture) {
+      throw new Error(
+        `${label}: 텍스처를 쓰는 재질('${material.name}')은 다른 재질과 합칠 수 없습니다.`,
+      );
     }
-    indexOffset += mesh.indices.length;
-    vertexOffset += mesh.boneIndices.length;
+    positions.set(part.positions, vertexOffset * 3);
+    normals.set(part.normals, vertexOffset * 3);
+    boneIndices.set(part.boneIndices, vertexOffset);
+    if (part.uvs) {
+      uvs.set(part.uvs, vertexOffset * 2);
+    }
+    if (colors) {
+      // 재질을 하나로 줄이므로 재질 색을 정점 색에 곱해 둔다. 한 재질이면 곱하지 않는다.
+      const tint = isSingleMaterial ? [1, 1, 1] : (pbr.baseColorFactor ?? [1, 1, 1]);
+
+      for (let vertex = 0; vertex < vertexCount; vertex += 1) {
+        for (let channel = 0; channel < 3; channel += 1) {
+          const base = part.colors ? part.colors[vertex * 3 + channel] : 1;
+
+          colors[(vertexOffset + vertex) * 3 + channel] = base * tint[channel];
+        }
+      }
+    }
+    for (let index = 0; index < part.indices.length; index += 1) {
+      indices[indexOffset + index] = part.indices[index] + vertexOffset;
+    }
+    vertexOffset += vertexCount;
+    indexOffset += part.indices.length;
   }
 
-  return {
-    positions: concat("positions", Float32Array),
-    normals: concat("normals", Float32Array),
-    uvs: concat("uvs", Float32Array),
-    boneIndices: concat("boneIndices", Float32Array),
-    indices,
-    material: first.material,
-  };
+  // 대표 재질은 맨 앞 조각의 것. 그래서 `--body` 에는 몸통을 무기보다 먼저 적는다.
+  // 색은 정점 색에 구웠으니 재질 색은 뗀다.
+  const sourceMaterial = materials[parts[0].materialIndex];
+  const material = isSingleMaterial
+    ? sourceMaterial
+    : {
+        ...sourceMaterial,
+        pbrMetallicRoughness: {
+          ...sourceMaterial.pbrMetallicRoughness,
+          baseColorFactor: undefined,
+        },
+      };
+
+  if (!isSingleMaterial) {
+    console.log(
+      `[bake] ${label}: 재질 ${new Set(parts.map((part) => part.materialIndex)).size}개를 정점 색으로 합침 → '${sourceMaterial.name}'`,
+    );
+  }
+
+  return { positions, normals, uvs, colors, boneIndices, indices, material };
 };
 // endregion
 
@@ -245,6 +377,9 @@ const writeStaticGlb = (source, meshes, file) => {
     return accessors.length - 1;
   };
 
+  // 쓰는 재질만 담는다. 합치면서 안 쓰게 된 재질이 남아 있으면 로더가 괜히 만든다.
+  const materials = [...new Set(meshes.map(({ mesh }) => mesh.material))];
+
   const gltfMeshes = meshes.map(({ name, mesh }) => {
     const usesShortIndices = mesh.boneIndices.length <= 0xffff;
 
@@ -256,12 +391,13 @@ const writeStaticGlb = (source, meshes, file) => {
             POSITION: pushAccessor(mesh.positions, "VEC3", 5126, 34962, true),
             NORMAL: pushAccessor(mesh.normals, "VEC3", 5126, 34962),
             TEXCOORD_0: pushAccessor(mesh.uvs, "VEC2", 5126, 34962),
+            ...(mesh.colors ? { COLOR_0: pushAccessor(mesh.colors, "VEC3", 5126, 34962) } : {}),
             _BONEINDEX: pushAccessor(mesh.boneIndices, "SCALAR", 5126, 34962),
           },
           indices: usesShortIndices
             ? pushAccessor(Uint16Array.from(mesh.indices), "SCALAR", 5123, 34963)
             : pushAccessor(mesh.indices, "SCALAR", 5125, 34963),
-          material: mesh.material,
+          material: materials.indexOf(mesh.material),
         },
       ],
     };
@@ -284,7 +420,7 @@ const writeStaticGlb = (source, meshes, file) => {
     scenes: [{ nodes: gltfMeshes.map((_, index) => index) }],
     nodes: gltfMeshes.map((mesh, index) => ({ name: mesh.name, mesh: index })),
     meshes: gltfMeshes,
-    materials: source.json.materials,
+    materials,
     ...(source.json.textures ? { textures: source.json.textures } : {}),
     ...(source.json.samplers ? { samplers: source.json.samplers } : {}),
     ...(images.length > 0 ? { images } : {}),
@@ -363,17 +499,18 @@ const stripTextures = (file) => {
  * 끝 프레임(= 첫 프레임과 같은 자세)까지 담는다. 그래야 셰이더가 다음 줄과 보간할 때
  * 끝에서 처음으로 돌아가는 계산을 따로 안 해도 된다.
  */
-const bakeClips = async (file, bodyMeshName) => {
+const bakeClips = async (file) => {
   const gltf = await new GLTFLoader().parseAsync(stripTextures(file), "");
   let skinnedMesh = null;
 
   gltf.scene.traverse((object) => {
-    if (object.isSkinnedMesh && object.name === bodyMeshName) {
+    // 메시들이 전부 같은 뼈대를 쓴다. 아무거나 하나면 된다.
+    if (object.isSkinnedMesh && !skinnedMesh) {
       skinnedMesh = object;
     }
   });
   if (!skinnedMesh) {
-    throw new Error(`'${bodyMeshName}' 스킨 메시가 없습니다.`);
+    throw new Error("스킨 메시가 없습니다.");
   }
   const { skeleton } = skinnedMesh;
 
@@ -452,24 +589,40 @@ const bakeClips = async (file, bodyMeshName) => {
 };
 // endregion
 
+/**
+ * `--body A,B` 같은 옵션을 읽는다. 없으면 `<id>_body` 식의 기본 이름을 쓴다.
+ *
+ * 원본마다 메시 이름이 달라서, 어느 메시가 몸통·색 부위·눈인지 받아야 한다.
+ */
+const readOption = (name, fallback) => {
+  const index = options.indexOf(`--${name}`);
+
+  return index >= 0 && options[index + 1] ? options[index + 1].split(",") : fallback;
+};
+
 const outputDirectory = path.join(process.cwd(), "public", "models");
 const source = readGlb(sourcePath);
-const body = mergeMeshes([
-  readRigidMesh(source, `${modelID}_body`),
-  readRigidMesh(source, `${modelID}_weapon`),
-]);
-const accent = readRigidMesh(source, `${modelID}_accent`);
-const eyes = readRigidMesh(source, `${modelID}_eyes`);
+const readMerged = (role, meshNames) =>
+  mergeParts(
+    source,
+    meshNames.flatMap((meshName) => readParts(source, meshName)),
+    `${modelID} ${role}`,
+  );
+const body = readMerged("몸통", readOption("body", [`${modelID}_body`, `${modelID}_weapon`]));
+const accent = readMerged("색 부위", readOption("accent", [`${modelID}_accent`]));
+const eyes = readMerged("눈", readOption("eyes", [`${modelID}_eyes`]));
 
-if (!accent) {
-  throw new Error(`'${modelID}_accent' 메시가 없습니다. 플레이어 색을 입힐 부위가 필요합니다.`);
+if (!body || !accent) {
+  throw new Error(
+    "몸통이나 플레이어 색 부위 메시를 못 찾았습니다. --body · --accent 로 메시 이름을 알려 주세요.",
+  );
 }
 const meshes = [
   { name: `${modelID}_body`, mesh: body },
   { name: `${modelID}_accent`, mesh: accent },
   ...(eyes ? [{ name: `${modelID}_pupil_glint`, mesh: eyes }] : []),
 ];
-const clips = await bakeClips(sourcePath, `${modelID}_body`);
+const clips = await bakeClips(sourcePath);
 const triangleCount = meshes.reduce((sum, { mesh }) => sum + mesh.indices.length / 3, 0);
 const headTop = body.positions.reduce(
   (highest, value, index) => (index % 3 === 1 ? Math.max(highest, value) : highest),

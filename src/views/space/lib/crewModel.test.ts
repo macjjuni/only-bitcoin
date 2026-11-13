@@ -17,7 +17,7 @@ import { CREW_CLIPS, CREW_MODEL } from "./crewModel";
  * 넘기면 깨지는 선이라, 다음 모델이 더 무거우면 이 테스트가 알려 줌.
  */
 const TRIANGLE_BUDGET = 175_000;
-/** 아틀라스 1장. 눈은 텍스처 없이 발광 재질만 씀. */
+/** 아틀라스는 많아야 1장. 눈은 텍스처 없이 발광 재질만 씀. */
 const MAXIMUM_IMAGE_COUNT = 1;
 const NEAREST_FILTER = 9728;
 
@@ -177,18 +177,22 @@ describe.each(
     expect(min[1]).toBeGreaterThan(0.3);
   });
 
-  it("몸통은 아틀라스를 쓰고 색 띠는 텍스처 없이 단색으로 칠한다", () => {
+  it("몸통은 아틀라스나 정점 색으로 칠하고 색 부위는 텍스처 없이 단색으로 칠한다", () => {
     const body = findMesh(gltf, model.bodyMeshName).primitives[0];
     const accent = findMesh(gltf, model.accentMeshName).primitives[0];
+    const hasAtlas =
+      gltf.materials[body.material].pbrMetallicRoughness?.baseColorTexture !== undefined;
+    const hasVertexColors = "COLOR_0" in body.attributes;
 
-    expect(gltf.materials[body.material].pbrMetallicRoughness?.baseColorTexture).toBeDefined();
+    // 둘 다 없으면 몸통이 재질 기본색 한 가지로만 칠해짐.
+    expect(hasAtlas || hasVertexColors).toBe(true);
     // 텍스처가 있으면 플레이어 색이 그 위에 곱해져 탁해짐.
     expect(gltf.materials[accent.material].pbrMetallicRoughness?.baseColorTexture).toBeUndefined();
   });
 
-  it("아틀라스를 픽셀 필터로 쓰고 이미지가 한 장뿐이다", () => {
-    // 선형 필터면 픽셀 아트가 뭉개짐.
-    expect(gltf.images ?? []).toHaveLength(MAXIMUM_IMAGE_COUNT);
+  it("아틀라스를 픽셀 필터로 쓰고 이미지가 많아야 한 장이다", () => {
+    // 선형 필터면 픽셀 아트가 뭉개짐. 정점 색으로 칠하는 모델은 이미지가 없음.
+    expect((gltf.images ?? []).length).toBeLessThanOrEqual(MAXIMUM_IMAGE_COUNT);
     for (const sampler of gltf.samplers ?? []) {
       expect(sampler.magFilter).toBe(NEAREST_FILTER);
     }

@@ -55,11 +55,12 @@ describe("SPACE_AVATAR_MODELS", () => {
 describe("resolveAvatarModel", () => {
   it("범위 안 번호는 그 모델을 준다", () => {
     expect(resolveAvatarModel(0).id).toBe("nightshift");
+    expect(resolveAvatarModel(1).id).toBe("redcrew");
   });
 
   it("범위를 벗어나면 기본 모델로 떨어진다", () => {
-    // 캐릭터가 7종이던 때의 번호(1 ~ 7)도 여기로 온다. 안 그리는 것보다 기본 모델이 낫다.
-    for (const invalid of [-1, 3, 99, 1.5, Number.NaN]) {
+    // 캐릭터가 더 많던 때의 번호도 여기로 온다. 안 그리는 것보다 기본 모델이 낫다.
+    for (const invalid of [-1, 7, 99, 1.5, Number.NaN]) {
       expect(resolveAvatarModel(invalid)).toBe(
         SPACE_AVATAR_MODELS[SPACE_DEFAULT_AVATAR_MODEL_INDEX],
       );

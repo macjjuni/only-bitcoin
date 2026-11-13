@@ -5,8 +5,8 @@
  * 본 행렬(`-clips.bin`) 두 파일이 나오고, 스크립트가 찍어 주는 모션 표를 아래에 옮겨 적음.
  * 어긋나면 `crewModel.test.ts` 가 `.bin` 크기와 표를 맞대어 잡아냄.
  *
- * 지금은 나이트시프트 하나뿐임. 목록 구조와 모델 번호(`modelIndex`)는 남겨 둠 —
- * 번호가 프로토콜에 실려 다녀서, 캐릭터를 다시 늘릴 때 서버를 안 고쳐도 됨.
+ * 모델 번호(`modelIndex`)는 이 목록의 순서임. 번호가 프로토콜에 실려 다니고 브라우저에
+ * 저장되므로 **순서를 바꾸거나 중간을 지우지 말고 끝에 덧붙임.**
  */
 
 /**
@@ -42,7 +42,7 @@ export interface SpaceAvatarModel {
   clipsUrl: string;
   /** 몸통. 무기가 모델에 들어 있으면 여기에 합쳐져 있음. */
   bodyMeshName: string;
-  /** 플레이어 색을 받는 부위. 나이트시프트는 가슴 띠임. */
+  /** 플레이어 색을 받는 부위. 버거빠따킹는 가슴 띠임. */
   accentMeshName: string;
   /** 발광하는 눈 메시. 없는 모델은 `null`. */
   pupilGlintMeshName: string | null;
@@ -68,7 +68,7 @@ export interface SpaceAvatarModel {
 export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
   {
     id: "nightshift",
-    label: "나이트시프트",
+    label: "버거빠따킹",
     swatchColor: "#526e35",
     modelUrl: "/models/nightshift.glb",
     clipsUrl: "/models/nightshift-clips.bin",
@@ -89,6 +89,33 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
       revive: { startFrame: 189, frameCount: 46, seconds: 1.875 },
     },
     triangleCount: 2986,
+  },
+  {
+    id: "redcrew",
+    label: "맥시크루",
+    swatchColor: "#dc2626",
+    modelUrl: "/models/redcrew.glb",
+    clipsUrl: "/models/redcrew-clips.bin",
+    // 텍스처 없이 정점 색으로 칠함. 렌치가 몸통 메시에 합쳐져 있고, 렌치의 재질 색은
+    // 구울 때 정점 색으로 옮겼음(금속 재질은 몸통과 한 재질로 못 합쳐서).
+    bodyMeshName: "redcrew_body",
+    // 앞치마가 플레이어 색을 받음.
+    accentMeshName: "redcrew_accent",
+    pupilGlintMeshName: "redcrew_pupil_glint",
+    height: 1.81,
+    headCenterY: 1.484,
+    // 뼈대와 모션이 버거빠따킹과 같아 표도 같음.
+    clipFrameCount: 235,
+    clips: {
+      idle: { startFrame: 0, frameCount: 49, seconds: 2 },
+      walk: { startFrame: 49, frameCount: 33, seconds: 1.3333 },
+      run: { startFrame: 82, frameCount: 23, seconds: 0.9167 },
+      attack: { startFrame: 105, frameCount: 27, seconds: 1.0833 },
+      hit: { startFrame: 132, frameCount: 18, seconds: 0.7083 },
+      death: { startFrame: 150, frameCount: 39, seconds: 1.5833 },
+      revive: { startFrame: 189, frameCount: 46, seconds: 1.875 },
+    },
+    triangleCount: 1212,
   },
 ] as const;
 
