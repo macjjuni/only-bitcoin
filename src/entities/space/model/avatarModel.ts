@@ -47,6 +47,13 @@ export interface SpaceAvatarModel {
   /** 발광하는 눈 메시. 없는 모델은 `null`. */
   pupilGlintMeshName: string | null;
   /**
+   * 몸통과 따로 그리는 무기 메시. 무기를 몸통에 합친 모델은 `null`.
+   *
+   * 몸통이 아틀라스 텍스처를 쓰는데 무기가 단색 재질이면 한 재질로 합칠 수 없어 따로 둠.
+   * 드로우 콜이 하나 늚.
+   */
+  weaponMeshName: string | null;
+  /**
    * 모델 키(m).
    *
    * 발바닥이 원점이라 런타임은 이 값으로 배치하지 않음. glb 를 검증하는 데 씀.
@@ -76,6 +83,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     bodyMeshName: "nightshift_body",
     accentMeshName: "nightshift_accent",
     pupilGlintMeshName: "nightshift_pupil_glint",
+    weaponMeshName: null,
     height: 1.81,
     headCenterY: 1.473,
     clipFrameCount: 235,
@@ -102,6 +110,7 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     // 앞치마가 플레이어 색을 받음.
     accentMeshName: "redcrew_accent",
     pupilGlintMeshName: "redcrew_pupil_glint",
+    weaponMeshName: null,
     height: 1.81,
     headCenterY: 1.484,
     // 뼈대와 모션이 버거빠따킹과 같아 표도 같음.
@@ -116,6 +125,35 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
       revive: { startFrame: 189, frameCount: 46, seconds: 1.875 },
     },
     triangleCount: 1212,
+  },
+  {
+    id: "pepe",
+    label: "코인충",
+    swatchColor: "#22c55e",
+    modelUrl: "/models/pepe.glb",
+    clipsUrl: "/models/pepe-clips.bin",
+    bodyMeshName: "pepe_body",
+    // 셔츠 몸판과 양 소매가 플레이어 색을 받음.
+    accentMeshName: "pepe_accent",
+    // 눈이 머리 메시의 픽셀이라 떼어 낼 눈 메시가 없음.
+    pupilGlintMeshName: null,
+    // 파리채. 몸통은 아틀라스를 쓰고 파리채는 단색이라 못 합쳐서 따로 그림.
+    weaponMeshName: "pepe_weapon",
+    // 다른 모델보다 작음.
+    height: 1.6,
+    headCenterY: 1.3303,
+    // 뼈대가 달라(본 21개) 걷기·공격 길이도 다른 모델과 다름.
+    clipFrameCount: 234,
+    clips: {
+      idle: { startFrame: 0, frameCount: 49, seconds: 2 },
+      walk: { startFrame: 49, frameCount: 41, seconds: 1.6667 },
+      run: { startFrame: 90, frameCount: 23, seconds: 0.9167 },
+      attack: { startFrame: 113, frameCount: 18, seconds: 0.7083 },
+      hit: { startFrame: 131, frameCount: 18, seconds: 0.7083 },
+      death: { startFrame: 149, frameCount: 39, seconds: 1.5833 },
+      revive: { startFrame: 188, frameCount: 46, seconds: 1.875 },
+    },
+    triangleCount: 1498,
   },
 ] as const;
 

@@ -57,6 +57,7 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
   const crew = useCrewModel(model);
   const bodyMaterial = useSkinnedCrewMaterial(crew.bodyMaterial, crew.clipTexture);
   const pupilGlintMaterial = useSkinnedCrewMaterial(crew.pupilGlintMaterial, crew.clipTexture);
+  const weaponMaterial = useSkinnedCrewMaterial(crew.weaponMaterial, crew.clipTexture);
   const body = useMemo(() => createCrewInstanceGeometry(crew.bodyGeometry, 1), [crew.bodyGeometry]);
   /** 눈 메시가 없는 모델에서는 `null` 임. 메시도 그리지 않음. */
   const pupilGlint = useMemo(
@@ -66,6 +67,11 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
   const accent = useMemo(
     () => createCrewInstanceGeometry(crew.accentGeometry, 1),
     [crew.accentGeometry],
+  );
+  /** 무기를 몸통에 합친 모델에서는 `null` 임. */
+  const weapon = useMemo(
+    () => (crew.weaponGeometry ? createCrewInstanceGeometry(crew.weaponGeometry, 1) : null),
+    [crew.weaponGeometry],
   );
   const accentMaterial = useMemo(() => {
     const material = new MeshStandardMaterial({ roughness: 0.84, metalness: 0 });
@@ -80,6 +86,7 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
   const bodyMeshRef = useRef<InstancedMesh>(null);
   const pupilGlintMeshRef = useRef<InstancedMesh>(null);
   const accentMeshRef = useRef<InstancedMesh>(null);
+  const weaponMeshRef = useRef<InstancedMesh>(null);
   // endregion
 
 
@@ -108,14 +115,14 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
       model,
     );
     writeCrewPose(body, 0, animation);
-    syncCrewPose(body, [accent, pupilGlint]);
+    syncCrewPose(body, [accent, pupilGlint, weapon]);
   };
 
   /** 그룹이 위치를 잡으므로 인스턴스 행렬은 단위행렬 한 번만 넣음. */
   const resetInstanceMatrix = (): void => {
     const identity = new Object3D();
     identity.updateMatrix();
-    for (const meshRef of [bodyMeshRef, accentMeshRef, pupilGlintMeshRef]) {
+    for (const meshRef of [bodyMeshRef, accentMeshRef, pupilGlintMeshRef, weaponMeshRef]) {
       meshRef.current?.setMatrixAt(0, identity.matrix);
       if (meshRef.current) {
         meshRef.current.instanceMatrix.needsUpdate = true;
@@ -126,7 +133,8 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
 
 
   // region [Life Cycles]
-  useEffect(resetInstanceMatrix, []);
+  // 모델을 바꾸면 부위 메시가 새로 생김. 새 메시에도 단위행렬을 넣어야 보임.
+  useEffect(resetInstanceMatrix, [body, accent, pupilGlint, weapon]);
 
   // 훅이 서스펜드하지 않고 여기까지 왔으면 모델이 다 받아진 것임.
   useEffect(() => {
@@ -140,9 +148,10 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
       body.geometry.dispose();
       accent.geometry.dispose();
       pupilGlint?.geometry.dispose();
+      weapon?.geometry.dispose();
       accentMaterial.dispose();
     };
-  }, [shadowTexture, body, accent, pupilGlint, accentMaterial]);
+  }, [shadowTexture, body, accent, pupilGlint, weapon, accentMaterial]);
 
   useFrame((_, deltaSeconds) => {
     advanceAnimation(deltaSeconds);
@@ -177,6 +186,17 @@ function PlayerAvatar({ colorIndex, modelIndex, hasRealtimeShadows, playerStateR
           ref={pupilGlintMeshRef}
           args={[pupilGlint.geometry, pupilGlintMaterial, 1]}
           count={1}
+          frustumCulled={false}
+          dispose={null}
+        />
+      )}
+
+      {weapon && weaponMaterial && (
+        <instancedMesh
+          ref={weaponMeshRef}
+          args={[weapon.geometry, weaponMaterial, 1]}
+          count={1}
+          castShadow={hasRealtimeShadows}
           frustumCulled={false}
           dispose={null}
         />

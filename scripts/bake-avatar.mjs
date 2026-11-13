@@ -18,6 +18,8 @@
  *   node scripts/bake-avatar.mjs assets/originals/avatars/nightshift-rigged.glb nightshift
  *   node scripts/bake-avatar.mjs assets/originals/avatars/red-crew-laser-large-wrench.glb redcrew \
  *     --body "Body,Combination wrench" --accent Apron --eyes "Laser eyes"
+ *   node scripts/bake-avatar.mjs assets/originals/avatars/pepe-flyswatter.glb pepe \
+ *     --body pepe_body --weapon Flyswatter
  *
  * 원본은 glTF 관례대로 +Z 를 본다. 게임의 전방은 −Z 라서 메시와 본 행렬을 Y 축으로
  * 반 바퀴 돌려 굽는다. 안 돌리면 아바타가 등을 보인 채 걷는다.
@@ -25,6 +27,8 @@
  * 입력 GLB 의 조건:
  *   - 메시 이름이 `<id>_body` · `<id>_weapon`(선택) · `<id>_accent` · `<id>_eyes`(선택).
  *     다르면 `--body` · `--accent` · `--eyes` 로 알려 준다(쉼표로 여러 개).
+ *   - 무기는 보통 `--body` 에 같이 적어 몸통에 합친다. 몸통이 텍스처를 쓰고 무기가 단색
+ *     재질이라 못 합칠 때만 `--weapon` 으로 따로 굽는다(`<id>_weapon` 메시가 하나 더 나옴).
  *   - 부위 하나에 재질이 여러 개면 재질 색을 정점 색으로 구워 하나로 합친다
  *   - 정점 하나가 본 하나에만 100% 묶여 있음(리지드). 섞인 정점은 가장 센 본에 붙이고 알린다.
  *   - 클립 이름이 `Idle` · `Walk` · `Run` · `Attack` · `Hit` · `Death` · `Revive`
@@ -71,7 +75,7 @@ const [sourcePath, modelID, ...options] = process.argv.slice(2);
 
 if (!sourcePath || !modelID) {
   console.error(
-    "사용: node scripts/bake-avatar.mjs <리깅된 glb> <모델 id> [--body 메시,메시] [--accent 메시] [--eyes 메시]",
+    "사용: node scripts/bake-avatar.mjs <리깅된 glb> <모델 id> [--body 메시,메시] [--accent 메시] [--eyes 메시] [--weapon 메시]",
   );
   process.exit(1);
 }
@@ -193,9 +197,12 @@ const pickRigidBone = (glb, influences) => {
  * 메시가 없으면 빈 배열을 준다. 재질이 여러 개인 메시는 프리미티브가 여러 개다.
  */
 const readParts = (glb, meshName) => {
-  const node = glb.json.nodes.find((candidate) => candidate.name === meshName);
+  // 뼈와 메시 이름이 같을 수 있다(무기 뼈 `Flyswatter` 와 무기 메시 `Flyswatter`). 메시가 달린 쪽을 찾는다.
+  const node = glb.json.nodes.find(
+    (candidate) => candidate.name === meshName && candidate.mesh !== undefined,
+  );
 
-  if (!node || node.mesh === undefined) {
+  if (!node) {
     return [];
   }
 
@@ -611,6 +618,17 @@ const readMerged = (role, meshNames) =>
 const body = readMerged("몸통", readOption("body", [`${modelID}_body`, `${modelID}_weapon`]));
 const accent = readMerged("색 부위", readOption("accent", [`${modelID}_accent`]));
 const eyes = readMerged("눈", readOption("eyes", [`${modelID}_eyes`]));
+// 무기를 몸통에 못 합칠 때만 따로 둔다. 몸통은 아틀라스 텍스처를 쓰는데 무기는 단색
+// 재질이면 한 재질로 합칠 수 없다. 따로 두면 드로우 콜이 하나 는다.
+const weapon = readMerged("무기", readOption("weapon", []));
+
+if (accent) {
+  // 런타임은 이 부위를 플레이어 색 단색으로 칠한다. 원본 재질의 텍스처는 안 쓰여서 뗀다.
+  accent.material = {
+    ...accent.material,
+    pbrMetallicRoughness: { ...accent.material.pbrMetallicRoughness, baseColorTexture: undefined },
+  };
+}
 
 if (!body || !accent) {
   throw new Error(
@@ -621,6 +639,7 @@ const meshes = [
   { name: `${modelID}_body`, mesh: body },
   { name: `${modelID}_accent`, mesh: accent },
   ...(eyes ? [{ name: `${modelID}_pupil_glint`, mesh: eyes }] : []),
+  ...(weapon ? [{ name: `${modelID}_weapon`, mesh: weapon }] : []),
 ];
 const clips = await bakeClips(sourcePath);
 const triangleCount = meshes.reduce((sum, { mesh }) => sum + mesh.indices.length / 3, 0);

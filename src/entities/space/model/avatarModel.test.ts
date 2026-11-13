@@ -56,6 +56,7 @@ describe("resolveAvatarModel", () => {
   it("범위 안 번호는 그 모델을 준다", () => {
     expect(resolveAvatarModel(0).id).toBe("nightshift");
     expect(resolveAvatarModel(1).id).toBe("redcrew");
+    expect(resolveAvatarModel(2).id).toBe("pepe");
   });
 
   it("범위를 벗어나면 기본 모델로 떨어진다", () => {

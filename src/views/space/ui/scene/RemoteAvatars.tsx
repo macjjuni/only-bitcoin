@@ -64,11 +64,13 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
   const bodyMeshRef = useRef<InstancedMesh>(null);
   const accentMeshRef = useRef<InstancedMesh>(null);
   const pupilGlintMeshRef = useRef<InstancedMesh>(null);
+  const weaponMeshRef = useRef<InstancedMesh>(null);
   const shadowMeshRef = useRef<InstancedMesh>(null);
   const shadowTexture = useMemo(() => createShadowBlobTexture(), []);
   const crew = useCrewModel(model);
   const bodyMaterial = useSkinnedCrewMaterial(crew.bodyMaterial, crew.clipTexture);
   const pupilGlintMaterial = useSkinnedCrewMaterial(crew.pupilGlintMaterial, crew.clipTexture);
+  const weaponMaterial = useSkinnedCrewMaterial(crew.weaponMaterial, crew.clipTexture);
 
   /** 공유 지오메트리에 인스턴스 버퍼를 직접 달면 로컬 플레이어와 서로 덮어씀. */
   const body = useMemo(
@@ -86,6 +88,14 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
         ? createCrewInstanceGeometry(crew.pupilGlintGeometry, SPACE_MAX_OCCUPANTS)
         : null,
     [crew.pupilGlintGeometry],
+  );
+  /** 무기를 몸통에 합친 모델에서는 `null` 임. 따로 그리는 모델은 드로우 콜이 하나 늚. */
+  const weapon = useMemo(
+    () =>
+      crew.weaponGeometry
+        ? createCrewInstanceGeometry(crew.weaponGeometry, SPACE_MAX_OCCUPANTS)
+        : null,
+    [crew.weaponGeometry],
   );
   const accentMaterial = useMemo(() => {
     const material = new MeshStandardMaterial({ roughness: 0.84, metalness: 0 });
@@ -197,7 +207,7 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
     }
 
     // 색 띠·눈은 몸통과 같은 포즈여야 따로 안 놂.
-    syncCrewPose(body, [accent, pupilGlint]);
+    syncCrewPose(body, [accent, pupilGlint, weapon]);
   };
 
   const applyInstanceTransforms = (): void => {
@@ -209,6 +219,7 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
       bodyMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
       accentMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
       pupilGlintMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
+      weaponMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
 
       // 그림자 평면은 눕혀야 하므로 회전을 따로 줌. 높이는 **발밑 기준**임.
       // 상수만 넣으면 바닥이 0 이던 벙커 기준이 되어, 광장(5)·테라스(7.5)·궁전(11)
@@ -220,7 +231,7 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
       shadowMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
     });
 
-    for (const meshRef of [bodyMeshRef, accentMeshRef, pupilGlintMeshRef, shadowMeshRef]) {
+    for (const meshRef of [bodyMeshRef, accentMeshRef, pupilGlintMeshRef, weaponMeshRef, shadowMeshRef]) {
       if (meshRef.current) {
         meshRef.current.instanceMatrix.needsUpdate = true;
       }
@@ -241,9 +252,10 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
       body.geometry.dispose();
       accent.geometry.dispose();
       pupilGlint?.geometry.dispose();
+      weapon?.geometry.dispose();
       accentMaterial.dispose();
     };
-  }, [shadowTexture, body, accent, pupilGlint, accentMaterial]);
+  }, [shadowTexture, body, accent, pupilGlint, weapon, accentMaterial]);
 
   useFrame((_, deltaSeconds) => {
     applyInstanceTransforms();
@@ -282,6 +294,16 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
           ref={pupilGlintMeshRef}
           count={renderedPlayers.length}
           args={[pupilGlint.geometry, pupilGlintMaterial, SPACE_MAX_OCCUPANTS]}
+          frustumCulled={false}
+          dispose={null}
+        />
+      )}
+
+      {weapon && weaponMaterial && (
+        <instancedMesh
+          ref={weaponMeshRef}
+          count={renderedPlayers.length}
+          args={[weapon.geometry, weaponMaterial, SPACE_MAX_OCCUPANTS]}
           frustumCulled={false}
           dispose={null}
         />

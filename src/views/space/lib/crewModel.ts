@@ -65,6 +65,9 @@ export interface CrewModelParts {
    */
   bodyMaterial: Material;
   pupilGlintMaterial: Material | null;
+  /** 몸통과 따로 그리는 무기. 무기를 몸통에 합친 모델에서는 `null`. */
+  weaponGeometry: BufferGeometry | null;
+  weaponMaterial: Material | null;
   /** 모든 모션의 본 행렬 텍스처. 셰이더가 본 번호와 줄 번호로 조회함. */
   clipTexture: Texture;
 }
@@ -152,6 +155,9 @@ export const useCrewModel = (model: SpaceAvatarModel): CrewModelParts => {
   const pupilGlint = model.pupilGlintMeshName
     ? findMesh(scene, model.pupilGlintMeshName, model.modelUrl)
     : null;
+  const weapon = model.weaponMeshName
+    ? findMesh(scene, model.weaponMeshName, model.modelUrl)
+    : null;
 
   return {
     bodyGeometry: body.geometry,
@@ -159,6 +165,8 @@ export const useCrewModel = (model: SpaceAvatarModel): CrewModelParts => {
     pupilGlintGeometry: pupilGlint?.geometry ?? null,
     bodyMaterial: body.material as Material,
     pupilGlintMaterial: (pupilGlint?.material as Material | undefined) ?? null,
+    weaponGeometry: weapon?.geometry ?? null,
+    weaponMaterial: (weapon?.material as Material | undefined) ?? null,
     clipTexture,
   };
 };

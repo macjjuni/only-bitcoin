@@ -66,11 +66,14 @@ const findMesh = (gltf: GltfJson, name: string) => {
   return mesh;
 };
 
-/** 모델 하나의 메시 이름 목록. 눈 메시가 없는 모델은 두 개임. */
+/** 모델 하나의 메시 이름 목록. 눈·무기 메시는 없는 모델도 있음. */
 const meshNamesOf = (model: SpaceAvatarModel): string[] => {
-  return [model.bodyMeshName, model.accentMeshName, model.pupilGlintMeshName].filter(
-    (name): name is string => name !== null,
-  );
+  return [
+    model.bodyMeshName,
+    model.accentMeshName,
+    model.pupilGlintMeshName,
+    model.weaponMeshName,
+  ].filter((name): name is string => name !== null);
 };
 
 const countTriangles = (gltf: GltfJson): number => {
