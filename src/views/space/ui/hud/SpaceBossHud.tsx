@@ -1,13 +1,11 @@
 "use client";
 
-import { Heart, Skull, Swords, Timer } from "lucide-react";
+import { Heart, Skull, Timer } from "lucide-react";
 import { type CSSProperties, memo, type ReactNode, useEffect, useMemo, useState } from "react";
 import type { SpaceBossDefeat, SpaceSession } from "@/features/space-session";
-import { formatBossCountdown } from "@/views/space/lib/bossHud";
+import { BOSS_NAME, formatBossCountdown } from "@/views/space/lib/bossHud";
 import { useBossHud } from "@/views/space/model/useBossHud";
 
-/** 보스 이름. 하락에 베팅하는 숏 곰들의 왕임. */
-const BOSS_NAME = "숏베어킹";
 /** 처치 결과를 띄워 두는 시간(ms). */
 const DEFEAT_RESULT_DURATION_MS = 9_000;
 /** 내 체력이 이 비율 아래면 체력바를 위험 색으로 바꿈. */
@@ -15,12 +13,14 @@ const LOW_HEALTH_RATIO = 0.3;
 
 interface SpaceBossHudProps {
   session: SpaceSession;
-  /** 손가락 기기인지. 좌측 상단 대화 내역과 겹치지 않게 보스 체력바를 내림. */
+  /** 손가락 기기인지. 좌측 상단 대화 내역과 겹치지 않게 젠 안내를 내림. */
   isCoarsePointer: boolean;
 }
 
 /**
  * 보스 전투 UI.
+ *
+ * 보스 체력은 여기 없고 보스 머리 위에 뜸(`RaidBoss`).
  *
  * 전부 읽기 전용이라 터치를 막지 않음. 막으면 떠 있는 동안 그 자리의 시야 조작이 죽음.
  * 색·크기는 HUD 의 다른 패널(인원 배지, 조작 안내)과 같은 반투명 검정 판을 씀.
@@ -73,33 +73,6 @@ function SpaceBossHud({ session, isCoarsePointer }: SpaceBossHudProps): ReactNod
   const topStyle = useMemo((): CSSProperties => {
     return { top: `calc(${isCoarsePointer ? "9.25rem" : "1rem"} + env(safe-area-inset-top))` };
   }, [isCoarsePointer]);
-
-  const BossBarTemplate = view.bossBar ? (
-    <div className="w-[min(420px,calc(100vw-2rem))] rounded-xl bg-black/65 px-3 py-2 backdrop-blur-sm">
-      <div className="flex items-center justify-between gap-2">
-        <span className="flex items-center gap-1.5 text-xs font-bold text-white/90">
-          <Swords size={13} className="shrink-0 text-red-400" />
-          {BOSS_NAME}
-        </span>
-        <span className="text-[11px] font-semibold tabular-nums text-white/60">
-          {view.bossBar.health.toLocaleString()} / {view.bossBar.maximumHealth.toLocaleString()}
-        </span>
-      </div>
-      <div
-        role="progressbar"
-        aria-label={`${BOSS_NAME} 체력`}
-        aria-valuemin={0}
-        aria-valuemax={view.bossBar.maximumHealth}
-        aria-valuenow={view.bossBar.health}
-        className="mt-1.5 h-2.5 overflow-hidden rounded-full bg-white/10"
-      >
-        <div
-          className="h-full rounded-full bg-gradient-to-r from-red-600 to-red-400 transition-[width] duration-300 ease-out"
-          style={{ width: `${view.bossBar.ratio * 100}%` }}
-        />
-      </div>
-    </div>
-  ) : null;
 
   const NextSpawnTemplate =
     view.nextSpawnSeconds !== null ? (
@@ -203,7 +176,6 @@ function SpaceBossHud({ session, isCoarsePointer }: SpaceBossHudProps): ReactNod
       {HitFlashTemplate}
 
       <div className="absolute left-1/2 flex -translate-x-1/2 flex-col items-center gap-2" style={topStyle}>
-        {BossBarTemplate}
         {NextSpawnTemplate}
       </div>
 

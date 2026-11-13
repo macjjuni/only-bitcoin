@@ -17,14 +17,12 @@ import {
 const CLOCK_OFFSET_MS = Date.parse("2026-11-13T13:25:00+09:00");
 const HALL = { x: 0 };
 const COURTYARD = { x: 30 };
-const FULL_BOSS = { health: 3_000, maximumHealth: 3_000 };
 
 const createInput = (overrides: Partial<BossHudInput> = {}): BossHudInput => ({
   nowMs: 0,
   clockOffsetMs: CLOCK_OFFSET_MS,
   canFightBoss: true,
   bossPhase: "idle",
-  bossHealth: FULL_BOSS,
   selfPosition: HALL,
   selfHealth: SPACE_BOSS_PLAYER.maximumHealth,
   deadUntil: null,
@@ -44,21 +42,16 @@ describe("resolveBossHudView", () => {
     expect(resolveBossHudView(createInput())).toEqual(EMPTY_BOSS_HUD_VIEW);
   });
 
-  it("안뜰에 나가면 보스 체력바와 내 체력바를 띄운다", () => {
+  it("안뜰에 나가면 내 체력바를 띄운다", () => {
     const view = resolveBossHudView(createInput({ selfPosition: COURTYARD }));
 
-    expect(view.bossBar).toEqual({ ratio: 1, health: 3_000, maximumHealth: 3_000 });
     expect(view.playerBar).toEqual({ ratio: 1, health: 100 });
     expect(view.nextSpawnSeconds).toBeNull();
   });
 
-  it("싸움을 건 보스는 홀로 피해 있어도 체력이 보이고, 다친 내 체력도 보인다", () => {
-    const view = resolveBossHudView(
-      createInput({ bossHealth: { health: 1_499.2, maximumHealth: 3_000 }, selfHealth: 44.3 }),
-    );
+  it("다친 내 체력은 홀로 피해 있어도 보인다", () => {
+    const view = resolveBossHudView(createInput({ selfHealth: 44.3 }));
 
-    expect(view.bossBar).toMatchObject({ health: 1_500 });
-    expect(view.bossBar?.ratio).toBeCloseTo(0.4997, 3);
     expect(view.playerBar?.health).toBe(45);
     expect(view.playerBar?.ratio).toBeCloseTo(0.443, 6);
   });
@@ -74,13 +67,12 @@ describe("resolveBossHudView", () => {
 
   it("보스가 없을 때 안뜰에 있으면 다음 젠까지 남은 시간을 띄운다", () => {
     const nextSpawnAt = resolveBossSlotStart(CLOCK_OFFSET_MS) + SPACE_BOSS_SPAWN_INTERVAL_MS;
-    const input = createInput({ bossPhase: "hidden", bossHealth: null, selfPosition: COURTYARD });
+    const input = createInput({ bossPhase: "hidden", selfPosition: COURTYARD });
     const view = resolveBossHudView(input);
 
     // 13:25 에서 14:00 까지 35분.
     expect(view.nextSpawnSeconds).toBe((nextSpawnAt - CLOCK_OFFSET_MS) / 1000);
     expect(view.nextSpawnSeconds).toBe(35 * 60);
-    expect(view.bossBar).toBeNull();
     expect(view.playerBar).toBeNull();
     expect(resolveBossHudView({ ...input, selfPosition: HALL }).nextSpawnSeconds).toBeNull();
     expect(resolveBossHudView({ ...input, clockOffsetMs: null }).nextSpawnSeconds).toBeNull();

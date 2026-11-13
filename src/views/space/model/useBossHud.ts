@@ -17,7 +17,7 @@ const BOSS_HUD_INTERVAL_MS = 200;
 /**
  * 전투 UI 에 띄울 값.
  *
- * 보스 체력과 내 위치는 매 프레임 바뀌어 세션 상태에 없음. 1초에 다섯 번만 읽어
+ * 내 위치는 매 프레임 바뀌어 세션 상태에 없음. 1초에 다섯 번만 읽어
  * 화면에 쓸 값이 실제로 달라졌을 때만 상태를 바꿈.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
@@ -59,7 +59,6 @@ export const useBossHud = (session: SpaceSession): BossHudView => {
       clockOffsetMs: current.serverClockOffsetMs,
       canFightBoss: current.canFightBoss,
       bossPhase: current.bossState.phase,
-      bossHealth: current.getBossHealth(),
       selfPosition,
       selfHealth: displayedHealthRef.current,
       deadUntil: current.deadUntil,

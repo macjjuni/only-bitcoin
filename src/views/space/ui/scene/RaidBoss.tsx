@@ -1,10 +1,13 @@
 "use client";
 
+import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { memo, type ReactNode, useEffect, useMemo, useRef } from "react";
-import type { Mesh, MeshBasicMaterial } from "three";
+import type { Group, Mesh, MeshBasicMaterial } from "three";
 import { SPACE_BOSS, type SpaceBossState } from "@/entities/space";
+import type { BossHealth } from "@/features/space-session";
 import { type BossAnimator, createBossAnimator } from "@/views/space/lib/bossAnimator";
+import { BOSS_NAME } from "@/views/space/lib/bossHud";
 import { useBossModel } from "@/views/space/lib/bossModel";
 import { createShadowBlobTexture } from "@/views/space/lib/shadowBlobTexture";
 
@@ -12,6 +15,10 @@ import { createShadowBlobTexture } from "@/views/space/lib/shadowBlobTexture";
 const SHADOW_DIAMETER = 5.6;
 /** 바닥 예고 표시(최대 5.4 cm)보다 아래에 깔아 예고를 가리지 않게 함. */
 const SHADOW_LIFT_Y = 0.008;
+/** 체력판을 정수리에서 띄우는 높이(m). */
+const HEALTH_PLATE_LIFT = 0.6;
+/** 거리와 무관하게 읽히는 크기. 명찰·피해 숫자와 같은 값. */
+const HEALTH_PLATE_DISTANCE_FACTOR = 18;
 
 interface RaidBossProps {
   /**
@@ -21,6 +28,8 @@ interface RaidBossProps {
    * 여기서는 `useFrame` 안에서만 읽음.
    */
   bossState: SpaceBossState;
+  /** 보스 체력. 매 프레임 불러 머리 위 체력판에 씀. */
+  getBossHealth: () => BossHealth | null;
 }
 
 /**
@@ -30,7 +39,7 @@ interface RaidBossProps {
  * 모델은 발바닥이 원점이고, 위치는 애니메이터가 씬 그래프 안의 몸 노드에 직접 넣음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function RaidBoss({ bossState }: RaidBossProps): ReactNode {
+function RaidBoss({ bossState, getBossHealth }: RaidBossProps): ReactNode {
   // region [Hooks]
   const model = useBossModel();
   /**
@@ -43,6 +52,12 @@ function RaidBoss({ bossState }: RaidBossProps): ReactNode {
   const shadowTexture = useMemo(() => createShadowBlobTexture(), []);
   const shadowMeshRef = useRef<Mesh>(null);
   const shadowMaterialRef = useRef<MeshBasicMaterial>(null);
+  const healthAnchorRef = useRef<Group>(null);
+  const healthPlateRef = useRef<HTMLDivElement>(null);
+  const healthFillRef = useRef<HTMLDivElement>(null);
+  const healthTextRef = useRef<HTMLSpanElement>(null);
+  /** 마지막으로 화면에 쓴 체력. 값이 바뀔 때만 DOM 을 건드림. */
+  const shownHealthKeyRef = useRef<string>("");
   // endregion
 
 
@@ -63,6 +78,59 @@ function RaidBoss({ bossState }: RaidBossProps): ReactNode {
       model.rig.position.z,
     );
     shadowMaterial.opacity = emergence;
+  };
+
+  /**
+   * 체력판을 머리 위에 붙이고 값을 씀.
+   *
+   * 몸 노드를 따라가서 솟아오를 때 같이 올라옴. 리렌더 없이 DOM 을 직접 고침 —
+   * 체력은 맞을 때마다 바뀌어 상태로 올리면 씬이 계속 다시 그려짐.
+   */
+  const applyHealthPlate = (emergence: number): void => {
+    const anchor = healthAnchorRef.current;
+    const plate = healthPlateRef.current;
+    const bossHealth = getBossHealth();
+
+    if (!anchor || !plate) {
+      return;
+    }
+
+    // 쓰러진 뒤에는 내림. 누워 가라앉는 몸 위에 빈 체력판만 떠 있게 됨.
+    const isShown = emergence > 0 && bossHealth !== null && bossHealth.health > 0;
+
+    anchor.position.set(
+      model.rig.position.x,
+      model.rig.position.y + SPACE_BOSS.height + HEALTH_PLATE_LIFT,
+      model.rig.position.z,
+    );
+    plate.style.visibility = isShown ? "visible" : "hidden";
+    plate.style.opacity = String(emergence);
+
+    if (!isShown || !bossHealth) {
+      return;
+    }
+
+    const health = Math.ceil(bossHealth.health);
+    const healthKey = `${health}/${bossHealth.maximumHealth}`;
+
+    if (healthKey === shownHealthKeyRef.current) {
+      return;
+    }
+
+    shownHealthKeyRef.current = healthKey;
+
+    if (healthFillRef.current) {
+      const ratio = Math.min(1, Math.max(0, bossHealth.health / bossHealth.maximumHealth));
+
+      healthFillRef.current.style.width = `${ratio * 100}%`;
+    }
+
+    if (healthTextRef.current) {
+      healthTextRef.current.textContent = `${health.toLocaleString()} / ${bossHealth.maximumHealth.toLocaleString()}`;
+    }
+
+    plate.setAttribute("aria-valuenow", String(health));
+    plate.setAttribute("aria-valuemax", String(bossHealth.maximumHealth));
   };
   // endregion
 
@@ -92,7 +160,10 @@ function RaidBoss({ bossState }: RaidBossProps): ReactNode {
       return;
     }
 
-    applyShadow(animator.update(bossState, performance.now(), deltaSeconds));
+    const emergence = animator.update(bossState, performance.now(), deltaSeconds);
+
+    applyShadow(emergence);
+    applyHealthPlate(emergence);
   });
   // endregion
 
@@ -110,6 +181,39 @@ function RaidBoss({ bossState }: RaidBossProps): ReactNode {
           depthWrite={false}
         />
       </mesh>
+
+      <group ref={healthAnchorRef}>
+        <Html
+          center
+          distanceFactor={HEALTH_PLATE_DISTANCE_FACTOR}
+          zIndexRange={[22, 0]}
+          style={{ pointerEvents: "none" }}
+        >
+          <div
+            ref={healthPlateRef}
+            role="progressbar"
+            aria-label={`${BOSS_NAME} 체력`}
+            aria-valuemin={0}
+            className="flex w-44 select-none flex-col items-center gap-1"
+            style={{ visibility: "hidden" }}
+          >
+            <span className="whitespace-nowrap text-xs font-bold text-white [text-shadow:0_1px_3px_rgba(0,0,0,0.9)]">
+              {BOSS_NAME}
+            </span>
+            <div className="h-2.5 w-full overflow-hidden rounded-full bg-black/70 ring-1 ring-black/60">
+              <div
+                ref={healthFillRef}
+                className="h-full rounded-full bg-gradient-to-r from-red-600 to-red-400 transition-[width] duration-300 ease-out"
+                style={{ width: "100%" }}
+              />
+            </div>
+            <span
+              ref={healthTextRef}
+              className="whitespace-nowrap text-[10px] font-semibold tabular-nums text-white/85 [text-shadow:0_1px_3px_rgba(0,0,0,0.9)]"
+            />
+          </div>
+        </Html>
+      </group>
     </>
   );
 }

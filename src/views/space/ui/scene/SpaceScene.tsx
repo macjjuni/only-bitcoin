@@ -713,7 +713,7 @@ function SpaceScene({
       {/* 보스 모델을 받는 동안 씬이 비지 않게 따로 매달아 둠. */}
       {session.canFightBoss && (
         <Suspense fallback={null}>
-          <RaidBoss bossState={session.bossState} />
+          <RaidBoss bossState={session.bossState} getBossHealth={session.getBossHealth} />
         </Suspense>
       )}
 

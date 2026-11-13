@@ -3,9 +3,14 @@ import { resolveNextBossSpawnAt, SPACE_BOSS_PLAYER, type SpaceBossPhase } from "
 /**
  * 전투 UI 에 무엇을 띄울지 정함. 순수 함수임.
  *
+ * 보스 체력은 여기서 안 다룸. 보스 머리 위에 뜨고 `RaidBoss` 가 직접 씀.
+ *
  * 보스 체력·내 위치는 매 프레임 바뀌어 React 상태에 없음. `useBossHud` 가 1초에 몇 번
  * 이 함수로 화면에 쓸 값만 뽑아 상태로 올림.
  */
+
+/** 보스 이름. 하락에 베팅하는 숏 곰들의 왕임. */
+export const BOSS_NAME = "숏베어킹";
 
 export interface BossHudInput {
   nowMs: number;
@@ -14,7 +19,6 @@ export interface BossHudInput {
   /** 서버가 보스를 지원하는지. 아니면 아무것도 안 띄움. */
   canFightBoss: boolean;
   bossPhase: SpaceBossPhase;
-  bossHealth: { health: number; maximumHealth: number } | null;
   /** 내 위치. 접속 전이면 `null`. */
   selfPosition: { x: number } | null;
   /** 화면에 보일 내 체력. 홀 안 회복을 반영한 값임. */
@@ -24,8 +28,6 @@ export interface BossHudInput {
 }
 
 export interface BossHudView {
-  /** 보스 체력바. 안 띄울 때는 `null`. */
-  bossBar: { ratio: number; health: number; maximumHealth: number } | null;
   /** 내 체력바. */
   playerBar: { ratio: number; health: number } | null;
   /** 다시 움직일 수 있기까지 남은 초. 살아 있으면 `null`. */
@@ -35,7 +37,6 @@ export interface BossHudView {
 }
 
 export const EMPTY_BOSS_HUD_VIEW: BossHudView = {
-  bossBar: null,
   playerBar: null,
   knockoutSeconds: null,
   nextSpawnSeconds: null,
@@ -59,23 +60,11 @@ export const resolveBossHudView = (input: BossHudInput): BossHudView => {
   const isOutside = isInCourtyard(input.selfPosition);
   const isBossPresent = input.bossPhase !== "hidden";
   const isKnockedOut = input.deadUntil !== null && input.nowMs < input.deadUntil;
-  const boss = input.bossHealth;
-  // 싸움을 건 뒤 홀로 피해 있어도 보스 체력은 계속 보임. 안 건드렸으면 안뜰에서만 보임.
-  const shouldShowBossBar =
-    isBossPresent && boss !== null && (isOutside || boss.health < boss.maximumHealth);
   const shouldShowPlayerBar =
     !isKnockedOut && (input.selfHealth < maximumHealth || (isOutside && isBossPresent));
   const serverNowMs = input.clockOffsetMs === null ? null : input.nowMs + input.clockOffsetMs;
 
   return {
-    bossBar:
-      shouldShowBossBar && boss
-        ? {
-            ratio: clampRatio(boss.health / boss.maximumHealth),
-            health: Math.ceil(boss.health),
-            maximumHealth: boss.maximumHealth,
-          }
-        : null,
     playerBar: shouldShowPlayerBar
       ? { ratio: clampRatio(input.selfHealth / maximumHealth), health: Math.ceil(input.selfHealth) }
       : null,
@@ -132,8 +121,6 @@ export const formatBossCountdown = (totalSeconds: number): string => {
 /** 두 화면 값이 같은지. 같으면 상태를 안 바꿔 리렌더를 막음. */
 export const isSameBossHudView = (first: BossHudView, second: BossHudView): boolean => {
   return (
-    first.bossBar?.health === second.bossBar?.health &&
-    first.bossBar?.maximumHealth === second.bossBar?.maximumHealth &&
     first.playerBar?.health === second.playerBar?.health &&
     first.knockoutSeconds === second.knockoutSeconds &&
     first.nextSpawnSeconds === second.nextSpawnSeconds

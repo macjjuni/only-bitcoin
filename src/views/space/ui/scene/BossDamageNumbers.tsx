@@ -15,8 +15,8 @@ const DAMAGE_NUMBER_LIFETIME_MS = 900;
  * 프레임이 떨어짐. 넘치면 오래된 것부터 내림.
  */
 const MAXIMUM_DAMAGE_NUMBERS = 10;
-/** 보스 머리 위 높이(m). 키가 4.5 m 임. */
-const HEAD_HEIGHT = 4.9;
+/** 숫자가 뜨기 시작하는 높이(m). 키가 4.5 m 이고 그 위 5.1 m 에 체력판이 있어 더 위로 잡았음. */
+const HEAD_HEIGHT = 5.7;
 /** 숫자끼리 겹치지 않게 좌우·앞뒤로 흩는 폭(m). */
 const SCATTER_WIDTH = 2.4;
 /** 거리와 무관하게 읽히는 크기. 명찰·말풍선과 같은 값. */
