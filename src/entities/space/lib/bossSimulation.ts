@@ -15,6 +15,7 @@ import {
 } from "@/entities/space/model/boss";
 import {
   canKickReachBoss,
+  isAtBossArenaHeight,
   isInsideBossArena,
   isInsideBossAttack,
   isInsideBossChargeSweep,
@@ -502,7 +503,8 @@ export const createBossSimulation = (
     }
 
     const origin = toAttackOrigin();
-    const alivePlayers = players.filter((player) => player.isAlive);
+    // 아레나 밖 가장자리에 선 사람은 맞지만, 위층(발코니)에 선 사람은 안 맞음.
+    const alivePlayers = players.filter((player) => player.isAlive && isAtBossArenaHeight(player));
 
     if (attack === "charge") {
       const travelFrom = resolveBossChargeTravel(attackElapsedSeconds);
@@ -628,7 +630,12 @@ export const createBossSimulation = (
       state.phase === "dead" ||
       (state.phase === "spawn" && elapsedSeconds < SPACE_BOSS_SPAWN.invulnerableSeconds);
 
-    if (isInvulnerable || !player.isAlive || !canKickReachBoss(state, player)) {
+    if (
+      isInvulnerable ||
+      !player.isAlive ||
+      !isAtBossArenaHeight(player) ||
+      !canKickReachBoss(state, player)
+    ) {
       return null;
     }
 

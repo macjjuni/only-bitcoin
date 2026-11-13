@@ -239,6 +239,29 @@ describe("보스 공격 판정", () => {
     expect(hits[1].attack).toBe("slam");
   });
 
+  it("싸우는 자리 바로 위층에 선 사람은 안 맞는다", () => {
+    const simulation = createSpawnedSimulation();
+    const hitSeats = new Set<number>();
+
+    run({
+      simulation,
+      fromMs: 0,
+      seconds: 12,
+      // 한 사람은 보스 앞 바닥에, 한 사람은 같은 자리 위 발코니에 섬.
+      players: (now) => [
+        createPlayer(1, -2.5, 0, now),
+        createPlayer(2, -2.5, 0, now, { y: arena.floorY + 4 }),
+      ],
+      onTick: (_, tickHits) => {
+        for (const hit of tickHits) {
+          hitSeats.add(hit.seat);
+        }
+      },
+    });
+
+    expect(hitSeats).toEqual(new Set([1]));
+  });
+
   it("판정 시각 전에 범위를 벗어나면 안 맞는다", () => {
     const simulation = createSpawnedSimulation();
     let hitCount = 0;
@@ -326,6 +349,15 @@ describe("유저 공격", () => {
     expect(simulation.applyKick(afterMs, attacker(afterMs))?.damage).toBe(
       SPACE_BOSS_COMBAT.kickDamage,
     );
+  });
+
+  it("위층에서는 바로 아래 보스를 못 때린다", () => {
+    const simulation = createSpawnedSimulation();
+    const below = facingBoss(createPlayer(1, 2, 0, 0), simulation);
+    const above = { ...below, y: arena.floorY + 4 };
+
+    expect(simulation.applyKick(0, above)).toBeNull();
+    expect(simulation.applyKick(0, below)).not.toBeNull();
   });
 
   it("멀거나 등지면 안 닿는다", () => {

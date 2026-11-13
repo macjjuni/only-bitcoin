@@ -105,16 +105,26 @@ export const isInsideBossAttack = (
     : isInsideBossSlam(origin, point, margin);
 };
 
+/**
+ * 아레나 바닥과 같은 층에 서 있는지.
+ *
+ * 범위 판정은 x·z 만 봐서 발코니처럼 같은 자리 위에 뜬 곳을 못 가름. 보스와 주고받는
+ * 판정은 전부 이걸 먼저 거름. 안 거르면 위층에서 바닥을 뚫고 때리고 맞음.
+ */
+export const isAtBossArenaHeight = (point: { y: number }): boolean => {
+  return Math.abs(point.y - SPACE_BOSS.arena.floorY) <= SPACE_BOSS_COMBAT.arenaHeightTolerance;
+};
+
 /** 아레나 안에 서 있는지. 높이도 봄 — 발코니는 같은 x·z 위에 떠 있음. */
 export const isInsideBossArena = (
   point: BossPoint & { y: number },
   margin: number = 0,
 ): boolean => {
-  const { centerX, centerZ, floorY, radius } = SPACE_BOSS.arena;
+  const { centerX, centerZ, radius } = SPACE_BOSS.arena;
 
   return (
     Math.hypot(point.x - centerX, point.z - centerZ) <= radius - margin &&
-    Math.abs(point.y - floorY) <= SPACE_BOSS_COMBAT.arenaHeightTolerance
+    isAtBossArenaHeight(point)
   );
 };
 
