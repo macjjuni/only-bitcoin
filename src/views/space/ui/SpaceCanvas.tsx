@@ -56,8 +56,11 @@ const SPACE_TONE_MAPPING = NeutralToneMapping;
 const SPACE_TONE_MAPPING_EXPOSURE = 1;
 
 const CAMERA_NEAR = 0.1;
-/** 원평면. 홀 대각선(약 60 m)에 천장 높이를 더해도 넉넉한 값임. */
-const CAMERA_FAR = 120;
+/**
+ * 원평면. 안뜰 하늘 돔(중심 x 28, 반지름 약 87 m)이 홀 반대쪽 끝에서도 안 잘리게 잡았음.
+ * 가장 먼 카메라 자리에서 돔 끝까지 약 150 m 임.
+ */
+const CAMERA_FAR = 160;
 
 interface SpaceCanvasProps {
   identity: ChatIdentity;
