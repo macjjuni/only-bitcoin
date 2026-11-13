@@ -1,5 +1,6 @@
 export type {
   SpaceBossDefeat,
+  SpaceBossHitEvent,
   SpaceKickEvent,
   SpaceSessionIdentity,
   SpaceSessionSnapshot,

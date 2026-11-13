@@ -105,6 +105,8 @@ export const useSpaceSession = ({ identity, modelIndex, enabled }: UseSpaceSessi
     bossState: controller.bossState,
     sampleBoss: controller.sampleBoss,
     getBossHealth: controller.getBossHealth,
+    drainBossHits: controller.drainBossHits,
+    getSelfPosition: controller.getSelfPosition,
     sendMessage: controller.sendMessage,
     changeNickname: controller.changeNickname,
     changeModel: controller.changeModel,

@@ -61,6 +61,7 @@ import type { LanternAnchor } from "@/views/space/lib/hallModel";
 import type { HallTerrain } from "@/views/space/lib/hallTerrain";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 import BlockDashboard from "./BlockDashboard";
+import BossDamageNumbers from "./BossDamageNumbers";
 import ChatBubbles from "./ChatBubbles";
 import Hall from "./Hall";
 import MenuGraffiti from "./MenuGraffiti";
@@ -597,6 +598,15 @@ function SpaceScene({
         <Suspense fallback={null}>
           <RaidBoss bossState={bossPreview?.state ?? session.bossState} />
         </Suspense>
+      )}
+
+      {/* 피해 숫자는 서버가 알려 준 피격만 띄움. 흉내 보스에는 없음. */}
+      {!bossPreview && session.canFightBoss && (
+        <BossDamageNumbers
+          bossState={session.bossState}
+          drainBossHits={session.drainBossHits}
+          selfSeat={session.self?.seat}
+        />
       )}
 
       <RemoteAvatars

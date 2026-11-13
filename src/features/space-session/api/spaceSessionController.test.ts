@@ -1309,5 +1309,62 @@ describe("SpaceSessionController", () => {
       expect(controller.sampleBoss(1_000).phase).toBe("hidden");
       controller.stop();
     });
+
+    it("피격 소식을 쌓아 뒀다가 씬이 꺼내 가면 비운다. 숨은 탭에서는 안 쌓는다", () => {
+      const { controller, socket } = joinWithBoss({
+        lastKilledAt: null,
+        health: 100,
+        serverAt: SERVER_NOW,
+      });
+      const hit = (from: number, damage: number) =>
+        socket.receive({
+          v: SPACE_PROTOCOL_VERSION,
+          t: "boss-hit",
+          from,
+          damage,
+          health: 2_000,
+          serverAt: SERVER_NOW,
+        });
+
+      hit(1, 10);
+      hit(0, 10);
+
+      expect(controller.drainBossHits()).toEqual([
+        { from: 1, damage: 10 },
+        { from: 0, damage: 10 },
+      ]);
+      expect(controller.drainBossHits()).toEqual([]);
+
+      controller.setVisibility(false);
+      hit(1, 10);
+      controller.setVisibility(true);
+
+      expect(controller.drainBossHits()).toEqual([]);
+      controller.stop();
+    });
+
+    it("보스에게 맞은 시각을 남기고, 보낸 위치를 UI 가 읽을 수 있게 한다", () => {
+      const { controller, socket } = joinWithBoss({
+        lastKilledAt: null,
+        health: 100,
+        serverAt: SERVER_NOW,
+      });
+
+      expect(controller.getSnapshot().selfDamagedAt).toBeNull();
+
+      vi.advanceTimersByTime(250);
+      socket.receive({
+        v: SPACE_PROTOCOL_VERSION,
+        t: "hp",
+        health: 80,
+        by: "swipe",
+        serverAt: SERVER_NOW,
+      });
+      controller.publishMovement(movement(30));
+
+      expect(controller.getSnapshot().selfDamagedAt).toBe(1_250);
+      expect(controller.getSelfPosition()).toMatchObject({ x: 30, z: 0 });
+      controller.stop();
+    });
   });
 });
