@@ -32,6 +32,13 @@ import {
 
 export interface BossSimulationPlayer {
   seat: number;
+  /**
+   * 사람을 가리는 키. 피해를 이 키로 쌓음.
+   *
+   * 좌석은 나갔다 들어오면 바뀌고 빈 좌석은 다른 사람이 물려받음. 좌석으로 쌓으면
+   * 재접속한 사람의 피해가 끊기고, 새로 온 사람이 앞사람 피해를 물려받음.
+   */
+  actorKey: string;
   x: number;
   y: number;
   z: number;
@@ -51,8 +58,8 @@ export interface BossDeath {
   killedAt: number;
   /** 막타를 친 좌석. */
   lastHitSeat: number;
-  /** 피해 순위. 많이 준 순서. */
-  ranking: { seat: number; damage: number }[];
+  /** 피해 순위. 많이 준 순서. `seat` 는 그 사람이 마지막으로 때릴 때 앉아 있던 좌석임. */
+  ranking: { actorKey: string; seat: number; damage: number }[];
 }
 
 export interface BossStepResult {
@@ -97,6 +104,12 @@ export interface BossSimulation {
     player: BossSimulationPlayer,
     damage?: number,
   ) => BossKickResult | null;
+  /**
+   * 유저가 쓰러짐. 그 사람의 누적 피해를 `deathDamagePenaltyRatio` 만큼 깎음.
+   *
+   * 보스 체력은 그대로임. 그래서 순위의 피해 합은 보스 체력보다 작을 수 있음.
+   */
+  applyPlayerDeath: (actorKey: string) => void;
 }
 
 /** 거리별 공격 선택 기준(m). */
@@ -168,8 +181,8 @@ export const createBossSimulation = (
   let attackElapsedSeconds = 0;
   /** 이번 돌진에 이미 맞은 좌석. 같은 사람은 한 번만 맞음. */
   const chargeHitSeats = new Set<number>();
-  /** 누적 피해. 어그로와 처치 순위에 씀. */
-  const damageBySeat = new Map<number, number>();
+  /** 사람별 누적 피해. 어그로와 처치 순위에 씀. 좌석은 마지막으로 때릴 때의 것임. */
+  const damageByActor = new Map<string, { seat: number; damage: number }>();
   /** 아레나에 들어온 시각. 아무도 안 때렸을 때 먼저 온 사람을 쫓음. */
   const enteredAtBySeat = new Map<number, number>();
 
@@ -194,7 +207,7 @@ export const createBossSimulation = (
     targetSeat = null;
     targetPickedAt = Number.NEGATIVE_INFINITY;
     lastHitSeat = -1;
-    damageBySeat.clear();
+    damageByActor.clear();
   };
 
   const placeAtHome = (): void => {
@@ -376,8 +389,8 @@ export const createBossSimulation = (
         continue;
       }
 
-      const damage = damageBySeat.get(player.seat) ?? 0;
-      const bestDamage = damageBySeat.get(best.seat) ?? 0;
+      const damage = damageByActor.get(player.actorKey)?.damage ?? 0;
+      const bestDamage = damageByActor.get(best.actorKey)?.damage ?? 0;
       const enteredAt = enteredAtBySeat.get(player.seat) ?? nowMs;
       const bestEnteredAt = enteredAtBySeat.get(best.seat) ?? nowMs;
 
@@ -614,7 +627,11 @@ export const createBossSimulation = (
   const createDeath = (nowMs: number): BossDeath => ({
     killedAt: nowMs,
     lastHitSeat,
-    ranking: Array.from(damageBySeat, ([seat, damage]) => ({ seat, damage }))
+    ranking: Array.from(damageByActor, ([actorKey, { seat, damage }]) => ({
+      actorKey,
+      seat,
+      damage,
+    }))
       .sort((first, second) => second.damage - first.damage)
       .slice(0, RANKING_COUNT),
   });
@@ -644,7 +661,10 @@ export const createBossSimulation = (
     health -= damage;
     lastHitSeat = player.seat;
     state.lastHitAt = nowMs;
-    damageBySeat.set(player.seat, (damageBySeat.get(player.seat) ?? 0) + damage);
+    damageByActor.set(player.actorKey, {
+      seat: player.seat,
+      damage: (damageByActor.get(player.actorKey)?.damage ?? 0) + damage,
+    });
 
     if (health <= 0) {
       const death = createDeath(nowMs);
@@ -702,5 +722,13 @@ export const createBossSimulation = (
     },
     step,
     applyKick,
+    applyPlayerDeath: (actorKey) => {
+      const tally = damageByActor.get(actorKey);
+
+      if (tally) {
+        // 정수로 내림. 순위 프레임과 화면이 정수 피해를 씀.
+        tally.damage = Math.floor(tally.damage * (1 - SPACE_BOSS_COMBAT.deathDamagePenaltyRatio));
+      }
+    },
   };
 };

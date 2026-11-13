@@ -38,6 +38,8 @@ const createPlayer = (
   overrides: Partial<BossSimulationPlayer> = {},
 ): BossSimulationPlayer => ({
   seat,
+  // 좌석마다 다른 사람. 같은 사람이 좌석을 바꾼 경우는 `actorKey` 를 따로 넘김.
+  actorKey: `actor-${seat}`,
   x: arena.centerX + offsetX,
   y: arena.floorY,
   z: arena.centerZ + offsetZ,
@@ -386,8 +388,8 @@ describe("유저 공격", () => {
       killedAt: 500,
       lastHitSeat: 9,
       ranking: [
-        { seat: 4, damage: 30 },
-        { seat: 9, damage: 20 },
+        { actorKey: "actor-4", seat: 4, damage: 30 },
+        { actorKey: "actor-9", seat: 9, damage: 20 },
       ],
     });
     expect(simulation.state.phase).toBe("dead");
@@ -402,6 +404,77 @@ describe("유저 공격", () => {
 
     expect(simulation.state.phase).toBe("hidden");
     expect(simulation.isResting()).toBe(true);
+  });
+
+  it("나갔다 다른 좌석으로 들어온 사람의 피해는 이어지고, 그 좌석을 물려받은 사람은 0 에서 시작한다", () => {
+    const simulation = createSpawnedSimulation(50);
+    const before = facingBoss(createPlayer(4, 2, 0, 0, { actorKey: "returning" }), simulation);
+    // 같은 사람이 좌석 7 로 다시 들어오고, 비어 있던 좌석 4 에는 새 사람이 앉음.
+    const after = { ...before, seat: 7 };
+    const newcomer = facingBoss(createPlayer(4, 0, 2, 0, { actorKey: "newcomer" }), simulation);
+
+    simulation.applyKick(0, before);
+    simulation.applyKick(0, before);
+    simulation.applyKick(0, newcomer);
+    simulation.applyKick(0, after);
+
+    const death = simulation.applyKick(500, after)?.death;
+
+    expect(death?.ranking).toEqual([
+      { actorKey: "returning", seat: 7, damage: 40 },
+      { actorKey: "newcomer", seat: 4, damage: 10 },
+    ]);
+  });
+
+  it("어그로도 사람 기준이라 좌석을 바꿔 들어와도 가장 많이 때린 사람을 쫓는다", () => {
+    const simulation = createSpawnedSimulation();
+    const heavy = facingBoss(createPlayer(4, 2, 0, 0, { actorKey: "heavy" }), simulation);
+
+    simulation.applyKick(0, heavy);
+    simulation.applyKick(0, heavy);
+
+    run({
+      simulation,
+      fromMs: 0,
+      seconds: 2,
+      // 좌석 4 는 새 사람이 물려받았고, 많이 때린 사람은 좌석 7 로 들어와 있음.
+      players: (now) => [
+        createPlayer(4, -3, 0, now, { actorKey: "newcomer" }),
+        createPlayer(7, 3, 0, now, { actorKey: "heavy" }),
+      ],
+    });
+
+    expect(simulation.getTargetSeat()).toBe(7);
+  });
+
+  it("쓰러지면 그 사람의 누적 피해만 20% 깎이고 보스 체력은 그대로다", () => {
+    const simulation = createSpawnedSimulation(100);
+    const fallen = facingBoss(createPlayer(4, 2, 0, 0), simulation);
+    const steady = facingBoss(createPlayer(9, 0, 2, 0), simulation);
+
+    // 30 과 20 을 넣어 둠.
+    for (const player of [fallen, fallen, fallen, steady, steady]) {
+      simulation.applyKick(0, player);
+    }
+
+    simulation.applyPlayerDeath(fallen.actorKey);
+    // 때린 적 없는 사람이 쓰러져도 아무 일 없음.
+    simulation.applyPlayerDeath("stranger");
+
+    expect(SPACE_BOSS_COMBAT.deathDamagePenaltyRatio).toBe(0.2);
+    expect(simulation.getHealth()).toBe(50);
+
+    // 남은 50 을 다른 사람이 마저 깎아 순위를 봄.
+    let death = null;
+
+    for (let swing = 0; swing < 5; swing += 1) {
+      death = simulation.applyKick(100, steady)?.death ?? death;
+    }
+
+    expect(death?.ranking).toEqual([
+      { actorKey: "actor-9", seat: 9, damage: 70 },
+      { actorKey: "actor-4", seat: 4, damage: 24 },
+    ]);
   });
 
   it("다 회복하고 나면 지난 싸움의 피해 기록을 지운다", () => {

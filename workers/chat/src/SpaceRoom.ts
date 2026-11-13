@@ -210,6 +210,13 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
    * 옮길 때까지는 틱을 이어 감. 보스가 쉬러 들어가도 누운 사람을 그대로 두면 안 됨.
    */
   private pendingRespawns = new Map<number, number>();
+  /**
+   * 이번 싸움에서 보스를 때린 사람의 이름. 키는 `stableActorKey` 임.
+   *
+   * 처치 순위에 이름을 실으려고 둠. 싸우다 나간 사람은 소켓이 없어 이름을 찾을 수 없음.
+   * 싸움이 끝나면 비움.
+   */
+  private bossFighterNicknames = new Map<string, string>();
   /** 개발용. 처치 뒤 보스를 다시 불러낼 때까지의 시간(ms). 꺼져 있으면 `null`. */
   private readonly bossRespawnMs: number | null;
   private bossRespawnTimer: ReturnType<typeof setTimeout> | null = null;
@@ -709,6 +716,15 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     return remembered ? { health: remembered.health, healthAt: now } : {};
   }
 
+  /**
+   * 피해를 쌓을 때 쓰는 사람 키. 좌석이 아니라 사람을 따라감.
+   *
+   * 입장한 소켓은 늘 `stableActorKey` 가 있음. 없는 경우는 좌석으로 대신해 집계가 깨지지 않게 함.
+   */
+  private resolveBossActorKey(attachment: SpaceSocketAttachment, peer: SpacePeer): string {
+    return attachment.stableActorKey ?? `seat:${peer.seat}`;
+  }
+
   private isDead(attachment: SpaceSocketAttachment, now: number): boolean {
     return attachment.deadUntil !== undefined && attachment.deadUntil > now;
   }
@@ -728,6 +744,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         ? [
             {
               seat: peer.seat,
+              actorKey: this.resolveBossActorKey(attachment, peer),
               x: peer.x,
               y: peer.y,
               z: peer.z,
@@ -772,6 +789,8 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       this.sendBossFrameTo(socket, { v: SPACE_PROTOCOL_VERSION, t: "hp", health, by: hit.attack, serverAt: now });
       return;
     }
+    // 쓰러지면 누적 피해를 일부 깎음. 순위와 어그로에 바로 반영됨.
+    this.boss.applyPlayerDeath(this.resolveBossActorKey(attachment, peer));
     const reviveAt = now + SPACE_BOSS_PLAYER.respawnDelayMs;
     // 좌석 좌표는 clientKey 로 뽑지만 서버는 그 키를 안 들고 있음. 리스폰 자리는
     // 프레임에 실어 보내서 클라이언트가 미리 맞힐 필요가 없으니 서버 키로 뽑음.
@@ -855,7 +874,12 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       t: "boss-dead",
       killedAt: death.killedAt,
       lastHitSeat: death.lastHitSeat,
-      ranking: death.ranking,
+      // 사람 키는 서버 안에서만 씀. 밖으로는 좌석·피해·이름만 내보냄.
+      ranking: death.ranking.map(({ actorKey, seat, damage }) => {
+        const nickname = this.bossFighterNicknames.get(actorKey);
+
+        return nickname === undefined ? { seat, damage } : { seat, damage, nickname };
+      }),
       serverAt: now,
     });
   }
@@ -914,6 +938,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     if (!isActive) {
       // 싸움이 끝났음. 다음 싸움은 다들 지금 체력에서 시작함.
       this.healthByActor.clear();
+      this.bossFighterNicknames.clear();
     }
     this.wasBossActive = isActive;
 
@@ -1278,8 +1303,10 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     if (!attachment.features?.includes(SPACE_FEATURE_BOSS) || !this.syncBossPresence(now)) {
       return;
     }
+    const actorKey = this.resolveBossActorKey(attachment, kicker);
     const result = this.boss.applyKick(now, {
       seat: kicker.seat,
+      actorKey,
       x: kicker.x,
       y: kicker.y,
       z: kicker.z,
@@ -1291,6 +1318,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     if (!result) {
       return;
     }
+    this.bossFighterNicknames.set(actorKey, kicker.nickname);
     this.broadcastBossFrame({
       v: SPACE_PROTOCOL_VERSION,
       t: "boss-hit",

@@ -60,6 +60,15 @@ export interface SpaceMotionSnapshot {
  * 시각은 전부 **서버 시각**(ms)임. 받는 쪽이 `clock` 으로 잰 차이만큼 옮겨 씀.
  * "지금 몇 초째" 가 아니라 시작 시각이라 중간에 들어온 사람도 모션을 이어서 봄.
  */
+/** 처치 순위 한 줄. */
+export interface SpaceBossRankingEntry {
+  /** 그 사람이 마지막으로 때릴 때 앉아 있던 좌석. */
+  seat: number;
+  damage: number;
+  /** 마지막으로 때릴 때의 이름. 옛 서버는 안 보내서 그때는 좌석으로 이름을 찾음. */
+  nickname?: string;
+}
+
 export interface SpaceBossWire {
   phase: SpaceBossPhase;
   attack: SpaceBossAttack | null;
@@ -208,13 +217,18 @@ export type SpaceServerFrame =
    * 받는 쪽은 처치 기록을 지우고 `spawnedAt` 부터 등장 연출을 틂.
    */
   | { v: SpaceProtocolVersion; t: "boss-spawn"; spawnedAt: number; serverAt: number }
-  /** 보스를 잡음. 순위는 피해를 많이 준 순서임. */
+  /**
+   * 보스를 잡음. 순위는 피해를 많이 준 순서이고 사람 기준으로 쌓은 값임.
+   *
+   * `nickname` 은 그 사람이 마지막으로 때릴 때의 이름임. 싸우다 나간 사람도 이름이
+   * 남고, 그 좌석에 새로 온 사람과 헷갈리지 않음. 옛 서버는 안 보냄.
+   */
   | {
       v: SpaceProtocolVersion;
       t: "boss-dead";
       killedAt: number;
       lastHitSeat: number;
-      ranking: { seat: number; damage: number }[];
+      ranking: SpaceBossRankingEntry[];
       serverAt: number;
     }
   /** 이 클라이언트가 모르는 새 종류. 끊지 않고 버림. */
@@ -360,11 +374,22 @@ const isBossWelcome = (value: unknown): value is SpaceBossWelcome => {
   );
 };
 
-const isBossRanking = (value: unknown): value is { seat: number; damage: number }[] => {
+/** 순위에 실린 이름의 길이 상한. 닉네임 규칙보다 넉넉하게 잡아 규칙이 바뀌어도 안 끊김. */
+const MAXIMUM_RANKING_NICKNAME_LENGTH = 64;
+
+const isBossRanking = (value: unknown): value is SpaceBossRankingEntry[] => {
   return (
     Array.isArray(value) &&
     value.length <= SPACE_MAX_OCCUPANTS &&
-    value.every((entry) => isRecord(entry) && isSeat(entry.seat) && isAmount(entry.damage))
+    value.every(
+      (entry) =>
+        isRecord(entry) &&
+        isSeat(entry.seat) &&
+        isAmount(entry.damage) &&
+        (entry.nickname === undefined ||
+          (typeof entry.nickname === "string" &&
+            entry.nickname.length <= MAXIMUM_RANKING_NICKNAME_LENGTH)),
+    )
   );
 };
 

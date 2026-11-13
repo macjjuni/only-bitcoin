@@ -153,13 +153,14 @@ function SpaceBossHud({ session, isCoarsePointer }: SpaceBossHudProps): ReactNod
         막타 <span className="font-bold text-white">{resolveNickname(shownDefeat.lastHitSeat)}</span>
       </p>
       <ol className="mt-3 flex flex-col gap-1">
-        {shownDefeat.ranking.map(({ seat, damage }, index) => (
-          <li key={seat} className="flex items-baseline justify-between gap-2 text-xs">
+        {shownDefeat.ranking.map(({ seat, damage, nickname }, index) => (
+          // 나간 사람의 좌석을 새로 온 사람이 물려받으면 같은 좌석이 두 번 나올 수 있음.
+          <li key={`${index}:${seat}`} className="flex items-baseline justify-between gap-2 text-xs">
             <span className="min-w-0 truncate text-white/85">
               <span className="mr-1.5 inline-block w-3 font-bold tabular-nums text-white/50">
                 {index + 1}
               </span>
-              {resolveNickname(seat)}
+              {nickname ?? resolveNickname(seat)}
             </span>
             <span className="shrink-0 font-semibold tabular-nums text-white/70">
               {damage.toLocaleString()}

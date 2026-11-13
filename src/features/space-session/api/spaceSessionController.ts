@@ -13,6 +13,7 @@ import {
   SPACE_FEATURE_MARKET,
   SPACE_PROTOCOL_VERSION,
   type SpaceBossAttack,
+  type SpaceBossRankingEntry,
   type SpaceBossState,
   type SpaceCelebration,
   type SpaceChatMessage,
@@ -66,7 +67,7 @@ export interface SpaceBossDefeat {
   /** 처치 시각(서버 축). 같은 처치를 두 번 띄우지 않게 구분하는 데도 씀. */
   killedAt: number;
   lastHitSeat: number;
-  ranking: { seat: number; damage: number }[];
+  ranking: SpaceBossRankingEntry[];
 }
 
 /** 누가 보스를 맞힌 것 하나. 피해 숫자를 띄우는 데 씀. */
