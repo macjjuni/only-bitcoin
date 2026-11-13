@@ -450,8 +450,9 @@ export const parseSpaceClientFrame = (rawPayload: string): SpaceClientFrame | nu
       return typeof payload.clientKey === "string" &&
         CLIENT_KEY_PATTERN.test(payload.clientKey) &&
         isBoundedString(payload.nickname, 128) &&
-        // 모델 선택 전에 배포된 클라이언트는 이 값을 안 보냄.
-        (payload.modelIndex === undefined || isAvatarModelIndex(payload.modelIndex)) &&
+        // 범위만 봄. 목록에 없는 번호로 막으면, 캐릭터를 줄여 배포했을 때 새로고침 안 한
+        // 탭(옛 번호를 들고 있음)이 재접속할 때마다 입장을 거절당함. 서버가 기본 모델로 접음.
+        (payload.modelIndex === undefined || isReceivedModelIndex(payload.modelIndex)) &&
         (payload.features === undefined || isFeatureList(payload.features))
         ? (payload as SpaceClientFrame)
         : null;

@@ -1,75 +1,64 @@
 /**
- * 고를 수 있는 아바타 모델.
+ * 아바타 모델.
  *
- * 모든 모델의 Walk `.bin` 은 **본 22칸** 폭임. 본 수가 셰이더의 텍셀 조회 폭을 정해서
- * 이것만은 꼭 같아야 함. 어긋나면 엉뚱한 텍셀을 읽어 아바타가 터짐.
+ * 에셋은 `scripts/bake-avatar.mjs` 가 리깅된 GLB 에서 구움. 메시(`.glb`)와 모든 모션의
+ * 본 행렬(`-clips.bin`) 두 파일이 나오고, 스크립트가 찍어 주는 모션 표를 아래에 옮겨 적음.
+ * 어긋나면 `crewModel.test.ts` 가 `.bin` 크기와 표를 맞대어 잡아냄.
  *
- * **Walk 프레임 수는 모델마다 다를 수 있음**(크루·곰 40, 황소 48). 셰이더가
- * 프레임 수를 상수로 박지 않고 본 행렬 텍스처 높이에서 읽어서임.
- * 지오메트리·아틀라스·눈 글린트 유무도 모델마다 다름.
- *
- * 에셋은 `scripts/blender/process-voxel-character.py` 가 `.blend` 에서 구움.
+ * 지금은 나이트시프트 하나뿐임. 목록 구조와 모델 번호(`modelIndex`)는 남겨 둠 —
+ * 번호가 프로토콜에 실려 다녀서, 캐릭터를 다시 늘릴 때 서버를 안 고쳐도 됨.
  */
-/** 아바타별 무기. 기본은 렌치, 머슼크는 도지코인, 빚탈릭은 똥, 세일러문은 비트코인 동전. */
-export type SpaceWeaponId =
-  /** 기본 무기. 비트코인 밈 "$5 렌치 공격". */
-  | "wrench"
-  /** 머슼크 전용. 손에 쥔 큰 도지코인(시바 이미지). */
-  | "dogeCoin"
-  /** 세일러문 전용. 손에 쥔 큰 비트코인 동전(₿). */
-  | "bitcoinCoin"
-  /** 빚탈릭 전용. 손에 쥔 💩. "똥코인" 개그. */
-  | "poop";
+
+/**
+ * 구워 둔 모션.
+ *
+ * `idle` · `walk` · `run` 은 반복하고 나머지는 한 번만 재생함.
+ */
+export type SpaceAvatarClip = "idle" | "walk" | "run" | "attack" | "hit" | "death" | "revive";
+
+/** 모션 하나가 `-clips.bin` 에서 차지하는 자리. */
+export interface SpaceAvatarClipRange {
+  /** 시작 줄. 한 줄이 한 프레임임. */
+  startFrame: number;
+  /**
+   * 프레임 수. **끝 프레임까지 포함**함.
+   *
+   * 반복 모션은 끝 프레임이 첫 프레임과 같은 자세임. 셰이더가 다음 줄과 보간할 때
+   * 끝에서 처음으로 돌아가는 계산을 안 해도 되게 그렇게 구웠음.
+   */
+  frameCount: number;
+  /** 원래 재생 길이(초). */
+  seconds: number;
+}
 
 export interface SpaceAvatarModel {
   id: string;
-  /** 선택 UI 에 보이는 이름. */
+  /** 화면에 보이는 이름. */
   label: string;
-  /** 선택 UI 이름 옆 색 점. 플레이어 색과 무관하게 모델마다 고정. */
+  /** 이름 옆 색 점. 플레이어 색과 무관하게 모델마다 고정. */
   swatchColor: string;
   modelUrl: string;
-  walkUrl: string;
-  /** 발차기 본 행렬. 프레임 수는 모든 모델이 같음(`CREW_KICK.frameCount`). */
-  kickUrl: string;
+  /** 모든 모션의 본 행렬. 반정밀도 실수임. */
+  clipsUrl: string;
+  /** 몸통. 무기가 모델에 들어 있으면 여기에 합쳐져 있음. */
   bodyMeshName: string;
+  /** 플레이어 색을 받는 부위. 나이트시프트는 가슴 띠임. */
   accentMeshName: string;
-  /**
-   * 붉게 발광하는 눈동자 메시.
-   *
-   * 크루는 `apply-laser-eyes-to-crew.py` 가 레이저아이 변형 glb 에서 UV·발광
-   * 마스크를 옮겨 만듦. 황소는 변형본이 없어 가공 스크립트가 눈동자 메시를
-   * 떼어 단색 발광 재질을 입힘. 곰은 눈동자 메시가 따로 없어 `null`.
-   */
+  /** 발광하는 눈 메시. 없는 모델은 `null`. */
   pupilGlintMeshName: string | null;
   /**
-   * 모델 키(m). 가공 스크립트의 `--height` 값. 생략하면 1.81.
+   * 모델 키(m).
    *
    * 발바닥이 원점이라 런타임은 이 값으로 배치하지 않음. glb 를 검증하는 데 씀.
    */
   height: number;
-  /** 명찰·말풍선이 매달리는 머리 중심. 가공 스크립트의 `[anchor]` 값. */
+  /** 명찰·말풍선이 매달리는 머리 중심. */
   headCenterY: number;
+  /** `-clips.bin` 의 전체 프레임 수. 로더가 파일 크기를 이 값으로 검증하고 텍스처 높이로 씀. */
+  clipFrameCount: number;
+  clips: Readonly<Record<SpaceAvatarClip, SpaceAvatarClipRange>>;
   /**
-   * 렌치를 붙이는 오른손 위치(모델 좌표, 배율 전). 가공 스크립트의 `[anchor] handPivot` 값.
-   *
-   * 손 본의 머리·꼬리 가운데임. 크루·곰·황소는 팔이 한 덩어리라 손 정점이 없어 본으로 잼.
-   */
-  handPivot: readonly [number, number, number];
-  /**
-   * 공격할 때 손에 나타나는 무기. 모양만 다르고 쿨다운은 모두 같음.
-   *
-   * 성능이 다르면 다들 센 아바타만 고름. 모양은 `views/space/lib/weaponModel.ts`.
-   */
-  weapon: SpaceWeaponId | "embedded";
-  /**
-   * Walk `.bin` 의 프레임 수. 가공 스크립트의 `[export] 프레임=` 값.
-   *
-   * 로더가 `.bin` 크기를 이 값으로 검증하고 텍스처 높이로 씀. 틀리면 셰이더가
-   * 엉뚱한 텍셀을 읽음.
-   */
-  walkFrameCount: number;
-  /**
-   * glb 의 삼각형 수. 예산 계산에 씀(§8).
+   * glb 의 삼각형 수. 예산 계산에 씀(`docs/btc-space-3d.md` §8).
    *
    * 접지 그림자 평면(2 tri)은 모델 밖이라 뺌.
    */
@@ -78,156 +67,27 @@ export interface SpaceAvatarModel {
 
 export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
   {
-    id: "crew",
-    label: "맥시크루",
-    swatchColor: "#f7931a",
-    modelUrl: "/models/crew.glb",
-    walkUrl: "/models/crew-walk.bin",
-    kickUrl: "/models/crew-kick.bin",
-    bodyMeshName: "crew_body",
-    accentMeshName: "crew_accent",
-    pupilGlintMeshName: "crew_pupil_glint",
-    height: 1.81,
-    headCenterY: 1.484,
-    handPivot: [0.2719, 0.7603, 0],
-    weapon: "wrench",
-    walkFrameCount: 40,
-    triangleCount: 1240,
-  },
-  {
-    id: "bear",
-    label: "숏베어",
-    swatchColor: "#3b82f6",
-    modelUrl: "/models/bear.glb",
-    walkUrl: "/models/bear-walk.bin",
-    kickUrl: "/models/bear-kick.bin",
-    bodyMeshName: "bear_body",
-    accentMeshName: "bear_accent",
-    pupilGlintMeshName: null,
-    height: 1.81,
-    headCenterY: 1.4758,
-    handPivot: [0.2717, 0.7596, 0],
-    weapon: "wrench",
-    walkFrameCount: 40,
-    triangleCount: 1504,
-  },
-  {
-    id: "bull",
-    label: "풀롱불",
-    swatchColor: "#ef4444",
-    modelUrl: "/models/bull.glb",
-    walkUrl: "/models/bull-walk.bin",
-    kickUrl: "/models/bull-kick.bin",
-    bodyMeshName: "bull_body",
-    accentMeshName: "bull_accent",
-    pupilGlintMeshName: "bull_pupil_glint",
-    height: 1.81,
-    headCenterY: 1.4638,
-    handPivot: [0.2645, 0.7397, 0],
-    weapon: "wrench",
-    // Walk 가 48프레임임. 셰이더는 텍스처 높이에서 읽어서 그대로 씀.
-    walkFrameCount: 48,
-    triangleCount: 1972,
-  },
-  {
-    id: "pepe",
-    label: "코인충",
-    swatchColor: "#22c55e",
-    modelUrl: "/models/pepe.glb",
-    walkUrl: "/models/pepe-walk.bin",
-    kickUrl: "/models/pepe-kick.bin",
-    bodyMeshName: "pepe_body",
-    // 셔츠 몸판과 양 소매가 플레이어 색을 받음. 앞판만 따로 떼면 소매만 파랗게 남음.
-    accentMeshName: "pepe_accent",
-    pupilGlintMeshName: null,
-    // 원본 키 그대로 둠. 다른 모델보다 작음.
-    height: 1.6,
-    headCenterY: 1.3303,
-    handPivot: [0.25, 0.565, 0],
-    weapon: "wrench",
-    // 원본 본은 20개라 가공 스크립트가 남는 2칸을 항등 행렬로 채웠음.
-    walkFrameCount: 40,
-    triangleCount: 1286,
-  },
-  {
-    id: "elon",
-    label: "머슼크",
-    swatchColor: "#ef4444",
-    modelUrl: "/models/elon.glb",
-    walkUrl: "/models/elon-walk.bin",
-    kickUrl: "/models/elon-kick.bin",
-    bodyMeshName: "elon_body",
-    // 연 재킷 안 티셔츠가 플레이어 색을 받음. 재킷은 원래대로 검정.
-    accentMeshName: "elon_accent",
-    // 눈이 머리 메시의 픽셀이라 떼어 낼 눈동자 메시가 없음.
-    pupilGlintMeshName: null,
-    height: 1.8,
-    headCenterY: 1.4771,
-    handPivot: [0.31, 0.68, 0],
-    weapon: "dogeCoin",
-    // 본 20개라 페페처럼 2칸을 항등 행렬로 채웠음.
-    walkFrameCount: 40,
-    triangleCount: 3202,
-  },
-  {
-    id: "vitalik",
-    label: "빚탈릭",
-    swatchColor: "#8b5cf6",
-    modelUrl: "/models/vitalik.glb",
-    walkUrl: "/models/vitalik-walk.bin",
-    kickUrl: "/models/vitalik-kick.bin",
-    bodyMeshName: "vitalik_body",
-    // 티셔츠 몸판·양 소매·목 테두리가 플레이어 색을 받음. 가슴 이더리움 아이콘은
-    // 따로 붙은 메시라 몸통에 남아 색이 바뀌어도 그대로 보임. 등 똥 아이콘은
-    // `remove-poop-from-vitalik.py` 로 지웠음.
-    accentMeshName: "vitalik_accent",
-    // 눈이 머리 메시의 픽셀이라 떼어 낼 눈동자 메시가 없음.
-    pupilGlintMeshName: null,
-    height: 1.8,
-    headCenterY: 1.4606,
-    handPivot: [0.1693, 0.7025, 0],
-    weapon: "poop",
-    // 본 20개라 2칸을 항등 행렬로 채웠음.
-    walkFrameCount: 40,
-    triangleCount: 1522,
-  },
-  {
-    id: "saylor",
-    label: "세일러문",
-    swatchColor: "#eab308",
-    modelUrl: "/models/saylor.glb",
-    walkUrl: "/models/saylor-walk.bin",
-    kickUrl: "/models/saylor-kick.bin",
-    bodyMeshName: "saylor_body",
-    // 정장 안 와이셔츠가 플레이어 색을 받음. 원본이 흰색(#f1efe9)이라 어떤 색도 제대로 올라옴.
-    // 원본은 몸이 메시 하나라 `split-saylor-parts.py` 가 UV 타일로 셔츠를 떼어 냄.
-    accentMeshName: "saylor_accent",
-    // 레이저아이. 눈동자(`eye`)에 흰자(`eye_w`)까지 묶어 눈 전체를 발광시킴.
-    // 눈동자만 6면이라 추종 카메라 거리에서 빛이 안 보였음.
-    pupilGlintMeshName: "saylor_pupil_glint",
-    height: 1.8,
-    headCenterY: 1.4502,
-    handPivot: [0.2793, 0.781, 0],
-    weapon: "bitcoinCoin",
-    // 황소처럼 Walk 가 48프레임임. 본은 22개를 꽉 써서 패딩이 없음.
-    walkFrameCount: 48,
-    triangleCount: 3392,
-  },
-  {
     id: "nightshift",
     label: "나이트시프트",
     swatchColor: "#526e35",
     modelUrl: "/models/nightshift.glb",
-    walkUrl: "/models/nightshift-walk.bin",
-    kickUrl: "/models/nightshift-kick.bin",
+    clipsUrl: "/models/nightshift-clips.bin",
+    // 철조망 방망이가 몸통 메시에 합쳐져 있음. 같은 아틀라스를 써서 드로우 콜이 안 늚.
     bodyMeshName: "nightshift_body",
     accentMeshName: "nightshift_accent",
     pupilGlintMeshName: "nightshift_pupil_glint",
     height: 1.81,
     headCenterY: 1.473,
-    handPivot: [0.2856, 0.7305, 0],
-    weapon: "embedded",
-    walkFrameCount: 32,
+    clipFrameCount: 235,
+    clips: {
+      idle: { startFrame: 0, frameCount: 49, seconds: 2 },
+      walk: { startFrame: 49, frameCount: 33, seconds: 1.3333 },
+      run: { startFrame: 82, frameCount: 23, seconds: 0.9167 },
+      attack: { startFrame: 105, frameCount: 27, seconds: 1.0833 },
+      hit: { startFrame: 132, frameCount: 18, seconds: 0.7083 },
+      death: { startFrame: 150, frameCount: 39, seconds: 1.5833 },
+      revive: { startFrame: 189, frameCount: 46, seconds: 1.875 },
+    },
     triangleCount: 2986,
   },
 ] as const;
@@ -237,17 +97,19 @@ export const SPACE_DEFAULT_AVATAR_MODEL_INDEX = 0;
 /**
  * 모델 번호를 목록 범위로 접음.
  *
- * 서버가 보낸 번호나 저장소에 남은 옛 번호가 범위를 벗어날 수 있음. 그때
- * 아바타를 안 그리는 대신 기본 모델로 떨어뜨림. 사람이 사라지는 쪽이 더 나쁨.
+ * 서버가 보낸 번호나 저장소에 남은 옛 번호가 범위를 벗어날 수 있음. 캐릭터가 7종이던
+ * 때 접속한 탭은 1 ~ 7 을 들고 있음. 그때 아바타를 안 그리는 대신 기본 모델로 떨어뜨림.
+ * 사람이 사라지는 쪽이 더 나쁨.
  */
-export const resolveAvatarModel = (modelIndex: number): SpaceAvatarModel => {
-  const isValid =
-    Number.isInteger(modelIndex) && modelIndex >= 0 && modelIndex < SPACE_AVATAR_MODELS.length;
-
-  return SPACE_AVATAR_MODELS[isValid ? modelIndex : SPACE_DEFAULT_AVATAR_MODEL_INDEX];
+export const resolveAvatarModelIndex = (modelIndex: unknown): number => {
+  return isAvatarModelIndex(modelIndex) ? modelIndex : SPACE_DEFAULT_AVATAR_MODEL_INDEX;
 };
 
-/** 지금 목록에 있는 모델 번호인지. 서버의 요청 검사·저장값 복원에 씀. 서버가 보낸 값은 범위만 봄(`spaceProtocol`). */
+export const resolveAvatarModel = (modelIndex: number): SpaceAvatarModel => {
+  return SPACE_AVATAR_MODELS[resolveAvatarModelIndex(modelIndex)];
+};
+
+/** 지금 목록에 있는 모델 번호인지. 서버가 모델 변경 요청을 검사할 때 씀. */
 export const isAvatarModelIndex = (value: unknown): value is number => {
   return (
     typeof value === "number" &&

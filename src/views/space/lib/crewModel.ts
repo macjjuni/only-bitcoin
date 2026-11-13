@@ -5,7 +5,7 @@ import {
   type BufferGeometry,
   DataTexture,
   FileLoader,
-  FloatType,
+  HalfFloatType,
   type Material,
   type Mesh,
   NearestFilter,
@@ -14,7 +14,6 @@ import {
   type Texture,
 } from "three";
 import {
-  SPACE_AVATAR,
   SPACE_AVATAR_MODELS,
   SPACE_DEFAULT_AVATAR_MODEL_INDEX,
   type SpaceAvatarModel,
@@ -24,9 +23,9 @@ import { toVersionedModelUrl } from "./modelAssetUrl";
 /**
  * 아바타 모델 로더.
  *
- * 원본은 `assets/avatars/voxel-*.blend` 이고 `scripts/blender/process-voxel-character.py`
- * 가 인스턴싱 가능한 형태로 가공함. 원본은 메시가 부위마다 쪼개져 있고 스킨이 붙어
- * 있어 그대로 쓰면 아바타 한 명이 드로우 콜 수십 개를 씀.
+ * 에셋은 `scripts/bake-avatar.mjs` 가 리깅된 GLB 에서 구움. 원본은 스킨이 붙어 있어
+ * 그대로 쓰면 `InstancedMesh` 로 못 그림. 구운 것은 스킨을 떼고 정점마다 따라갈 본
+ * 번호만 남긴 메시와, 모든 모션의 본 행렬을 담은 파일임.
  *
  * 모델 목록과 에셋 경로는 `entities/space` 의 `SPACE_AVATAR_MODELS` 가 가짐. 여기서는
  * 그중 하나를 받아 three 객체로 바꾸는 일만 함.
@@ -39,59 +38,35 @@ export const CREW_MODEL = {
 } as const;
 
 /**
- * Walk 베이크 규격.
+ * 모션 베이크 규격.
  *
- * 가공 스크립트와 **같은 값**이어야 함. 어긋나면 셰이더가 엉뚱한 텍셀을 읽어 아바타가
+ * 굽는 스크립트와 **같은 값**이어야 함. 어긋나면 셰이더가 엉뚱한 텍셀을 읽어 아바타가
  * 터짐. `crewModel.test.ts` 가 `.bin` 크기로 검증함.
  */
-export const CREW_WALK = {
+export const CREW_CLIPS = {
   /**
    * 본 칸 수. **모든 모델이 같아야 함**. 셰이더의 텍셀 조회 폭을 정함.
    *
-   * 프레임 수는 여기 안 둠. 모델마다 달라(크루·곰 40, 황소 48) 레지스트리의
-   * `walkFrameCount` 가 들고 있고, 셰이더는 텍스처 높이에서 읽음.
+   * 본이 이보다 적은 모델은 남는 칸이 단위행렬임(나이트시프트는 17개).
    */
   boneCount: 22,
   /** 행렬 한 개는 4x4 의 위 3행만 저장함. 마지막 행은 늘 (0,0,0,1). */
   rowsPerBone: 3,
-  /**
-   * 한 사이클이 덮는 이동 거리(m).
-   *
-   * 걸은 거리에 비례해 사이클을 돌려 발이 안 미끄러지게 함. 실제 보폭(약 0.52 m x 2
-   * 걸음)보다 길게 잡았음. 보폭 그대로 쓰면 4.5 m/s 에서 초당 4.3 사이클이 되어
-   * 다리가 과하게 빨라짐. 그리기 배율만큼 보폭이 길어져 같이 곱함.
-   */
-  metersPerCycle: 1.9 * SPACE_AVATAR.scale,
-  /** 멈출 때 레스트 포즈로 돌아가는 시간(초). */
-  blendSeconds: 0.12,
-} as const;
-
-/**
- * 발차기 베이크 규격. 가공 스크립트의 `KICK_FRAMES` 와 같아야 함.
- *
- * 모든 모델이 같은 프레임 수라 레지스트리에 안 둠. 첫·끝 프레임은 레스트 포즈임.
- */
-export const CREW_KICK = {
-  frameCount: 16,
-  /** 시작·끝에 걷기와 섞는 구간(재생 비율). 걷다 차도 다리가 순간이동하지 않게 함. */
-  blendInRatio: 0.15,
 } as const;
 
 export interface CrewModelParts {
   bodyGeometry: BufferGeometry;
   accentGeometry: BufferGeometry;
-  /** 눈 글린트가 없는 모델(곰)에서는 `null`. */
+  /** 눈 메시가 없는 모델에서는 `null`. */
   pupilGlintGeometry: BufferGeometry | null;
   /**
    * 아틀라스가 붙은 **원본** 머티리얼. 픽셀 아트라 확대 필터를 유지해야 함.
-   * 걷기 셰이더는 `useSkinnedCrewMaterial` 이 사본에 심음.
+   * 스키닝 셰이더는 `useSkinnedCrewMaterial` 이 사본에 심음.
    */
   bodyMaterial: Material;
   pupilGlintMaterial: Material | null;
-  /** Walk 본 행렬 텍스처. 셰이더가 본 번호와 프레임으로 조회함. */
-  walkTexture: Texture;
-  /** 발차기 본 행렬 텍스처. 걷기 결과 위에 섞음. */
-  kickTexture: Texture;
+  /** 모든 모션의 본 행렬 텍스처. 셰이더가 본 번호와 줄 번호로 조회함. */
+  clipTexture: Texture;
 }
 
 // region [Privates]
@@ -115,11 +90,11 @@ const findMesh = (root: Object3D, name: string, modelUrl: string): Mesh => {
   }
   const mesh = found as Mesh;
 
-  // 본 번호가 없으면 셰이더가 0번 본만 읽어 걷기가 **조용히** 죽음.
+  // 본 번호가 없으면 셰이더가 0번 본만 읽어 모션이 **조용히** 죽음.
   if (!mesh.geometry.getAttribute(CREW_MODEL.boneIndexAttribute)) {
     throw new Error(
       `'${name}' 에 '${CREW_MODEL.boneIndexAttribute}' 속성이 없습니다. ` +
-        "scripts/blender/process-voxel-character.py 로 모델을 다시 가공하세요.",
+        "scripts/bake-avatar.mjs 로 모델을 다시 구우세요.",
     );
   }
 
@@ -129,19 +104,24 @@ const findMesh = (root: Object3D, name: string, modelUrl: string): Mesh => {
 /**
  * 구운 행렬을 그대로 담는 데이터 텍스처.
  *
- * 본 하나가 텍셀 3개(행렬의 위 3행)를 쓰고 가로 한 줄이 한 프레임임. 정점 위치를
- * 통째로 굽는 VAT 보다 훨씬 작음(걷기 41 KB, 발차기 16 KB).
+ * 본 하나가 텍셀 3개(행렬의 위 3행)를 쓰고 가로 한 줄이 한 프레임임. 모션들이 세로로
+ * 쌓여 있음. 정점 위치를 통째로 굽는 VAT 보다 훨씬 작음(모션 7개에 124 KB).
  */
-const createBoneTexture = (buffer: ArrayBuffer, frameCount: number, url: string): Texture => {
-  const width = CREW_WALK.boneCount * CREW_WALK.rowsPerBone;
+export const createClipTexture = (
+  buffer: ArrayBuffer,
+  frameCount: number,
+  url: string,
+): Texture => {
+  const width = CREW_CLIPS.boneCount * CREW_CLIPS.rowsPerBone;
   const expected = width * frameCount * 4;
-  const data = new Float32Array(buffer);
+  const data = new Uint16Array(buffer);
 
   if (data.length !== expected) {
-    throw new Error(`${url} 크기가 규격과 다릅니다. float ${data.length}개, 기대 ${expected}개.`);
+    throw new Error(`${url} 크기가 규격과 다릅니다. 값 ${data.length}개, 기대 ${expected}개.`);
   }
 
-  const texture = new DataTexture(data, width, frameCount, RGBAFormat, FloatType);
+  // 반정밀도임. WebGL2 는 확장 없이 읽음.
+  const texture = new DataTexture(data, width, frameCount, RGBAFormat, HalfFloatType);
   // 프레임 보간은 셰이더가 직접 함. 텍셀을 섞으면 이웃 본의 행렬이 번짐.
   texture.magFilter = NearestFilter;
   texture.minFilter = NearestFilter;
@@ -150,11 +130,10 @@ const createBoneTexture = (buffer: ArrayBuffer, frameCount: number, url: string)
 
   return texture;
 };
-
 // endregion
 
 /**
- * 모델에서 지오메트리와 몸통 머티리얼, 걷기·발차기 행렬 텍스처를 꺼냄.
+ * 모델에서 지오메트리와 몸통 머티리얼, 모션 행렬 텍스처를 꺼냄.
  *
  * 머티리얼을 직접 안 만들고 glTF 가 만든 것을 그대로 씀. 아틀라스 샘플러의 `NEAREST`
  * 확대 필터가 같이 따라와야 픽셀 아트가 안 뭉개짐.
@@ -162,20 +141,12 @@ const createBoneTexture = (buffer: ArrayBuffer, frameCount: number, url: string)
 export const useCrewModel = (model: SpaceAvatarModel): CrewModelParts => {
   // 다시 구운 모델이 30일 캐시에 막히지 않게 내용 해시를 붙여 받음.
   const { scene } = useGLTF(toVersionedModelUrl(model.modelUrl));
-  const [walkBuffer, kickBuffer] = useLoader(
-    FileLoader,
-    [toVersionedModelUrl(model.walkUrl), toVersionedModelUrl(model.kickUrl)],
-    (loader) => {
-      loader.setResponseType("arraybuffer");
-    },
-  ) as unknown as [ArrayBuffer, ArrayBuffer];
-  const walkTexture = useMemo(
-    () => createBoneTexture(walkBuffer, model.walkFrameCount, model.walkUrl),
-    [walkBuffer, model],
-  );
-  const kickTexture = useMemo(
-    () => createBoneTexture(kickBuffer, CREW_KICK.frameCount, model.kickUrl),
-    [kickBuffer, model],
+  const clipBuffer = useLoader(FileLoader, toVersionedModelUrl(model.clipsUrl), (loader) => {
+    loader.setResponseType("arraybuffer");
+  }) as unknown as ArrayBuffer;
+  const clipTexture = useMemo(
+    () => createClipTexture(clipBuffer, model.clipFrameCount, model.clipsUrl),
+    [clipBuffer, model],
   );
   const body = findMesh(scene, model.bodyMeshName, model.modelUrl);
   const pupilGlint = model.pupilGlintMeshName
@@ -188,12 +159,11 @@ export const useCrewModel = (model: SpaceAvatarModel): CrewModelParts => {
     pupilGlintGeometry: pupilGlint?.geometry ?? null,
     bodyMaterial: body.material as Material,
     pupilGlintMaterial: (pupilGlint?.material as Material | undefined) ?? null,
-    walkTexture,
-    kickTexture,
+    clipTexture,
   };
 };
 
-// 기본 모델만 미리 받음. 나머지는 쓰는 아바타가 생길 때 받음.
+// 기본 모델을 미리 받음.
 useGLTF.preload(
   toVersionedModelUrl(SPACE_AVATAR_MODELS[SPACE_DEFAULT_AVATAR_MODEL_INDEX].modelUrl),
 );

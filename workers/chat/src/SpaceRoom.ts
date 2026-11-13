@@ -11,7 +11,7 @@ import {
 import { resolveColorIndexFromClientKey } from "../../../src/entities/space/lib/clientKeyHash";
 import { encodeSpaceSnapshot } from "../../../src/entities/space/lib/spaceSnapshot";
 import { createSpawnPoint } from "../../../src/entities/space/lib/spawnPoint";
-import { SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "../../../src/entities/space/model/avatarModel";
+import { resolveAvatarModelIndex } from "../../../src/entities/space/model/avatarModel";
 import {
   SPACE_BOSS_COMBAT,
   SPACE_BOSS_PLAYER,
@@ -963,7 +963,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         // 아바타 모델은 클라이언트가 고름. 색·스폰과 달리 서버가 정할 근거가
         // 없고 프레임 파서가 이미 목록 범위를 검증함. 모델 선택을 모르는
         // 옛 클라이언트는 이 값을 안 보내서 기본 모델로 받음.
-        modelIndex: frame.modelIndex ?? SPACE_DEFAULT_AVATAR_MODEL_INDEX,
+        modelIndex: resolveAvatarModelIndex(frame.modelIndex),
         isRunning: false,
       };
 

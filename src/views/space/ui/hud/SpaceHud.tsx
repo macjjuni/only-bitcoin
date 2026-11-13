@@ -9,7 +9,6 @@ import {
   PartyPopper,
   Pencil,
   Share2,
-  UserRound,
   VolumeX,
 } from "lucide-react";
 import { usePathname } from "next/navigation";
@@ -33,7 +32,6 @@ import { env } from "@/shared/config/env";
 import { DonationQrDialog, LightningIcon } from "@/shared/ui";
 import { useDismissOnOutsidePointer } from "@/views/space/lib/useDismissOnOutsidePointer";
 import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
-import SpaceAvatarPicker from "./SpaceAvatarPicker";
 import SpaceBossHud from "./SpaceBossHud";
 import { SPACE_CHAT_INPUT_ID } from "./SpaceChatComposer";
 import SpaceChatPanel from "./SpaceChatPanel";
@@ -87,9 +85,6 @@ interface SpaceHudProps {
   inputSource: SpaceInputSource;
   session: SpaceSession;
   nickname: string;
-  /** 지금 쓰는 아바타 모델. 서버가 확정한 값이 우선함. */
-  modelIndex: number;
-  onChangeModel: (modelIndex: number) => Promise<boolean>;
 }
 
 /**
@@ -103,21 +98,19 @@ interface SpaceHudProps {
  * 전체 화면 3D 페이지라 브라우저가 대신 비켜주지 않음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, modelIndex, onChangeModel, onCelebrate }: SpaceHudProps): ReactNode {
+function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, onCelebrate }: SpaceHudProps): ReactNode {
   // region [Hooks]
   const router = useTransitionRouter();
   const pathname = usePathname();
   const isCoarsePointer = useCoarsePointer();
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
-  const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
   const [isDonationOpen, setIsDonationOpen] = useState(false);
   const [isShareOpen, setIsShareOpen] = useState(false);
   /** 손가락 기기에서 키보드 위 입력 막대에 포커스가 있는 동안. */
   const [isComposingChat, setIsComposingChat] = useState(false);
   /** 바깥을 누르면 닫는 패널들. 패널 안을 누른 건지 가르는 데 씀. */
   const nicknameEditorRef = useRef<HTMLDivElement>(null);
-  const avatarPickerRef = useRef<HTMLDivElement>(null);
   // endregion
 
 
@@ -138,14 +131,12 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
 
   const onClickToggleGuide = useCallback((): void => {
     setIsNicknameEditorOpen(false);
-    setIsAvatarPickerOpen(false);
     setIsGuideOpen((previousOpen) => !previousOpen);
   }, []);
 
   const onClickOpenDonation = useCallback((): void => {
     setIsGuideOpen(false);
     setIsNicknameEditorOpen(false);
-    setIsAvatarPickerOpen(false);
     setIsShareOpen(false);
     setIsDonationOpen(true);
   }, []);
@@ -153,7 +144,6 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
   const onClickOpenShare = useCallback((): void => {
     setIsGuideOpen(false);
     setIsNicknameEditorOpen(false);
-    setIsAvatarPickerOpen(false);
     setIsDonationOpen(false);
     setIsShareOpen(true);
   }, []);
@@ -171,7 +161,6 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
    */
   const onClickComposeChat = useCallback((): void => {
     setIsNicknameEditorOpen(false);
-    setIsAvatarPickerOpen(false);
     document.getElementById(SPACE_CHAT_INPUT_ID)?.focus();
   }, []);
 
@@ -179,28 +168,8 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
     setIsDonationOpen(false);
   }, []);
 
-  const onClickToggleAvatarPicker = useCallback((): void => {
-    setIsGuideOpen(false);
-    setIsNicknameEditorOpen(false);
-    setIsAvatarPickerOpen((previousOpen) => !previousOpen);
-  }, []);
-
-  const onClickCloseAvatarPicker = useCallback((): void => {
-    setIsAvatarPickerOpen(false);
-    document.getElementById("space-avatar-toggle")?.focus();
-  }, []);
-
-  /**
-   * 바깥을 눌러 닫을 때. 닫기 버튼과 달리 포커스를 여는 버튼으로 돌리지 않음. 화면을
-   * 누른 사람에게 버튼 포커스 테두리가 갑자기 생기면 어색함.
-   */
-  const onDismissAvatarPicker = useCallback((): void => {
-    setIsAvatarPickerOpen(false);
-  }, []);
-
   const onClickToggleNicknameEditor = useCallback((): void => {
     setIsGuideOpen(false);
-    setIsAvatarPickerOpen(false);
     setIsNicknameEditorOpen((previousOpen) => !previousOpen);
   }, []);
 
@@ -209,7 +178,10 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
     document.getElementById("space-nickname-toggle")?.focus();
   }, []);
 
-  /** 바깥을 눌러 닫을 때. 아바타 선택 창과 같은 이유로 포커스를 옮기지 않음. */
+  /**
+   * 바깥을 눌러 닫을 때. 닫기 버튼과 달리 포커스를 여는 버튼으로 돌리지 않음. 화면을
+   * 누른 사람에게 버튼 포커스 테두리가 갑자기 생기면 어색함.
+   */
   const onDismissNicknameEditor = useCallback((): void => {
     setIsNicknameEditorOpen(false);
   }, []);
@@ -271,9 +243,6 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
 
   // region [Life Cycles]
   // 여는 버튼은 빼야 열린 상태에서 그 버튼을 눌렀을 때 닫혔다 다시 열리지 않음.
-  useDismissOnOutsidePointer(avatarPickerRef, isAvatarPickerOpen, onDismissAvatarPicker, [
-    "space-avatar-toggle",
-  ]);
   useDismissOnOutsidePointer(nicknameEditorRef, isNicknameEditorOpen, onDismissNicknameEditor, [
     "space-nickname-toggle",
   ]);
@@ -320,14 +289,6 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
     });
 
     actions.push({
-      id: "space-avatar-toggle",
-      label: "아바타 변경",
-      icon: <UserRound size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
-      isActive: isAvatarPickerOpen,
-      onClick: onClickToggleAvatarPicker,
-    });
-
-    actions.push({
       id: "space-share-toggle",
       label: "공유하기",
       icon: <Share2 size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
@@ -368,8 +329,6 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
   }, [
     isNicknameEditorOpen,
     onClickToggleNicknameEditor,
-    isAvatarPickerOpen,
-    onClickToggleAvatarPicker,
     isDonationOpen,
     onClickOpenDonation,
     isShareOpen,
@@ -397,16 +356,6 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
     </div>
   ) : null;
 
-  const AvatarPickerTemplate = isAvatarPickerOpen ? (
-    <div ref={avatarPickerRef} className="pointer-events-auto absolute right-12 top-24">
-      <SpaceAvatarPicker
-        modelIndex={modelIndex}
-        onChangeModel={onChangeModel}
-        onClose={onClickCloseAvatarPicker}
-      />
-    </div>
-  ) : null;
-
   const GuidePanelTemplate = isGuideOpen ? (
     <div className="mt-2">
       <SpaceControlGuide isCoarsePointer={isCoarsePointer} />
@@ -422,7 +371,6 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
   const shouldRenderTouchControls =
     isCoarsePointer &&
     !isNicknameEditorOpen &&
-    !isAvatarPickerOpen &&
     !isDonationOpen &&
     !isShareOpen &&
     !isComposingChat;
@@ -491,8 +439,6 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
         </div>
 
         {NicknameEditorTemplate}
-
-        {AvatarPickerTemplate}
 
         {/* 안내는 읽기 전용임. 터치를 막으면 열어둔 동안 그 영역의 시야 조작이 죽음. */}
         {GuidePanelTemplate}

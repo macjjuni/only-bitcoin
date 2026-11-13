@@ -40,10 +40,12 @@ export {
 export {
   isAvatarModelIndex,
   resolveAvatarModel,
+  resolveAvatarModelIndex,
   SPACE_AVATAR_MODELS,
   SPACE_DEFAULT_AVATAR_MODEL_INDEX,
+  type SpaceAvatarClip,
+  type SpaceAvatarClipRange,
   type SpaceAvatarModel,
-  type SpaceWeaponId,
 } from "./model/avatarModel";
 export {
   createHiddenBossState,

@@ -665,6 +665,8 @@ function SpaceScene({
             hasRealtimeShadows={hasRealtimeShadows}
             playerStateRef={playerStateRef}
             kickStartedAtRef={kickStartedAtRef}
+            damagedAt={session.selfDamagedAt}
+            knockedOutUntil={session.deadUntil}
             onReady={onReadyAvatar}
           />
         </Suspense>

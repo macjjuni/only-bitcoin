@@ -13,20 +13,24 @@ import {
   type SpaceAvatarModel,
   type SpaceTerrain,
 } from "@/entities/space";
+import {
+  AVATAR_MOTION,
+  type AvatarAnimation,
+  createAvatarAnimation,
+  stepAvatarAnimation,
+} from "@/views/space/lib/avatarAnimation";
 import { groupPlayersByModel, selectSpaceAvatarSlots } from "@/views/space/lib/avatarCapacity";
-import { CREW_KICK, CREW_WALK, useCrewModel } from "@/views/space/lib/crewModel";
+import { useCrewModel } from "@/views/space/lib/crewModel";
 import {
   applyCrewSkinning,
   createCrewInstanceGeometry,
-  resolveKickPose,
+  syncCrewPose,
   useSkinnedCrewMaterial,
+  writeCrewPose,
 } from "@/views/space/lib/crewSkinning";
 import { createShadowBlobTexture } from "@/views/space/lib/shadowBlobTexture";
-import { useWeapon } from "@/views/space/lib/weaponModel";
 
 const SHADOW_LIFT_Y = 0.02;
-/** 이보다 느리면 멈춘 것으로 보고 레스트 포즈로 돌림. */
-const MOVING_SPEED_THRESHOLD = 0.25;
 /**
  * 지면에 서 있다고 보는 높이 차.
  *
@@ -38,7 +42,7 @@ const MOVING_SPEED_THRESHOLD = 0.25;
 const GROUNDED_TOLERANCE_Y = 0.2;
 
 interface RemoteAvatarGroupProps {
-  /** 이 그룹이 쓰는 모델. 그룹 하나가 `InstancedMesh` 4개를 씀. */
+  /** 이 그룹이 쓰는 모델. 그룹 하나가 `InstancedMesh` 4개(몸통·색 띠·눈·그림자)를 씀. */
   model: SpaceAvatarModel;
   players: readonly RemotePlayer[];
   /** 접지 판정용. 원격 아바타는 적분기가 없어 지형에 직접 물음. */
@@ -51,7 +55,7 @@ interface RemoteAvatarGroupProps {
  * 같은 모델을 고른 원격 아바타를 인스턴싱으로 그림.
  *
  * 개별 `<mesh>` 로 만들면 50명이면 부위마다 50 콜씩 쌓여 모바일 예산(50)을 몇 배
- * 넘김. `InstancedMesh` 4개로 고정해 그룹 전원을 드로우 콜 4개에 담음. 걷기는
+ * 넘김. `InstancedMesh` 4개로 고정해 그룹 전원을 드로우 콜 4개에 담음. 모션은
  * 구워 둔 본 행렬을 셰이더가 읽어 처리함. 근거는 `docs/btc-space-3d.md` §8 에 있음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
@@ -60,14 +64,11 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
   const bodyMeshRef = useRef<InstancedMesh>(null);
   const accentMeshRef = useRef<InstancedMesh>(null);
   const pupilGlintMeshRef = useRef<InstancedMesh>(null);
-  const weaponMeshRef = useRef<InstancedMesh>(null);
   const shadowMeshRef = useRef<InstancedMesh>(null);
   const shadowTexture = useMemo(() => createShadowBlobTexture(), []);
   const crew = useCrewModel(model);
-  /** 공격 때만 손에서 펼쳐지는 무기(렌치, 머슼크는 도지코인). 그룹당 드로우 콜 하나가 늘어남. */
-  const weapon = useWeapon(model.weapon, model.handPivot, SPACE_MAX_OCCUPANTS, crew.walkTexture, crew.kickTexture);
-  const bodyMaterial = useSkinnedCrewMaterial(crew.bodyMaterial, crew.walkTexture, crew.kickTexture);
-  const pupilGlintMaterial = useSkinnedCrewMaterial(crew.pupilGlintMaterial, crew.walkTexture, crew.kickTexture);
+  const bodyMaterial = useSkinnedCrewMaterial(crew.bodyMaterial, crew.clipTexture);
+  const pupilGlintMaterial = useSkinnedCrewMaterial(crew.pupilGlintMaterial, crew.clipTexture);
 
   /** 공유 지오메트리에 인스턴스 버퍼를 직접 달면 로컬 플레이어와 서로 덮어씀. */
   const body = useMemo(
@@ -78,7 +79,7 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
     () => createCrewInstanceGeometry(crew.accentGeometry, SPACE_MAX_OCCUPANTS),
     [crew.accentGeometry],
   );
-  /** 글린트가 없는 모델(곰)에서는 `null` 임. 메시도 그리지 않음. */
+  /** 눈 메시가 없는 모델에서는 `null` 임. 메시도 그리지 않음. */
   const pupilGlint = useMemo(
     () =>
       crew.pupilGlintGeometry
@@ -88,9 +89,9 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
   );
   const accentMaterial = useMemo(() => {
     const material = new MeshStandardMaterial({ roughness: 0.84, metalness: 0 });
-    applyCrewSkinning(material, crew.walkTexture, crew.kickTexture);
+    applyCrewSkinning(material, crew.clipTexture);
     return material;
-  }, [crew.walkTexture, crew.kickTexture]);
+  }, [crew.clipTexture]);
 
   /** 행렬 계산용 임시 객체. 프레임마다 새로 만들면 GC 부하가 측정값에 섞임. */
   const transformProxy = useMemo(() => {
@@ -100,8 +101,10 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
     return proxy;
   }, []);
   const colorProxy = useMemo(() => new Color(), []);
-  /** 좌석별 직전 좌표. 이동 거리로 걷기 사이클을 돌림. */
+  /** 좌석별 직전 좌표. 이동 거리로 속도를 구함. */
   const lastPositions = useRef(new Map<number, { x: number; z: number }>());
+  /** 좌석별로 틀고 있는 모션. 자리가 바뀌어도(인스턴스 번호가 밀려도) 사람을 따라감. */
+  const animations = useRef(new Map<number, AvatarAnimation>());
   const renderedPlayers = useMemo(() => selectSpaceAvatarSlots(players), [players]);
   // endregion
 
@@ -119,7 +122,7 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
    * 동안에도 다리가 섬.
    *
    * 레이캐스트는 **수평으로 움직이는 아바타만** 쏨. 멈춘 아바타는 어차피
-   * 블렌드가 0 으로 내려가 레스트 포즈가 되므로 접지를 알 필요가 없음.
+   * 서 있는 모션이라 접지를 알 필요가 없음.
    */
   const isStandingOnGround = (player: RemotePlayer): boolean => {
     const terrain = terrainRef.current;
@@ -131,7 +134,7 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
     return player.y - terrain.resolveGroundY(player.x, player.z, player.y) <= GROUNDED_TOLERANCE_Y;
   };
 
-  /** 앞치마 앞판만 플레이어 색을 받음. 몸통 배색은 아틀라스 텍스처에 있음. */
+  /** 가슴 띠만 플레이어 색을 받음. 몸통 배색은 아틀라스 텍스처에 있음. */
   const applyInstanceColors = (): void => {
     renderedPlayers.forEach((player, instanceIndex) => {
       colorProxy.set(resolveAvatarColor(player.colorIndex));
@@ -144,79 +147,57 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
   };
 
   /**
-   * 걸은 거리만큼 사이클을 돌림.
+   * 사람마다 지금 틀 모션을 골라 포즈를 넣음.
    *
-   * 시간이 아니라 거리를 기준으로 삼아야 발이 미끄러지지 않음. 멈추면
-   * 블렌드를 0 으로 당겨 레스트 포즈로 돌아감.
+   * 속도는 직전 프레임과의 이동 거리로 구함. 남의 위치는 보간된 값이라 이게 화면에서
+   * 실제로 움직인 속도임. 공격은 좌석마다 받아 둔 시작 시각으로 진행도를 구함.
+   * 남이 맞거나 쓰러지는 것은 서버가 안 알려 줘서 모션이 없음.
    */
-  const advanceWalkCycle = (deltaSeconds: number): void => {
-    const phases = body.phase;
-    const blends = body.blend;
+  const advanceAnimations = (deltaSeconds: number): void => {
+    const now = performance.now();
+    const activeSeats = new Set<number>();
 
     renderedPlayers.forEach((player, instanceIndex) => {
       const previous = lastPositions.current.get(player.seat);
       const moved = previous ? Math.hypot(player.x - previous.x, player.z - previous.z) : 0;
+      const speed = deltaSeconds > 0 ? moved / deltaSeconds : 0;
+      let animation = animations.current.get(player.seat);
+
+      if (!animation) {
+        animation = createAvatarAnimation();
+        animations.current.set(player.seat, animation);
+      }
       lastPositions.current.set(player.seat, { x: player.x, z: player.z });
+      activeSeats.add(player.seat);
 
-      const phase = phases.getX(instanceIndex) + moved / CREW_WALK.metersPerCycle;
-      phases.setX(instanceIndex, phase - Math.floor(phase));
-
-      // 공중에서는 다리를 멈춤. 뛰는 중에 걷는 모션이 돌면 허우적대 보임.
-      const isMoving =
-        deltaSeconds > 0 &&
-        moved / deltaSeconds > MOVING_SPEED_THRESHOLD &&
-        isStandingOnGround(player);
-      const step = deltaSeconds / CREW_WALK.blendSeconds;
-      const blend = blends.getX(instanceIndex) + (isMoving ? step : -step);
-      blends.setX(instanceIndex, Math.min(1, Math.max(0, blend)));
-    });
-
-    // 발차기는 좌석마다 시작 시각으로 진행도를 구함.
-    const now = performance.now();
-    renderedPlayers.forEach((player, instanceIndex) => {
-      const kick = resolveKickPose(
-        kickStartsRef.current?.get(player.seat),
-        now,
-        SPACE_KICK.animationSeconds,
-        CREW_KICK.blendInRatio,
+      stepAvatarAnimation(
+        animation,
+        {
+          nowMs: now,
+          deltaSeconds,
+          speed,
+          // 공중에서는 다리를 멈춤. 멈춰 있으면 지형에 물을 필요가 없음.
+          isGrounded: speed <= AVATAR_MOTION.movingSpeed || isStandingOnGround(player),
+          attackStartedAt: kickStartsRef.current?.get(player.seat),
+          attackSeconds: SPACE_KICK.animationSeconds,
+          hitStartedAt: undefined,
+          knockout: undefined,
+        },
+        model,
       );
-      body.kickPhase.setX(instanceIndex, kick.phase);
-      body.kickBlend.setX(instanceIndex, kick.blend);
+      writeCrewPose(body, instanceIndex, animation);
     });
 
-    // 앞판·눈·무기는 몸통과 같은 위상이어야 따로 안 놂. 복사를 먼저 안 하면 한 프레임
-    // 뒤처진 값이 올라감.
-    for (const part of [accent, pupilGlint, weapon?.buffers]) {
-      if (!part) {
-        continue;
-      }
-      part.phase.array.set(phases.array);
-      part.blend.array.set(blends.array);
-      part.kickPhase.array.set(body.kickPhase.array);
-      part.kickBlend.array.set(body.kickBlend.array);
-    }
-    for (const attribute of [
-      phases,
-      blends,
-      body.kickPhase,
-      body.kickBlend,
-      accent.phase,
-      accent.blend,
-      accent.kickPhase,
-      accent.kickBlend,
-      pupilGlint?.phase,
-      pupilGlint?.blend,
-      pupilGlint?.kickPhase,
-      pupilGlint?.kickBlend,
-      weapon?.buffers.phase,
-      weapon?.buffers.blend,
-      weapon?.buffers.kickPhase,
-      weapon?.buffers.kickBlend,
-    ]) {
-      if (attribute) {
-        attribute.needsUpdate = true;
+    // 나간 사람의 기록을 지움. 같은 좌석에 다른 사람이 들어오면 처음부터 시작함.
+    for (const seat of animations.current.keys()) {
+      if (!activeSeats.has(seat)) {
+        animations.current.delete(seat);
+        lastPositions.current.delete(seat);
       }
     }
+
+    // 색 띠·눈은 몸통과 같은 포즈여야 따로 안 놂.
+    syncCrewPose(body, [accent, pupilGlint]);
   };
 
   const applyInstanceTransforms = (): void => {
@@ -228,7 +209,6 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
       bodyMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
       accentMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
       pupilGlintMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
-      weaponMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
 
       // 그림자 평면은 눕혀야 하므로 회전을 따로 줌. 높이는 **발밑 기준**임.
       // 상수만 넣으면 바닥이 0 이던 벙커 기준이 되어, 광장(5)·테라스(7.5)·궁전(11)
@@ -240,7 +220,7 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
       shadowMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
     });
 
-    for (const meshRef of [bodyMeshRef, accentMeshRef, pupilGlintMeshRef, weaponMeshRef, shadowMeshRef]) {
+    for (const meshRef of [bodyMeshRef, accentMeshRef, pupilGlintMeshRef, shadowMeshRef]) {
       if (meshRef.current) {
         meshRef.current.instanceMatrix.needsUpdate = true;
       }
@@ -267,7 +247,7 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
 
   useFrame((_, deltaSeconds) => {
     applyInstanceTransforms();
-    advanceWalkCycle(deltaSeconds);
+    advanceAnimations(deltaSeconds);
   });
   // endregion
 
@@ -296,15 +276,6 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef }: Remote
         frustumCulled={false}
         dispose={null}
       />
-
-      {weapon && (
-        <instancedMesh
-          ref={weaponMeshRef}
-          count={renderedPlayers.length}
-          args={[weapon.buffers.geometry, weapon.material, SPACE_MAX_OCCUPANTS]}
-          frustumCulled={false}
-        />
-      )}
 
       {pupilGlint && pupilGlintMaterial && (
         <instancedMesh
@@ -346,8 +317,8 @@ interface RemoteAvatarsProps {
  * 원격 아바타를 **모델별로 나눠** 그림.
  *
  * 모델마다 지오메트리가 다르니 하나의 `InstancedMesh` 에 담을 수 없음. 사람이
- * 있는 모델만 그룹을 띄우므로, 아무도 곰을 고르지 않았으면 곰 에셋을 받지도
- * 않음. 그룹마다 `Suspense` 로 감싸는 이유는, 새 모델이 로드되는 동안 씬
+ * 있는 모델만 그룹을 띄우므로, 아무도 안 쓰는 모델은 에셋을 받지도 않음.
+ * 지금은 모델이 하나라 그룹도 하나임. 그룹마다 `Suspense` 로 감싸는 이유는, 새 모델이 로드되는 동안 씬
  * 전체가 사라지지 않게 하기 위함임.
  */
 function RemoteAvatars({
