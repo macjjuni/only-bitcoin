@@ -16,6 +16,22 @@ export const TOUCH_BUTTON_EDGE = "1.5rem";
 export const TOUCH_BUTTON_BOTTOM = "4.5rem";
 
 /**
+ * 공격·점프 버튼이 같이 쓰는 겉모양.
+ *
+ * 위가 밝은 유리 판에 안쪽 윗선을 넣어 떠 있는 버튼처럼 보이게 함. 3D 화면 위라
+ * 단색 반투명만으로는 배경에 묻혔음.
+ */
+export const TOUCH_BUTTON_SURFACE_CLASS =
+  "absolute flex items-center justify-center rounded-full border backdrop-blur-md touch-none select-none " +
+  "shadow-[0_4px_14px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.22)] " +
+  "transition-[transform,background-color,border-color] duration-100";
+/** 평소 모습. */
+export const TOUCH_BUTTON_IDLE_CLASS = "border-white/25 bg-gradient-to-b from-white/20 to-white/5";
+/** 누르고 있는 모습. 살짝 눌려 들어가고 주황으로 물듦. */
+export const TOUCH_BUTTON_PRESSED_CLASS =
+  "scale-90 border-bitcoin/80 bg-gradient-to-b from-bitcoin/55 to-bitcoin/25";
+
+/**
  * 발차기 버튼을 점프 버튼에서 옮기는 거리(px). 왼쪽으로 조금, 위로 크게.
  *
  * 이동 조이스틱이 화면 가로 가운데(지름 120 px)라 360 px 폭 폰에서는 오른쪽 끝에서
