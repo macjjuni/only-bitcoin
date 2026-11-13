@@ -13,14 +13,16 @@ import {
   useState,
 } from "react";
 import { NeutralToneMapping } from "three";
-import {
-  SPACE_DEFAULT_AVATAR_MODEL_INDEX,
-  SPACE_MARKET,
-  type SpaceCelebration,
-} from "@/entities/space";
+import { SPACE_MARKET, type SpaceCelebration } from "@/entities/space";
 import type { ChatIdentity } from "@/features/chat-session";
 import { useSpaceBgm } from "@/features/space-bgm";
-import { createSpaceInputSource, SPACE_CAMERA, useKeyboardInput } from "@/features/space-controls";
+import {
+  createSpaceInputSource,
+  loadAvatarModelIndex,
+  SPACE_CAMERA,
+  saveAvatarModelIndex,
+  useKeyboardInput,
+} from "@/features/space-controls";
 import { useSpaceSession } from "@/features/space-session";
 import { isAndroidDevice, isIOSDevice } from "@/shared/utils/device";
 import {
@@ -113,9 +115,16 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
     () => new URLSearchParams(window.location.search).get("celebrate") === "1",
   );
 
+  /**
+   * 고른 아바타 모델.
+   *
+   * 저장소에서 한 번 읽어 입장 프레임에 실어 보내고, 서버가 확정한 값이 오면
+   * 그쪽을 쓴다. 바꿀 때는 저장소와 이 상태를 함께 갱신한다.
+   */
+  const [localModelIndex, setLocalModelIndex] = useState<number>(loadAvatarModelIndex);
   const session = useSpaceSession({
     identity,
-    modelIndex: SPACE_DEFAULT_AVATAR_MODEL_INDEX,
+    modelIndex: localModelIndex,
     enabled: isSupportProbed && !fallbackReason && dummyCount === 0,
   });
   const bgm = useSpaceBgm({
@@ -137,7 +146,7 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   const [isServerTimedOut, setIsServerTimedOut] = useState<boolean>(false);
   const [isLoadingHardTimedOut, setIsLoadingHardTimedOut] = useState<boolean>(false);
   const nickname = session.self?.nickname ?? identity.nickname;
-  const modelIndex = session.self?.modelIndex ?? SPACE_DEFAULT_AVATAR_MODEL_INDEX;
+  const modelIndex = session.self?.modelIndex ?? localModelIndex;
 
   useKeyboardInput(inputSource);
   // endregion
@@ -154,6 +163,17 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
     }
     session.requestCelebration();
   }, [dummyCount, session.requestCelebration]);
+
+  /** 선택을 저장하고 서버에 알린다. 서버가 받아들이면 `peer` 로 모두에게 퍼진다. */
+  const onChangeModel = useCallback(
+    async (nextModelIndex: number): Promise<boolean> => {
+      setLocalModelIndex(nextModelIndex);
+      saveAvatarModelIndex(nextModelIndex);
+
+      return session.changeModel(nextModelIndex);
+    },
+    [session.changeModel],
+  );
   // endregion
 
   // region [Privates]
@@ -355,6 +375,8 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
         inputSource={inputSource}
         session={session}
         nickname={nickname}
+        modelIndex={modelIndex}
+        onChangeModel={onChangeModel}
       />
 
       <SpaceLoadingOverlay stages={loadStages} isHardTimedOut={isLoadingHardTimedOut} />
