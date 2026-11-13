@@ -18,6 +18,8 @@ import {
   createSpawnPoint,
   type LocalPlayerState,
   resolveColorIndexFromClientKey,
+  SPACE_AVATAR_COLLISION_RADIUS,
+  SPACE_BOSS,
   SPACE_HALL,
   SPACE_HEATMAP_FRAME,
   SPACE_KICK,
@@ -44,10 +46,12 @@ import {
   resolveCameraPosition,
   resolveFollowDamping,
   resolveMergedMovementInput,
+  type SolidBody,
   SPACE_CAMERA,
   SPACE_MOVEMENT,
   type SpaceInputSource,
   separateFromPlayers,
+  separateFromSolidBody,
   stepMovement,
   useCoarsePointer,
   usePointerDrag,
@@ -212,6 +216,34 @@ function SpaceScene({
   };
 
   /**
+   * 지금 몸으로 막고 서 있는 보스. 막지 않을 때는 `null`.
+   *
+   * 없거나 쓰러진 보스는 안 막음. **돌진 중에도 안 막음** — 막으면 보스 앞에 선 사람이
+   * 12 m/s 로 9 m 를 밀려가는데, 서버의 이동 속도 상한(8.5 m/s)을 넘어 이동이 반려되고
+   * 화면이 되감김. 돌진은 몸으로 밀지 않고 치고 지나감(피해는 서버가 줌).
+   */
+  const resolveBossBody = (): SolidBody | null => {
+    const bossState = bossPreview?.state ?? (session.canFightBoss ? session.bossState : null);
+
+    if (
+      !bossState ||
+      bossState.phase === "hidden" ||
+      bossState.phase === "dead" ||
+      bossState.attack === "charge"
+    ) {
+      return null;
+    }
+
+    return {
+      x: bossState.x,
+      y: SPACE_BOSS.arena.floorY,
+      z: bossState.z,
+      radius: SPACE_BOSS.bodyRadius,
+      height: SPACE_BOSS.height,
+    };
+  };
+
+  /**
    * 보스에게 쓰러져 리스폰을 기다리는 중인지.
    *
    * 서버가 이 동안 이동·공격을 안 받음. 화면에서만 움직이면 끝났을 때 서버 자리로 되감김.
@@ -233,6 +265,7 @@ function SpaceScene({
     }
 
     const movementInput = resolveMergedMovementInput(inputSource);
+    const bossBody = resolveBossBody();
 
     accumulatedSecondsRef.current += deltaSeconds;
 
@@ -248,6 +281,15 @@ function SpaceScene({
       nextState = separateFromPlayers(
         nextState,
         remotePlayers,
+        selfSeat,
+        SPACE_MOVEMENT.fixedTimeStep,
+        terrainRef.current,
+      );
+      // 보스 몸통은 밀고 지나갈 수 없음.
+      nextState = separateFromSolidBody(
+        nextState,
+        bossBody,
+        SPACE_AVATAR_COLLISION_RADIUS,
         selfSeat,
         SPACE_MOVEMENT.fixedTimeStep,
         terrainRef.current,
