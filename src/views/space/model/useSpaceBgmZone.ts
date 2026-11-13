@@ -9,6 +9,18 @@ import { resolveRaidZonePresence, resolveZoneBgmTrack } from "@/views/space/lib/
 const BGM_ZONE_INTERVAL_MS = 200;
 
 /**
+ * `?bgmzone=courtyard` · `?bgmzone=raid` 로 곡을 고정함. 확인용임.
+ *
+ * 개발 서버는 보스가 금방 다시 떠서(`SPACE_BOSS_RESPAWN_SECONDS`) 대기 곡을 들을 틈이 없음.
+ * 내 소리만 바뀌어서 운영에서도 막지 않음.
+ */
+const readForcedZoneTrack = (): SpaceBgmZoneTrack | null => {
+  const rawValue = new URLSearchParams(window.location.search).get("bgmzone");
+
+  return rawValue === "courtyard" || rawValue === "raid" ? rawValue : null;
+};
+
+/**
  * 안뜰에서 틀 곡. 홀 안이면 `null`.
  *
  * 내 위치와 보스 상태는 매 프레임 바뀌어 세션 상태에 없음. `useBossHud` 처럼 1초에
@@ -18,6 +30,7 @@ const BGM_ZONE_INTERVAL_MS = 200;
 export const useSpaceBgmZone = (session: SpaceSession): SpaceBgmZoneTrack | null => {
   // region [Hooks]
   const [zoneTrack, setZoneTrack] = useState<SpaceBgmZoneTrack | null>(null);
+  const [forcedZoneTrack] = useState<SpaceBgmZoneTrack | null>(readForcedZoneTrack);
   /** 타이머가 늘 최신 세션을 읽게 함. 세션이 바뀔 때마다 타이머를 다시 걸지 않음. */
   const sessionRef = useRef(session);
   const isInRaidZoneRef = useRef<boolean>(false);
@@ -53,5 +66,5 @@ export const useSpaceBgmZone = (session: SpaceSession): SpaceBgmZoneTrack | null
   useEffect(startPolling, []);
   // endregion
 
-  return zoneTrack;
+  return forcedZoneTrack ?? zoneTrack;
 };
