@@ -55,6 +55,12 @@ export interface SpaceAvatarCombat {
    * `attackSeconds` 보다 짧아야 함.
    */
   impactSeconds: number;
+  /**
+   * 보스 몸통에서 이 거리 안이어야 닿음(m). 무기 길이임.
+   *
+   * 표준은 `SPACE_BOSS_COMBAT.kickReach`(2 m). 긴 무기만 더 김.
+   */
+  reach: number;
 }
 
 export interface SpaceAvatarModel {
@@ -128,7 +134,13 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
     },
     // 렌치. 기준이 되는 표준형. 처음 온 사람이 받는 캐릭터라 초당 피해가 다른 둘보다
     // 처지지 않게 11 로 둠(10 이면 초당 10.0 으로 혼자 7 ~ 9 % 낮았음).
-    combat: { kickDamage: 11, cooldownMs: 1_000, attackSeconds: 0.55, impactSeconds: 0.28 },
+    combat: {
+      kickDamage: 11,
+      cooldownMs: 1_000,
+      attackSeconds: 0.55,
+      impactSeconds: 0.28,
+      reach: 2,
+    },
     triangleCount: 1212,
   },
   {
@@ -155,9 +167,16 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
       revive: { startFrame: 189, frameCount: 46, seconds: 1.875 },
     },
     // 철조망 방망이. 느리고 묵직한 한 방. 보스 공격 사이의 틈에 한 대 넣고 빠지는 식.
-    // 초당 피해를 일부러 다른 둘보다 15 ~ 16 % 높게 둠(12.7). 닿기까지 0.45초라 보스 공격을
-    // 피하다 보면 한 대를 통째로 놓쳐서, 표로 맞춘 16 으로는 실전 피해가 코인충보다 처졌음.
-    combat: { kickDamage: 19, cooldownMs: 1_500, attackSeconds: 0.9, impactSeconds: 0.45 },
+    // 초당 피해는 다른 둘보다 3 ~ 4 % 만 높음(11.3). 닿기까지 0.45초라 보스 공격을 피하다
+    // 보면 한 대를 통째로 놓치는데, 그 손해는 피해가 아니라 사거리로 메움(2.3 m). 방망이
+    // 길이만큼 한 발 떨어져서 치고 빠질 수 있음. 19 까지 올렸을 때는 사거리와 겹쳐 너무 셌음.
+    combat: {
+      kickDamage: 17,
+      cooldownMs: 1_500,
+      attackSeconds: 0.9,
+      impactSeconds: 0.45,
+      reach: 2.3,
+    },
     triangleCount: 2986,
   },
   {
@@ -188,7 +207,13 @@ export const SPACE_AVATAR_MODELS: readonly SpaceAvatarModel[] = [
       revive: { startFrame: 188, frameCount: 46, seconds: 1.875 },
     },
     // 파리채. 빠르고 약한 연타. 붙어서 계속 때려야 해서 맞을 일도 많음.
-    combat: { kickDamage: 6, cooldownMs: 550, attackSeconds: 0.45, impactSeconds: 0.2 },
+    combat: {
+      kickDamage: 6,
+      cooldownMs: 550,
+      attackSeconds: 0.45,
+      impactSeconds: 0.2,
+      reach: 2,
+    },
     triangleCount: 1498,
   },
 ] as const;

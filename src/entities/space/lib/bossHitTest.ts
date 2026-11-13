@@ -132,14 +132,18 @@ export const isInsideBossArena = (
  * 유저 공격이 보스에 닿는지.
  *
  * 거리는 보스 몸통 반지름을 뺀 값으로 잼. 보스가 커서 중심 기준이면 닿지 않음.
- * 보스 쪽을 보고 있어야 함.
+ * 보스 쪽을 보고 있어야 함. 사거리는 캐릭터마다 달라 받아 씀(`SpaceAvatarCombat.reach`).
  */
-export const canKickReachBoss = (boss: BossPoint, player: BossPoint & { yaw: number }): boolean => {
+export const canKickReachBoss = (
+  boss: BossPoint,
+  player: BossPoint & { yaw: number },
+  reach: number = SPACE_BOSS_COMBAT.kickReach,
+): boolean => {
   const deltaX = boss.x - player.x;
   const deltaZ = boss.z - player.z;
   const distance = Math.hypot(deltaX, deltaZ);
 
-  if (distance - SPACE_BOSS.bodyRadius > SPACE_BOSS_COMBAT.kickReach) {
+  if (distance - SPACE_BOSS.bodyRadius > reach) {
     return false;
   }
 

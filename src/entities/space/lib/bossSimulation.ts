@@ -98,11 +98,13 @@ export interface BossSimulation {
    * 유저가 공격을 휘두름. 안 닿았으면 `null`.
    *
    * @param damage 이 공격의 피해. 캐릭터마다 다름. 안 넘기면 표준 피해를 씀.
+   * @param reach 이 공격의 사거리(m). 캐릭터마다 다름. 안 넘기면 표준 사거리를 씀.
    */
   applyKick: (
     nowMs: number,
     player: BossSimulationPlayer,
     damage?: number,
+    reach?: number,
   ) => BossKickResult | null;
   /**
    * 유저가 쓰러짐. 그 사람의 누적 피해를 `deathDamagePenaltyRatio` 만큼 깎음.
@@ -640,6 +642,7 @@ export const createBossSimulation = (
     nowMs: number,
     player: BossSimulationPlayer,
     kickDamage: number = SPACE_BOSS_COMBAT.kickDamage,
+    kickReach: number = SPACE_BOSS_COMBAT.kickReach,
   ): BossKickResult | null => {
     const elapsedSeconds = (nowMs - state.phaseStartedAt) / 1000;
     const isInvulnerable =
@@ -651,7 +654,7 @@ export const createBossSimulation = (
       isInvulnerable ||
       !player.isAlive ||
       !isAtBossArenaHeight(player) ||
-      !canKickReachBoss(state, player)
+      !canKickReachBoss(state, player, kickReach)
     ) {
       return null;
     }

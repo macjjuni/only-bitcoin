@@ -107,6 +107,9 @@ describe("유저 공격 사거리", () => {
     // 보스의 +Z 쪽에 서서 −Z(보스 쪽)를 봄.
     expect(canKickReachBoss(boss, { x: 0, z: reach - 0.01, yaw: 0 })).toBe(true);
     expect(canKickReachBoss(boss, { x: 0, z: reach + 0.01, yaw: 0 })).toBe(false);
+    // 긴 무기는 받은 사거리만큼 더 닿는다.
+    expect(canKickReachBoss(boss, { x: 0, z: reach + 0.5, yaw: 0 }, 2.6)).toBe(true);
+    expect(canKickReachBoss(boss, { x: 0, z: reach + 0.7, yaw: 0 }, 2.6)).toBe(false);
   });
 
   it("보스를 등지면 안 닿는다", () => {

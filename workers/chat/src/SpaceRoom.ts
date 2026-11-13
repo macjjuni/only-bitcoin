@@ -1302,7 +1302,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         return;
       }
       // 피해는 닿는 순간에 뽑음. 캐릭터 기준값에서 위아래로 조금씩 흔들림.
-      this.applyKickToBoss(kicker, attachment, now, rollKickDamage(combat.kickDamage, Math.random()));
+      this.applyKickToBoss(kicker, attachment, now, rollKickDamage(combat.kickDamage, Math.random()), combat.reach);
     }, Math.max(0, delayMs));
   }
 
@@ -1311,7 +1311,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
    *
    * 쿨다운은 받을 때 이미 걸렀음. 사거리와 방향은 무기가 닿는 순간 서버가 아는 위치로 봄.
    */
-  private applyKickToBoss(kicker: SpacePeer, attachment: SpaceSocketAttachment, now: number, damage: number): void {
+  private applyKickToBoss(kicker: SpacePeer, attachment: SpaceSocketAttachment, now: number, damage: number, reach: number): void {
     if (!attachment.features?.includes(SPACE_FEATURE_BOSS) || !this.syncBossPresence(now)) {
       return;
     }
@@ -1325,7 +1325,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       yaw: kicker.yaw,
       lastInputAt: now,
       isAlive: !this.isDead(attachment, now),
-    }, damage);
+    }, damage, reach);
 
     if (!result) {
       return;
