@@ -17,6 +17,7 @@ import {
   createLocalPlayerState,
   createSpawnPoint,
   type LocalPlayerState,
+  type PlayerTransform,
   resolveAvatarCombat,
   resolveColorIndexFromClientKey,
   SPACE_AVATAR_COLLISION_RADIUS,
@@ -72,6 +73,7 @@ import type { BossPhaseSound } from "@/views/space/lib/bossAttackSounds";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import type { LanternAnchor } from "@/views/space/lib/hallModel";
 import type { HallTerrain } from "@/views/space/lib/hallTerrain";
+import { resolveNameplateLiftY } from "@/views/space/lib/overlayLayout";
 import { resolveRemoteSfxGain, type SpaceSfxName } from "@/views/space/lib/spaceSfx";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 import type { PlaySpaceSfx } from "@/views/space/model/useSpaceSfx";
@@ -84,6 +86,7 @@ import Hall from "./Hall";
 import MenuGraffiti from "./MenuGraffiti";
 import Nameplates from "./Nameplates";
 import PlayerAvatar from "./PlayerAvatar";
+import PlayerDamageNumbers, { type PlayerDamage } from "./PlayerDamageNumbers";
 import PriceBillboard from "./PriceBillboard";
 import RaidBoss from "./RaidBoss";
 import RemoteAvatars, { type RemoteAvatarHit } from "./RemoteAvatars";
@@ -144,6 +147,8 @@ const LONGEST_ATTACK_MS =
 /** 남의 피격 기록을 들고 있는 시간(ms). 쓰러졌다 일어나는 모션이 다 끝난 뒤 지움. */
 const REMOTE_HIT_KEEP_MS = SPACE_BOSS_PLAYER.respawnDelayMs + 1_000;
 /** 밀리는 동안 대신 넣는 빈 입력. 중력·착지는 그대로 돌아감. */
+/** 유저 피해 숫자를 명찰 기준점에서 이만큼 위에 띄움(m). 명찰과 체력바를 안 가림. */
+const PLAYER_DAMAGE_NUMBER_LIFT_Y = 0.4;
 const EMPTY_MOVEMENT_INPUT = createEmptyMovementInput();
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 function SpaceScene({
@@ -211,6 +216,8 @@ function SpaceScene({
   const remoteKickStartsRef = useRef(new Map<number, number>());
   /** 다른 사람이 보스에게 맞은 시각(좌석별). 쓰러졌으면 일어나는 시각도 같이 둠. */
   const remoteHitsRef = useRef(new Map<number, RemoteAvatarHit>());
+  /** 보스에게 맞아 아직 숫자로 안 띄운 피해. `PlayerDamageNumbers` 가 비움. */
+  const pendingPlayerDamagesRef = useRef<PlayerDamage[]>([]);
   /**
    * 지형 질의.
    *
@@ -481,17 +488,43 @@ function SpaceScene({
     kickStartedAtRef.current = now;
   };
 
+  /** 맞은 사람 머리 위에 피해 숫자를 띄움. 명찰을 안 가리게 그 위에서 뜸. */
+  const queuePlayerDamage = (
+    damage: number | undefined,
+    isMine: boolean,
+    victim: PlayerTransform,
+    victimModelIndex: number,
+  ): void => {
+    // 피해를 안 싣는 옛 서버면 숫자 없이 모션만 틂.
+    if (damage === undefined) {
+      return;
+    }
+    pendingPlayerDamagesRef.current.push({
+      damage,
+      isMine,
+      x: victim.x,
+      y: victim.y + resolveNameplateLiftY(victimModelIndex) + PLAYER_DAMAGE_NUMBER_LIFT_Y,
+      z: victim.z,
+    });
+  };
+
   /**
-   * 남이 보스에게 맞은 것을 받아 둠. 그 사람 아바타가 움찔하거나 쓰러짐.
+   * 보스에게 맞은 것을 받아 둠. 피해 숫자를 띄우고, 남이면 그 사람 아바타가 움찔하거나 쓰러짐.
    *
    * 쓰러진 사람은 서버가 잠시 뒤 홀로 옮김. 그때까지 그 자리에 누워 있다가, 옮겨진
    * 자리에서 일어나는 모션이 이어짐(내 화면의 내 캐릭터와 같은 흐름).
    */
   const applyReceivedPlayerHits = (now: number): void => {
     for (const event of session.drainPlayerHits()) {
+      // 내 체력·모션·소리는 `hp` 프레임이 맡음. 여기서는 숫자만 띄움.
+      if (event.seat === session.self?.seat) {
+        queuePlayerDamage(event.damage, true, renderStateRef.current, avatarModelIndex);
+        continue;
+      }
       const victim = remotePlayers.find((player) => player.seat === event.seat);
 
       if (victim) {
+        queuePlayerDamage(event.damage, false, victim, victim.modelIndex);
         playSfx(
           event.isFatal ? "knockout" : "hurt",
           0,
@@ -516,6 +549,7 @@ function SpaceScene({
   const resetKickPresentation = (): void => {
     remoteKickStartsRef.current.clear();
     remoteHitsRef.current.clear();
+    pendingPlayerDamagesRef.current = [];
   };
 
   const applyPlayerTransform = (playerState: LocalPlayerState): void => {
@@ -872,6 +906,8 @@ function SpaceScene({
           onHitByOthers={onHitBossByOthers}
         />
       )}
+
+      {session.canFightBoss && <PlayerDamageNumbers pendingRef={pendingPlayerDamagesRef} />}
 
       <SpaceBarista terrainRef={terrainRef} isCoarsePointer={isCoarsePointer} />
       <AvatarSwingTrails

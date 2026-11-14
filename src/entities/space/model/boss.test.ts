@@ -5,6 +5,7 @@ import {
   resolveBossAttackSeconds,
   resolveBossChargeTravel,
   resolveBossSpinClipSeconds,
+  rollBossAttackDamage,
   rollKickDamage,
   SPACE_BOSS,
   SPACE_BOSS_ATTACKS,
@@ -288,5 +289,19 @@ describe("rollKickDamage", () => {
 
       expect(total / 1_000).toBeCloseTo(baseDamage, 1);
     }
+  });
+});
+
+describe("rollBossAttackDamage", () => {
+  it("난수가 가운데면 기준값이고, 양 끝이면 80 % 와 120 % 다", () => {
+    expect(rollBossAttackDamage("swipe", 0.5)).toBe(20);
+    expect(rollBossAttackDamage("swipe", 0)).toBe(16);
+    expect(rollBossAttackDamage("swipe", 0.999_999)).toBe(24);
+    expect(rollBossAttackDamage("slam", 0)).toBe(28);
+    expect(rollBossAttackDamage("slam", 0.999_999)).toBe(42);
+    expect(rollBossAttackDamage("charge", 0)).toBe(24);
+    expect(rollBossAttackDamage("charge", 0.999_999)).toBe(36);
+    expect(rollBossAttackDamage("spin", 0)).toBe(12);
+    expect(rollBossAttackDamage("spin", 0.999_999)).toBe(18);
   });
 });

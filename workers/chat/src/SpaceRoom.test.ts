@@ -1404,13 +1404,18 @@ describe("SpaceRoom", () => {
       const fighterSeat = fighter.peer().seat;
 
       expect(seen.length).toBeGreaterThanOrEqual(2);
-      expect(seen[0]).toMatchObject({ seat: fighterSeat, by: "swipe", isFatal: false });
+      expect(seen[0]).toMatchObject({
+        seat: fighterSeat,
+        by: "swipe",
+        damage: SPACE_BOSS_COMBAT.attackDamage.swipe,
+        isFatal: false,
+      });
       expect(seen.at(-1)).toMatchObject({ seat: fighterSeat, isFatal: true });
       expect(seen.filter((frame) => frame.isFatal)).toHaveLength(1);
       for (const frame of seen) {
         expect(parseSpaceServerFrame(JSON.stringify(frame))).toEqual(frame);
       }
-      // 맞은 본인도 같은 알림을 받음(받는 쪽이 자기 좌석은 걸러 냄).
+      // 맞은 본인도 같은 알림을 받음. 본인은 피해 숫자를 띄우는 데만 씀.
       expect(framesOf(fighter, "player-hit")).toHaveLength(seen.length);
       expect(framesOf(oldClient, "player-hit")).toHaveLength(0);
     });

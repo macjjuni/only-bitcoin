@@ -205,13 +205,15 @@ export type SpaceServerFrame =
   /**
    * `seat` 이 보스 공격에 맞음. 맞는 모션과 쓰러지는 모션을 남에게도 보여 주는 데 씀.
    *
-   * 체력은 안 실음. 남의 체력은 본인만 앎(`hp`).
+   * 체력은 안 실음. 남의 체력은 본인만 앎(`hp`). `damage` 는 맞은 사람 머리 위에 숫자로 띄움.
    */
   | {
       v: SpaceProtocolVersion;
       t: "player-hit";
       seat: number;
       by: SpaceBossAttack;
+      /** 이 한 대의 피해. 피해를 싣기 전 서버는 안 보냄. */
+      damage?: number;
       /** 이 공격으로 쓰러졌는지. */
       isFatal: boolean;
       serverAt: number;
@@ -682,6 +684,7 @@ export const parseSpaceServerFrame = (rawPayload: string): SpaceServerFrame | nu
     case "player-hit":
       return isSeat(payload.seat) &&
         isBossAttack(payload.by) &&
+        (payload.damage === undefined || isAmount(payload.damage)) &&
         typeof payload.isFatal === "boolean" &&
         isTimestamp(payload.serverAt)
         ? (payload as SpaceServerFrame)

@@ -56,6 +56,7 @@ export {
   resolveBossChargeTravel,
   resolveBossSpinClipSeconds,
   resolveBossSpinPosition,
+  rollBossAttackDamage,
   rollKickDamage,
   SPACE_BOSS,
   SPACE_BOSS_ATTACKS,

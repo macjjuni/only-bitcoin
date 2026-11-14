@@ -141,11 +141,18 @@ export const SPACE_BOSS_COMBAT = {
   /** 보스를 향한 정도(내적)가 이보다 커야 닿음. 등지고 휘두른 건 안 맞음. 약 70° 안. */
   kickFacingDot: 0.34,
   /**
-   * 공격별 피해. 유저 최대 체력 100 기준 3 ~ 5대.
+   * 공격별 기준 피해. 유저 최대 체력 100 기준 3 ~ 5대.
    *
-   * 회전만 작음. 도는 4초 동안 1초마다 다시 맞아서 다 맞으면 60 임.
+   * 회전만 작음. 도는 4초 동안 1초마다 다시 맞아서 다 맞으면 평균 60 임.
    */
   attackDamage: { swipe: 20, slam: 35, charge: 30, spin: 15 },
+  /**
+   * 보스 공격 피해가 기준값에서 위아래로 흔들리는 비율. 0.2 면 기준의 80 ~ 120 %.
+   *
+   * 휘두르기 16 ~ 24, 내려찍기 28 ~ 42, 돌진 24 ~ 36, 회전 12 ~ 18. 유저 공격과 같은 폭임.
+   * 한 번에 여럿이 맞아도 사람마다 따로 뽑음.
+   */
+  attackDamageSpreadRatio: 0.2,
   /**
    * 판정 범위를 예고보다 이만큼 작게 잡음(m).
    *
@@ -442,6 +449,14 @@ export const resolveBossChargeTravel = (elapsedSeconds: number): number => {
   return from + (to - from) * (frame - index);
 };
 
+/** 기준값의 `1 ± spreadRatio` 안에서 정수 하나를 고름. `random` 이 0.5 면 기준값임. */
+const rollSpreadDamage = (baseDamage: number, spreadRatio: number, random: number): number => {
+  const spread = (random * 2 - 1) * spreadRatio;
+
+  // 피해가 작은 캐릭터도 0 이 나오면 안 됨.
+  return Math.max(1, Math.round(baseDamage * (1 + spread)));
+};
+
 /**
  * 이번 공격의 피해를 뽑음. 기준값의 `1 ± kickDamageSpreadRatio` 안에서 고른 정수임.
  *
@@ -450,10 +465,22 @@ export const resolveBossChargeTravel = (elapsedSeconds: number): number => {
  * @param random 0 이상 1 미만의 난수. 0.5 면 기준값이 나옴.
  */
 export const rollKickDamage = (baseDamage: number, random: number): number => {
-  const spread = (random * 2 - 1) * SPACE_BOSS_COMBAT.kickDamageSpreadRatio;
+  return rollSpreadDamage(baseDamage, SPACE_BOSS_COMBAT.kickDamageSpreadRatio, random);
+};
 
-  // 피해가 작은 캐릭터도 0 이 나오면 안 됨.
-  return Math.max(1, Math.round(baseDamage * (1 + spread)));
+/**
+ * 보스 공격 한 대의 피해를 뽑음. 기준값의 `1 ± attackDamageSpreadRatio` 안에서 고른 정수임.
+ *
+ * 서버만 부름. 클라이언트는 서버가 알려 준 값을 그대로 띄움.
+ *
+ * @param random 0 이상 1 미만의 난수. 0.5 면 기준값이 나옴.
+ */
+export const rollBossAttackDamage = (attack: SpaceBossAttack, random: number): number => {
+  return rollSpreadDamage(
+    SPACE_BOSS_COMBAT.attackDamage[attack],
+    SPACE_BOSS_COMBAT.attackDamageSpreadRatio,
+    random,
+  );
 };
 
 /** 아무것도 없는 상태. 젠 전이나 처치 뒤임. */

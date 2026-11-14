@@ -87,9 +87,15 @@ export interface SpaceBossHitEvent {
   damage: number;
 }
 
-/** 남이 보스 공격에 맞은 것 하나. 맞는 모션과 쓰러지는 모션을 트는 데 씀. */
+/**
+ * 누가 보스 공격에 맞은 것 하나. 피해 숫자를 띄우고, 남이면 맞는 모션과 쓰러지는 모션을 틂.
+ *
+ * 내 좌석도 들어옴. 내 체력과 모션은 `hp` 프레임이 맡아서, 내 것은 숫자를 띄우는 데만 씀.
+ */
 export interface SpacePlayerHitEvent {
   seat: number;
+  /** 이 한 대의 피해. 피해를 안 싣는 옛 서버면 없음. */
+  damage: number | undefined;
   /** 받은 시각(로컬 `now` 축). 모션을 이 시각부터 틂. */
   hitAt: number;
   /** 이 공격으로 쓰러졌는지. */
@@ -407,7 +413,7 @@ export class SpaceSessionController {
     return events;
   };
 
-  /** 쌓인 남의 피격을 꺼내고 비움. 씬이 매 프레임 부름. */
+  /** 쌓인 유저 피격을 꺼내고 비움. 씬이 매 프레임 부름. */
   drainPlayerHits = (): SpacePlayerHitEvent[] => {
     if (this.playerHitEvents.length === 0) {
       return EMPTY_PLAYER_HIT_EVENTS;
@@ -1199,13 +1205,16 @@ export class SpaceSessionController {
         return;
       }
       case "player-hit": {
-        // 내 피격은 `hp` 프레임이 체력과 함께 알려 줌. 숨은 탭에서는 큐를 아무도 안 비워서 버림.
-        const isSelf = frame.seat === this.snapshot.self?.seat;
-
-        if (this.snapshot.canFightBoss && !isSelf && this.isVisible) {
+        // 숨은 탭에서는 큐를 아무도 안 비워서 버림.
+        if (this.snapshot.canFightBoss && this.isVisible) {
           this.playerHitEvents = [
             ...this.playerHitEvents,
-            { seat: frame.seat, hitAt: this.options.now(), isFatal: frame.isFatal },
+            {
+              seat: frame.seat,
+              damage: frame.damage,
+              hitAt: this.options.now(),
+              isFatal: frame.isFatal,
+            },
           ].slice(-maximumBossHitEventCount);
         }
         return;

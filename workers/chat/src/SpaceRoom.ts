@@ -18,8 +18,8 @@ import {
 } from "../../../src/entities/space/model/avatarModel";
 import { resolveBaristaProximity } from "../../../src/entities/space/model/barista";
 import {
+  rollBossAttackDamage,
   rollKickDamage,
-  SPACE_BOSS_COMBAT,
   SPACE_BOSS_DEATH,
   SPACE_BOSS_PLAYER,
   SPACE_FEATURE_BOSS,
@@ -860,7 +860,8 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     if (!socket || !attachment || !peer || !attachment.stableActorKey || this.isDead(attachment, now)) {
       return;
     }
-    const health = this.resolveHealth(attachment, now) - SPACE_BOSS_COMBAT.attackDamage[hit.attack];
+    const damage = rollBossAttackDamage(hit.attack, Math.random());
+    const health = this.resolveHealth(attachment, now) - damage;
 
     // 맞는 모션·쓰러지는 모션을 남의 화면에도 보여 주려고 모두에게 알림.
     this.broadcastBossFrame({
@@ -868,6 +869,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       t: "player-hit",
       seat: peer.seat,
       by: hit.attack,
+      damage,
       isFatal: health <= 0,
       serverAt: now,
     });

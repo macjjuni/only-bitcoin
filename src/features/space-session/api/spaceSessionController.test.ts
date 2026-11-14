@@ -1430,31 +1430,34 @@ describe("SpaceSessionController", () => {
       controller.stop();
     });
 
-    it("남이 맞은 것만 쌓아 두고, 내 좌석과 숨은 탭에서 온 것은 버린다", () => {
+    it("맞은 것을 피해와 함께 쌓아 두고, 숨은 탭에서 온 것은 버린다", () => {
       const { controller, socket } = joinWithBoss({
         lastKilledAt: null,
         health: 100,
         serverAt: SERVER_NOW,
       });
-      const hit = (seat: number, isFatal: boolean) =>
+      const hit = (seat: number, isFatal: boolean, damage?: number) =>
         socket.receive({
           v: SPACE_PROTOCOL_VERSION,
           t: "player-hit",
           seat,
           by: "slam",
+          ...(damage === undefined ? {} : { damage }),
           isFatal,
           serverAt: SERVER_NOW,
         });
 
-      hit(1, false);
-      // 내 좌석(0). 내 피격은 `hp` 프레임이 알려 줌.
-      hit(0, false);
+      hit(1, false, 31);
+      // 내 좌석(0). 숫자를 띄우려고 같이 쌓음.
+      hit(0, false, 40);
       vi.advanceTimersByTime(300);
+      // 피해를 안 싣는 옛 서버.
       hit(2, true);
 
       expect(controller.drainPlayerHits()).toEqual([
-        { seat: 1, hitAt: 1_000, isFatal: false },
-        { seat: 2, hitAt: 1_300, isFatal: true },
+        { seat: 1, damage: 31, hitAt: 1_000, isFatal: false },
+        { seat: 0, damage: 40, hitAt: 1_000, isFatal: false },
+        { seat: 2, damage: undefined, hitAt: 1_300, isFatal: true },
       ]);
       expect(controller.drainPlayerHits()).toEqual([]);
 
