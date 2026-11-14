@@ -1,5 +1,10 @@
 import { describe, expect, it } from "vitest";
-import { resolveBaristaProximity, SPACE_BARISTA } from "./barista";
+import {
+  pickBaristaGreeting,
+  resolveBaristaProximity,
+  SPACE_BARISTA,
+  SPACE_BARISTA_LINES,
+} from "./barista";
 
 const at = (distance: number, heightOffset = 0) => ({
   x: SPACE_BARISTA.x,
@@ -21,5 +26,13 @@ describe("바리스타에게 말 걸 수 있는 자리", () => {
 
   it("바로 위 발코니에 선 사람은 빠진다", () => {
     expect(resolveBaristaProximity(false, at(1, SPACE_BARISTA.heightTolerance + 0.5))).toBe(false);
+  });
+});
+
+describe("바리스타 인사말", () => {
+  it("난수가 어디에 떨어져도 목록 안의 대사를 고른다", () => {
+    for (const random of [0, 0.3, 0.999]) {
+      expect(SPACE_BARISTA_LINES.greetings).toContain(pickBaristaGreeting(random));
+    }
   });
 });

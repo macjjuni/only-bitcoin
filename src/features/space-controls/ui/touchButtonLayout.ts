@@ -13,7 +13,7 @@ export const TOUCH_BUTTON_ICON_SIZE = 22;
 /** 화면 좌우 끝에서 띄우는 거리. */
 export const TOUCH_BUTTON_EDGE = "1.5rem";
 /** 화면 아래에서 띄우는 거리. 아래쪽 입력 막대 자리를 비워 둠. */
-export const TOUCH_BUTTON_BOTTOM = "4.5rem";
+export const TOUCH_BUTTON_BOTTOM = "5.5rem";
 
 /**
  * 공격·점프 버튼이 같이 쓰는 겉모양.

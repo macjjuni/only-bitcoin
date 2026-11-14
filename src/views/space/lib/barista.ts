@@ -49,3 +49,25 @@ export const resolveBaristaProximity = (
 
   return distance <= (wasNear ? SPACE_BARISTA.leaveRadius : SPACE_BARISTA.talkRadius);
 };
+
+/**
+ * 바리스타 대사. 메뉴를 열면 대화상자에 한 글자씩 찍힘.
+ *
+ * `greetings` 는 말을 걸 때마다 하나를 골라 씀. 대사를 더하려면 배열에 줄을 더하면 됨.
+ */
+export const SPACE_BARISTA_LINES = {
+  greetings: ["어서 오세요! 음악을 바꾸거나 폭죽을 터뜨려 드릴 수 있어요."],
+  /** 배경음악 설정으로 들어갔을 때. */
+  bgm: "어떤 곡으로 틀어 드릴까요?",
+} as const;
+
+/**
+ * 이번에 할 인사말을 고름.
+ *
+ * @param random 0 이상 1 미만의 난수.
+ */
+export const pickBaristaGreeting = (random: number): string => {
+  const { greetings } = SPACE_BARISTA_LINES;
+
+  return greetings[Math.min(greetings.length - 1, Math.floor(random * greetings.length))];
+};

@@ -209,11 +209,11 @@ function VirtualJoystick({ inputSource }: VirtualJoystickProps): ReactNode {
       ref={baseElementRef}
       role="presentation"
       aria-hidden="true"
-      className={`absolute bottom-16 left-1/2 -translate-x-1/2 rounded-full border backdrop-blur-md touch-none select-none shadow-[0_4px_18px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.18)] transition-[border-color,background-color] duration-150 ${BASE_STATE_CLASS[baseState]}`}
+      className={`absolute bottom-20 left-1/2 -translate-x-1/2 rounded-full border backdrop-blur-md touch-none select-none shadow-[0_4px_18px_rgba(0,0,0,0.35),inset_0_1px_0_rgba(255,255,255,0.18)] transition-[border-color,background-color] duration-150 ${BASE_STATE_CLASS[baseState]}`}
       style={{
         width: JOYSTICK_BASE_RADIUS * 2,
         height: JOYSTICK_BASE_RADIUS * 2,
-        bottom: "calc(4rem + env(safe-area-inset-bottom))",
+        bottom: "calc(5rem + env(safe-area-inset-bottom))",
       }}
       onPointerDown={onPointerDownJoystickBase}
       onPointerMove={onPointerMoveJoystickBase}

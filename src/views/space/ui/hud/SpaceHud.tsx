@@ -452,8 +452,9 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
       {/* 맨 아래에 깖. 사망 화면이 떠도 우측 상단 버튼(뒤로 가기 등)은 눌려야 함. */}
       <SpaceBossHud session={session} isCoarsePointer={isCoarsePointer} />
 
+      {/* z-[31]: 씬 위에 뜨는 이름표·말풍선·피해 숫자(z 20 ~ 30)가 대화 내역을 가리지 않게 함. */}
       <div
-        className="absolute left-4 top-4"
+        className="absolute left-4 top-4 z-[31]"
         style={{
           left: "calc(1rem + env(safe-area-inset-left))",
           top: "calc(1rem + env(safe-area-inset-top))",
@@ -544,7 +545,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
       {/* 데스크톱은 접속 표시를 겸한 대화창을 좌측 하단에 늘 띄움. */}
       {!isCoarsePointer && (
         <div
-          className="absolute"
+          className="absolute z-[31]"
           style={{
             left: "calc(1rem + env(safe-area-inset-left))",
             bottom: "calc(1rem + env(safe-area-inset-bottom))",

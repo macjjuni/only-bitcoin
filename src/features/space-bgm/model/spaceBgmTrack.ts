@@ -86,10 +86,11 @@ export const SPACE_BGM_VOLUME = 0.12;
 /**
  * 급등락 트랙 음량.
  *
- * 기본 트랙을 낮출 때 같이 낮추지 않고 0.15 로 둠. 잠깐 틀리는 연출이라
- * 바뀐 게 조금 더 크게 들리는 편이 낫다.
+ * 음원 자체가 기본 곡보다 2.8 dB 크게 녹음돼 있음(평균 −13.2 dB 대 −16.0 dB). 0.15 로 틀 때는
+ * 기본 곡보다 4.7 dB 나 커서 시끄러웠음. 0.09 면 기본 곡과 거의 같은 크기로 들림.
+ * 바리스타 메뉴에서 홀 곡으로 골라 오래 틀 수 있게 된 뒤로는 더 튀면 안 됨.
  */
-export const SPACE_BGM_SURGE_VOLUME = 0.15;
+export const SPACE_BGM_SURGE_VOLUME = 0.09;
 
 /** 안뜰 대기 곡이 든 커밋. 따로 박는 이유는 `RAID_BGM_SOURCE_REF` 와 같음. */
 const COURTYARD_BGM_SOURCE_REF = "70bcf2401b9b2508aac8acd325a0e88e1fc53e43";
@@ -110,5 +111,5 @@ export const SPACE_BGM_COURTYARD_TRACK_SRC = `https://cdn.jsdelivr.net/gh/macjju
  */
 export const SPACE_BGM_COURTYARD_VOLUME = 0.15;
 
-/** 레이드 곡 음량. 급등락 곡과 같은 이유로 기본 곡보다 조금 크게 둠. */
+/** 레이드 곡 음량. 잠깐 틀리는 연출이라 기본 곡보다 조금 크게 둠. */
 export const SPACE_BGM_RAID_VOLUME = 0.15;
