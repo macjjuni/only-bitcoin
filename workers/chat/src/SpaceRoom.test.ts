@@ -753,7 +753,7 @@ describe("SpaceRoom", () => {
     ).toBe(movedX);
   });
 
-  it("IP 하나는 연결을 나눠도 1분에 12개까지만 보내고, 다른 IP 는 영향받지 않는다", async () => {
+  it("IP 하나는 연결을 나눠도 1분에 24개까지만 보내고, 다른 IP 는 영향받지 않는다", async () => {
     const { join, send } = createRoom();
     const first = await join(clientKey(1), "첫째", 0, "shared-ip");
     const second = await join(clientKey(2), "둘째", 0, "shared-ip");
@@ -763,13 +763,17 @@ describe("SpaceRoom", () => {
     const errorCodes = (socket: RoomSocket) =>
       socket.frames().flatMap((frame) => (frame.t === "error" ? [frame.code] : []));
 
-    // 두 연결이 번갈아 6개씩, 3초 간격을 지키며 12개를 채움.
-    for (let index = 0; index < 6; index += 1) {
+    // 두 연결이 번갈아 12개씩, 연결당 1초 간격을 지키며 24개를 채움.
+    for (let index = 0; index < 12; index += 1) {
       await say(first, `첫째 ${index}`);
       await say(second, `둘째 ${index}`);
-      vi.advanceTimersByTime(3000);
+      vi.advanceTimersByTime(1000);
     }
-    await say(first, "열세 번째");
+    // 한도까지는 다 받음.
+    expect(errorCodes(first)).toEqual([]);
+    expect(errorCodes(second)).toEqual([]);
+
+    await say(first, "스물다섯 번째");
     await say(other, "다른 IP");
 
     expect(errorCodes(first)).toContain("RATE_SAY_MINUTE");

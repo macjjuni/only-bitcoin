@@ -136,7 +136,7 @@ const MAXIMUM_RECENT_SAY_RECEIPTS = 32;
  * 연결당 1초 간격만으로는 IP 하나가 연결 2개로 분당 120개를 보낼 수 있음.
  * 기록 50개가 1분 남짓이면 다 덮여서 IP 단위로 한 번 더 묶음.
  */
-const MAXIMUM_SAYS_PER_IP_PER_MINUTE = 12;
+const MAXIMUM_SAYS_PER_IP_PER_MINUTE = 24;
 /** 연결당 간격을 어겼을 때 보내는 안내. 초 수는 상수에서 뽑아 값과 문구가 어긋나지 않게 함. */
 const SAY_INTERVAL_MESSAGE = `메시지는 ${SPACE_CHAT_COOLDOWN_MS / 1000}초에 한 번 보낼 수 있어요.`;
 const SAY_RATE_WINDOW_MS = 60_000;
