@@ -415,7 +415,10 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
           shadows={hasRealtimeShadows}
           camera={{ fov: SPACE_CAMERA.fov, near: CAMERA_NEAR, far: CAMERA_FAR }}
           gl={{
-            antialias: true,
+            // 모바일은 끔. 기기 해상도에 가깝게(2 ~ 2.5 배) 그려 계단이 덜 보이는데, 그 위에
+            // MSAA 까지 얹으면 픽셀 수가 많은 만큼 비용이 큼. 컨텍스트를 만들 때만 읽는 값이고,
+            // 기기 판별(`isMobileRef`)은 캔버스가 뜨기 전에 끝남.
+            antialias: !isMobileRef.current,
             powerPreference: "high-performance",
             toneMapping: SPACE_TONE_MAPPING,
             toneMappingExposure: SPACE_TONE_MAPPING_EXPOSURE,
