@@ -19,6 +19,7 @@ export {
   SPACE_BGM_SURGE_VOLUME,
   SPACE_BGM_TRACK_SRC,
   SPACE_BGM_VOLUME,
+  SPACE_HALL_BGM_TRACK_LABELS,
 } from "./model/spaceBgmTrack";
 export {
   default as useSpaceBgm,

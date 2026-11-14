@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useRef, useState } from "react";
-import type { SpaceMarketState } from "@/entities/space";
+import type { SpaceHallBgmState, SpaceHallBgmTrack, SpaceMarketState } from "@/entities/space";
 import { loadBgmEnabled, saveBgmEnabled } from "./bgmPreferenceStore";
 import {
   SPACE_BGM_COURTYARD_TRACK_SRC,
@@ -17,7 +17,8 @@ import {
 /** 내가 선 자리로 정하는 곡. 안뜰에서 보스가 없으면 `courtyard`, 떠 있으면 `raid`. */
 export type SpaceBgmZoneTrack = "courtyard" | "raid";
 
-type BgmTrack = "base" | "surge" | SpaceBgmZoneTrack;
+/** 홀 곡은 유저가 고를 수 있는 곡 전부임. 급등락 곡도 그 안에 듦. */
+type BgmTrack = SpaceHallBgmTrack | SpaceBgmZoneTrack;
 
 interface BgmTarget {
   track: BgmTrack;
@@ -49,6 +50,8 @@ export interface SpaceBgm {
 interface SpaceBgmOptions {
   market: SpaceMarketState | null;
   serverClockOffsetMs: number | null;
+  /** 누가 골라 둔 홀 곡. 아무도 안 바꿨으면 `null` 이고 기본 곡을 틂. */
+  hallBgm: SpaceHallBgmState | null;
   /** 안뜰에 나와 있는 동안 시세 트랙 대신 틀 곡. 홀 안이면 `null`. */
   zoneTrack: SpaceBgmZoneTrack | null;
 }
@@ -67,10 +70,12 @@ const RESYNC_TOLERANCE_SECONDS = 2;
 /**
  * 음악을 켤지 여부만 개인 설정이다. 트랙 종류·시작 시각·재생 위치는 서버가 정한다.
  *
+ * 홀 곡의 순서는 급등락 곡 → 누가 골라 둔 곡 → 기본 곡이다. 급등락이 끝나면 고른 곡으로 돌아온다.
+ *
  * 안뜰 곡(대기·보스전)만 예외다. 내가 선 자리로 정해서 사람마다 다르고 위치도 안 맞춘다.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-const useSpaceBgm = ({ market, serverClockOffsetMs, zoneTrack }: SpaceBgmOptions): SpaceBgm => {
+const useSpaceBgm = ({ market, serverClockOffsetMs, hallBgm, zoneTrack }: SpaceBgmOptions): SpaceBgm => {
   // region [Hooks]
   const tracksRef = useRef<Partial<Record<BgmTrack, HTMLAudioElement>>>({});
   const enabledRef = useRef(false);
@@ -82,6 +87,7 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, zoneTrack }: SpaceBgmOptions
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
   const marketRef = useRef(market);
   const clockOffsetRef = useRef(serverClockOffsetMs);
+  const hallBgmRef = useRef(hallBgm);
   const zoneTrackRef = useRef(zoneTrack);
   const blockedPlaybackRef = useRef<(() => void) | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
@@ -161,7 +167,8 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, zoneTrack }: SpaceBgmOptions
       activeStartRef.current = startsAt;
       setIsPlaying(true);
       setIsUnavailable(false);
-      setIsSurging(track === "surge");
+      // 급등락 곡을 누가 홀 곡으로 골라 둔 것일 수 있음. 시세가 급등락 중일 때만 그렇게 알림.
+      setIsSurging(track === "surge" && marketRef.current?.track === "surge");
       if (previous && previous !== audio && !previous.paused) {
         const beganAt = performance.now();
         const previousVolume = previous.volume;
@@ -203,8 +210,17 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, zoneTrack }: SpaceBgmOptions
       return { track: zoneTrackRef.current, startsAt: null };
     }
     const state = marketRef.current;
+    const hall = hallBgmRef.current;
     const offset = clockOffsetRef.current;
-    if (state && offset !== null && performance.now() + offset >= state.startsAt) {
+    const serverNow = offset === null ? null : performance.now() + offset;
+    const hasMarketStarted = state !== null && serverNow !== null && serverNow >= state.startsAt;
+    if (state && hasMarketStarted && state.track === "surge") {
+      return { track: "surge", startsAt: state.startsAt };
+    }
+    if (hall && serverNow !== null && serverNow >= hall.startsAt) {
+      return { track: hall.track, startsAt: hall.startsAt };
+    }
+    if (state && hasMarketStarted) {
       return { track: state.track, startsAt: state.startsAt };
     }
     // 안뜰에서 나왔는데 시세 상태를 아직 모르면 안뜰 곡이 계속 남는다. 기본 곡으로 돌린다.
@@ -298,14 +314,24 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, zoneTrack }: SpaceBgmOptions
   const scheduleSynchronization = (): (() => void) => {
     marketRef.current = market;
     clockOffsetRef.current = serverClockOffsetMs;
+    hallBgmRef.current = hallBgm;
     zoneTrackRef.current = zoneTrack;
+    // 이번에 기다릴 곡. 안뜰 곡 → 급등락 곡 → 고른 곡 → 기본 곡 순서임.
+    const upcoming: BgmTarget | null = zoneTrack
+      ? { track: zoneTrack, startsAt: null }
+      : market?.track === "surge"
+        ? market
+        : (hallBgm ?? market);
+    if (enabledRef.current && hallBgm) {
+      resolveTrack(hallBgm.track);
+    }
     if (enabledRef.current && (market?.prefetch || market?.track === "surge")) {
       resolveTrack("surge");
     }
     // 새 서버 이벤트는 과거 실패의 재시도 대기와 별도로 예정 시각에 실행한다.
     const begin = (): void => {
       const pending = pendingTrackRef.current;
-      const awaited = zoneTrack ? `${zoneTrack}:null` : market && `${market.track}:${market.startsAt}`;
+      const awaited = upcoming && `${upcoming.track}:${upcoming.startsAt}`;
       if (awaited && pending && pending !== awaited) {
         generationRef.current += 1;
         pendingTrackRef.current = null;
@@ -319,7 +345,7 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, zoneTrack }: SpaceBgmOptions
       synchronizePlayback();
     };
     // 안뜰 곡은 서버 예정 시각을 안 기다린다. 안뜰을 드나들거나 보스가 뜨면 즉시 바꾼다.
-    const delay = !zoneTrack && market && serverClockOffsetMs !== null ? Math.max(0, market.startsAt - serverClockOffsetMs - performance.now()) : 0;
+    const delay = upcoming && upcoming.startsAt !== null && serverClockOffsetMs !== null ? Math.max(0, upcoming.startsAt - serverClockOffsetMs - performance.now()) : 0;
     const timer = setTimeout(begin, delay);
     const retryTimer = setInterval(synchronizePlayback, 5000);
     const onVisibility = (): void => {
@@ -352,7 +378,7 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, zoneTrack }: SpaceBgmOptions
 
   // region [Life Cycles]
   useEffect(restorePlayback, [restorePlayback]);
-  useEffect(() => scheduleSynchronization(), [market, serverClockOffsetMs, zoneTrack, isPlaying, resolveTrack, synchronizePlayback]);
+  useEffect(() => scheduleSynchronization(), [market, serverClockOffsetMs, hallBgm, zoneTrack, isPlaying, resolveTrack, synchronizePlayback]);
   // endregion
 
   return { isPlaying, isUnavailable, isSurging, toggle: onClickToggleBgm };

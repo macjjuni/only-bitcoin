@@ -34,6 +34,7 @@ import { DonationQrDialog, LightningIcon } from "@/shared/ui";
 import { useDismissOnOutsidePointer } from "@/views/space/lib/useDismissOnOutsidePointer";
 import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
 import SpaceAvatarPicker from "./SpaceAvatarPicker";
+import SpaceBaristaMenu from "./SpaceBaristaMenu";
 import SpaceBossHud from "./SpaceBossHud";
 import { SPACE_CHAT_INPUT_ID } from "./SpaceChatComposer";
 import SpaceChatPanel from "./SpaceChatPanel";
@@ -519,6 +520,15 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
           isMessagePending={session.isMessagePending}
           sendMessage={session.sendMessage}
           onComposingChange={setIsComposingChat}
+        />
+      )}
+
+      {/* 글을 치거나 다른 창을 연 동안에는 내림. 키보드에 가려지고 조작이 겹침. */}
+      {!isComposingChat && !isDonationOpen && !isShareOpen && (
+        <SpaceBaristaMenu
+          session={session}
+          isCoarsePointer={isCoarsePointer}
+          onCelebrate={onCelebrate}
         />
       )}
 

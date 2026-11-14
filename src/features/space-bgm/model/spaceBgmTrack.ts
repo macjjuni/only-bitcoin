@@ -1,3 +1,5 @@
+import type { SpaceHallBgmTrack } from "@/entities/space";
+
 /**
  * 음원을 읽어올 GitHub 커밋.
  *
@@ -37,6 +39,17 @@ const BGM_SOURCE_REF = "d5ca1aa3444e7c95ed5e249c4aa16e4fb00a056c";
 const BGM_BASE_URL = `https://cdn.jsdelivr.net/gh/macjjuni/only-bitcoin@${BGM_SOURCE_REF}/media`;
 
 export const SPACE_BGM_TRACK_SRC = `${BGM_BASE_URL}/MONKEY_BGM.mp3`;
+
+/**
+ * 바리스타 NPC 메뉴에 띄우는 곡 이름. 곡 목록(`SPACE_HALL_BGM_TRACKS`)과 같은 키임.
+ *
+ * 곡을 더하려면 목록에 키를 더하고, 여기 이름과 `useSpaceBgm` 의 음원·음량을 채우고,
+ * 워커를 다시 배포함. 서버가 같은 목록으로 요청을 검사함.
+ */
+export const SPACE_HALL_BGM_TRACK_LABELS: Readonly<Record<SpaceHallBgmTrack, string>> = {
+  base: "기본 곡",
+  surge: "급등락 곡",
+};
 
 /**
  * 급등락 중에 까는 교체 트랙.

@@ -1,5 +1,11 @@
 import { isAvatarModelIndex, SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "./avatarModel";
 import type { SpaceBossAttack, SpaceBossPhase, SpaceBossSpinSegment } from "./boss";
+import {
+  isSpaceHallBgmState,
+  isSpaceHallBgmTrack,
+  type SpaceHallBgmState,
+  type SpaceHallBgmTrack,
+} from "./hallBgm";
 import type { PlayerTransform, RemotePlayer } from "./playerState";
 import {
   isSpaceCelebration,
@@ -116,6 +122,8 @@ type SpaceProtocolVersion = typeof SPACE_PROTOCOL_VERSION;
 export type SpaceClientFrame =
   | { v: SpaceProtocolVersion; t: "clock"; sentAt: number }
   | { v: SpaceProtocolVersion; t: "celebrate" }
+  /** 홀 배경음악을 바꿔 달라고 함. 바리스타 NPC 메뉴에서 보냄. */
+  | { v: SpaceProtocolVersion; t: "hall-bgm"; track: SpaceHallBgmTrack }
   | {
       v: SpaceProtocolVersion;
       t: "join";
@@ -155,7 +163,11 @@ export type SpaceServerFrame =
       features?: string[];
       /** 보스를 아는 클라이언트에만 옴. */
       boss?: SpaceBossWelcome;
+      /** 누가 홀 배경음악을 바꿔 둔 적이 있고, 그 기능을 아는 클라이언트에만 옴. */
+      hallBgm?: SpaceHallBgmState;
     }
+  /** 누가 홀 배경음악을 바꿈. 그 기능을 아는 클라이언트에만 옴. */
+  | { v: SpaceProtocolVersion; t: "hall-bgm"; state: SpaceHallBgmState; serverAt: number }
   | { v: SpaceProtocolVersion; t: "peer"; peer: SpacePeer }
   | { v: SpaceProtocolVersion; t: "leave"; seat: number }
   | { v: SpaceProtocolVersion; t: "say"; message: SpaceChatMessage }
@@ -520,6 +532,8 @@ export const parseSpaceClientFrame = (rawPayload: string): SpaceClientFrame | nu
         : null;
     case "celebrate":
       return payload as SpaceClientFrame;
+    case "hall-bgm":
+      return isSpaceHallBgmTrack(payload.track) ? (payload as SpaceClientFrame) : null;
     case "join":
       return typeof payload.clientKey === "string" &&
         CLIENT_KEY_PATTERN.test(payload.clientKey) &&
@@ -597,6 +611,13 @@ export const parseSpaceServerFrame = (rawPayload: string): SpaceServerFrame | nu
         payload.serverAt >= 0
         ? (payload as SpaceServerFrame)
         : null;
+    case "hall-bgm":
+      // 곡 목록에 없는 곡이면 새 서버가 더한 곡임. 끊지 않고 버림.
+      return isSpaceHallBgmState(payload.state) &&
+        isFiniteNumber(payload.serverAt) &&
+        payload.serverAt >= 0
+        ? (payload as SpaceServerFrame)
+        : { v: SPACE_PROTOCOL_VERSION, t: "ignored" };
     case "welcome": {
       const selfPeer = payload.self;
       const peers = payload.peers;
@@ -619,6 +640,8 @@ export const parseSpaceServerFrame = (rawPayload: string): SpaceServerFrame | nu
         peers: peers.map(withDefaultModel),
         // 보스 정보가 깨져 와도 입장은 막지 않음. 보스만 안 보임.
         boss: isBossWelcome(payload.boss) ? payload.boss : undefined,
+        // 곡 정보가 깨져 오거나 모르는 곡이어도 입장은 막지 않음. 기본 곡을 틂.
+        hallBgm: isSpaceHallBgmState(payload.hallBgm) ? payload.hallBgm : undefined,
       } as SpaceServerFrame;
     }
     case "peer":

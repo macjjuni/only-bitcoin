@@ -89,6 +89,7 @@ import RemoteAvatars, { type RemoteAvatarHit } from "./RemoteAvatars";
 import SceneLighting from "./SceneLighting";
 import ScreenCelebration from "./ScreenCelebration";
 import SelfHealthBar from "./SelfHealthBar";
+import SpaceBarista from "./SpaceBarista";
 import SpaceHeatmap from "./SpaceHeatmap";
 import SpaceTicker from "./SpaceTicker";
 
@@ -848,6 +849,7 @@ function SpaceScene({
         />
       )}
 
+      <SpaceBarista terrainRef={terrainRef} isCoarsePointer={isCoarsePointer} />
       <AvatarSwingTrails
         selfTransformRef={playerStateRef}
         selfModelIndex={avatarModelIndex}

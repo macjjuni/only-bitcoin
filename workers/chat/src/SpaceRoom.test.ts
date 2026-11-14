@@ -16,6 +16,7 @@ import {
   SPACE_BOSS_DEATH,
   SPACE_BOSS_PLAYER,
 } from "../../../src/entities/space/model/boss";
+import { SPACE_HALL_BGM } from "../../../src/entities/space/model/hallBgm";
 import { resolveKickServerIntervalMs, SPACE_KICK } from "../../../src/entities/space/model/kick";
 import {
   parseSpaceServerFrame,
@@ -373,7 +374,7 @@ describe("SpaceRoom", () => {
       t: "welcome",
       self: observer.peer(),
       peers: [remaining.peer()],
-      features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1"],
+      features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1", "hall-bgm-v1"],
     });
     expect(vi.getTimerCount()).toBe(0);
   });
@@ -913,7 +914,7 @@ describe("SpaceRoom", () => {
       const socket = await join(clientKey(1), "참여자", 0, "test-ip", ["kick"]);
 
       expect(socket.frames().find((frame) => frame.t === "welcome")).toMatchObject({
-        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1"],
+        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1", "hall-bgm-v1"],
       });
     });
 
@@ -1027,6 +1028,74 @@ describe("SpaceRoom", () => {
         expect(frame.dirX).toBeCloseTo(-Math.sin(yaw));
         expect(frame.dirZ).toBeCloseTo(-Math.cos(yaw));
       }
+    });
+  });
+
+  describe("홀 배경음악", () => {
+    const HALL_BGM_FEATURES = ["hall-bgm-v1"];
+    const hallBgmFrames = (socket: RoomSocket) =>
+      socket.frames().filter((frame) => frame.t === "hall-bgm");
+
+    it("곡을 바꾸면 그 기능을 아는 사람 모두에게 알리고 저장한다", async () => {
+      const { state, send, join } = createRoom();
+      const changer = await join(clientKey(1), "디제이", 0, "ip-1", HALL_BGM_FEATURES);
+      const listener = await join(clientKey(2), "손님", 0, "ip-2", HALL_BGM_FEATURES);
+      const oldClient = await join(clientKey(3), "옛탭", 0, "ip-3");
+      const now = Date.now();
+
+      await send(changer, { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", track: "surge" });
+
+      const expected = {
+        track: "surge",
+        startsAt: now + SPACE_HALL_BGM.leadMs,
+        changedAt: now,
+        byNickname: "디제이",
+      };
+
+      expect(hallBgmFrames(changer)).toMatchObject([{ state: expected }]);
+      expect(hallBgmFrames(listener)).toMatchObject([{ state: expected }]);
+      // 모르는 클라이언트에는 안 보냄.
+      expect(hallBgmFrames(oldClient)).toHaveLength(0);
+      expect(state.storage.put).toHaveBeenCalledWith("space-hall-bgm-v1", expected);
+    });
+
+    it("방 전체 쿨다운 안에는 누구의 요청이든 거절하고, 지나면 다시 받는다", async () => {
+      const { send, join } = createRoom();
+      const first = await join(clientKey(1), "디제이", 0, "ip-1", HALL_BGM_FEATURES);
+      const second = await join(clientKey(2), "손님", 0, "ip-2", HALL_BGM_FEATURES);
+
+      await send(first, { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", track: "surge" });
+      vi.advanceTimersByTime(SPACE_HALL_BGM.changeCooldownMs - 1_000);
+      await send(second, { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", track: "base" });
+
+      expect(hallBgmFrames(second)).toHaveLength(1);
+      expect(second.frames().at(-1)).toMatchObject({ t: "error", code: "HALL_BGM_COOLDOWN" });
+
+      vi.advanceTimersByTime(1_000);
+      await send(second, { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", track: "base" });
+
+      expect(hallBgmFrames(second)).toHaveLength(2);
+      expect(hallBgmFrames(second)[1]).toMatchObject({
+        state: { track: "base", byNickname: "손님" },
+      });
+    });
+
+    it("뒤에 들어온 사람은 입장 응답으로 지금 곡을 받는다", async () => {
+      const { send, join } = createRoom();
+      const changer = await join(clientKey(1), "디제이", 0, "ip-1", HALL_BGM_FEATURES);
+
+      expect(changer.frames().find((frame) => frame.t === "welcome")).not.toHaveProperty("hallBgm");
+
+      await send(changer, { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", track: "surge" });
+      const late = await join(clientKey(2), "손님", 0, "ip-2", HALL_BGM_FEATURES);
+      const oldClient = await join(clientKey(3), "옛탭", 0, "ip-3");
+
+      expect(late.frames().find((frame) => frame.t === "welcome")).toMatchObject({
+        hallBgm: { track: "surge", byNickname: "디제이" },
+      });
+      expect(oldClient.frames().find((frame) => frame.t === "welcome")).not.toHaveProperty(
+        "hallBgm",
+      );
     });
   });
 

@@ -74,6 +74,16 @@ export {
   type SpaceBossState,
 } from "./model/boss";
 export {
+  isSpaceHallBgmState,
+  isSpaceHallBgmTrack,
+  resolveHallBgmReadyAt,
+  SPACE_FEATURE_HALL_BGM,
+  SPACE_HALL_BGM,
+  SPACE_HALL_BGM_TRACKS,
+  type SpaceHallBgmState,
+  type SpaceHallBgmTrack,
+} from "./model/hallBgm";
+export {
   resolveKickAdmission,
   resolveKickServerIntervalMs,
   SPACE_FEATURE_KICK,

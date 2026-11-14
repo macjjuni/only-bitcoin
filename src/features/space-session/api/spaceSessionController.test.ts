@@ -163,6 +163,38 @@ describe("SpaceSessionController", () => {
     controller.stop();
   });
 
+  it("홀 배경음악은 서버가 지원할 때만 바꿀 수 있고, 바뀐 곡은 끊겨도 들고 있는다", () => {
+    const { controller, welcome } = createHarness();
+    controller.start();
+    const oldServerSocket = welcome(undefined, [], ["kick"]);
+
+    expect(controller.getSnapshot().canChangeHallBgm).toBe(false);
+    expect(controller.requestHallBgm("surge")).toBe(false);
+    expect(sentFrames(oldServerSocket, "hall-bgm")).toHaveLength(0);
+    controller.stop();
+
+    const { controller: nextController, welcome: nextWelcome } = createHarness();
+    nextController.start();
+    const socket = nextWelcome(undefined, [], ["hall-bgm-v1"]);
+    const state = { track: "surge", startsAt: 6_700, changedAt: 6_000, byNickname: "디제이" };
+
+    expect(nextController.getSnapshot().canChangeHallBgm).toBe(true);
+    expect(nextController.getSnapshot().hallBgm).toBeNull();
+    expect(nextController.requestHallBgm("surge")).toBe(true);
+    expect(sentFrames(socket, "hall-bgm")).toEqual([
+      { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", track: "surge" },
+    ]);
+
+    socket.receive({ v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", state, serverAt: 6_000 });
+    expect(nextController.getSnapshot().hallBgm).toEqual(state);
+
+    // 끊겨도 곡은 그대로 둠. 다시 붙는 사이에 기본 곡으로 갔다 오지 않음.
+    socket.close();
+    expect(nextController.getSnapshot().canChangeHallBgm).toBe(false);
+    expect(nextController.getSnapshot().hallBgm).toEqual(state);
+    nextController.stop();
+  });
+
   it("서버 시계는 왕복 지연의 중간값으로 보정하고 상승 이벤트 중복을 무시한다", () => {
     const { controller, welcome } = createHarness();
     controller.start();
@@ -266,7 +298,7 @@ describe("SpaceSessionController", () => {
         t: "join",
         ...identity,
         modelIndex: 0,
-        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1"],
+        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1", "hall-bgm-v1"],
       },
     ]);
     expect(socket.binaryType).toBe("arraybuffer");
@@ -794,7 +826,7 @@ describe("SpaceSessionController", () => {
         clientKey: identity.clientKey,
         nickname: identity.nickname,
         modelIndex: 1,
-        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1"],
+        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1", "hall-bgm-v1"],
       },
     ]);
     controller.stop();
@@ -876,7 +908,7 @@ describe("SpaceSessionController", () => {
         clientKey: identity.clientKey,
         nickname: "새이름",
         modelIndex: 0,
-        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1"],
+        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1", "hall-bgm-v1"],
       },
     ]);
     controller.stop();
@@ -947,7 +979,7 @@ describe("SpaceSessionController", () => {
       const oldServer = welcome();
 
       expect(sentFrames(oldServer, "join")[0]).toMatchObject({
-        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1"],
+        features: ["kick", "market-sync-v1", "kick-timing-v1", "boss-v1", "hall-bgm-v1"],
       });
       expect(controller.getSnapshot().canKick).toBe(false);
       expect(controller.sendKick()).toBe(false);

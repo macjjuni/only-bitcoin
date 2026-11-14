@@ -136,6 +136,7 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   const bgm = useSpaceBgm({
     market: session.market,
     serverClockOffsetMs: session.serverClockOffsetMs,
+    hallBgm: session.hallBgm,
     zoneTrack: useSpaceBgmZone(session),
   });
   const celebration = dummyCount > 0 ? localCelebration : session.celebration;

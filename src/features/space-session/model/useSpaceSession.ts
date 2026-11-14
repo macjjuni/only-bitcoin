@@ -100,6 +100,7 @@ export const useSpaceSession = ({ identity, modelIndex, enabled }: UseSpaceSessi
     sampleRemotePlayers: controller.sampleRemotePlayers,
     sendKick: controller.sendKick,
     requestCelebration: controller.requestCelebration,
+    requestHallBgm: controller.requestHallBgm,
     drainKickEvents: controller.drainKickEvents,
     /** 그릴 보스 상태. 같은 객체를 `sampleBoss` 가 매 프레임 제자리에서 고침. */
     bossState: controller.bossState,

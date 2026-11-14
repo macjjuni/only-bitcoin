@@ -8,6 +8,7 @@ import {
   type RemotePlayer,
   SPACE_BOSS_PLAYER,
   SPACE_FEATURE_BOSS,
+  SPACE_FEATURE_HALL_BGM,
   SPACE_FEATURE_KICK,
   SPACE_FEATURE_KICK_TIMING,
   SPACE_FEATURE_MARKET,
@@ -17,6 +18,8 @@ import {
   type SpaceBossState,
   type SpaceCelebration,
   type SpaceChatMessage,
+  type SpaceHallBgmState,
+  type SpaceHallBgmTrack,
   type SpaceMarketState,
   type SpacePeer,
   type SpacePresence,
@@ -47,6 +50,14 @@ export interface SpaceSessionSnapshot {
   canKick: boolean;
   /** 서버가 보스를 지원하는지. 옛 서버면 보스를 안 그림. */
   canFightBoss: boolean;
+  /** 서버가 홀 배경음악 바꾸기를 지원하는지. 옛 서버면 메뉴에서 곡 목록을 숨김. */
+  canChangeHallBgm: boolean;
+  /**
+   * 누가 골라 둔 홀 배경음악. 아무도 안 바꿨으면 `null` 이고 기본 곡을 틂.
+   *
+   * 연결이 끊겨도 안 지움. 다시 붙는 사이에 곡이 기본 곡으로 갔다 돌아오면 거슬림.
+   */
+  hallBgm: SpaceHallBgmState | null;
   /**
    * 서버가 마지막으로 알려 준 내 체력.
    *
@@ -298,6 +309,8 @@ export class SpaceSessionController {
     isNicknamePending: false,
     canKick: false,
     canFightBoss: false,
+    canChangeHallBgm: false,
+    hallBgm: null,
     selfHealth: SPACE_BOSS_PLAYER.maximumHealth,
     deadUntil: null,
     selfDamagedAt: null,
@@ -351,6 +364,19 @@ export class SpaceSessionController {
       this.snapshot.presence.status === "online" &&
       this.snapshot.canSyncMarket &&
       this.sendFrame({ v: SPACE_PROTOCOL_VERSION, t: "celebrate" })
+    );
+  };
+
+  /**
+   * 홀 배경음악을 바꿔 달라고 함. 보냈는지만 돌려줌.
+   *
+   * 방 전체 쿨다운은 서버가 봄. 거절되면 오류 프레임이 와서 `error` 에 이유가 실림.
+   */
+  requestHallBgm = (track: SpaceHallBgmTrack): boolean => {
+    return (
+      this.snapshot.presence.status === "online" &&
+      this.snapshot.canChangeHallBgm &&
+      this.sendFrame({ v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", track })
     );
   };
 
@@ -792,6 +818,7 @@ export class SpaceSessionController {
           SPACE_FEATURE_MARKET,
           SPACE_FEATURE_KICK_TIMING,
           SPACE_FEATURE_BOSS,
+          SPACE_FEATURE_HALL_BGM,
         ],
       });
     });
@@ -907,6 +934,16 @@ export class SpaceSessionController {
         });
         return;
       }
+      case "hall-bgm": {
+        if (this.snapshot.canChangeHallBgm) {
+          this.updateSnapshot({
+            hallBgm: frame.state,
+            serverClockOffsetMs:
+              this.snapshot.serverClockOffsetMs ?? frame.serverAt - this.options.now(),
+          });
+        }
+        return;
+      }
       case "celebrate": {
         if (
           !this.snapshot.self ||
@@ -944,7 +981,12 @@ export class SpaceSessionController {
             ? { lastKilledAt: boss.lastKilledAt, wire: boss.state, nowMs: this.options.now() }
             : null,
         );
+        const canChangeHallBgm = frame.features?.includes(SPACE_FEATURE_HALL_BGM) ?? false;
+
         this.updateSnapshot({
+          canChangeHallBgm,
+          // 곡의 시작 시각을 서버 시계로 맞춤. 시계 왕복 전에도 틀 수 있게 어림값을 넣어 둠.
+          hallBgm: canChangeHallBgm ? (frame.hallBgm ?? null) : null,
           canFightBoss: boss !== undefined,
           selfHealth: boss?.health ?? SPACE_BOSS_PLAYER.maximumHealth,
           deadUntil: null,
@@ -1238,6 +1280,7 @@ export class SpaceSessionController {
       celebration: null,
       canSyncMarket: false,
       canFightBoss: false,
+      canChangeHallBgm: false,
       deadUntil: null,
       bossDefeat: null,
       serverClockOffsetMs: null,

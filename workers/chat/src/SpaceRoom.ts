@@ -24,6 +24,14 @@ import {
   SPACE_FEATURE_BOSS,
 } from "../../../src/entities/space/model/boss";
 import {
+  isSpaceHallBgmState,
+  resolveHallBgmReadyAt,
+  SPACE_FEATURE_HALL_BGM,
+  SPACE_HALL_BGM,
+  type SpaceHallBgmState,
+  type SpaceHallBgmTrack,
+} from "../../../src/entities/space/model/hallBgm";
+import {
   resolveKickAdmission,
   SPACE_FEATURE_KICK,
   SPACE_FEATURE_KICK_TIMING,
@@ -139,8 +147,10 @@ const SERVER_FEATURES = [
   SPACE_FEATURE_MARKET,
   SPACE_FEATURE_KICK_TIMING,
   SPACE_FEATURE_BOSS,
+  SPACE_FEATURE_HALL_BGM,
 ];
 const BOSS_STORAGE_KEY = "space-boss-v1";
+const HALL_BGM_STORAGE_KEY = "space-hall-bgm-v1";
 /**
  * 보스 한 걸음의 최대 길이(초).
  *
@@ -198,6 +208,8 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   private boss: BossSimulation;
   /** 마지막 처치 시각. `undefined` 면 아직 저장소에서 안 읽은 것임. */
   private bossLastKilledAt: number | null | undefined;
+  /** 홀 배경음악 선택. 아직 저장소를 안 읽었으면 `undefined`, 아무도 안 바꿨으면 `null`. */
+  private hallBgm: SpaceHallBgmState | null | undefined;
   private lastBossStepAt = 0;
   /** 직전 틱에 보스가 싸우는 중이었는지. 쉬러 들어가는 순간 마지막 상태를 한 번 더 보냄. */
   private wasBossActive = false;
@@ -411,7 +423,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
    * 64KB 를 넘겨 클라이언트가 프레임을 버리고 아무도 입장하지 못함. 넘치면 오래된
    * 메시지부터 뺌.
    */
-  private createWelcomePayload(self: SpacePeer, peers: SpacePeer[], boss?: SpaceBossWelcome): string {
+  private createWelcomePayload(self: SpacePeer, peers: SpacePeer[], boss?: SpaceBossWelcome, hallBgm?: SpaceHallBgmState): string {
     const messages = [...this.getChatHistory()];
     const serialize = (): string =>
       JSON.stringify({
@@ -422,6 +434,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         messages,
         features: SERVER_FEATURES,
         ...(boss ? { boss } : {}),
+        ...(hallBgm ? { hallBgm } : {}),
       } satisfies SpaceServerFrame);
     let payload = serialize();
 
@@ -628,6 +641,69 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       this.bossLastKilledAt ??= saved?.lastKilledAt ?? null;
     } catch {
       this.bossLastKilledAt ??= null;
+    }
+  }
+
+  /**
+   * 저장소에서 홀 배경음악 선택을 한 번 읽음. 실패하거나 없으면 기본 곡으로 봄.
+   *
+   * 방이 잠들면 메모리가 비워져서 저장소에 둠. 안 그러면 잠깐 비었다 다시 찬 방에서
+   * 고른 곡이 기본 곡으로 돌아감.
+   */
+  private async loadHallBgm(): Promise<void> {
+    if (this.hallBgm !== undefined) {
+      return;
+    }
+
+    try {
+      const saved = await this.state.storage.get<unknown>(HALL_BGM_STORAGE_KEY);
+      // 읽는 사이 누가 바꿨으면 덮지 않음. 곡 목록에서 빠진 곡이 남아 있으면 버림.
+      this.hallBgm ??= isSpaceHallBgmState(saved) ? saved : null;
+    } catch {
+      this.hallBgm ??= null;
+    }
+  }
+
+  private hasHallBgmFeature(socket: WebSocket): boolean {
+    return this.getJoinedAttachment(socket)?.features?.includes(SPACE_FEATURE_HALL_BGM) ?? false;
+  }
+
+  /**
+   * 홀 배경음악을 바꿈. 방 전체에 쿨다운이 하나라 그동안은 누구의 요청이든 거절함.
+   *
+   * 같은 곡을 다시 고르면 처음부터 다시 틂. 쿨다운 안이면 그것도 거절함.
+   */
+  private async handleHallBgm(socket: WebSocket, track: SpaceHallBgmTrack): Promise<void> {
+    const attachment = this.getJoinedAttachment(socket);
+
+    if (!attachment?.peer || !this.hasHallBgmFeature(socket)) {
+      this.sendError(socket, "JOIN_REQUIRED", "먼저 공간에 입장해 주세요.");
+      return;
+    }
+    await this.loadHallBgm();
+    const now = Date.now();
+    const waitMs = resolveHallBgmReadyAt(this.hallBgm ?? null) - now;
+
+    if (waitMs > 0) {
+      this.sendError(socket, "HALL_BGM_COOLDOWN", `배경음악은 ${Math.ceil(waitMs / 1000)}초 뒤에 다시 바꿀 수 있어요.`);
+      return;
+    }
+    const state: SpaceHallBgmState = {
+      track,
+      startsAt: now + SPACE_HALL_BGM.leadMs,
+      changedAt: now,
+      byNickname: attachment.peer.nickname,
+    };
+
+    this.hallBgm = state;
+    void this.state.storage
+      .put(HALL_BGM_STORAGE_KEY, state)
+      .catch((error) => console.error("Hall bgm save failed", error));
+
+    for (const candidate of this.socketsBySeat.values()) {
+      if (this.hasHallBgmFeature(candidate)) {
+        this.sendFrame(candidate, { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", state, serverAt: now });
+      }
     }
   }
 
@@ -1081,6 +1157,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       }
       const now = Date.now();
       await this.loadBoss();
+      await this.loadHallBgm();
       // 스폰·색은 클라이언트도 같은 값을 계산해야 함. 비밀키에서 파생한
       // stableActorKey 로 뽑으면 입장 직후 welcome 이 아바타를 순간이동시킴.
       const peer: SpacePeer = {
@@ -1145,7 +1222,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
               serverAt: now,
             }
           : undefined;
-      this.sendPayload(socket, this.createWelcomePayload(peer, peers, bossWelcome));
+      const hallBgm = this.hasHallBgmFeature(socket) ? (this.hallBgm ?? undefined) : undefined;
+
+      this.sendPayload(socket, this.createWelcomePayload(peer, peers, bossWelcome, hallBgm));
 
       if (this.getJoinedAttachment(socket)) {
         this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer }, socket);
@@ -1619,10 +1698,13 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
           if (frame.t === "clock") {
             this.sendFrame(socket, { v: SPACE_PROTOCOL_VERSION, t: "clock", sentAt: frame.sentAt, serverAt: Date.now() });
           } else if (!await this.marketMonitor.testCelebration(attachment.peer.seat)) {
-            this.sendError(socket, "CELEBRATION_COOLDOWN", "폭죽 테스트는 공간 전체에서 30초에 한 번만 할 수 있어요.");
+            this.sendError(socket, "CELEBRATION_COOLDOWN", "폭죽은 공간 전체에서 30초에 한 번만 터뜨릴 수 있어요.");
           }
           break;
         }
+        case "hall-bgm":
+          await this.handleHallBgm(socket, frame.track);
+          break;
         case "join":
           await this.handleJoin(socket, frame);
           break;
