@@ -3,7 +3,6 @@ import { useMemo } from "react";
 import {
   type BufferGeometry,
   type Group,
-  type Material,
   type Mesh,
   MeshBasicMaterial,
   type MeshStandardMaterial,
@@ -19,9 +18,19 @@ import { toVersionedModelUrl } from "./modelAssetUrl";
  * 비트코인 홀 맵 로더.
  *
  * 원본은 `bitcoin_hall.blend` 이고 굽는 파이썬 스크립트는 저장소 밖에 있음.
- * 조명은 라이트맵으로 구워져 있어서, 런타임 할 일은 머티리얼을 라이트맵용으로
- * 바꾸고 충돌·램프 자리를 꺼내는 것뿐임. 맵 동봉 `bitcoinHall.js` 의
- * `setupHall` 을 옮겨 왔음.
+ * 조명은 텍스처에 구워져 있어서, 런타임 할 일은 머티리얼을 언릿으로 바꾸고
+ * 충돌·램프 자리를 꺼내는 것뿐임. 맵 동봉 `bitcoinHall.js` 의 `setupHall` 을 옮겨 왔음.
+ *
+ * 맵 파일은 블렌더에서 WebP · Draco(위치 14 · 노멀 10 · UV 14 비트, 압축 레벨 6)로 내보낸 것을
+ * 그대로 올림. UV 를 기본값(12 비트)으로 두면 4096 px 텍스처에서 한 칸 단위라 구운 무늬가 밀림.
+ *
+ * 압축 없이 내보낸 GLB(통짜 굽기 기준 약 10 MB)를 받았을 때는 같은 설정으로 이렇게 줄일 수 있음:
+ *
+ * ```bash
+ * pnpm dlx @gltf-transform/cli@4 webp <원본.glb> tmp.glb --slots "emissiveTexture" --quality 90
+ * pnpm dlx @gltf-transform/cli@4 draco tmp.glb public/models/bitcoin_hall_draco.glb \\
+ *   --quantize-position 14 --quantize-normal 10 --quantize-texcoord 14 --quantize-color 10
+ * ```
  */
 
 /** 빌드 때 맵 파일 해시를 붙임(`next.config.ts`). 맵이 바뀌면 주소가 바뀌어 캐시를 건너뜀. */
@@ -80,39 +89,62 @@ const isMesh = (object: Object3D): object is Mesh => {
 /**
  * 구운 조명을 쓰는 머티리얼로 바꾼다.
  *
- * 라이트맵은 glTF 의 occlusion 슬롯(TEXCOORD_1)에 실려 와서 로더가 `aoMap` 으로
- * 읽음. 그걸 `lightMap` 으로 옮긴 언릿 머티리얼을 씀. 이미 바꾼 메시(재마운트)는
- * `aoMap` 이 없어 건너뜀.
+ * 굽는 방식이 둘이라 둘 다 읽음. 어느 쪽이든 조명 계산이 없는 언릿 머티리얼로 바꿈.
+ * 이미 바꾼 메시(재마운트)와 처음부터 언릿인 메시(안뜰)는 건너뜀.
  *
- * 색 텍스처는 굽는 쪽에 따라 자리가 다름. 블렌더를 거쳐 내보낸 맵은 base color 를
- * 검정으로 두고 emission 슬롯에 실어 와서(`emissiveMap`), `map` 이 비면 그쪽을 씀.
- * 안 그러면 홀 안이 텍스처 없이 라이트맵만 입혀짐.
+ * - **통짜 굽기**: 색과 조명을 한 장에 구워 emission 슬롯에 실어 옴(`emissiveMap`,
+ *   occlusion 슬롯 없음). 밝기 배율은 맵이 `emissiveStrength` 로 들고 와서 그대로 곱함.
+ * - **라이트맵**: 반복 무늬 텍스처와 따로, 라이트맵이 occlusion 슬롯(TEXCOORD_1)에 실려 와
+ *   로더가 `aoMap` 으로 읽음. 그걸 `lightMap` 으로 옮김. 색 텍스처는 base color 나
+ *   emission 슬롯 중 실려 온 쪽을 씀.
+ *
+ * 램프 불빛은 톤 매핑을 꺼서 늘 밝게 둠. 색은 구운 텍스처나 버텍스 컬러 중 있는 쪽을 씀.
  */
 const applyBakedLighting = (mesh: Mesh): void => {
+  const source = mesh.material as MeshStandardMaterial;
+
+  if (!source.isMeshStandardMaterial) {
+    return;
+  }
+
+  const hasVertexColors = mesh.geometry.hasAttribute("color");
+
   if (mesh.userData.lamp_glow === true) {
-    if (!(mesh.material as MeshBasicMaterial).isMeshBasicMaterial) {
-      (mesh.material as Material).dispose();
-      mesh.material = new MeshBasicMaterial({ vertexColors: true, toneMapped: false });
-    }
+    mesh.material = new MeshBasicMaterial({
+      map: source.emissiveMap,
+      vertexColors: hasVertexColors,
+      side: source.side,
+      toneMapped: false,
+    });
+    source.dispose();
 
     return;
   }
 
-  const source = mesh.material as MeshStandardMaterial;
   const lightMap = source.aoMap;
 
-  if (!lightMap) {
+  if (lightMap) {
+    lightMap.colorSpace = SRGBColorSpace;
+    mesh.material = new MeshBasicMaterial({
+      map: source.map ?? source.emissiveMap,
+      vertexColors: hasVertexColors,
+      lightMap,
+      lightMapIntensity: HALL_LIGHTMAP_MAX * Math.PI,
+    });
+    source.dispose();
+
     return;
   }
 
-  lightMap.colorSpace = SRGBColorSpace;
-  mesh.material = new MeshBasicMaterial({
-    map: source.map ?? source.emissiveMap,
-    vertexColors: true,
-    lightMap,
-    lightMapIntensity: HALL_LIGHTMAP_MAX * Math.PI,
-  });
-  source.dispose();
+  if (source.emissiveMap) {
+    mesh.material = new MeshBasicMaterial({
+      map: source.emissiveMap,
+      color: source.emissive.clone().multiplyScalar(source.emissiveIntensity),
+      vertexColors: hasVertexColors,
+      side: source.side,
+    });
+    source.dispose();
+  }
 };
 // endregion
 
