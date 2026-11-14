@@ -29,7 +29,11 @@ export {
   stepSurgeState,
 } from "./lib/marketSurge";
 export { createSpaceInterpolator, type SpaceInterpolator } from "./lib/remoteInterpolation";
-export { decodeSpaceSnapshot, encodeSpaceSnapshot } from "./lib/spaceSnapshot";
+export {
+  decodeSpaceSnapshot,
+  encodeSpaceSnapshot,
+  quantizeSpaceMotion,
+} from "./lib/spaceSnapshot";
 export { createSpawnPoint } from "./lib/spawnPoint";
 export {
   resolveAvatarColor,
@@ -112,8 +116,12 @@ export {
 export {
   parseSpaceClientFrame,
   parseSpaceServerFrame,
+  SPACE_BOSS_AMOUNT_MAX,
   SPACE_CHAT_COOLDOWN_MS,
   SPACE_CHAT_MAX_GRAPHEMES,
+  SPACE_CLIENT_FRAME_MAX_BYTES,
+  SPACE_CLOSE_CODES,
+  SPACE_FEATURES,
   SPACE_NETWORK_INTERVAL_MS,
   SPACE_NICKNAME_COOLDOWN_MS,
   SPACE_PROTOCOL_VERSION,

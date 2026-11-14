@@ -1,7 +1,8 @@
 import { SPACE_BOSS_COMBAT } from "../../../../src/entities/space/model/boss";
+import { SPACE_BOSS_AMOUNT_MAX } from "../../../../src/entities/space/model/spaceProtocol";
 
-/** 프로토콜이 받아 주는 체력 상한. `spaceProtocol.ts` 의 수치 검증과 같아야 함. */
-const MAXIMUM_CONFIGURABLE_HEALTH = 10_000_000;
+/** 프로토콜이 받아 주는 체력 상한. 넘기면 클라이언트가 보스 프레임을 버림. */
+const MAXIMUM_CONFIGURABLE_HEALTH = SPACE_BOSS_AMOUNT_MAX;
 
 /**
  * 보스 최대 체력을 정함. 환경변수 `SPACE_BOSS_MAXIMUM_HEALTH` 가 있으면 그 값을 씀.

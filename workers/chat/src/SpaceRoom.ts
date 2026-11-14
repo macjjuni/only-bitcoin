@@ -35,7 +35,6 @@ import {
 import {
   resolveKickAdmission,
   SPACE_FEATURE_KICK,
-  SPACE_FEATURE_KICK_TIMING,
   SPACE_KICK,
 } from "../../../src/entities/space/model/kick";
 import { SPACE_FEATURE_MARKET } from "../../../src/entities/space/model/spaceMarket";
@@ -44,6 +43,9 @@ import {
   SPACE_CHAT_COOLDOWN_MS,
   SPACE_CHAT_HISTORY_COUNT,
   SPACE_CHAT_MAX_GRAPHEMES,
+  SPACE_CLIENT_FRAME_MAX_BYTES,
+  SPACE_CLOSE_CODES,
+  SPACE_FEATURES,
   SPACE_NETWORK_INTERVAL_MS,
   SPACE_NICKNAME_COOLDOWN_MS,
   SPACE_PROTOCOL_VERSION,
@@ -127,7 +129,7 @@ interface PersistedBoss {
 }
 
 const MAXIMUM_PENDING_CONNECTIONS = 10;
-const MAXIMUM_FRAME_BYTES = 8 * 1024;
+const MAXIMUM_FRAME_BYTES = SPACE_CLIENT_FRAME_MAX_BYTES;
 const MAXIMUM_FRAMES_PER_SECOND = 40;
 const MAXIMUM_RECENT_SAY_RECEIPTS = 32;
 /**
@@ -144,13 +146,9 @@ const JOIN_TIMEOUT_MS = 10_000;
 const STALE_CONNECTION_MS = 60_000;
 const PRUNE_INTERVAL_MS = 15_000;
 /** 이 서버가 지원하는 기능. 입장 응답에 실어 보냄. */
-const SERVER_FEATURES = [
-  SPACE_FEATURE_KICK,
-  SPACE_FEATURE_MARKET,
-  SPACE_FEATURE_KICK_TIMING,
-  SPACE_FEATURE_BOSS,
-  SPACE_FEATURE_HALL_BGM,
-];
+const SERVER_FEATURES = [...SPACE_FEATURES];
+/** 입장 · 리스폰 직후의 이동 거리 예산(m). 첫 이동이 양자화 오차만큼 어긋나도 반려되지 않게 함. */
+const INITIAL_MOVEMENT_BUDGET = 0.5;
 const BOSS_STORAGE_KEY = "space-boss-v1";
 const HALL_BGM_STORAGE_KEY = "space-hall-bgm-v1";
 /**
@@ -590,7 +588,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
           if (attachment && !attachment.joined) {
             this.sendError(socket, "JOIN_TIMEOUT", "입장 준비 시간이 초과됐어요.");
-            this.removeSocket(socket, 4009, "join timeout");
+            this.removeSocket(socket, SPACE_CLOSE_CODES.joinTimeout, "join timeout");
           }
         },
         Math.max(0, deadline - Date.now()),
@@ -670,7 +668,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         : (attachment.joinDeadlineAt ?? 0) <= now;
 
       if (isStale || socket.readyState !== 1) {
-        this.removeSocket(socket, 4000, "inactive connection");
+        this.removeSocket(socket, SPACE_CLOSE_CODES.inactive, "inactive connection");
       }
     }
   }
@@ -968,7 +966,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         ...attachment,
         peer: respawned,
         lastMoveAt: now,
-        movementBudget: 0.5,
+        movementBudget: INITIAL_MOVEMENT_BUDGET,
       });
       // 보스를 모르는 옛 클라이언트도 `peer` 는 알아서 이걸로 자리를 옮김.
       this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: respawned });
@@ -1153,7 +1151,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
     if (frameRate.count > MAXIMUM_FRAMES_PER_SECOND) {
       this.sendError(socket, "RATE_LIMIT", "입력이 너무 빠르게 들어왔어요.");
-      this.removeSocket(socket, 4008, "rate limit");
+      this.removeSocket(socket, SPACE_CLOSE_CODES.frameRateLimit, "rate limit");
       return false;
     }
 
@@ -1195,7 +1193,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
       if (seat === undefined) {
         this.sendFrame(socket, { v: SPACE_PROTOCOL_VERSION, t: "full" });
-        this.removeSocket(socket, 4003, "room full");
+        this.removeSocket(socket, SPACE_CLOSE_CODES.roomFull, "room full");
         return;
       }
       const now = Date.now();
@@ -1222,7 +1220,12 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         this.sendError(previousSocket, "SESSION_REPLACED", "다른 탭에서 스페이스에 접속했어요.");
         // 새 연결이 같은 좌석을 물려받을 때만 leave 를 생략함. 다른 좌석을 받으면
         // 옛 좌석이 다른 클라이언트에 유령으로 남음.
-        this.removeSocket(previousSocket, 4001, "session replaced", previousPeer?.seat !== seat);
+        this.removeSocket(
+          previousSocket,
+          SPACE_CLOSE_CODES.sessionReplaced,
+          "session replaced",
+          previousPeer?.seat !== seat,
+        );
       }
 
       if (previousReceipts) {
@@ -1236,7 +1239,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         peer,
         lastActivityAt: now,
         lastMoveAt: now,
-        movementBudget: previousAttachment?.movementBudget ?? 0.5,
+        movementBudget: previousAttachment?.movementBudget ?? INITIAL_MOVEMENT_BUDGET,
         lastSayAt: previousAttachment?.lastSayAt ?? null,
         // 서버가 아는 기능만 남김. 탭을 바꿔 들어와도 쿨다운은 이어 감.
         features: (frame.features ?? []).filter((feature) => SERVER_FEATURES.includes(feature)),
@@ -1685,7 +1688,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       joinDeadlineAt: now + JOIN_TIMEOUT_MS,
       lastActivityAt: now,
       lastMoveAt: now,
-      movementBudget: 0.5,
+      movementBudget: INITIAL_MOVEMENT_BUDGET,
       lastSayAt: null,
     };
     this.setAttachment(server, attachment);
@@ -1705,7 +1708,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       textEncoder.encode(payload).byteLength > MAXIMUM_FRAME_BYTES
     ) {
       this.sendError(socket, "INVALID_PROTOCOL", "입력 형식을 확인해 주세요.");
-      this.removeSocket(socket, 4002, "invalid frame");
+      this.removeSocket(socket, SPACE_CLOSE_CODES.invalidProtocol, "invalid frame");
       return;
     }
     if (!this.canProcessFrame(socket)) {
@@ -1715,7 +1718,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
     if (!frame) {
       this.sendError(socket, "INVALID_PROTOCOL", "입력 형식을 확인해 주세요.");
-      this.removeSocket(socket, 4002, "invalid protocol");
+      this.removeSocket(socket, SPACE_CLOSE_CODES.invalidProtocol, "invalid protocol");
       return;
     }
 

@@ -21,6 +21,15 @@ export const NAMEPLATE_HEIGHT_PX = 20;
 
 /** 말풍선은 읽혀야 해서 터치에서도 줄이지 않음. */
 export const BUBBLE_DISTANCE_FACTOR = 18;
+/** 피해 숫자와 보스 체력판. 싸우는 중에 읽혀야 해서 말풍선과 같은 크기로 둠. */
+export const COMBAT_OVERLAY_DISTANCE_FACTOR = BUBBLE_DISTANCE_FACTOR;
+/**
+ * 피해 숫자가 떠 있는 시간(ms).
+ *
+ * 떠오르는 애니메이션(`.space-damage-number`)의 길이로도 그대로 넘김. 둘이 다르면 숫자가
+ * 다 뜨기 전에 사라지거나, 다 사라진 뒤에도 DOM 이 남음.
+ */
+export const DAMAGE_NUMBER_LIFETIME_MS = 900;
 /** 명찰 윗변과 말풍선 꼬리 끝 사이(명찰 px). */
 const BUBBLE_GAP_PX = 4;
 /** 말풍선 상자 아래로 나온 꼬리 길이(말풍선 px). `-bottom-1.5` 와 같음. */

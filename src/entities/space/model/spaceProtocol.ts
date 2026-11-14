@@ -1,15 +1,23 @@
 import { isAvatarModelIndex, SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "./avatarModel";
-import type { SpaceBossAttack, SpaceBossPhase, SpaceBossSpinSegment } from "./boss";
+import {
+  SPACE_FEATURE_BOSS,
+  type SpaceBossAttack,
+  type SpaceBossPhase,
+  type SpaceBossSpinSegment,
+} from "./boss";
 import {
   isSpaceHallBgmState,
   isSpaceHallBgmTrack,
+  SPACE_FEATURE_HALL_BGM,
   type SpaceHallBgmState,
   type SpaceHallBgmTrack,
 } from "./hallBgm";
+import { SPACE_FEATURE_KICK, SPACE_FEATURE_KICK_TIMING } from "./kick";
 import type { PlayerTransform, RemotePlayer } from "./playerState";
 import {
   isSpaceCelebration,
   isSpaceMarketState,
+  SPACE_FEATURE_MARKET,
   type SpaceCelebration,
   type SpaceMarketState,
 } from "./spaceMarket";
@@ -31,6 +39,43 @@ export const SPACE_PROTOCOL_VERSION = 2;
 export const SPACE_NETWORK_INTERVAL_MS = 100;
 export const SPACE_CHAT_COOLDOWN_MS = 1_000;
 export const SPACE_CHAT_MAX_GRAPHEMES = 100;
+/**
+ * 지금 코드가 아는 기능 전부. 클라이언트는 입장할 때 이 목록을 알리고, 서버는 이 목록
+ * 안에서만 받아 줌.
+ *
+ * 한 곳에 둬서 기능을 더할 때 한쪽만 고치는 일이 없게 함. 배포는 워커와 웹이 따로라
+ * 실제로 주고받는 목록은 잠깐 다를 수 있고, 그건 서버가 걸러서 맞춤.
+ */
+export const SPACE_FEATURES: readonly string[] = [
+  SPACE_FEATURE_KICK,
+  SPACE_FEATURE_MARKET,
+  SPACE_FEATURE_KICK_TIMING,
+  SPACE_FEATURE_BOSS,
+  SPACE_FEATURE_HALL_BGM,
+];
+/**
+ * 서버가 연결을 닫을 때 쓰는 코드. 클라이언트는 이걸로 사유를 가려 다시 붙을지 정함.
+ *
+ * 4000 번대는 WebSocket 이 앱 몫으로 비워 둔 범위임.
+ */
+export const SPACE_CLOSE_CODES = {
+  /** 한동안 아무 신호가 없던 연결. */
+  inactive: 4000,
+  /** 같은 사람이 다른 탭으로 들어옴. 이 탭은 자동으로 다시 붙지 않음. */
+  sessionReplaced: 4001,
+  /** 읽을 수 없는 프레임. */
+  invalidProtocol: 4002,
+  roomFull: 4003,
+  /** 초당 프레임 수를 넘김. */
+  frameRateLimit: 4008,
+  joinTimeout: 4009,
+  /**
+   * 접속(업그레이드) 요청 한도를 넘김. 영구 오류가 아니라 창이 지나면 다시 들어갈 수 있음.
+   *
+   * 핸드셰이크 429 는 브라우저가 JS 에 숨겨서, 워커가 101 로 받은 뒤 이 코드로 닫음.
+   */
+  upgradeRateLimit: 4010,
+} as const;
 /** 입장할 때 서버가 함께 내려주는 최근 대화 수. */
 export const SPACE_CHAT_HISTORY_COUNT = 50;
 /** 닉네임 변경 간격. 자주 바꾸면 다른 사람이 누가 누군지 못 따라감. */
@@ -254,7 +299,9 @@ export type SpaceServerFrame =
   /** 이 클라이언트가 모르는 새 종류. 끊지 않고 버림. */
   | { v: SpaceProtocolVersion; t: "ignored" };
 
-const CLIENT_FRAME_MAX_BYTES = 8 * 1024;
+/** 서버가 받아주는 클라이언트 프레임 최대 크기. 서버도 이 값으로 먼저 거름. */
+export const SPACE_CLIENT_FRAME_MAX_BYTES = 8 * 1024;
+const CLIENT_FRAME_MAX_BYTES = SPACE_CLIENT_FRAME_MAX_BYTES;
 /**
  * 클라이언트가 받아주는 서버 프레임 최대 크기. 넘으면 프레임을 버림.
  *
@@ -320,8 +367,9 @@ const BOSS_ATTACKS: readonly string[] = [
   "charge",
   "spin",
 ] satisfies SpaceBossAttack[];
-/** 체력·피해로 받아 주는 상한. 수치를 조정해도 걸리지 않게 넉넉히 잡음. */
-const MAXIMUM_BOSS_AMOUNT = 10_000_000;
+/** 체력·피해로 받아 주는 상한. 수치를 조정해도 걸리지 않게 넉넉히 잡음. 서버 설정도 이 값을 넘기지 않음. */
+export const SPACE_BOSS_AMOUNT_MAX = 10_000_000;
+const MAXIMUM_BOSS_AMOUNT = SPACE_BOSS_AMOUNT_MAX;
 
 const isBossAttack = (value: unknown): value is SpaceBossAttack => {
   return typeof value === "string" && BOSS_ATTACKS.includes(value);

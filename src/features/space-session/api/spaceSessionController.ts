@@ -5,13 +5,17 @@ import {
   decodeSpaceSnapshot,
   type LocalPlayerState,
   parseSpaceServerFrame,
+  quantizeSpaceMotion,
   type RemotePlayer,
   SPACE_BOSS_PLAYER,
+  SPACE_CLOSE_CODES,
   SPACE_FEATURE_BOSS,
   SPACE_FEATURE_HALL_BGM,
   SPACE_FEATURE_KICK,
   SPACE_FEATURE_KICK_TIMING,
   SPACE_FEATURE_MARKET,
+  SPACE_FEATURES,
+  SPACE_NETWORK_INTERVAL_MS,
   SPACE_PROTOCOL_VERSION,
   type SpaceBossAttack,
   type SpaceBossRankingEntry,
@@ -153,7 +157,7 @@ interface PendingModel extends PendingMessage {
 
 const socketOpenState = 1;
 const socketClosingState = 2;
-const movementIntervalMs = 100;
+const movementIntervalMs = SPACE_NETWORK_INTERVAL_MS;
 /**
  * 송신 박자 여유. 30 fps 면 프레임이 100 ms 에 딱 안 맞아 133 ms 마다 보내게 됐음.
  * 예정 시각보다 이만큼 이르면 보내고 예정 시각을 누적해 평균 100 ms 로 맞춤.
@@ -180,13 +184,6 @@ const connectionTimeoutMs = 10_000;
  */
 const hiddenDisconnectDelayMs = 60_000;
 const messageTimeoutMs = 10_000;
-/**
- * 업그레이드 한도를 넘겼다고 서버가 알려주는 종료 코드.
- *
- * 핸드셰이크 429는 브라우저가 JS 에 숨기므로 Worker 가 101 로 받은 뒤 이 코드로
- * 닫음. 영구 오류 아님. 창이 지나면 다시 들어갈 수 있음.
- */
-const rateLimitCloseCode = 4010;
 /** 한도를 맞은 뒤 쉬는 시간. 서버 리미터 창(60초)과 같게 둠. */
 const rateLimitCooldownMs = 60_000;
 /**
@@ -207,8 +204,6 @@ const EMPTY_BOSS_HIT_EVENTS: SpaceBossHitEvent[] = [];
 const EMPTY_PLAYER_HIT_EVENTS: SpacePlayerHitEvent[] = [];
 /** 씬이 안 꺼내 가는 동안 쌓아 둘 피해 숫자 상한. 넘으면 오래된 것부터 버림. */
 const maximumBossHitEventCount = 32;
-const fullTurn = Math.PI * 2;
-const yawSteps = 256;
 const permanentErrorCodes = new Set([
   "SESSION_REPLACED",
   "INVALID_PROTOCOL",
@@ -219,7 +214,7 @@ const permanentErrorCodes = new Set([
   "INVALID_NICKNAME",
   "INVALID_CLIENT_KEY",
 ]);
-const permanentCloseCodes = new Set([1002, 1003, 1008, 4001]);
+const permanentCloseCodes = new Set<number>([1002, 1003, 1008, SPACE_CLOSE_CODES.sessionReplaced]);
 
 /**
  * 입장 때 받은 기록을 지금 보던 목록에 합침.
@@ -253,19 +248,9 @@ const hasSameMovement = (first: MovementFrame | null, second: MovementFrame): bo
   );
 };
 
-/** 서버 스냅샷과 같은 cm·8비트 방향으로 접어 미세한 부동소수점 흔들림은 안 보냄. */
+/** 서버 스냅샷과 같은 정밀도로 접어 미세한 부동소수점 흔들림은 안 보냄. */
 const quantizeMovement = (state: MovementFrame): MovementFrame => {
-  const normalizedYaw = ((state.yaw % fullTurn) + fullTurn) % fullTurn;
-  const yawStep = Math.round((normalizedYaw / fullTurn) * yawSteps) % yawSteps;
-
-  return {
-    x: Math.round(state.x * 100) / 100,
-    // 스냅샷이 1 cm 정밀도라 같은 정밀도로 접음.
-    y: Math.round(state.y * 100) / 100,
-    z: Math.round(state.z * 100) / 100,
-    yaw: (yawStep / yawSteps) * fullTurn,
-    isRunning: state.isRunning,
-  };
+  return { ...quantizeSpaceMotion(state), isRunning: state.isRunning };
 };
 
 /**
@@ -839,13 +824,7 @@ export class SpaceSessionController {
         clientKey: this.options.identity.clientKey,
         nickname: this.nickname,
         modelIndex: this.modelIndex,
-        features: [
-          SPACE_FEATURE_KICK,
-          SPACE_FEATURE_MARKET,
-          SPACE_FEATURE_KICK_TIMING,
-          SPACE_FEATURE_BOSS,
-          SPACE_FEATURE_HALL_BGM,
-        ],
+        features: [...SPACE_FEATURES],
       });
     });
     socket.addEventListener("message", (event) => {
@@ -859,14 +838,14 @@ export class SpaceSessionController {
       }
 
       const closeCode = (event as CloseEvent).code;
-      if (closeCode === rateLimitCloseCode) {
+      if (closeCode === SPACE_CLOSE_CODES.upgradeRateLimit) {
         this.rateLimitedUntil = this.options.now() + rateLimitCooldownMs;
         this.handleDisconnected("접속 요청이 많아요. 잠시 뒤 자동으로 다시 연결합니다.");
         return;
       }
       if (permanentCloseCodes.has(closeCode)) {
         this.stopAutomaticRetry(
-          closeCode === 4001
+          closeCode === SPACE_CLOSE_CODES.sessionReplaced
             ? "다른 탭에서 스페이스에 접속했어요. 이 탭에서 다시 접속하려면 재시도해 주세요."
             : "스페이스 연결을 유지할 수 없어요. 다시 접속해 주세요.",
         );

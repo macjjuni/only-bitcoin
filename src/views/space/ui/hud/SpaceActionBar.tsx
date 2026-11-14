@@ -1,6 +1,7 @@
 "use client";
 
 import { memo, type ReactNode } from "react";
+import { TOUCH_BUTTON_DIAMETER } from "@/features/space-controls";
 
 /**
  * HUD 버튼 하나.
@@ -45,8 +46,11 @@ const BASE_BUTTON_CLASS =
 const BUTTON_SIZE_CLASS = {
   default: "size-10",
   desktop: "size-12",
-  large: "size-[52px]",
+  // 크기는 클래스가 아니라 `LARGE_BUTTON_STYLE` 로 줌.
+  large: "",
 } as const;
+/** 큰 버튼(모바일 채팅)은 같은 줄의 점프·발차기와 지름을 맞춤. 값을 한 곳에서 받아 따로 놀지 않게 함. */
+const LARGE_BUTTON_STYLE = { width: TOUCH_BUTTON_DIAMETER, height: TOUCH_BUTTON_DIAMETER } as const;
 
 // region [Privates]
 const resolveButtonClassName = (
@@ -93,6 +97,7 @@ function SpaceActionBar({
           disabled={action.isDisabled}
           onClick={action.onClick}
           className={resolveButtonClassName(action, size)}
+          style={size === "large" ? LARGE_BUTTON_STYLE : undefined}
         >
           {action.icon}
 

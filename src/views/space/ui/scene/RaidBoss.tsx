@@ -9,6 +9,7 @@ import type { BossHealth } from "@/features/space-session";
 import { type BossAnimator, createBossAnimator } from "@/views/space/lib/bossAnimator";
 import { BOSS_NAME } from "@/views/space/lib/bossHud";
 import { useBossModel } from "@/views/space/lib/bossModel";
+import { COMBAT_OVERLAY_DISTANCE_FACTOR } from "@/views/space/lib/overlayLayout";
 import { createShadowBlobTexture } from "@/views/space/lib/shadowBlobTexture";
 
 /** 접지 그림자 지름(m). 어깨 폭(4.3 m)보다 조금 넓게 잡았음. */
@@ -17,8 +18,6 @@ const SHADOW_DIAMETER = 5.6;
 const SHADOW_LIFT_Y = 0.008;
 /** 체력판을 정수리에서 띄우는 높이(m). */
 const HEALTH_PLATE_LIFT = 0.6;
-/** 거리와 무관하게 읽히는 크기. 명찰·피해 숫자와 같은 값. */
-const HEALTH_PLATE_DISTANCE_FACTOR = 18;
 
 interface RaidBossProps {
   /**
@@ -213,7 +212,7 @@ function RaidBoss({ bossState, getBossHealth }: RaidBossProps): ReactNode {
       <group ref={healthAnchorRef}>
         <Html
           center
-          distanceFactor={HEALTH_PLATE_DISTANCE_FACTOR}
+          distanceFactor={COMBAT_OVERLAY_DISTANCE_FACTOR}
           zIndexRange={[22, 0]}
           style={{ pointerEvents: "none" }}
         >

@@ -1,3 +1,4 @@
+import { SPACE_CLOSE_CODES } from "../../../src/entities/space/model/spaceProtocol";
 import { deriveIpGuardKey } from "./lib/crypto";
 import { SpaceRoom } from "./SpaceRoom";
 import type { ChatWorkerEnv } from "./types";
@@ -64,7 +65,7 @@ const normalizeIpGuardPrefix = (ipAddress: string): string => {
  * 요청도 창에 쌓으므로 락아웃이 스스로 길어진다. 101 로 받은 뒤 전용 코드로
  * 닫으면 사유가 `CloseEvent.code` 로 전달되어 클라이언트가 대기로 전환할 수 있다.
  */
-const RATE_LIMIT_CLOSE_CODE = 4010;
+const RATE_LIMIT_CLOSE_CODE = SPACE_CLOSE_CODES.upgradeRateLimit;
 
 /** 핸드셰이크는 성공시키고 즉시 닫아 거절 사유만 전달한다. 방까지 올려보내지 않는다. */
 const createRateLimitedSocketResponse = (): Response => {

@@ -14,6 +14,8 @@ const HEADER_BYTES = 8;
  * 보내므로 늘어난 50바이트는 사실상 공짜다.
  */
 const PLAYER_BYTES = 9;
+/** 수평 좌표는 1 cm 정밀도의 2바이트로 담는다. */
+const POSITION_SCALE = 100;
 /**
  * 높이는 1 cm 정밀도의 **2바이트**로 담는다.
  *
@@ -48,6 +50,26 @@ const encodeYaw = (yaw: number): number => {
   return Math.round((normalizedYaw / FULL_TURN) * YAW_STEPS) % YAW_STEPS;
 };
 
+/**
+ * 스냅샷에 실리는 정밀도로 접는다(좌표 1 cm, 방향 256 단계).
+ *
+ * 클라이언트가 보낼 값을 미리 접어, 서버가 되돌려준 자기 위치와 같은 격자에서 비교한다.
+ * 정밀도를 여기서만 정해서 스냅샷 형식을 바꿔도 비교가 어긋나지 않는다.
+ */
+export const quantizeSpaceMotion = (motion: {
+  x: number;
+  y: number;
+  z: number;
+  yaw: number;
+}): { x: number; y: number; z: number; yaw: number } => {
+  return {
+    x: Math.round(motion.x * POSITION_SCALE) / POSITION_SCALE,
+    y: Math.round(motion.y * HEIGHT_SCALE) / HEIGHT_SCALE,
+    z: Math.round(motion.z * POSITION_SCALE) / POSITION_SCALE,
+    yaw: (encodeYaw(motion.yaw) / YAW_STEPS) * FULL_TURN,
+  };
+};
+
 /** 고정 길이 LE 패킷. 타임스탬프는 서버가 Date.now() >>> 0 으로 변환해 전달한다. */
 export const encodeSpaceSnapshot = (snapshot: SpaceMotionSnapshot): ArrayBuffer => {
   if (!isValidSpaceSnapshot(snapshot)) {
@@ -64,8 +86,8 @@ export const encodeSpaceSnapshot = (snapshot: SpaceMotionSnapshot): ArrayBuffer 
   snapshot.players.forEach((player, playerIndex) => {
     const offset = HEADER_BYTES + playerIndex * PLAYER_BYTES;
     view.setUint8(offset, player.seat);
-    view.setInt16(offset + 1, Math.round(player.x * 100), true);
-    view.setInt16(offset + 3, Math.round(player.z * 100), true);
+    view.setInt16(offset + 1, Math.round(player.x * POSITION_SCALE), true);
+    view.setInt16(offset + 3, Math.round(player.z * POSITION_SCALE), true);
     view.setUint8(offset + 5, encodeYaw(player.yaw));
     view.setUint16(offset + 6, Math.round(player.y * HEIGHT_SCALE), true);
     view.setUint8(offset + 8, player.isRunning ? RUNNING_FLAG : 0);
@@ -112,8 +134,8 @@ export const decodeSpaceSnapshot = (buffer: ArrayBuffer): SpaceMotionSnapshot | 
     occupiedSeats.add(seat);
     snapshot.players.push({
       seat,
-      x: view.getInt16(offset + 1, true) / 100,
-      z: view.getInt16(offset + 3, true) / 100,
+      x: view.getInt16(offset + 1, true) / POSITION_SCALE,
+      z: view.getInt16(offset + 3, true) / POSITION_SCALE,
       yaw: (view.getUint8(offset + 5) / YAW_STEPS) * FULL_TURN,
       y: view.getUint16(offset + 6, true) / HEIGHT_SCALE,
       isRunning: (flags & RUNNING_FLAG) !== 0,

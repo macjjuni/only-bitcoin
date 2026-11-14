@@ -5,8 +5,7 @@
  * 바로 위. 가장 자주 누르는 발차기를 엄지가 쉬는 맨 아래에 두고 둘을 세로 한 줄로 세움.
  * 전에는 점프가 아래 끝, 발차기가 그 왼쪽 위 대각선이었음.
  *
- * 채팅 버튼은 `SpaceActionBar` 의 `large`(`size-[52px]`) 클래스로 그려서 지름을 바꾸면
- * 거기도 같이 바꿔야 함.
+ * 채팅 버튼(`SpaceActionBar` 의 `large`)도 이 지름을 받아 씀.
  */
 export const TOUCH_BUTTON_DIAMETER = 52;
 export const TOUCH_BUTTON_ICON_SIZE = 22;

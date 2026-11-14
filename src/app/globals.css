@@ -381,7 +381,8 @@ html.slide-right::view-transition-new(root) {
   스페이스 보스 전투 연출.
 
   맞으면 화면 가장자리가 붉게 번쩍이고, 보스를 때리면 피해 숫자가 떠오름.
-  숫자가 떠 있는 시간(900ms)은 `BossDamageNumbers.tsx` 의 수명과 같아야 함.
+  숫자가 떠 있는 시간은 여기 적지 않음. 숫자를 띄우는 쪽이 수명과 같은 값을
+  `animation-duration` 으로 넘김(`DAMAGE_NUMBER_LIFETIME_MS`).
 */
 @keyframes space-hit-flash {
   0% { opacity: 0.95; }
@@ -395,7 +396,7 @@ html.slide-right::view-transition-new(root) {
   30% { transform: translateY(-8px) scale(1); }
   100% { opacity: 0; transform: translateY(-52px) scale(1); }
 }
-.space-damage-number { animation: space-damage-rise 900ms ease-out both; }
+.space-damage-number { animation: space-damage-rise ease-out both; }
 
 @media (prefers-reduced-motion: reduce) {
   /* 번쩍임은 짧고 옅게, 숫자는 제자리에서 흐려지기만 함. */

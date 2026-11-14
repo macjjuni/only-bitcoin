@@ -3,9 +3,14 @@
 import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { memo, type ReactNode, type RefObject, useRef, useState } from "react";
+import {
+  COMBAT_OVERLAY_DISTANCE_FACTOR,
+  DAMAGE_NUMBER_LIFETIME_MS,
+} from "@/views/space/lib/overlayLayout";
 
-/** 숫자가 떠 있는 시간(ms). `.space-damage-number` 애니메이션 길이와 같아야 함. */
-const DAMAGE_NUMBER_LIFETIME_MS = 900;
+/** 떠오르는 애니메이션 길이를 수명과 같은 값으로 넘김. */
+const DAMAGE_NUMBER_STYLE = { animationDuration: `${DAMAGE_NUMBER_LIFETIME_MS}ms` } as const;
+
 /**
  * 동시에 띄우는 숫자 상한.
  *
@@ -15,8 +20,6 @@ const DAMAGE_NUMBER_LIFETIME_MS = 900;
 const MAXIMUM_DAMAGE_NUMBERS = 10;
 /** 숫자끼리 겹치지 않게 좌우·앞뒤로 흩는 폭(m). 사람 몸 너비 정도. */
 const SCATTER_WIDTH = 0.6;
-/** 거리와 무관하게 읽히는 크기. 보스 피해 숫자와 같은 값. */
-const DISTANCE_FACTOR = 18;
 
 /** 띄울 피해 하나. 씬이 맞은 순간에 자리까지 정해서 넘김. */
 export interface PlayerDamage {
@@ -112,11 +115,12 @@ function PlayerDamageNumbers({ pendingRef }: PlayerDamageNumbersProps): ReactNod
         <group key={number.id} position={number.position}>
           <Html
             center
-            distanceFactor={DISTANCE_FACTOR}
+            distanceFactor={COMBAT_OVERLAY_DISTANCE_FACTOR}
             zIndexRange={[30, 0]}
             style={{ pointerEvents: "none" }}
           >
             <span
+              style={DAMAGE_NUMBER_STYLE}
               className={`space-damage-number block select-none whitespace-nowrap font-extrabold tabular-nums [text-shadow:0_2px_4px_rgba(0,0,0,0.85)] ${
                 number.isMine ? "text-3xl text-red-500" : "text-xl text-red-300/90"
               }`}

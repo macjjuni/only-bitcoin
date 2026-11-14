@@ -5,9 +5,14 @@ import { useFrame } from "@react-three/fiber";
 import { memo, type ReactNode, useRef, useState } from "react";
 import { SPACE_BOSS, type SpaceBossState } from "@/entities/space";
 import type { SpaceBossHitEvent } from "@/features/space-session";
+import {
+  COMBAT_OVERLAY_DISTANCE_FACTOR,
+  DAMAGE_NUMBER_LIFETIME_MS,
+} from "@/views/space/lib/overlayLayout";
 
-/** 숫자가 떠 있는 시간(ms). `.space-damage-number` 애니메이션 길이와 같아야 함. */
-const DAMAGE_NUMBER_LIFETIME_MS = 900;
+/** 떠오르는 애니메이션 길이를 수명과 같은 값으로 넘김. */
+const DAMAGE_NUMBER_STYLE = { animationDuration: `${DAMAGE_NUMBER_LIFETIME_MS}ms` } as const;
+
 /**
  * 동시에 띄우는 숫자 상한.
  *
@@ -19,8 +24,6 @@ const MAXIMUM_DAMAGE_NUMBERS = 10;
 const HEAD_HEIGHT = 5.7;
 /** 숫자끼리 겹치지 않게 좌우·앞뒤로 흩는 폭(m). */
 const SCATTER_WIDTH = 2.4;
-/** 거리와 무관하게 읽히는 크기. 명찰·말풍선과 같은 값. */
-const DISTANCE_FACTOR = 18;
 
 interface DamageNumber {
   id: number;
@@ -120,11 +123,12 @@ function BossDamageNumbers({ bossState, drainBossHits, selfSeat, onHitByMe, onHi
         <group key={number.id} position={number.position}>
           <Html
             center
-            distanceFactor={DISTANCE_FACTOR}
+            distanceFactor={COMBAT_OVERLAY_DISTANCE_FACTOR}
             zIndexRange={[30, 0]}
             style={{ pointerEvents: "none" }}
           >
             <span
+              style={DAMAGE_NUMBER_STYLE}
               className={`space-damage-number block select-none whitespace-nowrap font-extrabold tabular-nums [text-shadow:0_2px_4px_rgba(0,0,0,0.85)] ${
                 number.isMine ? "text-3xl text-bitcoin" : "text-xl text-white/85"
               }`}
