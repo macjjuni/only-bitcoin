@@ -109,16 +109,16 @@ function SpaceLoadingOverlay({ stages, isHardTimedOut }: SpaceLoadingOverlayProp
       const status = displayedStages[key];
 
       return (
-        <li key={key} className="flex items-center justify-between gap-6 text-xs">
+        <li key={key} className="flex items-center justify-between gap-6 text-xs [@media(pointer:fine)]:text-base">
           <span className={status === "pending" ? "text-white/80" : "text-white/40"}>{label}</span>
           <span className={`font-semibold tabular-nums ${STAGE_STATUS_CLASS_NAME[status]}`}>
             {status === "pending" && (
-              <span className="inline-block size-1.5 animate-pulse rounded-full bg-white/60" />
+              <span className="inline-block size-1.5 animate-pulse rounded-full bg-white/60 [@media(pointer:fine)]:size-2" />
             )}
             {/* 끝나면 같은 자리의 점을 초록으로 바꿈. 글자는 화면 낭독기에만 남김. */}
             {status === "done" && (
               <>
-                <span aria-hidden="true" className="inline-block size-1.5 rounded-full bg-emerald-400" />
+                <span aria-hidden="true" className="inline-block size-1.5 rounded-full bg-emerald-400 [@media(pointer:fine)]:size-2" />
                 <span className="sr-only">{STAGE_STATUS_TEXT.done}</span>
               </>
             )}
@@ -142,22 +142,26 @@ function SpaceLoadingOverlay({ stages, isHardTimedOut }: SpaceLoadingOverlayProp
       className={`absolute inset-0 z-50 flex flex-col items-center justify-center bg-[#06080e] transition-opacity ${isComplete ? "pointer-events-none opacity-0" : "opacity-100"}`}
       style={{ transitionDuration: `${SPACE_LOADING.fadeOutInMilliseconds}ms` }}
     >
-      <div className="flex w-56 flex-col gap-4">
+      {/*
+        데스크톱(마우스 기기)은 한 단계 크게 그림. 폰 크기 그대로면 넓은 화면 한가운데서 작아 보였음.
+        미디어 쿼리로 나눔. 로딩 화면은 첫 렌더에 바로 떠서, 훅으로 재면 크기가 한 번 바뀌어 보임.
+      */}
+      <div className="flex w-56 flex-col gap-4 [@media(pointer:fine)]:w-80 [@media(pointer:fine)]:gap-6">
         <div className="flex items-end justify-between">
-          <span className="text-sm font-bold text-white">BTC Space</span>
-          <span className="text-xs font-semibold tabular-nums text-white/60">
+          <span className="text-sm font-bold text-white [@media(pointer:fine)]:text-xl">BTC Space</span>
+          <span className="text-xs font-semibold tabular-nums text-white/60 [@media(pointer:fine)]:text-base">
             {loadingPercent}%
           </span>
         </div>
 
-        <div className="h-1 w-full overflow-hidden rounded-full bg-white/10">
+        <div className="h-1 w-full overflow-hidden rounded-full bg-white/10 [@media(pointer:fine)]:h-1.5">
           <div
             className="h-full rounded-full bg-bitcoin transition-[width] duration-300 ease-out"
             style={{ width: `${loadingPercent}%` }}
           />
         </div>
 
-        <ul className="flex flex-col gap-1.5">{StageListTemplate}</ul>
+        <ul className="flex flex-col gap-1.5 [@media(pointer:fine)]:gap-2.5">{StageListTemplate}</ul>
       </div>
     </div>
   );

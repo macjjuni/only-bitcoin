@@ -50,7 +50,13 @@ const FALLBACK_BACK_PATH = "/orange";
 /** 설정 화면 개발자 후원과 같은 라이트닝 주소. 비어 있으면 후원 버튼을 숨김. */
 const DONATION_LIGHTNING_ADDRESS = env.NEXT_PUBLIC_DONATION_ADDRESS;
 
-const ICON_SIZE = 18;
+/**
+ * 우측 상단 버튼의 아이콘 크기. 손가락 기기가 기준이고 데스크톱은 한 단계 큼.
+ *
+ * 데스크톱은 화면이 넓고 멀리서 봐서, 폰 크기 그대로면 버튼·글자가 작아 보였음.
+ * 좌측 상단 접속 표시와 좌측 하단 채팅창도 같은 이유로 데스크톱 크기를 따로 둠.
+ */
+const ICON_SIZE = { coarse: 18, fine: 22 } as const;
 const ICON_STROKE_WIDTH = 2;
 /** 모바일 채팅 버튼 아이콘. 점프·발차기 버튼 아이콘과 같은 크기. */
 const MOBILE_CHAT_ICON_SIZE = TOUCH_BUTTON_ICON_SIZE;
@@ -69,15 +75,15 @@ const resolveBgmLabel = (bgm: SpaceBgm): string => {
   return bgm.isSurging ? "배경음악 끄기 (급등락 중)" : "배경음악 끄기";
 };
 
-const resolveBgmIcon = (bgm: SpaceBgm): ReactNode => {
+const resolveBgmIcon = (bgm: SpaceBgm, iconSize: number): ReactNode => {
   if (!bgm.isPlaying) {
-    return <VolumeX size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />;
+    return <VolumeX size={iconSize} strokeWidth={ICON_STROKE_WIDTH} />;
   }
 
   return bgm.isSurging ? (
-    <Flame size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />
+    <Flame size={iconSize} strokeWidth={ICON_STROKE_WIDTH} />
   ) : (
-    <Music size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />
+    <Music size={iconSize} strokeWidth={ICON_STROKE_WIDTH} />
   );
 };
 
@@ -109,6 +115,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
   const router = useTransitionRouter();
   const pathname = usePathname();
   const isCoarsePointer = useCoarsePointer();
+  const iconSize = isCoarsePointer ? ICON_SIZE.coarse : ICON_SIZE.fine;
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
   const [isAvatarPickerOpen, setIsAvatarPickerOpen] = useState(false);
@@ -297,7 +304,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
       {
         id: "back",
         label: "뒤로 가기",
-        icon: <ArrowLeft size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+        icon: <ArrowLeft size={iconSize} strokeWidth={ICON_STROKE_WIDTH} />,
         onClick: onClickBack,
       },
     ];
@@ -306,7 +313,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
       actions.push({
         id: "space-donation-toggle",
         label: "개발자 후원",
-        icon: <LightningIcon size={ICON_SIZE} />,
+        icon: <LightningIcon size={iconSize} />,
         isActive: isDonationOpen,
         onClick: onClickOpenDonation,
       });
@@ -315,7 +322,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
     actions.push({
       id: "space-nickname-toggle",
       label: "닉네임 변경",
-      icon: <Pencil size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+      icon: <Pencil size={iconSize} strokeWidth={ICON_STROKE_WIDTH} />,
       isActive: isNicknameEditorOpen,
       onClick: onClickToggleNicknameEditor,
     });
@@ -323,7 +330,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
     actions.push({
       id: "space-avatar-toggle",
       label: "아바타 변경",
-      icon: <UserRound size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+      icon: <UserRound size={iconSize} strokeWidth={ICON_STROKE_WIDTH} />,
       isActive: isAvatarPickerOpen,
       onClick: onClickToggleAvatarPicker,
     });
@@ -331,7 +338,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
     actions.push({
       id: "space-share-toggle",
       label: "공유하기",
-      icon: <Share2 size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+      icon: <Share2 size={iconSize} strokeWidth={ICON_STROKE_WIDTH} />,
       isActive: isShareOpen,
       onClick: onClickOpenShare,
     });
@@ -342,7 +349,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
         id: "space-bgm-toggle",
         // 급등락 트랙이 깔린 동안에는 왜 곡이 바뀌었는지 버튼이 설명해 줌.
         label: resolveBgmLabel(bgm),
-        icon: resolveBgmIcon(bgm),
+        icon: resolveBgmIcon(bgm, iconSize),
         isActive: bgm.isPlaying,
         onClick: bgm.toggle,
       });
@@ -352,7 +359,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
       actions.push({
       id: "space-celebration-test",
       label: "전광판 폭죽 테스트",
-      icon: <PartyPopper size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+      icon: <PartyPopper size={iconSize} strokeWidth={ICON_STROKE_WIDTH} />,
       onClick: onClickTestCelebration,
       });
     }
@@ -360,7 +367,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
     actions.push({
       id: "guide",
       label: "조작 안내",
-      icon: <CircleHelp size={ICON_SIZE} strokeWidth={ICON_STROKE_WIDTH} />,
+      icon: <CircleHelp size={iconSize} strokeWidth={ICON_STROKE_WIDTH} />,
       isActive: isGuideOpen,
       onClick: onClickToggleGuide,
     });
@@ -382,12 +389,13 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
     bgm.isUnavailable,
     bgm.isSurging,
     bgm.toggle,
+    iconSize,
     onClickTestCelebration,
     canTestCelebration,
   ]);
 
   const NicknameEditorTemplate = isNicknameEditorOpen ? (
-    <div ref={nicknameEditorRef} className="pointer-events-auto absolute right-12 top-24">
+    <div ref={nicknameEditorRef} className={`pointer-events-auto absolute top-24 ${isCoarsePointer ? "right-12" : "right-14"}`}>
       <SpaceNicknameEditor
         nickname={nickname}
         error={session.error}
@@ -399,7 +407,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
   ) : null;
 
   const AvatarPickerTemplate = isAvatarPickerOpen ? (
-    <div ref={avatarPickerRef} className="pointer-events-auto absolute right-12 top-24">
+    <div ref={avatarPickerRef} className={`pointer-events-auto absolute top-24 ${isCoarsePointer ? "right-12" : "right-14"}`}>
       <SpaceAvatarPicker
         modelIndex={modelIndex}
         onChangeModel={onChangeModel}
@@ -489,7 +497,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
         }}
       >
         <div className="pointer-events-auto">
-          <SpaceActionBar actions={hudActions} />
+          <SpaceActionBar actions={hudActions} size={isCoarsePointer ? "default" : "desktop"} />
         </div>
 
         {NicknameEditorTemplate}
@@ -559,9 +567,10 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
             sendMessage={session.sendMessage}
             onRetry={session.retry}
             hasComposer
-            messageTextClassName="text-sm"
-            height={248}
-            className="w-[400px] max-w-[calc(100vw-2rem)]"
+            isDesktopSized
+            messageTextClassName="text-base"
+            height={320}
+            className="w-[460px] max-w-[calc(100vw-2rem)]"
           />
         </div>
       )}

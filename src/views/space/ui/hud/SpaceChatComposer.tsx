@@ -159,11 +159,14 @@ function SpaceChatComposer({ presence, isMessagePending, sendMessage, onFocus, o
   const canSend = presence.status === "online" && !isMessagePending && remainingSeconds === 0 && characterCount > 0 && characterCount <= SPACE_CHAT_MAX_GRAPHEMES;
   const sendLabel = isMessagePending ? "전송 중" : remainingSeconds > 0 ? `${remainingSeconds}초` : "보내기";
   const isOverCharacterLimit = characterCount > SPACE_CHAT_MAX_GRAPHEMES;
-  /** 기본 32 px. 손가락 기기에서는 44 px. 34 px 일 때는 칸도 보내기 버튼도 작아 누르기 어려웠음. */
-  const inputHeightClassName = isTouchSized ? "h-11" : "h-8";
-  const sendButtonSizeClassName = isTouchSized ? "size-11 text-xs" : "size-8 text-[10px]";
-  const inputPaddingClassName = isTouchSized ? "pl-4 pr-3" : "pl-3 pr-2";
-  const sendIconSize = isTouchSized ? 18 : 13;
+  /**
+   * 기본(데스크톱 채팅창) 40 px. 손가락 기기에서는 44 px. 34 px 일 때는 칸도 보내기 버튼도 작아 누르기 어려웠음.
+   * 데스크톱도 32 px 였는데 넓은 화면에서 작아 보여 키움.
+   */
+  const inputHeightClassName = isTouchSized ? "h-11" : "h-10";
+  const sendButtonSizeClassName = isTouchSized ? "size-11 text-xs" : "size-10 text-xs";
+  const inputPaddingClassName = isTouchSized ? "pl-4 pr-3" : "pl-4 pr-2.5";
+  const sendIconSize = isTouchSized ? 18 : 16;
   // endregion
 
   return (

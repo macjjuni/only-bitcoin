@@ -44,7 +44,13 @@ interface SpaceChatPanelProps {
   onRetry: () => void;
   /** 손가락 기기는 내역만 띄우고 입력은 키보드 위 막대가 맡음. */
   hasComposer: boolean;
-  /** 메시지 글자 크기. 모바일은 12px, 데스크톱은 14px 로 씀. */
+  /**
+   * 데스크톱 크기로 그릴지. 머리줄·안내 글자·여백을 한 단계 키움.
+   *
+   * 모바일 크기 그대로면 넓은 화면에서 작아 보였음. 모바일은 화면이 좁아 그대로 둠.
+   */
+  isDesktopSized?: boolean;
+  /** 메시지 글자 크기. 모바일은 12px, 데스크톱은 16px 로 씀. */
   messageTextClassName?: string;
   /** 내역을 펼쳤을 때 높이(px). 숨기면 접속 표시 줄 높이만 남음. */
   height: number;
@@ -59,7 +65,7 @@ interface SpaceChatPanelProps {
  * 위에서도 읽히게 했음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessage, onRetry, hasComposer, messageTextClassName = "text-xs", height, className }: SpaceChatPanelProps): ReactNode {
+function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessage, onRetry, hasComposer, isDesktopSized = false, messageTextClassName = "text-xs", height, className }: SpaceChatPanelProps): ReactNode {
   // region [Hooks]
   const [isLogHidden, setIsLogHidden] = useState(readIsLogHidden);
   /**
@@ -148,29 +154,35 @@ function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessa
   const { label, accessibleLabel, dotClassName, isPulsing } = resolvePresenceDisplay(presence);
   const latestMessageId = messages.at(-1)?.id ?? null;
   const hasUnseenMessages = isLogHidden && hiddenBaselineMessageId !== undefined && latestMessageId !== null && latestMessageId !== hiddenBaselineMessageId;
+  const headerClassName = isDesktopSized ? "py-1.5 pl-3.5 pr-1.5" : "py-1 pl-2.5 pr-1";
+  const headerTextClassName = isDesktopSized ? "text-sm" : "text-xs";
+  const toggleButtonClassName = isDesktopSized ? "size-8" : "size-7";
+  const toggleIconSize = isDesktopSized ? 17 : 14;
+  const logClassName = isDesktopSized ? "py-2.5 pl-3.5 pr-2" : "py-2 pl-2.5 pr-1.5";
+  const noticeClassName = isDesktopSized ? "px-3.5 text-xs" : "px-2.5 text-[11px]";
   const toggleLabel = isLogHidden ? (hasUnseenMessages ? "채팅 내역 보기, 새 메시지 있음" : "채팅 내역 보기") : "채팅 내역 숨기기";
   // endregion
 
   return (
     <section aria-label="공간 채팅" className={`pointer-events-auto flex flex-col overflow-hidden rounded-xl bg-black/45 text-white [text-shadow:0_1px_2px_rgba(0,0,0,0.6)] ${className ?? ""}`} style={isLogHidden ? undefined : { height }}>
-      <div className={`flex shrink-0 items-center justify-between gap-2 py-1 pl-2.5 pr-1 ${isLogHidden ? "" : "border-b border-white/10"}`}>
+      <div className={`flex shrink-0 items-center justify-between gap-2 ${headerClassName} ${isLogHidden ? "" : "border-b border-white/10"}`}>
         <div role="status" aria-label={accessibleLabel} className="flex items-center gap-1.5">
           <span className={`size-2 shrink-0 rounded-full ${dotClassName} ${isPulsing ? "animate-pulse" : ""}`} />
-          <span aria-hidden="true" className="text-xs font-semibold tabular-nums text-white/90">{label}</span>
+          <span aria-hidden="true" className={`${headerTextClassName} font-semibold tabular-nums text-white/90`}>{label}</span>
         </div>
         <div className="flex items-center gap-1">
           {hasUnseenMessages && (
             <span aria-hidden="true" className="flex size-4 items-center justify-center rounded-full bg-red-500 text-[9px] font-bold leading-none text-white [text-shadow:none]">N</span>
           )}
-          <button type="button" onClick={onClickToggleLog} aria-label={toggleLabel} title={toggleLabel} aria-expanded={!isLogHidden} aria-controls={CHAT_LOG_ID} className="flex size-7 shrink-0 items-center justify-center rounded-full text-white/60 hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-bitcoin">
-            {isLogHidden ? <Eye size={14} /> : <EyeOff size={14} />}
+          <button type="button" onClick={onClickToggleLog} aria-label={toggleLabel} title={toggleLabel} aria-expanded={!isLogHidden} aria-controls={CHAT_LOG_ID} className={`flex ${toggleButtonClassName} shrink-0 items-center justify-center rounded-full text-white/60 hover:bg-white/10 hover:text-white focus-visible:outline focus-visible:outline-2 focus-visible:outline-bitcoin`}>
+            {isLogHidden ? <Eye size={toggleIconSize} /> : <EyeOff size={toggleIconSize} />}
           </button>
         </div>
       </div>
 
-      <div ref={logRef} id={CHAT_LOG_ID} role="log" aria-label="공간 대화" aria-live="polite" aria-relevant="additions" tabIndex={-1} hidden={isLogHidden} onMouseDown={onMouseDownLog} onScroll={onScrollLog} className="min-h-0 flex-1 select-none overflow-y-auto overscroll-contain space-chat-scrollbar py-2 pl-2.5 pr-1.5">
+      <div ref={logRef} id={CHAT_LOG_ID} role="log" aria-label="공간 대화" aria-live="polite" aria-relevant="additions" tabIndex={-1} hidden={isLogHidden} onMouseDown={onMouseDownLog} onScroll={onScrollLog} className={`min-h-0 flex-1 select-none overflow-y-auto overscroll-contain space-chat-scrollbar ${logClassName}`}>
         {messages.length === 0 && <p className={`${messageTextClassName} text-white/60`}>함께 전광판을 보며 이야기해 보세요.</p>}
-        <ol className="flex flex-col gap-0.5">
+        <ol className={`flex flex-col ${isDesktopSized ? "gap-1" : "gap-0.5"}`}>
           {messages.map((message) => (
             <li key={message.id} className={`break-words whitespace-pre-wrap leading-snug [overflow-wrap:anywhere] ${messageTextClassName}`}>
               <span className="mr-1 font-semibold text-bitcoin">{message.nickname}</span>
@@ -180,16 +192,16 @@ function SpaceChatPanel({ messages, presence, error, isMessagePending, sendMessa
         </ol>
       </div>
 
-      {error && <p role="status" className="px-2.5 pb-1 text-[11px] leading-snug text-amber-200">{error}</p>}
+      {error && <p role="status" className={`${noticeClassName} pb-1 leading-snug text-amber-200`}>{error}</p>}
       {!isOnline && (
-        <div className="flex items-center justify-between gap-2 px-2.5 pb-1 text-[11px] text-white/70">
+        <div className={`flex items-center justify-between gap-2 ${noticeClassName} pb-1 text-white/70`}>
           <span className="flex items-center gap-1"><WifiOff size={11} />연결되면 대화할 수 있어요.</span>
           <button type="button" onClick={onRetry} disabled={presence.status === "connecting"} className="shrink-0 rounded px-1 py-0.5 font-semibold text-bitcoin disabled:opacity-40">재연결</button>
         </div>
       )}
 
       {hasComposer && (
-        <SpaceChatComposer presence={presence} isMessagePending={isMessagePending} sendMessage={sendMessage} className={`px-1.5 pb-1.5 ${isLogHidden ? "pt-0.5" : ""}`} />
+        <SpaceChatComposer presence={presence} isMessagePending={isMessagePending} sendMessage={sendMessage} className={`${isDesktopSized ? "px-2 pb-2" : "px-1.5 pb-1.5"} ${isLogHidden ? "pt-0.5" : ""}`} />
       )}
     </section>
   );

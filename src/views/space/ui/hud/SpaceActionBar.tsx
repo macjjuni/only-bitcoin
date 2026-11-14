@@ -33,8 +33,10 @@ interface SpaceActionBarProps {
   /**
    * 버튼 크기. 엄지로 자주 누르는 모바일 채팅 버튼만 `large` 를 씀.
    * 점프·발차기와 같은 52 px(`TOUCH_BUTTON_DIAMETER`)라 바꾸면 같이 바꿔야 함.
+   *
+   * `desktop` 은 데스크톱 우측 상단 묶음용임. 폰 크기(40 px) 그대로면 넓은 화면에서 작아 보였음.
    */
-  size?: "default" | "large";
+  size?: "default" | "desktop" | "large";
 }
 
 const BASE_BUTTON_CLASS =
@@ -42,6 +44,7 @@ const BASE_BUTTON_CLASS =
 
 const BUTTON_SIZE_CLASS = {
   default: "size-10",
+  desktop: "size-12",
   large: "size-[52px]",
 } as const;
 
@@ -76,7 +79,9 @@ function SpaceActionBar({
   }
 
   return (
-    <div className={`flex flex-col gap-2 ${align === "start" ? "items-start" : "items-end"}`}>
+    <div
+      className={`flex flex-col ${size === "desktop" ? "gap-2.5" : "gap-2"} ${align === "start" ? "items-start" : "items-end"}`}
+    >
       {actions.map((action) => (
         <button
           key={action.id}
