@@ -143,7 +143,7 @@ export const SPACE_BOSS_COMBAT = {
   /**
    * 공격별 피해. 유저 최대 체력 100 기준 3 ~ 5대.
    *
-   * 회전만 작음. 도는 5초 동안 1초마다 다시 맞아서 다 맞으면 75 임.
+   * 회전만 작음. 도는 4초 동안 1초마다 다시 맞아서 다 맞으면 60 임.
    */
   attackDamage: { swipe: 20, slam: 35, charge: 30, spin: 15 },
   /**
@@ -179,7 +179,7 @@ export const SPACE_BOSS_COMBAT = {
   /**
    * 회전을 시작한 뒤 다음 회전까지 두는 간격(ms).
    *
-   * 한 번이 6.5초라 근접 순서대로 매번 쓰면 싸움의 절반을 돌기만 함.
+   * 한 번이 5.5초라 근접 순서대로 매번 쓰면 싸움의 절반을 돌기만 함.
    */
   spinIntervalMs: 15_000,
 } as const;
@@ -236,7 +236,8 @@ export const SPACE_BOSS_CLIP_SECONDS = {
  */
 const BOSS_SPIN_LAUNCH_SECONDS = framesToSeconds(24);
 const BOSS_SPIN_LOOP_SECONDS = framesToSeconds(24);
-const BOSS_SPIN_LOOP_COUNT = 5;
+/** 5 번(5초)이었는데 피하는 시간이 너무 길어 4 번으로 줄임. */
+const BOSS_SPIN_LOOP_COUNT = 4;
 
 /** `Turn` 모션에서 실제로 몸이 도는 구간(초). 이 사이에만 yaw 를 옮김. 앞뒤는 발 디딤임. */
 export const SPACE_BOSS_TURN = {
