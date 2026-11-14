@@ -1,30 +1,37 @@
 "use client";
 
-import { Html } from "@react-three/drei";
 import { addAfterEffect, useFrame, useThree } from "@react-three/fiber";
-import { type ReactNode, useCallback, useEffect, useRef, useState } from "react";
+import { type ReactNode, useCallback, useEffect, useRef } from "react";
 import {
   createSpacePerformanceSample,
   recordSpacePerformanceFrame,
+  type SpacePerformanceSummary,
   summarizeSpacePerformance,
 } from "../lib/performanceSample";
 
+/** 요약을 다시 내보내는 간격(ms). */
+const PUBLISH_INTERVAL_MS = 1_000;
+
 interface SpacePerformanceStatsProps {
-  dummyCount: number;
+  /** 요약이 바뀔 때마다 부름. 패널은 캔버스 밖 HUD(`SpacePerformancePanel`)가 그림. */
+  onPublish: (summary: SpacePerformanceSummary) => void;
 }
 
-/** 개발용 stats 쿼리에서만 표시한다. 측정은 준비 5초 + 표본 10초이며 탭 복귀 시 재시작한다. */
+/**
+ * 렌더 통계 측정기. 조작 안내 창에서 "성능 표시" 를 켰을 때만 붙임. 측정은 준비 5초 + 표본 10초이며 탭 복귀 시 재시작한다.
+ *
+ * 캔버스 안에서는 측정만 하고 아무것도 안 그림. 전에는 `<Html>` 로 패널까지 여기서 그렸는데,
+ * 그건 3D 공간의 한 점에 매달린 DOM 이라 시야를 돌리면 사라지고 HUD 의 채팅창과 자리를
+ * 맞출 수도 없었음.
+ */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-export default function SpacePerformanceStats({
-  dummyCount,
-}: SpacePerformanceStatsProps): ReactNode {
+export default function SpacePerformanceStats({ onPublish }: SpacePerformanceStatsProps): ReactNode {
   // region [Hooks]
   const renderer = useThree((rootState) => rootState.gl);
   const sampleRef = useRef(createSpacePerformanceSample());
   const previousTimestampRef = useRef<number | null>(null);
   const publishedTimestampRef = useRef<number>(0);
   const hasRenderedFrameRef = useRef<boolean>(false);
-  const [summary, setSummary] = useState(() => summarizeSpacePerformance(sampleRef.current));
   // endregion
 
 
@@ -34,8 +41,8 @@ export default function SpacePerformanceStats({
     previousTimestampRef.current = null;
     publishedTimestampRef.current = 0;
     hasRenderedFrameRef.current = false;
-    setSummary(summarizeSpacePerformance(sampleRef.current));
-  }, []);
+    onPublish(summarizeSpacePerformance(sampleRef.current));
+  }, [onPublish]);
 
   const markRenderedFrame = (): void => {
     hasRenderedFrameRef.current = true;
@@ -63,9 +70,9 @@ export default function SpacePerformanceStats({
         dpr: renderer.getPixelRatio(),
       });
 
-      if (timestamp - publishedTimestampRef.current >= 1_000) {
+      if (timestamp - publishedTimestampRef.current >= PUBLISH_INTERVAL_MS) {
         publishedTimestampRef.current = timestamp;
-        setSummary(summarizeSpacePerformance(sampleRef.current));
+        onPublish(summarizeSpacePerformance(sampleRef.current));
       }
     });
     document.addEventListener("visibilitychange", resetSample);
@@ -74,7 +81,7 @@ export default function SpacePerformanceStats({
       removeAfterEffect();
       document.removeEventListener("visibilitychange", resetSample);
     };
-  }, [renderer, resetSample]);
+  }, [renderer, resetSample, onPublish]);
   // endregion
 
 
@@ -86,35 +93,5 @@ export default function SpacePerformanceStats({
   }, [subscribePerformanceSampling]);
   // endregion
 
-
-  // region [Templates]
-  const phaseLabel = summary.isWarmingUp ? "준비 5초" : "측정 중";
-  const statusLabel = summary.isComplete ? "측정 완료" : phaseLabel;
-  const progressLabel = `${summary.elapsedSeconds.toFixed(1)} / 10초 · ${summary.frameCount} frames`;
-  const liveLabel = `지금 ${summary.liveFramesPerSecond.toFixed(1)} FPS`;
-  const fpsLabel = `${summary.framesPerSecond.toFixed(1)} FPS · p95 ${summary.p95FrameMilliseconds.toFixed(1)} ms`;
-  const renderLabel = `최대 ${summary.maxDrawCalls} calls · ${summary.maxTriangles.toLocaleString()} triangles`;
-  const dprLabel = `DPR ${summary.minDpr.toFixed(2)} ~ ${summary.maxDpr.toFixed(2)}`;
-  const serializedSummary = JSON.stringify(summary);
-  // endregion
-
-  return (
-    <Html fullscreen style={{ pointerEvents: "none" }}>
-      <output
-        data-space-performance={serializedSummary}
-        className="pointer-events-none absolute left-4 top-16 max-w-[calc(100vw-5rem)] rounded-lg bg-black/80 px-3 py-2 font-mono text-[11px] leading-5 text-white"
-      >
-        <span className="block">Space dev · 원격 더미 {dummyCount}명 + 로컬 1명</span>
-        <span className="block">
-          {statusLabel} · {progressLabel}
-        </span>
-        {/* 실시간 값이 먼저다. 10초 표본은 끝나면 멈추지만 이 줄은 계속 돈다. */}
-        <span className="block font-bold text-white">{liveLabel}</span>
-        <span className="block">{fpsLabel}</span>
-        <span className="block">{renderLabel}</span>
-        <span className="block">{dprLabel}</span>
-        <span className="block text-white/60">10초 표본은 새로고침으로 재측정</span>
-      </output>
-    </Html>
-  );
+  return null;
 }

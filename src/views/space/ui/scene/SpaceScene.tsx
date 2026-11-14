@@ -45,6 +45,7 @@ import {
   createDefaultCameraOrbit,
   createEmptyMovementInput,
   dampVector,
+  interpolatePlayerState,
   isKnockbackActive,
   type Knockback,
   planFixedSteps,
@@ -188,6 +189,15 @@ function SpaceScene({
     resolveCameraPosition(spawnTransform, cameraOrbitRef.current),
   );
   const accumulatedSecondsRef = useRef<number>(0);
+  /** 마지막 걸음을 떼기 직전의 상태. 그릴 자리를 이 상태와 지금 상태 사이에서 구함. */
+  const previousStepStateRef = useRef<LocalPlayerState>(playerStateRef.current);
+  /**
+   * 화면에 그리는 내 상태. 걸음 사이를 이은 값이라 `playerStateRef` 보다 한 걸음 안에서 뒤처짐.
+   *
+   * 아바타·카메라·명찰처럼 보이는 것은 전부 이걸 씀. 섞어 쓰면 서로 어긋나 떨림.
+   * 판정·충돌·서버 전송은 `playerStateRef` 를 씀.
+   */
+  const renderStateRef = useRef<LocalPlayerState>(playerStateRef.current);
   const playerGroupRef = useRef<Group>(null);
   /** 보스 공격에 맞아 밀리는 중이면 그 밀림. 끝났거나 안 맞았으면 `null`. */
   const knockbackRef = useRef<Knockback | null>(null);
@@ -237,6 +247,8 @@ function SpaceScene({
   // region [Privates]
   const applyServerTransform = useCallback((peer: SpacePeer): void => {
     playerStateRef.current = createLocalPlayerState(peer);
+    previousStepStateRef.current = playerStateRef.current;
+    renderStateRef.current = playerStateRef.current;
     accumulatedSecondsRef.current = 0;
     smoothedCameraRef.current = resolveCameraPosition(peer, cameraOrbitRef.current);
     // 순간이동 뒤에는 옛 상한에서 천천히 풀릴 이유가 없음.
@@ -341,6 +353,7 @@ function SpaceScene({
       }
       // 쌓인 시간을 버림. 안 버리면 일어나는 순간 밀린 걸음을 한꺼번에 걸음.
       accumulatedSecondsRef.current = 0;
+      previousStepStateRef.current = playerStateRef.current;
 
       return playerStateRef.current;
     }
@@ -363,6 +376,7 @@ function SpaceScene({
     const selfSeat = session.self?.seat ?? 0;
 
     for (let stepIndex = 0; stepIndex < stepPlan.stepCount; stepIndex += 1) {
+      previousStepStateRef.current = nextState;
       nextState = stepMovement(nextState, movementInput, cameraYaw, undefined, terrainRef.current);
       if (isKnockbackActive(knockback)) {
         nextState = stepKnockback(
@@ -535,6 +549,7 @@ function SpaceScene({
     const respawned = createLocalPlayerState(spawnTransform);
 
     playerStateRef.current = respawned;
+    previousStepStateRef.current = respawned;
     accumulatedSecondsRef.current = 0;
     cameraOrbitRef.current = { ...cameraOrbitRef.current, yaw: spawnTransform.yaw };
     smoothedCameraRef.current = resolveCameraPosition(spawnTransform, cameraOrbitRef.current);
@@ -714,7 +729,6 @@ function SpaceScene({
 
     const cameraOrbit = advanceCameraOrbit(deltaSeconds);
     const steppedState = advancePlayerState(cameraOrbit.yaw, deltaSeconds, now);
-    applyPlayerTransform(steppedState);
 
     // 맵 밖으로 빠졌으면 여기서 스폰으로 되돌아옴. 되돌린 궤도를 쓰려고 아래
     // 카메라 계산은 지역 변수가 아니라 ref 를 다시 읽음.
@@ -727,8 +741,18 @@ function SpaceScene({
       session.sampleBoss(now);
     }
 
-    const focus = resolveCameraFocus(playerState);
-    const targetPosition = resolveCameraPosition(playerState, cameraOrbitRef.current);
+    // 그리는 자리는 걸음 사이를 이음. 걸음 결과를 그대로 그리면 프레임마다 가는 거리가 달라 덜컥거림.
+    const renderState = interpolatePlayerState(
+      previousStepStateRef.current,
+      playerState,
+      accumulatedSecondsRef.current / SPACE_MOVEMENT.fixedTimeStep,
+    );
+
+    renderStateRef.current = renderState;
+    applyPlayerTransform(renderState);
+
+    const focus = resolveCameraFocus(renderState);
+    const targetPosition = resolveCameraPosition(renderState, cameraOrbitRef.current);
     const dampedPosition = dampVector(
       smoothedCameraRef.current,
       targetPosition,
@@ -851,7 +875,7 @@ function SpaceScene({
 
       <SpaceBarista terrainRef={terrainRef} isCoarsePointer={isCoarsePointer} />
       <AvatarSwingTrails
-        selfTransformRef={playerStateRef}
+        selfTransformRef={renderStateRef}
         selfModelIndex={avatarModelIndex}
         selfKickStartedAtRef={kickStartedAtRef}
         remotePlayers={remotePlayers}
@@ -870,20 +894,20 @@ function SpaceScene({
         selfModelIndex={avatarModelIndex}
         isCoarsePointer={isCoarsePointer}
         rosterRevision={session.rosterRevision}
-        viewerTransformRef={playerStateRef}
+        viewerTransformRef={renderStateRef}
       />
       <SelfHealthBar
         session={session}
         modelIndex={avatarModelIndex}
         isCoarsePointer={isCoarsePointer}
-        viewerTransformRef={playerStateRef}
+        viewerTransformRef={renderStateRef}
       />
       <ChatBubbles
         messages={session.bubbleMessages}
         isCoarsePointer={isCoarsePointer}
         players={remotePlayers}
         self={session.self}
-        viewerTransformRef={playerStateRef}
+        viewerTransformRef={renderStateRef}
       />
     </>
   );

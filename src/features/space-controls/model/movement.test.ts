@@ -10,6 +10,7 @@ import {
 } from "@/entities/space";
 import {
   createEmptyMovementInput,
+  interpolatePlayerState,
   type MovementInput,
   planFixedSteps,
   SPACE_MOVEMENT,
@@ -227,6 +228,60 @@ describe("stepMovement", () => {
     // GLB 가 도착하기 전 한두 프레임이 이 경로를 탐. 0 으로 떨어뜨리면
     // 맵이 붙는 순간 홀 바닥으로 솟아오름.
     expect(stepMovement(createState(), createEmptyMovementInput(), 0).y).toBe(SPACE_HALL.floorY);
+  });
+});
+
+describe("interpolatePlayerState", () => {
+  const stateAt = (x: number, yaw = 0): LocalPlayerState => ({
+    ...createLocalPlayerState({ x, y: 0, z: 0, yaw }),
+  });
+
+  it("직전 걸음과 지금 걸음 사이를 남은 시간만큼 잇는다", () => {
+    const previous = stateAt(1);
+    const current = stateAt(1.2);
+
+    expect(interpolatePlayerState(previous, current, 0).x).toBeCloseTo(1, 6);
+    expect(interpolatePlayerState(previous, current, 0.5).x).toBeCloseTo(1.1, 6);
+    expect(interpolatePlayerState(previous, current, 1).x).toBeCloseTo(1.2, 6);
+  });
+
+  it("프레임 간격이 들쭉날쭉해도 그리는 자리는 시간에 비례해 나아간다", () => {
+    const stepSeconds = SPACE_MOVEMENT.fixedTimeStep;
+    const speed = 6;
+    // 16 ms 와 19 ms 가 섞인 프레임. 걸음 결과만 그리면 프레임마다 0 ~ 2 걸음씩 감.
+    const frameSeconds = [0.016, 0.019, 0.016, 0.019, 0.017, 0.019, 0.016, 0.018];
+    let accumulated = 0;
+    let previous = stateAt(0);
+    let current = stateAt(0);
+    let elapsed = 0;
+
+    for (const seconds of frameSeconds) {
+      accumulated += seconds;
+      elapsed += seconds;
+      const plan = planFixedSteps(accumulated);
+
+      accumulated = plan.remainder;
+      for (let step = 0; step < plan.stepCount; step += 1) {
+        previous = current;
+        current = stateAt(current.x + speed * stepSeconds);
+      }
+
+      const rendered = interpolatePlayerState(previous, current, accumulated / stepSeconds);
+
+      // 한 걸음만큼 뒤에서 시간에 비례해 따라감.
+      expect(rendered.x).toBeCloseTo(Math.max(0, speed * (elapsed - stepSeconds)), 6);
+    }
+  });
+
+  it("방향은 짧은 쪽으로 돌고, 순간이동은 잇지 않고 바로 옮긴다", () => {
+    const turned = interpolatePlayerState(
+      stateAt(0, Math.PI - 0.1),
+      stateAt(0, -Math.PI + 0.1),
+      0.5,
+    );
+
+    expect(Math.abs(Math.abs(turned.yaw) - Math.PI)).toBeLessThan(1e-6);
+    expect(interpolatePlayerState(stateAt(0), stateAt(30), 0.5).x).toBe(30);
   });
 });
 

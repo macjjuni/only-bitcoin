@@ -31,6 +31,7 @@ import {
 import type { SpaceSession } from "@/features/space-session";
 import { env } from "@/shared/config/env";
 import { DonationQrDialog, LightningIcon } from "@/shared/ui";
+import type { SpacePerformanceSummary } from "@/views/space/lib/performanceSample";
 import { useDismissOnOutsidePointer } from "@/views/space/lib/useDismissOnOutsidePointer";
 import SpaceActionBar, { type SpaceHudAction } from "./SpaceActionBar";
 import SpaceAvatarPicker from "./SpaceAvatarPicker";
@@ -42,6 +43,7 @@ import SpaceControlGuide from "./SpaceControlGuide";
 import SpaceKeyboardChatBar from "./SpaceKeyboardChatBar";
 import SpaceNicknameEditor from "./SpaceNicknameEditor";
 import SpaceOccupantBadge from "./SpaceOccupantBadge";
+import SpacePerformancePanel from "./SpacePerformancePanel";
 import SpaceShareDialog from "./SpaceShareDialog";
 
 /** 히스토리가 없을 때(직접 링크 진입) 돌아갈 곳. `/space` 를 노출하는 목록임. */
@@ -97,6 +99,11 @@ interface SpaceHudProps {
   /** 지금 쓰는 아바타 모델. 서버가 확정한 값이 우선함. */
   modelIndex: number;
   onChangeModel: (modelIndex: number) => Promise<boolean>;
+  /** 계측 패널에 띄울 렌더 통계. 조작 안내 창에서 "성능 표시" 를 켰을 때만 값이 있음. */
+  performanceSummary: SpacePerformanceSummary | null;
+  isPerformanceStatsEnabled: boolean;
+  onTogglePerformanceStats: () => void;
+  dummyCount: number;
 }
 
 /**
@@ -110,7 +117,7 @@ interface SpaceHudProps {
  * 전체 화면 3D 페이지라 브라우저가 대신 비켜주지 않음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, modelIndex, onChangeModel, onCelebrate }: SpaceHudProps): ReactNode {
+function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, modelIndex, onChangeModel, onCelebrate, performanceSummary, isPerformanceStatsEnabled, onTogglePerformanceStats, dummyCount }: SpaceHudProps): ReactNode {
   // region [Hooks]
   const router = useTransitionRouter();
   const pathname = usePathname();
@@ -418,7 +425,11 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
 
   const GuidePanelTemplate = isGuideOpen ? (
     <div className="mt-2">
-      <SpaceControlGuide isCoarsePointer={isCoarsePointer} />
+      <SpaceControlGuide
+        isCoarsePointer={isCoarsePointer}
+        isPerformanceStatsEnabled={isPerformanceStatsEnabled}
+        onTogglePerformanceStats={onTogglePerformanceStats}
+      />
     </div>
   ) : null;
 
@@ -487,6 +498,16 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
             />
           </div>
         )}
+
+        {/* 계측 패널은 위 요소 바로 아래에 붙임. 채팅 내역을 접으면 같이 올라감. */}
+        {performanceSummary && (
+          <SpacePerformancePanel
+            summary={performanceSummary}
+            dummyCount={dummyCount}
+            getNetworkStats={session.getNetworkStats}
+            probeNetwork={session.probeNetwork}
+          />
+        )}
       </div>
 
       <div
@@ -504,7 +525,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
 
         {AvatarPickerTemplate}
 
-        {/* 안내는 읽기 전용임. 터치를 막으면 열어둔 동안 그 영역의 시야 조작이 죽음. */}
+        {/* 안내는 스위치 한 줄만 빼고 읽기 전용임. 터치를 통째로 막으면 열어둔 동안 그 영역의 시야 조작이 죽음. */}
         {GuidePanelTemplate}
       </div>
 

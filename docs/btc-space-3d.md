@@ -134,7 +134,7 @@ src/views/space/
   index.ts
   ui/SpaceView.tsx           # 클라이언트 키·개발 더미 수, SpaceCanvas dynamic import
   ui/SpaceCanvas.tsx         # <Canvas> 래퍼, dpr·frameloop·가시성 제어
-  ui/SpacePerformanceStats.tsx # 개발용 ?stats=1, 5초 준비 + 10초 렌더 측정
+  ui/SpacePerformanceStats.tsx # 조작 안내 창의 "성능 표시" 스위치, 5초 준비 + 10초 렌더 측정
   ui/SpaceFallback.tsx       # WebGL 미지원·저사양 폴백
   ui/scene/SpaceScene.tsx    # 씬 조립 + useRef 로컬 플레이어 + 프레임 루프
   ui/scene/SceneLighting.tsx # 노을 조명·따라다니는 태양·가까운 랜턴만 (§4.4)
@@ -884,7 +884,7 @@ GLTF 지오메트리·머티리얼을 쓰는 메시에는 **`dispose={null}` 이
 
 재현 절차:
 
-1. `pnpm dev` 로 개발 서버를 띄우고 `http://localhost:3002/space?dummies=50&stats=1` 을 연다. 운영 환경에서는 더미와 계측 패널이 비활성화된다.
+1. `pnpm dev` 로 개발 서버를 띄우고 `http://localhost:3002/space?dummies=50` 을 열고, 우측 상단 조작 안내 창에서 "성능 표시" 를 켠다(이 브라우저에 기억됨). 운영 환경에서는 더미만 비활성화되고 계측 패널은 같은 스위치로 켤 수 있다.
 2. 원격 더미 50명과 로컬 아바타 1명이 함께 렌더되는지 확인한다. 50명 목표보다 로컬 1명을 더한 상태로 여유를 측정한다.
 3. 탭을 활성 상태로 유지한다. 셰이더·텍스처 준비 5초를 제외하고 10초 동안 표본을 모아 화면에 `측정 완료` 가 표시될 때까지 기다린다. 새로고침이나 탭 가시성 변경은 측정을 초기화한다.
 4. 평균 FPS, 프레임 시간 p95, 최대 드로우 콜·삼각형 수, dpr 범위를 기록한다. 기기·브라우저·뷰포트·그림자 설정도 남기고 실제 중급 모바일 기기에서 같은 절차를 반복한다.

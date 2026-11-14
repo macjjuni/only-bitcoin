@@ -337,6 +337,8 @@ export class SpaceSessionController {
   private readonly receivedKickIds = new Map<string, number>();
   private clockSentAt: number | null = null;
   private bestClockRtt = Number.POSITIVE_INFINITY;
+  /** 가장 최근에 잰 서버 왕복 시간(ms). 계측 패널에 보여 줌. */
+  private lastClockRtt: number | null = null;
   private clockBurstRemaining = 0;
   private clockBurstTimer: ReturnType<typeof setTimeout> | null = null;
 
@@ -446,6 +448,24 @@ export class SpaceSessionController {
       this.clockBurstTimer = null;
     }
   }
+
+  /**
+   * 서버까지의 왕복 시간(ms). 아직 못 쟀으면 `null`.
+   *
+   * 계측 패널(조작 안내 창의 "성능 표시")용임. 화면은 초당 60장을 잘 그리는데 보스나 남의 움직임이 늦다면
+   * 이 값이 큰 것임. 로컬 서버는 1 ~ 2 ms 이고 운영은 망과 서버 위치에 따라 달라짐.
+   */
+  getNetworkStats = (): { lastRttMs: number | null; bestRttMs: number | null } => ({
+    lastRttMs: this.lastClockRtt,
+    bestRttMs: Number.isFinite(this.bestClockRtt) ? this.bestClockRtt : null,
+  });
+
+  /** 서버 왕복 시간을 지금 한 번 더 잼. 계측 패널이 자주 불러 값을 갱신함. */
+  probeNetwork = (): void => {
+    if (this.clockSentAt === null) {
+      this.requestClock();
+    }
+  };
 
   subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
@@ -906,6 +926,9 @@ export class SpaceSessionController {
             this.requestClock();
           }, clockBurstIntervalMs);
         }
+        if (rtt >= 0 && rtt < 10000) {
+          this.lastClockRtt = rtt;
+        }
         if (rtt >= 0 && rtt <= this.bestClockRtt && rtt < 10000) {
           this.bestClockRtt = rtt;
           this.updateSnapshot({
@@ -1265,6 +1288,7 @@ export class SpaceSessionController {
     this.receivedKickIds.clear();
     this.clockSentAt = null;
     this.bestClockRtt = Number.POSITIVE_INFINITY;
+    this.lastClockRtt = null;
     this.kickEvents = [];
     this.peers.clear();
     this.interpolator.clear();

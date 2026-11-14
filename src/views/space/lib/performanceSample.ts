@@ -76,6 +76,9 @@ export const recordSpacePerformanceFrame = (
   sample.maxDpr = Math.max(sample.maxDpr, frame.dpr);
 };
 
+/** 계측 패널에 보여 주는 요약. */
+export type SpacePerformanceSummary = ReturnType<typeof summarizeSpacePerformance>;
+
 export const summarizeSpacePerformance = (sample: SpacePerformanceSample) => {
   const sortedMilliseconds = [...sample.frameMilliseconds].sort((first, second) => first - second);
   const frameCount = sortedMilliseconds.length;

@@ -36,6 +36,7 @@ import {
   SPACE_LOADING,
   type SpaceLoadStages,
 } from "@/views/space/lib/spaceLoading";
+import type { SpacePerformanceSummary } from "../lib/performanceSample";
 import { useScreenCelebrationSound } from "../model/useScreenCelebrationSound";
 import { useSpaceBgmZone } from "../model/useSpaceBgmZone";
 import { useSpaceSfx } from "../model/useSpaceSfx";
@@ -44,6 +45,26 @@ import SpaceFallback, { type SpaceFallbackReason } from "./SpaceFallback";
 import SpaceLoadingOverlay from "./SpaceLoadingOverlay";
 import SpacePerformanceStats from "./SpacePerformanceStats";
 import SpaceScene from "./scene/SpaceScene";
+
+/** 계측 패널을 켜 뒀는지는 이 브라우저에만 기억함. 새로고침해야 10초 표본을 다시 재서 남겨 둬야 함. */
+const STATS_ENABLED_STORAGE_KEY = "only-btc.space.stats-enabled";
+
+const readIsStatsEnabled = (): boolean => {
+  try {
+    return window.localStorage.getItem(STATS_ENABLED_STORAGE_KEY) === "1";
+  } catch {
+    // 사파리 프라이빗 모드 등에서 저장소 접근이 막힘.
+    return false;
+  }
+};
+
+const writeIsStatsEnabled = (isEnabled: boolean): void => {
+  try {
+    window.localStorage.setItem(STATS_ENABLED_STORAGE_KEY, isEnabled ? "1" : "0");
+  } catch {
+    // 기억하지 못해도 지금 화면의 스위치는 동작함.
+  }
+};
 
 /** 컨텍스트 복구를 기다리는 시간. 넘기면 폴백으로 전환한다. */
 const CONTEXT_RESTORE_TIMEOUT_MS = 3_000;
@@ -102,19 +123,19 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   /** 모바일 여부. 성능 콜백에서 읽어서 ref 로 둠. */
   const isMobileRef = useRef<boolean>(false);
   /**
-   * 계측 패널 표시 여부.
+   * 계측 패널 표시 여부. 조작 안내 창의 "성능 표시" 스위치로 켜고 이 브라우저에 기억함.
    *
-   * **운영에서도 `?stats=1` 로 켠다.** 개발 환경에만 두면 실기기 측정이
-   * `pnpm dev` 를 띄운 PC 와 같은 네트워크에 폰을 붙이는 일이 되고, dpr·번들·
-   * 소스맵이 모두 달라 운영 성능을 대신하지 못한다. §8.2 가 계속 "미측정" 인
-   * 이유도 그것이다.
+   * **운영에서도 켤 수 있음.** 개발 환경에만 두면 실기기 측정이 `pnpm dev` 를 띄운 PC 와
+   * 같은 네트워크에 폰을 붙이는 일이 되고, dpr·번들·소스맵이 모두 달라 운영 성능을 대신하지
+   * 못함. 전에는 `?stats=1` 쿼리로 켰는데 폰에서 주소를 고쳐 치기 번거로워 스위치로 옮김.
    *
-   * 쿼리로만 켜지므로 일반 접속자에게는 보이지 않고, 패널에는 렌더 통계 외에
-   * 아무 정보도 없다. 더미(`?dummies=N`)는 운영에서 계속 막는다 — 가짜 아바타
-   * 50명은 실제 접속자에게 보이고 좌석을 혼동시킨다.
+   * 패널에는 렌더 통계와 서버 왕복 시간 외에 아무 정보도 없음. 더미(`?dummies=N`)는 운영에서
+   * 계속 막음 — 가짜 아바타 50명은 실제 접속자에게 보이고 좌석을 혼동시킴.
    */
-  const [hasPerformanceStats] = useState(
-    () => new URLSearchParams(window.location.search).get("stats") === "1",
+  const [hasPerformanceStats, setHasPerformanceStats] = useState<boolean>(readIsStatsEnabled);
+  /** 캔버스 안 측정기가 내보낸 렌더 통계. 패널은 HUD 가 채팅창 아래에 그림. 계측을 안 켰으면 `null`. */
+  const [performanceSummary, setPerformanceSummary] = useState<SpacePerformanceSummary | null>(
+    null,
   );
   /** `?celebrate=1` 로만 폭죽 테스트 버튼을 켠다. 누르면 방 전체에 터져서 일반 접속자에게는 숨긴다. */
   const [hasCelebrationTest] = useState(
@@ -248,6 +269,16 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
 
   const onFallbackPerformance = useCallback((): void => {
     setRenderDpr(dprPolicyRef.current.min);
+  }, []);
+
+  const onTogglePerformanceStats = useCallback((): void => {
+    setHasPerformanceStats((wasEnabled) => {
+      writeIsStatsEnabled(!wasEnabled);
+
+      return !wasEnabled;
+    });
+    // 끄면 패널도 내림. 켜면 측정기가 곧 새 요약을 내보냄.
+    setPerformanceSummary(null);
   }, []);
 
   const onReadyMap = useCallback((): void => {
@@ -394,7 +425,7 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
             playSfx={playSfx}
           />
         </Suspense>
-        {hasPerformanceStats && <SpacePerformanceStats dummyCount={dummyCount} />}
+        {hasPerformanceStats && <SpacePerformanceStats onPublish={setPerformanceSummary} />}
       </Canvas>
 
       <SpaceHud
@@ -409,6 +440,10 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
         nickname={nickname}
         modelIndex={modelIndex}
         onChangeModel={onChangeModel}
+        performanceSummary={hasPerformanceStats ? performanceSummary : null}
+        isPerformanceStatsEnabled={hasPerformanceStats}
+        onTogglePerformanceStats={onTogglePerformanceStats}
+        dummyCount={dummyCount}
       />
 
       <SpaceLoadingOverlay stages={loadStages} isHardTimedOut={isLoadingHardTimedOut} />

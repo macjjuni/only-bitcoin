@@ -29,6 +29,7 @@ export {
 } from "./model/knockback";
 export {
   createEmptyMovementInput,
+  interpolatePlayerState,
   type MovementInput,
   planFixedSteps,
   SPACE_MOVEMENT,

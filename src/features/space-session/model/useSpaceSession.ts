@@ -109,6 +109,8 @@ export const useSpaceSession = ({ identity, modelIndex, enabled }: UseSpaceSessi
     drainBossHits: controller.drainBossHits,
     drainPlayerHits: controller.drainPlayerHits,
     getSelfPosition: controller.getSelfPosition,
+    getNetworkStats: controller.getNetworkStats,
+    probeNetwork: controller.probeNetwork,
     sendMessage: controller.sendMessage,
     changeNickname: controller.changeNickname,
     changeModel: controller.changeModel,

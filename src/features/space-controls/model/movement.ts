@@ -193,6 +193,50 @@ export const planFixedSteps = (accumulatedSeconds: number): FixedStepPlan => {
   return { stepCount: maxCatchUpSteps, remainder: 0 };
 };
 
+/** 이보다 멀리 떨어진 두 상태는 잇지 않고 바로 옮김(m). 리스폰·서버 보정 같은 순간이동임. */
+const RENDER_SNAP_DISTANCE = 1;
+
+/**
+ * 화면에 그릴 상태. 직전 걸음과 지금 걸음 사이를 남은 시간만큼 이음.
+ *
+ * 이동은 1/60 초 고정 걸음으로 계산하는데 화면 프레임은 그 박자와 딱 안 맞음. 프레임이
+ * 19 ms 걸리면 어떤 프레임은 한 걸음, 어떤 프레임은 두 걸음을 가고, 16 ms 면 가끔 한 걸음도
+ * 못 감. 걸음 결과를 그대로 그리면 초당 60장을 다 그려도 캐릭터와 카메라가 덜컥거림.
+ * 프레임 간격이 고르지 않은 모바일에서 특히 심했음.
+ *
+ * 그리는 자리만 이음. 판정·충돌·서버로 보내는 위치는 걸음 결과 그대로 씀.
+ *
+ * @param stepProgress 다음 걸음까지 쌓인 시간의 비율(0 … 1). `남은 시간 ÷ fixedTimeStep` 임.
+ */
+export const interpolatePlayerState = (
+  previous: LocalPlayerState,
+  current: LocalPlayerState,
+  stepProgress: number,
+): LocalPlayerState => {
+  const deltaX = current.x - previous.x;
+  const deltaY = current.y - previous.y;
+  const deltaZ = current.z - previous.z;
+
+  if (Math.hypot(deltaX, deltaY, deltaZ) > RENDER_SNAP_DISTANCE) {
+    return current;
+  }
+
+  const progress = Math.min(1, Math.max(0, stepProgress));
+  // 짧은 쪽으로 돎. 그냥 이으면 −π 와 π 사이를 넘을 때 한 바퀴를 거꾸로 돎.
+  const yawGap = Math.atan2(
+    Math.sin(current.yaw - previous.yaw),
+    Math.cos(current.yaw - previous.yaw),
+  );
+
+  return {
+    ...current,
+    x: previous.x + deltaX * progress,
+    y: previous.y + deltaY * progress,
+    z: previous.z + deltaZ * progress,
+    yaw: previous.yaw + yawGap * progress,
+  };
+};
+
 /**
  * 수직 속도와 높이를 적분함.
  *
