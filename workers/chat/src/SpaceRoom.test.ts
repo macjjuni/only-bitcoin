@@ -50,7 +50,6 @@ class RoomSocket {
       lastMoveAt: Date.now(),
       movementBudget: 0.5,
       lastSayAt: null,
-      recentSayReceipts: [],
     };
   }
 
@@ -669,7 +668,7 @@ describe("SpaceRoom", () => {
     expect(response.status).toBe(429);
   });
 
-  it("say 중복 방지는 wake 후에도 유지하고 attachment에는 최근 메타데이터만 남긴다", async () => {
+  it("say 중복 방지 기록은 메모리에만 두고 attachment에는 싣지 않는다", async () => {
     const { state, join, send } = createRoom();
     const sender = await join(clientKey(1));
     const body = "이 말풍선 본문은 보관하지 않아요";
@@ -680,26 +679,78 @@ describe("SpaceRoom", () => {
       await send(sender, { v: SPACE_PROTOCOL_VERSION, t: "say", rid: lastRid, body });
       vi.advanceTimersByTime(5000);
     }
-    const attachment = sender.deserializeAttachment() as { recentSayReceipts: unknown[] };
-    expect(attachment.recentSayReceipts).toHaveLength(32);
+    const attachment = sender.deserializeAttachment();
+    // 말을 아무리 해도 소켓 상태는 그대로임. 이동할 때마다 같이 저장되는 값이라 커지면 안 됨.
+    expect(attachment).not.toHaveProperty("recentSayReceipts");
     expect(JSON.stringify(attachment)).not.toContain(body);
-    expect(new TextEncoder().encode(JSON.stringify(attachment)).byteLength).toBeLessThan(8192);
+    expect(JSON.stringify(attachment)).not.toContain(lastRid);
 
-    const restored = createRoom(state);
-    const previousEcho = sender
-      .frames()
-      .filter((frame) => frame.t === "say")
-      .at(-1);
+    const sayFrames = () => sender.frames().filter((frame) => frame.t === "say");
+    const previousEcho = sayFrames().at(-1);
     const writeCountBeforeReplay = state.storage.sql.writeCount;
-    await restored.send(sender, { v: SPACE_PROTOCOL_VERSION, t: "say", rid: lastRid, body });
-    const repeatedEcho = sender
-      .frames()
-      .filter((frame) => frame.t === "say")
-      .at(-1);
+    await send(sender, { v: SPACE_PROTOCOL_VERSION, t: "say", rid: lastRid, body });
 
-    expect(repeatedEcho).toEqual(previousEcho);
+    expect(sayFrames().at(-1)).toEqual(previousEcho);
     // 재전송은 기록에 다시 안 씀.
     expect(state.storage.sql.writeCount).toBe(writeCountBeforeReplay);
+
+    // 하이버네이션 뒤에는 기록이 비워져 같은 요청 번호도 새 메시지로 받음.
+    const restored = createRoom(state);
+    await restored.send(sender, { v: SPACE_PROTOCOL_VERSION, t: "say", rid: lastRid, body });
+
+    expect(sayFrames().at(-1)).not.toEqual(previousEcho);
+    expect(state.storage.sql.writeCount).toBeGreaterThan(writeCountBeforeReplay);
+  });
+
+  it("탭을 바꿔 들어와도 say 중복 방지 기록을 이어 간다", async () => {
+    const { join, send } = createRoom();
+    const previous = await join(clientKey(1));
+    const frame = {
+      v: SPACE_PROTOCOL_VERSION,
+      t: "say",
+      rid: crypto.randomUUID(),
+      body: "한 번만 보여요",
+    };
+
+    await send(previous, frame);
+    const replacement = await join(clientKey(1));
+    await send(replacement, frame);
+
+    const echoes = [...previous.frames(), ...replacement.frames()].filter(
+      (item) => item.t === "say",
+    );
+
+    expect(echoes).toHaveLength(2);
+    expect(echoes[0]).toEqual(echoes[1]);
+  });
+
+  it("소켓 상태는 처음 한 번만 풀어 읽고 그 뒤로는 메모리 사본을 쓴다", async () => {
+    const { state, join, send } = createRoom();
+    const features = ["kick", "boss-v1"];
+    const mover = await join(clientKey(1), "참여자", 0, "test-ip", features);
+    const observer = await join(clientKey(2), "참여자", 0, "test-ip", features);
+    const start = mover.peer();
+    const spies = [mover, observer].map((socket) => vi.spyOn(socket, "deserializeAttachment"));
+
+    await send(mover, { v: SPACE_PROTOCOL_VERSION, t: "move", ...start, x: start.x + 0.1 });
+    await send(mover, { v: SPACE_PROTOCOL_VERSION, t: "kick" });
+    // 공격은 받는 사람마다, 틱은 좌석마다 상태를 읽음. 그래도 방은 한 번도 안 풀어 읽음.
+    vi.advanceTimersByTime(300);
+    expect(observer.frames().some((frame) => frame.t === "kick")).toBe(true);
+    expect(spies[0]).not.toHaveBeenCalled();
+    expect(spies[1]).not.toHaveBeenCalled();
+
+    // 깨어난 방은 소켓에 저장된 값에서 다시 시작함. 이동한 자리가 그대로 남아 있어야 함.
+    const movedX = mover.peer().x;
+
+    expect(movedX).toBeCloseTo(start.x + 0.1);
+    const restored = createRoom(state);
+    const arriving = await restored.join(clientKey(3));
+    const welcome = arriving.frames().find((frame) => frame.t === "welcome");
+
+    expect(
+      welcome?.t === "welcome" && welcome.peers.find((peer) => peer.seat === mover.peer().seat)?.x,
+    ).toBe(movedX);
   });
 
   it("IP 하나는 연결을 나눠도 1분에 12개까지만 보내고, 다른 IP 는 영향받지 않는다", async () => {

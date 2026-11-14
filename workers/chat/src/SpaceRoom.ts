@@ -107,7 +107,6 @@ interface SpaceSocketAttachment {
   movementBudget: number;
   lastSayAt: number | null;
   lastNickAt?: number | null;
-  recentSayReceipts: SayReceipt[];
   /** 입장 때 클라이언트가 안다고 한 기능. 모르는 기능 프레임은 안 보냄. */
   features?: string[];
   /** 마지막으로 찬 시각. 쿨다운 판정용. */
@@ -189,6 +188,22 @@ const textEncoder = new TextEncoder();
 export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   private marketMonitor: SpaceMarketMonitor;
   private socketsBySeat = new Map<number, WebSocket>();
+  /**
+   * 소켓에 붙여 둔 상태의 메모리 사본.
+   *
+   * `deserializeAttachment` 는 부를 때마다 통째로 복사해 줌. 보스전에서는 0.1초마다
+   * 인원수만큼, 공격·이동 때도 받는 사람 수만큼 읽어서 그 복사가 가장 큰 비용이었음.
+   * 읽기는 여기서 하고, 쓰기는 `setAttachment` 가 여기와 소켓을 함께 고침.
+   * 하이버네이션으로 비워지면 처음 읽을 때 소켓에서 다시 채움.
+   */
+  private attachments = new Map<WebSocket, SpaceSocketAttachment>();
+  /**
+   * 소켓별 최근 전송 기록. 같은 요청 번호가 다시 오면 새 메시지로 안 치고 응답만 다시 줌.
+   *
+   * 메모리에만 둠. 소켓 상태에 실으면 말할수록 커지고 이동할 때마다 같이 저장됨.
+   * 하이버네이션 뒤에는 비워지지만, 그건 방이 한동안 조용했다는 뜻이라 재전송이 걸칠 일이 없음.
+   */
+  private sayReceipts = new Map<WebSocket, SayReceipt[]>();
   private dirtySeats = new Set<number>();
   private snapshotTimer: ReturnType<typeof setTimeout> | null = null;
   private nextSnapshotAt = 0;
@@ -251,11 +266,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
     this.bossRespawnMs = bossRespawnSeconds === null ? null : bossRespawnSeconds * 1000;
     this.marketMonitor = new SpaceMarketMonitor(state.storage, () => this.socketsBySeat.size > 0, (frame) => {
-      for (const socket of this.socketsBySeat.values()) {
-        if (this.getJoinedAttachment(socket)?.features?.includes(SPACE_FEATURE_MARKET)) {
-          this.sendFrame(socket, frame);
-        }
-      }
+      this.broadcastToFeature(SPACE_FEATURE_MARKET, frame);
     });
     this.state.setWebSocketAutoResponse(new WebSocketRequestResponsePair("ping", "pong"));
 
@@ -275,6 +286,11 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
   // region [Privates]
   private getAttachment(socket: WebSocket): SpaceSocketAttachment | null {
+    const cached = this.attachments.get(socket);
+
+    if (cached) {
+      return cached;
+    }
     let attachment: unknown;
 
     try {
@@ -288,12 +304,31 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     }
     const candidate = attachment as Partial<SpaceSocketAttachment>;
 
-    return candidate.v === SPACE_PROTOCOL_VERSION &&
-      typeof candidate.joined === "boolean" &&
-      typeof candidate.ipGuardKey === "string" &&
-      Array.isArray(candidate.recentSayReceipts)
-      ? (candidate as SpaceSocketAttachment)
-      : null;
+    if (
+      candidate.v !== SPACE_PROTOCOL_VERSION ||
+      typeof candidate.joined !== "boolean" ||
+      typeof candidate.ipGuardKey !== "string"
+    ) {
+      return null;
+    }
+    this.attachments.set(socket, candidate as SpaceSocketAttachment);
+
+    return candidate as SpaceSocketAttachment;
+  }
+
+  /**
+   * 소켓 상태를 바꿈. **상태를 쓰는 유일한 자리임.**
+   *
+   * 소켓에 직접 쓰면 메모리 사본이 옛 값으로 남음. 소켓에 먼저 써서, 저장이 실패하면
+   * 사본도 그대로 둠. 넘긴 객체는 그대로 사본이 되므로 넘긴 뒤에 고치면 안 됨.
+   */
+  private setAttachment(socket: WebSocket, attachment: SpaceSocketAttachment): void {
+    socket.serializeAttachment(attachment);
+    this.attachments.set(socket, attachment);
+  }
+
+  private hasFeature(socket: WebSocket, feature: string): boolean {
+    return this.getJoinedAttachment(socket)?.features?.includes(feature) ?? false;
   }
 
   private getJoinedAttachment(socket: WebSocket): SpaceSocketAttachment | null {
@@ -327,6 +362,17 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
     for (const socket of this.socketsBySeat.values()) {
       if (socket !== excludedSocket) {
+        this.sendPayload(socket, payload);
+      }
+    }
+  }
+
+  /** 그 기능을 안다고 한 클라이언트에만 보냄. 모르는 프레임을 받은 옛 클라이언트는 연결을 끊음. */
+  private broadcastToFeature(feature: string, frame: SpaceServerFrame): void {
+    const payload = JSON.stringify(frame);
+
+    for (const socket of this.socketsBySeat.values()) {
+      if (this.hasFeature(socket, feature)) {
         this.sendPayload(socket, payload);
       }
     }
@@ -572,7 +618,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     const ownedSeat = warmSeat ?? coldSeat;
 
     if (attachment?.joined && socket.readyState === 1) {
-      socket.serializeAttachment({ ...attachment, joined: false });
+      this.setAttachment(socket, { ...attachment, joined: false });
     }
     if (ownedSeat !== undefined) {
       this.socketsBySeat.delete(ownedSeat);
@@ -598,6 +644,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     } catch {
       // 이미 닫힌 소켓도 좌석·타이머 정리는 끝냄.
     }
+    // 맨 끝에 지움. 위에서 읽으면서 다시 채워질 수 있음.
+    this.attachments.delete(socket);
+    this.sayReceipts.delete(socket);
   }
 
   /** ping은 런타임이 응답함. 유령 좌석 정리도 다른 실제 이벤트가 있을 때만 함. */
@@ -667,10 +716,6 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     }
   }
 
-  private hasHallBgmFeature(socket: WebSocket): boolean {
-    return this.getJoinedAttachment(socket)?.features?.includes(SPACE_FEATURE_HALL_BGM) ?? false;
-  }
-
   /**
    * 홀 배경음악을 바꿈. 방 전체에 쿨다운이 하나라 그동안은 누구의 요청이든 거절함.
    *
@@ -681,7 +726,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   private async handleHallBgm(socket: WebSocket, track: SpaceHallBgmTrack): Promise<void> {
     const attachment = this.getJoinedAttachment(socket);
 
-    if (!attachment?.peer || !this.hasHallBgmFeature(socket)) {
+    if (!attachment?.peer || !this.hasFeature(socket, SPACE_FEATURE_HALL_BGM)) {
       this.sendError(socket, "JOIN_REQUIRED", "먼저 공간에 입장해 주세요.");
       return;
     }
@@ -710,11 +755,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       .put(HALL_BGM_STORAGE_KEY, state)
       .catch((error) => console.error("Hall bgm save failed", error));
 
-    for (const candidate of this.socketsBySeat.values()) {
-      if (this.hasHallBgmFeature(candidate)) {
-        this.sendFrame(candidate, { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", state, serverAt: now });
-      }
-    }
+    this.broadcastToFeature(SPACE_FEATURE_HALL_BGM, { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", state, serverAt: now });
   }
 
   /**
@@ -738,18 +779,8 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     return true;
   }
 
-  private hasBossFeature(socket: WebSocket): boolean {
-    return this.getJoinedAttachment(socket)?.features?.includes(SPACE_FEATURE_BOSS) ?? false;
-  }
-
   private broadcastBossFrame(frame: SpaceServerFrame): void {
-    const payload = JSON.stringify(frame);
-
-    for (const socket of this.socketsBySeat.values()) {
-      if (this.hasBossFeature(socket)) {
-        this.sendPayload(socket, payload);
-      }
-    }
+    this.broadcastToFeature(SPACE_FEATURE_BOSS, frame);
   }
 
   private createBossWire(): SpaceBossWire {
@@ -877,7 +908,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     });
 
     if (health > 0) {
-      socket.serializeAttachment({ ...attachment, health, healthAt: now } satisfies SpaceSocketAttachment);
+      this.setAttachment(socket, { ...attachment, health, healthAt: now });
       this.healthByActor.set(attachment.stableActorKey, { health, healthAt: now });
       this.sendBossFrameTo(socket, { v: SPACE_PROTOCOL_VERSION, t: "hp", health, by: hit.attack, serverAt: now });
       return;
@@ -889,12 +920,12 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     // 프레임에 실어 보내서 클라이언트가 미리 맞힐 필요가 없으니 서버 키로 뽑음.
     const destination = createSpawnPoint(attachment.stableActorKey);
 
-    socket.serializeAttachment({
+    this.setAttachment(socket, {
       ...attachment,
       health: SPACE_BOSS_PLAYER.maximumHealth,
       healthAt: reviveAt,
       deadUntil: reviveAt,
-    } satisfies SpaceSocketAttachment);
+    });
     this.healthByActor.delete(attachment.stableActorKey);
     this.pendingRespawns.set(peer.seat, now + SPACE_BOSS_PLAYER.respawnMoveDelayMs);
     this.sendBossFrameTo(socket, { v: SPACE_PROTOCOL_VERSION, t: "hp", health: 0, by: hit.attack, serverAt: now });
@@ -933,12 +964,12 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       }
       const respawned: SpacePeer = { ...peer, ...createSpawnPoint(attachment.stableActorKey), isRunning: false };
 
-      socket.serializeAttachment({
+      this.setAttachment(socket, {
         ...attachment,
         peer: respawned,
         lastMoveAt: now,
         movementBudget: 0.5,
-      } satisfies SpaceSocketAttachment);
+      });
       // 보스를 모르는 옛 클라이언트도 `peer` 는 알아서 이걸로 자리를 옮김.
       this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: respawned });
       this.dirtySeats.add(respawned.seat);
@@ -946,7 +977,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   }
 
   private sendBossFrameTo(socket: WebSocket, frame: SpaceServerFrame): void {
-    if (this.hasBossFeature(socket)) {
+    if (this.hasFeature(socket, SPACE_FEATURE_BOSS)) {
       this.sendFrame(socket, frame);
     }
   }
@@ -1184,6 +1215,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         isRunning: false,
       };
 
+      // 탭을 바꿔 들어와도 재전송 중복 검사는 이어 감. 옛 소켓을 내보내면 기록도 지워져서 먼저 꺼냄.
+      const previousReceipts = previousSocket ? this.sayReceipts.get(previousSocket) : undefined;
+
       if (previousSocket) {
         this.sendError(previousSocket, "SESSION_REPLACED", "다른 탭에서 스페이스에 접속했어요.");
         // 새 연결이 같은 좌석을 물려받을 때만 leave 를 생략함. 다른 좌석을 받으면
@@ -1191,7 +1225,10 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         this.removeSocket(previousSocket, 4001, "session replaced", previousPeer?.seat !== seat);
       }
 
-      socket.serializeAttachment({
+      if (previousReceipts) {
+        this.sayReceipts.set(socket, previousReceipts);
+      }
+      this.setAttachment(socket, {
         ...attachment,
         joined: true,
         joinDeadlineAt: undefined,
@@ -1201,7 +1238,6 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         lastMoveAt: now,
         movementBudget: previousAttachment?.movementBudget ?? 0.5,
         lastSayAt: previousAttachment?.lastSayAt ?? null,
-        recentSayReceipts: previousAttachment?.recentSayReceipts ?? [],
         // 서버가 아는 기능만 남김. 탭을 바꿔 들어와도 쿨다운은 이어 감.
         features: (frame.features ?? []).filter((feature) => SERVER_FEATURES.includes(feature)),
         lastKickAt: previousAttachment?.lastKickAt,
@@ -1215,7 +1251,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
               deadUntil: previousAttachment.deadUntil,
             }
           : this.restoreRememberedHealth(stableActorKey, now)),
-      } satisfies SpaceSocketAttachment);
+      });
       this.socketsBySeat.set(seat, socket);
       this.clearJoinDeadline(socket);
       const peers = Array.from(this.socketsBySeat.values()).flatMap((candidate) => {
@@ -1223,7 +1259,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         return candidate !== socket && currentPeer ? [currentPeer] : [];
       });
       const joined = this.getJoinedAttachment(socket);
-      const isBossKnown = this.syncBossPresence(now) && this.hasBossFeature(socket);
+      const isBossKnown = this.syncBossPresence(now) && this.hasFeature(socket, SPACE_FEATURE_BOSS);
       const bossWelcome: SpaceBossWelcome | undefined =
         joined && isBossKnown && this.bossLastKilledAt !== undefined
           ? {
@@ -1234,14 +1270,14 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
               serverAt: now,
             }
           : undefined;
-      const hallBgm = this.hasHallBgmFeature(socket) ? (this.hallBgm ?? undefined) : undefined;
+      const hallBgm = this.hasFeature(socket, SPACE_FEATURE_HALL_BGM) ? (this.hallBgm ?? undefined) : undefined;
 
       this.sendPayload(socket, this.createWelcomePayload(peer, peers, bossWelcome, hallBgm));
 
       if (this.getJoinedAttachment(socket)) {
         this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer }, socket);
         const market = await this.marketMonitor.start();
-        if (this.getJoinedAttachment(socket)?.features?.includes(SPACE_FEATURE_MARKET)) {
+        if (this.hasFeature(socket, SPACE_FEATURE_MARKET)) {
           this.sendFrame(socket, { v: SPACE_PROTOCOL_VERSION, t: "market", state: market, serverAt: Date.now() });
         }
       }
@@ -1301,7 +1337,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     ) {
       return;
     }
-    socket.serializeAttachment({
+    this.setAttachment(socket, {
       ...attachment,
       peer: { ...peer, x: frame.x, y: frame.y, z: frame.z, yaw, isRunning: frame.isRunning },
       lastMoveAt: now,
@@ -1311,7 +1347,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       ...(attachment.health === undefined
         ? {}
         : { health: this.resolveHealth(attachment, now), healthAt: now }),
-    } satisfies SpaceSocketAttachment);
+    });
     this.dirtySeats.add(peer.seat);
     this.scheduleSnapshot();
   }
@@ -1352,14 +1388,13 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     const id = frame.id ?? crypto.randomUUID();
     // 시각은 연출에만 사용함. 쿨다운은 서버의 실제 시각으로 봄.
     const startedAt = Math.min(now, Math.max(now - SPACE_KICK.maximumBackdateMs, frame.startedAt ?? now));
-    socket.serializeAttachment({
+    this.setAttachment(socket, {
       ...attachment,
       lastKickAt: now,
       lastKickId: id,
       kickReadyAt: admission.readyAt,
-    } satisfies SpaceSocketAttachment);
-
-    const payload = JSON.stringify({
+    });
+    this.broadcastToFeature(SPACE_FEATURE_KICK, {
       v: SPACE_PROTOCOL_VERSION,
       t: "kick",
       id,
@@ -1368,13 +1403,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       from: kicker.seat,
       dirX: facingX,
       dirZ: facingZ,
-    } satisfies SpaceServerFrame);
-
-    for (const candidate of this.socketsBySeat.values()) {
-      if (this.getJoinedAttachment(candidate)?.features?.includes(SPACE_FEATURE_KICK)) {
-        this.sendPayload(candidate, payload);
-      }
-    }
+    });
     this.scheduleKickImpact(kicker.seat, id, combat, startedAt + combat.impactSeconds * 1000 - now);
   }
 
@@ -1474,12 +1503,12 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       return;
     }
     const renamed: SpacePeer = { ...peer, nickname };
-    socket.serializeAttachment({
+    this.setAttachment(socket, {
       ...attachment,
       peer: renamed,
       lastActivityAt: now,
       lastNickAt: now,
-    } satisfies SpaceSocketAttachment);
+    });
     this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: renamed });
   }
 
@@ -1506,11 +1535,11 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       return;
     }
     const changed: SpacePeer = { ...peer, modelIndex: frame.modelIndex };
-    socket.serializeAttachment({
+    this.setAttachment(socket, {
       ...attachment,
       peer: changed,
       lastActivityAt: Date.now(),
-    } satisfies SpaceSocketAttachment);
+    });
     this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "peer", peer: changed });
   }
 
@@ -1545,9 +1574,8 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         this.sendError(socket, "JOIN_REQUIRED", "먼저 공간에 입장해 주세요.", frame.rid);
         return;
       }
-      const previousReceipt = attachment.recentSayReceipts.find(
-        (receipt) => receipt.rid === frame.rid,
-      );
+      const receipts = this.sayReceipts.get(socket) ?? [];
+      const previousReceipt = receipts.find((receipt) => receipt.rid === frame.rid);
 
       if (previousReceipt) {
         if (previousReceipt.bodyHash !== bodyHash) {
@@ -1597,14 +1625,8 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         createdAt: now,
       };
       const receipt: SayReceipt = { rid: frame.rid, id: message.id, bodyHash, createdAt: now };
-      socket.serializeAttachment({
-        ...attachment,
-        lastActivityAt: now,
-        lastSayAt: now,
-        recentSayReceipts: [...attachment.recentSayReceipts, receipt].slice(
-          -MAXIMUM_RECENT_SAY_RECEIPTS,
-        ),
-      } satisfies SpaceSocketAttachment);
+      this.setAttachment(socket, { ...attachment, lastActivityAt: now, lastSayAt: now });
+      this.sayReceipts.set(socket, [...receipts, receipt].slice(-MAXIMUM_RECENT_SAY_RECEIPTS));
       this.appendChatHistory(message);
       this.recordIpSay(attachment.ipGuardKey, now);
       this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "say", message });
@@ -1665,9 +1687,8 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       lastMoveAt: now,
       movementBudget: 0.5,
       lastSayAt: null,
-      recentSayReceipts: [],
     };
-    server.serializeAttachment(attachment);
+    this.setAttachment(server, attachment);
     this.state.acceptWebSocket(server);
     this.scheduleJoinDeadline(server, attachment.joinDeadlineAt ?? now);
 
