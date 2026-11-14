@@ -1,4 +1,4 @@
-import { resolveBaristaProximity, SPACE_BARISTA_SPOT } from "@/entities/space";
+import { resolveBaristaProximity, SPACE_AVATAR, SPACE_BARISTA_SPOT } from "@/entities/space";
 
 /**
  * 커피 바의 바리스타 NPC. 말을 걸면 홀 배경음악을 바꾸거나 폭죽을 터뜨릴 수 있음.
@@ -12,13 +12,20 @@ export const SPACE_BARISTA = {
   name: "바리스타",
   /** 전방이 −Z 인 규약이라 0 이면 홀 쪽을 봄. */
   yaw: 0,
+  /** 모델 전체 높이(배율 전, m). `public/models/barista-skirt.glb` 에서 읽은 값. 발바닥이 원점임. */
+  modelHeight: 1.7,
   /**
-   * 임시로 쓰는 아바타 모델과 앞치마 색. 앞치마를 두른 맥시크루가 가장 바리스타 같음.
+   * 그릴 때 곱하는 배율. 유저 아바타와 같은 값을 써서 나란히 섰을 때 체격이 맞음.
    *
-   * 전용 모델이 준비되면 이 둘을 지우고 그 모델을 그림.
+   * 배율을 곱하면 2.04 m 로, 유저(2.17 m)보다 조금 작음.
    */
-  modelIndex: 0,
-  colorIndex: 3,
+  modelScale: SPACE_AVATAR.scale,
+  /**
+   * 몸통 반지름(m). 유저가 이 안으로 못 들어와 겹쳐 서지 않음.
+   *
+   * 어깨 폭(배율 곱해 0.87 m)의 절반쯤임. 유저 반지름을 더해서 보므로 실제로는 조금 더 떨어져 섬.
+   */
+  bodyRadius: 0.4,
 } as const;
 
 export { resolveBaristaProximity };

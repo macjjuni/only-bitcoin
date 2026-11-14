@@ -69,6 +69,7 @@ import {
   type Vector3Like,
 } from "@/features/space-controls";
 import type { SpaceSession } from "@/features/space-session";
+import { SPACE_BARISTA } from "@/views/space/lib/barista";
 import type { BossPhaseSound } from "@/views/space/lib/bossAttackSounds";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import type { LanternAnchor } from "@/views/space/lib/hallModel";
@@ -150,6 +151,14 @@ const REMOTE_HIT_KEEP_MS = SPACE_BOSS_PLAYER.respawnDelayMs + 1_000;
 /** 유저 피해 숫자를 명찰 기준점에서 이만큼 위에 띄움(m). 명찰과 체력바를 안 가림. */
 const PLAYER_DAMAGE_NUMBER_LIFT_Y = 0.4;
 const EMPTY_MOVEMENT_INPUT = createEmptyMovementInput();
+/** 바리스타 몸통. 늘 같은 자리에 서 있어 한 번만 만들어 둠. */
+const BARISTA_BODY: SolidBody = {
+  x: SPACE_BARISTA.x,
+  y: SPACE_BARISTA.y,
+  z: SPACE_BARISTA.z,
+  radius: SPACE_BARISTA.bodyRadius,
+  height: SPACE_BARISTA.modelHeight * SPACE_BARISTA.modelScale,
+};
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 function SpaceScene({
   celebration,
@@ -405,6 +414,15 @@ function SpaceScene({
       nextState = separateFromSolidBody(
         nextState,
         bossBody,
+        SPACE_AVATAR_COLLISION_RADIUS,
+        selfSeat,
+        SPACE_MOVEMENT.fixedTimeStep,
+        terrainRef.current,
+      );
+      // 바리스타도 겹쳐 설 수 없음. 서버에는 없는 NPC 라 내 화면에서만 막음.
+      nextState = separateFromSolidBody(
+        nextState,
+        BARISTA_BODY,
         SPACE_AVATAR_COLLISION_RADIUS,
         selfSeat,
         SPACE_MOVEMENT.fixedTimeStep,
@@ -909,7 +927,10 @@ function SpaceScene({
 
       {session.canFightBoss && <PlayerDamageNumbers pendingRef={pendingPlayerDamagesRef} />}
 
-      <SpaceBarista terrainRef={terrainRef} isCoarsePointer={isCoarsePointer} />
+      {/* 모델을 받는 동안 씬 전체가 멈추지 않게 따로 감쌈. */}
+      <Suspense fallback={null}>
+        <SpaceBarista isCoarsePointer={isCoarsePointer} />
+      </Suspense>
       <AvatarSwingTrails
         selfTransformRef={renderStateRef}
         selfModelIndex={avatarModelIndex}
