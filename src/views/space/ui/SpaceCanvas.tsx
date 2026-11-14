@@ -202,6 +202,8 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   const [isLoadingHardTimedOut, setIsLoadingHardTimedOut] = useState<boolean>(false);
   const nickname = selfNickname ?? identity.nickname;
   const modelIndex = selfModelIndex ?? localModelIndex;
+  /** 캔버스에 건 컨텍스트 복구 리스너를 떼는 함수. 캔버스가 만들어질 때 채움. */
+  const detachContextRecoveryRef = useRef<(() => void) | null>(null);
 
   useKeyboardInput(inputSource);
   // endregion
@@ -318,13 +320,23 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
 
   const onCreatedCanvas = useCallback(
     (rootState: { gl: { domElement: HTMLCanvasElement } }): void => {
-      attachContextRecovery(rootState.gl.domElement);
+      // 폴백에서 돌아오면 캔버스가 새로 만들어짐. 옛 캔버스에 건 것을 먼저 뗌.
+      detachContextRecoveryRef.current?.();
+      detachContextRecoveryRef.current = attachContextRecovery(rootState.gl.domElement);
     },
     [attachContextRecovery],
   );
   // endregion
 
   // region [Life Cycles]
+  useEffect(() => {
+    // 화면을 떠날 때 리스너와 복구 대기 타이머를 정리함. 안 하면 떠난 뒤에 타이머가 폴백 상태를 건드림.
+    return () => {
+      detachContextRecoveryRef.current?.();
+      detachContextRecoveryRef.current = null;
+    };
+  }, []);
+
   useEffect(() => {
     const selfPosition = session.getSelfPosition();
 
