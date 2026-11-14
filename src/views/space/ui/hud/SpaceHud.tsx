@@ -3,7 +3,6 @@
 import {
   ArrowLeft,
   CircleHelp,
-  Flame,
   MessageCircle,
   Music,
   PartyPopper,
@@ -63,29 +62,11 @@ const ICON_STROKE_WIDTH = 2;
 /** 모바일 채팅 버튼 아이콘. 점프·발차기 버튼 아이콘과 같은 크기. */
 const MOBILE_CHAT_ICON_SIZE = TOUCH_BUTTON_ICON_SIZE;
 
-/**
- * 배경음악 버튼의 라벨.
- *
- * 급등락 트랙은 사용자가 아무것도 안 했는데 곡이 바뀌는 연출이라, 눌러 보면
- * 왜 바뀌었는지 알 수 있게 버튼이 이유를 들고 있음.
- */
-const resolveBgmLabel = (bgm: SpaceBgm): string => {
-  if (!bgm.isPlaying) {
-    return "배경음악 켜기";
-  }
-
-  return bgm.isSurging ? "배경음악 끄기 (급등락 중)" : "배경음악 끄기";
-};
-
 const resolveBgmIcon = (bgm: SpaceBgm, iconSize: number): ReactNode => {
-  if (!bgm.isPlaying) {
-    return <VolumeX size={iconSize} strokeWidth={ICON_STROKE_WIDTH} />;
-  }
-
-  return bgm.isSurging ? (
-    <Flame size={iconSize} strokeWidth={ICON_STROKE_WIDTH} />
-  ) : (
+  return bgm.isPlaying ? (
     <Music size={iconSize} strokeWidth={ICON_STROKE_WIDTH} />
+  ) : (
+    <VolumeX size={iconSize} strokeWidth={ICON_STROKE_WIDTH} />
   );
 };
 
@@ -359,8 +340,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, nickname, modelIndex, 
     if (!bgm.isUnavailable) {
       actions.push({
         id: "space-bgm-toggle",
-        // 급등락 트랙이 깔린 동안에는 왜 곡이 바뀌었는지 버튼이 설명해 줌.
-        label: resolveBgmLabel(bgm),
+        label: bgm.isPlaying ? "배경음악 끄기" : "배경음악 켜기",
         icon: resolveBgmIcon(bgm, iconSize),
         isActive: bgm.isPlaying,
         onClick: bgm.toggle,
@@ -399,7 +379,6 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, nickname, modelIndex, 
     onClickToggleGuide,
     bgm.isPlaying,
     bgm.isUnavailable,
-    bgm.isSurging,
     bgm.toggle,
     iconSize,
     onClickTestCelebration,

@@ -84,11 +84,11 @@ export const SPACE_HALL_BGM_TRACK_LABELS: Readonly<Record<SpaceHallBgmTrack, str
 };
 
 /**
- * 급등락 중에 까는 교체 트랙.
+ * 바리스타 메뉴의 "급등락 곡".
  *
- * 등락 방향은 가리지 않고 한 곡을 공용으로 씀(`priceSurge.ts`).
- * 이벤트 때만 잠깐 틀어서 처음부터 받아 두지는 않음. 변동이 기준에 다가가면
- * (`SPACE_BGM_SURGE.prefetchPercent`) 그때 받기 시작함.
+ * 전에는 시세가 급등락할 때 자동으로 깔던 곡이라 키가 `surge` 임. 지금은 자동으로 안 바뀌고
+ * 바리스타에게 골라야만 나옴. 키는 서버가 요청을 검사하는 목록에 있어서 그대로 둠.
+ * 고른 사람이 있을 때만 6.2 MB 를 받음.
  */
 export const SPACE_BGM_SURGE_TRACK_SRC = resolveBgmUrl(BGM_SOURCE_REF, "nervous.mp3");
 
@@ -119,11 +119,11 @@ export const SPACE_BGM_RAID_TRACK_SRC = resolveBgmUrl(RAID_BGM_SOURCE_REF, "raid
 export const SPACE_BGM_VOLUME = 0.25;
 
 /**
- * 급등락 트랙 음량.
+ * 급등락 곡 음량.
  *
  * 음원 자체가 기본 곡보다 10 dB 크게 녹음돼 있음(평균 −13.2 dB 대 −23.6 dB). 0.15 로 틀 때는
  * 시끄러웠음. 0.09 면 기본 곡보다 1.5 dB 큰 정도로 들림.
- * 바리스타 메뉴에서 홀 곡으로 골라 오래 틀 수 있게 된 뒤로는 더 튀면 안 됨.
+ * 홀 곡으로 골라 오래 트는 곡이라 더 튀면 안 됨.
  */
 export const SPACE_BGM_SURGE_VOLUME = 0.09;
 
@@ -155,8 +155,7 @@ const RUSH_BGM_SOURCE_REF = "0f7401ae4927dae3a4a3e9755789b9c7c3cbf50a";
  * 바리스타 메뉴의 "신나는 곡 1". 밝은 장조의 124 BPM EDM 연주곡(4분)이고 ElevenLabs Music 으로
  * 만들었음. 긴장감 있는 곡을 먼저 만들었는데 오래 들으면 머리가 아파서 밝은 곡으로 바꿨음.
  *
- * **바리스타에게 골라야만 나옴.** 시세 급등락 때 자동으로 까는 곡은 `surge` 하나 그대로임.
- * 고른 사람이 있을 때만 받기 시작해서, 안 고르면 5.8 MB 를 안 받음.
+ * 바리스타에게 골라야만 나옴. 고른 사람이 있을 때만 받기 시작해서, 안 고르면 5.8 MB 를 안 받음.
  */
 export const SPACE_BGM_RUSH_TRACK_SRC = resolveBgmUrl(RUSH_BGM_SOURCE_REF, "edm-upbeat.mp3");
 

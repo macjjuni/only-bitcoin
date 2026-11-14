@@ -20,6 +20,7 @@ export interface SpaceCelebration {
 
 export interface SpaceMarketState {
   revision: number;
+  /** 급등락 중이면 `surge`. 클라이언트는 이 값으로 곡을 바꾸지 않고, 폭죽(`celebration`)만 씀. */
   track: "base" | "surge";
   direction: "rise" | "fall" | null;
   startsAt: number;

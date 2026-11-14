@@ -9,7 +9,7 @@ import {
   SPACE_BGM_SURGE,
   type SurgeState,
   stepSurgeState,
-} from "./priceSurge";
+} from "./marketSurge";
 
 const { candleIntervalMs, sampleIntervalMs } = SPACE_BGM_SURGE;
 /** 30분봉 경계에 맞춘 시각. 여기서 새 봉이 시작함. */

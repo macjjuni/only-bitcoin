@@ -162,7 +162,6 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
    * 여기서 쓰는 세션 상태. 조각별로 구독해서, 대화 · 입퇴장처럼 이 컴포넌트와 무관한
    * 변화에는 다시 그리지 않음. 내 정보는 자리(`x` · `z`)가 보정될 때도 바뀌어 필드로 쪼갬.
    */
-  const market = useSpaceSessionSelector(session, (snapshot) => snapshot.market);
   const serverClockOffsetMs = useSpaceSessionSelector(
     session,
     (snapshot) => snapshot.serverClockOffsetMs,
@@ -176,7 +175,6 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   const hasSessionError = useSpaceSessionSelector(session, (snapshot) => snapshot.error !== null);
   const canSyncMarket = useSpaceSessionSelector(session, (snapshot) => snapshot.canSyncMarket);
   const bgm = useSpaceBgm({
-    market,
     serverClockOffsetMs,
     hallBgm,
     zoneTrack: useSpaceBgmZone(session),

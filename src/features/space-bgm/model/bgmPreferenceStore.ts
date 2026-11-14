@@ -13,7 +13,7 @@ const STORAGE_KEY = "only-btc.space.bgm-enabled";
  * 기본값은 켜짐. 직접 끈 사람만 꺼진 채로 둠.
  *
  * 브라우저가 자동 재생을 막아서 실제 소리는 첫 터치·키 입력 뒤에 남.
- * 저장값이 없는 첫 방문자도 급등 곡과 폭죽 효과음을 듣게 하려고 바꿈.
+ * 저장값이 없는 첫 방문자도 배경음악과 폭죽 효과음을 듣게 하려고 바꿈.
  */
 export const loadBgmEnabled = (): boolean => {
   if (typeof window === "undefined") {

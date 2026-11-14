@@ -1,7 +1,7 @@
 "use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import type { SpaceHallBgmState, SpaceHallBgmTrack, SpaceMarketState } from "@/entities/space";
+import type { SpaceHallBgmState, SpaceHallBgmTrack } from "@/entities/space";
 import { loadBgmEnabled, saveBgmEnabled } from "./bgmPreferenceStore";
 import {
   SPACE_BGM_COURTYARD_TRACK_SRC,
@@ -21,7 +21,7 @@ import {
 /** 내가 선 자리로 정하는 곡. 안뜰에서 보스가 없으면 `courtyard`, 떠 있으면 `raid`. */
 export type SpaceBgmZoneTrack = "courtyard" | "raid";
 
-/** 홀 곡은 유저가 고를 수 있는 곡 전부임. 급등락 곡도 그 안에 듦. */
+/** 홀 곡은 유저가 고를 수 있는 곡 전부임. */
 type BgmTrack = SpaceHallBgmTrack | SpaceBgmZoneTrack;
 
 interface BgmTarget {
@@ -51,18 +51,23 @@ const TRACK_VOLUME: Record<BgmTrack, number> = {
 export interface SpaceBgm {
   isPlaying: boolean;
   isUnavailable: boolean;
-  isSurging: boolean;
   toggle: () => void;
 }
 
 interface SpaceBgmOptions {
-  market: SpaceMarketState | null;
   serverClockOffsetMs: number | null;
   /** 누가 골라 둔 홀 곡. 아무도 안 바꿨으면 `null` 이고 기본 곡을 틂. */
   hallBgm: SpaceHallBgmState | null;
-  /** 안뜰에 나와 있는 동안 시세 트랙 대신 틀 곡. 홀 안이면 `null`. */
+  /** 안뜰에 나와 있는 동안 홀 곡 대신 틀 곡. 홀 안이면 `null`. */
   zoneTrack: SpaceBgmZoneTrack | null;
 }
+
+/**
+ * 아무도 곡을 안 골랐을 때 트는 기본 곡.
+ *
+ * 시작점을 서버 시각 0 으로 고정해서, 언제 들어오든 다들 곡의 같은 자리를 들음.
+ */
+const DEFAULT_HALL_TARGET: BgmTarget = { track: "base", startsAt: 0 };
 
 /** 곡을 새로 틀 때 서버 위치와 맞추는 허용 오차(초). */
 const START_TOLERANCE_SECONDS = 0.3;
@@ -76,14 +81,14 @@ const START_TOLERANCE_SECONDS = 0.3;
 const RESYNC_TOLERANCE_SECONDS = 2;
 
 /**
- * 음악을 켤지 여부만 개인 설정이다. 트랙 종류·시작 시각·재생 위치는 서버가 정한다.
+ * 음악을 켤지 여부만 개인 설정이다. 홀 곡의 종류·시작 시각·재생 위치는 서버 시각에 맞춘다.
  *
- * 홀 곡의 순서는 급등락 곡 → 누가 골라 둔 곡 → 기본 곡이다. 급등락이 끝나면 고른 곡으로 돌아온다.
+ * 홀 곡의 순서는 누가 골라 둔 곡 → 기본 곡이다. 시세가 크게 움직여도 곡은 안 바뀐다.
  *
  * 안뜰 곡(대기·보스전)만 예외다. 내가 선 자리로 정해서 사람마다 다르고 위치도 안 맞춘다.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-const useSpaceBgm = ({ market, serverClockOffsetMs, hallBgm, zoneTrack }: SpaceBgmOptions): SpaceBgm => {
+const useSpaceBgm = ({ serverClockOffsetMs, hallBgm, zoneTrack }: SpaceBgmOptions): SpaceBgm => {
   // region [Hooks]
   const tracksRef = useRef<Partial<Record<BgmTrack, HTMLAudioElement>>>({});
   const enabledRef = useRef(false);
@@ -93,14 +98,12 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, hallBgm, zoneTrack }: SpaceB
   const pendingTrackRef = useRef<string | null>(null);
   const lastAttemptRef = useRef(Number.NEGATIVE_INFINITY);
   const fadeTimerRef = useRef<ReturnType<typeof setInterval> | null>(null);
-  const marketRef = useRef(market);
   const clockOffsetRef = useRef(serverClockOffsetMs);
   const hallBgmRef = useRef(hallBgm);
   const zoneTrackRef = useRef(zoneTrack);
   const blockedPlaybackRef = useRef<(() => void) | null>(null);
   const [isPlaying, setIsPlaying] = useState(false);
   const [isUnavailable, setIsUnavailable] = useState(false);
-  const [isSurging, setIsSurging] = useState(false);
   // endregion
 
 
@@ -175,8 +178,6 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, hallBgm, zoneTrack }: SpaceB
       activeStartRef.current = startsAt;
       setIsPlaying(true);
       setIsUnavailable(false);
-      // 급등락 곡을 누가 홀 곡으로 골라 둔 것일 수 있음. 시세가 급등락 중일 때만 그렇게 알림.
-      setIsSurging(track === "surge" && marketRef.current?.track === "surge");
       if (previous && previous !== audio && !previous.paused) {
         const beganAt = performance.now();
         const previousVolume = previous.volume;
@@ -199,7 +200,6 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, hallBgm, zoneTrack }: SpaceB
       }
       if (!previous || previous.paused) {
         setIsPlaying(false);
-        setIsSurging(false);
         setIsUnavailable((error as DOMException).name !== "NotAllowedError" && track === "base");
         // 새 시도로 교체된 취소는 위에서 걸러졌다. 실제로 막힌 재생만 첫 조작을 기다린다.
         blockedPlaybackRef.current?.();
@@ -217,21 +217,16 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, hallBgm, zoneTrack }: SpaceB
     if (zoneTrackRef.current) {
       return { track: zoneTrackRef.current, startsAt: null };
     }
-    const state = marketRef.current;
     const hall = hallBgmRef.current;
     const offset = clockOffsetRef.current;
     const serverNow = offset === null ? null : performance.now() + offset;
-    const hasMarketStarted = state !== null && serverNow !== null && serverNow >= state.startsAt;
-    if (state && hasMarketStarted && state.track === "surge") {
-      return { track: "surge", startsAt: state.startsAt };
-    }
     if (hall && serverNow !== null && serverNow >= hall.startsAt) {
       return { track: hall.track, startsAt: hall.startsAt };
     }
-    if (state && hasMarketStarted) {
-      return { track: state.track, startsAt: state.startsAt };
+    if (serverNow !== null) {
+      return DEFAULT_HALL_TARGET;
     }
-    // 안뜰에서 나왔는데 시세 상태를 아직 모르면 안뜰 곡이 계속 남는다. 기본 곡으로 돌린다.
+    // 안뜰에서 나왔는데 서버 시각을 아직 모르면 안뜰 곡이 계속 남는다. 기본 곡으로 돌린다.
     const isZoneTrackActive = activeTrackRef.current === "raid" || activeTrackRef.current === "courtyard";
     return isZoneTrackActive ? { track: "base", startsAt: null } : null;
   }, []);
@@ -251,7 +246,6 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, hallBgm, zoneTrack }: SpaceB
       audio.pause();
     }
     setIsPlaying(false);
-    setIsSurging(false);
   }, [clearFade]);
 
   const synchronizePlayback = useCallback((): void => {
@@ -320,27 +314,19 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, hallBgm, zoneTrack }: SpaceB
   }, [startPlayback, stopPlayback]);
 
   const scheduleSynchronization = (): (() => void) => {
-    marketRef.current = market;
     clockOffsetRef.current = serverClockOffsetMs;
     hallBgmRef.current = hallBgm;
     zoneTrackRef.current = zoneTrack;
-    // 이번에 기다릴 곡. 안뜰 곡 → 급등락 곡 → 고른 곡 → 기본 곡 순서임.
-    const upcoming: BgmTarget | null = zoneTrack
-      ? { track: zoneTrack, startsAt: null }
-      : market?.track === "surge"
-        ? market
-        : (hallBgm ?? market);
+    // 이번에 기다릴 곡. 안뜰 곡 → 고른 곡 → 기본 곡 순서임.
+    const upcoming: BgmTarget = zoneTrack ? { track: zoneTrack, startsAt: null } : (hallBgm ?? DEFAULT_HALL_TARGET);
     if (enabledRef.current && hallBgm) {
       resolveTrack(hallBgm.track);
-    }
-    if (enabledRef.current && (market?.prefetch || market?.track === "surge")) {
-      resolveTrack("surge");
     }
     // 새 서버 이벤트는 과거 실패의 재시도 대기와 별도로 예정 시각에 실행한다.
     const begin = (): void => {
       const pending = pendingTrackRef.current;
-      const awaited = upcoming && `${upcoming.track}:${upcoming.startsAt}`;
-      if (awaited && pending && pending !== awaited) {
+      const awaited = `${upcoming.track}:${upcoming.startsAt}`;
+      if (pending && pending !== awaited) {
         generationRef.current += 1;
         pendingTrackRef.current = null;
         for (const [track, audio] of Object.entries(tracksRef.current)) {
@@ -353,7 +339,7 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, hallBgm, zoneTrack }: SpaceB
       synchronizePlayback();
     };
     // 안뜰 곡은 서버 예정 시각을 안 기다린다. 안뜰을 드나들거나 보스가 뜨면 즉시 바꾼다.
-    const delay = upcoming && upcoming.startsAt !== null && serverClockOffsetMs !== null ? Math.max(0, upcoming.startsAt - serverClockOffsetMs - performance.now()) : 0;
+    const delay = upcoming.startsAt !== null && serverClockOffsetMs !== null ? Math.max(0, upcoming.startsAt - serverClockOffsetMs - performance.now()) : 0;
     const timer = setTimeout(begin, delay);
     const retryTimer = setInterval(synchronizePlayback, 5000);
     const onVisibility = (): void => {
@@ -386,13 +372,13 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, hallBgm, zoneTrack }: SpaceB
 
   // region [Life Cycles]
   useEffect(restorePlayback, [restorePlayback]);
-  useEffect(() => scheduleSynchronization(), [market, serverClockOffsetMs, hallBgm, zoneTrack, isPlaying, resolveTrack, synchronizePlayback]);
+  useEffect(() => scheduleSynchronization(), [serverClockOffsetMs, hallBgm, zoneTrack, isPlaying, resolveTrack, synchronizePlayback]);
   // endregion
 
   // 값이 그대로면 같은 객체를 돌려줌. 매번 새로 만들면 이걸 받는 HUD 가 `memo` 를 뚫고 다시 그려짐.
   return useMemo(
-    () => ({ isPlaying, isUnavailable, isSurging, toggle: onClickToggleBgm }),
-    [isPlaying, isUnavailable, isSurging, onClickToggleBgm],
+    () => ({ isPlaying, isUnavailable, toggle: onClickToggleBgm }),
+    [isPlaying, isUnavailable, onClickToggleBgm],
   );
 };
 
