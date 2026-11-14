@@ -187,6 +187,34 @@ describe("싸우는 보스(서버 프레임)", () => {
     expect(Math.abs(arena.centerX + 2.2 - (positions.at(-1) ?? 0))).toBeLessThan(0.5);
   });
 
+  it("회전 공격은 타깃을 따라 방향이 뒤집혀도 앞지르지 않고 프레임 사이만 잇는다", () => {
+    const tracker = createEnabledTracker();
+    const spin = { phase: "attack", attack: "spin" } as const;
+    const positions: number[] = [];
+    // 서버가 0.3 m 씩 갔다가 되돌아옴. 붙었다 떨어지는 타깃을 쫓는 모양임.
+    const offsets = [0, 0.3, 0.6, 0.3, 0, 0.3, 0.6];
+    let nowMs = 0;
+
+    offsets.forEach((offset, tick) => {
+      tracker.applyWire(
+        createWire({ ...spin, x: arena.centerX + offset }),
+        nowMs,
+        CLOCK_OFFSET_MS + tick * 100,
+      );
+      for (let frame = 0; frame < 6; frame += 1) {
+        nowMs += FRAME_MS;
+        positions.push(tracker.sample(nowMs, CLOCK_OFFSET_MS).x);
+      }
+    });
+
+    const strides = positions.slice(1).map((x, index) => Math.abs(x - positions[index]));
+
+    // 서버가 보낸 범위를 벗어나지 않고, 한 프레임에 한 틱 치(0.3 m)를 통째로 뛰지 않음.
+    expect(Math.max(...positions)).toBeLessThanOrEqual(arena.centerX + 0.6);
+    expect(Math.min(...positions)).toBeGreaterThanOrEqual(arena.centerX);
+    expect(Math.max(...strides)).toBeLessThan(0.1);
+  });
+
   it("멀리 떨어진 자리로는 따라가지 않고 바로 옮긴다", () => {
     const tracker = createEnabledTracker();
 
