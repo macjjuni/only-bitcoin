@@ -2,7 +2,7 @@
 
 import { useFrame, useThree } from "@react-three/fiber";
 import { memo, type ReactNode, useEffect, useMemo, useRef } from "react";
-import { CanvasTexture, RepeatWrapping, SRGBColorSpace } from "three";
+import { CanvasTexture, RepeatWrapping, SRGBColorSpace, Vector2 } from "three";
 import { useBitcoinStore } from "@/entities/bitcoin";
 import {
   useBitcoinDominanceQuery,
@@ -18,8 +18,9 @@ import {
   sharpenScreenMapSampling,
 } from "@/views/space/lib/screenMaterial";
 import {
-  createTickerSignature,
-  drawTicker,
+  createTickerSlotSignatures,
+  drawTickerSlot,
+  resolveChangedTickerSlots,
   resolveTickerItems,
   TICKER_SCROLL_SPEED,
   TICKER_TEXTURE,
@@ -33,7 +34,7 @@ const STATE_CHECK_INTERVAL_SECONDS = 1;
 /**
  * 패널에 한 번에 비치는 가로 비율.
  *
- * 흐를 때는 한 바퀴(50 m)의 28 m 만 보이고 나머지는 흘러 들어온다. 멈춰 있을
+ * 흐를 때는 한 바퀴(45 m)의 28 m 만 보이고 나머지는 흘러 들어온다. 멈춰 있을
  * 때 그렇게 두면 화면 밖 칸을 영영 못 보므로, 한 바퀴를 통째로 눌러 담는다.
  * 글자는 그만큼 작아지지만 다섯 지표가 모두 보인다.
  */
@@ -51,8 +52,22 @@ const createTickerSurface = () => {
   // 한 바퀴가 패널보다 길다. 남는 만큼은 반복으로 이어 붙여 흘린다.
   texture.wrapS = RepeatWrapping;
 
-  return { texture, context: canvasElement.getContext("2d") };
+  // 바뀐 칸만 GPU 에 올릴 때 거치는 칸 크기 캔버스. 씬에는 안 붙이고 복사 원본으로만 씀.
+  const slotCanvasElement = document.createElement("canvas");
+  slotCanvasElement.width = TICKER_TEXTURE.slotWidth;
+  slotCanvasElement.height = TICKER_TEXTURE.height;
+
+  return {
+    canvasElement,
+    texture,
+    context: canvasElement.getContext("2d"),
+    slotTexture: new CanvasTexture(slotCanvasElement),
+    slotContext: slotCanvasElement.getContext("2d"),
+  };
 };
+
+/** 칸을 올릴 자리. 프레임마다 새로 만들지 않으려고 하나를 돌려 씀. */
+const slotUploadPosition = new Vector2();
 // endregion
 
 /**
@@ -62,8 +77,9 @@ const createTickerSurface = () => {
  * 않고 텍스처 `offset.x` 만 민다. 네 칸 폭이 같아서 한 바퀴가 끝나고 처음이
  * 이어 붙어도 간격이 어긋나지 않는다.
  *
- * 시세는 초당 수십 번 바뀌지만 김프는 소수 둘째 자리라 표시가 거의 그대로다.
- * 그래서 스토어를 구독하지 않고 1초마다 들여다보고, 글자가 바뀔 때만 다시 굽는다.
+ * 스토어를 구독하지 않고 1초마다 들여다보고, 글자가 바뀐 칸만 다시 굽는다.
+ * 김프는 소수 둘째 자리라 거의 매번 바뀌는데, 그때 한 바퀴(4000 px)를 통째로 올리지
+ * 않고 그 칸(800 px)만 GPU 텍스처에 덮어쓴다.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 function SpaceTicker(): ReactNode {
@@ -76,7 +92,8 @@ function SpaceTicker(): ReactNode {
   const marketCapUsd = useBitcoinMarketCapQuery();
   const fearGreed = useFearGreedIndex();
   const macroRef = useRef({ dominance, marketCapUsd, fearGreed });
-  const lastSignatureRef = useRef<string>("");
+  /** 마지막으로 구운 칸별 서명. 비우면 다음 확인 때 전부 다시 굽는다. */
+  const slotSignaturesRef = useRef<readonly string[]>([]);
   const elapsedSinceCheckRef = useRef<number>(STATE_CHECK_INTERVAL_SECONDS);
   // endregion
 
@@ -98,23 +115,65 @@ function SpaceTicker(): ReactNode {
     };
   };
 
+  /**
+   * 칸 하나만 GPU 텍스처에 덮어쓴다.
+   *
+   * 한 바퀴 캔버스에서 그 칸을 작은 캔버스로 옮긴 뒤 올린다. 한 바퀴 캔버스는 늘 최신으로
+   * 두므로, 컨텍스트가 복구돼 통째로 다시 올라갈 때도 화면이 맞는다.
+   */
+  const uploadSlot = (slotIndex: number): void => {
+    const { canvasElement, texture, slotTexture, slotContext } = surface;
+    const left = TICKER_TEXTURE.slotWidth * slotIndex;
+
+    slotContext?.drawImage(
+      canvasElement,
+      left,
+      0,
+      TICKER_TEXTURE.slotWidth,
+      TICKER_TEXTURE.height,
+      0,
+      0,
+      TICKER_TEXTURE.slotWidth,
+      TICKER_TEXTURE.height,
+    );
+    renderer.copyTextureToTexture(slotTexture, texture, null, slotUploadPosition.set(left, 0));
+  };
+
   const redrawIfChanged = (): void => {
-    const { context, texture } = surface;
+    const { context, texture, slotContext } = surface;
 
     if (!context) {
       return;
     }
 
     const items = resolveTickerItems(readTickerState());
-    const signature = createTickerSignature(items);
+    const signatures = createTickerSlotSignatures(items);
+    const changedSlots = resolveChangedTickerSlots(slotSignaturesRef.current, signatures);
 
-    if (signature === lastSignatureRef.current) {
+    if (changedSlots.length === 0) {
       return;
     }
 
-    drawTicker(context, items);
-    lastSignatureRef.current = signature;
-    texture.needsUpdate = true;
+    for (const slotIndex of changedSlots) {
+      drawTickerSlot(context, items[slotIndex], slotIndex);
+    }
+    slotSignaturesRef.current = signatures;
+
+    // 전부 바뀌었으면(처음 · 폰트 도착) 통째로 올리는 게 쌈. 텍스처가 기기 상한보다 커서
+    // 줄여 올라간 기기에서는 칸 자리가 안 맞아 부분으로 못 올림.
+    const canUploadSlots =
+      slotContext !== null &&
+      changedSlots.length < TICKER_TEXTURE.slotCount &&
+      renderer.capabilities.maxTextureSize >= TICKER_TEXTURE.width;
+
+    if (!canUploadSlots) {
+      texture.needsUpdate = true;
+      return;
+    }
+
+    for (const slotIndex of changedSlots) {
+      uploadSlot(slotIndex);
+    }
   };
 
   const advanceScroll = (deltaSeconds: number): void => {
@@ -133,17 +192,17 @@ function SpaceTicker(): ReactNode {
   // region [Life Cycles]
   useEffect(() => {
     macroRef.current = { dominance, marketCapUsd, fearGreed };
-    lastSignatureRef.current = "";
   }, [dominance, marketCapUsd, fearGreed]);
 
   useEffect(() => {
     // 패널이 가로로 길어 항상 축소되어 그려진다. 기본 이방성(1)이면 글자가 뭉개진다.
     surface.texture.anisotropy = renderer.capabilities.getMaxAnisotropy();
-    lastSignatureRef.current = "";
+    slotSignaturesRef.current = [];
     redrawIfChanged();
 
     return () => {
       surface.texture.dispose();
+      surface.slotTexture.dispose();
     };
   }, [renderer, surface]);
 
@@ -162,7 +221,7 @@ function SpaceTicker(): ReactNode {
     // 캔버스는 웹폰트를 기다려 주지 않는다. 늦게 오면 한 번 다시 굽는다.
     loadScreenFonts().then((hasLoaded) => {
       if (isMounted && hasLoaded) {
-        lastSignatureRef.current = "";
+        slotSignaturesRef.current = [];
       }
     });
 

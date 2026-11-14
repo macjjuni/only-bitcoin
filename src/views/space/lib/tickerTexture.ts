@@ -1,3 +1,4 @@
+import { SPACE_TICKER_FRAME } from "@/entities/space";
 import {
   NUMERIC_FONT_STACK,
   resolveFittedFontSize,
@@ -9,42 +10,53 @@ import {
 /**
  * 메인 액자 위 티커 테이프 텍스처.
  *
- * 시세판·네트워크판과 달리 한 바퀴(50 m)가 패널 폭(28 m)보다 길다. 텍스처를
+ * 시세판·네트워크판과 달리 한 바퀴(45 m)가 패널 폭(28 m)보다 길다. 텍스처를
  * `RepeatWrapping` 으로 걸고 `offset.x` 만 밀어 흘리므로, 칸 폭을 똑같이 나눠
  * 끝과 처음이 만나는 자리에서도 간격이 어긋나지 않게 함.
+ *
+ * 칸마다 따로 다시 구울 수 있게 그림(`drawTickerSlot`). 김프는 거의 매초 바뀌는데
+ * 그때마다 한 바퀴를 통째로 GPU 에 올리면 한 번에 수 MB 임.
  */
 
 /** 칸 폭이 같아야 한 바퀴 끝과 처음이 이어 붙는 자리에서 간격이 안 튄다. */
 const SLOT_COUNT = 5;
-/** 칸 폭 = 지표 사이 간격. 1000 px(10 m)는 지표끼리 너무 떨어져 보였음. */
-const SLOT_WIDTH = 900;
-/** 100 px/m. 전광판(114 px/m)과 비슷한 밀도임. */
-const PIXELS_PER_METER = 100;
+/** 칸 하나의 월드 길이(m) = 지표 사이 간격. 10 m 는 지표끼리 너무 떨어져 보였음. */
+const SLOT_LENGTH_METERS = 9;
+/**
+ * 칸 폭(px). 다섯 칸이 4000 px 라 텍스처 크기 상한이 4096 인 기기에도 그대로 올라감.
+ *
+ * 900 px(한 바퀴 4500 px)일 때는 그런 기기에서 올릴 때마다 줄여 그려야 했음.
+ * 밀도는 약 89 px/m 로, 전광판(114 px/m)보다 조금 낮음.
+ */
+const SLOT_WIDTH = 800;
+const PIXELS_PER_METER = SLOT_WIDTH / SLOT_LENGTH_METERS;
 
 export const TICKER_TEXTURE = {
   width: SLOT_COUNT * SLOT_WIDTH,
-  height: 200,
+  /** 가로와 같은 밀도로 잡음. 다르면 글자가 한쪽으로 늘어나 보임. */
+  height: Math.round(SPACE_TICKER_FRAME.height * PIXELS_PER_METER),
+  slotWidth: SLOT_WIDTH,
   slotCount: SLOT_COUNT,
   /** 한 바퀴의 월드 길이(m). 패널 폭보다 길어서 화면에는 늘 일부만 보인다. */
-  cycleLength: (SLOT_COUNT * SLOT_WIDTH) / PIXELS_PER_METER,
+  cycleLength: SLOT_COUNT * SLOT_LENGTH_METERS,
   /** 칸 안쪽 여백. 값이 길어지면 이 폭에 맞춰 글자가 줄어든다. */
-  slotPaddingX: 60,
+  slotPaddingX: 53,
 } as const;
 
 /** 초당 흐르는 거리(m). 28 m 폭을 한 글자가 지나가는 데 약 25초. */
 export const TICKER_SCROLL_SPEED = 1.1;
 
 const FONT = {
-  label: 54,
-  value: 90,
-  /** 라벨과 값 사이. 글자 크기가 달라 24 px 로는 한 덩어리처럼 붙어 보였음. */
-  gap: 48,
+  label: 48,
+  value: 80,
+  /** 라벨과 값 사이. 글자 크기가 달라 이 절반으로는 한 덩어리처럼 붙어 보였음. */
+  gap: 43,
   /** 값과 꼬리말 사이. 같은 값을 설명하는 말이라 라벨 간격보다 좁게 붙임. */
-  suffixGap: 20,
+  suffixGap: 18,
 } as const;
 
 /** 칸 경계마다 찍는 점. 글자만 흐르면 어디서 끊기는지 안 보임. */
-const DIVIDER = { radius: 7, color: SCREEN_COLORS.labelDim } as const;
+const DIVIDER = { radius: 6, color: SCREEN_COLORS.labelDim } as const;
 
 export type TickerTone = "up" | "down" | "flat";
 
@@ -199,11 +211,19 @@ export const resolveTickerItems = (state: TickerState): TickerItem[] => {
   ];
 };
 
-/** 다시 구울지 가리는 서명. 화면에 찍히는 글자만 모았음. */
-export const createTickerSignature = (items: readonly TickerItem[]): string => {
-  return items
-    .map((item) => `${item.label}:${item.valueText}:${item.suffix ?? ""}:${item.tone}`)
-    .join("|");
+/** 칸마다 다시 구울지 가리는 서명. 화면에 찍히는 글자만 모았음. */
+export const createTickerSlotSignatures = (items: readonly TickerItem[]): string[] => {
+  return items.map((item) => `${item.label}:${item.valueText}:${item.suffix ?? ""}:${item.tone}`);
+};
+
+/** 서명이 달라진 칸 번호. 이전 서명이 비어 있으면(처음이거나 통째로 다시 구울 때) 전부임. */
+export const resolveChangedTickerSlots = (
+  previousSignatures: readonly string[],
+  signatures: readonly string[],
+): number[] => {
+  return signatures.flatMap((signature, slotIndex) =>
+    signature === previousSignatures[slotIndex] ? [] : [slotIndex],
+  );
 };
 
 const resolveToneColor = (tone: TickerTone): string => {
@@ -215,7 +235,7 @@ const resolveToneColor = (tone: TickerTone): string => {
  * 글자 잉크 상자의 세로 가운데를 띠 중심에 맞추는 기준선 y.
  *
  * `textBaseline = "middle"` 은 글리프가 아니라 폰트 em 박스를 반으로 가른다.
- * 라벨(한글 산세리프 54 px)과 값(등폭 숫자 90 px)은 em 박스 안에서 글자가
+ * 라벨(한글 산세리프 48 px)과 값(등폭 숫자 80 px)은 em 박스 안에서 글자가
  * 차지하는 위치가 서로 달라, 같은 `middle` 로 그려도 눈에는 어긋나 보였다.
  * 실제로 칠해지는 상자를 재서 그 중심을 맞춘다.
  */
@@ -290,36 +310,39 @@ const drawSlot = (context: CanvasRenderingContext2D, item: TickerItem, slotIndex
   }
 };
 
-/**
- * 칸 경계 점.
- *
- * 맨 앞(x = 0) 점은 왼쪽 절반이 텍스처 밖으로 잘린다. 텍스처가 반복될 때 그
- * 절반은 오른쪽 끝에서 이어져야 하므로 같은 점을 끝에도 한 번 더 찍는다.
- */
-const drawDivider = (context: CanvasRenderingContext2D, slotIndex: number): void => {
-  const centerX = SLOT_WIDTH * slotIndex;
-  const centerY = TICKER_TEXTURE.height / 2;
-
+/** 칸 경계 점 하나. 가운데가 경계선 위라 양옆 칸에 반씩 걸친다. */
+const drawDivider = (context: CanvasRenderingContext2D, centerX: number): void => {
   context.fillStyle = DIVIDER.color;
-
-  for (const x of slotIndex === 0 ? [centerX, TICKER_TEXTURE.width] : [centerX]) {
-    context.beginPath();
-    context.arc(x, centerY, DIVIDER.radius, 0, Math.PI * 2);
-    context.fill();
-  }
+  context.beginPath();
+  context.arc(centerX, TICKER_TEXTURE.height / 2, DIVIDER.radius, 0, Math.PI * 2);
+  context.fill();
 };
 // endregion
 
-/** 티커 한 바퀴를 그린다. 왼쪽 끝과 오른쪽 끝이 이어 붙는다. */
-export const drawTicker = (
+/**
+ * 칸 하나를 다시 그린다. 그 칸 밖은 건드리지 않는다.
+ *
+ * 경계 점은 양옆 칸에 반씩 걸쳐 있어서 이 칸 쪽 반만 다시 찍는다. 잘라 내지 않고 점을
+ * 통째로 찍으면 옆 칸의 반쪽이 덧칠돼 가장자리가 진해진다. 맨 앞 칸의 왼쪽 반과 맨 끝
+ * 칸의 오른쪽 반은 텍스처 밖이고, 반복될 때 서로 이어 붙어 한 점이 된다.
+ */
+export const drawTickerSlot = (
   context: CanvasRenderingContext2D,
-  items: readonly TickerItem[],
+  item: TickerItem,
+  slotIndex: number,
 ): void => {
-  context.fillStyle = SCREEN_COLORS.backdrop;
-  context.fillRect(0, 0, TICKER_TEXTURE.width, TICKER_TEXTURE.height);
+  const left = SLOT_WIDTH * slotIndex;
 
-  items.slice(0, TICKER_TEXTURE.slotCount).forEach((item, slotIndex) => {
-    drawDivider(context, slotIndex);
-    drawSlot(context, item, slotIndex);
-  });
+  context.save();
+  context.beginPath();
+  context.rect(left, 0, SLOT_WIDTH, TICKER_TEXTURE.height);
+  context.clip();
+
+  context.fillStyle = SCREEN_COLORS.backdrop;
+  context.fillRect(left, 0, SLOT_WIDTH, TICKER_TEXTURE.height);
+  drawDivider(context, left);
+  drawDivider(context, left + SLOT_WIDTH);
+  drawSlot(context, item, slotIndex);
+
+  context.restore();
 };

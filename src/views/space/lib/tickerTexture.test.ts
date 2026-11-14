@@ -1,7 +1,9 @@
 import { describe, expect, it } from "vitest";
+import { SPACE_TICKER_FRAME } from "@/entities/space";
 import {
-  createTickerSignature,
+  createTickerSlotSignatures,
   formatMarketCapUsd,
+  resolveChangedTickerSlots,
   resolveFearGreedTone,
   resolveFearGreedZone,
   resolveTickerItems,
@@ -112,22 +114,50 @@ describe("resolveFearGreedTone", () => {
   });
 });
 
-describe("createTickerSignature", () => {
-  it("꼬리말만 바뀌어도 다시 굽는다", () => {
+describe("createTickerSlotSignatures", () => {
+  it("꼬리말만 바뀌어도 그 칸을 다시 굽는다", () => {
     // 54 와 56 은 둘 다 "공포·탐욕 5x" 라 숫자만 비교하면 중립↔탐욕 전환을 놓친다.
-    const neutral = resolveTickerItems(createState({ fearGreed: 54 }));
-    const greed = resolveTickerItems(createState({ fearGreed: 56 }));
+    const neutral = createTickerSlotSignatures(resolveTickerItems(createState({ fearGreed: 54 })));
+    const greed = createTickerSlotSignatures(resolveTickerItems(createState({ fearGreed: 56 })));
 
-    expect(createTickerSignature(neutral)).not.toBe(createTickerSignature(greed));
+    expect(resolveChangedTickerSlots(neutral, greed)).toEqual([4]);
   });
 
-  it("글자가 그대로면 같은 서명을 돌려준다", () => {
-    const first = resolveTickerItems(createState());
-    const almostSame = resolveTickerItems(createState({ dominance: 58.44 }));
-    const changed = resolveTickerItems(createState({ dominance: 59.1 }));
+  it("글자가 그대로면 다시 구울 칸이 없다", () => {
+    const first = createTickerSlotSignatures(resolveTickerItems(createState()));
+    const almostSame = createTickerSlotSignatures(
+      resolveTickerItems(createState({ dominance: 58.44 })),
+    );
 
     // 소수 한 자리까지만 찍으므로 58.42 와 58.44 는 같은 화면이다.
-    expect(createTickerSignature(almostSame)).toBe(createTickerSignature(first));
-    expect(createTickerSignature(changed)).not.toBe(createTickerSignature(first));
+    expect(resolveChangedTickerSlots(first, almostSame)).toEqual([]);
+  });
+
+  it("김프만 바뀌면 김프 칸만 다시 굽는다", () => {
+    // 거의 매초 일어나는 일임. 이때 나머지 네 칸까지 올리지 않으려고 칸별로 가름.
+    const before = createTickerSlotSignatures(resolveTickerItems(createState({ premium: 0.42 })));
+    const after = createTickerSlotSignatures(resolveTickerItems(createState({ premium: 0.43 })));
+
+    expect(resolveChangedTickerSlots(before, after)).toEqual([2]);
+  });
+
+  it("이전 서명이 없으면 전부 다시 굽는다", () => {
+    const signatures = createTickerSlotSignatures(resolveTickerItems(createState()));
+
+    expect(resolveChangedTickerSlots([], signatures)).toEqual([0, 1, 2, 3, 4]);
+  });
+});
+
+describe("TICKER_TEXTURE", () => {
+  it("텍스처 크기 상한이 4096 인 기기에도 줄이지 않고 올라간다", () => {
+    expect(TICKER_TEXTURE.width).toBeLessThanOrEqual(4096);
+    expect(TICKER_TEXTURE.width).toBe(TICKER_TEXTURE.slotWidth * TICKER_TEXTURE.slotCount);
+  });
+
+  it("가로와 세로를 같은 밀도로 구워 글자가 늘어나지 않는다", () => {
+    const horizontalDensity = TICKER_TEXTURE.width / TICKER_TEXTURE.cycleLength;
+    const verticalDensity = TICKER_TEXTURE.height / SPACE_TICKER_FRAME.height;
+
+    expect(verticalDensity / horizontalDensity).toBeCloseTo(1, 2);
   });
 });
