@@ -16,6 +16,7 @@ import {
   resolveAvatarModelIndex,
   type SpaceAvatarCombat,
 } from "../../../src/entities/space/model/avatarModel";
+import { resolveBaristaProximity } from "../../../src/entities/space/model/barista";
 import {
   rollKickDamage,
   SPACE_BOSS_COMBAT,
@@ -672,12 +673,19 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
    * 홀 배경음악을 바꿈. 방 전체에 쿨다운이 하나라 그동안은 누구의 요청이든 거절함.
    *
    * 같은 곡을 다시 고르면 처음부터 다시 틂. 쿨다운 안이면 그것도 거절함.
+   * 바리스타 앞에 선 사람의 요청만 받음. 화면은 가까이 가야 메뉴가 열리지만, 그건 클라이언트가
+   * 막는 것뿐이라 서버가 안 보면 어디서든 프레임만 보내 방 전체의 곡을 바꿀 수 있음.
    */
   private async handleHallBgm(socket: WebSocket, track: SpaceHallBgmTrack): Promise<void> {
     const attachment = this.getJoinedAttachment(socket);
 
     if (!attachment?.peer || !this.hasHallBgmFeature(socket)) {
       this.sendError(socket, "JOIN_REQUIRED", "먼저 공간에 입장해 주세요.");
+      return;
+    }
+    // 서버가 아는 위치는 조금 늦어서 넓은 쪽 반경으로 봄.
+    if (!resolveBaristaProximity(true, attachment.peer)) {
+      this.sendError(socket, "HALL_BGM_TOO_FAR", "바리스타 가까이에서만 배경음악을 바꿀 수 있어요.");
       return;
     }
     await this.loadHallBgm();

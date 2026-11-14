@@ -10,6 +10,7 @@ import {
   resolveAvatarCombat,
   SPACE_AVATAR_MODELS,
 } from "../../../src/entities/space/model/avatarModel";
+import { SPACE_BARISTA_SPOT } from "../../../src/entities/space/model/barista";
 import {
   SPACE_BOSS,
   SPACE_BOSS_COMBAT,
@@ -1035,12 +1036,30 @@ describe("SpaceRoom", () => {
     const HALL_BGM_FEATURES = ["hall-bgm-v1"];
     const hallBgmFrames = (socket: RoomSocket) =>
       socket.frames().filter((frame) => frame.t === "hall-bgm");
+    /** 스폰 자리에서 바리스타 앞까지 걸어갈 시간을 흘려보낸 뒤 그 앞으로 옮김. */
+    const walkToBarista = async (
+      send: ReturnType<typeof createRoom>["send"],
+      socket: RoomSocket,
+    ) => {
+      vi.advanceTimersByTime(8_000);
+      await send(socket, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "move",
+        x: SPACE_BARISTA_SPOT.x,
+        y: SPACE_BARISTA_SPOT.y,
+        z: SPACE_BARISTA_SPOT.z - 3,
+        yaw: 0,
+        isRunning: false,
+      });
+    };
 
     it("곡을 바꾸면 그 기능을 아는 사람 모두에게 알리고 저장한다", async () => {
       const { state, send, join } = createRoom();
       const changer = await join(clientKey(1), "디제이", 0, "ip-1", HALL_BGM_FEATURES);
       const listener = await join(clientKey(2), "손님", 0, "ip-2", HALL_BGM_FEATURES);
       const oldClient = await join(clientKey(3), "옛탭", 0, "ip-3");
+
+      await walkToBarista(send, changer);
       const now = Date.now();
 
       await send(changer, { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", track: "surge" });
@@ -1064,6 +1083,16 @@ describe("SpaceRoom", () => {
       const first = await join(clientKey(1), "디제이", 0, "ip-1", HALL_BGM_FEATURES);
       const second = await join(clientKey(2), "손님", 0, "ip-2", HALL_BGM_FEATURES);
 
+      await walkToBarista(send, first);
+      await send(second, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "move",
+        x: SPACE_BARISTA_SPOT.x + 1,
+        y: SPACE_BARISTA_SPOT.y,
+        z: SPACE_BARISTA_SPOT.z - 3,
+        yaw: 0,
+        isRunning: false,
+      });
       await send(first, { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", track: "surge" });
       vi.advanceTimersByTime(SPACE_HALL_BGM.changeCooldownMs - 1_000);
       await send(second, { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", track: "base" });
@@ -1080,12 +1109,34 @@ describe("SpaceRoom", () => {
       });
     });
 
+    it("바리스타에게서 떨어진 자리에서 보낸 요청은 거절한다", async () => {
+      const { state, send, join } = createRoom();
+      const changer = await join(clientKey(1), "디제이", 0, "ip-1", HALL_BGM_FEATURES);
+
+      vi.advanceTimersByTime(8_000);
+      await send(changer, {
+        v: SPACE_PROTOCOL_VERSION,
+        t: "move",
+        x: SPACE_BARISTA_SPOT.x,
+        y: SPACE_BARISTA_SPOT.y,
+        z: SPACE_BARISTA_SPOT.z - SPACE_BARISTA_SPOT.leaveRadius - 1,
+        yaw: 0,
+        isRunning: false,
+      });
+      await send(changer, { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", track: "surge" });
+
+      expect(hallBgmFrames(changer)).toHaveLength(0);
+      expect(changer.frames().at(-1)).toMatchObject({ t: "error", code: "HALL_BGM_TOO_FAR" });
+      expect(state.storage.put).not.toHaveBeenCalledWith("space-hall-bgm-v1", expect.anything());
+    });
+
     it("뒤에 들어온 사람은 입장 응답으로 지금 곡을 받는다", async () => {
       const { send, join } = createRoom();
       const changer = await join(clientKey(1), "디제이", 0, "ip-1", HALL_BGM_FEATURES);
 
       expect(changer.frames().find((frame) => frame.t === "welcome")).not.toHaveProperty("hallBgm");
 
+      await walkToBarista(send, changer);
       await send(changer, { v: SPACE_PROTOCOL_VERSION, t: "hall-bgm", track: "surge" });
       const late = await join(clientKey(2), "손님", 0, "ip-2", HALL_BGM_FEATURES);
       const oldClient = await join(clientKey(3), "옛탭", 0, "ip-3");

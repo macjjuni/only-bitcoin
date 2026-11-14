@@ -261,6 +261,31 @@ describe("싸우는 보스(서버 프레임)", () => {
     expect(tracker.state.x).toBeCloseTo(arena.centerX + 3, 2);
   });
 
+  it("도는 중에 들어와도 보스를 받은 자리에 바로 그린다", () => {
+    const spinX = arena.centerX + 4;
+    const path = [
+      {
+        startedAt: CLOCK_OFFSET_MS - 500,
+        fromX: spinX - 1.5,
+        fromZ: arena.centerZ,
+        toX: spinX + 1.5,
+        toZ: arena.centerZ,
+      },
+    ];
+
+    // 구간을 아는 서버와 모르는 옛 서버 둘 다. 직전 프레임이 없어도 원점 쪽으로 끌려가지 않음.
+    for (const spinPath of [path, undefined]) {
+      const tracker = createEnabledTracker(
+        null,
+        createWire({ phase: "attack", attack: "spin", x: spinX, spinPath }),
+      );
+      const state = tracker.sample(FRAME_MS, CLOCK_OFFSET_MS);
+
+      expect(Math.abs(state.x - spinX)).toBeLessThan(0.2);
+      expect(state.z).toBeCloseTo(arena.centerZ, 5);
+    }
+  });
+
   it("멀리 떨어진 자리로는 따라가지 않고 바로 옮긴다", () => {
     const tracker = createEnabledTracker();
 

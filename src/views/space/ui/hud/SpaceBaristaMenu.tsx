@@ -96,6 +96,13 @@ function SpaceBaristaMenu({ session, isCoarsePointer, onCelebrate }: SpaceBarist
   const [greeting, setGreeting] = useState<string>(SPACE_BARISTA_LINES.greetings[0]);
   /** 지금의 서버 시각. 메뉴가 열려 있는 동안만 갱신해 남은 시간을 셈. */
   const [serverNow, setServerNow] = useState<number | null>(null);
+  /**
+   * 누가 마지막으로 폭죽을 직접 터뜨린 서버 시각. 쿨다운을 여기서 셈.
+   *
+   * 세션의 `celebration` 은 가장 최근 폭죽 하나만 들고 있음. 누가 터뜨린 직후 시세 폭죽이
+   * 터지면 그걸로 덮여서, 따로 기억해 두지 않으면 쿨다운 중인데 버튼이 켜져 보임.
+   */
+  const [lastFireworksAt, setLastFireworksAt] = useState<number | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
   const clockOffsetRef = useRef(session.serverClockOffsetMs);
   const line = view === "root" ? greeting : SPACE_BARISTA_LINES.bgm;
@@ -208,6 +215,15 @@ function SpaceBaristaMenu({ session, isCoarsePointer, onCelebrate }: SpaceBarist
   useEffect(startCountdown, [startCountdown]);
 
   useEffect(() => {
+    // 시세가 터뜨린 폭죽은 쿨다운과 무관함. 누가 직접 터뜨린 것만 기억함.
+    const celebration = session.celebration;
+
+    if (celebration && celebration.testSeat !== undefined) {
+      setLastFireworksAt((previousAt) => Math.max(previousAt ?? 0, celebration.startsAt));
+    }
+  }, [session.celebration]);
+
+  useEffect(() => {
     // 자리를 뜨면 닫음. 멀리서 메뉴만 들고 다니지 않게 함.
     if (!isNear) {
       setIsOpen(false);
@@ -227,9 +243,6 @@ function SpaceBaristaMenu({ session, isCoarsePointer, onCelebrate }: SpaceBarist
   const choiceClass = `${CHOICE_CLASS} ${sizeClass.choice}`;
   const currentTrack = session.hallBgm?.track ?? DEFAULT_TRACK;
   const bgmWaitSeconds = resolveWaitSeconds(resolveHallBgmReadyAt(session.hallBgm), serverNow);
-  // 시세가 터뜨린 폭죽은 쿨다운과 무관함. 누가 직접 터뜨린 것만 셈.
-  const lastFireworksAt =
-    session.celebration?.testSeat === undefined ? null : session.celebration.startsAt;
   const fireworksWaitSeconds =
     lastFireworksAt === null
       ? 0

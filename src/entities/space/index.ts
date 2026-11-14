@@ -49,6 +49,7 @@ export {
   type SpaceAvatarCombat,
   type SpaceAvatarModel,
 } from "./model/avatarModel";
+export { resolveBaristaProximity, SPACE_BARISTA_SPOT } from "./model/barista";
 export {
   createHiddenBossState,
   resolveBossAttackSeconds,

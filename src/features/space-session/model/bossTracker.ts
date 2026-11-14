@@ -238,7 +238,19 @@ export const createBossTracker = (): BossTracker => {
         ? resolveBossSpinPosition(current.spinPath, nowMs + clockOffsetMs)
         : null;
 
-    if (spinPosition && wasFollowingWire) {
+    if (spinPosition) {
+      // 처음 그리거나(도는 중에 들어옴 · 다시 붙음) 멀리 떨어져 있으면 따라가지 않고 바로 놓음.
+      const isFarFromPath =
+        Math.hypot(spinPosition.x - state.x, spinPosition.z - state.z) > SNAP_DISTANCE;
+
+      if (!wasFollowingWire || isFarFromPath) {
+        state.x = spinPosition.x;
+        state.z = spinPosition.z;
+        state.yaw = current.yaw;
+        wasFollowingWire = true;
+        return;
+      }
+
       // 구간이 정해져 있어 서버 틱을 기다릴 필요가 없음. 서버도 같은 식으로 판정 자리를 구함.
       const spinFollow = 1 - Math.exp(-SPIN_FOLLOW_RATE * deltaSeconds);
 
@@ -297,6 +309,10 @@ export const createBossTracker = (): BossTracker => {
       wireServerAt = null;
       wireVelocityX = 0;
       wireVelocityZ = 0;
+      // 도는 중에 들어오면 직전 프레임이 없음. 받은 자리에서 시작함. 안 맞추면 옛 자리(처음엔
+      // 원점)에서 이어 그려 보스가 엉뚱한 데 나타남.
+      spinFromX = wire?.x ?? 0;
+      spinFromZ = wire?.z ?? 0;
       health = wire?.health ?? null;
       lastHitAt = undefined;
       wasFollowingWire = false;
