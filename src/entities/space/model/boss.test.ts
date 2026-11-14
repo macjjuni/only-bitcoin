@@ -103,6 +103,9 @@ const readAccessor = (json: GltfJson, binary: Buffer, accessorIndex: number): nu
   );
 };
 
+/** 상수는 에셋 값에 보스 배율을 곱해 둔 것임. 에셋과 견줄 때는 배율을 다시 나눔. */
+const toAssetScale = (value: number): number => value / SPACE_BOSS.modelScale;
+
 const boss = readGlb("public/models/bear-raid-boss.glb");
 const extras = boss.json.nodes.find((node) => node.name === "Bear_Rig")
   ?.extras as unknown as BossExtras;
@@ -124,18 +127,22 @@ describe("보스 상수 ↔ bear-raid-boss.glb", () => {
   it("공격 범위와 판정 시각이 에셋과 같다", () => {
     const { Swipe, Slam, Charge } = extras.attackRanges;
 
-    expect(SPACE_BOSS_ATTACKS.swipe.radius).toBe(Swipe.radius);
+    expect(toAssetScale(SPACE_BOSS_ATTACKS.swipe.radius)).toBeCloseTo(Swipe.radius, 6);
     expect(SPACE_BOSS_ATTACKS.swipe.fullAngle).toBeCloseTo(
       (Swipe.fullAngleDegrees * Math.PI) / 180,
       6,
     );
     expect(SPACE_BOSS_ATTACKS.swipe.hitSeconds).toBeCloseTo(Swipe.hitTime, 5);
-    expect(SPACE_BOSS_ATTACKS.slam.radius).toBe(Slam.radius);
-    expect(SPACE_BOSS_ATTACKS.slam.forwardOffset).toBeCloseTo(Slam.originXZ[1], 3);
+    expect(toAssetScale(SPACE_BOSS_ATTACKS.slam.radius)).toBeCloseTo(Slam.radius, 6);
+    expect(toAssetScale(SPACE_BOSS_ATTACKS.slam.forwardOffset)).toBeCloseTo(Slam.originXZ[1], 3);
     expect(SPACE_BOSS_ATTACKS.slam.hitSeconds).toBeCloseTo(Slam.hitTime, 5);
-    expect(SPACE_BOSS_ATTACKS.charge.width).toBe(Charge.width);
+    expect(toAssetScale(SPACE_BOSS_ATTACKS.charge.width)).toBeCloseTo(Charge.width, 6);
+    // 돌진 길이는 배율을 안 곱함. 길어지면 아레나 짧은 쪽으로 돌진을 못 함.
     expect(SPACE_BOSS_ATTACKS.charge.length).toBe(Charge.length);
-    expect(SPACE_BOSS_ATTACKS.charge.forwardOffset).toBeCloseTo(Charge.originXZ[1], 3);
+    expect(toAssetScale(SPACE_BOSS_ATTACKS.charge.forwardOffset)).toBeCloseTo(
+      Charge.originXZ[1],
+      3,
+    );
     expect(SPACE_BOSS_ATTACKS.charge.launchSeconds).toBeCloseTo(Charge.launchTime, 5);
     expect(SPACE_BOSS_ATTACKS.charge.arriveSeconds).toBeCloseTo(Charge.endOfDash, 5);
   });
@@ -170,8 +177,8 @@ describe("보스 상수 ↔ bear-raid-boss.glb", () => {
       boss.json.accessors[boss.json.meshes[footprint.mesh].primitives[0].attributes.POSITION].max ??
       [];
 
-    expect(SPACE_BOSS_ATTACKS.spin.radius).toBeCloseTo(meshRadius * drawnScale, 4);
-    expect(SPACE_BOSS_ATTACKS.spin.radius).toBeLessThanOrEqual(Spin.radius);
+    expect(toAssetScale(SPACE_BOSS_ATTACKS.spin.radius)).toBeCloseTo(meshRadius * drawnScale, 4);
+    expect(toAssetScale(SPACE_BOSS_ATTACKS.spin.radius)).toBeLessThanOrEqual(Spin.radius);
   });
 
   it("회전은 도는 구간을 되풀이해 틀고, 다 돌면 마무리로 넘어간다", () => {
@@ -198,8 +205,11 @@ describe("보스 상수 ↔ bear-raid-boss.glb", () => {
   it("보폭 속도·회전 구간·무적 시간이 에셋과 같다", () => {
     const { Walk, Run, Turn, Spawn } = extras.clipSettings;
 
-    expect(SPACE_BOSS_STRIDE.walk).toBeCloseTo(Walk.strideSpeedMetersPerSecond ?? 0, 4);
-    expect(SPACE_BOSS_STRIDE.run).toBeCloseTo(Run.strideSpeedMetersPerSecond ?? 0, 4);
+    expect(toAssetScale(SPACE_BOSS_STRIDE.walk)).toBeCloseTo(
+      Walk.strideSpeedMetersPerSecond ?? 0,
+      4,
+    );
+    expect(toAssetScale(SPACE_BOSS_STRIDE.run)).toBeCloseTo(Run.strideSpeedMetersPerSecond ?? 0, 4);
     expect(SPACE_BOSS_TURN.pivotFromSeconds).toBeCloseTo(Turn.pivotFrom ?? 0, 5);
     expect(SPACE_BOSS_TURN.pivotUntilSeconds).toBeCloseTo(Turn.pivotUntil ?? 0, 5);
     expect(SPACE_BOSS_SPAWN.invulnerableSeconds - SPACE_BOSS_SPAWN.riseSeconds).toBeCloseTo(

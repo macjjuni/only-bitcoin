@@ -1,5 +1,6 @@
 import {
   resolveBossChargeTravel,
+  SPACE_BOSS,
   SPACE_BOSS_ATTACKS,
   type SpaceBossAttack,
   type SpaceBossState,
@@ -52,9 +53,9 @@ export const BOSS_CHARGE_DUST_SPACING = 1.1;
  */
 export const BOSS_SLASH_LEAD_SECONDS = 0.1;
 /** 돌진을 시작하며 땅을 박차는 고리의 반지름(m). */
-const CHARGE_LAUNCH_RADIUS = 1.8;
+const CHARGE_LAUNCH_RADIUS = 1.8 * SPACE_BOSS.modelScale;
 /** 돌진 끝에 멈춰 서며 내는 고리의 반지름(m). */
-const CHARGE_ARRIVAL_RADIUS = 2.6;
+const CHARGE_ARRIVAL_RADIUS = 2.6 * SPACE_BOSS.modelScale;
 
 const NO_IMPACTS: readonly BossImpact[] = [];
 

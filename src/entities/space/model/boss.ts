@@ -60,7 +60,23 @@ export interface SpaceBossState {
   lastHitAt: number | undefined;
 }
 
+/**
+ * 보스를 에셋 크기에서 키우는 배율. **크기를 바꾸려면 이 값만 고침.**
+ *
+ * 에셋은 키 4.5 m 임. 몸(모델 · 몸통 반지름 · 키 · 그림자 · 솟고 가라앉는 깊이)과 공격(타격 범위 ·
+ * 바닥 예고 · 타격 연출)이 이 비율로 같이 커짐. 아래 수치는 에셋 기준 값에 배율을 곱해 둔 것임.
+ * 서버 판정도 같은 값을 써서 바꾸면 워커도 다시 배포함.
+ *
+ * **돌진의 길이와 이동 거리만 안 키움.** 아레나 짧은 쪽이 가운데에서 10.8 m 라, 9 m 보다 길어지면
+ * 끝점이 아레나를 벗어나 그 방향으로는 돌진을 못 함. 폭과 시작 거리는 몸에 맞춰 커짐.
+ *
+ * 이동 속도는 안 바꿈. 대신 보폭(`SPACE_BOSS_STRIDE`)이 같이 커져서 걸음이 그만큼 느리게 돎.
+ */
+const BOSS_MODEL_SCALE = 1.25;
+
 export const SPACE_BOSS = {
+  /** 그릴 때 모델에 곱하는 배율. */
+  modelScale: BOSS_MODEL_SCALE,
   /**
    * 아레나. 맵 GLB `Snow_Arena_Center`(38, 2, −1) 가 중심임.
    *
@@ -86,14 +102,14 @@ export const SPACE_BOSS = {
   /**
    * 보스가 아레나 가장자리에서 이만큼 안쪽까지만 다님(m).
    *
-   * 아레나가 담 바로 앞까지라 가장자리까지 가면 몸통(반지름 1.6 m)이 담에 파묻힘.
+   * 아레나가 담 바로 앞까지라 가장자리까지 가면 몸통이 담에 파묻힘.
    * 담에 붙어 선 유저도 휘두르기(3.5 m)가 닿아서 안전한 자리는 안 생김.
    */
   roamMargin: 1.2,
   /** 몸통 반지름(m). 유저 공격 사거리와 겹침 방지가 이 값을 뺀 거리로 잼. */
-  bodyRadius: 1.6,
+  bodyRadius: 1.6 * BOSS_MODEL_SCALE,
   /** 키(m). 이보다 위(발코니)에 있는 유저는 몸으로 막지 않음. */
-  height: 4.5,
+  height: 4.5 * BOSS_MODEL_SCALE,
   /**
    * 추적 속도(m/s). `Run` 모션의 보폭 속도(4.19)에 맞춘 값임.
    *
@@ -122,8 +138,8 @@ export const SPACE_FEATURE_BOSS = "boss-v1";
  * 전투 수치. 전부 초기값이고 플레이하면서 조정함. 근거는 계획서 §6.
  */
 export const SPACE_BOSS_COMBAT = {
-  /** 5명이 쉬지 않고 때리면 약 1분, 피하면서 싸우면 3 ~ 5분. */
-  maximumHealth: 3_000,
+  /** 5명이 쉬지 않고 때리면 약 2분, 피하면서 싸우면 6 ~ 10분. */
+  maximumHealth: 6_000,
   /**
    * 표준 공격 한 번의 피해. 실제 피해는 캐릭터마다 다르고(`SpaceAvatarCombat`),
    * 초당 피해는 셋 다 10 안팎으로 맞춰 둠.
@@ -214,8 +230,8 @@ export const SPACE_BOSS_SPAWN_INTERVAL_MS = 2 * 60 * 60 * 1_000;
 
 /** 모션별 보폭 속도(m/s). 재생 속도 = 실제 속도 ÷ 이 값. */
 export const SPACE_BOSS_STRIDE = {
-  walk: 1.2516,
-  run: 4.1868,
+  walk: 1.2516 * BOSS_MODEL_SCALE,
+  run: 4.1868 * BOSS_MODEL_SCALE,
 } as const;
 
 /** 모션 길이(초). GLB 클립 이름은 첫 글자만 대문자임(`Swipe`, `Idle` …). */
@@ -259,14 +275,22 @@ export const SPACE_BOSS_TURN = {
  */
 export const SPACE_BOSS_ATTACKS = {
   /** 발밑에서 앞으로 펼친 부채꼴. */
-  swipe: { radius: 3.5, fullAngle: (120 * Math.PI) / 180, hitSeconds: framesToSeconds(23) },
+  swipe: {
+    radius: 3.5 * BOSS_MODEL_SCALE,
+    fullAngle: (120 * Math.PI) / 180,
+    hitSeconds: framesToSeconds(23),
+  },
   /** 보스 앞 `forwardOffset` 에 중심을 둔 원. */
-  slam: { radius: 4, forwardOffset: 2.304, hitSeconds: framesToSeconds(33) },
+  slam: {
+    radius: 4 * BOSS_MODEL_SCALE,
+    forwardOffset: 2.304 * BOSS_MODEL_SCALE,
+    hitSeconds: framesToSeconds(33),
+  },
   /** 보스 앞 `forwardOffset` 에서 시작하는 직선. 보스가 `travel` 만큼 나아감. */
   charge: {
-    width: 3,
+    width: 3 * BOSS_MODEL_SCALE,
     length: 9,
-    forwardOffset: 2.762,
+    forwardOffset: 2.762 * BOSS_MODEL_SCALE,
     travel: 9,
     launchSeconds: framesToSeconds(24),
     arriveSeconds: framesToSeconds(46),
@@ -281,11 +305,11 @@ export const SPACE_BOSS_ATTACKS = {
    *
    * 한순간이 아니라 `launchSeconds` 부터 `arriveSeconds` 까지 도는 내내 판정함.
    * 같은 사람은 `rehitSeconds` 마다 다시 맞음.
-   * 예고는 내려찍기 원(4 m)을 0.7배로 줄여 그려서 반지름이 2.8 m 임. 에셋 `extras` 의 3.1 은
+   * 예고는 내려찍기 원(에셋 기준 4 m)을 0.7배로 줄여 그려서 에셋 기준 반지름이 2.8 m 임. 에셋 `extras` 의 3.1 은
    * 판정 여유 0.3 을 빼기 전 값이라 안 옮김. 원이 이미 여유를 뺀 크기라 `hitMargin` 은 안 뺌.
    */
   spin: {
-    radius: 2.8,
+    radius: 2.8 * BOSS_MODEL_SCALE,
     launchSeconds: BOSS_SPIN_LAUNCH_SECONDS,
     arriveSeconds: BOSS_SPIN_LAUNCH_SECONDS + BOSS_SPIN_LOOP_SECONDS * BOSS_SPIN_LOOP_COUNT,
     /** 모션에서 도는 구간의 길이. 이만큼을 되풀이해 틂. */
@@ -320,7 +344,7 @@ export const SPACE_BOSS_SPAWN = {
   /** 솟아오르는 시간(초). 이 동안 모션은 첫 프레임(웅크림)에 멈춰 있음. */
   riseSeconds: 0.9,
   /** 시작 깊이(m). 웅크린 키보다 깊어야 처음에 안 보임. */
-  riseDepth: 4.2,
+  riseDepth: 4.2 * BOSS_MODEL_SCALE,
   /** 솟는 시간 + 모션 길이. */
   totalSeconds: 0.9 + SPACE_BOSS_CLIP_SECONDS.spawn,
   /** 이때까지는 맞지 않음. 솟는 시간 + 에셋이 정한 1.25초. */
@@ -331,8 +355,8 @@ export const SPACE_BOSS_SPAWN = {
 export const SPACE_BOSS_DEATH = {
   holdSeconds: 1.6,
   sinkSeconds: 1.8,
-  /** 누운 몸 높이(2.5 m)보다 깊게 내림. */
-  sinkDepth: 3,
+  /** 누운 몸 높이(에셋 기준 2.5 m)보다 깊게 내림. */
+  sinkDepth: 3 * BOSS_MODEL_SCALE,
   totalSeconds: SPACE_BOSS_CLIP_SECONDS.death + 1.6 + 1.8,
 } as const;
 

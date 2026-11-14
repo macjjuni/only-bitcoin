@@ -46,7 +46,7 @@ const SNOW_COLOR = "#eef4fb";
 /** 할퀸 자국이 떠 있는 시간(초). 짧아야 날카로워 보임. */
 const SLASH_SECONDS = 0.32;
 /** 할퀸 자국의 높이(m). 유저 가슴께임. */
-const SLASH_HEIGHT = 1.3;
+const SLASH_HEIGHT = 1.3 * SPACE_BOSS.modelScale;
 /** 발톱 자국 세 줄의 반지름(m). 부채꼴(3.5 m) 안쪽에 듦. */
 const SLASH_CLAW_RADII = [2.05, 2.6, 3.15] as const;
 /** 자국 한 줄의 가장 굵은 곳 반폭(m). 양 끝으로 갈수록 가늘어짐. */
@@ -357,7 +357,7 @@ function BossAttackEffects({ bossState, onAttackSound, onPhaseSound }: BossAttac
     }
 
     const sweep = (0.5 - easeOutCubic(ratio)) * SLASH_SWEEP_ANGLE;
-    const scale = 0.92 + 0.14 * ratio;
+    const scale = (0.92 + 0.14 * ratio) * SPACE_BOSS.modelScale;
 
     slashGroup.position.set(slash.x, SPACE_BOSS.arena.floorY + SLASH_HEIGHT, slash.z);
     slashGroup.rotation.set(0, slash.yaw + sweep, 0);

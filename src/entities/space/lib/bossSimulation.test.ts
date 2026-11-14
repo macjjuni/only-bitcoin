@@ -287,21 +287,22 @@ describe("보스 공격 판정", () => {
     expect(hitCount).toBe(0);
   });
 
-  it("돌진은 길 위에 선 사람을 한 번만 치고 보스는 9 m 나아간다", () => {
+  it("돌진은 길 위에 선 사람을 한 번만 치고 보스는 돌진 거리만큼 나아간다", () => {
     const simulation = createSpawnedSimulation();
     const chargeHits: number[] = [];
-    let startX = Number.NaN;
-    let endX = Number.NaN;
+    let startZ = Number.NaN;
+    let endZ = Number.NaN;
 
     run({
       simulation,
       fromMs: 0,
       seconds: 9,
-      players: (now) => [createPlayer(1, -8, 0, now)],
+      // 아레나의 긴 쪽(z)으로 세움. 가운데에서 짧은 쪽(x)으로는 돌진 끝이 아레나를 벗어나 돌진을 안 함.
+      players: (now) => [createPlayer(1, 0, -10, now)],
       onTick: (_, hits) => {
         if (simulation.state.attack === "charge") {
-          startX = simulation.state.attackOriginX;
-          endX = simulation.state.x;
+          startZ = simulation.state.attackOriginZ;
+          endZ = simulation.state.z;
         }
         for (const hit of hits) {
           if (hit.attack === "charge") {
@@ -312,8 +313,8 @@ describe("보스 공격 판정", () => {
     });
 
     expect(chargeHits).toEqual([1]);
-    expect(startX - endX).toBeCloseTo(SPACE_BOSS_ATTACKS.charge.travel, 3);
-    expect(isInsideBossArenaFloor(endX, simulation.state.z, SPACE_BOSS.roamMargin)).toBe(true);
+    expect(startZ - endZ).toBeCloseTo(SPACE_BOSS_ATTACKS.charge.travel, 3);
+    expect(isInsideBossArenaFloor(simulation.state.x, endZ, SPACE_BOSS.roamMargin)).toBe(true);
   });
 
   it("내려찍기 원 안에 둘 이상 모이면 내려찍는다", () => {

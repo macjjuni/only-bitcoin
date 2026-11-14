@@ -12,8 +12,8 @@ import { useBossModel } from "@/views/space/lib/bossModel";
 import { COMBAT_OVERLAY_DISTANCE_FACTOR } from "@/views/space/lib/overlayLayout";
 import { createShadowBlobTexture } from "@/views/space/lib/shadowBlobTexture";
 
-/** 접지 그림자 지름(m). 어깨 폭(4.3 m)보다 조금 넓게 잡았음. */
-const SHADOW_DIAMETER = 5.6;
+/** 접지 그림자 지름(m). 어깨 폭(에셋 기준 4.3 m)보다 조금 넓게 잡았음. */
+const SHADOW_DIAMETER = 5.6 * SPACE_BOSS.modelScale;
 /** 바닥 예고 표시(최대 5.4 cm)보다 아래에 깔아 예고를 가리지 않게 함. */
 const SHADOW_LIFT_Y = 0.008;
 /** 체력판을 정수리에서 띄우는 높이(m). */

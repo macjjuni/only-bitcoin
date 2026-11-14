@@ -128,14 +128,15 @@ export interface BossSimulation {
 /** 가까이 붙었을 때 쓰는 공격. 돌진은 멀리서만 써서 빠짐. */
 type BossCloseAttack = Exclude<SpaceBossAttack, "charge">;
 
-/** 거리별 공격 선택 기준(m). */
+/** 거리별 공격 선택 기준(m). 공격 범위에 맞춘 값이라 보스 배율을 같이 곱함. */
 const ATTACK_RANGE = {
   /** 이 안이면 가까이 붙은 것으로 봄. 휘두르기 · 내려찍기 · 회전을 돌려 씀. */
-  close: 3.3,
+  close: 3.3 * SPACE_BOSS.modelScale,
   /** 내려찍기 원이 닿는 거리. */
-  slam: 5.8,
-  chargeMinimum: 6,
-  chargeMaximum: 11,
+  slam: 5.8 * SPACE_BOSS.modelScale,
+  chargeMinimum: 6 * SPACE_BOSS.modelScale,
+  /** 돌진 띠가 닿는 끝에서 조금 안쪽. 띠 길이는 배율과 무관해서 띠에서 바로 구함. */
+  chargeMaximum: SPACE_BOSS_ATTACKS.charge.forwardOffset + SPACE_BOSS_ATTACKS.charge.length - 0.75,
 } as const;
 /** 이 각도 안으로 마주 봐야 공격을 시작함(rad). */
 const ATTACK_FACING_ANGLE = 0.3;

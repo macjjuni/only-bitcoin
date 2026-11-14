@@ -11,7 +11,7 @@ import {
   type Object3D,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
-import type { SpaceBossAttack } from "@/entities/space";
+import { SPACE_BOSS, type SpaceBossAttack } from "@/entities/space";
 import { isAndroidDevice, isIOSDevice } from "@/shared/utils/device";
 import { toVersionedModelUrl } from "./modelAssetUrl";
 
@@ -57,6 +57,9 @@ export const BOSS_NODE_NAMES = {
   aoe: Record<SpaceBossAttack, string>;
   aoeAnchor: string;
 };
+
+/** 돌진 띠의 길이만 되돌리려고 끼우는 그룹의 이름. 에셋에는 없고 로더가 만듦. */
+const BOSS_CHARGE_LENGTH_NODE_NAME = "Boss_AOE_Charge_Length";
 
 export interface BossModel {
   /** 씬 그래프 전체. `<primitive>` 로 원점에 붙임. 믹서도 이걸 뿌리로 씀. */
@@ -196,6 +199,10 @@ export const prepareBossModel = (
   isLightweightAoe = false,
 ): BossModel => {
   const rig = requireNode(scene, BOSS_NODE_NAMES.rig);
+
+  // 몸을 키움. 바닥 예고(`aoeAnchor`)는 따로 붙어 있어서 아래에서 같은 배율로 키움.
+  rig.scale.setScalar(SPACE_BOSS.modelScale);
+
   const aoeRoots = Object.values(BOSS_NODE_NAMES.aoe).map((name) => requireNode(scene, name));
   const existingAnchor = scene.getObjectByName(BOSS_NODE_NAMES.aoeAnchor);
   const aoeAnchor = existingAnchor instanceof Group ? existingAnchor : new Group();
@@ -206,7 +213,23 @@ export const prepareBossModel = (
     for (const aoeRoot of aoeRoots) {
       aoeAnchor.add(aoeRoot);
     }
+
+    // 돌진 띠는 길이만 원래대로 둠(판정 길이에 배율을 안 곱함). 띠 노드의 크기는 모션이 직접
+    // 넣어서 못 고치므로, 띠가 시작하는 자리에 그룹을 하나 끼워 길이 방향만 되돌림.
+    const chargeRoot = requireNode(scene, BOSS_NODE_NAMES.aoe.charge);
+    const chargeLength = new Group();
+
+    chargeLength.name = BOSS_CHARGE_LENGTH_NODE_NAME;
+    chargeLength.position.copy(chargeRoot.position);
+    chargeLength.scale.set(1, 1, 1 / SPACE_BOSS.modelScale);
+    chargeRoot.position.set(0, 0, 0);
+    aoeAnchor.add(chargeLength);
+    chargeLength.add(chargeRoot);
   }
+
+  // 예고 표시와 그 앞쪽 거리(내려찍기 · 돌진의 `forwardOffset`)가 판정 범위와 같이 커짐.
+  // 돌진 띠의 길이만 위에서 끼운 그룹이 되돌림.
+  aoeAnchor.scale.setScalar(SPACE_BOSS.modelScale);
 
   const boneNames = new Set<string>();
   const lightweightMaterials = new Map<Material, MeshBasicMaterial>();

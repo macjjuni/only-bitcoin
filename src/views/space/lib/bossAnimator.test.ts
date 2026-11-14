@@ -85,8 +85,27 @@ beforeAll(async () => {
 describe("prepareBossModel", () => {
   it("예고 노드를 보스 몸과 따로 움직이는 묶음으로 옮긴다", () => {
     for (const name of Object.values(BOSS_NODE_NAMES.aoe)) {
-      expect(model.scene.getObjectByName(name)?.parent).toBe(model.aoeAnchor);
+      const parent = model.scene.getObjectByName(name)?.parent;
+
+      // 돌진 띠만 길이를 되돌리는 그룹을 하나 거쳐서 묶음에 달림.
+      expect(name === BOSS_NODE_NAMES.aoe.charge ? parent?.parent : parent).toBe(model.aoeAnchor);
     }
+  });
+
+  it("돌진 띠는 폭만 커지고 길이는 판정 길이 그대로 그린다", () => {
+    const charge = model.scene.getObjectByName(BOSS_NODE_NAMES.aoe.charge);
+    const worldScale = new Vector3();
+
+    // 띠 노드의 크기는 모션이 넣음. 다 펼쳐진 크기(1)로 두고 잼.
+    charge?.scale.setScalar(1);
+    model.scene.updateMatrixWorld(true);
+    charge?.getWorldScale(worldScale);
+
+    expect(worldScale.x).toBeCloseTo(SPACE_BOSS.modelScale, 5);
+    expect(worldScale.z).toBeCloseTo(1, 5);
+    expect(
+      readWorldPosition(BOSS_NODE_NAMES.aoe.charge).distanceTo(model.aoeAnchor.position),
+    ).toBeCloseTo(SPACE_BOSS_ATTACKS.charge.forwardOffset, 3);
   });
 
   it("두 번 손봐도 묶음을 또 만들지 않는다", () => {
@@ -204,7 +223,10 @@ describe("createBossAnimator", () => {
         state.x = originX - (seconds - launchSeconds) * SPACE_BOSS_ATTACKS.spin.moveSpeed;
         // 모션의 도는 구간(1초)이 끝나는 이음매에서도 꺼지면 안 됨.
         visibleAt.set("spinning", (visibleAt.get("spinning") ?? true) && (spin?.visible ?? false));
-        drawnRadius = (footprint?.geometry.boundingBox?.max.x ?? 0) * (spin?.scale.x ?? 0);
+        drawnRadius =
+          (footprint?.geometry.boundingBox?.max.x ?? 0) *
+          (spin?.scale.x ?? 0) *
+          model.aoeAnchor.scale.x;
         followGap = Math.max(
           followGap,
           Math.abs(readWorldPosition(BOSS_NODE_NAMES.aoe.spin).x - model.rig.position.x),

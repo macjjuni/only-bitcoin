@@ -3,6 +3,7 @@ import {
   encodeSpaceSnapshot,
   type LocalPlayerState,
   SPACE_BOSS,
+  SPACE_BOSS_COMBAT,
   SPACE_BOSS_PLAYER,
   SPACE_PROTOCOL_VERSION,
   type SpaceBossWire,
@@ -1207,7 +1208,10 @@ describe("SpaceSessionController", () => {
         z: SPACE_BOSS.arena.centerZ,
       });
       expect(controller.sampleBoss(1_000)).toBe(controller.bossState);
-      expect(controller.getBossHealth()).toEqual({ health: 3_000, maximumHealth: 3_000 });
+      expect(controller.getBossHealth()).toEqual({
+        health: SPACE_BOSS_COMBAT.maximumHealth,
+        maximumHealth: SPACE_BOSS_COMBAT.maximumHealth,
+      });
       controller.stop();
     });
 
