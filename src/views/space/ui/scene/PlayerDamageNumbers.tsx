@@ -6,10 +6,8 @@ import { memo, type ReactNode, type RefObject, useRef, useState } from "react";
 import {
   COMBAT_OVERLAY_DISTANCE_FACTOR,
   DAMAGE_NUMBER_LIFETIME_MS,
+  DAMAGE_NUMBER_STYLE,
 } from "@/views/space/lib/overlayLayout";
-
-/** 떠오르는 애니메이션 길이를 수명과 같은 값으로 넘김. */
-const DAMAGE_NUMBER_STYLE = { animationDuration: `${DAMAGE_NUMBER_LIFETIME_MS}ms` } as const;
 
 /**
  * 동시에 띄우는 숫자 상한.

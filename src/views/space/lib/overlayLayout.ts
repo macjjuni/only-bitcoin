@@ -30,6 +30,8 @@ export const COMBAT_OVERLAY_DISTANCE_FACTOR = BUBBLE_DISTANCE_FACTOR;
  * 다 뜨기 전에 사라지거나, 다 사라진 뒤에도 DOM 이 남음.
  */
 export const DAMAGE_NUMBER_LIFETIME_MS = 900;
+/** 피해 숫자 요소에 그대로 넘기는 스타일. 떠오르는 애니메이션 길이를 수명과 같은 값으로 맞춤. */
+export const DAMAGE_NUMBER_STYLE = { animationDuration: `${DAMAGE_NUMBER_LIFETIME_MS}ms` } as const;
 /** 명찰 윗변과 말풍선 꼬리 끝 사이(명찰 px). */
 const BUBBLE_GAP_PX = 4;
 /** 말풍선 상자 아래로 나온 꼬리 길이(말풍선 px). `-bottom-1.5` 와 같음. */

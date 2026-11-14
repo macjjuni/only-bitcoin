@@ -29,18 +29,24 @@ interface SpaceBossHudProps {
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 function SpaceBossHud({ isCoarsePointer }: SpaceBossHudProps): ReactNode {
   // region [Hooks]
-  const view = useBossHud(useSpaceSessionContext());
+  const session = useSpaceSessionContext();
+  const view = useBossHud(session);
   /** 화면에 띄우고 있는 처치 결과. 시간이 지나면 내림. */
   const [shownDefeat, setShownDefeat] = useState<SpaceBossDefeat | null>(null);
   const bossDefeat = useSpaceSessionState((snapshot) => snapshot.bossDefeat);
   const selfDamagedAt = useSpaceSessionState((snapshot) => snapshot.selfDamagedAt);
-  const self = useSpaceSessionState((snapshot) => snapshot.self);
-  const remotePlayers = useSpaceSessionState((snapshot) => snapshot.remotePlayers);
   // endregion
 
 
   // region [Privates]
+  /**
+   * 순위에 이름이 안 실려 온 좌석의 이름. 처치 결과를 그릴 때만 지금 명단에서 읽음.
+   *
+   * 명단을 구독하지 않음. 구독하면 결과를 안 띄운 평소에도 자리 보정 · 입퇴장마다 다시 그림.
+   */
   const resolveNickname = (seat: number): string => {
+    const { self, remotePlayers } = session.getSnapshot();
+
     if (self?.seat === seat) {
       return self.nickname;
     }

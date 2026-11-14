@@ -171,9 +171,12 @@ function SpaceTicker(): ReactNode {
       return;
     }
 
-    for (const slotIndex of changedSlots) {
+    // 칸을 올릴 때마다 한 바퀴 전체의 밉맵을 다시 만듦. 여러 칸이 같이 바뀌면 마지막 칸에서만 만들게 함.
+    changedSlots.forEach((slotIndex, order) => {
+      texture.generateMipmaps = order === changedSlots.length - 1;
       uploadSlot(slotIndex);
-    }
+    });
+    texture.generateMipmaps = true;
   };
 
   const advanceScroll = (deltaSeconds: number): void => {
