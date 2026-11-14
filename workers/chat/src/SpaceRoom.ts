@@ -668,6 +668,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
   private createBossWire(): SpaceBossWire {
     const { state } = this.boss;
+    const spinPath = this.boss.getSpinPath();
 
     return {
       phase: state.phase,
@@ -683,6 +684,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       maximumHealth: this.boss.maximumHealth,
       targetSeat: this.boss.getTargetSeat(),
       ...(state.lastHitAt === undefined ? {} : { lastHitAt: state.lastHitAt }),
+      ...(spinPath.length === 0 ? {} : { spinPath: [...spinPath] }),
     };
   }
 

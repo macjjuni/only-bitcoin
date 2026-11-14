@@ -54,6 +54,7 @@ export {
   resolveBossAttackSeconds,
   resolveBossChargeTravel,
   resolveBossSpinClipSeconds,
+  resolveBossSpinPosition,
   rollKickDamage,
   SPACE_BOSS,
   SPACE_BOSS_ATTACKS,
@@ -69,6 +70,7 @@ export {
   SPACE_FEATURE_BOSS,
   type SpaceBossAttack,
   type SpaceBossPhase,
+  type SpaceBossSpinSegment,
   type SpaceBossState,
 } from "./model/boss";
 export {

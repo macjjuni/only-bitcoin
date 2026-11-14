@@ -249,6 +249,11 @@ export const SPACE_BOSS_ATTACKS = {
   /**
    * 발밑에 중심을 둔 원. 팔을 벌리고 돌면서 타깃을 쫓아감. 예고 원도 보스를 따라감.
    *
+   * 매 틱 타깃을 다시 쫓지 않고 `repathSeconds` 마다 목적지를 정해 곧장 감. 서버가 구간을
+   * 통째로 알려 주고 클라이언트가 같은 식(`resolveBossSpinPosition`)으로 그려서, 프레임이
+   * 늦거나 몰려 와도 화면과 판정이 같은 자리를 지나감. 틱마다 쫓던 때는 위치를 100 ms
+   * 프레임으로만 알 수 있어 모바일에서 끊기고 늦어 보였음.
+   *
    * 한순간이 아니라 `launchSeconds` 부터 `arriveSeconds` 까지 도는 내내 판정함.
    * 같은 사람은 `rehitSeconds` 마다 다시 맞음.
    * 예고는 내려찍기 원(4 m)을 0.7배로 줄여 그려서 반지름이 2.8 m 임. 에셋 `extras` 의 3.1 은
@@ -262,6 +267,14 @@ export const SPACE_BOSS_ATTACKS = {
     loopSeconds: BOSS_SPIN_LOOP_SECONDS,
     /** 돌면서 쫓는 속도(m/s). 추적(4)보다 느려서 걸어서도 벗어남. */
     moveSpeed: 3,
+    /** 목적지를 다시 정하는 간격(초). 이 동안은 방향을 안 바꿈. */
+    repathSeconds: 1,
+    /**
+     * 구간을 시작하기 이만큼 전에 목적지를 정해 알림(초).
+     *
+     * 시작과 동시에 알리면 프레임이 오는 동안 클라이언트는 서 있다가 뒤늦게 따라붙음.
+     */
+    planLeadSeconds: 0.3,
     rehitSeconds: 1,
   },
 } as const;
@@ -339,6 +352,52 @@ export const resolveBossSpinClipSeconds = (elapsedSeconds: number): number => {
   }
 
   return launchSeconds + ((elapsedSeconds - launchSeconds) % loopSeconds);
+};
+
+/**
+ * 회전 공격의 이동 한 구간. `startedAt` 에 `from` 을 떠나 `moveSpeed` 로 `to` 까지 곧장 감.
+ *
+ * 시각은 서버 프레임에서는 서버 시각이고, 받는 쪽이 자기 축으로 옮겨 견줌.
+ */
+export interface SpaceBossSpinSegment {
+  startedAt: number;
+  fromX: number;
+  fromZ: number;
+  toX: number;
+  toZ: number;
+}
+
+/**
+ * 회전 공격 중 `nowMs` 에 있을 자리. 아직 첫 구간이 시작 전이면 `null`.
+ *
+ * 서버가 판정할 자리를 구할 때도, 클라이언트가 그릴 때도 이 함수를 씀.
+ *
+ * @param path 시작 시각 순서로 놓인 구간. `nowMs` 는 `startedAt` 과 같은 시계 축이어야 함.
+ */
+export const resolveBossSpinPosition = (
+  path: readonly SpaceBossSpinSegment[],
+  nowMs: number,
+): { x: number; z: number } | null => {
+  let active: SpaceBossSpinSegment | null = null;
+
+  for (const segment of path) {
+    if (segment.startedAt <= nowMs) {
+      active = segment;
+    }
+  }
+
+  if (!active) {
+    return null;
+  }
+
+  const distance = Math.hypot(active.toX - active.fromX, active.toZ - active.fromZ);
+  const travelled = ((nowMs - active.startedAt) / 1000) * SPACE_BOSS_ATTACKS.spin.moveSpeed;
+  const ratio = distance <= 1e-6 ? 1 : Math.min(1, travelled / distance);
+
+  return {
+    x: active.fromX + (active.toX - active.fromX) * ratio,
+    z: active.fromZ + (active.toZ - active.fromZ) * ratio,
+  };
 };
 
 /**

@@ -2,6 +2,7 @@ import {
   createHiddenBossState,
   resolveBossChargeTravel,
   resolveBossSpawnedAt,
+  resolveBossSpinPosition,
   SPACE_BOSS,
   SPACE_BOSS_COMBAT,
   SPACE_BOSS_SPAWN,
@@ -17,7 +18,7 @@ import {
  * - **싸우는 중**: 서버가 100 ms 마다 보내는 `boss` 프레임. 10 Hz 를 그대로 그리면 끊겨
  *   보여서 위치·방향을 부드럽게 따라감. 걷거나 달리는 동안은 프레임 사이를 직전 속도로
  *   이어 그려서, 프레임이 늦거나 몰려 와도(모바일 망) 멈췄다 튀지 않음. 회전 공격은
- *   앞지르지 않고 직전 프레임에서 새 프레임까지 한 틱에 걸쳐 옮김.
+ *   서버가 미리 알려 준 이동 구간을 서버와 같은 식으로 그려서 프레임을 안 기다림.
  * - **쉬는 중**: 서버가 아무것도 안 보냄. 마지막 처치 시각과 젠 계산식으로 스스로 그림.
  *   방이 비어 서버가 잠들어 있어도 젠 시각이 되면 보스가 솟아오름.
  *
@@ -76,6 +77,12 @@ const MAXIMUM_PREDICTION_MS = 250;
 /** 두 프레임의 서버 시각 차가 이 안이어야 속도를 구함(ms). 틱은 100 ms 임. */
 const VELOCITY_MINIMUM_SPAN_MS = 50;
 const VELOCITY_MAXIMUM_SPAN_MS = 350;
+/**
+ * 회전 공격의 구간 위 자리를 따라가는 빠르기(1/초).
+ *
+ * 구간 자리는 이미 매끄러워서 바짝 붙음. 다음 구간이 늦게 도착했을 때만 따라붙는 걸 누그러뜨림.
+ */
+const SPIN_FOLLOW_RATE = 30;
 
 // region [Privates]
 /** −π…π 로 접은 각도 차. */
@@ -223,6 +230,22 @@ export const createBossTracker = (): BossTracker => {
       state.x = current.attackOriginX - Math.sin(current.yaw) * travel;
       state.z = current.attackOriginZ - Math.cos(current.yaw) * travel;
       wasFollowingWire = true;
+      return;
+    }
+
+    const spinPosition =
+      isSpinWire(current) && current.spinPath
+        ? resolveBossSpinPosition(current.spinPath, nowMs + clockOffsetMs)
+        : null;
+
+    if (spinPosition && wasFollowingWire) {
+      // 구간이 정해져 있어 서버 틱을 기다릴 필요가 없음. 서버도 같은 식으로 판정 자리를 구함.
+      const spinFollow = 1 - Math.exp(-SPIN_FOLLOW_RATE * deltaSeconds);
+
+      state.x += (spinPosition.x - state.x) * spinFollow;
+      state.z += (spinPosition.z - state.z) * spinFollow;
+      state.yaw +=
+        resolveYawGap(current.yaw, state.yaw) * (1 - Math.exp(-FOLLOW_RATE * deltaSeconds));
       return;
     }
 

@@ -453,6 +453,61 @@ describe("보스 공격 판정", () => {
     expect(countLateComerHits(arriveSeconds + TICK_SECONDS)).toBe(0);
   });
 
+  it("회전은 1초마다 목적지를 정해 미리 알리고, 구간 안에서는 타깃이 움직여도 곧장 간다", () => {
+    const simulation = createSpawnedSimulation();
+    const { launchSeconds, moveSpeed, repathSeconds, planLeadSeconds } = SPACE_BOSS_ATTACKS.spin;
+    const { state } = simulation;
+    let hasCheckedLead = false;
+    let hasCheckedStraight = false;
+
+    run({
+      simulation,
+      fromMs: 0,
+      seconds: 15,
+      // 회전이 시작되면 −X 로 물러났다가, 첫 구간 도중에 +Z 쪽으로 옮겨 감.
+      players: (now) => {
+        if (state.attack !== "spin") {
+          return [createPlayer(1, -2.5, 0, now)];
+        }
+
+        const isMidFirstSegment = (now - state.phaseStartedAt) / 1000 >= launchSeconds + 0.3;
+
+        return [createPlayer(1, isMidFirstSegment ? 0 : -9, isMidFirstSegment ? 9 : 0, now)];
+      },
+      onTick: (nowMs) => {
+        const path = simulation.getSpinPath();
+
+        if (state.attack !== "spin") {
+          expect(path).toHaveLength(0);
+          return;
+        }
+
+        const spinSeconds = (nowMs - state.phaseStartedAt) / 1000;
+
+        if (spinSeconds >= launchSeconds - planLeadSeconds + 0.1 && spinSeconds < launchSeconds) {
+          // 아직 준비 중인데 첫 구간이 이미 정해져 있음.
+          expect(path).toHaveLength(1);
+          expect(path[0].startedAt).toBe(state.phaseStartedAt + launchSeconds * 1000);
+          expect(Math.hypot(path[0].toX - path[0].fromX, path[0].toZ - path[0].fromZ)).toBeCloseTo(
+            moveSpeed * repathSeconds,
+            5,
+          );
+          hasCheckedLead = true;
+        }
+
+        if (spinSeconds >= launchSeconds + 0.4 && spinSeconds < launchSeconds + 0.6) {
+          // 타깃이 +Z 로 갔어도 첫 구간은 −X 로만 감.
+          expect(state.z).toBeCloseTo(state.attackOriginZ, 5);
+          expect(state.attackOriginX - state.x).toBeGreaterThan(1);
+          hasCheckedStraight = true;
+        }
+      },
+    });
+
+    expect(hasCheckedLead).toBe(true);
+    expect(hasCheckedStraight).toBe(true);
+  });
+
   it("옆이나 뒤에 붙은 사람이 있으면 순서를 건너뛰고 회전부터 쓴다", () => {
     const simulation = createSpawnedSimulation();
     const attacks: string[] = [];

@@ -1,5 +1,5 @@
 import { isAvatarModelIndex, SPACE_DEFAULT_AVATAR_MODEL_INDEX } from "./avatarModel";
-import type { SpaceBossAttack, SpaceBossPhase } from "./boss";
+import type { SpaceBossAttack, SpaceBossPhase, SpaceBossSpinSegment } from "./boss";
 import type { PlayerTransform, RemotePlayer } from "./playerState";
 import {
   isSpaceCelebration,
@@ -86,6 +86,12 @@ export interface SpaceBossWire {
   targetSeat: number | null;
   /** 마지막으로 맞은 시각. 한 번도 안 맞았으면 없음. */
   lastHitAt?: number;
+  /**
+   * 회전 공격의 이동 구간. 지금 구간과, 정해졌으면 다음 구간이 옴.
+   *
+   * 있으면 `x`·`z` 대신 이걸로 그림. 옛 서버는 안 보내고 옛 클라이언트는 안 읽음.
+   */
+  spinPath?: SpaceBossSpinSegment[];
 }
 
 /** 입장할 때 받는 보스 정보. */
@@ -348,6 +354,20 @@ const isTransform = (value: Record<string, unknown>): boolean => {
   );
 };
 
+/** 서버는 구간을 둘까지만 보냄. 여유를 둬서 넷까지 받음. */
+const MAXIMUM_SPIN_PATH_LENGTH = 4;
+
+const isBossSpinSegment = (value: unknown): value is SpaceBossSpinSegment => {
+  return (
+    isRecord(value) &&
+    isTimestamp(value.startedAt) &&
+    isFiniteNumber(value.fromX) &&
+    isFiniteNumber(value.fromZ) &&
+    isFiniteNumber(value.toX) &&
+    isFiniteNumber(value.toZ)
+  );
+};
+
 const isBossWire = (value: unknown): value is SpaceBossWire => {
   return (
     isRecord(value) &&
@@ -365,7 +385,11 @@ const isBossWire = (value: unknown): value is SpaceBossWire => {
     isAmount(value.maximumHealth) &&
     value.maximumHealth > 0 &&
     (value.targetSeat === null || isSeat(value.targetSeat)) &&
-    (value.lastHitAt === undefined || isTimestamp(value.lastHitAt))
+    (value.lastHitAt === undefined || isTimestamp(value.lastHitAt)) &&
+    (value.spinPath === undefined ||
+      (Array.isArray(value.spinPath) &&
+        value.spinPath.length <= MAXIMUM_SPIN_PATH_LENGTH &&
+        value.spinPath.every(isBossSpinSegment)))
   );
 };
 

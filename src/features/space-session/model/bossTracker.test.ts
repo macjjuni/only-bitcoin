@@ -215,6 +215,52 @@ describe("싸우는 보스(서버 프레임)", () => {
     expect(Math.max(...strides)).toBeLessThan(0.1);
   });
 
+  it("회전 공격은 서버가 알려 준 구간을 프레임을 안 기다리고 그린다", () => {
+    const tracker = createEnabledTracker();
+    const { moveSpeed } = SPACE_BOSS_ATTACKS.spin;
+    // 0.2초 뒤에 시작해 +X 로 3 m 가는 구간. 서버 프레임은 이것 하나만 옴.
+    const spin = createWire({
+      phase: "attack",
+      attack: "spin",
+      spinPath: [
+        {
+          startedAt: CLOCK_OFFSET_MS + 200,
+          fromX: arena.centerX,
+          fromZ: arena.centerZ,
+          toX: arena.centerX + 3,
+          toZ: arena.centerZ,
+        },
+      ],
+    });
+    let nowMs = 0;
+
+    tracker.applyWire(spin, nowMs, CLOCK_OFFSET_MS);
+    tracker.sample(nowMs, CLOCK_OFFSET_MS);
+
+    while (nowMs < 190) {
+      nowMs += FRAME_MS;
+      tracker.sample(nowMs, CLOCK_OFFSET_MS);
+    }
+    // 구간이 시작하기 전에는 제자리임.
+    expect(tracker.state.x).toBe(arena.centerX);
+
+    while (nowMs < 700) {
+      nowMs += FRAME_MS;
+      tracker.sample(nowMs, CLOCK_OFFSET_MS);
+    }
+    // 프레임이 더 안 와도 구간을 따라 3 m/s 로 나아감.
+    const expectedX = arena.centerX + ((nowMs - 200) / 1000) * moveSpeed;
+
+    expect(Math.abs(tracker.state.x - expectedX)).toBeLessThan(0.15);
+
+    while (nowMs < 1_600) {
+      nowMs += FRAME_MS;
+      tracker.sample(nowMs, CLOCK_OFFSET_MS);
+    }
+    // 다음 구간이 안 오면 끝에서 섬.
+    expect(tracker.state.x).toBeCloseTo(arena.centerX + 3, 2);
+  });
+
   it("멀리 떨어진 자리로는 따라가지 않고 바로 옮긴다", () => {
     const tracker = createEnabledTracker();
 

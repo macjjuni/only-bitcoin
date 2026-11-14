@@ -2,6 +2,7 @@ import {
   createHiddenBossState,
   resolveBossAttackSeconds,
   resolveBossChargeTravel,
+  resolveBossSpinPosition,
   SPACE_BOSS,
   SPACE_BOSS_ATTACKS,
   SPACE_BOSS_CLIP_SECONDS,
@@ -11,6 +12,7 @@ import {
   SPACE_BOSS_TURN,
   type SpaceBossAttack,
   type SpaceBossPhase,
+  type SpaceBossSpinSegment,
   type SpaceBossState,
 } from "@/entities/space/model/boss";
 import {
@@ -80,6 +82,12 @@ export interface BossSimulation {
   readonly maximumHealth: number;
   getHealth: () => number;
   getTargetSeat: () => number | null;
+  /**
+   * 회전 공격의 이동 구간. 지금 구간과, 정해졌으면 다음 구간. 회전 중이 아니면 비어 있음.
+   *
+   * 시각은 `step` 에 넘긴 시계 축임.
+   */
+  getSpinPath: () => readonly SpaceBossSpinSegment[];
   /**
    * 틱이 필요 없는지.
    *
@@ -197,6 +205,10 @@ export const createBossSimulation = (
   const sweepHitSeats = new Set<number>();
   /** 이번 회전에 좌석별로 마지막으로 맞은 시각. `rehitSeconds` 가 지나야 다시 맞음. */
   const spinHitAtBySeat = new Map<number, number>();
+  /** 이번 회전의 이동 구간. 지난 구간은 버리고 지금 것과 다음 것만 둠. */
+  let spinPath: SpaceBossSpinSegment[] = [];
+  /** 이번 회전에 목적지를 정한 구간 수. */
+  let spinPlannedCount = 0;
   /** 사람별 누적 피해. 어그로와 처치 순위에 씀. 좌석은 마지막으로 때릴 때의 것임. */
   const damageByActor = new Map<string, { seat: number; damage: number }>();
   /** 아레나에 들어온 시각. 아무도 안 때렸을 때 먼저 온 사람을 쫓음. */
@@ -245,6 +257,8 @@ export const createBossSimulation = (
     attackElapsedSeconds = 0;
     sweepHitSeats.clear();
     spinHitAtBySeat.clear();
+    spinPath = [];
+    spinPlannedCount = 0;
 
     if (attack === "charge") {
       chargeReadyAt = nowMs + SPACE_BOSS_COMBAT.chargeIntervalMs;
@@ -539,38 +553,51 @@ export const createBossSimulation = (
   };
 
   /**
-   * 돌면서 타깃 쪽으로 한 걸음 감.
+   * 회전의 다음 구간 목적지를 정함. 구간 시작 `planLeadSeconds` 전에 부름.
    *
-   * 몸은 모션이 돌려서 `yaw` 는 안 건드림. 끝나면 시작할 때 보던 쪽을 그대로 봄.
+   * 지금 타깃이 선 쪽으로 한 구간 동안 갈 수 있는 만큼 감. 정한 뒤에는 타깃이 움직여도
+   * 안 바꿈. 몸은 모션이 돌려서 `yaw` 는 안 건드림.
    * 타깃 몸에 닿을 만큼 붙으면 멈춤. 더 가면 타깃을 타고 넘음.
    */
-  const moveWhileSpinning = (target: BossSimulationPlayer, deltaSeconds: number): void => {
-    const deltaX = target.x - state.x;
-    const deltaZ = target.z - state.z;
-    const distance = Math.hypot(deltaX, deltaZ);
-    const stride = Math.min(
-      distance - SPACE_BOSS.bodyRadius,
-      SPACE_BOSS_ATTACKS.spin.moveSpeed * deltaSeconds,
-    );
+  const planSpinSegment = (nowMs: number, candidates: readonly BossSimulationPlayer[]): void => {
+    const { launchSeconds, moveSpeed, repathSeconds } = SPACE_BOSS_ATTACKS.spin;
+    const { centerX, centerZ, radius } = SPACE_BOSS.arena;
+    const startedAt =
+      state.phaseStartedAt + (launchSeconds + spinPlannedCount * repathSeconds) * 1000;
+    // 앞 구간이 끝나는 자리에서 이어 감. 첫 구간은 준비하며 서 있던 자리임.
+    const from = resolveBossSpinPosition(spinPath, startedAt) ?? { x: state.x, z: state.z };
+    const target = pickTarget(nowMs, candidates);
+    let toX = from.x;
+    let toZ = from.z;
 
-    if (stride <= 0) {
-      return;
+    if (target) {
+      const deltaX = target.x - from.x;
+      const deltaZ = target.z - from.z;
+      const distance = Math.hypot(deltaX, deltaZ);
+      const travel = Math.min(distance - SPACE_BOSS.bodyRadius, moveSpeed * repathSeconds);
+
+      if (travel > 0) {
+        toX = from.x + (deltaX / distance) * travel;
+        toZ = from.z + (deltaZ / distance) * travel;
+      }
     }
 
-    const nextX = state.x + (deltaX / distance) * stride;
-    const nextZ = state.z + (deltaZ / distance) * stride;
+    // 아레나 밖으로는 안 나감. 출발점이 안쪽이라 끝만 당기면 길 전체가 안쪽임.
+    const outwardDistance = Math.hypot(toX - centerX, toZ - centerZ);
 
-    if (isInsideArenaCircle(nextX, nextZ, 0)) {
-      state.x = nextX;
-      state.z = nextZ;
+    if (outwardDistance > radius) {
+      toX = centerX + ((toX - centerX) / outwardDistance) * radius;
+      toZ = centerZ + ((toZ - centerZ) / outwardDistance) * radius;
     }
+
+    spinPath = [...spinPath.slice(-1), { startedAt, fromX: from.x, fromZ: from.z, toX, toZ }];
+    spinPlannedCount += 1;
   };
 
   /** 공격을 진행하고 이번 걸음에 맞은 사람을 `hits` 에 담음. */
   const stepAttack = (
     nowMs: number,
     elapsedSeconds: number,
-    deltaSeconds: number,
     players: readonly BossSimulationPlayer[],
     candidates: readonly BossSimulationPlayer[],
     hits: BossPlayerHit[],
@@ -612,16 +639,26 @@ export const createBossSimulation = (
         }
       }
     } else if (attack === "spin") {
-      const { launchSeconds, arriveSeconds, rehitSeconds } = SPACE_BOSS_ATTACKS.spin;
+      const { launchSeconds, arriveSeconds, rehitSeconds, repathSeconds, planLeadSeconds } =
+        SPACE_BOSS_ATTACKS.spin;
+      const segmentCount = Math.round((arriveSeconds - launchSeconds) / repathSeconds);
+
+      while (
+        spinPlannedCount < segmentCount &&
+        elapsedSeconds >= launchSeconds + spinPlannedCount * repathSeconds - planLeadSeconds
+      ) {
+        planSpinSegment(nowMs, candidates);
+      }
+
+      const spinPosition = resolveBossSpinPosition(spinPath, nowMs);
+
+      if (spinPosition) {
+        state.x = spinPosition.x;
+        state.z = spinPosition.z;
+      }
 
       // 준비(예고가 차는 동안)와 마무리에는 제자리에 서 있고 안 맞음. 도는 동안만 봄.
       if (elapsedSeconds >= launchSeconds && elapsedSeconds < arriveSeconds) {
-        const target = pickTarget(nowMs, candidates);
-
-        if (target) {
-          moveWhileSpinning(target, deltaSeconds);
-        }
-
         for (const player of alivePlayers) {
           const lastHitAt = spinHitAtBySeat.get(player.seat);
           const canHit = lastHitAt === undefined || nowMs - lastHitAt >= rehitSeconds * 1000;
@@ -699,7 +736,7 @@ export const createBossSimulation = (
         stepTurn(nowMs, elapsedSeconds);
         break;
       case "attack":
-        stepAttack(nowMs, elapsedSeconds, deltaSeconds, players, candidates, hits);
+        stepAttack(nowMs, elapsedSeconds, players, candidates, hits);
         break;
       case "idle":
       case "walk":
@@ -786,6 +823,7 @@ export const createBossSimulation = (
     maximumHealth,
     getHealth: () => health,
     getTargetSeat: () => targetSeat,
+    getSpinPath: () => (state.phase === "attack" && state.attack === "spin" ? spinPath : []),
     isResting: () => {
       if (state.phase === "hidden") {
         return true;
