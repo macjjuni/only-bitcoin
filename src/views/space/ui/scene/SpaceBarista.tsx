@@ -3,7 +3,7 @@
 import { Html } from "@react-three/drei";
 import { useFrame } from "@react-three/fiber";
 import { memo, type ReactNode, useEffect, useMemo, useRef, useState } from "react";
-import { type AnimationAction, AnimationMixer } from "three";
+import { type AnimationAction, AnimationMixer, type Camera, Vector3 } from "three";
 import { SPACE_AVATAR } from "@/entities/space";
 import { SPACE_BARISTA } from "@/views/space/lib/barista";
 import { useBaristaModel } from "@/views/space/lib/baristaModel";
@@ -24,6 +24,15 @@ const MODEL_FORWARD_YAW_OFFSET = Math.PI;
 const GESTURE_EVERY_LOOPS = 3;
 /** 접지 그림자 지름(m). 유저 아바타와 같은 크기. */
 const SHADOW_DIAMETER = SPACE_AVATAR.shadowRadius * SPACE_BARISTA.modelScale * 2;
+/** 이름표가 붙는 자리(월드 좌표). 바리스타는 안 움직여서 고정임. */
+const NAMEPLATE_POSITION = new Vector3(
+  SPACE_BARISTA.x,
+  SPACE_BARISTA.y + BARISTA_HEIGHT + NAMEPLATE_LIFT_ABOVE_HEAD,
+  SPACE_BARISTA.z,
+);
+/** 매 프레임 쓰는 계산용 벡터. 프레임마다 새로 만들지 않음. */
+const cameraForward = new Vector3();
+const cameraToNameplate = new Vector3();
 /** 바닥과 겹쳐 지글거리지 않게 살짝 띄움(m). */
 const SHADOW_LIFT_Y = 0.02;
 
@@ -53,6 +62,7 @@ function SpaceBarista({ isCoarsePointer }: SpaceBaristaProps): ReactNode {
   const restActionRef = useRef<AnimationAction | null>(null);
   const shadowTexture = useMemo(() => createShadowBlobTexture(), []);
   const [isNameReady, setIsNameReady] = useState<boolean>(false);
+  const nameplateRef = useRef<HTMLSpanElement>(null);
   // endregion
 
 
@@ -69,6 +79,26 @@ function SpaceBarista({ isCoarsePointer }: SpaceBaristaProps): ReactNode {
 
     gestureActionRef.current?.setEffectiveWeight(isGestureLoop ? 1 : 0);
     restActionRef.current?.setEffectiveWeight(isGestureLoop ? 0 : 1);
+  };
+
+  /**
+   * 이름표가 카메라 뒤에 있으면 숨김.
+   *
+   * `<Html>` 도 뒤에 있으면 숨기지만, 숨김 여부가 **바뀔 때만** 스타일을 고침. 씬이 서스펜드했다
+   * 돌아오면 `<Html>` 이 스타일을 통째로 다시 써서 숨김이 풀리는데, 자기는 이미 숨겼다고 알고
+   * 있어서 다시 숨기지 않음. 그러면 바리스타를 한 번 바라보기 전까지, 등 뒤에 있는 이름표가
+   * 화면 반대편에 뒤집힌 좌표로 떠서 시점을 따라 돌아다님. 그래서 여기서 매 프레임 직접 봄.
+   */
+  const hideNameplateBehindCamera = (camera: Camera): void => {
+    const nameplate = nameplateRef.current;
+
+    if (!nameplate) {
+      return;
+    }
+
+    camera.getWorldDirection(cameraForward);
+    cameraToNameplate.copy(NAMEPLATE_POSITION).sub(camera.position);
+    nameplate.style.visibility = cameraToNameplate.dot(cameraForward) > 0 ? "visible" : "hidden";
   };
   // endregion
 
@@ -96,8 +126,10 @@ function SpaceBarista({ isCoarsePointer }: SpaceBaristaProps): ReactNode {
     };
   }, [shadowTexture]);
 
-  useFrame((_, deltaSeconds) => {
+  useFrame(({ camera }, deltaSeconds) => {
     const mixer = mixerRef.current;
+
+    hideNameplateBehindCamera(camera);
 
     if (mixer) {
       applyGestureCycle(mixer);
@@ -137,7 +169,10 @@ function SpaceBarista({ isCoarsePointer }: SpaceBaristaProps): ReactNode {
             style={{ pointerEvents: "none" }}
           >
             {/* 유저 명찰과 같은 모양에 글자색만 달리해 NPC 임을 알림. */}
-            <span className="flex h-5 w-max select-none items-center whitespace-nowrap rounded-full bg-black/65 px-2 text-[11px] font-medium leading-none text-amber-200 backdrop-blur-sm">
+            <span
+              ref={nameplateRef}
+              className="flex h-5 w-max select-none items-center whitespace-nowrap rounded-full bg-black/65 px-2 text-[11px] font-medium leading-none text-amber-200 backdrop-blur-sm"
+            >
               {SPACE_BARISTA.name}
             </span>
           </Html>
