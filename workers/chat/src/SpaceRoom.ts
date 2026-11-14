@@ -193,15 +193,18 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
    * 인원수만큼, 공격·이동 때도 받는 사람 수만큼 읽어서 그 복사가 가장 큰 비용이었음.
    * 읽기는 여기서 하고, 쓰기는 `setAttachment` 가 여기와 소켓을 함께 고침.
    * 하이버네이션으로 비워지면 처음 읽을 때 소켓에서 다시 채움.
+   *
+   * `WeakMap` 임. 소켓을 정리한 뒤에도 기다리던 처리(입장 중 끊김 등)가 돌아와 다시 읽으면
+   * 사본이 또 채워지는데, 일반 `Map` 이면 그걸 지울 곳이 없어 닫힌 소켓이 계속 남음.
    */
-  private attachments = new Map<WebSocket, SpaceSocketAttachment>();
+  private attachments = new WeakMap<WebSocket, SpaceSocketAttachment>();
   /**
    * 소켓별 최근 전송 기록. 같은 요청 번호가 다시 오면 새 메시지로 안 치고 응답만 다시 줌.
    *
    * 메모리에만 둠. 소켓 상태에 실으면 말할수록 커지고 이동할 때마다 같이 저장됨.
    * 하이버네이션 뒤에는 비워지지만, 그건 방이 한동안 조용했다는 뜻이라 재전송이 걸칠 일이 없음.
    */
-  private sayReceipts = new Map<WebSocket, SayReceipt[]>();
+  private sayReceipts = new WeakMap<WebSocket, SayReceipt[]>();
   private dirtySeats = new Set<number>();
   private snapshotTimer: ReturnType<typeof setTimeout> | null = null;
   private nextSnapshotAt = 0;

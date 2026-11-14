@@ -166,7 +166,13 @@ function SpaceTicker(): ReactNode {
       changedSlots.length < TICKER_TEXTURE.slotCount &&
       renderer.capabilities.maxTextureSize >= TICKER_TEXTURE.width;
 
-    if (!canUploadSlots) {
+    // 통째로 올릴 것이 아직 안 올라갔으면(처음 굽고 화면에 한 번도 안 그려진 경우 등) 그대로 둠.
+    // 한 바퀴 캔버스는 방금 고쳐 놨으니 그때 같이 올라감. 여기서 칸을 올리면 그 통째 올리기가
+    // 밉맵을 끈 채로 먼저 실행돼, 텍스처가 밉맵 자리 없이 만들어지고 뒤에 다시 만들 수 없음.
+    const uploadedVersion = (renderer.properties.get(texture) as { __version?: number }).__version;
+    const hasPendingFullUpload = uploadedVersion !== texture.version;
+
+    if (!canUploadSlots || hasPendingFullUpload) {
       texture.needsUpdate = true;
       return;
     }

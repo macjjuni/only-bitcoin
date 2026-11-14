@@ -318,15 +318,18 @@ const useSpaceBgm = ({ serverClockOffsetMs, hallBgm, zoneTrack }: SpaceBgmOption
     hallBgmRef.current = hallBgm;
     zoneTrackRef.current = zoneTrack;
     // 이번에 기다릴 곡. 안뜰 곡 → 고른 곡 → 기본 곡 순서임.
-    const upcoming: BgmTarget = zoneTrack ? { track: zoneTrack, startsAt: null } : (hallBgm ?? DEFAULT_HALL_TARGET);
+    // 서버 시각을 모르면(접속 전 · 접속 실패) 기다릴 곡이 없음. 여기서 기본 곡을 기다린다고 하면
+    // 입장하며 틀기 시작한 곡을 아래에서 "다른 곡을 기다리는 중" 으로 보고 끊음.
+    const hallTarget = hallBgm ?? (serverClockOffsetMs === null ? null : DEFAULT_HALL_TARGET);
+    const upcoming: BgmTarget | null = zoneTrack ? { track: zoneTrack, startsAt: null } : hallTarget;
     if (enabledRef.current && hallBgm) {
       resolveTrack(hallBgm.track);
     }
     // 새 서버 이벤트는 과거 실패의 재시도 대기와 별도로 예정 시각에 실행한다.
     const begin = (): void => {
       const pending = pendingTrackRef.current;
-      const awaited = `${upcoming.track}:${upcoming.startsAt}`;
-      if (pending && pending !== awaited) {
+      const awaited = upcoming && `${upcoming.track}:${upcoming.startsAt}`;
+      if (awaited && pending && pending !== awaited) {
         generationRef.current += 1;
         pendingTrackRef.current = null;
         for (const [track, audio] of Object.entries(tracksRef.current)) {
@@ -339,7 +342,7 @@ const useSpaceBgm = ({ serverClockOffsetMs, hallBgm, zoneTrack }: SpaceBgmOption
       synchronizePlayback();
     };
     // 안뜰 곡은 서버 예정 시각을 안 기다린다. 안뜰을 드나들거나 보스가 뜨면 즉시 바꾼다.
-    const delay = upcoming.startsAt !== null && serverClockOffsetMs !== null ? Math.max(0, upcoming.startsAt - serverClockOffsetMs - performance.now()) : 0;
+    const delay = upcoming && upcoming.startsAt !== null && serverClockOffsetMs !== null ? Math.max(0, upcoming.startsAt - serverClockOffsetMs - performance.now()) : 0;
     const timer = setTimeout(begin, delay);
     const retryTimer = setInterval(synchronizePlayback, 5000);
     const onVisibility = (): void => {
