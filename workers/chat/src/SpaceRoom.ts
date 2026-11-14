@@ -124,12 +124,40 @@ interface SpaceSocketAttachment {
   deadUntil?: number;
 }
 
+/**
+ * 소켓 하나에 딸린 메모리 상태. 하이버네이션으로 비워짐.
+ *
+ * 맵을 항목마다 따로 두면 소켓을 정리하거나 탭을 바꿔 넘겨줄 때 하나씩 챙겨야 해서 한 곳에 모음.
+ */
+interface SocketMemory {
+  /**
+   * 소켓에 붙여 둔 상태의 사본.
+   *
+   * `deserializeAttachment` 는 부를 때마다 통째로 복사해 줌. 보스전에서는 0.1초마다
+   * 인원수만큼, 공격·이동 때도 받는 사람 수만큼 읽어서 그 복사가 가장 큰 비용이었음.
+   * 읽기는 여기서 하고, 쓰기는 `setAttachment` 가 여기와 소켓을 함께 고침.
+   * 비어 있으면 처음 읽을 때 소켓에서 다시 채움.
+   */
+  attachment?: SpaceSocketAttachment;
+  /**
+   * 최근 전송 기록. 같은 요청 번호가 다시 오면 새 메시지로 안 치고 응답만 다시 줌.
+   *
+   * 메모리에만 둠. 소켓 상태에 실으면 말할수록 커지고 이동할 때마다 같이 저장됨.
+   * 하이버네이션 뒤에는 비워지지만, 그건 방이 한동안 조용했다는 뜻이라 재전송이 걸칠 일이 없음.
+   */
+  sayReceipts?: SayReceipt[];
+  joinTimer?: ReturnType<typeof setTimeout>;
+  frameRate?: { startedAt: number; count: number };
+  /** 입장 · 말하기를 처리하는 중인지. 기다리는 동안 같은 요청이 겹쳐 들어오는 것을 막음. */
+  isJoining?: boolean;
+  isSaying?: boolean;
+}
+
 interface PersistedBoss {
   lastKilledAt: number | null;
 }
 
 const MAXIMUM_PENDING_CONNECTIONS = 10;
-const MAXIMUM_FRAME_BYTES = SPACE_CLIENT_FRAME_MAX_BYTES;
 const MAXIMUM_FRAMES_PER_SECOND = 40;
 const MAXIMUM_RECENT_SAY_RECEIPTS = 32;
 /**
@@ -145,8 +173,6 @@ const SAY_RATE_WINDOW_MS = 60_000;
 const JOIN_TIMEOUT_MS = 10_000;
 const STALE_CONNECTION_MS = 60_000;
 const PRUNE_INTERVAL_MS = 15_000;
-/** 이 서버가 지원하는 기능. 입장 응답에 실어 보냄. */
-const SERVER_FEATURES = [...SPACE_FEATURES];
 /** 입장 · 리스폰 직후의 이동 거리 예산(m). 첫 이동이 양자화 오차만큼 어긋나도 반려되지 않게 함. */
 const INITIAL_MOVEMENT_BUDGET = 0.5;
 const BOSS_STORAGE_KEY = "space-boss-v1";
@@ -187,33 +213,17 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   private marketMonitor: SpaceMarketMonitor;
   private socketsBySeat = new Map<number, WebSocket>();
   /**
-   * 소켓에 붙여 둔 상태의 메모리 사본.
-   *
-   * `deserializeAttachment` 는 부를 때마다 통째로 복사해 줌. 보스전에서는 0.1초마다
-   * 인원수만큼, 공격·이동 때도 받는 사람 수만큼 읽어서 그 복사가 가장 큰 비용이었음.
-   * 읽기는 여기서 하고, 쓰기는 `setAttachment` 가 여기와 소켓을 함께 고침.
-   * 하이버네이션으로 비워지면 처음 읽을 때 소켓에서 다시 채움.
+   * 소켓별 메모리 상태.
    *
    * `WeakMap` 임. 소켓을 정리한 뒤에도 기다리던 처리(입장 중 끊김 등)가 돌아와 다시 읽으면
    * 사본이 또 채워지는데, 일반 `Map` 이면 그걸 지울 곳이 없어 닫힌 소켓이 계속 남음.
    */
-  private attachments = new WeakMap<WebSocket, SpaceSocketAttachment>();
-  /**
-   * 소켓별 최근 전송 기록. 같은 요청 번호가 다시 오면 새 메시지로 안 치고 응답만 다시 줌.
-   *
-   * 메모리에만 둠. 소켓 상태에 실으면 말할수록 커지고 이동할 때마다 같이 저장됨.
-   * 하이버네이션 뒤에는 비워지지만, 그건 방이 한동안 조용했다는 뜻이라 재전송이 걸칠 일이 없음.
-   */
-  private sayReceipts = new WeakMap<WebSocket, SayReceipt[]>();
+  private socketMemory = new WeakMap<WebSocket, SocketMemory>();
   private dirtySeats = new Set<number>();
   private snapshotTimer: ReturnType<typeof setTimeout> | null = null;
   private nextSnapshotAt = 0;
   /** 이동 없이 지나간 틱 수. 꼬리 틱을 몇 번 보냈는지 셈. */
   private idleSnapshotTicks = 0;
-  private joinTimers = new Map<WebSocket, ReturnType<typeof setTimeout>>();
-  private joiningSockets = new Set<WebSocket>();
-  private sayingSockets = new Set<WebSocket>();
-  private frameRates = new Map<WebSocket, { startedAt: number; count: number }>();
   private lastPrunedAt = 0;
   private chatHistory: SpaceChatMessage[] | null = null;
   private isChatHistorySchemaReady = false;
@@ -286,8 +296,19 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   }
 
   // region [Privates]
+  private memoryOf(socket: WebSocket): SocketMemory {
+    let memory = this.socketMemory.get(socket);
+
+    if (!memory) {
+      memory = {};
+      this.socketMemory.set(socket, memory);
+    }
+
+    return memory;
+  }
+
   private getAttachment(socket: WebSocket): SpaceSocketAttachment | null {
-    const cached = this.attachments.get(socket);
+    const cached = this.socketMemory.get(socket)?.attachment;
 
     if (cached) {
       return cached;
@@ -312,7 +333,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     ) {
       return null;
     }
-    this.attachments.set(socket, candidate as SpaceSocketAttachment);
+    this.memoryOf(socket).attachment = candidate as SpaceSocketAttachment;
 
     return candidate as SpaceSocketAttachment;
   }
@@ -325,7 +346,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
    */
   private setAttachment(socket: WebSocket, attachment: SpaceSocketAttachment): void {
     socket.serializeAttachment(attachment);
-    this.attachments.set(socket, attachment);
+    this.memoryOf(socket).attachment = attachment;
   }
 
   private hasFeature(socket: WebSocket, feature: string): boolean {
@@ -482,7 +503,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         self,
         peers,
         messages,
-        features: SERVER_FEATURES,
+        features: [...SPACE_FEATURES],
         ...(boss ? { boss } : {}),
         ...(hallBgm ? { hallBgm } : {}),
       } satisfies SpaceServerFrame);
@@ -552,11 +573,11 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   }
 
   private clearJoinDeadline(socket: WebSocket): void {
-    const timer = this.joinTimers.get(socket);
+    const memory = this.socketMemory.get(socket);
 
-    if (timer !== undefined) {
-      clearTimeout(timer);
-      this.joinTimers.delete(socket);
+    if (memory?.joinTimer !== undefined) {
+      clearTimeout(memory.joinTimer);
+      memory.joinTimer = undefined;
     }
   }
 
@@ -572,7 +593,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         v: SPACE_PROTOCOL_VERSION,
         t: "welcome",
         self: current.peer,
-        features: SERVER_FEATURES,
+        features: [...SPACE_FEATURES],
         peers: connectedPeers
           .filter((entry) => entry.socket !== current.socket)
           .map((entry) => entry.peer),
@@ -582,20 +603,19 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
   private scheduleJoinDeadline(socket: WebSocket, deadline: number): void {
     this.clearJoinDeadline(socket);
-    this.joinTimers.set(
-      socket,
-      setTimeout(
-        () => {
-          this.joinTimers.delete(socket);
-          const attachment = this.getAttachment(socket);
+    const memory = this.memoryOf(socket);
 
-          if (attachment && !attachment.joined) {
-            this.sendError(socket, "JOIN_TIMEOUT", "입장 준비 시간이 초과됐어요.");
-            this.removeSocket(socket, SPACE_CLOSE_CODES.joinTimeout, "join timeout");
-          }
-        },
-        Math.max(0, deadline - Date.now()),
-      ),
+    memory.joinTimer = setTimeout(
+      () => {
+        memory.joinTimer = undefined;
+        const attachment = this.getAttachment(socket);
+
+        if (attachment && !attachment.joined) {
+          this.sendError(socket, "JOIN_TIMEOUT", "입장 준비 시간이 초과됐어요.");
+          this.removeSocket(socket, SPACE_CLOSE_CODES.joinTimeout, "join timeout");
+        }
+      },
+      Math.max(0, deadline - Date.now()),
     );
   }
 
@@ -606,7 +626,6 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     shouldAnnounceLeave = true,
   ): void {
     this.clearJoinDeadline(socket);
-    this.frameRates.delete(socket);
     const attachment = this.getAttachment(socket);
     const warmSeat = Array.from(this.socketsBySeat).find(
       ([, currentSocket]) => currentSocket === socket,
@@ -645,9 +664,15 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     } catch {
       // 이미 닫힌 소켓도 좌석·타이머 정리는 끝냄.
     }
-    // 맨 끝에 지움. 위에서 읽으면서 다시 채워질 수 있음.
-    this.attachments.delete(socket);
-    this.sayReceipts.delete(socket);
+    // 맨 끝에 비움. 위에서 읽으면서 사본이 다시 채워질 수 있음.
+    // 처리 중 표시(`isJoining` · `isSaying`)는 그 처리가 끝나며 직접 내리므로 남겨 둠.
+    const memory = this.socketMemory.get(socket);
+
+    if (memory) {
+      memory.attachment = undefined;
+      memory.sayReceipts = undefined;
+      memory.frameRate = undefined;
+    }
   }
 
   /** ping은 런타임이 응답함. 유령 좌석 정리도 다른 실제 이벤트가 있을 때만 함. */
@@ -1144,10 +1169,11 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
 
   private canProcessFrame(socket: WebSocket): boolean {
     const now = Date.now();
-    const frameRate = this.frameRates.get(socket);
+    const memory = this.memoryOf(socket);
+    const frameRate = memory.frameRate;
 
     if (!frameRate || now - frameRate.startedAt >= 1000) {
-      this.frameRates.set(socket, { startedAt: now, count: 1 });
+      memory.frameRate = { startedAt: now, count: 1 };
       return true;
     }
     frameRate.count += 1;
@@ -1165,11 +1191,13 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     socket: WebSocket,
     frame: Extract<SpaceClientFrame, { t: "join" }>,
   ): Promise<void> {
-    if (this.getJoinedAttachment(socket) || this.joiningSockets.has(socket)) {
+    const memory = this.memoryOf(socket);
+
+    if (this.getJoinedAttachment(socket) || memory.isJoining) {
       this.sendError(socket, "ALREADY_JOINED", "이미 입장한 연결이에요.");
       return;
     }
-    this.joiningSockets.add(socket);
+    memory.isJoining = true;
 
     try {
       const nickname = normalizeNickname(frame.nickname);
@@ -1217,7 +1245,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       };
 
       // 탭을 바꿔 들어와도 재전송 중복 검사는 이어 감. 옛 소켓을 내보내면 기록도 지워져서 먼저 꺼냄.
-      const previousReceipts = previousSocket ? this.sayReceipts.get(previousSocket) : undefined;
+      const previousReceipts = previousSocket
+        ? this.socketMemory.get(previousSocket)?.sayReceipts
+        : undefined;
 
       if (previousSocket) {
         this.sendError(previousSocket, "SESSION_REPLACED", "다른 탭에서 스페이스에 접속했어요.");
@@ -1232,7 +1262,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       }
 
       if (previousReceipts) {
-        this.sayReceipts.set(socket, previousReceipts);
+        memory.sayReceipts = previousReceipts;
       }
       this.setAttachment(socket, {
         ...attachment,
@@ -1245,7 +1275,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         movementBudget: previousAttachment?.movementBudget ?? INITIAL_MOVEMENT_BUDGET,
         lastSayAt: previousAttachment?.lastSayAt ?? null,
         // 서버가 아는 기능만 남김. 탭을 바꿔 들어와도 쿨다운은 이어 감.
-        features: (frame.features ?? []).filter((feature) => SERVER_FEATURES.includes(feature)),
+        features: (frame.features ?? []).filter((feature) => SPACE_FEATURES.includes(feature)),
         lastKickAt: previousAttachment?.lastKickAt,
         lastKickId: previousAttachment?.lastKickId,
         kickReadyAt: previousAttachment?.kickReadyAt,
@@ -1288,7 +1318,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         }
       }
     } finally {
-      this.joiningSockets.delete(socket);
+      memory.isJoining = false;
     }
   }
 
@@ -1553,7 +1583,9 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
     socket: WebSocket,
     frame: Extract<SpaceClientFrame, { t: "say" }>,
   ): Promise<void> {
-    if (this.sayingSockets.has(socket)) {
+    const memory = this.memoryOf(socket);
+
+    if (memory.isSaying) {
       this.sendError(
         socket,
         "RATE_SAY_INTERVAL",
@@ -1562,7 +1594,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       );
       return;
     }
-    this.sayingSockets.add(socket);
+    memory.isSaying = true;
 
     try {
       const body = normalizeChatMessage(frame.body);
@@ -1580,7 +1612,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         this.sendError(socket, "JOIN_REQUIRED", "먼저 공간에 입장해 주세요.", frame.rid);
         return;
       }
-      const receipts = this.sayReceipts.get(socket) ?? [];
+      const receipts = memory.sayReceipts ?? [];
       const previousReceipt = receipts.find((receipt) => receipt.rid === frame.rid);
 
       if (previousReceipt) {
@@ -1632,12 +1664,12 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       };
       const receipt: SayReceipt = { rid: frame.rid, id: message.id, bodyHash, createdAt: now };
       this.setAttachment(socket, { ...attachment, lastActivityAt: now, lastSayAt: now });
-      this.sayReceipts.set(socket, [...receipts, receipt].slice(-MAXIMUM_RECENT_SAY_RECEIPTS));
+      memory.sayReceipts = [...receipts, receipt].slice(-MAXIMUM_RECENT_SAY_RECEIPTS);
       this.appendChatHistory(message);
       this.recordIpSay(attachment.ipGuardKey, now);
       this.broadcastFrame({ v: SPACE_PROTOCOL_VERSION, t: "say", message });
     } finally {
-      this.sayingSockets.delete(socket);
+      memory.isSaying = false;
     }
   }
   // endregion
@@ -1707,8 +1739,8 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
   async webSocketMessage(socket: WebSocket, payload: string | ArrayBuffer): Promise<void> {
     if (
       typeof payload !== "string" ||
-      payload.length > MAXIMUM_FRAME_BYTES ||
-      textEncoder.encode(payload).byteLength > MAXIMUM_FRAME_BYTES
+      payload.length > SPACE_CLIENT_FRAME_MAX_BYTES ||
+      textEncoder.encode(payload).byteLength > SPACE_CLIENT_FRAME_MAX_BYTES
     ) {
       this.sendError(socket, "INVALID_PROTOCOL", "입력 형식을 확인해 주세요.");
       this.removeSocket(socket, SPACE_CLOSE_CODES.invalidProtocol, "invalid frame");

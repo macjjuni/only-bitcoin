@@ -24,6 +24,10 @@ export interface SpaceMarketState {
   track: "base" | "surge";
   direction: "rise" | "fall" | null;
   startsAt: number;
+  /**
+   * 급등락 곡을 미리 받으라는 표시였음. 지금은 서버가 늘 `false` 로 보내고 아무도 안 읽음.
+   * 열어 둔 옛 탭이 이 칸이 없으면 프레임을 통째로 버려서 자리만 남김.
+   */
   prefetch: boolean;
   celebration: SpaceCelebration | null;
 }

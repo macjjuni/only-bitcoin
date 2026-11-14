@@ -82,7 +82,7 @@ export class SpaceMarketMonitor {
         const now = Date.now();
         const isStale = now - saved.nextPollAt > SPACE_BGM_SURGE.stalePriceMs;
         // 방이 빈 동안 멈춘 급등 판정을 다음 입장자에게 그대로 들려주지 않는다.
-        if (isStale && (saved.state.track !== "base" || saved.state.prefetch)) {
+        if (isStale && saved.state.track !== "base") {
           const state: SpaceMarketState = {
             revision: saved.state.revision + 1,
             track: "base",
@@ -169,7 +169,6 @@ export class SpaceMarketMonitor {
       const surge = stepSurgeState(sampled, sample.referencePrice, sample.atMs);
       const change = readCandleChangePercent(sampled, sample.referencePrice, sample.atMs);
       let state = saved.state;
-      const prefetch = change !== null && Math.abs(change) >= SPACE_BGM_SURGE.prefetchPercent;
       // 급등락 중 반대쪽으로 진입 기준을 넘으면 방향이 뒤집힌 것으로 봄.
       const liveDirection =
         surge.isSurging && change !== null && Math.abs(change) >= SPACE_BGM_SURGE.enterPercent
@@ -185,7 +184,7 @@ export class SpaceMarketMonitor {
           track: surge.isSurging ? "surge" : "base",
           direction: surge.isSurging ? (isRising ? "rise" : "fall") : null,
           startsAt: celebration?.startsAt ?? Date.now() + SPACE_MARKET.eventLeadMs,
-          prefetch,
+          prefetch: false,
           celebration,
         };
       } else if (liveDirection && liveDirection !== state.direction) {
@@ -194,11 +193,9 @@ export class SpaceMarketMonitor {
           ...state,
           revision: state.revision + 1,
           direction: liveDirection,
-          prefetch,
+          prefetch: false,
           celebration: liveDirection === "rise" ? this.createCelebration() : null,
         };
-      } else if (prefetch !== state.prefetch) {
-        state = { ...state, revision: state.revision + 1, prefetch };
       }
       const next = { ...saved, state, surge, nextPollAt: Date.now() + SPACE_MARKET.pollIntervalMs };
       // 먼저 저장해야 재시작 후 같은 상승을 다시 발동하지 않는다.

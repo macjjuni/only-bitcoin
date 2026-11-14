@@ -1,9 +1,6 @@
 import { SPACE_BOSS_COMBAT } from "../../../../src/entities/space/model/boss";
 import { SPACE_BOSS_AMOUNT_MAX } from "../../../../src/entities/space/model/spaceProtocol";
 
-/** 프로토콜이 받아 주는 체력 상한. 넘기면 클라이언트가 보스 프레임을 버림. */
-const MAXIMUM_CONFIGURABLE_HEALTH = SPACE_BOSS_AMOUNT_MAX;
-
 /**
  * 보스 최대 체력을 정함. 환경변수 `SPACE_BOSS_MAXIMUM_HEALTH` 가 있으면 그 값을 씀.
  *
@@ -18,7 +15,7 @@ export const resolveBossMaximumHealth = (rawValue: string | undefined): number =
     return SPACE_BOSS_COMBAT.maximumHealth;
   }
 
-  return Math.min(MAXIMUM_CONFIGURABLE_HEALTH, parsedValue);
+  return Math.min(SPACE_BOSS_AMOUNT_MAX, parsedValue);
 };
 
 /** 다시 젠되기까지 기다리는 시간의 상한(초). 실수로 큰 값을 넣어도 하루를 넘기지 않게 함. */

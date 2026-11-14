@@ -87,7 +87,7 @@ const isMesh = (object: Object3D): object is Mesh => {
 };
 
 /**
- * 구운 조명을 쓰는 머티리얼로 바꾼다.
+ * 구운 조명을 쓰는 머티리얼을 만든다.
  *
  * 굽는 방식이 둘이라 둘 다 읽음. 어느 쪽이든 조명 계산이 없는 언릿 머티리얼로 바꿈.
  * 이미 바꾼 메시(재마운트)와 처음부터 언릿인 메시(안뜰)는 건너뜀.
@@ -98,53 +98,82 @@ const isMesh = (object: Object3D): object is Mesh => {
  *   로더가 `aoMap` 으로 읽음. 그걸 `lightMap` 으로 옮김. 색 텍스처는 base color 나
  *   emission 슬롯 중 실려 온 쪽을 씀.
  *
+ * - **단색**: 텍스처 없이 emission 색만 가진 재질(출구 문틀의 황동, 칼 · 방패 표식). 구운 맵과
+ *   같은 약속이라 그 색을 그대로 칠함. base color 가 검정이라 버텍스 컬러는 원래도 안 보였고,
+ *   언릿으로 바꾸면서 켜면 색이 달라져서 끔.
+ *
  * 램프 불빛은 톤 매핑을 꺼서 늘 밝게 둠. 색은 구운 텍스처나 버텍스 컬러 중 있는 쪽을 씀.
+ *
+ * @returns 바꿀 것이 없으면 `null`.
  */
-const applyBakedLighting = (mesh: Mesh): void => {
-  const source = mesh.material as MeshStandardMaterial;
-
-  if (!source.isMeshStandardMaterial) {
-    return;
-  }
-
-  const hasVertexColors = mesh.geometry.hasAttribute("color");
-
-  if (mesh.userData.lamp_glow === true) {
-    mesh.material = new MeshBasicMaterial({
+const createBakedMaterial = (
+  source: MeshStandardMaterial,
+  isLampGlow: boolean,
+  hasVertexColors: boolean,
+): MeshBasicMaterial | null => {
+  if (isLampGlow) {
+    return new MeshBasicMaterial({
       map: source.emissiveMap,
       vertexColors: hasVertexColors,
       side: source.side,
       toneMapped: false,
     });
-    source.dispose();
-
-    return;
   }
 
   const lightMap = source.aoMap;
 
   if (lightMap) {
     lightMap.colorSpace = SRGBColorSpace;
-    mesh.material = new MeshBasicMaterial({
+
+    return new MeshBasicMaterial({
       map: source.map ?? source.emissiveMap,
       vertexColors: hasVertexColors,
       lightMap,
       lightMapIntensity: HALL_LIGHTMAP_MAX * Math.PI,
     });
-    source.dispose();
+  }
 
+  const hasEmissiveColor = source.emissive.r + source.emissive.g + source.emissive.b > 0;
+
+  if (!source.emissiveMap && !hasEmissiveColor) {
+    return null;
+  }
+
+  return new MeshBasicMaterial({
+    map: source.emissiveMap,
+    color: source.emissive.clone().multiplyScalar(source.emissiveIntensity),
+    vertexColors: source.emissiveMap !== null && hasVertexColors,
+    side: source.side,
+  });
+};
+
+/**
+ * 메시의 머티리얼을 구운 조명용으로 바꿈.
+ *
+ * 같은 원본을 쓰는 메시끼리는 바꾼 머티리얼도 같이 씀. 메시마다 새로 만들면 같은 텍스처를
+ * 쓰는데도 머티리얼이 달라서 그릴 때마다 유니폼을 다시 올림. 램프 여부와 버텍스 컬러 유무로
+ * 결과가 달라져서 그것까지 같을 때만 같이 씀.
+ */
+const applyBakedLighting = (mesh: Mesh, cache: Map<string, MeshBasicMaterial>): void => {
+  const source = mesh.material as MeshStandardMaterial;
+
+  if (!source.isMeshStandardMaterial) {
     return;
   }
 
-  if (source.emissiveMap) {
-    mesh.material = new MeshBasicMaterial({
-      map: source.emissiveMap,
-      color: source.emissive.clone().multiplyScalar(source.emissiveIntensity),
-      vertexColors: hasVertexColors,
-      side: source.side,
-    });
-    source.dispose();
+  const isLampGlow = mesh.userData.lamp_glow === true;
+  const hasVertexColors = mesh.geometry.hasAttribute("color");
+  const cacheKey = `${source.uuid}:${isLampGlow}:${hasVertexColors}`;
+  const baked = cache.get(cacheKey) ?? createBakedMaterial(source, isLampGlow, hasVertexColors);
+
+  if (!baked) {
+    return;
   }
+
+  cache.set(cacheKey, baked);
+  mesh.material = baked;
+  // 텍스처는 새 머티리얼이 이어 쓰므로 머티리얼만 버림. 여러 번 불러도 됨.
+  source.dispose();
 };
 // endregion
 
@@ -160,6 +189,7 @@ export const useHallModel = (): HallModel => {
   return useMemo((): HallModel => {
     let collisionGeometry: BufferGeometry | null = null;
     const lanternAnchors: LanternAnchor[] = [];
+    const bakedMaterials = new Map<string, MeshBasicMaterial>();
 
     scene.traverse((object) => {
       if (object.userData.lamp === true && object.name.startsWith(HALL_NODE_NAMES.lampPrefix)) {
@@ -182,7 +212,7 @@ export const useHallModel = (): HallModel => {
         return;
       }
 
-      applyBakedLighting(object);
+      applyBakedLighting(object, bakedMaterials);
     });
 
     if (!collisionGeometry) {

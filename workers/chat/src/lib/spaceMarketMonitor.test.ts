@@ -138,9 +138,10 @@ describe("공간 공통 시세와 연출", () => {
     vi.advanceTimersByTime(10000);
     await monitor.poll();
     expect((await monitor.start()).track).toBe("base");
+    // 폭죽이 실린 프레임은 처음 올랐을 때 하나뿐임. 쿨다운 중의 재상승은 발동하지 않음.
     expect(
       frames.filter((frame) => frame.t === "market" && frame.state.celebration !== null),
-    ).toHaveLength(2);
+    ).toHaveLength(1);
   });
 
   it("빈 방에 남은 급등 상태는 다음 입장자에게 기본 음악으로 돌려준다", async () => {

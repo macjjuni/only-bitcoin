@@ -24,7 +24,6 @@ import {
   type SpaceChatMessage,
   type SpaceHallBgmState,
   type SpaceHallBgmTrack,
-  type SpaceMarketState,
   type SpacePeer,
   type SpacePresence,
   type SpaceServerFrame,
@@ -37,7 +36,6 @@ export interface SpaceSessionIdentity {
 }
 
 export interface SpaceSessionSnapshot {
-  market: SpaceMarketState | null;
   celebration: SpaceCelebration | null;
   serverClockOffsetMs: number | null;
   canSyncMarket: boolean;
@@ -157,7 +155,6 @@ interface PendingModel extends PendingMessage {
 
 const socketOpenState = 1;
 const socketClosingState = 2;
-const movementIntervalMs = SPACE_NETWORK_INTERVAL_MS;
 /**
  * 송신 박자 여유. 30 fps 면 프레임이 100 ms 에 딱 안 맞아 133 ms 마다 보내게 됐음.
  * 예정 시각보다 이만큼 이르면 보내고 예정 시각을 누적해 평균 100 ms 로 맞춤.
@@ -285,7 +282,6 @@ export class SpaceSessionController {
   private rateLimitedUntil = 0;
   private lastReceivedAt = 0;
   private snapshot: SpaceSessionSnapshot = {
-    market: null,
     celebration: null,
     serverClockOffsetMs: null,
     canSyncMarket: false,
@@ -323,6 +319,8 @@ export class SpaceSessionController {
    */
   private kickEvents: { event: SpaceKickEvent; receivedAt: number }[] = [];
   private canSyncKickTiming = false;
+  /** 마지막으로 받은 시세 상태의 번호. 순서가 뒤바뀌어 온 옛 프레임을 거름. */
+  private marketRevision: number | null = null;
   private lastKickStartedAt: number | null = null;
   private readonly pendingKickStarts = new Map<string, number>();
   private readonly receivedKickIds = new Map<string, number>();
@@ -926,20 +924,24 @@ export class SpaceSessionController {
         if (
           !this.snapshot.self ||
           !this.snapshot.canSyncMarket ||
-          (this.snapshot.market && frame.state.revision <= this.snapshot.market.revision)
+          (this.marketRevision !== null && frame.state.revision <= this.marketRevision)
         ) {
           return;
         }
-        this.updateSnapshot({
-          market: frame.state,
-          serverClockOffsetMs:
-            this.snapshot.serverClockOffsetMs ?? frame.serverAt - this.options.now(),
-          ...(frame.state.celebration &&
-          (!this.snapshot.celebration ||
-            frame.state.celebration.startsAt > this.snapshot.celebration.startsAt)
-            ? { celebration: frame.state.celebration }
-            : {}),
-        });
+        this.marketRevision = frame.state.revision;
+        // 시세 상태에서 화면이 쓰는 건 폭죽뿐임. 서버 시각을 처음 알게 됐거나 새 폭죽일 때만 알림.
+        const { celebration } = frame.state;
+        const hasNewCelebration =
+          celebration !== null &&
+          (!this.snapshot.celebration || celebration.startsAt > this.snapshot.celebration.startsAt);
+
+        if (hasNewCelebration || this.snapshot.serverClockOffsetMs === null) {
+          this.updateSnapshot({
+            serverClockOffsetMs:
+              this.snapshot.serverClockOffsetMs ?? frame.serverAt - this.options.now(),
+            ...(hasNewCelebration ? { celebration } : {}),
+          });
+        }
         return;
       }
       case "hall-bgm": {
@@ -1285,10 +1287,10 @@ export class SpaceSessionController {
     this.bossTracker.reset(null);
     this.bossHitEvents = [];
     this.playerHitEvents = [];
+    this.marketRevision = null;
     this.updateSnapshot({
       selfDamagedAt: null,
       selfDamagedBy: null,
-      market: null,
       celebration: null,
       canSyncMarket: false,
       canFightBoss: false,
@@ -1312,7 +1314,7 @@ export class SpaceSessionController {
       (!this.isVisible && !isImmediate) ||
       this.snapshot.presence.status !== "online" ||
       (!isImmediate &&
-        now - this.lastMovementSentAt < movementIntervalMs - movementSendToleranceMs) ||
+        now - this.lastMovementSentAt < SPACE_NETWORK_INTERVAL_MS - movementSendToleranceMs) ||
       hasSameMovement(this.lastSentMovement, movement) ||
       (this.socket?.bufferedAmount ?? 0) > maximumBufferedBytes
     ) {
@@ -1323,9 +1325,9 @@ export class SpaceSessionController {
       this.lastSentMovement = { ...movement };
       // 예정 시각을 누적해 평균 100 ms 로 맞춤. 한 칸 넘게 쉬었으면 지금부터 다시 셈.
       // 잠깐 멈췄다 보낼 때도 여유 이상은 당기지 않음. 몰아 보내면 대역만 씀.
-      const scheduledAt = this.lastMovementSentAt + movementIntervalMs;
+      const scheduledAt = this.lastMovementSentAt + SPACE_NETWORK_INTERVAL_MS;
       this.lastMovementSentAt =
-        isImmediate || scheduledAt < now - movementIntervalMs
+        isImmediate || scheduledAt < now - SPACE_NETWORK_INTERVAL_MS
           ? now
           : Math.max(scheduledAt, now - movementSendToleranceMs);
     }

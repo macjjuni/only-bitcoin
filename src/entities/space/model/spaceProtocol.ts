@@ -301,7 +301,6 @@ export type SpaceServerFrame =
 
 /** 서버가 받아주는 클라이언트 프레임 최대 크기. 서버도 이 값으로 먼저 거름. */
 export const SPACE_CLIENT_FRAME_MAX_BYTES = 8 * 1024;
-const CLIENT_FRAME_MAX_BYTES = SPACE_CLIENT_FRAME_MAX_BYTES;
 /**
  * 클라이언트가 받아주는 서버 프레임 최대 크기. 넘으면 프레임을 버림.
  *
@@ -369,14 +368,13 @@ const BOSS_ATTACKS: readonly string[] = [
 ] satisfies SpaceBossAttack[];
 /** 체력·피해로 받아 주는 상한. 수치를 조정해도 걸리지 않게 넉넉히 잡음. 서버 설정도 이 값을 넘기지 않음. */
 export const SPACE_BOSS_AMOUNT_MAX = 10_000_000;
-const MAXIMUM_BOSS_AMOUNT = SPACE_BOSS_AMOUNT_MAX;
 
 const isBossAttack = (value: unknown): value is SpaceBossAttack => {
   return typeof value === "string" && BOSS_ATTACKS.includes(value);
 };
 
 const isAmount = (value: unknown): value is number => {
-  return isFiniteNumber(value) && value >= 0 && value <= MAXIMUM_BOSS_AMOUNT;
+  return isFiniteNumber(value) && value >= 0 && value <= SPACE_BOSS_AMOUNT_MAX;
 };
 
 const isSeat = (value: unknown): value is number => {
@@ -499,7 +497,7 @@ const isChatMessage = (value: unknown): value is SpaceChatMessage => {
     isUuid(value.rid) &&
     isSeat(value.seat) &&
     isBoundedString(value.nickname, 128) &&
-    isBoundedString(value.body, CLIENT_FRAME_MAX_BYTES) &&
+    isBoundedString(value.body, SPACE_CLIENT_FRAME_MAX_BYTES) &&
     isFiniteNumber(value.createdAt) &&
     Number.isSafeInteger(value.createdAt) &&
     value.createdAt >= 0
@@ -569,7 +567,7 @@ export const isSpacePeer = (value: unknown): value is SpacePeer => {
 
 /** 텍스트 정책·권한 검사는 서버에 맡기고 프레임 구조와 수치 범위만 검증함. */
 export const parseSpaceClientFrame = (rawPayload: string): SpaceClientFrame | null => {
-  const payload = parsePayload(rawPayload, CLIENT_FRAME_MAX_BYTES);
+  const payload = parsePayload(rawPayload, SPACE_CLIENT_FRAME_MAX_BYTES);
 
   if (!payload) {
     return null;
@@ -599,7 +597,7 @@ export const parseSpaceClientFrame = (rawPayload: string): SpaceClientFrame | nu
         ? (payload as SpaceClientFrame)
         : null;
     case "say":
-      return isUuid(payload.rid) && isBoundedString(payload.body, CLIENT_FRAME_MAX_BYTES)
+      return isUuid(payload.rid) && isBoundedString(payload.body, SPACE_CLIENT_FRAME_MAX_BYTES)
         ? (payload as SpaceClientFrame)
         : null;
     case "nick":
