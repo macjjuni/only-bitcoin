@@ -13,7 +13,7 @@ export const SPACE_FEATURE_HALL_BGM = "hall-bgm-v1";
  *
  * 음원 주소와 화면 이름은 클라이언트가 따로 듦(`spaceBgmTrack.ts`).
  */
-export const SPACE_HALL_BGM_TRACKS = ["base", "surge"] as const;
+export const SPACE_HALL_BGM_TRACKS = ["base", "surge", "rush", "phonk"] as const;
 
 export type SpaceHallBgmTrack = (typeof SPACE_HALL_BGM_TRACKS)[number];
 

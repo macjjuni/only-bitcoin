@@ -3,7 +3,7 @@
   "version": "v4.1.0",
   "private": true,
   "scripts": {
-    "dev": "pnpm archive:ensure && next dev -p 3002",
+    "dev": "pnpm archive:ensure && pnpm media:link && next dev -p 3002",
     "build": "next build",
     "build:chat": "wrangler deploy --dry-run --config workers/chat/wrangler.jsonc",
     "chat:dev": "node workers/chat/scripts/prepare-dev.mjs && wrangler dev --ip 0.0.0.0 --config workers/chat/wrangler.jsonc",
@@ -17,6 +17,7 @@
     "check:cycles": "node scripts/check-cycles.mjs",
     "build:apartment-archive": "node --env-file-if-exists=.env.local --experimental-strip-types --import ./scripts/ts-loader.mjs --no-warnings scripts/build-apartment-archive.ts",
     "build:btc-monthly-usd-archive": "node --env-file-if-exists=.env.local --experimental-strip-types --import ./scripts/ts-loader.mjs --no-warnings scripts/build-btc-monthly-usd-archive.ts",
+    "media:link": "node scripts/link-dev-media.mjs",
     "archive:ensure": "pnpm build:apartment-archive --if-stale && pnpm build:btc-monthly-usd-archive --if-stale",
     "test": "vitest run",
     "screenshot": "playwright install chromium && node scripts/screenshot.mjs"

@@ -44,6 +44,9 @@ yarn-error.log*
 next-env.d.ts
 /workers/chat/.wrangler/
 
+# 개발 서버가 media/ 음원을 바로 읽는 링크(`scripts/link-dev-media.mjs`).
+/public/dev-media
+
 # 3D 원본 에셋(빌드 입력). 구운 스프라이트만 public/ 에 커밋함.
 /assets
 

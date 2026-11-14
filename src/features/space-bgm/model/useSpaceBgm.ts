@@ -6,8 +6,12 @@ import { loadBgmEnabled, saveBgmEnabled } from "./bgmPreferenceStore";
 import {
   SPACE_BGM_COURTYARD_TRACK_SRC,
   SPACE_BGM_COURTYARD_VOLUME,
+  SPACE_BGM_PHONK_TRACK_SRC,
+  SPACE_BGM_PHONK_VOLUME,
   SPACE_BGM_RAID_TRACK_SRC,
   SPACE_BGM_RAID_VOLUME,
+  SPACE_BGM_RUSH_TRACK_SRC,
+  SPACE_BGM_RUSH_VOLUME,
   SPACE_BGM_SURGE_TRACK_SRC,
   SPACE_BGM_SURGE_VOLUME,
   SPACE_BGM_TRACK_SRC,
@@ -29,6 +33,8 @@ interface BgmTarget {
 const TRACK_SRC: Record<BgmTrack, string> = {
   base: SPACE_BGM_TRACK_SRC,
   surge: SPACE_BGM_SURGE_TRACK_SRC,
+  rush: SPACE_BGM_RUSH_TRACK_SRC,
+  phonk: SPACE_BGM_PHONK_TRACK_SRC,
   courtyard: SPACE_BGM_COURTYARD_TRACK_SRC,
   raid: SPACE_BGM_RAID_TRACK_SRC,
 };
@@ -36,6 +42,8 @@ const TRACK_SRC: Record<BgmTrack, string> = {
 const TRACK_VOLUME: Record<BgmTrack, number> = {
   base: SPACE_BGM_VOLUME,
   surge: SPACE_BGM_SURGE_VOLUME,
+  rush: SPACE_BGM_RUSH_VOLUME,
+  phonk: SPACE_BGM_PHONK_VOLUME,
   courtyard: SPACE_BGM_COURTYARD_VOLUME,
   raid: SPACE_BGM_RAID_VOLUME,
 };
