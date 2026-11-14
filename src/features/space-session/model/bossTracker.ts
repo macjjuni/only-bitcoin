@@ -14,7 +14,8 @@ import {
  *
  * 두 가지 출처를 이어 붙임.
  * - **싸우는 중**: 서버가 100 ms 마다 보내는 `boss` 프레임. 10 Hz 를 그대로 그리면 끊겨
- *   보여서 위치·방향을 부드럽게 따라감.
+ *   보여서 위치·방향을 부드럽게 따라감. 걷거나 달리는 동안은 프레임 사이를 직전 속도로
+ *   이어 그려서, 프레임이 늦거나 몰려 와도(모바일 망) 멈췄다 튀지 않음.
  * - **쉬는 중**: 서버가 아무것도 안 보냄. 마지막 처치 시각과 젠 계산식으로 스스로 그림.
  *   방이 비어 서버가 잠들어 있어도 젠 시각이 되면 보스가 솟아오름.
  *
@@ -33,7 +34,10 @@ export interface BossTracker {
   reset: (
     welcome: { lastKilledAt: number | null; wire?: SpaceBossWire; nowMs: number } | null,
   ) => void;
-  applyWire: (wire: SpaceBossWire, nowMs: number) => void;
+  /**
+   * @param serverAt 서버가 이 프레임을 만든 시각(서버 축). 있으면 프레임 사이를 이어 그림.
+   */
+  applyWire: (wire: SpaceBossWire, nowMs: number, serverAt?: number) => void;
   /** 누가 보스를 맞힘. 움찔 연출과 체력에 반영함. */
   applyHit: (health: number, nowMs: number) => void;
   /** 처치됨. 다음 젠 시각까지 없는 것으로 계산함. */
@@ -61,6 +65,15 @@ const FOLLOW_RATE = 14;
 const SNAP_DISTANCE = 3;
 /** 한 프레임으로 볼 최대 시간(초). 탭이 멈췄다 돌아오면 한 번에 끝까지 따라붙음. */
 const MAXIMUM_FRAME_SECONDS = 0.1;
+/**
+ * 마지막 프레임에서 앞질러 그리는 시간 상한(ms). 프레임이 이보다 오래 안 오면 그 자리에 섬.
+ *
+ * 길게 잡으면 보스가 멈춰 공격을 시작했을 때 지나친 만큼 되돌아오는 게 눈에 띔.
+ */
+const MAXIMUM_PREDICTION_MS = 250;
+/** 두 프레임의 서버 시각 차가 이 안이어야 속도를 구함(ms). 틱은 100 ms 임. */
+const VELOCITY_MINIMUM_SPAN_MS = 50;
+const VELOCITY_MAXIMUM_SPAN_MS = 350;
 
 // region [Privates]
 /** −π…π 로 접은 각도 차. */
@@ -72,6 +85,15 @@ const resolveYawGap = (targetYaw: number, yaw: number): number => {
   }
 
   return gap < -Math.PI ? gap + Math.PI * 2 : gap;
+};
+
+/** 서버가 틱마다 위치를 옮기는 상태인지. 돌진은 이동표로 따로 그려서 뺌. */
+const isMovingWire = (wire: SpaceBossWire): boolean => {
+  return (
+    wire.phase === "walk" ||
+    wire.phase === "run" ||
+    (wire.phase === "attack" && wire.attack === "spin")
+  );
 };
 
 /**
@@ -101,6 +123,11 @@ export const createBossTracker = (): BossTracker => {
   let lastKilledAt: number | null = null;
   let wire: SpaceBossWire | null = null;
   let wireReceivedAt = 0;
+  /** 마지막 프레임을 서버가 만든 시각(서버 축). 모르면 `null`. */
+  let wireServerAt: number | null = null;
+  /** 직전 두 프레임으로 구한 속도(m/s). 프레임 사이를 이어 그리는 데 씀. */
+  let wireVelocityX = 0;
+  let wireVelocityZ = 0;
   let health: number | null = null;
   let lastHitAt: number | undefined;
   let lastSampledAt = Number.NEGATIVE_INFINITY;
@@ -188,11 +215,17 @@ export const createBossTracker = (): BossTracker => {
       return;
     }
 
-    const distance = Math.hypot(current.x - state.x, current.z - state.z);
+    // 서버 시각을 알면 프레임이 오는 데 걸린 시간까지 쳐서 앞질러 그림.
+    const wireAgeMs =
+      wireServerAt === null ? nowMs - wireReceivedAt : nowMs + clockOffsetMs - wireServerAt;
+    const predictionSeconds = Math.min(MAXIMUM_PREDICTION_MS, Math.max(0, wireAgeMs)) / 1000;
+    const targetX = current.x + wireVelocityX * predictionSeconds;
+    const targetZ = current.z + wireVelocityZ * predictionSeconds;
+    const distance = Math.hypot(targetX - state.x, targetZ - state.z);
 
     if (!wasFollowingWire || distance > SNAP_DISTANCE) {
-      state.x = current.x;
-      state.z = current.z;
+      state.x = targetX;
+      state.z = targetZ;
       state.yaw = current.yaw;
       wasFollowingWire = true;
       return;
@@ -200,8 +233,8 @@ export const createBossTracker = (): BossTracker => {
 
     const follow = 1 - Math.exp(-FOLLOW_RATE * deltaSeconds);
 
-    state.x += (current.x - state.x) * follow;
-    state.z += (current.z - state.z) * follow;
+    state.x += (targetX - state.x) * follow;
+    state.z += (targetZ - state.z) * follow;
     state.yaw += resolveYawGap(current.yaw, state.yaw) * follow;
   };
 
@@ -212,6 +245,9 @@ export const createBossTracker = (): BossTracker => {
       lastKilledAt = welcome?.lastKilledAt ?? null;
       wire = welcome?.wire ?? null;
       wireReceivedAt = welcome?.nowMs ?? 0;
+      wireServerAt = null;
+      wireVelocityX = 0;
+      wireVelocityZ = 0;
       health = wire?.health ?? null;
       lastHitAt = undefined;
       wasFollowingWire = false;
@@ -219,10 +255,22 @@ export const createBossTracker = (): BossTracker => {
       announcedSpawnedAt = null;
       hide();
     },
-    applyWire: (nextWire, nowMs) => {
+    applyWire: (nextWire, nowMs, serverAt) => {
       if (!isEnabled) {
         return;
       }
+
+      const spanMs = serverAt !== undefined && wireServerAt !== null ? serverAt - wireServerAt : 0;
+      const canResolveVelocity =
+        wire !== null &&
+        isMovingWire(wire) &&
+        isMovingWire(nextWire) &&
+        spanMs >= VELOCITY_MINIMUM_SPAN_MS &&
+        spanMs <= VELOCITY_MAXIMUM_SPAN_MS;
+
+      wireVelocityX = canResolveVelocity && wire ? ((nextWire.x - wire.x) / spanMs) * 1000 : 0;
+      wireVelocityZ = canResolveVelocity && wire ? ((nextWire.z - wire.z) / spanMs) * 1000 : 0;
+      wireServerAt = serverAt ?? null;
 
       // 쉬러 들어간 프레임이면 싸움 상태를 내려놓음. 다음 싸움은 체력 가득에서 시작함.
       wire = isRestingWire(nextWire) ? null : nextWire;

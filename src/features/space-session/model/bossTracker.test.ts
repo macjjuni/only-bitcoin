@@ -144,6 +144,49 @@ describe("싸우는 보스(서버 프레임)", () => {
     expect(arena.centerX + 4 - (positions.at(-1) ?? 0)).toBeLessThan(0.5);
   });
 
+  it("프레임이 늦게 몰려 와도 멈췄다 튀지 않고 직전 속도로 이어 그린다", () => {
+    const tracker = createEnabledTracker();
+    const positions: number[] = [];
+    let nowMs = 0;
+    let tick = 0;
+
+    const applyTick = (): void => {
+      tick += 1;
+      tracker.applyWire(
+        createWire({ x: arena.centerX + tick * 0.4 }),
+        nowMs,
+        CLOCK_OFFSET_MS + tick * 100,
+      );
+    };
+    const sampleUntil = (untilMs: number): void => {
+      while (nowMs + FRAME_MS <= untilMs) {
+        nowMs += FRAME_MS;
+        positions.push(tracker.sample(nowMs, CLOCK_OFFSET_MS).x);
+      }
+    };
+
+    // 서버가 0.1초마다 0.4 m 씩 +X 로 옮김(4 m/s). 처음 두 틱은 제때 옴.
+    nowMs = 100;
+    applyTick();
+    tracker.sample(nowMs, CLOCK_OFFSET_MS);
+    sampleUntil(200);
+    applyTick();
+    positions.length = 0;
+    // 다음 두 틱은 늦어져서 0.25초 뒤에 한꺼번에 옴.
+    sampleUntil(450);
+    applyTick();
+    applyTick();
+    sampleUntil(550);
+
+    const strides = positions.slice(1).map((x, index) => x - positions[index]);
+
+    // 프레임이 안 오는 동안에도 계속 나아가고, 몰려 왔을 때 한 번에 뛰지 않음.
+    expect(Math.min(...strides)).toBeGreaterThan(0);
+    expect(Math.max(...strides)).toBeLessThan(0.15);
+    // 서버의 지금 위치(4 m/s × 0.55초) 근처에 있음.
+    expect(Math.abs(arena.centerX + 2.2 - (positions.at(-1) ?? 0))).toBeLessThan(0.5);
+  });
+
   it("멀리 떨어진 자리로는 따라가지 않고 바로 옮긴다", () => {
     const tracker = createEnabledTracker();
 

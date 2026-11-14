@@ -1116,7 +1116,7 @@ export class SpaceSessionController {
       }
       case "boss": {
         if (this.snapshot.canFightBoss) {
-          this.bossTracker.applyWire(frame.state, this.options.now());
+          this.bossTracker.applyWire(frame.state, this.options.now(), frame.serverAt);
         }
         return;
       }
