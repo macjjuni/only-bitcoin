@@ -145,6 +145,8 @@ function AvatarSwingTrails({ selfTransformRef, selfModelIndex, selfKickStartedAt
     slotGroup.visible = true;
     slotGroup.position.set(transform.x, transform.y + style.centerHeight, transform.z);
     slotGroup.rotation.set(0, transform.yaw, 0);
+    // 앞이 −Z 라 앞으로 벗어난 만큼은 부호를 뒤집음.
+    tiltGroup.position.set(style.centerRight, 0, -style.centerForward);
     tiltGroup.rotation.set(0, 0, style.tiltAngle);
 
     trailMeshesRef.current[slot].forEach((mesh, meshIndex) => {
