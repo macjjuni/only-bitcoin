@@ -9,12 +9,14 @@ import {
   resolveAvatarModel,
   SPACE_AVATAR,
   SPACE_MAX_OCCUPANTS,
+  SPACE_NETWORK_INTERVAL_MS,
   type SpaceAvatarModel,
   type SpaceTerrain,
 } from "@/entities/space";
 import {
   AVATAR_MOTION,
   type AvatarAnimation,
+  type AvatarMotionInput,
   createAvatarAnimation,
   stepAvatarAnimation,
 } from "@/views/space/lib/avatarAnimation";
@@ -39,6 +41,29 @@ const SHADOW_LIFT_Y = 0.02;
  * 공중을 접지로 오판하지 않음.
  */
 const GROUNDED_TOLERANCE_Y = 0.2;
+/**
+ * 접지를 다시 묻는 간격(ms). 서버가 위치를 보내는 간격과 같음.
+ *
+ * 그 사이의 위치는 두 스냅샷을 이은 값이라 더 자주 물어도 새로 알게 되는 게 없음.
+ * 매 프레임 물으면 움직이는 사람 수만큼 레이캐스트가 나감(50명이면 프레임당 50번).
+ */
+const GROUND_CHECK_INTERVAL_MS = SPACE_NETWORK_INTERVAL_MS;
+/** 접지 확인을 이만큼의 박자로 흩음. 다 같은 프레임에 몰리면 그 프레임만 무거워짐. */
+const GROUND_CHECK_STAGGER_STEPS = 6;
+
+/** 좌석 하나의 프레임 간 기록. 자리가 바뀌어도(인스턴스 번호가 밀려도) 사람을 따라감. */
+interface RemoteAvatarTrack {
+  /** 틀고 있는 모션. */
+  animation: AvatarAnimation;
+  /** 직전 프레임의 좌표. 이동 거리로 속도를 구함. 첫 프레임에는 `NaN` 임. */
+  x: number;
+  z: number;
+  /** 마지막으로 확인한 접지 여부와 그 시각. */
+  isGrounded: boolean;
+  groundCheckedAt: number;
+  /** 마지막으로 그린 프레임 번호. 나간 사람을 가리는 데 씀. */
+  seenFrame: number;
+}
 
 /** 남이 보스에게 맞은 기록. */
 export interface RemoteAvatarHit {
@@ -120,10 +145,23 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef, hitsRef 
     return proxy;
   }, []);
   const colorProxy = useMemo(() => new Color(), []);
-  /** 좌석별 직전 좌표. 이동 거리로 속도를 구함. */
-  const lastPositions = useRef(new Map<number, { x: number; z: number }>());
-  /** 좌석별로 틀고 있는 모션. 자리가 바뀌어도(인스턴스 번호가 밀려도) 사람을 따라감. */
-  const animations = useRef(new Map<number, AvatarAnimation>());
+  const tracks = useRef(new Map<number, RemoteAvatarTrack>());
+  const frameNumberRef = useRef<number>(0);
+  /** 모션 계산에 넘기는 입력. 사람마다 값만 바꿔 돌려 씀(받는 쪽이 들고 있지 않음). */
+  const motionInput = useMemo<AvatarMotionInput>(
+    () => ({
+      nowMs: 0,
+      deltaSeconds: 0,
+      speed: 0,
+      isGrounded: true,
+      attackStartedAt: undefined,
+      attackSeconds: 0,
+      hitStartedAt: undefined,
+      knockout: undefined,
+    }),
+    [],
+  );
+  const knockoutProxy = useMemo(() => ({ startedAt: 0, until: 0 }), []);
   const renderedPlayers = useMemo(() => selectSpaceAvatarSlots(players), [players]);
   // endregion
 
@@ -132,16 +170,12 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef, hitsRef 
   /**
    * 지면에 서 있는지 지형에 물음.
    *
-   * 전에는 `y <= 0` 으로 봤음. 바닥이 0 이던 벙커 기준이라 광장(5)·테라스(7.5)·
-   * 궁전(11) 어디에 서 있어도 거짓이 되어 **다른 사람의 다리가 통째로 멈춰
-   * 있었음.** 로컬 아바타의 같은 실수는 적분기가 넘겨주는 `isGrounded` 로
-   * 고쳤지만(`PlayerAvatar`), 원격 아바타에는 적분기가 없어 여기만 남았음.
+   * 높이를 상수(`y <= 0`)로 보면 안 됨. 홀 바닥 · 발코니 · 안뜰이 높이가 다 달라서
+   * 바닥이 0 이 아닌 곳에 선 사람은 다리가 통째로 멈춤. 로컬 아바타는 적분기가
+   * `isGrounded` 를 넘겨주지만(`PlayerAvatar`), 원격 아바타에는 적분기가 없어 지형에 물음.
    *
-   * 발밑이 열린 바다면 `resolveGroundY` 가 `-Infinity` 를 돌려주므로 떨어지는
+   * 발밑에 아무것도 없으면 `resolveGroundY` 가 `-Infinity` 를 돌려주므로 떨어지는
    * 동안에도 다리가 섬.
-   *
-   * 레이캐스트는 **수평으로 움직이는 아바타만** 쏨. 멈춘 아바타는 어차피
-   * 서 있는 모션이라 접지를 알 필요가 없음.
    */
   const isStandingOnGround = (player: RemotePlayer): boolean => {
     const terrain = terrainRef.current;
@@ -152,6 +186,32 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef, hitsRef 
 
     return player.y - terrain.resolveGroundY(player.x, player.z, player.y) <= GROUNDED_TOLERANCE_Y;
   };
+
+  /**
+   * 접지 여부. 지형에는 `GROUND_CHECK_INTERVAL_MS` 에 한 번만 묻고 그 사이에는 기억해 둔 값을 씀.
+   *
+   * **수평으로 움직이는 아바타만** 부름. 멈춘 아바타는 어차피 서 있는 모션이라 접지를 알
+   * 필요가 없음. 점프하는 순간과 착지하는 순간에는 다리 모션이 이 간격만큼 늦게 바뀜.
+   */
+  const resolveGrounded = (track: RemoteAvatarTrack, player: RemotePlayer, now: number): boolean => {
+    if (now - track.groundCheckedAt >= GROUND_CHECK_INTERVAL_MS) {
+      track.isGrounded = isStandingOnGround(player);
+      track.groundCheckedAt = now;
+    }
+
+    return track.isGrounded;
+  };
+
+  const createTrack = (seat: number, now: number): RemoteAvatarTrack => ({
+    animation: createAvatarAnimation(),
+    x: Number.NaN,
+    z: Number.NaN,
+    // 서 있다고 보고 시작함. 첫 확인은 좌석마다 조금씩 어긋나게 잡아 한 프레임에 안 몰리게 함.
+    isGrounded: true,
+    groundCheckedAt:
+      now - (GROUND_CHECK_INTERVAL_MS * (seat % GROUND_CHECK_STAGGER_STEPS)) / GROUND_CHECK_STAGGER_STEPS,
+    seenFrame: 0,
+  });
 
   /** 가슴 띠만 플레이어 색을 받음. 몸통 배색은 아틀라스 텍스처에 있음. */
   const applyInstanceColors = (): void => {
@@ -174,49 +234,53 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef, hitsRef 
    */
   const advanceAnimations = (deltaSeconds: number): void => {
     const now = performance.now();
-    const activeSeats = new Set<number>();
+    const frameNumber = frameNumberRef.current + 1;
 
-    renderedPlayers.forEach((player, instanceIndex) => {
-      const previous = lastPositions.current.get(player.seat);
-      const moved = previous ? Math.hypot(player.x - previous.x, player.z - previous.z) : 0;
-      const speed = deltaSeconds > 0 ? moved / deltaSeconds : 0;
-      let animation = animations.current.get(player.seat);
+    frameNumberRef.current = frameNumber;
+    motionInput.nowMs = now;
+    motionInput.deltaSeconds = deltaSeconds;
+    motionInput.attackSeconds = model.combat.attackSeconds;
 
-      if (!animation) {
-        animation = createAvatarAnimation();
-        animations.current.set(player.seat, animation);
+    for (let instanceIndex = 0; instanceIndex < renderedPlayers.length; instanceIndex += 1) {
+      const player = renderedPlayers[instanceIndex];
+      let track = tracks.current.get(player.seat);
+
+      if (!track) {
+        track = createTrack(player.seat, now);
+        tracks.current.set(player.seat, track);
       }
-      lastPositions.current.set(player.seat, { x: player.x, z: player.z });
-      activeSeats.add(player.seat);
-
+      // 처음 본 프레임에는 직전 좌표가 없어 멈춘 것으로 봄.
+      const moved = Number.isNaN(track.x) ? 0 : Math.hypot(player.x - track.x, player.z - track.z);
+      const speed = deltaSeconds > 0 ? moved / deltaSeconds : 0;
       const hit = hitsRef.current?.get(player.seat);
 
-      stepAvatarAnimation(
-        animation,
-        {
-          nowMs: now,
-          deltaSeconds,
-          speed,
-          // 공중에서는 다리를 멈춤. 멈춰 있으면 지형에 물을 필요가 없음.
-          isGrounded: speed <= AVATAR_MOTION.movingSpeed || isStandingOnGround(player),
-          attackStartedAt: kickStartsRef.current?.get(player.seat),
-          attackSeconds: model.combat.attackSeconds,
-          hitStartedAt: hit?.hitAt,
-          knockout:
-            hit?.knockedOutUntil === undefined
-              ? undefined
-              : { startedAt: hit.hitAt, until: hit.knockedOutUntil },
-        },
-        model,
-      );
-      writeCrewPose(body, instanceIndex, animation);
-    });
+      track.x = player.x;
+      track.z = player.z;
+      track.seenFrame = frameNumber;
+
+      motionInput.speed = speed;
+      // 공중에서는 다리를 멈춤. 멈춰 있으면 지형에 물을 필요가 없음.
+      motionInput.isGrounded =
+        speed <= AVATAR_MOTION.movingSpeed || resolveGrounded(track, player, now);
+      motionInput.attackStartedAt = kickStartsRef.current?.get(player.seat);
+      motionInput.hitStartedAt = hit?.hitAt;
+
+      if (hit?.knockedOutUntil === undefined) {
+        motionInput.knockout = undefined;
+      } else {
+        knockoutProxy.startedAt = hit.hitAt;
+        knockoutProxy.until = hit.knockedOutUntil;
+        motionInput.knockout = knockoutProxy;
+      }
+
+      stepAvatarAnimation(track.animation, motionInput, model);
+      writeCrewPose(body, instanceIndex, track.animation);
+    }
 
     // 나간 사람의 기록을 지움. 같은 좌석에 다른 사람이 들어오면 처음부터 시작함.
-    for (const seat of animations.current.keys()) {
-      if (!activeSeats.has(seat)) {
-        animations.current.delete(seat);
-        lastPositions.current.delete(seat);
+    for (const [seat, track] of tracks.current) {
+      if (track.seenFrame !== frameNumber) {
+        tracks.current.delete(seat);
       }
     }
 
@@ -236,9 +300,8 @@ function RemoteAvatarGroup({ model, players, terrainRef, kickStartsRef, hitsRef 
       weaponMeshRef.current?.setMatrixAt(instanceIndex, transformProxy.matrix);
 
       // 그림자 평면은 눕혀야 하므로 회전을 따로 줌. 높이는 **발밑 기준**임.
-      // 상수만 넣으면 바닥이 0 이던 벙커 기준이 되어, 광장(5)·테라스(7.5)·궁전(11)
-      // 에 선 사람의 그림자가 저 아래 해수면에 깔림. 로컬 아바타는 그림자가
-      // 플레이어 그룹 안에 있어 자연히 발밑을 따라간다(`PlayerAvatar`).
+      // 상수만 넣으면 발코니나 안뜰에 선 사람의 그림자가 다른 층 바닥에 깔림.
+      // 로컬 아바타는 그림자가 플레이어 그룹 안에 있어 자연히 발밑을 따라간다(`PlayerAvatar`).
       transformProxy.rotation.set(-Math.PI / 2, 0, 0);
       transformProxy.position.set(player.x, player.y + SHADOW_LIFT_Y, player.z);
       transformProxy.updateMatrix();
