@@ -6,6 +6,7 @@ import {
   SPACE_BOSS_DEATH,
   SPACE_BOSS_SPAWN,
 } from "@/entities/space/model/boss";
+import { isInsideBossArenaFloor } from "./bossHitTest";
 import {
   type BossPlayerHit,
   type BossSimulation,
@@ -312,9 +313,7 @@ describe("보스 공격 판정", () => {
 
     expect(chargeHits).toEqual([1]);
     expect(startX - endX).toBeCloseTo(SPACE_BOSS_ATTACKS.charge.travel, 3);
-    expect(Math.hypot(endX - arena.centerX, simulation.state.z - arena.centerZ)).toBeLessThan(
-      arena.radius,
-    );
+    expect(isInsideBossArenaFloor(endX, simulation.state.z, SPACE_BOSS.roamMargin)).toBe(true);
   });
 
   it("내려찍기 원 안에 둘 이상 모이면 내려찍는다", () => {

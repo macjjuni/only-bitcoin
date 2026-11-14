@@ -131,17 +131,69 @@ export const isAtBossArenaHeight = (point: { y: number }): boolean => {
   return Math.abs(point.y - SPACE_BOSS.arena.floorY) <= SPACE_BOSS_COMBAT.arenaHeightTolerance;
 };
 
+/**
+ * 아레나를 `margin` 만큼 안으로 줄인 둥근 직사각형의 치수.
+ *
+ * 둥근 직사각형은 "안쪽 상자에서 `cornerRadius` 이내인 점" 임. 그 안쪽 상자의 반 치수를 줌.
+ */
+const resolveArenaCore = (
+  margin: number,
+): { innerHalfWidth: number; innerHalfDepth: number; cornerRadius: number } => {
+  const { halfWidth, halfDepth, cornerRadius } = SPACE_BOSS.arena;
+  const insetCornerRadius = Math.max(0, cornerRadius - margin);
+
+  return {
+    innerHalfWidth: Math.max(0, halfWidth - margin - insetCornerRadius),
+    innerHalfDepth: Math.max(0, halfDepth - margin - insetCornerRadius),
+    cornerRadius: insetCornerRadius,
+  };
+};
+
+/** 아레나 바닥 범위 안인지. 높이는 안 봄. `margin` 만큼 가장자리에서 안쪽으로 줄여 봄. */
+export const isInsideBossArenaFloor = (x: number, z: number, margin: number = 0): boolean => {
+  const { centerX, centerZ } = SPACE_BOSS.arena;
+  const { innerHalfWidth, innerHalfDepth, cornerRadius } = resolveArenaCore(margin);
+  const overX = Math.max(0, Math.abs(x - centerX) - innerHalfWidth);
+  const overZ = Math.max(0, Math.abs(z - centerZ) - innerHalfDepth);
+
+  return Math.hypot(overX, overZ) <= cornerRadius + 1e-9;
+};
+
+/**
+ * 아레나 바닥 범위 밖의 점을 가장 가까운 안쪽 점으로 당김. 안이면 그대로 돌려줌.
+ *
+ * 보스가 가장자리에서 멈추지 않고 담을 따라 미끄러지게 하는 데 씀.
+ */
+export const clampToBossArenaFloor = (
+  x: number,
+  z: number,
+  margin: number = 0,
+): { x: number; z: number } => {
+  if (isInsideBossArenaFloor(x, z, margin)) {
+    return { x, z };
+  }
+
+  const { centerX, centerZ } = SPACE_BOSS.arena;
+  const { innerHalfWidth, innerHalfDepth, cornerRadius } = resolveArenaCore(margin);
+  const coreX = Math.min(innerHalfWidth, Math.max(-innerHalfWidth, x - centerX));
+  const coreZ = Math.min(innerHalfDepth, Math.max(-innerHalfDepth, z - centerZ));
+  const outwardX = x - centerX - coreX;
+  const outwardZ = z - centerZ - coreZ;
+  const outwardDistance = Math.hypot(outwardX, outwardZ);
+  const scale = outwardDistance > 0 ? cornerRadius / outwardDistance : 0;
+
+  return {
+    x: centerX + coreX + outwardX * scale,
+    z: centerZ + coreZ + outwardZ * scale,
+  };
+};
+
 /** 아레나 안에 서 있는지. 높이도 봄 — 발코니는 같은 x·z 위에 떠 있음. */
 export const isInsideBossArena = (
   point: BossPoint & { y: number },
   margin: number = 0,
 ): boolean => {
-  const { centerX, centerZ, radius } = SPACE_BOSS.arena;
-
-  return (
-    Math.hypot(point.x - centerX, point.z - centerZ) <= radius - margin &&
-    isAtBossArenaHeight(point)
-  );
+  return isInsideBossArenaFloor(point.x, point.z, margin) && isAtBossArenaHeight(point);
 };
 
 /**

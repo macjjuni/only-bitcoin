@@ -17,8 +17,10 @@ import {
 } from "@/entities/space/model/boss";
 import {
   canKickReachBoss,
+  clampToBossArenaFloor,
   isAtBossArenaHeight,
   isInsideBossArena,
+  isInsideBossArenaFloor,
   isInsideBossAttack,
   isInsideBossChargeSweep,
   isInsideBossSpin,
@@ -171,11 +173,6 @@ const smoothStep = (ratio: number): number => {
   return clamped * clamped * (3 - 2 * clamped);
 };
 
-const isInsideArenaCircle = (x: number, z: number, margin: number): boolean => {
-  const { centerX, centerZ, radius } = SPACE_BOSS.arena;
-
-  return Math.hypot(x - centerX, z - centerZ) <= radius - margin;
-};
 // endregion
 
 export const createBossSimulation = (
@@ -317,14 +314,16 @@ export const createBossSimulation = (
       return;
     }
 
-    const nextX = state.x + (deltaX / distance) * stride;
-    const nextZ = state.z + (deltaZ / distance) * stride;
+    // 서버가 지형을 몰라서 아레나 밖(계단·담)으로는 안 나감. 밖으로 나가는 걸음은 가장자리로
+    // 당겨서 담을 따라 미끄러지게 함. 멈춰 세우면 담에 붙은 타깃을 비스듬히 쫓다가 굳음.
+    const next = clampToBossArenaFloor(
+      state.x + (deltaX / distance) * stride,
+      state.z + (deltaZ / distance) * stride,
+      SPACE_BOSS.roamMargin,
+    );
 
-    // 서버가 지형을 몰라서 아레나 밖(계단·담)으로는 안 나감.
-    if (isInsideArenaCircle(nextX, nextZ, 0)) {
-      state.x = nextX;
-      state.z = nextZ;
-    }
+    state.x = next.x;
+    state.z = next.z;
   };
 
   const standStill = (nowMs: number): void => {
@@ -383,7 +382,11 @@ export const createBossSimulation = (
     const endZ = state.z - Math.cos(state.yaw) * travel;
 
     // 끝점이 아레나 밖이면 담을 뚫고 나감.
-    if (isChargeDistance && nowMs >= chargeReadyAt && isInsideArenaCircle(endX, endZ, 1)) {
+    if (
+      isChargeDistance &&
+      nowMs >= chargeReadyAt &&
+      isInsideBossArenaFloor(endX, endZ, SPACE_BOSS.roamMargin)
+    ) {
       return "charge";
     }
 
@@ -561,7 +564,6 @@ export const createBossSimulation = (
    */
   const planSpinSegment = (nowMs: number, candidates: readonly BossSimulationPlayer[]): void => {
     const { launchSeconds, moveSpeed, repathSeconds } = SPACE_BOSS_ATTACKS.spin;
-    const { centerX, centerZ, radius } = SPACE_BOSS.arena;
     const startedAt =
       state.phaseStartedAt + (launchSeconds + spinPlannedCount * repathSeconds) * 1000;
     // 앞 구간이 끝나는 자리에서 이어 감. 첫 구간은 준비하며 서 있던 자리임.
@@ -582,13 +584,11 @@ export const createBossSimulation = (
       }
     }
 
-    // 아레나 밖으로는 안 나감. 출발점이 안쪽이라 끝만 당기면 길 전체가 안쪽임.
-    const outwardDistance = Math.hypot(toX - centerX, toZ - centerZ);
+    // 아레나 밖으로는 안 나감. 범위가 볼록해서 출발점이 안쪽이면 끝만 당겨도 길 전체가 안쪽임.
+    const clampedTo = clampToBossArenaFloor(toX, toZ, SPACE_BOSS.roamMargin);
 
-    if (outwardDistance > radius) {
-      toX = centerX + ((toX - centerX) / outwardDistance) * radius;
-      toZ = centerZ + ((toZ - centerZ) / outwardDistance) * radius;
-    }
+    toX = clampedTo.x;
+    toZ = clampedTo.z;
 
     spinPath = [...spinPath.slice(-1), { startedAt, fromX: from.x, fromZ: from.z, toX, toZ }];
     spinPlannedCount += 1;

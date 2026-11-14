@@ -2,7 +2,9 @@ import { describe, expect, it } from "vitest";
 import { SPACE_BOSS, SPACE_BOSS_ATTACKS, SPACE_BOSS_COMBAT } from "@/entities/space/model/boss";
 import {
   canKickReachBoss,
+  clampToBossArenaFloor,
   isInsideBossArena,
+  isInsideBossArenaFloor,
   isInsideBossAttack,
   isInsideBossChargeSweep,
   isInsideBossSpin,
@@ -109,11 +111,48 @@ describe("돌진 직선", () => {
 });
 
 describe("아레나", () => {
-  const { centerX, centerZ, floorY, radius } = SPACE_BOSS.arena;
+  const { centerX, centerZ, floorY, halfWidth, halfDepth, cornerRadius } = SPACE_BOSS.arena;
 
-  it("반지름과 높이를 같이 본다", () => {
-    expect(isInsideBossArena({ x: centerX + radius - 0.1, y: floorY, z: centerZ })).toBe(true);
-    expect(isInsideBossArena({ x: centerX + radius + 0.1, y: floorY, z: centerZ })).toBe(false);
+  it("안뜰 바닥 모양(둥근 직사각형)대로 본다", () => {
+    // 변의 가운데는 끝까지 안임. 원이던 때는 z 쪽 끝 4 m 가 빠졌음.
+    expect(isInsideBossArenaFloor(centerX + halfWidth - 0.1, centerZ)).toBe(true);
+    expect(isInsideBossArenaFloor(centerX + halfWidth + 0.1, centerZ)).toBe(false);
+    expect(isInsideBossArenaFloor(centerX, centerZ + halfDepth - 0.1)).toBe(true);
+    expect(isInsideBossArenaFloor(centerX, centerZ - halfDepth - 0.1)).toBe(false);
+    // 모서리는 둥글려서, 각진 구석 끝은 밖이고 호 안쪽은 안임.
+    expect(isInsideBossArenaFloor(centerX + halfWidth - 0.1, centerZ + halfDepth - 0.1)).toBe(
+      false,
+    );
+    const arcOffset = cornerRadius * (1 - Math.SQRT1_2) + 0.1;
+
+    expect(
+      isInsideBossArenaFloor(centerX + halfWidth - arcOffset, centerZ + halfDepth - arcOffset),
+    ).toBe(true);
+    // 홀 쪽 발코니·계단(x 21 ~ 26)은 밖임.
+    expect(isInsideBossArenaFloor(24, centerZ)).toBe(false);
+  });
+
+  it("여유를 주면 그만큼 안으로 줄여 본다", () => {
+    expect(isInsideBossArenaFloor(centerX + halfWidth - 1, centerZ, 1.2)).toBe(false);
+    expect(isInsideBossArenaFloor(centerX + halfWidth - 1.3, centerZ, 1.2)).toBe(true);
+  });
+
+  it("밖의 점은 가장 가까운 안쪽 점으로 당긴다", () => {
+    const inside = clampToBossArenaFloor(centerX + 2, centerZ - 3);
+    const pastEdge = clampToBossArenaFloor(centerX + halfWidth + 5, centerZ + 2, 1.2);
+    const pastCorner = clampToBossArenaFloor(centerX + 40, centerZ + 40, 1.2);
+
+    expect(inside).toEqual({ x: centerX + 2, z: centerZ - 3 });
+    // 변 밖이면 변으로 곧장 당겨서 변을 따라 미끄러짐.
+    expect(pastEdge.x).toBeCloseTo(centerX + halfWidth - 1.2, 6);
+    expect(pastEdge.z).toBeCloseTo(centerZ + 2, 6);
+    expect(isInsideBossArenaFloor(pastCorner.x, pastCorner.z, 1.2)).toBe(true);
+    expect(isInsideBossArenaFloor(pastCorner.x, pastCorner.z, 1.3)).toBe(false);
+  });
+
+  it("높이도 같이 본다", () => {
+    expect(isInsideBossArena({ x: centerX + halfWidth - 0.1, y: floorY, z: centerZ })).toBe(true);
+    expect(isInsideBossArena({ x: centerX + halfWidth + 0.1, y: floorY, z: centerZ })).toBe(false);
     // 발코니(안뜰 바닥보다 4 m 위)는 같은 자리 위라도 밖임.
     expect(isInsideBossArena({ x: centerX, y: floorY + 4, z: centerZ })).toBe(false);
     // 점프 중은 안임.
