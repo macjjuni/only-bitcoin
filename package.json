@@ -6,7 +6,7 @@
     "dev": "pnpm archive:ensure && next dev -p 3002",
     "build": "next build",
     "build:chat": "wrangler deploy --dry-run --config workers/chat/wrangler.jsonc",
-    "chat:dev": "node workers/chat/scripts/prepare-dev.mjs && wrangler dev --config workers/chat/wrangler.jsonc",
+    "chat:dev": "node workers/chat/scripts/prepare-dev.mjs && wrangler dev --ip 0.0.0.0 --config workers/chat/wrangler.jsonc",
     "chat:deploy": "wrangler deploy --config workers/chat/wrangler.jsonc",
     "chat:types": "wrangler types workers/chat/worker-configuration.d.ts --config workers/chat/wrangler.jsonc",
     "chat:typecheck": "tsc --noEmit -p workers/chat/tsconfig.json",
