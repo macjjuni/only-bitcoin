@@ -74,6 +74,7 @@ import type { HallTerrain } from "@/views/space/lib/hallTerrain";
 import { resolveRemoteSfxGain, type SpaceSfxName } from "@/views/space/lib/spaceSfx";
 import { advanceStressDummies, createStressDummies } from "@/views/space/lib/stressDummies";
 import type { PlaySpaceSfx } from "@/views/space/model/useSpaceSfx";
+import AvatarSwingTrails from "./AvatarSwingTrails";
 import BlockDashboard from "./BlockDashboard";
 import BossAttackEffects from "./BossAttackEffects";
 import BossDamageNumbers from "./BossDamageNumbers";
@@ -847,6 +848,13 @@ function SpaceScene({
         />
       )}
 
+      <AvatarSwingTrails
+        selfTransformRef={playerStateRef}
+        selfModelIndex={avatarModelIndex}
+        selfKickStartedAtRef={kickStartedAtRef}
+        remotePlayers={remotePlayers}
+        remoteKickStartsRef={remoteKickStartsRef}
+      />
       <RemoteAvatars
         players={remotePlayers}
         rosterRevision={session.rosterRevision}
