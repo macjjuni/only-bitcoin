@@ -118,7 +118,7 @@ function Nameplates({
   // endregion
 
   // region [Life Cycles]
-  useFrame(({ clock }) => {
+  useFrame(() => {
     const viewer = viewerTransformRef.current;
 
     if (!viewer) {
@@ -138,7 +138,10 @@ function Nameplates({
       viewer.z,
     );
 
-    const nowMs = clock.elapsedTime * 1000;
+    // 렌더 시계(`clock.elapsedTime`)로 재면 안 됨. 탭을 가렸다 돌아오면 렌더 루프를 다시 켜면서
+    // 그 시계가 0 으로 돌아가는데, 마지막 선별 시각은 옛 값으로 남아서 그만큼(머문 시간만큼)
+    // 선별이 멈춤. 그동안 새로 들어온 사람은 명찰이 안 뜸.
+    const nowMs = performance.now();
 
     if (nowMs - lastSelectedAtRef.current >= SELECTION_INTERVAL_MS) {
       lastSelectedAtRef.current = nowMs;
