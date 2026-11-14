@@ -45,7 +45,7 @@ export const useSpaceBgmZone = (session: SpaceSession): SpaceBgmZoneTrack | null
 
     isInRaidZoneRef.current = resolveRaidZonePresence(
       isInRaidZoneRef.current,
-      current.canFightBoss,
+      current.getSnapshot().canFightBoss,
       current.getSelfPosition(),
     );
     setZoneTrack(resolveZoneBgmTrack(isInRaidZoneRef.current, current.bossState.phase));

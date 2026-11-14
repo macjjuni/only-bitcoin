@@ -540,7 +540,7 @@ describe("SpaceRoom", () => {
     expect(vi.getTimerCount()).toBe(0);
   });
 
-  it("재전송 rid는 sender에만 같은 ID를 echo하며 2초 쿨다운과 본문 재사용을 검증한다", async () => {
+  it("재전송 rid는 sender에만 같은 ID를 echo하며 1초 쿨다운과 본문 재사용을 검증한다", async () => {
     const { join, send } = createRoom();
     const sender = await join(clientKey(1));
     const observer = await join(clientKey(2));
@@ -561,7 +561,7 @@ describe("SpaceRoom", () => {
     expect(sender.frames()).toContainEqual(
       expect.objectContaining({ t: "error", code: "RATE_SAY_INTERVAL" }),
     );
-    vi.advanceTimersByTime(1999);
+    vi.advanceTimersByTime(999);
     const earlyRid = crypto.randomUUID();
     await send(sender, { ...frame, rid: earlyRid });
     expect(sender.frames()).toContainEqual(

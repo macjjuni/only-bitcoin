@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useMemo, useSyncExternalStore } from "react";
+import { useEffect, useMemo } from "react";
 import { spaceConfig } from "@/shared/config/space";
 import { createDelayedSocket, resolveDebugSocketDelayMs } from "../api/delayedSocket";
 import { SpaceSessionController, type SpaceSessionIdentity } from "../api/spaceSessionController";
@@ -14,7 +14,13 @@ export interface UseSpaceSessionOptions {
 
 export type SpaceSession = ReturnType<typeof useSpaceSession>;
 
-/** 브라우저와 PWA에서 같은 공간 세션을 사용하며 DOM 수명에 맞춰 연결을 정리함. */
+/**
+ * 브라우저와 PWA에서 같은 공간 세션을 사용하며 DOM 수명에 맞춰 연결을 정리함.
+ *
+ * 돌려주는 객체는 연결이 바뀌지 않는 한 같은 객체임. 상태(`SpaceSessionSnapshot`)는 여기
+ * 싣지 않음 — 실으면 채팅 한 줄에도 객체가 새로 만들어져, 이걸 받는 씬과 HUD 가 `memo` 를
+ * 뚫고 통째로 다시 그려짐. 상태는 `useSpaceSessionState` 로 쓰는 조각만 골라 구독함.
+ */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
 export const useSpaceSession = ({ identity, modelIndex, enabled }: UseSpaceSessionOptions) => {
   // region [Hooks]
@@ -44,7 +50,35 @@ export const useSpaceSession = ({ identity, modelIndex, enabled }: UseSpaceSessi
         : {}),
     });
   }, [identity.clientKey]);
-  const snapshot = useSyncExternalStore(controller.subscribe, controller.getSnapshot, controller.getSnapshot);
+  const session = useMemo(
+    () => ({
+      /** 상태가 바뀔 때마다 부름. `useSpaceSessionState` 가 씀. */
+      subscribe: controller.subscribe,
+      /** 지금 상태. 타이머나 `useFrame` 처럼 렌더 밖에서 읽을 때 씀. */
+      getSnapshot: controller.getSnapshot,
+      isConnectionConfigured: spaceConfig.isConnectionConfigured,
+      publishMovement: controller.publishMovement,
+      sampleRemotePlayers: controller.sampleRemotePlayers,
+      sendKick: controller.sendKick,
+      requestCelebration: controller.requestCelebration,
+      requestHallBgm: controller.requestHallBgm,
+      drainKickEvents: controller.drainKickEvents,
+      /** 그릴 보스 상태. 같은 객체를 `sampleBoss` 가 매 프레임 제자리에서 고침. */
+      bossState: controller.bossState,
+      sampleBoss: controller.sampleBoss,
+      getBossHealth: controller.getBossHealth,
+      drainBossHits: controller.drainBossHits,
+      drainPlayerHits: controller.drainPlayerHits,
+      getSelfPosition: controller.getSelfPosition,
+      getNetworkStats: controller.getNetworkStats,
+      probeNetwork: controller.probeNetwork,
+      sendMessage: controller.sendMessage,
+      changeNickname: controller.changeNickname,
+      changeModel: controller.changeModel,
+      retry: controller.retry,
+    }),
+    [controller],
+  );
   // endregion
 
 
@@ -93,27 +127,5 @@ export const useSpaceSession = ({ identity, modelIndex, enabled }: UseSpaceSessi
   // endregion
 
 
-  return {
-    ...snapshot,
-    isConnectionConfigured: spaceConfig.isConnectionConfigured,
-    publishMovement: controller.publishMovement,
-    sampleRemotePlayers: controller.sampleRemotePlayers,
-    sendKick: controller.sendKick,
-    requestCelebration: controller.requestCelebration,
-    requestHallBgm: controller.requestHallBgm,
-    drainKickEvents: controller.drainKickEvents,
-    /** 그릴 보스 상태. 같은 객체를 `sampleBoss` 가 매 프레임 제자리에서 고침. */
-    bossState: controller.bossState,
-    sampleBoss: controller.sampleBoss,
-    getBossHealth: controller.getBossHealth,
-    drainBossHits: controller.drainBossHits,
-    drainPlayerHits: controller.drainPlayerHits,
-    getSelfPosition: controller.getSelfPosition,
-    getNetworkStats: controller.getNetworkStats,
-    probeNetwork: controller.probeNetwork,
-    sendMessage: controller.sendMessage,
-    changeNickname: controller.changeNickname,
-    changeModel: controller.changeModel,
-    retry: controller.retry,
-  };
+  return session;
 };

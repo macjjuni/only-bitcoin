@@ -5,7 +5,7 @@ import { useFrame } from "@react-three/fiber";
 import { memo, type ReactNode, useRef } from "react";
 import type { Group } from "three";
 import type { PlayerTransform } from "@/entities/space";
-import type { SpaceSession } from "@/features/space-session";
+import { useSpaceSessionContext } from "@/features/space-session";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
 import {
   resolveNameplateDistanceFactor,
@@ -17,7 +17,6 @@ import { useBossHud } from "@/views/space/model/useBossHud";
 const LOW_HEALTH_RATIO = 0.3;
 
 interface SelfHealthBarProps {
-  session: SpaceSession;
   /** 내 아바타 모델 번호. 명찰과 같은 높이에 맞추려고 받음. */
   modelIndex: number;
   isCoarsePointer: boolean;
@@ -35,10 +34,10 @@ interface SelfHealthBarProps {
  * 체력 값은 1초에 몇 번 바뀜. `Nameplates` 에 넣으면 명찰 전체가 같이 다시 그려져서 뗐음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SelfHealthBar({ session, modelIndex, isCoarsePointer, viewerTransformRef }: SelfHealthBarProps): ReactNode {
+function SelfHealthBar({ modelIndex, isCoarsePointer, viewerTransformRef }: SelfHealthBarProps): ReactNode {
   // region [Hooks]
   const groupRef = useRef<Group>(null);
-  const view = useBossHud(session);
+  const view = useBossHud(useSpaceSessionContext());
   // endregion
 
 

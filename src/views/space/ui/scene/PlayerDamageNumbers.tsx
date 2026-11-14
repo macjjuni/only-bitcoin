@@ -117,7 +117,7 @@ function PlayerDamageNumbers({ pendingRef }: PlayerDamageNumbersProps): ReactNod
             style={{ pointerEvents: "none" }}
           >
             <span
-              className={`space-damage-number block whitespace-nowrap font-extrabold tabular-nums [text-shadow:0_2px_4px_rgba(0,0,0,0.85)] ${
+              className={`space-damage-number block select-none whitespace-nowrap font-extrabold tabular-nums [text-shadow:0_2px_4px_rgba(0,0,0,0.85)] ${
                 number.isMine ? "text-3xl text-red-500" : "text-xl text-red-300/90"
               }`}
             >

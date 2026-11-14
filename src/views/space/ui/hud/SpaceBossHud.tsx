@@ -2,7 +2,11 @@
 
 import { Skull, Timer } from "lucide-react";
 import { type CSSProperties, memo, type ReactNode, useEffect, useMemo, useState } from "react";
-import type { SpaceBossDefeat, SpaceSession } from "@/features/space-session";
+import {
+  type SpaceBossDefeat,
+  useSpaceSessionContext,
+  useSpaceSessionState,
+} from "@/features/space-session";
 import { BOSS_NAME, formatBossCountdown } from "@/views/space/lib/bossHud";
 import { useBossHud } from "@/views/space/model/useBossHud";
 
@@ -10,7 +14,6 @@ import { useBossHud } from "@/views/space/model/useBossHud";
 const DEFEAT_RESULT_DURATION_MS = 9_000;
 
 interface SpaceBossHudProps {
-  session: SpaceSession;
   /** 손가락 기기인지. 좌측 상단 대화 내역과 겹치지 않게 젠 안내를 내림. */
   isCoarsePointer: boolean;
 }
@@ -24,22 +27,25 @@ interface SpaceBossHudProps {
  * 색·크기는 HUD 의 다른 패널(인원 배지, 조작 안내)과 같은 반투명 검정 판을 씀.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SpaceBossHud({ session, isCoarsePointer }: SpaceBossHudProps): ReactNode {
+function SpaceBossHud({ isCoarsePointer }: SpaceBossHudProps): ReactNode {
   // region [Hooks]
-  const view = useBossHud(session);
+  const view = useBossHud(useSpaceSessionContext());
   /** 화면에 띄우고 있는 처치 결과. 시간이 지나면 내림. */
   const [shownDefeat, setShownDefeat] = useState<SpaceBossDefeat | null>(null);
-  const { bossDefeat, selfDamagedAt } = session;
+  const bossDefeat = useSpaceSessionState((snapshot) => snapshot.bossDefeat);
+  const selfDamagedAt = useSpaceSessionState((snapshot) => snapshot.selfDamagedAt);
+  const self = useSpaceSessionState((snapshot) => snapshot.self);
+  const remotePlayers = useSpaceSessionState((snapshot) => snapshot.remotePlayers);
   // endregion
 
 
   // region [Privates]
   const resolveNickname = (seat: number): string => {
-    if (session.self?.seat === seat) {
-      return session.self.nickname;
+    if (self?.seat === seat) {
+      return self.nickname;
     }
 
-    return session.remotePlayers.find((player) => player.seat === seat)?.nickname ?? "떠난 사람";
+    return remotePlayers.find((player) => player.seat === seat)?.nickname ?? "떠난 사람";
   };
 
   /** 새 처치 소식이 오면 결과를 띄우고 잠시 뒤 내림. */

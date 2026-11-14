@@ -68,7 +68,7 @@ import {
   usePrefersReducedMotion,
   type Vector3Like,
 } from "@/features/space-controls";
-import type { SpaceSession } from "@/features/space-session";
+import { useSpaceSessionContext, useSpaceSessionState } from "@/features/space-session";
 import { SPACE_BARISTA } from "@/views/space/lib/barista";
 import type { BossPhaseSound } from "@/views/space/lib/bossAttackSounds";
 import { SPACE_FRAME_PRIORITY } from "@/views/space/lib/framePriority";
@@ -106,7 +106,6 @@ interface SpaceSceneProps {
   nickname: string;
   /** 접속 전에 보여줄 모델. 서버가 확정하면 그 값이 우선함. */
   modelIndex: number;
-  session: SpaceSession;
   hasRealtimeShadows: boolean;
   /** 개발 전용 더미 아바타 수. 더미 측정 중에는 실제 공간 소켓을 열지 않음. */
   dummyCount: number;
@@ -167,7 +166,6 @@ function SpaceScene({
   clientKey,
   nickname,
   modelIndex,
-  session,
   hasRealtimeShadows,
   dummyCount,
   onReadyMap,
@@ -180,6 +178,23 @@ function SpaceScene({
   const viewportSize = useThree((rootState) => rootState.size);
   const prefersReducedMotion = usePrefersReducedMotion();
   const isCoarsePointer = useCoarsePointer();
+  /**
+   * 세션. 동작(`sendKick` 등)은 컨텍스트의 세션에서 부르고, 상태는 씬이 쓰는 조각만 구독함.
+   *
+   * 통째로 받으면 대화 내역 · 시계 보정 · 전송 대기처럼 씬과 무관한 변화에도 씬 전체가
+   * 다시 그려짐.
+   */
+  const session = useSpaceSessionContext();
+  const self = useSpaceSessionState((snapshot) => snapshot.self);
+  const sessionRemotePlayers = useSpaceSessionState((snapshot) => snapshot.remotePlayers);
+  const rosterRevision = useSpaceSessionState((snapshot) => snapshot.rosterRevision);
+  const bubbleMessages = useSpaceSessionState((snapshot) => snapshot.bubbleMessages);
+  const presenceStatus = useSpaceSessionState((snapshot) => snapshot.presence.status);
+  const canFightBoss = useSpaceSessionState((snapshot) => snapshot.canFightBoss);
+  const selfHealth = useSpaceSessionState((snapshot) => snapshot.selfHealth);
+  const deadUntil = useSpaceSessionState((snapshot) => snapshot.deadUntil);
+  const selfDamagedAt = useSpaceSessionState((snapshot) => snapshot.selfDamagedAt);
+  const selfDamagedBy = useSpaceSessionState((snapshot) => snapshot.selfDamagedBy);
 
   /** 손가락 기기는 가장 멀리 물러나 시작해 전광판과 라운지가 한 화면에 들어오게 함. */
   const initialCameraDistance = isCoarsePointer
@@ -188,11 +203,11 @@ function SpaceScene({
 
   const spawnTransform = useMemo(() => createSpawnPoint(clientKey), [clientKey]);
   const colorIndex = useMemo(() => resolveColorIndexFromClientKey(clientKey), [clientKey]);
-  const avatarColorIndex = session.self?.colorIndex ?? colorIndex;
+  const avatarColorIndex = self?.colorIndex ?? colorIndex;
   /** 서버가 확정한 모델을 씀. 접속 전에는 저장된 선택으로 보여줌. */
-  const avatarModelIndex = session.self?.modelIndex ?? modelIndex;
+  const avatarModelIndex = self?.modelIndex ?? modelIndex;
   const dummies = useMemo(() => createStressDummies(dummyCount), [dummyCount]);
-  const remotePlayers = dummyCount > 0 ? dummies : session.remotePlayers;
+  const remotePlayers = dummyCount > 0 ? dummies : sessionRemotePlayers;
   /** 1단계는 빈 슬롯임. 3단계에서 라이트닝 결제로 채움. */
 
   const playerStateRef = useRef<LocalPlayerState>(createLocalPlayerState(spawnTransform));
@@ -295,7 +310,7 @@ function SpaceScene({
    * 화면이 되감김. 돌진은 몸으로 밀지 않고 치고 지나감(피해는 서버가 줌).
    */
   const resolveBossBody = (): SolidBody | null => {
-    const bossState = session.canFightBoss ? session.bossState : null;
+    const bossState = canFightBoss ? session.bossState : null;
 
     if (
       !bossState ||
@@ -321,7 +336,7 @@ function SpaceScene({
    * 서버가 이 동안 이동·공격을 안 받음. 화면에서만 움직이면 끝났을 때 서버 자리로 되감김.
    */
   const isKnockedOut = (now: number): boolean => {
-    return session.deadUntil !== null && now < session.deadUntil;
+    return deadUntil !== null && now < deadUntil;
   };
 
   /**
@@ -331,8 +346,6 @@ function SpaceScene({
    * 홀로 옮겨지는데 그 전에 밀리면 리스폰 자리에서 미끄러져 보임.
    */
   const startKnockbackIfDamaged = (): void => {
-    const { selfDamagedAt, selfDamagedBy } = session;
-
     if (selfDamagedAt === handledDamageAtRef.current) {
       return;
     }
@@ -341,7 +354,7 @@ function SpaceScene({
     if (selfDamagedAt !== null) {
       playSfx("hurt");
     }
-    if (selfDamagedAt === null || selfDamagedBy === null || session.selfHealth <= 0) {
+    if (selfDamagedAt === null || selfDamagedBy === null || selfHealth <= 0) {
       return;
     }
     knockbackRef.current = createBossKnockback(
@@ -361,10 +374,10 @@ function SpaceScene({
       // 쓰러뜨린 피격은 여기서 받음. 서버가 체력 0 과 리스폰을 연달아 보내서, 다음 프레임에는
       // 이미 쓰러진 상태라 아래 `startKnockbackIfDamaged` 까지 못 감. 여기서 처리해 두지 않으면
       // 일어난 뒤에 묵은 피격으로 뒤늦게 밀림.
-      handledDamageAtRef.current = session.selfDamagedAt;
+      handledDamageAtRef.current = selfDamagedAt;
       // 소리는 피격이 아니라 쓰러진 것 자체에 묶음. 보스 공격 소리에 묻히지 않게 조금 늦춤.
-      if (soundedDeadUntilRef.current !== session.deadUntil) {
-        soundedDeadUntilRef.current = session.deadUntil;
+      if (soundedDeadUntilRef.current !== deadUntil) {
+        soundedDeadUntilRef.current = deadUntil;
         playSfx("knockout", KNOCKOUT_SOUND_DELAY_SECONDS);
       }
       // 쌓인 시간을 버림. 안 버리면 일어나는 순간 밀린 걸음을 한꺼번에 걸음.
@@ -389,7 +402,7 @@ function SpaceScene({
     accumulatedSecondsRef.current = stepPlan.remainder;
 
     let nextState = playerStateRef.current;
-    const selfSeat = session.self?.seat ?? 0;
+    const selfSeat = self?.seat ?? 0;
 
     for (let stepIndex = 0; stepIndex < stepPlan.stepCount; stepIndex += 1) {
       previousStepStateRef.current = nextState;
@@ -463,7 +476,7 @@ function SpaceScene({
    * 맞지 않음. 동작만 보임.
    */
   const applyReceivedKicks = (now: number): void => {
-    const selfSeat = session.self?.seat;
+    const selfSeat = self?.seat;
 
     for (const event of session.drainKickEvents()) {
       if (event.from !== selfSeat) {
@@ -535,7 +548,7 @@ function SpaceScene({
   const applyReceivedPlayerHits = (now: number): void => {
     for (const event of session.drainPlayerHits()) {
       // 내 체력·모션·소리는 `hp` 프레임이 맡음. 여기서는 숫자만 띄움.
-      if (event.seat === session.self?.seat) {
+      if (event.seat === self?.seat) {
         queuePlayerDamage(event.damage, true, renderStateRef.current, avatarModelIndex);
         continue;
       }
@@ -750,8 +763,6 @@ function SpaceScene({
   }, [camera, viewportSize, isCoarsePointer]);
 
   useLayoutEffect(() => {
-    const self = session.self;
-
     if (!self) {
       return;
     }
@@ -763,11 +774,11 @@ function SpaceScene({
     if (gap > SERVER_CORRECTION_THRESHOLD) {
       applyServerTransform(self);
     }
-  }, [session.self, applyServerTransform]);
+  }, [self, applyServerTransform]);
 
   useLayoutEffect(() => {
     resetKickPresentation();
-  }, [session.presence.status, session.self?.seat]);
+  }, [presenceStatus, self?.seat]);
 
   useFrame(({ clock }, deltaSeconds) => {
     session.sampleRemotePlayers(performance.now());
@@ -789,7 +800,7 @@ function SpaceScene({
     // 공격은 위치를 바로 보내서 되돌린 뒤에 처리함. 음수 높이가 나가면 서버가 반려함.
     handleKickInput(now, playerState);
     session.publishMovement(playerState);
-    if (session.canFightBoss) {
+    if (canFightBoss) {
       session.sampleBoss(now);
     }
 
@@ -893,21 +904,21 @@ function SpaceScene({
             hasRealtimeShadows={hasRealtimeShadows}
             playerStateRef={playerStateRef}
             kickStartedAtRef={kickStartedAtRef}
-            damagedAt={session.selfDamagedAt}
-            knockedOutUntil={session.deadUntil}
+            damagedAt={selfDamagedAt}
+            knockedOutUntil={deadUntil}
             onReady={onReadyAvatar}
           />
         </Suspense>
       </group>
 
       {/* 보스 모델을 받는 동안 씬이 비지 않게 따로 매달아 둠. */}
-      {session.canFightBoss && (
+      {canFightBoss && (
         <Suspense fallback={null}>
           <RaidBoss bossState={session.bossState} getBossHealth={session.getBossHealth} />
         </Suspense>
       )}
 
-      {session.canFightBoss && (
+      {canFightBoss && (
         <BossAttackEffects
           bossState={session.bossState}
           onAttackSound={onBossAttackSound}
@@ -915,17 +926,17 @@ function SpaceScene({
         />
       )}
 
-      {session.canFightBoss && (
+      {canFightBoss && (
         <BossDamageNumbers
           bossState={session.bossState}
           drainBossHits={session.drainBossHits}
-          selfSeat={session.self?.seat}
+          selfSeat={self?.seat}
           onHitByMe={onHitBossByMe}
           onHitByOthers={onHitBossByOthers}
         />
       )}
 
-      {session.canFightBoss && <PlayerDamageNumbers pendingRef={pendingPlayerDamagesRef} />}
+      {canFightBoss && <PlayerDamageNumbers pendingRef={pendingPlayerDamagesRef} />}
 
       {/* 모델을 받는 동안 씬 전체가 멈추지 않게 따로 감쌈. */}
       <Suspense fallback={null}>
@@ -940,7 +951,7 @@ function SpaceScene({
       />
       <RemoteAvatars
         players={remotePlayers}
-        rosterRevision={session.rosterRevision}
+        rosterRevision={rosterRevision}
         terrainRef={terrainRef}
         kickStartsRef={remoteKickStartsRef}
         hitsRef={remoteHitsRef}
@@ -950,20 +961,19 @@ function SpaceScene({
         selfNickname={nickname}
         selfModelIndex={avatarModelIndex}
         isCoarsePointer={isCoarsePointer}
-        rosterRevision={session.rosterRevision}
+        rosterRevision={rosterRevision}
         viewerTransformRef={renderStateRef}
       />
       <SelfHealthBar
-        session={session}
         modelIndex={avatarModelIndex}
         isCoarsePointer={isCoarsePointer}
         viewerTransformRef={renderStateRef}
       />
       <ChatBubbles
-        messages={session.bubbleMessages}
+        messages={bubbleMessages}
         isCoarsePointer={isCoarsePointer}
         players={remotePlayers}
-        self={session.self}
+        self={self}
         viewerTransformRef={renderStateRef}
       />
     </>

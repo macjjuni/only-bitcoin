@@ -23,7 +23,11 @@ import {
   saveAvatarModelIndex,
   useKeyboardInput,
 } from "@/features/space-controls";
-import { useSpaceSession } from "@/features/space-session";
+import {
+  SpaceSessionContext,
+  useSpaceSession,
+  useSpaceSessionSelector,
+} from "@/features/space-session";
 import { isAndroidDevice, isIOSDevice } from "@/shared/utils/device";
 import {
   type DprPolicy,
@@ -154,16 +158,32 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
     modelIndex: localModelIndex,
     enabled: isSupportProbed && !fallbackReason && dummyCount === 0,
   });
+  /**
+   * 여기서 쓰는 세션 상태. 조각별로 구독해서, 대화 · 입퇴장처럼 이 컴포넌트와 무관한
+   * 변화에는 다시 그리지 않음. 내 정보는 자리(`x` · `z`)가 보정될 때도 바뀌어 필드로 쪼갬.
+   */
+  const market = useSpaceSessionSelector(session, (snapshot) => snapshot.market);
+  const serverClockOffsetMs = useSpaceSessionSelector(
+    session,
+    (snapshot) => snapshot.serverClockOffsetMs,
+  );
+  const hallBgm = useSpaceSessionSelector(session, (snapshot) => snapshot.hallBgm);
+  const sessionCelebration = useSpaceSessionSelector(session, (snapshot) => snapshot.celebration);
+  const selfSeat = useSpaceSessionSelector(session, (snapshot) => snapshot.self?.seat);
+  const selfNickname = useSpaceSessionSelector(session, (snapshot) => snapshot.self?.nickname);
+  const selfModelIndex = useSpaceSessionSelector(session, (snapshot) => snapshot.self?.modelIndex);
+  const presenceStatus = useSpaceSessionSelector(session, (snapshot) => snapshot.presence.status);
+  const hasSessionError = useSpaceSessionSelector(session, (snapshot) => snapshot.error !== null);
+  const canSyncMarket = useSpaceSessionSelector(session, (snapshot) => snapshot.canSyncMarket);
   const bgm = useSpaceBgm({
-    market: session.market,
-    serverClockOffsetMs: session.serverClockOffsetMs,
-    hallBgm: session.hallBgm,
+    market,
+    serverClockOffsetMs,
+    hallBgm,
     zoneTrack: useSpaceBgmZone(session),
   });
-  const celebration = dummyCount > 0 ? localCelebration : session.celebration;
-  const celebrationClockOffsetMs = dummyCount > 0 ? 0 : session.serverClockOffsetMs;
-  const isTestRequester =
-    celebration?.testSeat !== undefined && celebration.testSeat === session.self?.seat;
+  const celebration = dummyCount > 0 ? localCelebration : sessionCelebration;
+  const celebrationClockOffsetMs = dummyCount > 0 ? 0 : serverClockOffsetMs;
+  const isTestRequester = celebration?.testSeat !== undefined && celebration.testSeat === selfSeat;
   useScreenCelebrationSound(
     celebration,
     celebrationClockOffsetMs,
@@ -171,14 +191,17 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   );
   /** 효과음도 배경음악 설정을 따름. 음악을 끈 사람은 조용히 있고 싶은 사람임. */
   const playSfx = useSpaceSfx(bgm.isPlaying);
-  const bossKilledAt = session.bossDefeat?.killedAt;
+  const bossKilledAt = useSpaceSessionSelector(
+    session,
+    (snapshot) => snapshot.bossDefeat?.killedAt,
+  );
   /** 입장 로딩 신호. 한 번 켜지면 끄지 않음 — 모델을 바꿔도 오버레이를 다시 띄우지 않음. */
   const [isMapReady, setIsMapReady] = useState<boolean>(false);
   const [isAvatarReady, setIsAvatarReady] = useState<boolean>(false);
   const [isServerTimedOut, setIsServerTimedOut] = useState<boolean>(false);
   const [isLoadingHardTimedOut, setIsLoadingHardTimedOut] = useState<boolean>(false);
-  const nickname = session.self?.nickname ?? identity.nickname;
-  const modelIndex = session.self?.modelIndex ?? localModelIndex;
+  const nickname = selfNickname ?? identity.nickname;
+  const modelIndex = selfModelIndex ?? localModelIndex;
 
   useKeyboardInput(inputSource);
   // endregion
@@ -356,8 +379,8 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
       map: isMapReady ? "done" : "pending",
       avatar: isAvatarReady ? "done" : "pending",
       server: resolveServerLoadStage({
-        presenceStatus: session.presence.status,
-        hasSessionError: session.error !== null,
+        presenceStatus,
+        hasSessionError,
         isConnectionConfigured: session.isConnectionConfigured,
         isDummyMode: dummyCount > 0,
         isServerTimedOut,
@@ -366,8 +389,8 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
     [
       isMapReady,
       isAvatarReady,
-      session.presence.status,
-      session.error,
+      presenceStatus,
+      hasSessionError,
       session.isConnectionConfigured,
       dummyCount,
       isServerTimedOut,
@@ -384,70 +407,69 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   // endregion
 
   return (
-    <div className="relative h-full w-full overflow-hidden bg-[#06080e]">
-      <Canvas
-        dpr={renderDpr}
-        frameloop={frameloop}
-        shadows={hasRealtimeShadows}
-        camera={{ fov: SPACE_CAMERA.fov, near: CAMERA_NEAR, far: CAMERA_FAR }}
-        gl={{
-          antialias: true,
-          powerPreference: "high-performance",
-          toneMapping: SPACE_TONE_MAPPING,
-          toneMappingExposure: SPACE_TONE_MAPPING_EXPOSURE,
-        }}
-        onCreated={onCreatedCanvas}
-      >
-        <PerformanceMonitor
-          onChange={onChangePerformance}
-          onFallback={onFallbackPerformance}
-          flipflops={3}
-        />
+    <SpaceSessionContext value={session}>
+      <div className="relative h-full w-full overflow-hidden bg-[#06080e]">
+        <Canvas
+          dpr={renderDpr}
+          frameloop={frameloop}
+          shadows={hasRealtimeShadows}
+          camera={{ fov: SPACE_CAMERA.fov, near: CAMERA_NEAR, far: CAMERA_FAR }}
+          gl={{
+            antialias: true,
+            powerPreference: "high-performance",
+            toneMapping: SPACE_TONE_MAPPING,
+            toneMappingExposure: SPACE_TONE_MAPPING_EXPOSURE,
+          }}
+          onCreated={onCreatedCanvas}
+        >
+          <PerformanceMonitor
+            onChange={onChangePerformance}
+            onFallback={onFallbackPerformance}
+            flipflops={3}
+          />
 
-        {/*
+          {/*
           씬 서스펜드를 캔버스 안에서 막음. 경계가 없으면 R3F 가 바깥 트리로 넘겨
           `next/dynamic` 폴백이 화면을 덮고, 돌아올 때 로딩 오버레이가 새로 마운트돼
           두 번 뜸. 주소로 바로 들어와 모델이 아직 캐시에 없을 때 생겼음.
         */}
-        <Suspense fallback={null}>
-          <SpaceScene
-            inputSource={inputSource}
-            celebration={celebration}
-            celebrationClockOffsetMs={celebrationClockOffsetMs}
-            clientKey={identity.clientKey}
-            modelIndex={modelIndex}
-            nickname={nickname}
-            session={session}
-            hasRealtimeShadows={hasRealtimeShadows}
-            dummyCount={dummyCount}
-            onReadyMap={onReadyMap}
-            onReadyAvatar={onReadyAvatar}
-            playSfx={playSfx}
-          />
-        </Suspense>
-        {hasPerformanceStats && <SpacePerformanceStats onPublish={setPerformanceSummary} />}
-      </Canvas>
+          <Suspense fallback={null}>
+            <SpaceScene
+              inputSource={inputSource}
+              celebration={celebration}
+              celebrationClockOffsetMs={celebrationClockOffsetMs}
+              clientKey={identity.clientKey}
+              modelIndex={modelIndex}
+              nickname={nickname}
+              hasRealtimeShadows={hasRealtimeShadows}
+              dummyCount={dummyCount}
+              onReadyMap={onReadyMap}
+              onReadyAvatar={onReadyAvatar}
+              playSfx={playSfx}
+            />
+          </Suspense>
+          {hasPerformanceStats && <SpacePerformanceStats onPublish={setPerformanceSummary} />}
+        </Canvas>
 
-      <SpaceHud
-        bgm={bgm}
-        canTestCelebration={
-          hasCelebrationTest &&
-          (dummyCount > 0 || (session.canSyncMarket && session.presence.status === "online"))
-        }
-        onCelebrate={onCelebrate}
-        inputSource={inputSource}
-        session={session}
-        nickname={nickname}
-        modelIndex={modelIndex}
-        onChangeModel={onChangeModel}
-        performanceSummary={hasPerformanceStats ? performanceSummary : null}
-        isPerformanceStatsEnabled={hasPerformanceStats}
-        onTogglePerformanceStats={onTogglePerformanceStats}
-        dummyCount={dummyCount}
-      />
+        <SpaceHud
+          bgm={bgm}
+          canTestCelebration={
+            hasCelebrationTest && (dummyCount > 0 || (canSyncMarket && presenceStatus === "online"))
+          }
+          onCelebrate={onCelebrate}
+          inputSource={inputSource}
+          nickname={nickname}
+          modelIndex={modelIndex}
+          onChangeModel={onChangeModel}
+          performanceSummary={hasPerformanceStats ? performanceSummary : null}
+          isPerformanceStatsEnabled={hasPerformanceStats}
+          onTogglePerformanceStats={onTogglePerformanceStats}
+          dummyCount={dummyCount}
+        />
 
-      <SpaceLoadingOverlay stages={loadStages} isHardTimedOut={isLoadingHardTimedOut} />
-    </div>
+        <SpaceLoadingOverlay stages={loadStages} isHardTimedOut={isLoadingHardTimedOut} />
+      </div>
+    </SpaceSessionContext>
   );
 }
 

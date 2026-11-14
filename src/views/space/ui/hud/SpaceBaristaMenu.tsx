@@ -10,7 +10,7 @@ import {
 } from "@/entities/space";
 import { SPACE_HALL_BGM_TRACK_LABELS } from "@/features/space-bgm";
 import { shouldIgnoreSpaceHotkey } from "@/features/space-controls";
-import type { SpaceSession } from "@/features/space-session";
+import { useSpaceSessionContext, useSpaceSessionState } from "@/features/space-session";
 import { pickBaristaGreeting, SPACE_BARISTA, SPACE_BARISTA_LINES } from "@/views/space/lib/barista";
 import { useDismissOnOutsidePointer } from "@/views/space/lib/useDismissOnOutsidePointer";
 import { useBaristaProximity } from "@/views/space/model/useBaristaProximity";
@@ -63,7 +63,6 @@ const SIZE_CLASS = {
 } as const;
 
 interface SpaceBaristaMenuProps {
-  session: SpaceSession;
   isCoarsePointer: boolean;
   /** 폭죽을 터뜨림. 방 전체에 터지고 쿨다운은 서버가 봄. */
   onCelebrate: () => void;
@@ -87,8 +86,14 @@ const resolveWaitSeconds = (readyAt: number, serverNow: number | null): number =
  * 3D 모델을 직접 누르게 하지 않은 이유는 모바일에서 시야 드래그와 겹치기 때문임.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SpaceBaristaMenu({ session, isCoarsePointer, onCelebrate }: SpaceBaristaMenuProps): ReactNode {
+function SpaceBaristaMenu({ isCoarsePointer, onCelebrate }: SpaceBaristaMenuProps): ReactNode {
   // region [Hooks]
+  const session = useSpaceSessionContext();
+  const serverClockOffsetMs = useSpaceSessionState((snapshot) => snapshot.serverClockOffsetMs);
+  const celebration = useSpaceSessionState((snapshot) => snapshot.celebration);
+  const hallBgm = useSpaceSessionState((snapshot) => snapshot.hallBgm);
+  const canChangeHallBgm = useSpaceSessionState((snapshot) => snapshot.canChangeHallBgm);
+  const canSyncMarket = useSpaceSessionState((snapshot) => snapshot.canSyncMarket);
   const isNear = useBaristaProximity(session);
   const [isOpen, setIsOpen] = useState<boolean>(false);
   const [view, setView] = useState<BaristaMenuView>("root");
@@ -104,12 +109,12 @@ function SpaceBaristaMenu({ session, isCoarsePointer, onCelebrate }: SpaceBarist
    */
   const [lastFireworksAt, setLastFireworksAt] = useState<number | null>(null);
   const panelRef = useRef<HTMLDivElement>(null);
-  const clockOffsetRef = useRef(session.serverClockOffsetMs);
+  const clockOffsetRef = useRef(serverClockOffsetMs);
   const line = view === "root" ? greeting : SPACE_BARISTA_LINES.bgm;
   // 닫혀 있는 동안은 빈 글을 줘서, 다시 열 때 처음부터 찍히게 함.
   const typewriter = useTypewriter(isOpen ? line : "");
 
-  clockOffsetRef.current = session.serverClockOffsetMs;
+  clockOffsetRef.current = serverClockOffsetMs;
   // endregion
 
 
@@ -216,12 +221,10 @@ function SpaceBaristaMenu({ session, isCoarsePointer, onCelebrate }: SpaceBarist
 
   useEffect(() => {
     // 시세가 터뜨린 폭죽은 쿨다운과 무관함. 누가 직접 터뜨린 것만 기억함.
-    const celebration = session.celebration;
-
     if (celebration && celebration.testSeat !== undefined) {
       setLastFireworksAt((previousAt) => Math.max(previousAt ?? 0, celebration.startsAt));
     }
-  }, [session.celebration]);
+  }, [celebration]);
 
   useEffect(() => {
     // 자리를 뜨면 닫음. 멀리서 메뉴만 들고 다니지 않게 함.
@@ -241,8 +244,8 @@ function SpaceBaristaMenu({ session, isCoarsePointer, onCelebrate }: SpaceBarist
   const sizeClass = SIZE_CLASS[pointerKind];
   const iconSize = ICON_SIZE[pointerKind];
   const choiceClass = `${CHOICE_CLASS} ${sizeClass.choice}`;
-  const currentTrack = session.hallBgm?.track ?? DEFAULT_TRACK;
-  const bgmWaitSeconds = resolveWaitSeconds(resolveHallBgmReadyAt(session.hallBgm), serverNow);
+  const currentTrack = hallBgm?.track ?? DEFAULT_TRACK;
+  const bgmWaitSeconds = resolveWaitSeconds(resolveHallBgmReadyAt(hallBgm), serverNow);
   const fireworksWaitSeconds =
     lastFireworksAt === null
       ? 0
@@ -250,7 +253,7 @@ function SpaceBaristaMenu({ session, isCoarsePointer, onCelebrate }: SpaceBarist
 
   const RootChoicesTemplate = (
     <>
-      {session.canChangeHallBgm && (
+      {canChangeHallBgm && (
         <li>
           <button type="button" onClick={onClickOpenBgm} className={choiceClass}>
             <span aria-hidden="true" className={CHOICE_CURSOR_CLASS}>▶</span>
@@ -260,7 +263,7 @@ function SpaceBaristaMenu({ session, isCoarsePointer, onCelebrate }: SpaceBarist
         </li>
       )}
 
-      {session.canSyncMarket && (
+      {canSyncMarket && (
         <li>
           <button
             type="button"
@@ -324,7 +327,7 @@ function SpaceBaristaMenu({ session, isCoarsePointer, onCelebrate }: SpaceBarist
   // 쿨다운이나 마지막으로 바꾼 사람처럼 알릴 게 있을 때만 띄움.
   const bgmHint = [
     bgmWaitSeconds > 0 ? `${bgmWaitSeconds}초 뒤에 다시 바꿀 수 있어요.` : null,
-    session.hallBgm ? `마지막으로 바꾼 사람: ${session.hallBgm.byNickname}` : null,
+    hallBgm ? `마지막으로 바꾼 사람: ${hallBgm.byNickname}` : null,
   ]
     .filter((part) => part !== null)
     .join(" ");

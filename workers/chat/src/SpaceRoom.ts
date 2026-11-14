@@ -134,10 +134,12 @@ const MAXIMUM_RECENT_SAY_RECEIPTS = 32;
 /**
  * IP guard 키 하나가 1분에 보낼 수 있는 메시지 수.
  *
- * 연결당 3초 간격만으로는 IP 하나가 연결 2개로 분당 40개를 보낼 수 있음.
+ * 연결당 1초 간격만으로는 IP 하나가 연결 2개로 분당 120개를 보낼 수 있음.
  * 기록 50개가 1분 남짓이면 다 덮여서 IP 단위로 한 번 더 묶음.
  */
 const MAXIMUM_SAYS_PER_IP_PER_MINUTE = 12;
+/** 연결당 간격을 어겼을 때 보내는 안내. 초 수는 상수에서 뽑아 값과 문구가 어긋나지 않게 함. */
+const SAY_INTERVAL_MESSAGE = `메시지는 ${SPACE_CHAT_COOLDOWN_MS / 1000}초에 한 번 보낼 수 있어요.`;
 const SAY_RATE_WINDOW_MS = 60_000;
 const JOIN_TIMEOUT_MS = 10_000;
 const STALE_CONNECTION_MS = 60_000;
@@ -465,7 +467,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
    * 이 IP 가 최근 1분 동안 보낸 메시지가 한도에 찼는지 봄.
    *
    * 메모리에 두면 하이버네이션 뒤 초기화돼서 SQL 에 둠. 읽기가 실패하면 막지
-   * 않고 통과시킴. 연결당 3초 간격은 그대로 걸려 있음.
+   * 않고 통과시킴. 연결당 간격(`SPACE_CHAT_COOLDOWN_MS`)은 그대로 걸려 있음.
    */
   private isIpSayLimitReached(ipGuardKey: string, now: number): boolean {
     try {
@@ -1520,7 +1522,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
       this.sendError(
         socket,
         "RATE_SAY_INTERVAL",
-        "메시지는 3초에 한 번 보낼 수 있어요.",
+        SAY_INTERVAL_MESSAGE,
         frame.rid,
       );
       return;
@@ -1572,7 +1574,7 @@ export class SpaceRoom extends DurableObject<ChatWorkerEnv> {
         this.sendError(
           socket,
           "RATE_SAY_INTERVAL",
-          "메시지는 3초에 한 번 보낼 수 있어요.",
+          SAY_INTERVAL_MESSAGE,
           frame.rid,
         );
         return;

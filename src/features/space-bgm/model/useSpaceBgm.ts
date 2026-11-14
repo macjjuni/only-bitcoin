@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import type { SpaceHallBgmState, SpaceHallBgmTrack, SpaceMarketState } from "@/entities/space";
 import { loadBgmEnabled, saveBgmEnabled } from "./bgmPreferenceStore";
 import {
@@ -389,7 +389,11 @@ const useSpaceBgm = ({ market, serverClockOffsetMs, hallBgm, zoneTrack }: SpaceB
   useEffect(() => scheduleSynchronization(), [market, serverClockOffsetMs, hallBgm, zoneTrack, isPlaying, resolveTrack, synchronizePlayback]);
   // endregion
 
-  return { isPlaying, isUnavailable, isSurging, toggle: onClickToggleBgm };
+  // 값이 그대로면 같은 객체를 돌려줌. 매번 새로 만들면 이걸 받는 HUD 가 `memo` 를 뚫고 다시 그려짐.
+  return useMemo(
+    () => ({ isPlaying, isUnavailable, isSurging, toggle: onClickToggleBgm }),
+    [isPlaying, isUnavailable, isSurging, onClickToggleBgm],
+  );
 };
 
 export default useSpaceBgm;

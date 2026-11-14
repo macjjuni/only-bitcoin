@@ -28,7 +28,7 @@ import {
   useCoarsePointer,
   VirtualJoystick,
 } from "@/features/space-controls";
-import type { SpaceSession } from "@/features/space-session";
+import { useSpaceSessionContext, useSpaceSessionState } from "@/features/space-session";
 import { env } from "@/shared/config/env";
 import { DonationQrDialog, LightningIcon } from "@/shared/ui";
 import type { SpacePerformanceSummary } from "@/views/space/lib/performanceSample";
@@ -94,7 +94,6 @@ interface SpaceHudProps {
   canTestCelebration: boolean;
   onCelebrate: () => void;
   inputSource: SpaceInputSource;
-  session: SpaceSession;
   nickname: string;
   /** 지금 쓰는 아바타 모델. 서버가 확정한 값이 우선함. */
   modelIndex: number;
@@ -117,11 +116,17 @@ interface SpaceHudProps {
  * 전체 화면 3D 페이지라 브라우저가 대신 비켜주지 않음.
  */
 // biome-ignore format: AGENTS.md requires two blank lines between regions.
-function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, modelIndex, onChangeModel, onCelebrate, performanceSummary, isPerformanceStatsEnabled, onTogglePerformanceStats, dummyCount }: SpaceHudProps): ReactNode {
+function SpaceHud({ bgm, canTestCelebration, inputSource, nickname, modelIndex, onChangeModel, onCelebrate, performanceSummary, isPerformanceStatsEnabled, onTogglePerformanceStats, dummyCount }: SpaceHudProps): ReactNode {
   // region [Hooks]
   const router = useTransitionRouter();
   const pathname = usePathname();
   const isCoarsePointer = useCoarsePointer();
+  const session = useSpaceSessionContext();
+  const presence = useSpaceSessionState((snapshot) => snapshot.presence);
+  const messages = useSpaceSessionState((snapshot) => snapshot.messages);
+  const sessionError = useSpaceSessionState((snapshot) => snapshot.error);
+  const isMessagePending = useSpaceSessionState((snapshot) => snapshot.isMessagePending);
+  const isNicknamePending = useSpaceSessionState((snapshot) => snapshot.isNicknamePending);
   const iconSize = isCoarsePointer ? ICON_SIZE.coarse : ICON_SIZE.fine;
   const [isGuideOpen, setIsGuideOpen] = useState<boolean>(false);
   const [isNicknameEditorOpen, setIsNicknameEditorOpen] = useState(false);
@@ -405,8 +410,8 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
     <div ref={nicknameEditorRef} className={`pointer-events-auto absolute top-24 ${isCoarsePointer ? "right-12" : "right-14"}`}>
       <SpaceNicknameEditor
         nickname={nickname}
-        error={session.error}
-        isNicknamePending={session.isNicknamePending}
+        error={sessionError}
+        isNicknamePending={isNicknamePending}
         changeNickname={onSubmitNickname}
         onClose={onClickCloseNicknameEditor}
       />
@@ -469,7 +474,7 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
       }}
     >
       {/* 맨 아래에 깖. 사망 화면이 떠도 우측 상단 버튼(뒤로 가기 등)은 눌려야 함. */}
-      <SpaceBossHud session={session} isCoarsePointer={isCoarsePointer} />
+      <SpaceBossHud isCoarsePointer={isCoarsePointer} />
 
       {/* z-[31]: 씬 위에 뜨는 이름표·말풍선·피해 숫자(z 20 ~ 30)가 대화 내역을 가리지 않게 함. */}
       <div
@@ -480,16 +485,16 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
         }}
       >
         {/* 데스크톱은 같은 자리에 인원수만 띄움. 대화 내역은 좌측 하단에 있음. */}
-        {!isCoarsePointer && <SpaceOccupantBadge presence={session.presence} />}
+        {!isCoarsePointer && <SpaceOccupantBadge presence={presence} />}
 
         {/* 손가락 기기는 접속 표시를 겸한 대화 내역을 좌측 상단에 늘 띄움. 오류도 그 안에서 보여줌. */}
         {isCoarsePointer && (
           <div>
             <SpaceChatPanel
-              messages={session.messages}
-              presence={session.presence}
-              error={session.error}
-              isMessagePending={session.isMessagePending}
+              messages={messages}
+              presence={presence}
+              error={sessionError}
+              isMessagePending={isMessagePending}
               sendMessage={session.sendMessage}
               onRetry={session.retry}
               hasComposer={false}
@@ -546,8 +551,8 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
 
       {isCoarsePointer && (
         <SpaceKeyboardChatBar
-          presence={session.presence}
-          isMessagePending={session.isMessagePending}
+          presence={presence}
+          isMessagePending={isMessagePending}
           sendMessage={session.sendMessage}
           onComposingChange={setIsComposingChat}
         />
@@ -556,7 +561,6 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
       {/* 글을 치거나 다른 창을 연 동안에는 내림. 키보드에 가려지고 조작이 겹침. */}
       {!isComposingChat && !isDonationOpen && !isShareOpen && (
         <SpaceBaristaMenu
-          session={session}
           isCoarsePointer={isCoarsePointer}
           onCelebrate={onCelebrate}
         />
@@ -581,10 +585,10 @@ function SpaceHud({ bgm, canTestCelebration, inputSource, session, nickname, mod
           }}
         >
           <SpaceChatPanel
-            messages={session.messages}
-            presence={session.presence}
-            error={session.error}
-            isMessagePending={session.isMessagePending}
+            messages={messages}
+            presence={presence}
+            error={sessionError}
+            isMessagePending={isMessagePending}
             sendMessage={session.sendMessage}
             onRetry={session.retry}
             hasComposer

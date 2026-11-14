@@ -38,16 +38,17 @@ export const useBossHud = (session: SpaceSession): BossHudView => {
   // region [Privates]
   const refreshView = (): void => {
     const current = sessionRef.current;
+    const snapshot = current.getSnapshot();
     const nowMs = performance.now();
     const deltaSeconds = lastTickAtRef.current === 0 ? 0 : (nowMs - lastTickAtRef.current) / 1000;
     const selfPosition = current.getSelfPosition();
     // 같은 체력으로 두 번 맞을 일은 없지만 쓰러졌다 일어나면 가득으로 같은 값이 다시 옴.
-    const serverHealthKey = `${current.selfHealth}:${current.selfDamagedAt}:${current.deadUntil}`;
+    const serverHealthKey = `${snapshot.selfHealth}:${snapshot.selfDamagedAt}:${snapshot.deadUntil}`;
 
     lastTickAtRef.current = nowMs;
     displayedHealthRef.current = stepDisplayedHealth(
       displayedHealthRef.current,
-      current.selfHealth,
+      snapshot.selfHealth,
       serverHealthKey !== serverHealthKeyRef.current,
       selfPosition,
       deltaSeconds,
@@ -56,12 +57,12 @@ export const useBossHud = (session: SpaceSession): BossHudView => {
 
     const nextView = resolveBossHudView({
       nowMs,
-      clockOffsetMs: current.serverClockOffsetMs,
-      canFightBoss: current.canFightBoss,
+      clockOffsetMs: snapshot.serverClockOffsetMs,
+      canFightBoss: snapshot.canFightBoss,
       bossPhase: current.bossState.phase,
       selfPosition,
       selfHealth: displayedHealthRef.current,
-      deadUntil: current.deadUntil,
+      deadUntil: snapshot.deadUntil,
     });
 
     setView((previousView) => (isSameBossHudView(previousView, nextView) ? previousView : nextView));
