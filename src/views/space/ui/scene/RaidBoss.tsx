@@ -1,7 +1,7 @@
 "use client";
 
 import { Html } from "@react-three/drei";
-import { useFrame } from "@react-three/fiber";
+import { useFrame, useThree } from "@react-three/fiber";
 import { memo, type ReactNode, useEffect, useMemo, useRef } from "react";
 import type { Group, Mesh, MeshBasicMaterial } from "three";
 import { SPACE_BOSS, type SpaceBossState } from "@/entities/space";
@@ -56,6 +56,9 @@ interface RaidBossProps {
 function RaidBoss({ bossState, getBossHealth }: RaidBossProps): ReactNode {
   // region [Hooks]
   const model = useBossModel();
+  const renderer = useThree((rootState) => rootState.gl);
+  const camera = useThree((rootState) => rootState.camera);
+  const rootScene = useThree((rootState) => rootState.scene);
   /**
    * 모션 재생기. **effect 에서 만들고 effect 에서 버림.**
    *
@@ -175,6 +178,31 @@ function RaidBoss({ bossState, getBossHealth }: RaidBossProps): ReactNode {
       animator.dispose();
     };
   }, [model]);
+
+  /**
+   * 보스와 바닥 예고의 셰이더를 미리 컴파일함.
+   *
+   * 숨겨 둔 메시는 처음 보이는 프레임에 컴파일됨. 그게 공격 종류마다 첫 예고가 뜨는
+   * 순간이라 폰에서는 화면이 멈칫하고 예고가 늦게 보였음. 컴파일은 보이는 것만 훑어서
+   * 잠깐 다 켜고 돌린 뒤 되돌림.
+   */
+  useEffect(() => {
+    const targets = [model.scene, ...model.aoeRoots];
+    const wasVisible = targets.map((target) => target.visible);
+
+    for (const target of targets) {
+      target.visible = true;
+    }
+
+    // 조명 수에 따라 셰이더가 달라져서 조명은 실제 씬에서 읽게 함.
+    renderer.compileAsync(model.scene, camera, rootScene).catch(() => {
+      // 못 해도 처음 보일 때 컴파일됨.
+    });
+
+    targets.forEach((target, index) => {
+      target.visible = wasVisible[index];
+    });
+  }, [model, renderer, camera, rootScene]);
 
   useEffect(() => {
     return () => {

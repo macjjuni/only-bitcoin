@@ -132,6 +132,37 @@ describe("SpaceSessionController", () => {
     vi.useRealTimers();
   });
 
+  it("입장 직후 서버 시계를 연달아 재서 왕복이 가장 짧았던 값을 쓴다", () => {
+    const { controller, welcome } = createHarness();
+    controller.start();
+    const socket = welcome(undefined, [], ["market-sync-v1"]);
+    const firstSentAt = sentFrames(socket, "clock")[0].sentAt;
+
+    // 로딩으로 응답을 늦게 읽음. 서버에는 50ms 만에 닿았는데 왕복이 600ms 로 재어짐.
+    vi.advanceTimersByTime(600);
+    socket.receive({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "clock",
+      sentAt: firstSentAt,
+      serverAt: firstSentAt + 50 + 5000,
+    });
+    expect(controller.getSnapshot().serverClockOffsetMs).toBe(4750);
+
+    vi.advanceTimersByTime(400);
+    expect(sentFrames(socket, "clock")).toHaveLength(2);
+    const secondSentAt = sentFrames(socket, "clock")[1].sentAt;
+
+    vi.advanceTimersByTime(100);
+    socket.receive({
+      v: SPACE_PROTOCOL_VERSION,
+      t: "clock",
+      sentAt: secondSentAt,
+      serverAt: secondSentAt + 50 + 5000,
+    });
+    expect(controller.getSnapshot().serverClockOffsetMs).toBe(5000);
+    controller.stop();
+  });
+
   it("서버 시계는 왕복 지연의 중간값으로 보정하고 상승 이벤트 중복을 무시한다", () => {
     const { controller, welcome } = createHarness();
     controller.start();

@@ -6,10 +6,13 @@ import {
   Group,
   type Material,
   type Mesh,
+  MeshBasicMaterial,
+  type MeshStandardMaterial,
   type Object3D,
 } from "three";
 import { GLTFLoader } from "three/examples/jsm/loaders/GLTFLoader.js";
 import type { SpaceBossAttack } from "@/entities/space";
+import { isAndroidDevice, isIOSDevice } from "@/shared/utils/device";
 import { toVersionedModelUrl } from "./modelAssetUrl";
 
 /**
@@ -133,6 +136,42 @@ const toAdditiveHitClip = (clip: AnimationClip, boneNames: ReadonlySet<string>):
   return AnimationUtils.makeClipAdditive(additive, 0, additive, 24);
 };
 
+/**
+ * 예고 재질을 조명 계산이 없는 가벼운 재질로 바꿈. 모바일에서만 씀.
+ *
+ * 원본은 PBR 반투명 양면이라 겹마다 앞뒤로 두 번 그림. 내려찍기 원은 다섯 겹이 화면을
+ * 거의 덮어서 폰에서는 예고가 뜨는 동안 프레임이 떨어졌음. 색은 바탕색에 자체 발광을
+ * 더해 비슷하게 맞추고 한 번에 그림.
+ */
+const toLightweightAoeMaterial = (
+  material: Material,
+  converted: Map<Material, MeshBasicMaterial>,
+): Material => {
+  if ((material as MeshBasicMaterial).isMeshBasicMaterial) {
+    return material;
+  }
+
+  const existing = converted.get(material);
+
+  if (existing) {
+    return existing;
+  }
+
+  const source = material as MeshStandardMaterial;
+  const lightweight = new MeshBasicMaterial({
+    name: source.name,
+    color: source.color.clone().add(source.emissive),
+    opacity: source.opacity,
+    transparent: source.transparent,
+    side: source.side,
+  });
+
+  lightweight.forceSinglePass = true;
+  converted.set(material, lightweight);
+
+  return lightweight;
+};
+
 /** 예고 표시가 바닥과 겹쳐 지글거리거나 서로 순서가 뒤바뀌지 않게 함. */
 const tuneAoeMesh = (mesh: Mesh): void => {
   const material = mesh.material as Material;
@@ -152,7 +191,10 @@ const tuneAoeMesh = (mesh: Mesh): void => {
  * 캐시된 씬 그래프를 제자리에서 고침. 보스는 화면에 하나뿐이고 고치는 내용이
  * 멱등이라 사본을 만들지 않았음. 클립은 원본을 두고 사본을 고침.
  */
-export const prepareBossModel = ({ scene, animations }: BossGltf): BossModel => {
+export const prepareBossModel = (
+  { scene, animations }: BossGltf,
+  isLightweightAoe = false,
+): BossModel => {
   const rig = requireNode(scene, BOSS_NODE_NAMES.rig);
   const aoeRoots = Object.values(BOSS_NODE_NAMES.aoe).map((name) => requireNode(scene, name));
   const existingAnchor = scene.getObjectByName(BOSS_NODE_NAMES.aoeAnchor);
@@ -167,6 +209,7 @@ export const prepareBossModel = ({ scene, animations }: BossGltf): BossModel => 
   }
 
   const boneNames = new Set<string>();
+  const lightweightMaterials = new Map<Material, MeshBasicMaterial>();
 
   scene.traverse((object) => {
     if ((object as Object3D & { isBone?: boolean }).isBone) {
@@ -181,6 +224,10 @@ export const prepareBossModel = ({ scene, animations }: BossGltf): BossModel => 
       // 경계 구가 기본 자세 기준이라 뒤로 넘어지면(4.6 m) 화면 끝에서 잘림. 한 마리라 그냥 끔.
       object.frustumCulled = false;
       return;
+    }
+
+    if (isLightweightAoe) {
+      object.material = toLightweightAoeMaterial(object.material as Material, lightweightMaterials);
     }
 
     tuneAoeMesh(object);
@@ -200,5 +247,5 @@ export const prepareBossModel = ({ scene, animations }: BossGltf): BossModel => 
 export const useBossModel = (): BossModel => {
   const gltf = useLoader(GLTFLoader, BOSS_MODEL_URL);
 
-  return useMemo(() => prepareBossModel(gltf), [gltf]);
+  return useMemo(() => prepareBossModel(gltf, isIOSDevice() || isAndroidDevice()), [gltf]);
 };

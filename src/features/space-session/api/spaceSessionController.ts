@@ -143,6 +143,15 @@ const movementIntervalMs = 100;
  */
 const movementSendToleranceMs = 8;
 const heartbeatIntervalMs = 15_000;
+/**
+ * 입장 직후와 탭 복귀 때 서버 시계를 연달아 재는 횟수와 간격.
+ *
+ * 한 번만 재면 그 한 번이 로딩으로 메인 스레드가 막힌 때에 걸림. 응답을 늦게 읽은 만큼
+ * 보스 모션과 바닥 예고가 실제보다 늦게 그려지고, 다음 측정(15초 뒤)까지 그대로였음.
+ * 여러 번 재서 왕복이 가장 짧았던 값을 씀.
+ */
+const clockBurstSampleCount = 5;
+const clockBurstIntervalMs = 400;
 const heartbeatTimeoutMs = 45_000;
 const connectionTimeoutMs = 10_000;
 /**
@@ -315,6 +324,8 @@ export class SpaceSessionController {
   private readonly receivedKickIds = new Map<string, number>();
   private clockSentAt: number | null = null;
   private bestClockRtt = Number.POSITIVE_INFINITY;
+  private clockBurstRemaining = 0;
+  private clockBurstTimer: ReturnType<typeof setTimeout> | null = null;
 
   /** 재접속 시 보낼 닉네임. 변경이 확정되면 갱신함. */
   private nickname: string;
@@ -396,6 +407,20 @@ export class SpaceSessionController {
     this.sendFrame({ v: SPACE_PROTOCOL_VERSION, t: "clock", sentAt: this.clockSentAt });
   }
 
+  /** 서버 시계를 연달아 잼. 응답을 받을 때마다 다음 측정을 예약함. */
+  private startClockBurst(): void {
+    this.clearClockBurstTimer();
+    this.clockBurstRemaining = clockBurstSampleCount - 1;
+    this.requestClock();
+  }
+
+  private clearClockBurstTimer(): void {
+    if (this.clockBurstTimer) {
+      clearTimeout(this.clockBurstTimer);
+      this.clockBurstTimer = null;
+    }
+  }
+
   subscribe = (listener: () => void): (() => void) => {
     this.listeners.add(listener);
     return () => this.listeners.delete(listener);
@@ -466,6 +491,12 @@ export class SpaceSessionController {
 
     this.connect();
     this.flushMovement();
+
+    if (this.snapshot.self) {
+      // 폰이 잠들면 `performance.now()` 가 멈춰 서버 시계와 벌어짐. 지난 기록을 버리고 다시 잼.
+      this.bestClockRtt = Number.POSITIVE_INFINITY;
+      this.startClockBurst();
+    }
   }
 
   setOnline(isOnline: boolean): void {
@@ -840,6 +871,14 @@ export class SpaceSessionController {
         const receivedAt = this.options.now();
         const rtt = receivedAt - frame.sentAt;
         this.clockSentAt = null;
+        if (this.clockBurstRemaining > 0) {
+          this.clockBurstRemaining -= 1;
+          this.clearClockBurstTimer();
+          this.clockBurstTimer = setTimeout(() => {
+            this.clockBurstTimer = null;
+            this.requestClock();
+          }, clockBurstIntervalMs);
+        }
         if (rtt >= 0 && rtt <= this.bestClockRtt && rtt < 10000) {
           this.bestClockRtt = rtt;
           this.updateSnapshot({
@@ -925,7 +964,7 @@ export class SpaceSessionController {
         });
         this.kickEvents = [];
         this.startHeartbeat();
-        this.requestClock();
+        this.startClockBurst();
         return;
       }
       case "peer": {
@@ -1323,6 +1362,8 @@ export class SpaceSessionController {
     this.socket = null;
     this.generation += 1;
     this.clearConnectionTimer();
+    this.clearClockBurstTimer();
+    this.clockBurstRemaining = 0;
     if (this.heartbeatTimer) {
       clearInterval(this.heartbeatTimer);
       this.heartbeatTimer = null;

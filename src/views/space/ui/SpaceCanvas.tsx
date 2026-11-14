@@ -99,6 +99,8 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   const [renderDpr, setRenderDpr] = useState<number>(SPACE_DPR_POLICY.desktop.initial);
   /** 기기별 해상도 범위. 성능 콜백에서 읽어서 ref 로 둠. */
   const dprPolicyRef = useRef<DprPolicy>(SPACE_DPR_POLICY.desktop);
+  /** 모바일 여부. 성능 콜백에서 읽어서 ref 로 둠. */
+  const isMobileRef = useRef<boolean>(false);
   /**
    * 계측 패널 표시 여부.
    *
@@ -232,10 +234,15 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
    * 프레임 측정값에 따라 렌더 해상도를 올리고 내린다.
    *
    * 기기 dpr 이 3 인 폰에서 1.5 로 그리면 같은 화면의 DOM HUD 보다 눈에 띄게
-   * 흐림. 여유가 있으면 기기별 상한(모바일 2.5)까지 올리고, 모자라면 다시 내림.
+   * 흐림. 여유가 있으면 기기별 상한까지 올리고, 모자라면 다시 내림.
+   *
+   * 모바일은 내리기만 함. 해상도를 바꿀 때마다 화면 버퍼를 다시 잡아 그 순간 끊기는데,
+   * 레이드처럼 부하가 오르내리는 장면에서 올렸다 내렸다 하면 계속 버벅였음.
    */
   const onChangePerformance = useCallback(({ factor }: PerformanceMonitorApi): void => {
-    setRenderDpr(resolveDprFromPerformanceFactor(factor, dprPolicyRef.current));
+    const nextDpr = resolveDprFromPerformanceFactor(factor, dprPolicyRef.current);
+
+    setRenderDpr((currentDpr) => (isMobileRef.current ? Math.min(currentDpr, nextDpr) : nextDpr));
   }, []);
 
   const onFallbackPerformance = useCallback((): void => {
@@ -285,8 +292,10 @@ function SpaceCanvas({ identity, dummyCount }: SpaceCanvasProps): ReactNode {
   }, [isSupportProbed]);
 
   useEffect(() => {
-    const dprPolicy = resolveDprPolicy(isIOSDevice() || isAndroidDevice(), window.devicePixelRatio);
+    const isMobile = isIOSDevice() || isAndroidDevice();
+    const dprPolicy = resolveDprPolicy(isMobile, window.devicePixelRatio);
 
+    isMobileRef.current = isMobile;
     dprPolicyRef.current = dprPolicy;
     setRenderDpr(dprPolicy.initial);
     setHasRealtimeShadows(hasRealtimeShadowBudget());
